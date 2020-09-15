@@ -1,0 +1,76 @@
+/*
+ *   Copyright 2020 Moros <https://github.com/PrimordialMoros>
+ *
+ *    This file is part of Bending.
+ *
+ *   Bending is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Affero General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Bending is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Affero General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Affero General Public License
+ *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.model.preset;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+public class Preset {
+	private final int id;
+	private final String name;
+	private final String[] abilities;
+
+	/**
+	 * Presets loaded from db have a positive id.
+	 * New presets must use a non positive id as they will acquire a real one when they get saved.
+	 */
+	public Preset(int id, String name, String[] abilities) {
+		this.id = id;
+		this.name = name;
+		this.abilities = abilities;
+	}
+
+	public int getInternalId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Returns an array of the ability names that this preset holds, names can be null!
+	 *
+	 * @return a copy of the names of the abilities that this preset holds.
+	 */
+	public String[] getAbilities() {
+		return Arrays.copyOf(abilities, 9);
+	}
+
+	public Preset createCopy(String name) {
+		return new Preset(0, name, getAbilities());
+	}
+
+	public boolean isEmpty() {
+		for (String s : abilities) {
+			if (s != null) return false;
+		}
+		return true;
+	}
+
+	public int compare(Preset preset) {
+		String[] otherAbilities = preset.getAbilities();
+		int count = 0;
+		for (int slot = 0; slot < 9; slot++) {
+			if (!Objects.equals(abilities[slot], otherAbilities[slot])) count++;
+		}
+		return count;
+	}
+}

@@ -1,0 +1,64 @@
+/*
+ *   Copyright 2020 Moros <https://github.com/PrimordialMoros>
+ *
+ *    This file is part of Bending.
+ *
+ *   Bending is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Affero General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Bending is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Affero General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Affero General Public License
+ *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.util;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.User;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+
+import java.time.Duration;
+import java.util.UUID;
+
+public final class DamageUtil {
+	private static final Cache<UUID, String> cache = Caffeine.newBuilder()
+		.maximumSize(100)
+		.expireAfterWrite(Duration.ofSeconds(60))
+		.build();
+
+	public static void damageEntity(Entity entity, User source, double damage, AbilityDescription desc) {
+		if (entity instanceof LivingEntity && damage > 0) {
+			LivingEntity targetEntity = (LivingEntity) entity;
+			LivingEntity sourceEntity = source.getEntity();
+			EntityDamageByEntityEvent finalEvent = new EntityDamageByEntityEvent(sourceEntity, entity, EntityDamageEvent.DamageCause.CUSTOM, damage);
+			targetEntity.damage(damage, sourceEntity);
+			targetEntity.setLastDamageCause(finalEvent);
+			if (desc != null && targetEntity instanceof Player) cache.put(targetEntity.getUniqueId(), desc.getName());
+		}
+	}
+
+
+	public static void damageEntity(Entity entity, User source, double damage) {
+		damageEntity(entity, source, damage, null);
+	}
+
+	public static String getBendingMessage(UUID uuid) {
+		return cache.getIfPresent(uuid);
+	}
+
+	private static class BendingDeath {
+		// TODO death messages
+	}
+}
