@@ -38,6 +38,7 @@ import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.exception.command.InvalidSlotException;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,8 +100,9 @@ public class Commands {
 		);
 
 		commandContexts.registerIssuerAwareContext(AbilityDescription.class, c -> {
-			if (!(c.getIssuer() instanceof BendingCommandIssuer)) throw new UserException("You must be player!");
-			BendingPlayer bendingPlayer = ((BendingCommandIssuer) c.getIssuer()).getBendingPlayer();
+			Player player = c.getPlayer();
+			if (player == null) throw new UserException("You must be player!");
+			BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
 			String name = c.popFirstArg();
 			Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate(FilterType.parse(c.getFlagValue("filter", "ALL")));
 			return Game.getAbilityRegistry().getAbilities()
@@ -111,9 +113,10 @@ public class Commands {
 		});
 
 		commandContexts.registerIssuerAwareContext(Preset.class, c -> {
-			if (!(c.getSender() instanceof BendingCommandIssuer)) throw new UserException("You must be player!");
+			Player player = c.getPlayer();
+			if (player == null) throw new UserException("You must be player!");
 			String name = c.popFirstArg().toLowerCase();
-			return ((BendingCommandIssuer) c.getIssuer()).getBendingPlayer().getPresetByName(name)
+			return Game.getPlayerManager().getPlayer(player.getUniqueId()).getPresetByName(name)
 				.orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
 		});
 

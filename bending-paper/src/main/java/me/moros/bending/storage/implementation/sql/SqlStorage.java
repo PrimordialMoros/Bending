@@ -79,7 +79,8 @@ public class SqlStorage implements StorageImplementation {
 	public BendingProfile createProfile(UUID uuid) {
 		return loadProfile(uuid).orElseGet(() ->
 			StorageFactory.getJdbi().withHandle(handle -> {
-				int id = (int) handle.createQuery(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid).mapToMap().one().get("player_id");
+				int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid)
+					.executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
 				return new BendingProfile(uuid, id, new BenderData());
 			})
 		);
@@ -89,10 +90,10 @@ public class SqlStorage implements StorageImplementation {
 	public Optional<BendingProfile> loadProfile(UUID uuid) {
 		try {
 			return StorageFactory.getJdbi().withHandle(handle -> {
-				Map<String, Object> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().one();
-				if (result == null) return Optional.empty();
-				int id = (int) result.getOrDefault("player_id", 0);
-				boolean board = (boolean) result.getOrDefault("board", true);
+				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().findOne();
+				if (!result.isPresent()) return Optional.empty();
+				int id = (int) result.get().get("player_id");
+				boolean board = (boolean) result.get().getOrDefault("board", true);
 				BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
 				return Optional.of(new BendingProfile(uuid, id, data, board));
 			});
@@ -218,8 +219,9 @@ public class SqlStorage implements StorageImplementation {
 		if (!deletePreset(playerId, preset.getName())) return false; // needed for overwriting
 		try {
 			StorageFactory.getJdbi().useHandle(handle -> {
-				int presetId = (int) handle.createQuery(SqlQueries.PRESET_INSERT_NEW.getQuery())
+				int presetId = (int) handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.getQuery())
 					.bind(0, playerId).bind(1, preset.getName())
+					.executeAndReturnGeneratedKeys()
 					.mapToMap().one().get("preset_id");
 				String[] abilities = preset.getAbilities();
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT_NEW.getQuery());
