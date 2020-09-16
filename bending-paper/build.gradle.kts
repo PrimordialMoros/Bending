@@ -17,6 +17,7 @@ dependencies {
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     implementation("org.jdbi", "jdbi3-core", "3.14.4")
     implementation("org.postgresql", "postgresql", "42.2.16.jre7")
+    implementation("com.h2database", "h2", "1.4.200")
     implementation("com.github.ben-manes.caffeine", "caffeine", "2.8.5")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.2-R0.1-SNAPSHOT")

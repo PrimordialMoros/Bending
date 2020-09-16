@@ -24,7 +24,7 @@ import java.util.Arrays;
 public enum StorageType {
 	// Remote databases
 	MARIADB("MariaDB", "mariadb.sql"),
-	MYSQL("MySQL", "mysql.sql"),
+	MYSQL("MySQL", "mariadb.sql"),
 	POSTGRESQL("PostgreSQL", "postgre.sql"),
 
 	// Local databases

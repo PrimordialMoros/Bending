@@ -42,7 +42,6 @@ public class StorageFactory {
 			Bending.getLog().warning("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
 		}
 		Bending.getLog().info("Loading storage provider... [" + engine + "]");
-		engine = StorageType.POSTGRESQL; // TODO remove this line
 		createHikari(engine);
 		return new Storage(new SqlStorage(engine));
 	}
@@ -67,8 +66,7 @@ public class StorageFactory {
 		config.addDataSourceProperty("user", username);
 		config.addDataSourceProperty("password", password);
 
-		String path = Bending.getConfigFolder() + File.separator + "bending.db";
-
+		String path = Bending.getConfigFolder() + File.separator;
 		switch (engine) {
 			case POSTGRESQL:
 				config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
@@ -80,12 +78,10 @@ public class StorageFactory {
 				config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
 				break;
 			case H2:
-				config.setDataSourceClassName("org.h2.Driver");
-				config.setJdbcUrl("jdbc:h2:" + path);
-				//TODO add H2
+				config.setJdbcUrl("jdbc:h2:./" + path + "bending-h2;MODE=PostgreSQL");
 				break;
 			case SQLITE:
-				config.setJdbcUrl("jdbc:sqlite:" + path);
+				config.setJdbcUrl("jdbc:sqlite:" + path + "bending-sqlite.db?autoReconnect=true");
 				break;
 		}
 		dataSource = new HikariDataSource(config);
