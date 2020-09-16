@@ -19,7 +19,6 @@
 
 package me.moros.bending.game;
 
-import co.aikar.idb.DB;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.manager.PlayerManager;
@@ -110,7 +109,7 @@ public final class Game {
 		removeTemporary();
 		Flight.removeAll();
 		playerManager.getOnlinePlayers().forEach(storage::savePlayerAsync);
-		DB.close();
+		StorageFactory.getHikari().close();
 	}
 
 	private static void setupTemporary() {

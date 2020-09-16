@@ -19,21 +19,19 @@
 
 package me.moros.bending.storage;
 
-import co.aikar.idb.DB;
-import co.aikar.idb.DatabaseOptions;
-import co.aikar.idb.HikariPooledDatabase;
-import co.aikar.idb.PooledDatabaseOptions;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.storage.implementation.sql.SqlStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.jdbi.v3.core.Jdbi;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class StorageFactory {
-	private static final String poolName = "bending-hikari";
+	private static Jdbi jdbi;
+	private static HikariDataSource dataSource;
 
 	// TODO implement database redundancy
 	public static Storage createInstance() {
@@ -45,18 +43,7 @@ public class StorageFactory {
 		}
 		Bending.getLog().info("Loading storage provider... [" + engine + "]");
 		engine = StorageType.POSTGRESQL; // TODO remove this line
-		switch (engine) {
-			case POSTGRESQL:
-			case MARIADB:
-			case MYSQL:
-				createHikari(engine);
-				break;
-			case H2:
-			case SQLITE:
-				createSQLite();
-				break;
-		}
-
+		createHikari(engine);
 		return new Storage(new SqlStorage(engine));
 	}
 
@@ -70,40 +57,47 @@ public class StorageFactory {
 		String password = storageNode.getNode("password").getString("password");
 		String database = storageNode.getNode("database").getString("bending");
 
-		DatabaseOptions.DatabaseOptionsBuilder optionsBuilder = DatabaseOptions.builder().poolName(poolName).logger(Bending.getLog());
-		PooledDatabaseOptions poolOptions;
-		if (postgre) {
-			Map<String, Object> properties = new HashMap<>(5);
-			properties.put("serverName", host);
-			properties.put("portNumber", port);
-			properties.put("databaseName", database);
-			properties.put("user", username);
-			properties.put("password", password);
+		HikariConfig config = new HikariConfig();
+		config.setMaximumPoolSize(5);
+		config.setMinimumIdle(3);
+		config.setPoolName(engine.name() + " Bending Hikari Connection Pool");
+		config.addDataSourceProperty("serverName", host);
+		config.addDataSourceProperty("portNumber", port);
+		config.addDataSourceProperty("databaseName", database);
+		config.addDataSourceProperty("user", username);
+		config.addDataSourceProperty("password", password);
 
-			optionsBuilder
-				.dataSourceClassName("org.postgresql.ds.PGSimpleDataSource")
-				.driverClassName("org.postgresql.Driver")
-				.dsn("postgresql://" + host + ":" + port + "/" + database);
-			poolOptions = PooledDatabaseOptions.builder().options(optionsBuilder.build())
-				.dataSourceProperties(properties).build();
-		} else {
-			// IDB handles datasources
-			optionsBuilder.mysql(username, password, database, host + ":" + port);
-			poolOptions = PooledDatabaseOptions.builder().options(optionsBuilder.build()).build();
-		}
-		DB.setGlobalDatabase(new HikariPooledDatabase(poolOptions));
-	}
-
-	private static void createSQLite() {
 		String path = Bending.getConfigFolder() + File.separator + "bending.db";
-		DatabaseOptions options = DatabaseOptions.builder().poolName(poolName).logger(Bending.getLog())
-			.sqlite(path).build();
-		PooledDatabaseOptions poolOptions = PooledDatabaseOptions.builder().options(options).build();
-		DB.setGlobalDatabase(new HikariPooledDatabase(poolOptions));
+
+		switch (engine) {
+			case POSTGRESQL:
+				config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+				break;
+			case MARIADB:
+				config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+				break;
+			case MYSQL:
+				config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+				break;
+			case H2:
+				config.setDataSourceClassName("org.h2.Driver");
+				config.setJdbcUrl("jdbc:h2:" + path);
+				//TODO add H2
+				break;
+			case SQLITE:
+				config.setJdbcUrl("jdbc:sqlite:" + path);
+				break;
+		}
+		dataSource = new HikariDataSource(config);
+		jdbi = Jdbi.create(dataSource);
 	}
 
-	private static void createH2() {
-		// TODO Implement H2 db
+	public static Jdbi getJdbi() {
+		return jdbi;
+	}
+
+	public static HikariDataSource getHikari() {
+		return dataSource;
 	}
 }
 
