@@ -76,7 +76,7 @@ public class FireBlast implements Ability, Burstable {
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		recalculateConfig();
 		startTime = System.currentTimeMillis();
 		charging = true;
 		particleCount = 6;
@@ -164,9 +164,11 @@ public class FireBlast implements Ability, Burstable {
 	@Override
 	public void initialize(User user, Vector3 location, Vector3 direction) {
 		this.user = user;
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		recalculateConfig();
 		factor = 1.0;
-		removalPolicy = CompositeRemovalPolicy.builder().build();
+		charging = false;
+		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		stream = new FireStream(user, new Ray(location, direction), userConfig.abilityCollisionRadius);
 	}
 
 	@Override

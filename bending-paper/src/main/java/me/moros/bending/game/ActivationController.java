@@ -78,7 +78,7 @@ public final class ActivationController {
         }*/
 
 		//Combustion.combust(user);
-		//FireBurst.activateCone(user);
+		FireBurst.activateCone(user);
 		//AirBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {

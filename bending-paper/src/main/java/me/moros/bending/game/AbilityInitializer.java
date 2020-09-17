@@ -55,6 +55,9 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
+		fire.add(AbilityDescription.builder("FireBurst", FireBurst.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+
 		Game.getAbilityRegistry().registerAbilities(air);
 		Game.getAbilityRegistry().registerAbilities(water);
 		Game.getAbilityRegistry().registerAbilities(earth);
@@ -76,7 +79,7 @@ public final class AbilityInitializer {
         registerAbility("HeatControl", HeatControl.class, Element.FIRE, ActivationMethod.Punch);
         registerAbility("Lightning", Lightning.class, Element.FIRE, ActivationMethod.Sneak);
         registerAbility("Combustion", Combustion.class, Element.FIRE, ActivationMethod.Sneak);
-        registerAbility("FireBurst", FireBurst.class, Element.FIRE, ActivationMethod.Sneak);
+
         AbilityDescription fireKick = registerAbility("FireKick", FireKick.class, Element.FIRE, ActivationMethod.Sequence);
         AbilityDescription jetBlast = registerAbility("JetBlast", JetBlast.class, Element.FIRE, ActivationMethod.Sequence).setHarmless(true);
         AbilityDescription jetBlaze = registerAbility("JetBlaze", JetBlaze.class, Element.FIRE, ActivationMethod.Sequence);

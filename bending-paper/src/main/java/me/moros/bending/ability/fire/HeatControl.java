@@ -59,7 +59,7 @@ public class HeatControl implements Ability {
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
-		this.userConfig = Game.getAttributeSystem().calculate(this, config);
+		recalculateConfig();
 
 		if (method == ActivationMethod.PUNCH) {
 			if (melt()) {
@@ -73,6 +73,7 @@ public class HeatControl implements Ability {
 				.add(Policies.NOT_SNEAKING)
 				.add(new SwappedSlotsRemovalPolicy(getDescription()))
 				.build();
+			startTime = System.currentTimeMillis();
 			return true;
 		}
 		return false;

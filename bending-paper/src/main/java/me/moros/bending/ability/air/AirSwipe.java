@@ -69,7 +69,7 @@ public class AirSwipe implements Ability {
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		recalculateConfig();
 		startTime = System.currentTimeMillis();
 		charging = true;
 
