@@ -44,9 +44,9 @@ public class ProtectionSystem extends Configurable {
 
 	public ProtectionSystem() {
 		onConfigReload();
+		registerProtectMethod("WorldGuard", WorldGuardProtectMethod::new);
 		registerProtectMethod("GriefPrevention", GriefPreventionProtectMethod::new);
 		registerProtectMethod("Towny", TownyProtectMethod::new);
-		registerProtectMethod("WorldGuard", WorldGuardProtectMethod::new);
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class ProtectionSystem extends Configurable {
 		try {
 			ProtectMethod method = creator.create();
 			protectionMethods.add(method);
-			Bending.getLog().warning("Registered bending protection for " + name);
+			Bending.getLog().info("Registered bending protection for " + name);
 		} catch (PluginNotFoundException e) {
 			Bending.getLog().warning("ProtectMethod " + name + " not able to be used since plugin was not found.");
 		}

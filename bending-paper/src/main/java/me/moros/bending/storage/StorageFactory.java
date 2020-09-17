@@ -32,7 +32,7 @@ public class StorageFactory {
 	// TODO implement database redundancy
 	public static Storage createInstance() {
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");
-		String configValue = storageNode.getNode("engine").getString("H2");
+		String configValue = storageNode.getNode("engine").getString("");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {
 			Bending.getLog().warning("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
@@ -45,7 +45,7 @@ public class StorageFactory {
 	private static SqlStorage createHikari(StorageType engine) {
 		boolean postgre = engine == StorageType.POSTGRESQL;
 
-		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage").getNode(engine.toString().toLowerCase());
+		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage").getNode("connection");
 		String host = storageNode.getNode("host").getString("localhost");
 		int port = storageNode.getNode("port").getInt(postgre ? 5432 : 3306);
 		String username = storageNode.getNode("username").getString("bending");
