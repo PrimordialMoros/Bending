@@ -20,8 +20,8 @@
 package me.moros.bending.model.predicates.removal;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 
 import java.util.Objects;
 import java.util.function.Supplier;

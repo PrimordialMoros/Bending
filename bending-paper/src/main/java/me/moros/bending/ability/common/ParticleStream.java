@@ -21,12 +21,12 @@ package me.moros.bending.ability.common;
 
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;

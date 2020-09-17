@@ -19,10 +19,10 @@
 
 package me.moros.bending.util.collision;
 
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.CollisionCallback;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 import org.bukkit.GameMode;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;

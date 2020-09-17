@@ -19,9 +19,8 @@
 
 package me.moros.bending.game;
 
-import me.moros.bending.ability.air.AirSwipe;
-import me.moros.bending.ability.air.passives.AirAgility;
-import me.moros.bending.ability.air.passives.GracefulDescent;
+import me.moros.bending.ability.air.*;
+import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -53,6 +52,8 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
+		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
 		Game.getAbilityRegistry().registerAbilities(air);
 		Game.getAbilityRegistry().registerAbilities(water);

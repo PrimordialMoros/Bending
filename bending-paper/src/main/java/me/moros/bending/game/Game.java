@@ -21,6 +21,7 @@ package me.moros.bending.game;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
+import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.game.manager.PlayerManager;
 import me.moros.bending.game.manager.SequenceManager;
 import me.moros.bending.game.manager.WorldManager;
@@ -28,7 +29,6 @@ import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;

@@ -24,8 +24,8 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.user.User;
 
 public class GracefulDescent implements PassiveAbility {
 	private User user;

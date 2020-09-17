@@ -28,8 +28,8 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.MultiAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.World;
 
 import java.util.ArrayList;
@@ -136,7 +136,7 @@ public class AbilityManager {
 		if (!globalInstances.containsKey(user)) return false;
 		List<Ability> abilities = globalInstances.get(user);
 		boolean destroyed = false;
-		for (Iterator<Ability> iterator = abilities.iterator(); iterator.hasNext();) {
+		for (Iterator<Ability> iterator = abilities.iterator(); iterator.hasNext(); ) {
 			Ability ability = iterator.next();
 			if (ability.getClass() == type) {
 				iterator.remove();
@@ -173,6 +173,7 @@ public class AbilityManager {
 		return addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility)
 			.filter(a -> a.getClass() == type).map(type::cast).findAny();
 	}
+
 	public List<Ability> getInstances() {
 		List<Ability> totalInstances = new ArrayList<>(getInstanceCount());
 		globalInstances.values().forEach(totalInstances::addAll);

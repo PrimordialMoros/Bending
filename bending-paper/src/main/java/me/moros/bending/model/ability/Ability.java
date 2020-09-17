@@ -21,9 +21,9 @@ package me.moros.bending.model.ability;
 
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.user.User;
 
 import java.util.Collections;
 import java.util.List;

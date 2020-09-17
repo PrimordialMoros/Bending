@@ -20,9 +20,9 @@
 package me.moros.bending.protection.methods;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.exception.PluginNotFoundException;
+import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;

@@ -19,10 +19,10 @@
 
 package me.moros.bending.util.methods;
 
-import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;

@@ -34,10 +34,10 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.exception.command.InvalidSlotException;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;

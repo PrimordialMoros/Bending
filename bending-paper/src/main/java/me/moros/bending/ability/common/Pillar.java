@@ -22,9 +22,9 @@ package me.moros.bending.ability.common;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -95,7 +95,7 @@ public class Pillar {
 	}
 
 	private Vector normalizeVelocity(Vector velocity) {
-		switch(direction) {
+		switch (direction) {
 			case NORTH:
 			case SOUTH:
 				return velocity.setX(direction.getDirection().getX());
@@ -118,7 +118,8 @@ public class Pillar {
 	}
 
 	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, long interval, long duration) {
-		if (user == null || origin == null || !BlockMethods.MAIN_FACES.contains(direction) || length < 1) return Optional.empty();
+		if (user == null || origin == null || !BlockMethods.MAIN_FACES.contains(direction) || length < 1)
+			return Optional.empty();
 		int maxLength = validate(user, origin, direction, length);
 		if (maxLength < 1) return Optional.empty();
 		return Optional.of(new Pillar(user, origin, direction, maxLength, interval, duration));

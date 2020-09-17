@@ -34,7 +34,6 @@ import me.moros.bending.listeners.BlockListener;
 import me.moros.bending.listeners.PlayerListener;
 import me.moros.bending.listeners.TempArmorListener;
 import me.moros.bending.listeners.WorldListener;
-
 import me.moros.bending.util.Tasker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.TextComponent;

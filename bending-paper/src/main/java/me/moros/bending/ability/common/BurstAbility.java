@@ -22,8 +22,8 @@ package me.moros.bending.ability.common;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;

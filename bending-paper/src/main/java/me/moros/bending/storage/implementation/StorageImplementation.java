@@ -19,11 +19,11 @@
 
 package me.moros.bending.storage.implementation;
 
-import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.storage.StorageType;
 
 import java.util.Optional;
@@ -32,20 +32,28 @@ import java.util.UUID;
 
 public interface StorageImplementation {
 	StorageType getType();
+
 	void init();
+
 	void close();
 
 	BendingProfile createProfile(UUID uuid);
+
 	Optional<BendingProfile> loadProfile(UUID uuid);
+
 	boolean updateProfile(BendingProfile profile);
 
 	boolean createElements(Set<Element> elements);
+
 	boolean createAbilities(Set<AbilityDescription> abilities);
 
 	boolean saveElements(BendingPlayer bendingPlayer);
+
 	boolean saveSlot(BendingPlayer bendingPlayer, int slotIndex);
 
 	Preset loadPreset(int playerId, String name);
+
 	boolean savePreset(int playerId, Preset preset);
+
 	boolean deletePreset(int presetId);
 }

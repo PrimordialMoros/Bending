@@ -19,14 +19,15 @@
 
 package me.moros.bending.game;
 
-import me.moros.bending.ability.air.passives.GracefulDescent;
+import me.moros.bending.ability.air.passives.*;
+import me.moros.bending.ability.fire.*;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.Action;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.util.Vector;
@@ -135,7 +136,6 @@ public final class ActivationController {
 	}
 
 	public boolean onFireTickDamage(User user) {
-		return true;
-		//return HeatControl.canBurn(user);
+		return HeatControl.canBurn(user);
 	}
 }

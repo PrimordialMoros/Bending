@@ -21,8 +21,8 @@ package me.moros.bending.util;
 
 import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.Game;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

@@ -19,11 +19,11 @@
 
 package me.moros.bending.storage;
 
-import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.storage.implementation.StorageImplementation;
 import me.moros.bending.util.Tasker;
 

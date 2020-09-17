@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.water.util;
 
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -28,9 +27,10 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
+import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;

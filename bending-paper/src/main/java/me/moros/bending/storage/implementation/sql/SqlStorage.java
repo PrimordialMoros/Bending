@@ -21,12 +21,12 @@ package me.moros.bending.storage.implementation.sql;
 
 import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
-import me.moros.bending.model.user.player.BenderData;
-import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.player.BenderData;
+import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.storage.StorageType;
 import me.moros.bending.storage.implementation.StorageImplementation;
 import me.moros.bending.storage.sql.SqlQueries;
@@ -350,7 +350,7 @@ public class SqlStorage implements StorageImplementation {
 		return 0;
 	}
 
-	private boolean tableExists(String table){
+	private boolean tableExists(String table) {
 		try (ResultSet rs = dataSource.getConnection().getMetaData().getTables(null, null, "%", null)) {
 			while (rs.next()) {
 				if (rs.getString(3).equalsIgnoreCase(table)) {

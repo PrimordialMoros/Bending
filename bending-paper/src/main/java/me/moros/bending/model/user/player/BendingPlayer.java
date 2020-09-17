@@ -20,10 +20,10 @@
 package me.moros.bending.model.user.player;
 
 import me.moros.bending.game.Game;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
+import me.moros.bending.model.user.BendingUser;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;

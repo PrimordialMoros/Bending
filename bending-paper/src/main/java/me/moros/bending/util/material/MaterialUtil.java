@@ -28,9 +28,27 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public final class MaterialUtil {
+	public static final Map<Material, Material> COOKABLE = new HashMap<>();
+
+	static {
+		COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
+		COOKABLE.put(Material.BEEF, Material.COOKED_BEEF);
+		COOKABLE.put(Material.CHICKEN, Material.COOKED_CHICKEN);
+		COOKABLE.put(Material.COD, Material.COOKED_COD);
+		COOKABLE.put(Material.SALMON, Material.COOKED_SALMON);
+		COOKABLE.put(Material.POTATO, Material.BAKED_POTATO);
+		COOKABLE.put(Material.MUTTON, Material.COOKED_MUTTON);
+		COOKABLE.put(Material.RABBIT, Material.COOKED_RABBIT);
+		COOKABLE.put(Material.WET_SPONGE, Material.SPONGE);
+		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
+		COOKABLE.put(Material.STICK, Material.TORCH);
+	}
+
 	//TODO change to Paper's MaterialTagSet and split into better categories
 	private static final Set<Material> TRANSPARENT_MATERIALS = EnumSet.of(
 		Material.AIR, Material.CAVE_AIR, Material.OAK_SAPLING, Material.SPRUCE_SAPLING, Material.BIRCH_SAPLING,
@@ -136,6 +154,14 @@ public final class MaterialUtil {
 
 	public static boolean isWater(Material type) {
 		return type == Material.WATER;
+	}
+
+	public static boolean isIce(Block block) {
+		return isFire(block.getType());
+	}
+
+	public static boolean isIce(Material material) {
+		return WaterMaterials.ICE_BENDABLE.isTagged(material);
 	}
 
 	public static boolean isPlant(Block block) {

@@ -25,5 +25,6 @@ import org.bukkit.block.Block;
 
 public interface ProtectMethod {
 	boolean canBuild(User user, AbilityDescription desc, Block block);
+
 	String getName();
 }

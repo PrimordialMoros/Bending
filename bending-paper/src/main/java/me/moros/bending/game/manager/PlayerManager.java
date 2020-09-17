@@ -24,10 +24,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.game.Game;
-import me.moros.bending.model.user.player.BendingProfile;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.player.BendingProfile;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;

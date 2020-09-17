@@ -19,11 +19,13 @@
 
 package me.moros.bending.model.ability;
 
-import me.moros.bending.model.user.User;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.User;
 
 public interface Burstable extends Ability {
 	void initialize(User user, Vector3 location, Vector3 direction);
+
 	void setRenderInterval(long interval);
+
 	void setRenderParticleCount(int count);
 }
