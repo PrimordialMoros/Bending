@@ -33,6 +33,7 @@ import java.util.UUID;
 public interface StorageImplementation {
 	StorageType getType();
 	void init();
+	void close();
 
 	BendingProfile createProfile(UUID uuid);
 	Optional<BendingProfile> loadProfile(UUID uuid);

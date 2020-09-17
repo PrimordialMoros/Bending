@@ -44,6 +44,10 @@ public class Storage {
 		this.implementation.init();
 	}
 
+	public void close() {
+		implementation.close();
+	}
+
 	public BendingProfile createProfile(UUID uuid) {
 		return implementation.createProfile(uuid);
 	}

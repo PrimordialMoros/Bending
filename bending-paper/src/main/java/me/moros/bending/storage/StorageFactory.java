@@ -25,14 +25,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.storage.implementation.sql.SqlStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.jdbi.v3.core.Jdbi;
 
 import java.io.File;
 
 public class StorageFactory {
-	private static Jdbi jdbi;
-	private static HikariDataSource dataSource;
-
 	// TODO implement database redundancy
 	public static Storage createInstance() {
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");
@@ -42,11 +38,11 @@ public class StorageFactory {
 			Bending.getLog().warning("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
 		}
 		Bending.getLog().info("Loading storage provider... [" + engine + "]");
-		createHikari(engine);
-		return new Storage(new SqlStorage(engine));
+
+		return new Storage(createHikari(engine));
 	}
 
-	private static void createHikari(StorageType engine) {
+	private static SqlStorage createHikari(StorageType engine) {
 		boolean postgre = engine == StorageType.POSTGRESQL;
 
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage").getNode(engine.toString().toLowerCase());
@@ -84,16 +80,7 @@ public class StorageFactory {
 				config.setJdbcUrl("jdbc:sqlite:" + path + "bending-sqlite.db?autoReconnect=true");
 				break;
 		}
-		dataSource = new HikariDataSource(config);
-		jdbi = Jdbi.create(dataSource);
-	}
-
-	public static Jdbi getJdbi() {
-		return jdbi;
-	}
-
-	public static HikariDataSource getHikari() {
-		return dataSource;
+		return new SqlStorage(engine, new HikariDataSource(config));
 	}
 }
 

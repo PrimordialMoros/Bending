@@ -19,6 +19,7 @@
 
 package me.moros.bending.storage.implementation.sql;
 
+import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.player.BenderData;
 import me.moros.bending.model.user.player.BendingProfile;
@@ -26,17 +27,19 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.storage.StorageType;
 import me.moros.bending.storage.implementation.StorageImplementation;
 import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.storage.sql.SqlStreamReader;
+import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Batch;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.Query;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -47,9 +50,13 @@ import java.util.stream.Collectors;
 
 public class SqlStorage implements StorageImplementation {
 	private final StorageType type;
+	private final Jdbi DB;
+	private final HikariDataSource dataSource;
 
-	public SqlStorage(StorageType type) {
+	public SqlStorage(StorageType type, HikariDataSource source) {
 		this.type = type;
+		dataSource = source;
+		DB = Jdbi.create(dataSource);
 	}
 
 	@Override
@@ -66,19 +73,26 @@ public class SqlStorage implements StorageImplementation {
 			e.printStackTrace();
 			return;
 		}
-		StorageFactory.getJdbi().useHandle(handle -> {
-			Batch batch = handle.createBatch();
-			for (String query : statements) {
-				batch.add(query);
-			}
-			batch.execute();
-		});
+		if (!tableExists("bending_players")) {
+			DB.useHandle(handle -> {
+				Batch batch = handle.createBatch();
+				for (String query : statements) {
+					batch.add(query);
+				}
+				batch.execute();
+			});
+		}
+	}
+
+	@Override
+	public void close() {
+		dataSource.close();
 	}
 
 	@Override
 	public BendingProfile createProfile(UUID uuid) {
 		return loadProfile(uuid).orElseGet(() ->
-			StorageFactory.getJdbi().withHandle(handle -> {
+			DB.withHandle(handle -> {
 				int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid)
 					.executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
 				return new BendingProfile(uuid, id, new BenderData());
@@ -89,7 +103,7 @@ public class SqlStorage implements StorageImplementation {
 	@Override
 	public Optional<BendingProfile> loadProfile(UUID uuid) {
 		try {
-			return StorageFactory.getJdbi().withHandle(handle -> {
+			return DB.withHandle(handle -> {
 				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().findOne();
 				if (!result.isPresent()) return Optional.empty();
 				int id = (int) result.get().get("player_id");
@@ -106,7 +120,7 @@ public class SqlStorage implements StorageImplementation {
 	@Override
 	public boolean updateProfile(BendingProfile profile) {
 		try {
-			StorageFactory.getJdbi().useHandle(handle ->
+			DB.useHandle(handle ->
 				handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.getQuery())
 					.bind(0, profile.hasBoard()).bind(1, profile.getInternalId()).execute()
 			);
@@ -120,7 +134,7 @@ public class SqlStorage implements StorageImplementation {
 	@Override
 	public boolean createElements(Set<Element> elements) {
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.ELEMENTS_INSERT_NEW.getQuery());
 				for (Element element : elements) {
 					batch.bind(0, element.name()).add();
@@ -137,7 +151,7 @@ public class SqlStorage implements StorageImplementation {
 	@Override
 	public boolean createAbilities(Set<AbilityDescription> abilities) {
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.ABILITIES_INSERT_NEW.getQuery());
 				for (AbilityDescription desc : abilities) {
 					batch.bind(0, desc.getName()).add();
@@ -155,7 +169,7 @@ public class SqlStorage implements StorageImplementation {
 	public boolean saveElements(BendingPlayer player) {
 		int id = player.getProfile().getInternalId();
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE_FOR_ID.getQuery()).bind(0, id).execute();
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT_FOR_NAME.getQuery());
 				for (Element element : player.getElements()) {
@@ -178,7 +192,7 @@ public class SqlStorage implements StorageImplementation {
 		int abilityId = getAbilityId(desc.get().getName());
 		if (abilityId == 0) return false;
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_SPECIFIC.getQuery())
 					.bind(0, id).bind(1, slotIndex).execute();
 				handle.createUpdate(SqlQueries.PLAYER_SLOTS_INSERT_NEW.getQuery()).bind(0, id)
@@ -198,7 +212,7 @@ public class SqlStorage implements StorageImplementation {
 		if (presetId == 0) return null;
 		String[] abilities = new String[9];
 		try {
-			return StorageFactory.getJdbi().withHandle(handle -> {
+			return DB.withHandle(handle -> {
 				Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT_BY_ID.getQuery()).bind(0, presetId);
 				for (Map<String, Object> map : query.mapToMap()) {
 					int slot = (int) map.get("slot");
@@ -218,7 +232,7 @@ public class SqlStorage implements StorageImplementation {
 		if (preset.getInternalId() > 0) return false; // Must be a new preset!
 		if (!deletePreset(playerId, preset.getName())) return false; // needed for overwriting
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				int presetId = (int) handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.getQuery())
 					.bind(0, playerId).bind(1, preset.getName())
 					.executeAndReturnGeneratedKeys()
@@ -246,7 +260,7 @@ public class SqlStorage implements StorageImplementation {
 	public boolean deletePreset(int presetId) {
 		if (presetId <= 0) return false; // It won't exist
 		try {
-			StorageFactory.getJdbi().useHandle(handle ->
+			DB.useHandle(handle ->
 				handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.getQuery()).bind(0, presetId).execute()
 			);
 			return true;
@@ -259,7 +273,7 @@ public class SqlStorage implements StorageImplementation {
 	// Helper methods
 	private int getAbilityId(String name) {
 		try {
-			return StorageFactory.getJdbi().withHandle(handle ->
+			return DB.withHandle(handle ->
 				(int) handle.createQuery(SqlQueries.ABILITIES_SELECT_ID_BY_NAME.getQuery()).bind(0, name).mapToMap().one().get("ability_id")
 			);
 		} catch (Exception e) {
@@ -271,7 +285,7 @@ public class SqlStorage implements StorageImplementation {
 	private String[] getSlots(int playerId) {
 		String[] slots = new String[9];
 		try {
-			StorageFactory.getJdbi().useHandle(handle -> {
+			DB.useHandle(handle -> {
 				Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT_FOR_ID.getQuery()).bind(0, playerId);
 				for (Map<String, Object> map : query.mapToMap()) {
 					int slot = (int) map.get("slot");
@@ -287,7 +301,7 @@ public class SqlStorage implements StorageImplementation {
 
 	private Set<String> getElements(int playerId) {
 		try {
-			return StorageFactory.getJdbi().withHandle(handle ->
+			return DB.withHandle(handle ->
 				handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT_FOR_ID.getQuery()).bind(0, playerId)
 					.mapToMap().stream().map(r -> (String) r.get("element_name")).collect(Collectors.toSet())
 			);
@@ -299,7 +313,7 @@ public class SqlStorage implements StorageImplementation {
 
 	private Set<String> getPresets(int playerId) {
 		try {
-			return StorageFactory.getJdbi().withHandle(handle ->
+			return DB.withHandle(handle ->
 				handle.createQuery(SqlQueries.PRESET_NAMES_SELECT_BY_PLAYER_ID.getQuery()).bind(0, playerId)
 					.mapToMap().stream().map(r -> (String) r.get("preset_name")).collect(Collectors.toSet())
 			);
@@ -311,7 +325,7 @@ public class SqlStorage implements StorageImplementation {
 
 	private boolean deletePreset(int playerId, String presetName) {
 		try {
-			StorageFactory.getJdbi().withHandle(handle ->
+			DB.withHandle(handle ->
 				handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.getQuery()).bind(0, playerId).bind(1, presetName)
 			);
 			return true;
@@ -325,7 +339,7 @@ public class SqlStorage implements StorageImplementation {
 	// Returns 0 if doesn't exist or when a problem occurs.
 	private int getPresetId(int playerId, String presetName) {
 		try {
-			return StorageFactory.getJdbi().withHandle(handle -> {
+			return DB.withHandle(handle -> {
 				Query query = handle.createQuery(SqlQueries.PRESET_SELECT_ID_BY_ID_AND_NAME.getQuery())
 					.bind(0, playerId).bind(1, presetName);
 				return (int) query.mapToMap().one().get("preset_id");
@@ -334,5 +348,18 @@ public class SqlStorage implements StorageImplementation {
 			e.printStackTrace();
 		}
 		return 0;
+	}
+
+	private boolean tableExists(String table){
+		try (ResultSet rs = dataSource.getConnection().getMetaData().getTables(null, null, "%", null)) {
+			while (rs.next()) {
+				if (rs.getString(3).equalsIgnoreCase(table)) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

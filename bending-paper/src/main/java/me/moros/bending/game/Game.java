@@ -109,7 +109,7 @@ public final class Game {
 		removeTemporary();
 		Flight.removeAll();
 		playerManager.getOnlinePlayers().forEach(storage::savePlayerAsync);
-		StorageFactory.getHikari().close();
+		storage.close();
 	}
 
 	private static void setupTemporary() {
