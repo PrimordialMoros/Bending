@@ -78,7 +78,7 @@ public class AirBlast implements Ability, Burstable {
 
 		for (AirBlast blast : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, AirBlast.class)) {
 			if (!blast.launched) {
-				if (method == ActivationMethod.SNEAK) {
+				if (method == ActivationMethod.SNEAK_RELEASE) {
 					blast.selectOrigin();
 					if (!Game.getProtectionSystem().canBuild(user, blast.origin.toLocation(user.getWorld()).getBlock())) {
 						Game.getAbilityInstanceManager(user.getWorld()).destroyInstance(user, blast);
@@ -90,14 +90,14 @@ public class AirBlast implements Ability, Burstable {
 			}
 		}
 
-		if (method == ActivationMethod.SNEAK) {
+		if (method == ActivationMethod.SNEAK_RELEASE) {
 			selectOrigin();
 			return Game.getProtectionSystem().canBuild(user, origin.toLocation(user.getWorld()).getBlock());
 		} else {
-			origin = user.getEyeLocation();
 			if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 				return false;
 			}
+			origin = user.getEyeLocation();
 			launch();
 		}
 		return true;
@@ -141,6 +141,11 @@ public class AirBlast implements Ability, Burstable {
 		launched = true;
 		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(userConfig.selectRange));
 		Vector3 target = new Vector3(WorldMethods.getTarget(user.getWorld(), ray));
+		if (user.isSneaking()) {
+			Vector3 temp = new Vector3(origin.toArray());
+			origin = new Vector3(target.toArray());
+			target = temp;
+		}
 		direction = target.subtract(origin).normalize(Vector3.PLUS_I);
 		user.setCooldown(this, userConfig.cooldown);
 		stream = new AirStream(user, new Ray(origin, direction.scalarMultiply(userConfig.range)), userConfig.abilityCollisionRadius);

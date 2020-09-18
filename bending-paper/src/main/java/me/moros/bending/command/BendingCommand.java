@@ -39,7 +39,6 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
-import me.moros.bending.model.ability.sequence.Action;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -351,14 +350,14 @@ public class BendingCommand extends BaseCommand {
 				sb.append(" > ");
 			}
 			AbilityDescription desc = abilityAction.getAbilityDescription();
-			Action action = abilityAction.getAction();
+			ActivationMethod action = abilityAction.getAction();
 			String actionString = action.toString();
-			if (action == Action.SNEAK) {
+			if (action == ActivationMethod.SNEAK) {
 				actionString = "Hold Sneak";
 				// Check if the next instruction is to release this sneak.
 				if (i + 1 < actions.size()) {
 					AbilityAction next = actions.get(i + 1);
-					if (next.getAbilityDescription() == desc && next.getAction() == Action.SNEAK_RELEASE) {
+					if (next.getAbilityDescription() == desc && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
 						actionString = "Tap Sneak";
 						++i;
 					}

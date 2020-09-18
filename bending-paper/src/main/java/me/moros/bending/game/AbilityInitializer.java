@@ -48,7 +48,7 @@ public final class AbilityInitializer {
 			.setHidden(true).setHarmless(true).build());
 
 		air.add(AbilityDescription.builder("AirBlast", AirBlast.class)
-			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK_RELEASE).build());
 
 		air.add(AbilityDescription.builder("AirBurst", AirBurst.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());

@@ -26,7 +26,6 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.Action;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Flight;
@@ -83,21 +82,18 @@ public final class ActivationController {
 		AirBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
-			Game.getSequenceManager().registerAction(user, Action.PUNCH_ENTITY);
+			Game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH_ENTITY);
 		} else {
-			Game.getSequenceManager().registerAction(user, Action.PUNCH);
+			Game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH);
 		}
 
 		activateAbility(user, ActivationMethod.PUNCH);
 	}
 
 	public void onUserSneak(User user, boolean sneaking) {
-		Game.getSequenceManager().registerAction(user, sneaking ? Action.SNEAK : Action.SNEAK_RELEASE);
-
-		if (!sneaking) return;
-
-		activateAbility(user, ActivationMethod.SNEAK);
-
+		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
+		Game.getSequenceManager().registerAction(user, action);
+		activateAbility(user, action);
 		//Game.getAbilityInstanceManager().destroyInstanceType(user, AirScooter.class);
 	}
 
@@ -125,15 +121,15 @@ public final class ActivationController {
 
 	public void onUserInteract(User user, boolean rightClickAir) {
 		if (rightClickAir) {
-			Game.getSequenceManager().registerAction(user, Action.INTERACT);
+			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT);
 		} else {
-			Game.getSequenceManager().registerAction(user, Action.INTERACT_BLOCK);
+			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT_BLOCK);
 			activateAbility(user, ActivationMethod.USE);
 		}
 	}
 
 	public void onUserInteractEntity(User user) {
-		Game.getSequenceManager().registerAction(user, Action.INTERACT_ENTITY);
+		Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT_ENTITY);
 	}
 
 	public boolean onFireTickDamage(User user) {

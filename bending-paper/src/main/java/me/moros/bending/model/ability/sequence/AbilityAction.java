@@ -19,13 +19,14 @@
 
 package me.moros.bending.model.ability.sequence;
 
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
 public final class AbilityAction {
 	private final AbilityDescription desc;
-	private final Action action;
+	private final ActivationMethod action;
 
-	public AbilityAction(AbilityDescription desc, Action action) {
+	public AbilityAction(AbilityDescription desc, ActivationMethod action) {
 		this.desc = desc;
 		this.action = action;
 	}
@@ -34,7 +35,7 @@ public final class AbilityAction {
 		return desc;
 	}
 
-	public Action getAction() {
+	public ActivationMethod getAction() {
 		return action;
 	}
 

@@ -24,7 +24,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
-import me.moros.bending.model.ability.sequence.Action;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Tasker;
@@ -56,7 +55,7 @@ public final class SequenceManager {
 		return abilitySequences.get(desc);
 	}
 
-	public void registerAction(User user, Action action) {
+	public void registerAction(User user, ActivationMethod action) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null) return;
 		Sequence userSequence = userSequences.computeIfAbsent(user, u -> new Sequence(new AbilityAction(desc, action)));

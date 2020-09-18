@@ -22,6 +22,10 @@ package me.moros.bending.model.ability;
 public enum ActivationMethod {
 	PASSIVE,
 	PUNCH,
+	PUNCH_ENTITY,
+	INTERACT,
+	INTERACT_ENTITY,
+	INTERACT_BLOCK,
 	USE,
 	SNEAK,
 	SNEAK_RELEASE,
