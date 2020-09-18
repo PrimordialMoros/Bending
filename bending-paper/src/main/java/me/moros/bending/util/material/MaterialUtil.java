@@ -157,7 +157,7 @@ public final class MaterialUtil {
 	}
 
 	public static boolean isIce(Block block) {
-		return isFire(block.getType());
+		return isIce(block.getType());
 	}
 
 	public static boolean isIce(Material material) {

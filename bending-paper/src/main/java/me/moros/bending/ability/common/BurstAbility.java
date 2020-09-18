@@ -32,34 +32,22 @@ import java.util.List;
 public abstract class BurstAbility implements Ability {
 	protected final List<Burstable> blasts = new ArrayList<>();
 
-	protected <T extends Burstable> void createBurst(User user, double thetaMin, double thetaMax, double thetaStep, double phiMin, double phiMax, double phiStep, Class<T> type) {
-		for (double theta = thetaMin; theta < thetaMax; theta += thetaStep) {
-			for (double phi = phiMin; phi < phiMax; phi += phiStep) {
-				double x = FastMath.cos(phi) * FastMath.sin(theta);
-				double y = FastMath.cos(phi) * FastMath.cos(theta);
-				double z = FastMath.sin(phi);
-				Vector3 direction = new Vector3(x, y, z);
-				T blast;
-				try {
-					blast = type.getDeclaredConstructor().newInstance();
-				} catch (ReflectiveOperationException e) {
-					e.printStackTrace();
-					return;
-				}
-				blast.initialize(user, user.getEyeLocation().add(direction), direction);
-				blasts.add(blast);
-			}
-		}
+	protected <T extends Burstable> void createCone(User user, Class<T> type, double range) {
+		createBurst(user, type, range, true);
 	}
 
-	protected <T extends Burstable> void createCone(User user, Class<T> type) {
+	protected <T extends Burstable> void createSphere(User user, Class<T> type, double range) {
+		createBurst(user, type, range, false);
+	}
+
+	private <T extends Burstable> void createBurst(User user, Class<T> type, double range, boolean cone) {
 		for (double theta = 0; theta < FastMath.PI; theta += FastMath.toRadians(10)) {
 			for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.toRadians(10)) {
 				double x = FastMath.cos(phi) * FastMath.sin(theta);
 				double y = FastMath.cos(phi) * FastMath.cos(theta);
 				double z = FastMath.sin(phi);
 				Vector3 direction = new Vector3(x, y, z);
-				if (Vector3.angle(direction, user.getDirection()) > FastMath.toRadians(30)) {
+				if (cone && Vector3.angle(direction, user.getDirection()) > FastMath.toRadians(30)) {
 					continue;
 				}
 				T blast;
@@ -69,7 +57,7 @@ public abstract class BurstAbility implements Ability {
 					e.printStackTrace();
 					return;
 				}
-				blast.initialize(user, user.getEyeLocation().add(direction), direction);
+				blast.initialize(user, user.getLocation().add(Vector3.PLUS_J).add(direction), direction.scalarMultiply(range));
 				blasts.add(blast);
 			}
 		}

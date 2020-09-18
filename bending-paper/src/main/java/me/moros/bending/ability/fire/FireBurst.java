@@ -31,9 +31,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.methods.UserMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.apache.commons.math3.util.FastMath;
 
-// TODO add range for burst and test activation
 public class FireBurst extends BurstAbility {
 	public static Config config = new Config();
 
@@ -60,21 +58,14 @@ public class FireBurst extends BurstAbility {
 	@Override
 	public UpdateResult update() {
 		if (!released) {
-			boolean coneCharged = isConeCharged();
-			boolean sphereCharged = isSphereCharged();
-
-			if (coneCharged || sphereCharged) {
+			boolean charged = isCharged();
+			if (charged) {
 				ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
-			}
-
-			if (!user.isSneaking()) {
-				if (sphereCharged) {
-					releaseSphere();
-					return UpdateResult.REMOVE;
-				} else if (coneCharged) {
-					releaseCone();
-					return UpdateResult.REMOVE;
+				if (!user.isSneaking()) {
+					release(false);
 				}
+			} else {
+				if (!user.isSneaking()) return UpdateResult.REMOVE;
 			}
 			return UpdateResult.CONTINUE;
 		}
@@ -99,71 +90,54 @@ public class FireBurst extends BurstAbility {
 	public void handleCollision(Collision collision) {
 	}
 
-	public boolean isSphereCharged() {
-		return System.currentTimeMillis() >= startTime + userConfig.sphereChargeTime;
-	}
-
-	public boolean isConeCharged() {
-		return System.currentTimeMillis() >= startTime + userConfig.coneChargeTime;
+	public boolean isCharged() {
+		return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
 	}
 
 	public static void activateCone(User user) {
 		for (FireBurst burst : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, FireBurst.class)) {
-			if (!burst.released && burst.isConeCharged()) burst.releaseCone();
+			if (!burst.released && burst.isCharged()) burst.release(true);
 		}
 	}
 
-	private void releaseSphere() {
-		double angle = FastMath.toRadians(10);
-		createBurst(user, 0, FastMath.PI, angle, 0, FastMath.PI * 2, angle, FireBlast.class);
-		setRenderInterval(userConfig.sphereRenderInterval);
-		setRenderParticleCount(userConfig.sphereParticlesPerBlast);
+	private void release(boolean cone) {
+		if (cone) {
+			createCone(user, FireBlast.class, userConfig.coneRange);
+		} else {
+			createSphere(user, FireBlast.class, userConfig.sphereRange);
+		}
+		setRenderInterval(100);
+		setRenderParticleCount(1);
 		this.released = true;
-		user.setCooldown(this, userConfig.sphereCooldown);
-	}
-
-	private void releaseCone() {
-		createCone(user, FireBlast.class);
-		setRenderInterval(userConfig.coneRenderInterval);
-		setRenderParticleCount(userConfig.coneParticlesPerBlast);
-		this.released = true;
-		user.setCooldown(this, userConfig.coneCooldown);
+		user.setCooldown(this, userConfig.cooldown);
 	}
 
 	public static class Config extends Configurable {
 		public boolean enabled;
 
-		public int sphereParticlesPerBlast;
-		public int sphereRenderInterval;
-		@Attribute(Attributes.CHARGE_TIME)
-		public int sphereChargeTime;
 		@Attribute(Attributes.COOLDOWN)
-		public long sphereCooldown;
+		public long cooldown;
+		@Attribute(Attributes.CHARGE_TIME)
+		public int chargeTime;
 
-		public int coneParticlesPerBlast;
-		public int coneRenderInterval;
-		@Attribute(Attributes.CHARGE_TIME)
-		public int coneChargeTime;
-		@Attribute(Attributes.COOLDOWN)
-		public long coneCooldown;
+		@Attribute(Attributes.RANGE)
+		public double sphereRange;
+		@Attribute(Attributes.RANGE)
+		public double coneRange;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireburst");
 
 			enabled = abilityNode.getNode("enabled").getBoolean(true);
+			cooldown = abilityNode.getNode("cooldown").getLong(0);
+			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
 
 			CommentedConfigurationNode sphereNode = abilityNode.getNode("sphere");
-			sphereRenderInterval = sphereNode.getNode("render-interval").getInt(100);
-			sphereParticlesPerBlast = sphereNode.getNode("particles-per-blast").getInt(1);
-			sphereChargeTime = sphereNode.getNode("charge-time").getInt(3500);
-			sphereCooldown = sphereNode.getNode("cooldown").getLong(0);
+			sphereRange = sphereNode.getNode("range").getDouble(12);
 
 			CommentedConfigurationNode coneNode = abilityNode.getNode("cone");
-			coneRenderInterval = coneNode.getNode("render-interval").getInt(100);
-			coneParticlesPerBlast = coneNode.getNode("particles-per-blast").getInt(1);
-			coneChargeTime = coneNode.getNode("charge-time").getInt(1750);
-			coneCooldown = coneNode.getNode("cooldown").getLong(0);
+			coneRange = coneNode.getNode("range").getDouble(16);
 		}
 	}
 }

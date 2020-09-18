@@ -86,7 +86,6 @@ public class Bending extends JavaPlugin {
 		commandManager = new BendingCommandManager(this);
 		commandManager.enableUnstableAPI("help");
 		Commands.initialize();
-		ConfigManager.save();
 	}
 
 	@Override
