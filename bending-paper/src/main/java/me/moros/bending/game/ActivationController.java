@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.model.Element;
@@ -79,7 +80,7 @@ public final class ActivationController {
 
 		//Combustion.combust(user);
 		FireBurst.activateCone(user);
-		//AirBurst.activateCone(user);
+		AirBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
 			Game.getSequenceManager().registerAction(user, Action.PUNCH_ENTITY);

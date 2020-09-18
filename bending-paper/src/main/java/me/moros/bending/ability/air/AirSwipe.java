@@ -36,14 +36,12 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -200,17 +198,7 @@ public class AirSwipe implements Ability {
 
 		@Override
 		public boolean onBlockHit(Block block) {
-			boolean result = true;
-			for (Block b : WorldMethods.getNearbyBlocks(getBukkitLocation().add(0, 0.5, 0), 1, MaterialUtil::isFire)) {
-				if (!Game.getProtectionSystem().canBuild(user, b)) continue;
-				b.setType(Material.AIR);
-				result = false;
-			}
-			if (MaterialUtil.isLava(block)) {
-				block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
-				result = true;
-			}
-			return result;
+			return BlockMethods.extinguish(user, getBukkitLocation());
 		}
 	}
 

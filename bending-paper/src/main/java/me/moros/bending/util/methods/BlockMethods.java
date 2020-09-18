@@ -19,6 +19,10 @@
 
 package me.moros.bending.util.methods;
 
+import me.moros.bending.game.Game;
+import me.moros.bending.model.user.User;
+import me.moros.bending.util.material.MaterialUtil;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlastFurnace;
 import org.bukkit.block.Block;
@@ -52,5 +56,20 @@ public final class BlockMethods {
 		} else if (block instanceof Campfire && block instanceof Lightable) {
 			((Lightable) block.getBlockData()).setLit(true);
 		}
+	}
+
+	public static boolean extinguish(User user, Location center) {
+		boolean result = true;
+		for (Block b : WorldMethods.getNearbyBlocks(center.add(0, 0.5, 0), 1, MaterialUtil::isFire)) {
+			if (!Game.getProtectionSystem().canBuild(user, b)) continue;
+			b.setType(Material.AIR);
+			result = false;
+		}
+		Block block = center.getBlock();
+		if (MaterialUtil.isLava(block)) {
+			block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
+			result = true;
+		}
+		return result;
 	}
 }

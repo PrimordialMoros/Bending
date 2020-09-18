@@ -29,6 +29,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockIterator;
@@ -86,6 +87,28 @@ public final class WorldMethods {
 			}
 		}
 		return blocks;
+	}
+
+	public static Location getTarget(World world, Ray ray) {
+		return getTarget(world, ray, MaterialUtil.TRANSPARENT_MATERIALS);
+	}
+
+	public static Location getTarget(World world, Ray ray, Set<Material> transparent) {
+		Location location = ray.origin.toLocation(world);
+		Vector direction = ray.direction.toVector().normalize();
+		double closestDistance = Double.MAX_VALUE;
+		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
+			location.add(direction);
+			for (BlockFace face : BlockMethods.CARDINAL_FACES) {
+				Block block = location.getBlock().getRelative(face);
+				if (transparent.contains(block.getType())) continue;
+				AABB blockBounds = AABBUtils.getBlockBounds(block);
+				if (blockBounds.intersects(ray)) {
+					return location;
+				}
+			}
+		}
+		return location;
 	}
 
 	public static Block blockCast(World world, Ray ray, int maxRange, Set<Material> solids) {

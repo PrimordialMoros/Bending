@@ -41,13 +41,17 @@ public final class AbilityInitializer {
 
 		air.add(AbilityDescription.builder("AirAgility", AirAgility.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setHidden(true).setHarmless(true)
-			.build());
+			.setHidden(true).setHarmless(true).build());
 
 		air.add(AbilityDescription.builder("GracefulDescent", GracefulDescent.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setHidden(true).setHarmless(true)
-			.build());
+			.setHidden(true).setHarmless(true).build());
+
+		air.add(AbilityDescription.builder("AirBlast", AirBlast.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+
+		air.add(AbilityDescription.builder("AirBurst", AirBurst.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
 
 		fire.add(AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());

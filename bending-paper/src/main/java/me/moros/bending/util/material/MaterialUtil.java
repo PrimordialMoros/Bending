@@ -50,7 +50,7 @@ public final class MaterialUtil {
 	}
 
 	//TODO change to Paper's MaterialTagSet and split into better categories
-	private static final Set<Material> TRANSPARENT_MATERIALS = EnumSet.of(
+	public static final Set<Material> TRANSPARENT_MATERIALS = EnumSet.of(
 		Material.AIR, Material.CAVE_AIR, Material.OAK_SAPLING, Material.SPRUCE_SAPLING, Material.BIRCH_SAPLING,
 		Material.JUNGLE_SAPLING, Material.ACACIA_SAPLING, Material.DARK_OAK_SAPLING,
 		Material.COBWEB, Material.TALL_GRASS, Material.GRASS, Material.FERN, Material.DEAD_BUSH,
