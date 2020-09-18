@@ -282,7 +282,7 @@ public class AirBlast implements Ability, Burstable {
 			cooldown = abilityNode.getNode("cooldown").getLong(1500);
 			range = abilityNode.getNode("range").getDouble(25.0);
 			speed = abilityNode.getNode("speed").getDouble(1.25);
-			abilityCollisionRadius = abilityNode.getNode("ability-collision-radius").getDouble(2.0);
+			abilityCollisionRadius = abilityNode.getNode("ability-collision-radius").getDouble(1.0);
 
 			selfPush = abilityNode.getNode("push").getNode("self").getDouble(2.5);
 			otherPush = abilityNode.getNode("push").getNode("other").getDouble(3);

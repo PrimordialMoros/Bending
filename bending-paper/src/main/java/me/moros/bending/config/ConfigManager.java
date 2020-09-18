@@ -23,32 +23,30 @@ package me.moros.bending.config;
 import me.moros.bending.Bending;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class ConfigManager {
-	private static ConfigurationLoader<CommentedConfigurationNode> loader;
+	private static HoconConfigurationLoader loader;
 	private static CommentedConfigurationNode configRoot;
 
 	private static final List<Configurable> instances = new ArrayList<>();
 
 	public static void init(String directory) {
 		Path path = Paths.get(directory, "bending.conf");
+		URL url = Objects.requireNonNull(Bending.class.getClassLoader().getResource("default.conf"));
 		loader = HoconConfigurationLoader.builder()
-			.setDefaultOptions(o -> o.withShouldCopyDefaults(true))
-			.setPath(path)
-			.build();
-		try (InputStream is = Bending.getPlugin().getResource("default.conf")) {
+			.setDefaultOptions(o -> o.withShouldCopyDefaults(true)).setPath(path).build();
+		try {
 			Files.createDirectories(path.getParent());
-			if (is != null && Files.notExists(path)) Files.copy(is, path);
-			configRoot = loader.load();
+			configRoot = loader.load().mergeValuesFrom(HoconConfigurationLoader.builder().setURL(url).build().load());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +61,7 @@ public final class ConfigManager {
 	}
 
 	public static void reload() {
+		save();
 		load();
 		instances.forEach(Configurable::reload);
 	}
@@ -74,7 +73,6 @@ public final class ConfigManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		reload();
 	}
 
 	public static CommentedConfigurationNode getConfig() {

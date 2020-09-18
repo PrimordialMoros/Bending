@@ -20,7 +20,7 @@ dependencies {
     implementation("com.h2database", "h2", "1.4.200")
     implementation("com.github.ben-manes.caffeine", "caffeine", "2.8.5")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
-    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.2-R0.1-SNAPSHOT")
+    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.3-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1")
     compileOnly("com.github.TownyAdvanced", "Towny", "0.96.2.0")
     compileOnly("com.sk89q.worldedit", "worldedit-core", "7.0.0-SNAPSHOT")

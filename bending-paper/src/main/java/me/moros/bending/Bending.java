@@ -90,6 +90,7 @@ public class Bending extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		ConfigManager.save();
 		Game.cleanup();
 	}
 
