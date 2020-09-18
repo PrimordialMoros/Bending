@@ -22,7 +22,6 @@ package me.moros.bending.game.manager;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.board.BoardManager;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.preset.Preset;
@@ -64,7 +63,7 @@ public final class PlayerManager {
 	public void invalidatePlayer(BendingPlayer bendingPlayer) {
 		UUID uuid = bendingPlayer.getProfile().getUniqueId();
 		Game.getProtectionSystem().invalidate(bendingPlayer);
-		BoardManager.invalidate(uuid);
+		Game.getBoardManager().invalidate(uuid);
 		players.remove(uuid);
 		cache.synchronous().invalidate(uuid);
 	}
@@ -79,7 +78,7 @@ public final class PlayerManager {
 			players.put(player.getUniqueId(), p);
 			profile.getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
 			p.bindPreset(new Preset(0, "temp", profile.getData().slots));
-			BoardManager.canUseScoreboard(p.getEntity());
+			Game.getBoardManager().canUseScoreboard(p.getEntity());
 			Game.getAbilityInstanceManager(p.getWorld()).createPassives(p);
 			Bending.getEventBus().postBendingPlayerLoadEvent(p.getEntity());
 		});

@@ -36,15 +36,19 @@ import java.util.UUID;
  * Manages every individual {@link Board}
  */
 public final class BoardManager extends Configurable {
-	private static final Map<UUID, Board> scoreboardPlayers = new HashMap<>();
-	private static boolean enabled = true;
+	private final Map<UUID, Board> scoreboardPlayers = new HashMap<>();
+	private boolean enabled;
+
+	public BoardManager() {
+		onConfigReload();
+	}
 
 	/**
 	 * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
 	 *
 	 * @param player the player to force toggle
 	 */
-	public static void forceToggleScoreboard(Player player) {
+	public void forceToggleScoreboard(Player player) {
 		if (Game.isDisabledWorld(player.getWorld().getUID())) {
 			UUID uuid = player.getUniqueId();
 			if (scoreboardPlayers.containsKey(uuid)) {
@@ -56,7 +60,7 @@ public final class BoardManager extends Configurable {
 		}
 	}
 
-	public static boolean toggleScoreboard(Player player) {
+	public boolean toggleScoreboard(Player player) {
 		if (!enabled || Game.isDisabledWorld(player.getWorld().getUID())) {
 			return false;
 		}
@@ -76,7 +80,7 @@ public final class BoardManager extends Configurable {
 	 * @param player the player to check
 	 * @return true if player can use the bending board, false otherwise
 	 */
-	public static boolean canUseScoreboard(Player player) {
+	public boolean canUseScoreboard(Player player) {
 		BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
 		if (!enabled || Game.isDisabledWorld(player.getWorld().getUID())) {
 			return false;
@@ -88,17 +92,17 @@ public final class BoardManager extends Configurable {
 		return true;
 	}
 
-	public static void updateBoard(Player player) {
+	public void updateBoard(Player player) {
 		if (canUseScoreboard(player)) {
 			scoreboardPlayers.get(player.getUniqueId()).updateAll();
 		}
 	}
 
-	public static void updateBoardSlot(Player player, AbilityDescription desc) {
+	public void updateBoardSlot(Player player, AbilityDescription desc) {
 		updateBoardSlot(player, desc, false);
 	}
 
-	public static void updateBoardSlot(Player player, AbilityDescription desc, boolean cooldown) {
+	public void updateBoardSlot(Player player, AbilityDescription desc, boolean cooldown) {
 		if (canUseScoreboard(player)) {
 			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
 				scoreboardPlayers.get(player.getUniqueId()).updateMisc("  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName(), cooldown, true);
@@ -108,13 +112,13 @@ public final class BoardManager extends Configurable {
 		}
 	}
 
-	public static void changeActiveSlot(Player player, int oldSlot, int newSlot) {
+	public void changeActiveSlot(Player player, int oldSlot, int newSlot) {
 		if (canUseScoreboard(player)) {
 			scoreboardPlayers.get(player.getUniqueId()).setActiveSlot(++oldSlot, ++newSlot);
 		}
 	}
 
-	public static void invalidate(UUID uuid) {
+	public void invalidate(UUID uuid) {
 		scoreboardPlayers.remove(uuid);
 	}
 

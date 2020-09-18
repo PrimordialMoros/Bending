@@ -34,7 +34,6 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.Bending;
-import me.moros.bending.board.BoardManager;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -192,7 +191,7 @@ public class BendingCommand extends BaseCommand {
 			sender.sendMessageKyori(TextComponent.of("Bending Board is disabled!", NamedTextColor.RED));
 			return;
 		}
-		if (BoardManager.toggleScoreboard(sender.getPlayer())) {
+		if (Game.getBoardManager().toggleScoreboard(sender.getPlayer())) {
 			sender.sendMessageKyori(TextComponent.of("Toggled Bending Board on", NamedTextColor.GREEN));
 			sender.getBendingPlayer().getProfile().setBoard(true);
 		} else {

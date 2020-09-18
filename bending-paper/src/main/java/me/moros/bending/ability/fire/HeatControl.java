@@ -49,7 +49,7 @@ import java.util.Collections;
 import java.util.function.Predicate;
 
 public class HeatControl implements Ability {
-	public static Config config = new Config();
+	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
@@ -111,7 +111,6 @@ public class HeatControl implements Ability {
 		return false;
 	}
 
-
 	private boolean act(double range, double radius, Predicate<Block> predicate) {
 		Ray ray = new Ray(user.getEyeLocation(), user.getDirection());
 		Block b = WorldMethods.blockCast(user.getWorld(), ray, (int) range, Collections.emptySet());
@@ -165,8 +164,6 @@ public class HeatControl implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		public boolean enabled;
-
 		@Attribute(Attributes.COOLDOWN)
 		public long extinguishCooldown;
 		@Attribute(Attributes.RANGE)
@@ -187,8 +184,6 @@ public class HeatControl implements Ability {
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "heatcontrol");
-
-			enabled = abilityNode.getNode("enabled").getBoolean(true);
 
 			CommentedConfigurationNode extinguishNode = abilityNode.getNode("extinguish");
 

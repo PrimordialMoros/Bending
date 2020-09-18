@@ -21,7 +21,6 @@ package me.moros.bending.listeners;
 
 import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
-import me.moros.bending.board.BoardManager;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
 import me.moros.bending.game.Game;
@@ -137,19 +136,19 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-		BoardManager.forceToggleScoreboard(event.getPlayer());
+		Game.getBoardManager().forceToggleScoreboard(event.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerSlotChange(final PlayerItemHeldEvent event) {
-		BoardManager.changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
+		Game.getBoardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onCooldownAdd(CooldownAddEvent event) {
 		if (event.getUser() instanceof BendingPlayer) {
 			AbilityDescription desc = event.getAbilityDescription();
-			BoardManager.updateBoardSlot((Player) event.getUser().getEntity(), desc, true);
+			Game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), desc, true);
 		}
 	}
 
@@ -157,7 +156,7 @@ public class PlayerListener implements Listener {
 	public void onCooldownRemove(CooldownRemoveEvent event) {
 		if (event.getUser() instanceof BendingPlayer) {
 			AbilityDescription desc = event.getAbilityDescription();
-			BoardManager.updateBoardSlot((Player) event.getUser().getEntity(), desc, false);
+			Game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), desc, false);
 		}
 	}
 

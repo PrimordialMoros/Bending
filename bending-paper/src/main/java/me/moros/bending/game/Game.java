@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import me.moros.bending.Bending;
+import me.moros.bending.board.BoardManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.game.manager.PlayerManager;
@@ -53,6 +54,7 @@ public final class Game {
 	private static SequenceManager sequenceManager;
 	private static AttributeSystem attributeSystem;
 	private static ActivationController activationController;
+	private static BoardManager boardManager;
 
 	private static Storage storage;
 
@@ -70,9 +72,9 @@ public final class Game {
 
 		playerManager = new PlayerManager();
 		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
+		boardManager = new BoardManager();
 
 		setupTemporary();
-
 		Tasker.createTaskTimer(this::update, 1, 1);
 	}
 
@@ -169,5 +171,9 @@ public final class Game {
 
 	public static ActivationController getActivationController() {
 		return activationController;
+	}
+
+	public static BoardManager getBoardManager() {
+		return boardManager;
 	}
 }

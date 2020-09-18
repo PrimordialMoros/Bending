@@ -33,7 +33,7 @@ import me.moros.bending.util.methods.UserMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 public class FireBurst extends BurstAbility {
-	public static Config config = new Config();
+	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
@@ -113,8 +113,6 @@ public class FireBurst extends BurstAbility {
 	}
 
 	public static class Config extends Configurable {
-		public boolean enabled;
-
 		@Attribute(Attributes.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attributes.CHARGE_TIME)
@@ -129,7 +127,6 @@ public class FireBurst extends BurstAbility {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireburst");
 
-			enabled = abilityNode.getNode("enabled").getBoolean(true);
 			cooldown = abilityNode.getNode("cooldown").getLong(0);
 			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
 

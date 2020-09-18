@@ -20,8 +20,8 @@
 package me.moros.bending.model.user;
 
 import me.moros.bending.Bending;
-import me.moros.bending.board.BoardManager;
 import me.moros.bending.events.BindChangeEvent;
+import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
@@ -65,7 +65,7 @@ public class BendingUser implements User {
 	public int bindPreset(Preset preset) {
 		slotContainers.getFirst().fromPreset(preset);
 		validateSlots();
-		if (this instanceof BendingPlayer) BoardManager.updateBoard((Player) getEntity());
+		if (this instanceof BendingPlayer) Game.getBoardManager().updateBoard((Player) getEntity());
 		Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.MULTIPLE);
 		return preset.compare(createPresetFromSlots(""));
 	}
@@ -87,7 +87,7 @@ public class BendingUser implements User {
 	@Override
 	public void setSlotAbility(int slot, AbilityDescription desc) {
 		setSlotAbilityInternal(slot, desc);
-		if (this instanceof BendingPlayer) BoardManager.updateBoardSlot((Player) getEntity(), desc);
+		if (this instanceof BendingPlayer) Game.getBoardManager().updateBoardSlot((Player) getEntity(), desc);
 		Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.SINGLE);
 	}
 
