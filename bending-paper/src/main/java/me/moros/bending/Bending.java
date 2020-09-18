@@ -22,10 +22,6 @@ package me.moros.bending;
 import co.aikar.commands.BendingCommandManager;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.commands.lib.timings.TimingManager;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
-import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
@@ -34,6 +30,7 @@ import me.moros.bending.listeners.BlockListener;
 import me.moros.bending.listeners.PlayerListener;
 import me.moros.bending.listeners.TempArmorListener;
 import me.moros.bending.listeners.WorldListener;
+import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.util.Tasker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.TextComponent;
@@ -97,12 +94,7 @@ public class Bending extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-			final FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
-			try {
-				registry.register(new StateFlag("bending", false));
-			} catch (FlagConflictException e) {
-				// Do nothing
-			}
+			WorldGuardFlag.registerFlag();
 		}
 	}
 

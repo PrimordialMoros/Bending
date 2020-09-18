@@ -74,9 +74,11 @@ public class StorageFactory {
 				config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
 				break;
 			case H2:
+				config.setDriverClassName("org.h2.Driver");
 				config.setJdbcUrl("jdbc:h2:./" + path + "bending-h2;MODE=PostgreSQL");
 				break;
 			case SQLITE:
+				config.setDriverClassName("org.sqlite.JDBC");
 				config.setJdbcUrl("jdbc:sqlite:" + path + "bending-sqlite.db?autoReconnect=true");
 				break;
 		}
