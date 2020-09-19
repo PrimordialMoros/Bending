@@ -162,6 +162,6 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onWorldChange(PlayerChangedWorldEvent event) {
-		Game.getAbilityInstanceManager(event.getFrom()).destroyPlayerInstances(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+		Game.getAbilityManager(event.getFrom()).destroyUserInstances(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}
 }

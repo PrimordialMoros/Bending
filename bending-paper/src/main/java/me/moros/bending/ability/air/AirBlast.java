@@ -47,6 +47,7 @@ import org.bukkit.entity.Entity;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class AirBlast implements Ability, Burstable {
 	private static final Config config = new Config();
@@ -76,12 +77,12 @@ public class AirBlast implements Ability, Burstable {
 			.add(new OutOfRangeRemovalPolicy(userConfig.selectOutOfRange, () -> origin))
 			.build();
 
-		for (AirBlast blast : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, AirBlast.class)) {
+		for (AirBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
 			if (!blast.launched) {
 				if (method == ActivationMethod.SNEAK_RELEASE) {
 					blast.selectOrigin();
 					if (!Game.getProtectionSystem().canBuild(user, blast.origin.toLocation(user.getWorld()).getBlock())) {
-						Game.getAbilityInstanceManager(user.getWorld()).destroyInstance(user, blast);
+						Game.getAbilityManager(user.getWorld()).destroyInstance(user, blast);
 					}
 				} else {
 					blast.launch();
@@ -161,7 +162,7 @@ public class AirBlast implements Ability, Burstable {
 	@Override
 	public void handleCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityInstanceManager(user.getWorld()).destroyInstance(user, this);
+			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 

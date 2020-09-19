@@ -50,7 +50,7 @@ public final class CollisionManager {
 
 	private void run() {
 		if (manager.getInstanceCount() < 2) return;
-		List<Ability> instances = manager.getInstances();
+		List<Ability> instances = manager.getInstances().collect(Collectors.toList());
 		Map<Ability, List<Collider>> colliderCache = new HashMap<>();
 
 		for (RegisteredCollision registeredCollision : collisions) {

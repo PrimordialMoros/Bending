@@ -77,7 +77,7 @@ public final class SourceUtil {
 
 	public static boolean emptyBottle(User user) {
 		if (!BottleReturn.config.enabled || !hasFullBottle(user)) return false;
-		if (Game.getAbilityInstanceManager(user.getWorld()).hasAbility(user, BottleReturn.class)) return false;
+		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, BottleReturn.class)) return false;
 		if (user.getInventory().isPresent()) {
 			return user.getInventory().get().removeItem(waterBottle).isEmpty() && user.getInventory().get().addItem(emptyBottle).isEmpty();
 		}

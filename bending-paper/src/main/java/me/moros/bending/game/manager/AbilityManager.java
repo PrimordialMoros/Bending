@@ -39,7 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AbilityManager {
 	private final Map<User, List<Ability>> globalInstances = new HashMap<>();
@@ -105,16 +105,13 @@ public class AbilityManager {
 	}
 
 	public void clearPassives(User user) {
-		getPlayerInstances(user).stream()
+		getUserInstances(user)
 			.filter(a -> a.getDescription().isActivatedBy(ActivationMethod.PASSIVE))
 			.forEach(this::destroyAbility);
 	}
 
 	public <T extends Ability> boolean hasAbility(User user, Class<T> type) {
-		if (!globalInstances.containsKey(user)) return false;
-		List<Ability> abilities = globalInstances.get(user);
-		if (abilities.stream().anyMatch(a -> a.getClass() == type)) return true;
-		return addQueue.stream().anyMatch(i -> i.getUser().equals(user) && i.getAbility().getClass() == type);
+		return getUserInstances(user, type).findAny().isPresent();
 	}
 
 	public boolean hasAbility(User user, AbilityDescription desc) {
@@ -152,48 +149,43 @@ public class AbilityManager {
 		return globalInstances.values().stream().mapToInt(List::size).sum();
 	}
 
-	public List<Ability> getPlayerInstances(User user) {
-		return globalInstances.getOrDefault(user, Collections.emptyList());
+	private Stream<Ability> getQueuedInstances() {
+		return addQueue.stream().map(UserInstance::getAbility);
 	}
 
-	public <T extends Ability> List<T> getPlayerInstances(User user, Class<T> type) {
-		if (!globalInstances.containsKey(user)) return Collections.emptyList();
-		List<Ability> abilities = globalInstances.get(user);
-		List<T> result = abilities.stream().filter(a -> a.getClass() == type).map(type::cast).collect(Collectors.toList());
-		addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility)
-			.filter(a -> a.getClass() == type).map(type::cast).forEach(result::add);
-		return result;
+	private Stream<Ability> getQueuedUserInstances(User user) {
+		return addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility);
+	}
+
+	public Stream<Ability> getUserInstances(User user) {
+		return Stream.concat(getQueuedUserInstances(user), globalInstances.getOrDefault(user, Collections.emptyList()).stream());
+	}
+
+	public <T extends Ability> Stream<T> getUserInstances(User user, Class<T> type) {
+		return getUserInstances(user).filter(a -> a.getClass() == type).map(type::cast);
 	}
 
 	public <T extends Ability> Optional<T> getFirstInstance(User user, Class<T> type) {
-		if (!globalInstances.containsKey(user)) return Optional.empty();
-		List<Ability> abilities = globalInstances.get(user);
-		Optional<T> result = abilities.stream().filter(a -> a.getClass() == type).map(type::cast).findFirst();
-		if (result.isPresent()) return result;
-		return addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility)
-			.filter(a -> a.getClass() == type).map(type::cast).findAny();
+		return getUserInstances(user, type).findFirst();
 	}
 
-	public List<Ability> getInstances() {
-		List<Ability> totalInstances = new ArrayList<>(getInstanceCount());
-		globalInstances.values().forEach(totalInstances::addAll);
-		addQueue.stream().map(UserInstance::getAbility).forEach(totalInstances::add);
-		return totalInstances;
+	public Stream<Ability> getInstances() {
+		return Stream.concat(getQueuedInstances(), globalInstances.values().stream().flatMap(List::stream));
 	}
 
-	public <T extends Ability> List<T> getInstances(Class<T> type) {
-		return getInstances().stream().filter(a -> a.getClass() == type).map(type::cast).collect(Collectors.toList());
+	public <T extends Ability> Stream<T> getInstances(Class<T> type) {
+		return getInstances().filter(a -> a.getClass() == type).map(type::cast);
 	}
 
-	// Destroy every instance created by a player.
+	// Destroy every instance created by a user.
 	// Calls destroy on the ability before removing it.
-	public void destroyPlayerInstances(User user) {
+	public void destroyUserInstances(User user) {
 		if (!globalInstances.containsKey(user)) return;
 		globalInstances.get(user).forEach(this::destroyAbility);
 		globalInstances.remove(user);
 	}
 
-	// Destroy all instances created by every player.
+	// Destroy all instances created by every user.
 	// Calls destroy on the ability before removing it.
 	public void destroyAllInstances() {
 		globalInstances.values().forEach(abilities -> abilities.forEach(this::destroyAbility));
@@ -204,11 +196,11 @@ public class AbilityManager {
 	public void update() {
 		addQueue.forEach(i -> globalInstances.computeIfAbsent(i.getUser(), key -> new ArrayList<>()).add(i.getAbility()));
 		addQueue.clear();
-		Iterator<Map.Entry<User, List<Ability>>> playerIterator = globalInstances.entrySet().iterator();
+		Iterator<Map.Entry<User, List<Ability>>> globalIterator = globalInstances.entrySet().iterator();
 		// Store the removed abilities here so any abilities added during Ability#destroy won't be concurrent.
 		List<Ability> removed = new ArrayList<>();
-		while (playerIterator.hasNext()) {
-			Map.Entry<User, List<Ability>> entry = playerIterator.next();
+		while (globalIterator.hasNext()) {
+			Map.Entry<User, List<Ability>> entry = globalIterator.next();
 			List<Ability> instances = entry.getValue();
 			Iterator<Ability> iterator = instances.iterator();
 			while (iterator.hasNext()) {
@@ -225,7 +217,7 @@ public class AbilityManager {
 				}
 			}
 			if (entry.getValue().isEmpty()) {
-				playerIterator.remove();
+				globalIterator.remove();
 			}
 		}
 		removed.forEach(this::destroyAbility);

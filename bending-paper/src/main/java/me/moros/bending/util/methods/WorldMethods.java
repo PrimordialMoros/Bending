@@ -125,14 +125,14 @@ public final class WorldMethods {
 	}
 
 	public static Optional<LivingEntity> getTargetEntity(User user, int range) {
-		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range);
+		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
 		return Optional.empty();
 	}
 
 	public static Optional<LivingEntity> getTargetEntity(User user, int range, int raySize) {
-		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize);
+		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
 		return Optional.empty();

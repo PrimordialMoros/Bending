@@ -66,7 +66,7 @@ public final class SequenceManager {
 				if (!user.canBend(sequenceDesc)) continue;
 				Ability ability = sequenceDesc.createAbility();
 				if (ability.activate(user, ActivationMethod.SEQUENCE)) {
-					Game.getAbilityInstanceManager(user.getWorld()).addAbility(user, ability);
+					Game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 				}
 				userSequences.put(user, new Sequence());
 			}

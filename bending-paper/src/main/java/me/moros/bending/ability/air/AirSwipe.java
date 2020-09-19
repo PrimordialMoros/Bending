@@ -77,7 +77,7 @@ public class AirSwipe implements Ability {
 
 		removalPolicy = CompositeRemovalPolicy.defaults().build();
 
-		for (AirSwipe swipe : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, AirSwipe.class)) {
+		for (AirSwipe swipe : Game.getAbilityManager(user.getWorld()).getUserInstances(user, AirSwipe.class).collect(Collectors.toList())) {
 			if (swipe.charging) {
 				swipe.launch();
 				return false;
@@ -147,7 +147,7 @@ public class AirSwipe implements Ability {
 	@Override
 	public void handleCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityInstanceManager(user.getWorld()).destroyInstance(user, this);
+			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 

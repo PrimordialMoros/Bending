@@ -142,8 +142,8 @@ public class BendingCommand extends BaseCommand {
 			bendingPlayer = sender.getBendingPlayer();
 		}
 		if (bendingPlayer.addElement(element)) {
-			Game.getAbilityInstanceManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
-			Game.getAbilityInstanceManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
+			Game.getAbilityManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
+			Game.getAbilityManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
 			ChatUtil.sendMessage(bendingPlayer, TextComponent.of(
 				"You now have the element of ", NamedTextColor.GRAY)
 				.append(TextComponent.of(element.toString(), element.getColor()))
@@ -168,8 +168,8 @@ public class BendingCommand extends BaseCommand {
 			bendingPlayer = sender.getBendingPlayer();
 		}
 		if (bendingPlayer.removeElement(element)) {
-			Game.getAbilityInstanceManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
-			Game.getAbilityInstanceManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
+			Game.getAbilityManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
+			Game.getAbilityManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
 			ChatUtil.sendMessage(bendingPlayer, TextComponent.of(
 				"You no longer have the element of ", NamedTextColor.GRAY)
 				.append(TextComponent.of(element.toString(), element.getColor()))

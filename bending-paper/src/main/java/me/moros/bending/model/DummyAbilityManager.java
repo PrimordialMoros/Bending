@@ -25,9 +25,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.World;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class DummyAbilityManager extends AbilityManager {
 	public DummyAbilityManager(World world) {
@@ -80,13 +79,13 @@ public class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
-	public List<Ability> getPlayerInstances(User user) {
-		return Collections.emptyList();
+	public Stream<Ability> getUserInstances(User user) {
+		return Stream.empty();
 	}
 
 	@Override
-	public <T extends Ability> List<T> getPlayerInstances(User user, Class<T> type) {
-		return Collections.emptyList();
+	public <T extends Ability> Stream<T> getUserInstances(User user, Class<T> type) {
+		return Stream.empty();
 	}
 
 	@Override
@@ -95,17 +94,17 @@ public class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
-	public List<Ability> getInstances() {
-		return Collections.emptyList();
+	public Stream<Ability> getInstances() {
+		return Stream.empty();
 	}
 
 	@Override
-	public <T extends Ability> List<T> getInstances(Class<T> type) {
-		return Collections.emptyList();
+	public <T extends Ability> Stream<T> getInstances(Class<T> type) {
+		return Stream.empty();
 	}
 
 	@Override
-	public void destroyPlayerInstances(User user) {
+	public void destroyUserInstances(User user) {
 	}
 
 	@Override

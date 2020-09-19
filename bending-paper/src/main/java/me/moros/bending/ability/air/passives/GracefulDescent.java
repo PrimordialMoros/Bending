@@ -47,7 +47,7 @@ public class GracefulDescent implements PassiveAbility {
 	}
 
 	public static boolean isGraceful(User user) {
-		if (Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, GracefulDescent.class).isEmpty()) {
+		if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
 			return false;
 		}
 

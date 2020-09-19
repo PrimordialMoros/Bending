@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class FireBlast implements Ability, Burstable {
 	private static final Config config = new Config();
@@ -87,7 +88,7 @@ public class FireBlast implements Ability, Burstable {
 
 		removalPolicy = CompositeRemovalPolicy.defaults().build();
 
-		for (FireBlast blast : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, FireBlast.class)) {
+		for (FireBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, FireBlast.class).collect(Collectors.toList())) {
 			if (blast.charging) {
 				blast.launch();
 				return false;
@@ -146,7 +147,7 @@ public class FireBlast implements Ability, Burstable {
 	@Override
 	public void handleCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityInstanceManager(user.getWorld()).destroyInstance(user, this);
+			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 

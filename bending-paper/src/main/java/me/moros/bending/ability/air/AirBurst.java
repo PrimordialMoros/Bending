@@ -100,7 +100,7 @@ public class AirBurst extends BurstAbility {
 	}
 
 	public static void activateCone(User user) {
-		Game.getAbilityInstanceManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
 			.ifPresent(b -> b.release(true));
 	}
 

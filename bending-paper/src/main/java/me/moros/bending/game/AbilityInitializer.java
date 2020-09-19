@@ -56,10 +56,13 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
+		fire.add(AbilityDescription.builder("FireBurst", FireBurst.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+
 		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
-		fire.add(AbilityDescription.builder("FireBurst", FireBurst.class)
+		fire.add(AbilityDescription.builder("Bolt", Bolt.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
 		Game.getAbilityRegistry().registerAbilities(air);

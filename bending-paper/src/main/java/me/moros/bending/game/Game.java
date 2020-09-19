@@ -157,7 +157,7 @@ public final class Game {
 		return abilityRegistry;
 	}
 
-	public static AbilityManager getAbilityInstanceManager(World world) {
+	public static AbilityManager getAbilityManager(World world) {
 		return worldManager.getInstanceForWorld(world);
 	}
 

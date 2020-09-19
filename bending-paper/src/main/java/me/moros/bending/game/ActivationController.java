@@ -53,7 +53,7 @@ public final class ActivationController {
 		Flight.remove(player);
 
 		Game.getPlayerManager().invalidatePlayer(player);
-		Game.getAbilityInstanceManager(player.getWorld()).clearPassives(player);
+		Game.getAbilityManager(player.getWorld()).clearPassives(player);
 	}
 
 	public void onUserSwing(User user) {

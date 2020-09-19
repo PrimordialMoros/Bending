@@ -73,8 +73,8 @@ public interface User {
 		getElementHolder().clear();
 		getElementHolder().addElement(element);
 		validateSlots();
-		Game.getAbilityInstanceManager(getWorld()).clearPassives(this);
-		Game.getAbilityInstanceManager(getWorld()).createPassives(this);
+		Game.getAbilityManager(getWorld()).clearPassives(this);
+		Game.getAbilityManager(getWorld()).createPassives(this);
 		Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
 		return true;
 	}

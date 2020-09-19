@@ -94,7 +94,7 @@ public class FireBurst extends BurstAbility {
 	}
 
 	public static void activateCone(User user) {
-		Game.getAbilityInstanceManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
+		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
 			.ifPresent(b -> b.release(true));
 	}
 

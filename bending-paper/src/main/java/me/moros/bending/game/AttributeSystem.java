@@ -83,7 +83,7 @@ public final class AttributeSystem {
 
 	// Recalculates all of the config values for the user's instances.
 	public void recalculate(User user) {
-		Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user).forEach(Ability::recalculateConfig);
+		Game.getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
 	}
 
 	public <T extends Configurable> T calculate(Ability ability, T oldConfig) {

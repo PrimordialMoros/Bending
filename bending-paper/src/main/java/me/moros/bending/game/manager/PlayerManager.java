@@ -79,7 +79,7 @@ public final class PlayerManager {
 			profile.getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
 			p.bindPreset(new Preset(0, "temp", profile.getData().slots));
 			Game.getBoardManager().canUseScoreboard(p.getEntity());
-			Game.getAbilityInstanceManager(p.getWorld()).createPassives(p);
+			Game.getAbilityManager(p.getWorld()).createPassives(p);
 			Bending.getEventBus().postBendingPlayerLoadEvent(p.getEntity());
 		});
 		Bending.getLog().info(profile.toString()); // TODO remove debug message
