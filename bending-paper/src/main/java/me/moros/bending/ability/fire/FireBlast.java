@@ -47,6 +47,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -201,13 +202,13 @@ public class FireBlast implements Ability, Burstable {
 				if (factor < 1.2) {
 					ParticleUtil.createFire(user, loc)
 						.count(particleCount).offset(0.25, 0.25, 0.25).spawn();
-					ParticleUtil.createFire(user, loc)
+					ParticleUtil.create(Particle.SMOKE_NORMAL, loc)
 						.count(particleCount / 2).offset(0.25, 0.25, 0.25).spawn();
 				} else {
 					for (Block block : WorldMethods.getNearbyBlocks(loc, displayRadius)) {
 						ParticleUtil.createFire(user, block.getLocation())
 							.count(particleCount).offset(0.5, 0.5, 0.5).spawn();
-						ParticleUtil.createFire(user, block.getLocation())
+						ParticleUtil.create(Particle.SMOKE_NORMAL, block.getLocation())
 							.count(particleCount / 2).offset(0.5, 0.5, 0.5).spawn();
 					}
 				}
@@ -227,7 +228,7 @@ public class FireBlast implements Ability, Burstable {
 			if (entity.equals(user.getEntity())) return false;
 			if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-				FireTick.LARGER.apply(entity, 20);
+				FireTick.LARGER.apply(entity, 30);
 				affectedEntities.add(entity);
 			}
 			return true;

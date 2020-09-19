@@ -76,7 +76,7 @@ public class Sphere implements Collider {
 			return intersects((AABB) collider);
 		} else if (collider instanceof OBB) {
 			return intersects((OBB) collider);
-		} else if (collider instanceof Disc) {
+		} else if (collider instanceof Disk) {
 			return collider.intersects(this);
 		}
 

@@ -23,21 +23,21 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 
 // Combines an OBB and Sphere to create a disc-like collider.
-public class Disc implements Collider {
+public class Disk implements Collider {
 	private final Sphere sphere;
 	private final OBB obb;
 
-	public Disc(OBB obb, Sphere sphere) {
+	public Disk(OBB obb, Sphere sphere) {
 		this.obb = obb;
 		this.sphere = sphere;
 	}
 
-	public Disc addPosition(Vector3 position) {
-		return new Disc(this.obb.addPosition(position), this.sphere.at(position));
+	public Disk addPosition(Vector3 position) {
+		return new Disk(this.obb.addPosition(position), this.sphere.at(position));
 	}
 
-	public Disc at(Vector3 position) {
-		return new Disc(this.obb.at(position), this.sphere.at(position));
+	public Disk at(Vector3 position) {
+		return new Disk(this.obb.at(position), this.sphere.at(position));
 	}
 
 	@Override

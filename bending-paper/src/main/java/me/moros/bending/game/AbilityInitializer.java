@@ -62,6 +62,9 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
+		fire.add(AbilityDescription.builder("FireShield", FireShield.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+
 		fire.add(AbilityDescription.builder("Bolt", Bolt.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 

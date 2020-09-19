@@ -106,7 +106,7 @@ public class AABB implements Collider {
 			return intersects((AABB) collider);
 		} else if (collider instanceof OBB) {
 			return collider.intersects(this);
-		} else if (collider instanceof Disc) {
+		} else if (collider instanceof Disk) {
 			return collider.intersects(this);
 		}
 

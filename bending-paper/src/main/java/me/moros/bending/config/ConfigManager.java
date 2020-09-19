@@ -61,12 +61,12 @@ public final class ConfigManager {
 	}
 
 	public static void reload() {
-		save();
 		load();
+		save();
 		instances.forEach(Configurable::reload);
 	}
 
-	public static void save() {
+	private static void save() {
 		try {
 			Bending.getLog().info("Saving bending config");
 			loader.save(configRoot);
