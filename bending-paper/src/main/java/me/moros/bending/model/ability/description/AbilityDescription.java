@@ -291,7 +291,7 @@ public class AbilityDescription {
 
 		return TextComponent.builder(desc.getName(), desc.getElement().getColor())
 			.hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, details))
-			.clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, "/bending help " + desc.getName()))
+			.clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, "/bending info " + desc.getName()))
 			.build();
 	}
 }

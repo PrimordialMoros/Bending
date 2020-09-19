@@ -203,7 +203,6 @@ public class AirBlast implements Ability, Burstable {
 
 		public AirStream(User user, Ray ray, double collisionRadius) {
 			super(user, ray, userConfig.speed, collisionRadius);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
 
@@ -250,7 +249,7 @@ public class AirBlast implements Ability, Burstable {
 			} else {
 				velocity = velocity.add(direction.scalarMultiply(factor * 0.5));
 			}
-			entity.setVelocity(velocity.toVector());
+			entity.setVelocity(velocity.clampVelocity().toVector());
 			entity.setFireTicks(0);
 			return false;
 		}

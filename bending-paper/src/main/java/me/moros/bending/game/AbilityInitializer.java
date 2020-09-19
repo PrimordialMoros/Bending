@@ -51,7 +51,7 @@ public final class AbilityInitializer {
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK_RELEASE).build());
 
 		air.add(AbilityDescription.builder("AirBurst", AirBurst.class)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
+			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
 
 		fire.add(AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());

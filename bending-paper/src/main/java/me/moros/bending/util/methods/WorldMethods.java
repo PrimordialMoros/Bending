@@ -29,7 +29,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockIterator;
@@ -43,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class WorldMethods {
 	public static List<Block> getNearbyBlocks(Location location, double radius) {
@@ -63,25 +64,19 @@ public final class WorldMethods {
 
 	public static List<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate, int limit) {
 		int r = NumberConversions.ceil(radius) + 1;
-
 		double originX = location.getX();
 		double originY = location.getY();
 		double originZ = location.getZ();
-
 		List<Block> blocks = new ArrayList<>();
 		Vector pos = location.toVector();
-
 		for (double x = originX - r; x <= originX + r; ++x) {
 			for (double y = originY - r; y <= originY + r; ++y) {
 				for (double z = originZ - r; z <= originZ + r; ++z) {
-					if (pos.distanceSquared(new Vector(x, y, z)) <= radius * radius) {
-						Block block = location.getWorld().getBlockAt(NumberConversions.floor(x), NumberConversions.floor(y), NumberConversions.floor(z));
-						if (predicate.test(block)) {
-							blocks.add(block);
-							if (limit > 0 && blocks.size() >= limit) {
-								return blocks;
-							}
-						}
+					if (pos.distanceSquared(new Vector(x, y, z)) > radius * radius) continue;
+					Block block = location.getWorld().getBlockAt(NumberConversions.floor(x), NumberConversions.floor(y), NumberConversions.floor(z));
+					if (predicate.test(block)) {
+						blocks.add(block);
+						if (limit > 0 && blocks.size() >= limit) return blocks;
 					}
 				}
 			}
@@ -96,11 +91,12 @@ public final class WorldMethods {
 	public static Location getTarget(World world, Ray ray, Set<Material> transparent) {
 		Location location = ray.origin.toLocation(world);
 		Vector direction = ray.direction.toVector().normalize();
-		double closestDistance = Double.MAX_VALUE;
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
 			location.add(direction);
-			for (BlockFace face : BlockMethods.CARDINAL_FACES) {
-				Block block = location.getBlock().getRelative(face);
+			Block center = location.getBlock();
+			List<Block> blocks = Stream.concat(Stream.of(center), BlockMethods.CARDINAL_FACES.stream()
+				.map(center::getRelative)).collect(Collectors.toList()); // Construct stream with center and neighbouring blocks
+			for (Block block : blocks) {
 				if (transparent.contains(block.getType())) continue;
 				AABB blockBounds = AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
@@ -112,12 +108,9 @@ public final class WorldMethods {
 	}
 
 	public static Block blockCast(World world, Ray ray, int maxRange, Set<Material> solids) {
-		Vector origin = ray.origin.toVector();
-		Vector target = ray.direction.toVector();
-		BlockIterator it = new BlockIterator(world, origin, target, 0, maxRange);
-		Block closestBlock;
+		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, maxRange);
 		while (it.hasNext()) {
-			closestBlock = it.next();
+			Block closestBlock = it.next();
 			if (solids.contains(closestBlock.getType())) {
 				return closestBlock;
 			}
@@ -185,7 +178,6 @@ public final class WorldMethods {
 				return entity.getLocation().distance(block.getLocation());
 			}
 		}
-
 		return Double.MAX_VALUE;
 	}
 }

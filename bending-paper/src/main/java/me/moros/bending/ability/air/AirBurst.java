@@ -44,9 +44,14 @@ public class AirBurst extends BurstAbility {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		this.startTime = System.currentTimeMillis();
 		this.released = false;
-
+		if (method == ActivationMethod.FALL) {
+			if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
+				return false;
+			}
+			release(false);
+		}
+		this.startTime = System.currentTimeMillis();
 		return true;
 	}
 
@@ -95,12 +100,13 @@ public class AirBurst extends BurstAbility {
 	}
 
 	public static void activateCone(User user) {
-		for (AirBurst burst : Game.getAbilityInstanceManager(user.getWorld()).getPlayerInstances(user, AirBurst.class)) {
-			if (!burst.released && burst.isCharged()) burst.release(true);
-		}
+		Game.getAbilityInstanceManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+			.ifPresent(b -> b.release(true));
 	}
 
 	private void release(boolean cone) {
+		if (released || !isCharged()) return;
+		released = true;
 		if (cone) {
 			createCone(user, AirBlast.class, userConfig.coneRange);
 		} else {
@@ -108,7 +114,6 @@ public class AirBurst extends BurstAbility {
 		}
 		setRenderInterval(100);
 		setRenderParticleCount(1);
-		this.released = true;
 		user.setCooldown(this, userConfig.cooldown);
 	}
 
@@ -122,19 +127,16 @@ public class AirBurst extends BurstAbility {
 		public double sphereRange;
 		@Attribute(Attributes.RANGE)
 		public double coneRange;
-
+		public int fallThreshold;
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airburst");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(0);
 			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
-
-			CommentedConfigurationNode sphereNode = abilityNode.getNode("sphere");
-			sphereRange = sphereNode.getNode("range").getDouble(12);
-
-			CommentedConfigurationNode coneNode = abilityNode.getNode("cone");
-			coneRange = coneNode.getNode("range").getDouble(16);
+			coneRange = abilityNode.getNode("cone-range").getDouble(16);
+			sphereRange = abilityNode.getNode("sphere-range").getDouble(12);
+			fallThreshold = abilityNode.getNode("fall-threshold").getInt(10);
 		}
 	}
 }

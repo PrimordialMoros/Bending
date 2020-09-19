@@ -73,6 +73,12 @@ public class Vector3 extends Vector3D {
 	 */
 	public static final Vector3 MINUS_K = new Vector3(0, 0, -1);
 
+	/**
+	 * Min and max bukkit velocity vectors
+	 */
+	public static final Vector3 MIN_VELOCITY = new Vector3(-4, -4, -4);
+	public static final Vector3 MAX_VELOCITY = new Vector3(4, 4, 4);
+
 	public Vector3(double x, double y, double z) {
 		super(x, y, z);
 	}
@@ -173,5 +179,9 @@ public class Vector3 extends Vector3D {
 
 	public org.bukkit.util.Vector toVector() {
 		return new org.bukkit.util.Vector(getX(), getY(), getZ());
+	}
+
+	public Vector3 clampVelocity() {
+		return min(MAX_VELOCITY).max(MIN_VELOCITY);
 	}
 }
