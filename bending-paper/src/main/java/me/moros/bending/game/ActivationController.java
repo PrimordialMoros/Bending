@@ -22,6 +22,7 @@ package me.moros.bending.game;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
+import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -32,7 +33,6 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.util.Vector;
 
-// TODO remove comments once i re add the code
 public final class ActivationController {
 	public boolean activateAbility(User user, ActivationMethod method) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
@@ -57,22 +57,21 @@ public final class ActivationController {
 	}
 
 	public void onUserSwing(User user) {
+		AbilityDescription desc = user.getSelectedAbility().orElse(null);
+		if (desc != null && desc.getName().equalsIgnoreCase("FireJet")) {
+			if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, FireJet.class)) {
+				return;
+			}
+			if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, JetBlast.class)) {
+				return;
+			}
+			//if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, JetBlaze.class)) {
+			//return;
+			//}
+		}
+
         /*if (Game.getAbilityInstanceManager().destroyInstanceType(user, AirScooter.class)) {
             if (user.getSelectedAbility().orElse(null) == Game.getAbilityRegistry().getAbilityByName("AirScooter")) {
-                return;
-            }
-        }
-
-        if (user.getSelectedAbility().orElse(null) == Game.getAbilityRegistry().getAbilityByName("FireJet")) {
-            if (Game.getAbilityInstanceManager().destroyInstanceType(user, FireJet.class)) {
-                return;
-            }
-
-            if (Game.getAbilityInstanceManager().destroyInstanceType(user, JetBlast.class)) {
-                return;
-            }
-
-            if (Game.getAbilityInstanceManager().destroyInstanceType(user, JetBlaze.class)) {
                 return;
             }
         }*/

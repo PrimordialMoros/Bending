@@ -49,7 +49,7 @@ public interface StorageImplementation {
 
 	boolean saveElements(BendingPlayer bendingPlayer);
 
-	boolean saveSlot(BendingPlayer bendingPlayer, int slotIndex);
+	boolean saveSlots(BendingPlayer bendingPlayer);
 
 	Preset loadPreset(int playerId, String name);
 

@@ -19,50 +19,27 @@
 
 package me.moros.bending.model.ability.sequence;
 
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class Sequence {
-	private static final int MAX_SEQUENCE_SIZE = 10;
-	private List<AbilityAction> actions = new ArrayList<>();
-
-	public Sequence() {
-	}
+public final class Sequence {
+	private final List<AbilityAction> actions = new ArrayList<>();
 
 	public Sequence(AbilityAction action, AbilityAction... actions) {
-		this.actions.addAll(Arrays.asList(actions));
 		this.actions.add(action);
-		if (this.actions.size() > MAX_SEQUENCE_SIZE) {
-			this.actions = this.actions.subList(1, MAX_SEQUENCE_SIZE + 1);
-		}
-	}
-
-	public Sequence addAction(AbilityAction action) {
-		return new Sequence(action, actions.toArray(new AbilityAction[0]));
-	}
-
-	public boolean matches(Sequence other) {
-		if (actions.size() < other.actions.size()) return false;
-		for (int i = 0; i < FastMath.min(actions.size(), other.actions.size()); ++i) {
-			// Check for matches backward so the latest actions are included.
-			AbilityAction first = actions.get(actions.size() - 1 - i);
-			AbilityAction second = other.actions.get(other.actions.size() - 1 - i);
-
-			if (!first.equals(second)) {
-				return false;
-			}
-		}
-		return true;
+		this.actions.addAll(Arrays.asList(actions));
 	}
 
 	public int size() {
 		return actions.size();
 	}
 
+	/**
+	 * @return Unmodifiable and thread-safe view of this sequence's actions
+	 */
 	public List<AbilityAction> getActions() {
-		return actions;
+		return Collections.unmodifiableList(actions);
 	}
 }

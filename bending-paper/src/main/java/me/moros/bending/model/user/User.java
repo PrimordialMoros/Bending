@@ -34,7 +34,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -106,11 +105,13 @@ public interface User {
 
 	void removeLastSlotContainer();
 
-	void setCooldown(AbilityDescription desc);
+	boolean isOnCooldown(AbilityDescription desc);
 
 	void setCooldown(AbilityDescription desc, long duration);
 
-	boolean isOnCooldown(AbilityDescription desc);
+	default void setCooldown(AbilityDescription desc) {
+		if (desc != null) setCooldown(desc, desc.getCooldown());
+	}
 
 	default void setCooldown(Ability ability) {
 		if (ability != null) setCooldown(ability.getDescription());
@@ -119,8 +120,6 @@ public interface User {
 	default void setCooldown(Ability ability, long duration) {
 		if (ability != null) setCooldown(ability.getDescription(), duration);
 	}
-
-	Map<AbilityDescription, Long> getCooldowns();
 
 	boolean canBend(AbilityDescription desc);
 

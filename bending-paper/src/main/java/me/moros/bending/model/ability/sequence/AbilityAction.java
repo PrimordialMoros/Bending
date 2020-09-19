@@ -47,4 +47,9 @@ public final class AbilityAction {
 		}
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return desc.getName() + ": " + action.name();
+	}
 }

@@ -19,7 +19,6 @@
 
 package me.moros.bending.game;
 
-import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.manager.AbilityManager;
@@ -32,7 +31,6 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.Storage;
@@ -41,7 +39,6 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -80,17 +77,7 @@ public final class Game {
 
 	private void update() {
 		worldManager.update();
-		updateCooldowns();
 		Flight.updateAll();
-	}
-
-	private void updateCooldowns() {
-		long time = System.currentTimeMillis();
-		playerManager.getOnlinePlayers().forEach(bendingPlayer -> {
-			Map<AbilityDescription, Long> cooldowns = bendingPlayer.getCooldowns();
-			cooldowns.entrySet().stream().filter(e -> time >= e.getValue()).forEach(e -> Bending.getEventBus().postCooldownRemoveEvent(bendingPlayer, e.getKey()));
-			cooldowns.entrySet().removeIf(e -> time >= e.getValue());
-		});
 	}
 
 	public static boolean isDisabledWorld(UUID worldID) {

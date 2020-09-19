@@ -24,51 +24,50 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
+import me.moros.bending.model.ability.sequence.ActionBuffer;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Tasker;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public final class SequenceManager {
-	private final Map<User, Sequence> userSequences = new HashMap<>();
-	private final Map<AbilityDescription, Sequence> abilitySequences = new HashMap<>();
-
-	public SequenceManager() {
-		Tasker.createTaskTimer(this::update, 20, 20);
-	}
-
-	private void update() {
-		userSequences.keySet().removeIf(user -> !user.isValid());
-	}
+	private final ExpiringMap<User, ActionBuffer> cache = ExpiringMap.builder()
+		.expirationPolicy(ExpirationPolicy.ACCESSED)
+		.expiration(10, TimeUnit.SECONDS).build();
+	private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
 
 	public void clear() {
-		userSequences.clear();
+		cache.clear();
 	}
 
 	public void registerSequence(AbilityDescription desc, Sequence sequence) {
-		abilitySequences.put(desc, sequence);
+		registeredSequences.put(desc, sequence);
 	}
 
-	public Sequence getSequence(AbilityDescription desc) {
-		return abilitySequences.get(desc);
+	public Optional<Sequence> getSequence(AbilityDescription desc) {
+		if (desc == null) return Optional.empty();
+		return Optional.ofNullable(registeredSequences.get(desc));
 	}
 
 	public void registerAction(User user, ActivationMethod action) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null) return;
-		Sequence userSequence = userSequences.computeIfAbsent(user, u -> new Sequence(new AbilityAction(desc, action)));
-		for (Map.Entry<AbilityDescription, Sequence> entry : abilitySequences.entrySet()) {
+		ActionBuffer buffer = cache.computeIfAbsent(user, u -> new ActionBuffer()).add(new AbilityAction(desc, action));
+		for (Map.Entry<AbilityDescription, Sequence> entry : registeredSequences.entrySet()) {
 			AbilityDescription sequenceDesc = entry.getKey();
 			Sequence sequence = entry.getValue();
-			if (userSequence.matches(sequence)) {
+			if (buffer.matches(sequence)) {
 				if (!user.canBend(sequenceDesc)) continue;
 				Ability ability = sequenceDesc.createAbility();
 				if (ability.activate(user, ActivationMethod.SEQUENCE)) {
 					Game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 				}
-				userSequences.put(user, new Sequence());
+				buffer.clear(); // Consume all actions in the buffer
 			}
 		}
 	}

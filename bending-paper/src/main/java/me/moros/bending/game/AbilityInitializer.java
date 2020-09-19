@@ -22,15 +22,22 @@ package me.moros.bending.game;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
+import me.moros.bending.ability.fire.sequences.*;
+import me.moros.bending.game.manager.SequenceManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.sequence.AbilityAction;
+import me.moros.bending.model.ability.sequence.Sequence;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class AbilityInitializer {
 	public static void loadAbilities() {
+		AbilityRegistry abilityRegistry = Game.getAbilityRegistry();
+		SequenceManager sequenceManager = Game.getSequenceManager();
+
 		List<AbilityDescription> air = new ArrayList<>();
 		List<AbilityDescription> water = new ArrayList<>();
 		List<AbilityDescription> earth = new ArrayList<>();
@@ -62,24 +69,41 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
-		fire.add(AbilityDescription.builder("FireShield", FireShield.class)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+		AbilityDescription fireShield = AbilityDescription.builder("FireShield", FireShield.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
+		fire.add(fireShield);
+
+		AbilityDescription fireJet = AbilityDescription.builder("FireJet", FireJet.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
+		fire.add(fireJet);
+
+		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).setHarmless(true).build();
+		fire.add(jetBlast);
+
+		sequenceManager.registerSequence(jetBlast, new Sequence(
+			new AbilityAction(fireJet, ActivationMethod.SNEAK),
+			new AbilityAction(fireJet, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(fireJet, ActivationMethod.SNEAK),
+			new AbilityAction(fireJet, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(fireShield, ActivationMethod.SNEAK),
+			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(fireJet, ActivationMethod.PUNCH)
+		));
 
 		fire.add(AbilityDescription.builder("Bolt", Bolt.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
-		Game.getAbilityRegistry().registerAbilities(air);
-		Game.getAbilityRegistry().registerAbilities(water);
-		Game.getAbilityRegistry().registerAbilities(earth);
-		Game.getAbilityRegistry().registerAbilities(fire);
+		abilityRegistry.registerAbilities(air);
+		abilityRegistry.registerAbilities(water);
+		abilityRegistry.registerAbilities(earth);
+		abilityRegistry.registerAbilities(fire);
 
 		//registerAbility("EarthBlast", EarthBlast.class, Element.EARTH, ActivationMethod.Punch, ActivationMethod.Sneak).setCanBypassCooldown(true);
 		//registerAbility("WaterManipulation", WaterManipulation.class, Element.WATER, ActivationMethod.Punch, ActivationMethod.Sneak).setCanBypassCooldown(true);
 		//registerAbility("DensityShift", DensityShift.class, Element.EARTH, ActivationMethod.Passive).setHarmless(true).setHidden(true);
 
 		/*
-		AbilityRegistry abilityRegistry = Game.getAbilityRegistry();
-        SequenceService sequenceService = Game.getSequenceService();
         CollisionService collisionService = Game.getCollisionService();
 
 		AbilityDescription blaze = registerAbility("Blaze", Blaze.class, Element.FIRE, ActivationMethod.Punch, ActivationMethod.Sneak);
@@ -91,7 +115,6 @@ public final class AbilityInitializer {
         registerAbility("Combustion", Combustion.class, Element.FIRE, ActivationMethod.Sneak);
 
         AbilityDescription fireKick = registerAbility("FireKick", FireKick.class, Element.FIRE, ActivationMethod.Sequence);
-        AbilityDescription jetBlast = registerAbility("JetBlast", JetBlast.class, Element.FIRE, ActivationMethod.Sequence).setHarmless(true);
         AbilityDescription jetBlaze = registerAbility("JetBlaze", JetBlaze.class, Element.FIRE, ActivationMethod.Sequence);
         AbilityDescription fireSpin = registerAbility("FireSpin", FireSpin.class, Element.FIRE, ActivationMethod.Sequence);
         AbilityDescription fireWheel = registerAbility("FireWheel", FireWheel.class, Element.FIRE, ActivationMethod.Sequence);
@@ -186,16 +209,6 @@ public final class AbilityInitializer {
                 new AbilityAction(fireBlast, Action.Punch),
                 new AbilityAction(fireBlast, Action.Sneak),
                 new AbilityAction(fireBlast, Action.Punch)
-        ));
-
-        sequenceService.registerSequence(jetBlast, new Sequence(true,
-                new AbilityAction(fireJet, Action.Sneak),
-                new AbilityAction(fireJet, Action.SneakRelease),
-                new AbilityAction(fireJet, Action.Sneak),
-                new AbilityAction(fireJet, Action.SneakRelease),
-                new AbilityAction(fireShield, Action.Sneak),
-                new AbilityAction(fireShield, Action.SneakRelease),
-                new AbilityAction(fireJet, Action.Punch)
         ));
 
         sequenceService.registerSequence(jetBlaze, new Sequence(true,

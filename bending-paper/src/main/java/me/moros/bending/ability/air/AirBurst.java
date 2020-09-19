@@ -128,6 +128,7 @@ public class AirBurst extends BurstAbility {
 		@Attribute(Attributes.RANGE)
 		public double coneRange;
 		public int fallThreshold;
+
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airburst");

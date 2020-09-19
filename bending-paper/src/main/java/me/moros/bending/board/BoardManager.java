@@ -23,7 +23,6 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -81,7 +80,6 @@ public final class BoardManager extends Configurable {
 	 * @return true if player can use the bending board, false otherwise
 	 */
 	public boolean canUseScoreboard(Player player) {
-		BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
 		if (!enabled || Game.isDisabledWorld(player.getWorld().getUID())) {
 			return false;
 		}
@@ -105,7 +103,8 @@ public final class BoardManager extends Configurable {
 	public void updateBoardSlot(Player player, AbilityDescription desc, boolean cooldown) {
 		if (canUseScoreboard(player)) {
 			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
-				scoreboardPlayers.get(player.getUniqueId()).updateMisc("  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName(), cooldown, true);
+				String value = "  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName();
+				scoreboardPlayers.get(player.getUniqueId()).updateMisc(value, cooldown, true);
 			} else {
 				scoreboardPlayers.get(player.getUniqueId()).updateAll();
 			}

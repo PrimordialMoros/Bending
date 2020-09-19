@@ -91,7 +91,7 @@ public class Bolt implements Ability {
 			} else {
 				strike();
 			}
-		} else if (user.isSneaking()){
+		} else if (user.isSneaking()) {
 			return UpdateResult.CONTINUE;
 		}
 		return UpdateResult.REMOVE;

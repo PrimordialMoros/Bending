@@ -185,18 +185,19 @@ public class SqlStorage implements StorageImplementation {
 	}
 
 	@Override
-	public boolean saveSlot(BendingPlayer player, int slotIndex) {
+	public boolean saveSlots(BendingPlayer player) {
 		int id = player.getProfile().getInternalId();
-		Optional<AbilityDescription> desc = player.getStandardSlotAbility(slotIndex);
-		if (!desc.isPresent()) return false;
-		int abilityId = getAbilityId(desc.get().getName());
-		if (abilityId == 0) return false;
+		Preset temp = player.createPresetFromSlots("");
 		try {
 			DB.useHandle(handle -> {
-				handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_SPECIFIC.getQuery())
-					.bind(0, id).bind(1, slotIndex).execute();
-				handle.createUpdate(SqlQueries.PLAYER_SLOTS_INSERT_NEW.getQuery()).bind(0, id)
-					.bind(1, slotIndex).bind(2, abilityId).execute();
+				handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_FOR_ID.getQuery()).bind(0, id).execute();
+				PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT_NEW.getQuery());
+				for (int slot = 0; slot < temp.getAbilities().length; slot++) {
+					int abilityId = getAbilityId(temp.getAbilities()[slot]);
+					if (abilityId == 0) continue;
+					batch.bind(0, id).bind(1, slot + 1).bind(2, abilityId).add();
+				}
+				batch.execute();
 			});
 			return true;
 		} catch (Exception e) {
@@ -272,6 +273,7 @@ public class SqlStorage implements StorageImplementation {
 
 	// Helper methods
 	private int getAbilityId(String name) {
+		if (name == null) return 0;
 		try {
 			return DB.withHandle(handle ->
 				(int) handle.createQuery(SqlQueries.ABILITIES_SELECT_ID_BY_NAME.getQuery()).bind(0, name).mapToMap().one().get("ability_id")

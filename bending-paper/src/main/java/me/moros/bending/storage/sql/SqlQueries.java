@@ -35,7 +35,7 @@ public enum SqlQueries {
 
 	PLAYER_SLOTS_SELECT_FOR_ID("SELECT ps.slot, a.ability_name FROM bending_players_slots ps JOIN bending_abilities a ON a.ability_id = ps.ability_id WHERE ps.player_id=?"),
 	PLAYER_SLOTS_INSERT_NEW("INSERT INTO bending_players_slots (player_id, slot, ability_id) VALUES (?, ?, ?)"),
-	PLAYER_SLOTS_REMOVE_SPECIFIC("DELETE FROM bending_players_slots WHERE player_id=? AND slot=?"),
+	PLAYER_SLOTS_REMOVE_FOR_ID("DELETE FROM bending_players_slots WHERE player_id=?"),
 
 	PRESET_NAMES_SELECT_BY_PLAYER_ID("SELECT preset_name FROM bending_presets WHERE player_id=?"),
 	PRESET_SELECT_ID_BY_ID_AND_NAME("SELECT preset_id FROM bending_presets WHERE player_id=? AND preset_name=? LIMIT 1"),

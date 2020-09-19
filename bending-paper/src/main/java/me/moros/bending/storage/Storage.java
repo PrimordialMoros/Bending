@@ -30,7 +30,6 @@ import me.moros.bending.util.Tasker;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 /**
  * Handles all Storage tasks and their concurrency
@@ -62,7 +61,7 @@ public class Storage {
 		Tasker.newChain().async(() -> {
 			implementation.updateProfile(bendingPlayer.getProfile());
 			implementation.saveElements(bendingPlayer);
-			IntStream.rangeClosed(1, 9).forEach(slotIndex -> implementation.saveSlot(bendingPlayer, slotIndex));
+			implementation.saveSlots(bendingPlayer);
 		}).execute();
 	}
 

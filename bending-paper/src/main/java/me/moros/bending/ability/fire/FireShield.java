@@ -135,7 +135,9 @@ public class FireShield implements Ability {
 
 	private interface Shield {
 		UpdateResult update();
+
 		void render();
+
 		Collider getCollider();
 	}
 
@@ -167,7 +169,7 @@ public class FireShield implements Ability {
 			double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize(Vector3.PLUS_I).toArray();
 			for (int i = 0; i < 18; i++) {
 				for (double j = 0.2; j <= 1; j += 0.2) {
-					Vector3 loc = new Vector3(array).scalarMultiply(j*userConfig.diskRadius);
+					Vector3 loc = new Vector3(array).scalarMultiply(j * userConfig.diskRadius);
 					ParticleUtil.createFire(user, location.add(loc).toLocation(user.getWorld()))
 						.offset(0.25, 0.25, 0.25).spawn();
 				}

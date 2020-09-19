@@ -331,24 +331,21 @@ public class BendingCommand extends BaseCommand {
 		}
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Sequence sequence = Game.getSequenceManager().getSequence(ability);
-			if (sequence != null) {
+			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> {
 				String sequenceInstructions = getSequenceInstructions(sequence);
 				sender.sendMessageKyori(ability.getDisplayName()
-					.append(TextComponent.of(" sequence: " + sequenceInstructions, NamedTextColor.DARK_GRAY))
+					.append(TextComponent.of(": " + sequenceInstructions, NamedTextColor.DARK_GRAY))
 				);
-			}
+			});
 		}
 	}
 
 	private static String getSequenceInstructions(Sequence sequence) {
 		StringBuilder sb = new StringBuilder();
 		List<AbilityAction> actions = sequence.getActions();
-		for (int i = 0; i < actions.size(); ++i) {
+		for (int i = 0; i < actions.size(); i++) {
 			AbilityAction abilityAction = actions.get(i);
-			if (i != 0) {
-				sb.append(" > ");
-			}
+			if (i != 0) sb.append(" > ");
 			AbilityDescription desc = abilityAction.getAbilityDescription();
 			ActivationMethod action = abilityAction.getAction();
 			String actionString = action.toString();
@@ -357,13 +354,13 @@ public class BendingCommand extends BaseCommand {
 				// Check if the next instruction is to release this sneak.
 				if (i + 1 < actions.size()) {
 					AbilityAction next = actions.get(i + 1);
-					if (next.getAbilityDescription() == desc && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
+					if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
 						actionString = "Tap Sneak";
 						++i;
 					}
 				}
 			}
-			sb.append(desc.toString()).append(" (").append(actionString).append(")");
+			sb.append(desc.getName()).append(" (").append(actionString).append(")");
 		}
 		return sb.toString();
 	}

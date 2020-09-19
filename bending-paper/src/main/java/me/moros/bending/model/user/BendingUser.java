@@ -27,23 +27,30 @@ import me.moros.bending.model.predicates.conditionals.CompositeBendingConditiona
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.slots.AbilitySlotContainer;
 import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.util.Tasker;
+import net.jodah.expiringmap.ExpirationListener;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+// TODO add async thread to refresh cooldowns
 public class BendingUser implements User {
 	private final ElementHolder elementHolder = new ElementHolder();
 	private final ArrayDeque<AbilitySlotContainer> slotContainers = new ArrayDeque<>(2);
-	private final Map<AbilityDescription, Long> cooldowns = new HashMap<>();
+	private final ExpiringMap<AbilityDescription, Boolean> cooldowns = ExpiringMap.builder().variableExpiration().build();
 	private final CompositeBendingConditional bendingConditional;
 	private final LivingEntity entity;
 
 	protected BendingUser(LivingEntity entity) {
 		this.entity = entity;
+		ExpirationListener<AbilityDescription, Boolean> listener = (key, value) ->
+			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key));
+		cooldowns.addExpirationListener(listener);
 		slotContainers.add(new AbilitySlotContainer(9));
 		bendingConditional = CompositeBendingConditional.defaults().build();
 	}
@@ -110,29 +117,20 @@ public class BendingUser implements User {
 	}
 
 	@Override
-	public void setCooldown(AbilityDescription desc) {
-		setCooldown(desc, desc.getCooldown());
+	public boolean isOnCooldown(AbilityDescription desc) {
+		return cooldowns.containsKey(desc);
 	}
 
 	@Override
 	public void setCooldown(AbilityDescription desc, long duration) {
-		long time = System.currentTimeMillis();
-		// Only set cooldown if the new one is larger.
-		if (duration > 0 && duration > cooldowns.getOrDefault(desc, 0L) - time) {
-			cooldowns.put(desc, time + duration);
+		if (duration <= 0) return;
+		if (!isOnCooldown(desc)) {
+			cooldowns.put(desc, false, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
+			Bending.getEventBus().postCooldownAddEvent(this, desc);
+		} else if (duration > cooldowns.getExpectedExpiration(desc)) {
+			cooldowns.setExpiration(desc, duration, TimeUnit.MILLISECONDS);
 			Bending.getEventBus().postCooldownAddEvent(this, desc);
 		}
-	}
-
-	@Override
-	public boolean isOnCooldown(AbilityDescription desc) {
-		if (!cooldowns.containsKey(desc)) return false;
-		return System.currentTimeMillis() < cooldowns.get(desc);
-	}
-
-	@Override
-	public Map<AbilityDescription, Long> getCooldowns() {
-		return cooldowns;
 	}
 
 	@Override
