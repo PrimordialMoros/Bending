@@ -28,6 +28,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
@@ -196,5 +197,11 @@ public interface User {
 		IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
 			if (!hasElement(desc.getElement()) || !hasPermission(desc)) setSlotAbilityInternal(i, null);
 		}));
+	}
+
+	default void sendMessageKyori(String message) {
+	}
+
+	default void sendMessageKyori(TextComponent message) {
 	}
 }

@@ -24,6 +24,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.util.ChatUtil;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -142,10 +144,14 @@ public class BendingPlayer extends BendingUser {
 		return presetHolder.removePreset(name);
 	}
 
-	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {
-		if (Game.getPlayerManager().playerExists(player.getUniqueId())) return Optional.empty();
-		BendingPlayer bendingPlayer = new BendingPlayer(player, profile, new HashSet<>(profile.getData().presets));
-		return Optional.of(bendingPlayer);
+	@Override
+	public void sendMessageKyori(String message) {
+		ChatUtil.sendMessage(getEntity(), message);
+	}
+
+	@Override
+	public void sendMessageKyori(TextComponent message) {
+		ChatUtil.sendMessage(getEntity(), message);
 	}
 
 	@Override
@@ -159,5 +165,11 @@ public class BendingPlayer extends BendingUser {
 	@Override
 	public int hashCode() {
 		return getProfile().getInternalId();
+	}
+
+	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {
+		if (Game.getPlayerManager().playerExists(player.getUniqueId())) return Optional.empty();
+		BendingPlayer bendingPlayer = new BendingPlayer(player, profile, new HashSet<>(profile.getData().presets));
+		return Optional.of(bendingPlayer);
 	}
 }

@@ -123,7 +123,7 @@ public final class ActivationController {
 			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT);
 		} else {
 			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT_BLOCK);
-			activateAbility(user, ActivationMethod.USE);
+			activateAbility(user, ActivationMethod.INTERACT_BLOCK);
 		}
 	}
 

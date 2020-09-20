@@ -19,7 +19,6 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BendingCommandIssuer;
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.CommandCompletions;
@@ -65,50 +64,55 @@ public class Commands {
 	private static void registerCommandCompletions() {
 		CommandCompletions<BukkitCommandCompletionContext> commandCompletions = Bending.getCommandManager().getCommandCompletions();
 		commandCompletions.registerAsyncCompletion("abilities", c -> {
-			if (c.getIssuer() instanceof BendingCommandIssuer) {
-				BendingPlayer bendingPlayer = ((BendingCommandIssuer) c.getIssuer()).getBendingPlayer();
-				Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate();
-				return Game.getAbilityRegistry().getAbilities()
-					.filter(abilityPredicate)
-					.filter(bendingPlayer::hasPermission)
-					.map(AbilityDescription::getName).collect(Collectors.toList());
+			Player player = c.getPlayer();
+			Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate();
+			Predicate<AbilityDescription> permissionPredicate = x -> true;
+			if (player != null) {
+				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+				permissionPredicate = bendingPlayer::hasPermission;
 			}
-			return Collections.emptyList();
+			return Game.getAbilityRegistry().getAbilities().filter(abilityPredicate)
+				.filter(permissionPredicate).map(AbilityDescription::getName).collect(Collectors.toList());
 		});
 
 		commandCompletions.registerAsyncCompletion("presets", c -> {
-			if (c.getIssuer() instanceof BendingCommandIssuer) {
-				return ((BendingCommandIssuer) c.getIssuer()).getBendingPlayer().getPresets();
-			}
-			return Collections.emptyList();
+			Player player = c.getPlayer();
+			if (player == null) return Collections.emptyList();
+			return Game.getPlayerManager().getPlayer(player.getUniqueId()).getPresets();
 		});
 
 		commandCompletions.registerStaticCompletion("elements", Element.getElementNames());
 		commandCompletions.registerStaticCompletion("attributes", Arrays.asList(Attributes.TYPES));
-		commandCompletions.registerStaticCompletion("policies", Arrays.asList("<ability>", "<element>")); // TODO add them individually
 	}
 
 	private static void registerCommandContexts() {
 		CommandContexts<BukkitCommandExecutionContext> commandContexts = Bending.getCommandManager().getCommandContexts();
-		commandContexts.registerIssuerOnlyContext(BendingCommandIssuer.class, c -> (BendingCommandIssuer) c.getIssuer());
-
-		commandContexts.registerContext(Element.class, c -> {
-				String name = c.popFirstArg().toLowerCase();
-				return Element.getElementByName(name)
-					.orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
-			}
-		);
-
-		commandContexts.registerIssuerAwareContext(AbilityDescription.class, c -> {
+		commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
 			Player player = c.getPlayer();
 			if (player == null) throw new UserException("You must be player!");
-			BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+			return Game.getPlayerManager().getPlayer(player.getUniqueId());
+		});
+
+		commandContexts.registerContext(Element.class, c -> {
+			String name = c.popFirstArg().toLowerCase();
+			return Element.getElementByName(name)
+				.orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
+		});
+
+		commandContexts.registerIssuerAwareContext(AbilityDescription.class, c -> {
 			String name = c.popFirstArg();
+			if (name == null || name.isEmpty()) throw new InvalidCommandArgument("Could not find ability name");
+			Player player = c.getPlayer();
 			Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate(FilterType.parse(c.getFlagValue("filter", "ALL")));
+			Predicate<AbilityDescription> permissionPredicate = x -> true;
+			if (player != null) {
+				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+				permissionPredicate = bendingPlayer::hasPermission;
+			}
 			return Game.getAbilityRegistry().getAbilities()
 				.filter(abilityPredicate)
 				.filter(desc -> desc.getName().equalsIgnoreCase(name)) // TODO aliases for desc names?
-				.filter(bendingPlayer::hasPermission)
+				.filter(permissionPredicate)
 				.findAny().orElseThrow(() -> new InvalidCommandArgument("Could not find ability " + name));
 		});
 
@@ -140,8 +144,6 @@ public class Commands {
 			}
 			return ModifierOperation.ADDITIVE;
 		});
-
-		// TODO add context for attributes?
 	}
 
 	private static void registerCommandConditions() {

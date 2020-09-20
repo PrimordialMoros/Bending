@@ -19,7 +19,6 @@
 
 package me.moros.bending;
 
-import co.aikar.commands.BendingCommandManager;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.commands.lib.timings.TimingManager;
 import me.moros.bending.command.Commands;
@@ -80,7 +79,7 @@ public class Bending extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new TempArmorListener(), this);
 		getServer().getPluginManager().registerEvents(new WorldListener(), this);
 
-		commandManager = new BendingCommandManager(this);
+		commandManager = new PaperCommandManager(this);
 		commandManager.enableUnstableAPI("help");
 		Commands.initialize();
 	}

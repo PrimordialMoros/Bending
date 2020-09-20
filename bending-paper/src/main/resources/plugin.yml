@@ -27,6 +27,10 @@ permissions:
       bending.fire.bluefire: true
       bending.command.reload: true
       bending.command.add: true
+      bending.command.remove: true
+      bending.command.choose.other: true
+      bending.command.add.other: true
+      bending.command.remove.other: true
       bending.command.modify: true
   bending.player:
     default: true

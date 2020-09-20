@@ -37,8 +37,8 @@ public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
 	private final Map<Element, Set<AbilityDescription>> passives = new HashMap<>();
 
-	public Set<AbilityDescription> getPassives(Element element) {
-		return Collections.unmodifiableSet(passives.getOrDefault(element, Collections.emptySet()));
+	public Stream<AbilityDescription> getPassives(Element element) {
+		return passives.getOrDefault(element, Collections.emptySet()).stream();
 	}
 
 	protected void registerAbilities(Collection<AbilityDescription> abilities) {

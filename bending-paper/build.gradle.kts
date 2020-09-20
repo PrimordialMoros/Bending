@@ -43,7 +43,7 @@ tasks {
             relocate("co.aikar.locales", "me.moros.bending.internal.locales")
             relocate("org.jdbi", "me.moros.bending.internal.jdbi")
             relocate("com.github.benmanes", "me.moros.bending.internal.caffeine")
-            relocate("org.apache", "me.moros.bending.internal.apache")
+            relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
             relocate("net.jodah", "me.moros.bending.internal.expiringmap")
         }
         /*minimize {

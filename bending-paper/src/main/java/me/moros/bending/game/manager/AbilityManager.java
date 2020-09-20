@@ -93,14 +93,15 @@ public class AbilityManager {
 
 	public void createPassives(User user) {
 		for (Element element : user.getElements()) {
-			for (AbilityDescription passive : Game.getAbilityRegistry().getPassives(element)) {
+			Game.getAbilityRegistry().getPassives(element).forEach(passive -> {
 				destroyInstanceType(user, passive);
-				if (!user.hasPermission("bending.ability." + passive.getName())) continue;
-				Ability ability = passive.createAbility();
-				if (ability.activate(user, ActivationMethod.PASSIVE)) {
-					addAbility(user, ability);
+				if (user.hasPermission(passive)) {
+					Ability ability = passive.createAbility();
+					if (ability.activate(user, ActivationMethod.PASSIVE)) {
+						addAbility(user, ability);
+					}
 				}
-			}
+			});
 		}
 	}
 

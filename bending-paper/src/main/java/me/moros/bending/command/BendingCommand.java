@@ -20,7 +20,6 @@
 package me.moros.bending.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.BendingCommandIssuer;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
@@ -38,8 +37,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.AbilityAction;
-import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
@@ -47,11 +45,11 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -59,8 +57,8 @@ import java.util.stream.IntStream;
 public class BendingCommand extends BaseCommand {
 	@HelpCommand
 	@CommandPermission("bending.command.help")
-	public static void doHelp(BendingCommandIssuer sender, CommandHelp help) {
-		sender.sendMessageKyori(ChatUtil.brand("Help"));
+	public static void doHelp(CommandSender sender, CommandHelp help) {
+		ChatUtil.sendMessage(sender, ChatUtil.brand("Help"));
 		help.showHelp();
 	}
 
@@ -68,55 +66,46 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@players")
 	@CommandPermission("bending.command.toggle")
 	@Description("Toggles bending")
-	public void onToggle(BendingCommandIssuer sender, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
+	public void onToggle(BendingPlayer player, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
+		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		if (bendingPlayer.getBendingConditional().hasConditional(BendingConditions.TOGGLED)) {
 			bendingPlayer.getBendingConditional().remove(BendingConditions.TOGGLED);
-			ChatUtil.sendMessage(bendingPlayer, TextComponent.of("Your bending has been toggled back on.", NamedTextColor.GREEN));
+			bendingPlayer.sendMessageKyori(TextComponent.of("Your bending has been toggled back on.", NamedTextColor.GREEN));
 		} else {
 			bendingPlayer.getBendingConditional().add(BendingConditions.TOGGLED);
-			ChatUtil.sendMessage(bendingPlayer, TextComponent.of("Your bending has been toggled back off.", NamedTextColor.RED));
+			bendingPlayer.sendMessageKyori(TextComponent.of("Your bending has been toggled back off.", NamedTextColor.RED));
 		}
 	}
 
 	@Subcommand("reload")
 	@CommandPermission("bending.command.reload")
 	@Description("Reloads the plugin and its config")
-	public void onReload(BendingCommandIssuer sender) {
+	public void onReload(CommandSender sender) {
 		Game.reload();
-		sender.sendMessageKyori(TextComponent.of("Bending config reloaded.", NamedTextColor.GREEN));
+		ChatUtil.sendMessage(sender, TextComponent.of("Bending config reloaded.", NamedTextColor.GREEN));
 	}
 
 	@Subcommand("choose|ch")
 	@CommandPermission("bending.command.choose")
-	@CommandCompletion("@elements *")
+	@CommandCompletion("@elements @players")
 	@Description("Choose an element")
-	public static void onElementChoose(BendingCommandIssuer sender, Element element, @Optional @CommandPermission("bending.command.choose.others") OnlinePlayer target) {
-		if (!sender.hasPermission("bending.command.choose." + element)) {
-			sender.sendMessageKyori(TextComponent.of(
+	public static void onElementChoose(CommandSender sender, Element element, @Optional @CommandPermission("bending.command.choose.other") OnlinePlayer target) {
+		if (target == null && !(sender instanceof Player)) throw new UserException("You must be player!");
+		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) sender).getUniqueId() : target.getPlayer().getUniqueId());
+		if (target == null && !player.hasPermission("bending.command.choose." + element)) {
+			player.sendMessageKyori(TextComponent.of(
 				"You don't have permission to choose the element of ", NamedTextColor.RED)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 			return;
 		}
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
-		if (bendingPlayer.setElement(element)) {
-			ChatUtil.sendMessage(bendingPlayer, TextComponent.of(
+		if (player.setElement(element)) {
+			player.sendMessageKyori(TextComponent.of(
 				"Your bending was set to the element of ", NamedTextColor.GRAY)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 		} else {
-			sender.sendMessageKyori(TextComponent.of(
+			player.sendMessageKyori(TextComponent.of(
 				"Failed to choose element ", NamedTextColor.YELLOW)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
@@ -127,56 +116,48 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.add")
 	@CommandCompletion("@elements @players")
 	@Description("Add an element")
-	public static void onElementAdd(BendingCommandIssuer sender, Element element, @Optional @CommandPermission("bending.command.add.others") OnlinePlayer target) {
-		if (!sender.hasPermission("bending.command.add." + element)) {
-			sender.sendMessageKyori(TextComponent.of(
+	public static void onElementAdd(CommandSender sender, Element element, @Optional @CommandPermission("bending.command.add.other") OnlinePlayer target) {
+		if (target == null && !(sender instanceof Player)) throw new UserException("You must be player!");
+		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) sender).getUniqueId() : target.getPlayer().getUniqueId());
+		if (target == null && !player.hasPermission("bending.command.add." + element)) {
+			player.sendMessageKyori(TextComponent.of(
 				"You don't have permission to add the element of ", NamedTextColor.RED)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 			return;
 		}
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
-		if (bendingPlayer.addElement(element)) {
-			Game.getAbilityManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
-			Game.getAbilityManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
-			ChatUtil.sendMessage(bendingPlayer, TextComponent.of(
+		if (player.addElement(element)) {
+			Game.getAbilityManager(player.getWorld()).clearPassives(player);
+			Game.getAbilityManager(player.getWorld()).createPassives(player);
+			player.sendMessageKyori(TextComponent.of(
 				"You now have the element of ", NamedTextColor.GRAY)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 		} else {
-			sender.sendMessageKyori(TextComponent.of(
-				"User already has the element of ", NamedTextColor.YELLOW)
+			player.sendMessageKyori(TextComponent.of(
+				"You already have the element of ", NamedTextColor.YELLOW)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 		}
 	}
 
 	@Subcommand("remove|rm|r|delete|del")
-	@CommandPermission("bending.command.add")
+	@CommandPermission("bending.command.remove")
 	@CommandCompletion("@elements @players")
 	@Description("Remove an element")
-	public static void onElementRemove(BendingCommandIssuer sender, Element element, @Optional @CommandPermission("bending.command.remove.others") OnlinePlayer target) {
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
-		if (bendingPlayer.removeElement(element)) {
-			Game.getAbilityManager(bendingPlayer.getWorld()).clearPassives(bendingPlayer);
-			Game.getAbilityManager(bendingPlayer.getWorld()).createPassives(bendingPlayer);
-			ChatUtil.sendMessage(bendingPlayer, TextComponent.of(
+	public static void onElementRemove(CommandSender sender, Element element, @Optional @CommandPermission("bending.command.remove.other") OnlinePlayer target) {
+		if (target == null && !(sender instanceof Player)) throw new UserException("You must be player!");
+		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) sender).getUniqueId() : target.getPlayer().getUniqueId());
+		if (player.removeElement(element)) {
+			Game.getAbilityManager(player.getWorld()).clearPassives(player);
+			Game.getAbilityManager(player.getWorld()).createPassives(player);
+			player.sendMessageKyori(TextComponent.of(
 				"You no longer have the element of ", NamedTextColor.GRAY)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 		} else {
-			sender.sendMessageKyori(TextComponent.of(
-				"User doesn't have the element of ", NamedTextColor.YELLOW)
+			player.sendMessageKyori(TextComponent.of(
+				"Failed to remove the element of ", NamedTextColor.YELLOW)
 				.append(TextComponent.of(element.toString(), element.getColor()))
 			);
 		}
@@ -185,110 +166,104 @@ public class BendingCommand extends BaseCommand {
 	@Subcommand("bendingboard|board|bb")
 	@CommandPermission("bending.command.board")
 	@Description("Toggle bending board visibility")
-	public static void onBoard(BendingCommandIssuer sender) {
-		if (Game.isDisabledWorld(sender.getPlayer().getWorld().getUID())) {
-			sender.sendMessageKyori(TextComponent.of("Bending Board is disabled!", NamedTextColor.RED));
+	public static void onBoard(BendingPlayer player) {
+		if (Game.isDisabledWorld(player.getWorld().getUID())) {
+			player.sendMessageKyori(TextComponent.of("Bending Board is disabled!", NamedTextColor.RED));
 			return;
 		}
-		if (Game.getBoardManager().toggleScoreboard(sender.getPlayer())) {
-			sender.sendMessageKyori(TextComponent.of("Toggled Bending Board on", NamedTextColor.GREEN));
-			sender.getBendingPlayer().getProfile().setBoard(true);
+		if (Game.getBoardManager().toggleScoreboard(player.getEntity())) {
+			player.sendMessageKyori(TextComponent.of("Toggled Bending Board on", NamedTextColor.GREEN));
+			player.getProfile().setBoard(true);
 		} else {
-			sender.sendMessageKyori(TextComponent.of("Toggled Bending Board off", NamedTextColor.YELLOW));
-			sender.getBendingPlayer().getProfile().setBoard(false);
+			player.sendMessageKyori(TextComponent.of("Toggled Bending Board off", NamedTextColor.YELLOW));
+			player.getProfile().setBoard(false);
 		}
 	}
 
 	@Subcommand("version|ver|v")
 	@CommandPermission("bending.command.help")
 	@Description("View version info about the bending plugin")
-	public static void onVersion(BendingCommandIssuer sender) {
-		sender.sendMessageKyori(getVersionInfo());
+	public static void onVersion(CommandSender sender) {
+		ChatUtil.sendMessage(sender, getVersionInfo());
 	}
+
 
 	@Subcommand("display|d|elements|element|elem|e")
 	@CommandPermission("bending.command.display")
-	public static class DisplayCommand extends BaseCommand {
-		public DisplayCommand(BendingCommand command) {
+	@CommandCompletion("@elements")
+	@Description("List all available abilities for a specific element")
+	public static void onDisplay(CommandSender sender, Element element) {
+		// TODO Implement paginator and maybe allow console senders too
+		List<TextComponent> output = new ArrayList<>(16);
+		List<TextComponent> normal = Game.getAbilityRegistry().getAbilities()
+			.filter(d -> d.getElement() == element)
+			.filter(Commands.getAbilityPredicate(Commands.FilterType.NORMAL))
+			.filter(desc -> sender.hasPermission(desc.getPermission()))
+			.map(AbilityDescription::getMeta)
+			.collect(Collectors.toList());
+		if (!normal.isEmpty()) {
+			output.add(TextComponent.of("Abilities:", NamedTextColor.DARK_GRAY));
+			output.addAll(normal);
 		}
 
-		@Default
-		@CommandCompletion("@elements")
-		@Description("List all available abilities for a specific element")
-		public static void onDisplay(BendingCommandIssuer sender, Element element) {
-			BendingPlayer bendingPlayer = sender.getBendingPlayer();
-			// TODO Implement paginator
-
-			Map<Commands.FilterType, List<AbilityDescription>> groups = Game.getAbilityRegistry().getAbilities()
-				.filter(d -> d.getElement() == element)
-				.filter(Commands.getAbilityPredicate())
-				.filter(bendingPlayer::hasPermission)
-				.collect(Collectors.groupingBy(Commands::getMainType));
-
-			List<TextComponent> output = new ArrayList<>(16);
-			List<TextComponent> normal = groups.getOrDefault(Commands.FilterType.NORMAL, Collections.emptyList()).stream()
-				.map(AbilityDescription::getMeta)
-				.collect(Collectors.toList());
-			if (!normal.isEmpty()) {
-				output.add(TextComponent.of("Abilities:", NamedTextColor.DARK_GRAY));
-				output.addAll(normal);
-			}
-
-			List<TextComponent> sequences = groups.getOrDefault(Commands.FilterType.SEQUENCE, Collections.emptyList()).stream()
-				.map(AbilityDescription::getMeta)
-				.collect(Collectors.toList());
-
-			if (!sequences.isEmpty()) {
-				output.add(TextComponent.of("Sequences:", NamedTextColor.DARK_GRAY));
-				output.addAll(sequences);
-			}
-
-			List<TextComponent> passives = groups.getOrDefault(Commands.FilterType.PASSIVE, Collections.emptyList()).stream()
-				.map(AbilityDescription::getMeta)
-				.collect(Collectors.toList());
-
-			if (!passives.isEmpty()) {
-				output.add(TextComponent.of("Passives:", NamedTextColor.DARK_GRAY));
-				output.addAll(passives);
-			}
-
-			if (output.isEmpty()) {
-				sender.sendMessageKyori(
-					TextComponent.of("No abilities found for ", NamedTextColor.DARK_GRAY).append(element.getDisplayName())
-				);
-				return;
-			}
-			output.forEach(sender::sendMessageKyori);
+		List<TextComponent> sequences = Game.getSequenceManager().getRegisteredSequences()
+			.filter(d -> d.getElement() == element)
+			.filter(desc -> !desc.isHidden())
+			.filter(desc -> sender.hasPermission(desc.getPermission()))
+			.map(AbilityDescription::getMeta)
+			.collect(Collectors.toList());
+		if (!sequences.isEmpty()) {
+			output.add(TextComponent.of("Sequences:", NamedTextColor.DARK_GRAY));
+			output.addAll(sequences);
 		}
+
+		List<TextComponent> passives = Game.getAbilityRegistry().getPassives(element)
+			.filter(desc -> !desc.isHidden())
+			.filter(desc -> sender.hasPermission(desc.getPermission()))
+			.map(AbilityDescription::getMeta)
+			.collect(Collectors.toList());
+		if (!passives.isEmpty()) {
+			output.add(TextComponent.of("Passives:", NamedTextColor.DARK_GRAY));
+			output.addAll(passives);
+		}
+
+		if (output.isEmpty()) {
+			ChatUtil.sendMessage(sender, TextComponent.of(
+				"No abilities found for ", NamedTextColor.DARK_GRAY).append(element.getDisplayName())
+			);
+			return;
+		}
+		output.forEach(text -> ChatUtil.sendMessage(sender, text));
 	}
 
 	@Subcommand("bind|b")
 	@CommandPermission("bending.command.bind")
 	@CommandCompletion("@abilities @range:1-9")
 	@Description("Bind an ability to a slot")
-	public static void onBind(BendingCommandIssuer sender, @Flags("filter=NORMAL") AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
-		if (!sender.getBendingPlayer().hasElement(ability.getElement())) {
-			sender.sendMessageKyori(ability.getDisplayName()
+	public static void onBind(BendingPlayer player, @Flags("filter=NORMAL") AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
+		if (!player.hasElement(ability.getElement())) {
+			player.sendMessageKyori(ability.getDisplayName()
 				.append(TextComponent.of(" requires element ", NamedTextColor.YELLOW))
 				.append(TextComponent.of(ability.getElement().toString(), ability.getElement().getColor()))
 			);
 			return;
 		}
-		if (slot == 0) slot = sender.getBendingPlayer().getHeldItemSlot();
-		sender.getBendingPlayer().setSlotAbility(slot, ability);
-		sender.sendMessageKyori(ability.getDisplayName()
+		if (slot == 0) slot = player.getHeldItemSlot();
+		player.setSlotAbility(slot, ability);
+		player.sendMessageKyori(ability.getDisplayName()
 			.append(TextComponent.of(" was bound to slot " + slot, NamedTextColor.GREEN))
 		);
 	}
 
 	@Subcommand("binds")
 	@CommandPermission("bending.command.help")
+	@CommandCompletion("@players")
 	@Description("Show all bound abilities")
-	public static void onBinds(BendingCommandIssuer sender) {
-		BendingPlayer bendingPlayer = sender.getBendingPlayer();
-		sender.sendMessageKyori(TextComponent.of("Bound abilities: ", NamedTextColor.DARK_AQUA));
+	public static void onBinds(BendingPlayer player, @Optional OnlinePlayer target) {
+		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+		player.sendMessageKyori(TextComponent.of(bendingPlayer.getEntity().getName() + "'s bound abilities: ", NamedTextColor.DARK_AQUA));
 		IntStream.rangeClosed(1, 9).forEach(slot -> bendingPlayer.getStandardSlotAbility(slot)
-			.ifPresent(desc -> sender.sendMessageKyori(
+			.ifPresent(desc -> player.sendMessageKyori(
 				TextComponent.of(slot + ". ", NamedTextColor.DARK_AQUA).append(AbilityDescription.getMeta(desc))
 			))
 		);
@@ -298,33 +273,32 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.bind")
 	@CommandCompletion("@range:1-9")
 	@Description("Clear an ability slot")
-	public static void onClearBind(BendingCommandIssuer sender, @Default("0") @Conditions("slot") Integer slot) {
-		if (slot == 0) slot = sender.getBendingPlayer().getHeldItemSlot();
-		sender.getBendingPlayer().setSlotAbility(slot, null);
-		sender.sendMessageKyori(TextComponent.of("Cleared ability slot " + slot, NamedTextColor.GREEN));
+	public static void onClearBind(BendingPlayer player, @Default("0") @Conditions("slot") Integer slot) {
+		if (slot == 0) slot = player.getHeldItemSlot(); // TODO add option to clear all?
+		player.setSlotAbility(slot, null);
+		player.sendMessageKyori(TextComponent.of("Cleared ability slot " + slot, NamedTextColor.GREEN));
 	}
 
 	@Subcommand("info|i")
 	@CommandPermission("bending.command.help")
 	@CommandCompletion("@abilities")
 	@Description("View info about a specific ability")
-	public static void onInfo(BendingCommandIssuer sender, AbilityDescription ability) {
+	public static void onInfo(CommandSender sender, AbilityDescription ability) {
 		String description = ability.getDescription();
 		String instructions = ability.getInstructions();
-
 		if (description.isEmpty() && instructions.isEmpty()) {
-			sender.sendMessageKyori(
-				TextComponent.of("No description or instructions found for ", NamedTextColor.YELLOW)
-					.append(ability.getDisplayName())
+			ChatUtil.sendMessage(sender, TextComponent.of(
+				"No description or instructions found for ", NamedTextColor.YELLOW)
+				.append(ability.getDisplayName())
 			);
 		} else {
 			if (!description.isEmpty()) {
-				sender.sendMessageKyori(ability.getDisplayName()
+				ChatUtil.sendMessage(sender, ability.getDisplayName()
 					.append(TextComponent.of(" description: " + description, NamedTextColor.GRAY))
 				);
 			}
 			if (!instructions.isEmpty()) {
-				sender.sendMessageKyori(ability.getDisplayName()
+				ChatUtil.sendMessage(sender, ability.getDisplayName()
 					.append(TextComponent.of(" instructions: " + description, NamedTextColor.GRAY))
 				);
 			}
@@ -332,41 +306,15 @@ public class BendingCommand extends BaseCommand {
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
 			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> {
-				String sequenceInstructions = getSequenceInstructions(sequence);
-				sender.sendMessageKyori(ability.getDisplayName()
-					.append(TextComponent.of(": " + sequenceInstructions, NamedTextColor.DARK_GRAY))
+				ChatUtil.sendMessage(sender, ability.getDisplayName()
+					.append(TextComponent.of(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
 				);
 			});
 		}
 	}
 
-	private static String getSequenceInstructions(Sequence sequence) {
-		StringBuilder sb = new StringBuilder();
-		List<AbilityAction> actions = sequence.getActions();
-		for (int i = 0; i < actions.size(); i++) {
-			AbilityAction abilityAction = actions.get(i);
-			if (i != 0) sb.append(" > ");
-			AbilityDescription desc = abilityAction.getAbilityDescription();
-			ActivationMethod action = abilityAction.getAction();
-			String actionString = action.toString();
-			if (action == ActivationMethod.SNEAK) {
-				actionString = "Hold Sneak";
-				// Check if the next instruction is to release this sneak.
-				if (i + 1 < actions.size()) {
-					AbilityAction next = actions.get(i + 1);
-					if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
-						actionString = "Tap Sneak";
-						++i;
-					}
-				}
-			}
-			sb.append(desc.getName()).append(" (").append(actionString).append(")");
-		}
-		return sb.toString();
-	}
-
 	private static TextComponent getVersionInfo() {
-		String link = "https://github.com/PrimordialMoros/"; // TODO add proper link
+		String link = "https://github.com/PrimordialMoros/Bending";
 		TextComponent details = TextComponent.builder("Developed by: ", NamedTextColor.DARK_AQUA)
 			.append(Bending.getAuthor(), NamedTextColor.GREEN).append(TextComponent.newline())
 			.append("Source code: ", NamedTextColor.DARK_AQUA)

@@ -20,20 +20,20 @@
 package me.moros.bending.util;
 
 import me.moros.bending.Bending;
-import me.moros.bending.model.user.player.BendingPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 
 public class ChatUtil {
-	public static void sendMessage(BendingPlayer player, String text) {
-		sendMessage(player, TextComponent.of(text));
+	public static void sendMessage(CommandSender sender, String text) {
+		sendMessage(sender, TextComponent.of(text));
 	}
 
-	public static void sendMessage(BendingPlayer player, Component text) {
-		Bending.getAudiences().audience(player.getEntity()).sendMessage(text);
+	public static void sendMessage(CommandSender sender, Component text) {
+		Bending.getAudiences().audience(sender).sendMessage(text);
 	}
 
 	public static TextComponent brand(String text) {

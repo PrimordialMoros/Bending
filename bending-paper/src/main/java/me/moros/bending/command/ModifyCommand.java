@@ -20,7 +20,6 @@
 package me.moros.bending.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.BendingCommandIssuer;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.annotation.CommandAlias;
@@ -40,6 +39,7 @@ import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 
@@ -48,28 +48,23 @@ import java.util.Arrays;
 public class ModifyCommand extends BaseCommand {
 	@HelpCommand
 	@CommandPermission("bending.command.help")
-	public static void doHelp(BendingCommandIssuer sender, CommandHelp help) {
-		sender.sendMessageKyori(ChatUtil.brand("Help"));
+	public static void doHelp(CommandSender sender, CommandHelp help) {
+		ChatUtil.sendMessage(sender, ChatUtil.brand("Help"));
 		help.showHelp();
 	}
 
 	@Subcommand("add|a")
-	@CommandCompletion("@players @policies @attributes")
+	@CommandCompletion("@elements|@abilities @attributes @players")
 	@Description("Add a new modifier to the specified player")
-	public static void onAdd(BendingCommandIssuer sender, @Optional OnlinePlayer target, ModifyPolicy policy, String type, ModifierOperation operation, double amount) {
+	public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
 		String validType = Arrays.stream(Attributes.TYPES)
 			.filter(attr -> attr.equalsIgnoreCase(type))
 			.findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
 		AttributeModifier modifier = new AttributeModifier(validType, operation, amount);
+		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Game.getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
-		sender.sendMessageKyori(
+		player.sendMessageKyori(
 			TextComponent.of("Successfully added modifier to " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
 		);
 	}
@@ -77,16 +72,11 @@ public class ModifyCommand extends BaseCommand {
 	@Subcommand("clear|c")
 	@CommandCompletion("@players")
 	@Description("Clear all existing modifiers for a player")
-	public static void onClear(BendingCommandIssuer sender, @Optional OnlinePlayer target) {
-		BendingPlayer bendingPlayer;
-		if (target != null) {
-			bendingPlayer = Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		} else {
-			bendingPlayer = sender.getBendingPlayer();
-		}
+	public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
+		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Game.getAttributeSystem().clearModifiers(bendingPlayer);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
-		sender.sendMessageKyori(
+		player.sendMessageKyori(
 			TextComponent.of("Cleared attribute modifiers for " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
 		);
 	}

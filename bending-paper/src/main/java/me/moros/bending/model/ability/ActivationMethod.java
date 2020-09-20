@@ -20,15 +20,25 @@
 package me.moros.bending.model.ability;
 
 public enum ActivationMethod {
-	PASSIVE,
-	PUNCH,
-	PUNCH_ENTITY,
-	INTERACT,
-	INTERACT_ENTITY,
-	INTERACT_BLOCK,
-	USE,
-	SNEAK,
-	SNEAK_RELEASE,
-	FALL,
-	SEQUENCE
+	PASSIVE("Passive"),
+	PUNCH("Click"),
+	PUNCH_ENTITY("Click Entity"),
+	INTERACT("Right Click Air"),
+	INTERACT_ENTITY("Right Click Entity"),
+	INTERACT_BLOCK("Right Click Block"),
+	SNEAK("Hold Sneak"),
+	SNEAK_RELEASE("Release Sneak"),
+	FALL("Fall"),
+	SEQUENCE("Sequence");
+
+	private final String name;
+
+	ActivationMethod(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }
