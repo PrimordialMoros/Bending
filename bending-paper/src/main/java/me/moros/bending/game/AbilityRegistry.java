@@ -72,20 +72,20 @@ public final class AbilityRegistry {
 	/**
 	 * @param name the name to match
 	 * @return Optional ability description
-	 * @see #getDescriptionByName(String)
+	 * @see #getAbilityDescription(Ability)
 	 */
 	public Optional<AbilityDescription> getAbilityDescription(String name) {
 		if (name == null || name.isEmpty()) return Optional.empty();
-		return Optional.ofNullable(getDescriptionByName(name));
+		return Optional.ofNullable(abilities.get(name.toLowerCase()));
 	}
 
 	/**
 	 * This should only be used by {@link Ability#getDescription}
-	 * @param name the name to match
-	 * @return the ability description that matches the specified name or null if not found
+	 * @param ability the ability to match
+	 * @return the ability description that matches the specified ability by name or null if not found
 	 * @see #getAbilityDescription(String)
 	 */
-	public AbilityDescription getDescriptionByName(String name) {
-		return abilities.get(name);
+	public AbilityDescription getAbilityDescription(Ability ability) {
+		return abilities.get(ability.getName().toLowerCase());
 	}
 }

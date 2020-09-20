@@ -22,7 +22,6 @@ package me.moros.bending.game.manager;
 import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.game.Game;
-import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.MultiAbility;
@@ -39,6 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbilityManager {
@@ -92,16 +93,16 @@ public class AbilityManager {
 	}
 
 	public void createPassives(User user) {
-		for (Element element : user.getElements()) {
-			Game.getAbilityRegistry().getPassives(element).forEach(passive -> {
-				destroyInstanceType(user, passive);
-				if (user.hasPermission(passive)) {
-					Ability ability = passive.createAbility();
-					if (ability.activate(user, ActivationMethod.PASSIVE)) {
-						addAbility(user, ability);
-					}
+		Set<AbilityDescription> userPassives = user.getElements().stream()
+			.flatMap(Game.getAbilityRegistry()::getPassives).collect(Collectors.toSet());
+		for (AbilityDescription passive : userPassives) {
+			destroyInstanceType(user, passive);
+			if (user.hasPermission(passive)) {
+				Ability ability = passive.createAbility();
+				if (ability.activate(user, ActivationMethod.PASSIVE)) {
+					addAbility(user, ability);
 				}
-			});
+			}
 		}
 	}
 

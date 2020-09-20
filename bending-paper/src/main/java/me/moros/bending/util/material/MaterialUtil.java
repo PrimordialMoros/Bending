@@ -115,12 +115,11 @@ public final class MaterialUtil {
 	}
 
 	public static boolean isIgnitable(Block block) {
-		if (!isAir(block) && !ATTACH_MATERIALS.contains(block.getType())) {
+		if (isAir(block) || ATTACH_MATERIALS.contains(block.getType())) {
+			return IGNITABLE_MATERIALS.contains(block.getRelative(BlockFace.DOWN).getType());
+		} else {
 			return false;
 		}
-		// The current block is either air or can be overwritten.
-		// The below block still needs to be checked because it could be a torch against a wall.
-		return IGNITABLE_MATERIALS.contains(block.getRelative(BlockFace.DOWN).getType());
 	}
 
 	public static boolean isEarthbendable(Block block) {

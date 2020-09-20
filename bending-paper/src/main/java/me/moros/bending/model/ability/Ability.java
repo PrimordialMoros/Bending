@@ -48,7 +48,7 @@ public interface Ability {
 	}
 
 	default AbilityDescription getDescription() {
-		return Game.getAbilityRegistry().getDescriptionByName(getName());
+		return Game.getAbilityRegistry().getAbilityDescription(this);
 	}
 
 	default List<Collider> getColliders() {

@@ -194,7 +194,7 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@elements")
 	@Description("List all available abilities for a specific element")
 	public static void onDisplay(CommandSender sender, Element element) {
-		// TODO Implement paginator and maybe allow console senders too
+		// TODO Implement paginator
 		List<TextComponent> output = new ArrayList<>(16);
 		List<TextComponent> normal = Game.getAbilityRegistry().getAbilities()
 			.filter(d -> d.getElement() == element)
