@@ -51,7 +51,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
 import java.util.Collections;
@@ -237,12 +236,12 @@ public class FireBlast implements Ability, Burstable {
 		@Override
 		public boolean onBlockHit(Block block) {
 			Vector reverse = ray.direction.scalarMultiply(-1).toVector();
-			int rayRange = NumberConversions.ceil(userConfig.igniteRadius * factor) + 1;
+			double rayRange = userConfig.igniteRadius * factor + 2;
 			if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
 				for (Block b : WorldMethods.getNearbyBlocks(getBukkitLocation(), userConfig.igniteRadius * factor)) {
 					if (!Game.getProtectionSystem().canBuild(user, b)) continue;
 					if (WorldMethods.rayTraceBlocks(b.getLocation(), reverse, rayRange).isPresent()) continue;
-					BlockMethods.lightFurnaces(b);
+					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) TempBlock.create(b, Material.FIRE, 10000);
 				}
 			}

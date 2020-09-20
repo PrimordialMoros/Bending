@@ -17,14 +17,13 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection.methods;
+package me.moros.bending.protection.instances;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 
-public interface ProtectMethod {
-	boolean canBuild(User user, AbilityDescription desc, Block block);
+public interface Protection {
+	boolean canBuild(User user, Block block);
 
 	String getName();
 }

@@ -27,13 +27,24 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * Utility class to handle chat related functionality.
+ */
 public class ChatUtil {
-	public static void sendMessage(CommandSender sender, String text) {
-		sendMessage(sender, TextComponent.of(text));
+	/**
+	 * @see #sendMessage(CommandSender, Component)
+	 */
+	public static void sendMessage(CommandSender receiver, String text) {
+		sendMessage(receiver, TextComponent.of(text));
 	}
 
-	public static void sendMessage(CommandSender sender, Component text) {
-		Bending.getAudiences().audience(sender).sendMessage(text);
+	/**
+	 * Sends a message to the provided sender using the <a href="https://github.com/KyoriPowered/adventure">Adventure</a> Framework.
+	 * @param receiver the message receiver
+	 * @param text the text message as a Component
+	 */
+	public static void sendMessage(CommandSender receiver, Component text) {
+		Bending.getAudiences().audience(receiver).sendMessage(text);
 	}
 
 	public static TextComponent brand(String text) {
@@ -45,8 +56,8 @@ public class ChatUtil {
 	}
 
 	/**
-	 * Strip input of all non alphabetical values and limit to 16 characters long
-	 *
+	 * Strip input of all non alphabetical values and limit to 16 characters long.
+	 * This is used for preset names mainly.
 	 * @param input input the input string to sanitize
 	 * @return the sanitized output string
 	 */

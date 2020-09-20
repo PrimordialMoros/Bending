@@ -40,7 +40,11 @@ public final class BlockMethods {
 	public static final Set<BlockFace> MAIN_FACES = Collections.unmodifiableSet(EnumSet.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN));
 	public static final Set<BlockFace> CARDINAL_FACES = Collections.unmodifiableSet(EnumSet.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH));
 
-	public static void lightFurnaces(Block block) {
+	/**
+	 * Attempts to light a block if it's a furnace, smoker, blast furance or campfire.
+	 * @param block the block to light
+	 */
+	public static void lightBlock(Block block) {
 		if (block.getType() == Material.FURNACE) {
 			Furnace furnace = (Furnace) block.getState();
 			furnace.setBurnTime((short) 800);
@@ -58,14 +62,21 @@ public final class BlockMethods {
 		}
 	}
 
+	/**
+	 * Attempts to extinguish nearby blocks. Fire will be put out while Lava will be turned to Obsidian or Cobblestone.
+	 * @param user the user trying to extinguish the block.
+	 * @param center the location to check
+	 * @return true if Lava was cooled down, false otherwise.
+	 */
 	public static boolean extinguish(User user, Location center) {
+		Block block = center.getBlock();
+		if (!Game.getProtectionSystem().canBuild(user, block)) return false;
 		boolean result = true;
-		for (Block b : WorldMethods.getNearbyBlocks(center.add(0, 0.5, 0), 1, MaterialUtil::isFire)) {
+		for (Block b : WorldMethods.getNearbyBlocks(center, 1.2, MaterialUtil::isFire)) {
 			if (!Game.getProtectionSystem().canBuild(user, b)) continue;
 			b.setType(Material.AIR);
 			result = false;
 		}
-		Block block = center.getBlock();
 		if (MaterialUtil.isLava(block)) {
 			block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
 			result = true;

@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection.methods;
+package me.moros.bending.protection.instances;
 
 import com.palmergames.bukkit.towny.Towny;
 import com.palmergames.bukkit.towny.TownyAPI;
@@ -29,7 +29,6 @@ import com.palmergames.bukkit.towny.object.WorldCoord;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import com.palmergames.bukkit.towny.war.eventwar.WarUtil;
 import com.palmergames.bukkit.towny.war.flagwar.FlagWar;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -38,10 +37,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class TownyProtectMethod implements ProtectMethod {
+public class TownyProtection implements Protection {
 	private final Towny towny;
 
-	public TownyProtectMethod() throws PluginNotFoundException {
+	public TownyProtection() throws PluginNotFoundException {
 		towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
 
 		if (towny == null)
@@ -49,7 +48,7 @@ public class TownyProtectMethod implements ProtectMethod {
 	}
 
 	@Override
-	public boolean canBuild(User user, AbilityDescription desc, Block block) {
+	public boolean canBuild(User user, Block block) {
 		if (user instanceof BendingPlayer) {
 			Player player = ((BendingPlayer) user).getEntity();
 			return canPlayerBuild(player, block);

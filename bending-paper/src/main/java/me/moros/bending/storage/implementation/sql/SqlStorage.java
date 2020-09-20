@@ -76,9 +76,7 @@ public class SqlStorage implements StorageImplementation {
 		if (!tableExists("bending_players")) {
 			DB.useHandle(handle -> {
 				Batch batch = handle.createBatch();
-				for (String query : statements) {
-					batch.add(query);
-				}
+				statements.forEach(batch::add);
 				batch.execute();
 			});
 		}

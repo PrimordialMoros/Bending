@@ -34,6 +34,9 @@ import org.bukkit.potion.PotionType;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Utility class to handle bending sourcing.
+ */
 public final class SourceUtil {
 	private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
 	private static final ItemStack waterBottle;
@@ -45,8 +48,16 @@ public final class SourceUtil {
 		waterBottle.setItemMeta(potionMeta);
 	}
 
+	/**
+	 * Attempts to find a possible source.
+	 *
+	 * @param user the user checking for a source
+	 * @param range the max range to check
+	 * @param materials a set of valid source materials
+	 * @return an Optional source block
+	 */
 	public static Optional<Block> getSource(User user, int range, Set<Material> materials) {
-		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), user.getDirection()), range, materials);
+		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(range)), materials);
 		if (!Game.getProtectionSystem().canBuild(user, block) || !materials.contains(block.getType()) || !isBendableTempBlock(block)) {
 			return Optional.empty();
 		}
@@ -58,13 +69,11 @@ public final class SourceUtil {
 	}
 
 	public static boolean hasFullBottle(User user) {
-		if (user.getInventory().isPresent()) return user.getInventory().get().containsAtLeast(waterBottle, 1);
-		return false;
+		return user.getInventory().map(i -> i.containsAtLeast(waterBottle, 1)).orElse(false);
 	}
 
 	public static boolean hasEmptyBottle(User user) {
-		if (user.getInventory().isPresent()) return user.getInventory().get().containsAtLeast(emptyBottle, 1);
-		return false;
+		return user.getInventory().map(i -> i.containsAtLeast(emptyBottle, 1)).orElse(false);
 	}
 
 	public static boolean fillBottle(User user) {

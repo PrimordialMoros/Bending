@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Preset {
+	public static final Preset EMPTY = new Preset(0, "", new String[9]);
+
 	private final int id;
 	private final String name;
 	private final String[] abilities;

@@ -60,7 +60,7 @@ public class FireJet implements Ability {
 			return false;
 		}
 
-		if (!Game.getProtectionSystem().canBuild(user, getDescription(), block)) {
+		if (!Game.getProtectionSystem().canBuild(user, block)) {
 			return false;
 		}
 

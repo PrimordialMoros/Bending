@@ -24,6 +24,10 @@ import org.bukkit.Sound;
 
 import java.util.Objects;
 
+/**
+ * Utility class to provide a {@link Sound} along with volume and pitch.
+ * @see SoundUtil
+ */
 public class SoundEffect {
 	private final Sound sound;
 	private final float volume;

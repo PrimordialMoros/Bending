@@ -28,7 +28,12 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 import java.io.File;
 
-public class StorageFactory {
+/**
+ * Factory class that constructs and returns a Hikari-based database storage.
+ * @see Storage
+ * @see SqlStorage
+ */
+public final class StorageFactory {
 	// TODO implement database redundancy
 	public static Storage createInstance() {
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");

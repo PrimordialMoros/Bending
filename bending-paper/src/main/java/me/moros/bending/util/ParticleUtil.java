@@ -26,6 +26,11 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 
+/**
+ * Utility class to provide create and render {@link Particle}.
+ * You should prefer this over using a custom ParticleBuilder to ensure uniform rendering across different abilities.
+ * @see ParticleBuilder
+ */
 public final class ParticleUtil {
 	public static final int DEFAULT_DIST = 32;
 	public static final Color AIR = fromHex("EEEEEE");
@@ -52,18 +57,23 @@ public final class ParticleUtil {
 
 	/**
 	 * Asynchronously spawns and sends the given particle effect to its receivers.
-	 *
+	 * Make sure you have collected the receivers in a sync thread first.
 	 * @param pb the particle effect builder that holds the particle data to display
 	 */
 	public static void displayAsync(ParticleBuilder pb) {
 		if (pb.hasReceivers()) Tasker.newChain().async(pb::spawn).execute();
 	}
 
-	public static Color fromHex(String hexVal) {
-		if (hexVal.length() < 6) return Color.BLACK;
-		int r = Integer.valueOf(hexVal.substring(0, 2), 16);
-		int g = Integer.valueOf(hexVal.substring(2, 4), 16);
-		int b = Integer.valueOf(hexVal.substring(4, 6), 16);
+	/**
+	 * Convert a hex string into a {@link Color}.
+	 * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
+	 * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
+	 */
+	public static Color fromHex(String hexValue) {
+		if (hexValue.length() < 6) return Color.BLACK;
+		int r = Integer.valueOf(hexValue.substring(0, 2), 16);
+		int g = Integer.valueOf(hexValue.substring(2, 4), 16);
+		int b = Integer.valueOf(hexValue.substring(4, 6), 16);
 		return Color.fromRGB(r, g, b);
 	}
 }

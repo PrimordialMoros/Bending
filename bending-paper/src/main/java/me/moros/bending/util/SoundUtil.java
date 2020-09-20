@@ -22,6 +22,10 @@ package me.moros.bending.util;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 
+/**
+ * Utility class to provide a list of pre-configured sounds.
+ * @see SoundEffect
+ */
 public final class SoundUtil {
 	public static final SoundEffect AIR_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 2);
 

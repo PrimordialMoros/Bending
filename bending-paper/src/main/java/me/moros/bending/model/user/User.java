@@ -98,10 +98,6 @@ public interface User {
 		setSlotAbility(slot, null);
 	}
 
-	default void clearSlots() {
-		IntStream.rangeClosed(1, 9).forEach(this::clearSlot);
-	}
-
 	void addSlotContainer(AbilitySlotContainer slotContainer);
 
 	void removeLastSlotContainer();

@@ -25,9 +25,19 @@ import me.moros.bending.model.user.player.BendingPlayer;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 
+/**
+ * Utility class with useful methods that are {@link User} related
+ */
 public final class UserMethods {
 	private static final Vector3 playerOffset = new Vector3(0, 1.2, 0);
 
+	/**
+	 * Note: the returned value includes an offset and is ideal for showing charging particles
+	 * @see #getRightSide(User)
+	 * @see #getLeftSide(User)
+	 * @param user the user to check
+	 * @return a vector which represents the user's main hand location
+	 */
 	public static Vector3 getMainHandSide(User user) {
 		Vector3 dir = user.getDirection().scalarMultiply(0.4);
 		if (user instanceof BendingPlayer) {
@@ -42,16 +52,28 @@ public final class UserMethods {
 		return user.getEyeLocation().add(dir);
 	}
 
+
+	/**
+	 * Gets the user's right side
+	 */
 	public static Vector3 getRightSide(User user) {
 		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
 		return user.getLocation().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
 
+	/**
+	 * Gets the user's left side
+	 */
 	public static Vector3 getLeftSide(User user) {
 		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
 		return user.getLocation().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
 
+	/**
+	 * Checks the user's permissions and returns {@link Particle#FLAME} or {@link Particle#SOUL_FIRE_FLAME} accordingly.
+	 * @param user the user to check
+	 * @return th fire particle type
+	 */
 	public static Particle getFireParticles(User user) {
 		return user.hasPermission("bending.fire.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
 	}

@@ -32,6 +32,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import java.time.Duration;
 import java.util.UUID;
 
+/**
+ * Utility class to handle bending damage and player death messages.
+ */
 public final class DamageUtil {
 	private static final Cache<UUID, String> cache = Caffeine.newBuilder()
 		.maximumSize(100)

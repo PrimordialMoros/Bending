@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection.methods;
+package me.moros.bending.protection.instances;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.util.Location;
@@ -29,7 +29,6 @@ import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -37,21 +36,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class WorldGuardProtectMethod implements ProtectMethod {
+public class WorldGuardProtection implements Protection {
 	private final WorldGuardPlugin worldGuard;
 	private final StateFlag bendingFlag;
 
-	public WorldGuardProtectMethod() throws PluginNotFoundException {
+	public WorldGuardProtection() throws PluginNotFoundException {
 		worldGuard = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
-
 		if (worldGuard == null)
 			throw new PluginNotFoundException("WorldGuard");
-
 		bendingFlag = (StateFlag) WorldGuard.getInstance().getFlagRegistry().get("bending");
 	}
 
 	@Override
-	public boolean canBuild(User user, AbilityDescription desc, Block block) {
+	public boolean canBuild(User user, Block block) {
 		RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
 		Location adaptedLocation = BukkitAdapter.adapt(block.getLocation());

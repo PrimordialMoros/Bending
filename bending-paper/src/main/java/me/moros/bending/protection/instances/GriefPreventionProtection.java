@@ -17,9 +17,8 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection.methods;
+package me.moros.bending.protection.instances;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -28,20 +27,18 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 
-public class GriefPreventionProtectMethod implements ProtectMethod {
-	public GriefPreventionProtectMethod() throws PluginNotFoundException {
+public class GriefPreventionProtection implements Protection {
+	public GriefPreventionProtection() throws PluginNotFoundException {
 		GriefPrevention griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
 		if (griefPrevention == null)
 			throw new PluginNotFoundException("GriefPrevention");
 	}
 
 	@Override
-	public boolean canBuild(User user, AbilityDescription desc, Block block) {
+	public boolean canBuild(User user, Block block) {
 		if (!(user instanceof BendingPlayer)) return true;
-
 		String reason = GriefPrevention.instance.allowBuild(((BendingPlayer) user).getEntity(), block.getLocation());
 		Claim claim = GriefPrevention.instance.dataStore.getClaimAt(block.getLocation(), true, null);
-
 		return reason == null || claim == null || claim.siegeData != null;
 	}
 

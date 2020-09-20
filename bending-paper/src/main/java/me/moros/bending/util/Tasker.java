@@ -26,11 +26,15 @@ import me.moros.bending.Bending;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
+/**
+ * Utility class to provide task chains and create repeating tasks.
+ * @see TaskChain
+ */
 public final class Tasker {
 	private static TaskChainFactory taskChainFactory;
 
 	public static void init(Bending plugin) {
-		taskChainFactory = BukkitTaskChainFactory.create(plugin);
+		if (taskChainFactory == null) taskChainFactory = BukkitTaskChainFactory.create(plugin);
 	}
 
 	public static <T> TaskChain<T> newChain() {

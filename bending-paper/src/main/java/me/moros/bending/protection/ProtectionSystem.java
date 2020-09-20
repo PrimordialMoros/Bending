@@ -25,10 +25,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
-import me.moros.bending.protection.methods.GriefPreventionProtectMethod;
-import me.moros.bending.protection.methods.ProtectMethod;
-import me.moros.bending.protection.methods.TownyProtectMethod;
-import me.moros.bending.protection.methods.WorldGuardProtectMethod;
+import me.moros.bending.protection.instances.GriefPreventionProtection;
+import me.moros.bending.protection.instances.Protection;
+import me.moros.bending.protection.instances.TownyProtection;
+import me.moros.bending.protection.instances.WorldGuardProtection;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 
@@ -36,17 +36,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Represents the protection system which hooks into other region protection plugins.
+ */
 public class ProtectionSystem extends Configurable {
-	private final List<ProtectMethod> protectionMethods = new ArrayList<>();
-
-	private boolean allowHarmless;
+	private final List<Protection> protections = new ArrayList<>();
 	private final ProtectionCache cache = new ProtectionCache();
+	private boolean allowHarmless;
 
 	public ProtectionSystem() {
 		onConfigReload();
-		registerProtectMethod("WorldGuard", WorldGuardProtectMethod::new);
-		registerProtectMethod("GriefPrevention", GriefPreventionProtectMethod::new);
-		registerProtectMethod("Towny", TownyProtectMethod::new);
+		registerProtectMethod("WorldGuard", WorldGuardProtection::new);
+		registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
+		registerProtectMethod("Towny", TownyProtection::new);
 	}
 
 	@Override
@@ -55,38 +57,69 @@ public class ProtectionSystem extends Configurable {
 		allowHarmless = node.getNode("allow-harmless").getBoolean(true);
 	}
 
+	/**
+	 * @see ProtectionCache#invalidate(User)
+	 */
 	public void invalidate(User user) {
 		cache.invalidate(user);
 	}
 
+	/**
+	 * @see #canBuild(User, Block, boolean)
+	 */
 	public boolean canBuild(User user, Block block) {
-		return canBuild(user, null, block);
+		return canBuild(user, block, false);
 	}
 
-	public boolean canBuild(User user, AbilityDescription desc, Block block) {
-		boolean isHarmless = false;
-		if (desc != null) isHarmless = desc.isHarmless();
+	/**
+	 * Uses {@link AbilityDescription#isHarmless}
+	 * @see #canBuild(User, Block, boolean)
+	 */
+	public boolean canBuild(User user, Block block, AbilityDescription desc) {
+		return canBuild(user, block, desc != null && desc.isHarmless());
+	}
+
+
+	/**
+	 * Checks if a user can build at a block location. First it queries the cache.
+	 * If no result is found it computes it and adds it to the cache before returning the result.
+	 * Harmless actions are automatically allowed if allowHarmless is configured
+	 * @param user the user to check
+	 * @param block the block to check
+	 * @param isHarmless whether the action the user is peforming is harmless
+	 * @return the result.
+	 * @see #canBuildPostCache(User, Block)
+	 */
+	public boolean canBuild(User user, Block block, boolean isHarmless) {
 		if (isHarmless && allowHarmless) return true;
 		Optional<Boolean> result = cache.canBuild(user, block);
-		if (result.isPresent()) {
-			return result.get();
-		}
-
-		boolean allowed = canBuildPostCache(user, desc, block);
+		if (result.isPresent()) return result.get();
+		boolean allowed = canBuildPostCache(user, block);
 		cache.store(user, block, allowed);
 		return allowed;
 	}
 
-	private boolean canBuildPostCache(User user, AbilityDescription desc, Block block) {
-		return protectionMethods.stream().allMatch(m -> m.canBuild(user, desc, block));
+	/**
+	 * Checks if a user can build at a block location.
+	 * @param user the user to check
+	 * @param block the block to check
+	 * @return true if all enabled protections allow it, false otherwise
+	 */
+	private boolean canBuildPostCache(User user, Block block) {
+		return protections.stream().allMatch(m -> m.canBuild(user, block));
 	}
 
-	public void registerProtectMethod(String name, MethodCreator creator) {
+	/**
+	 * Register a new {@link Protection}
+	 * @param name the name of the protection to register
+	 * @param creator the factory function that creates the protection instance
+	 */
+	public void registerProtectMethod(String name, ProtectionFactory creator) {
 		CommentedConfigurationNode node = ConfigManager.getConfig().getNode("protection", name);
 		if (!node.getBoolean(true)) return;
 		try {
-			ProtectMethod method = creator.create();
-			protectionMethods.add(method);
+			Protection method = creator.create();
+			protections.add(method);
 			Bending.getLog().info("Registered bending protection for " + name);
 		} catch (PluginNotFoundException e) {
 			Bending.getLog().warning("ProtectMethod " + name + " not able to be used since plugin was not found.");
@@ -94,7 +127,7 @@ public class ProtectionSystem extends Configurable {
 	}
 
 	@FunctionalInterface
-	public interface MethodCreator {
-		ProtectMethod create() throws PluginNotFoundException;
+	public interface ProtectionFactory {
+		Protection create() throws PluginNotFoundException;
 	}
 }

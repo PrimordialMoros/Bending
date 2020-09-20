@@ -22,8 +22,11 @@ package me.moros.bending.util;
 import me.moros.bending.Bending;
 import org.bukkit.metadata.FixedMetadataValue;
 
+/**
+ * Utility class to provide and construct metadata for the {@link Bending} plugin.
+ * @see FixedMetadataValue
+ */
 public final class Metadata {
-
 	public static final String NO_INTERACT = "bending-no-interact";
 
 	public static FixedMetadataValue emptyMetadata() {

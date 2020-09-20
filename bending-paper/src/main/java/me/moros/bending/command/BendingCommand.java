@@ -39,6 +39,7 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
+import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.TextComponent;
@@ -274,7 +275,11 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@range:1-9")
 	@Description("Clear an ability slot")
 	public static void onClearBind(BendingPlayer player, @Default("0") @Conditions("slot") Integer slot) {
-		if (slot == 0) slot = player.getHeldItemSlot(); // TODO add option to clear all?
+		if (slot == 0) {
+			player.bindPreset(Preset.EMPTY);
+			player.sendMessageKyori(TextComponent.of("Cleared all slots.", NamedTextColor.GREEN));
+			return;
+		}
 		player.setSlotAbility(slot, null);
 		player.sendMessageKyori(TextComponent.of("Cleared ability slot " + slot, NamedTextColor.GREEN));
 	}

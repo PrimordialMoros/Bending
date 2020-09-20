@@ -35,7 +35,6 @@ import java.util.function.Consumer;
  * Handles all Storage tasks and their concurrency
  */
 public class Storage {
-
 	private final StorageImplementation implementation;
 
 	public Storage(StorageImplementation implementation) {

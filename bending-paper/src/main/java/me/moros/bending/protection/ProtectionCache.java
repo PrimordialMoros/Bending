@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A multi-layered cache used to check if a User can build in a specific block location
+ */
 public class ProtectionCache {
 	private final Map<User, UserProtectionCache> userMap = new ConcurrentHashMap<>();
 
@@ -46,9 +49,13 @@ public class ProtectionCache {
 		userMap.remove(user);
 	}
 
+	/**
+	 * Represents an individual user's cache.
+	 * Cached entries expire after 5000ms unless accessed again in which case the expiration time is refreshed.
+	 */
 	private static class UserProtectionCache {
 		private final Cache<Block, Boolean> blockCache = Caffeine.newBuilder()
-			.expireAfterWrite(Duration.ofMillis(5000))
+			.expireAfterAccess(Duration.ofMillis(5000))
 			.build();
 	}
 }

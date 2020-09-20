@@ -23,6 +23,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
@@ -37,7 +38,6 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,23 +45,33 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Utility class with useful methods that are {@link World} related. Note: This is not thread-safe.
+ */
 public final class WorldMethods {
+	/**
+	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
+	 */
 	public static List<Block> getNearbyBlocks(Location location, double radius) {
-		return getNearbyBlocks(location, radius, block -> true);
+		return getNearbyBlocks(location, radius, block -> true, 0);
 	}
 
-	public static List<Block> getNearbyBlocks(Location location, double radius, Set<Material> ignoreMaterials) {
-		return getNearbyBlocks(location, radius, block -> !ignoreMaterials.contains(block.getType()));
-	}
-
-	public static List<Block> getNearbyBlocks(Location location, double radius, Material type) {
-		return getNearbyBlocks(location, radius, block -> block.getType() == type);
-	}
-
+	/**
+	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
+	 */
 	public static List<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate) {
 		return getNearbyBlocks(location, radius, predicate, 0);
 	}
 
+	/**
+	 * Collects all blocks in a sphere that satisfy the given predicate.
+	 * Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+	 * @param location the center point
+	 * @param radius the radius of the sphere
+	 * @param predicate the predicate that needs to be satisfied for every block
+	 * @param limit the amount of blocks to collect
+	 * @return all collected blocks
+	 */
 	public static List<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate, int limit) {
 		int r = NumberConversions.ceil(radius) + 1;
 		double originX = location.getX();
@@ -84,11 +94,22 @@ public final class WorldMethods {
 		return blocks;
 	}
 
+	/**
+	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT_MATERIALS}.
+	 */
 	public static Location getTarget(World world, Ray ray) {
 		return getTarget(world, ray, MaterialUtil.TRANSPARENT_MATERIALS);
 	}
 
-	public static Location getTarget(World world, Ray ray, Set<Material> transparent) {
+	/**
+	 * Gets the targeted location.
+	 * Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
+	 * @param world the world to check in
+	 * @param ray the ray which holds the origin and direction
+	 * @param ignored a set of materials that will be ignored
+	 * @return the target location
+	 */
+	public static Location getTarget(World world, Ray ray, Set<Material> ignored) {
 		Location location = ray.origin.toLocation(world);
 		Vector direction = ray.direction.toVector().normalize();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
@@ -97,7 +118,7 @@ public final class WorldMethods {
 			List<Block> blocks = Stream.concat(Stream.of(center), BlockMethods.CARDINAL_FACES.stream()
 				.map(center::getRelative)).collect(Collectors.toList()); // Construct stream with center and neighbouring blocks
 			for (Block block : blocks) {
-				if (transparent.contains(block.getType())) continue;
+				if (ignored.contains(block.getType())) continue;
 				AABB blockBounds = AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
 					return location;
@@ -107,8 +128,18 @@ public final class WorldMethods {
 		return location;
 	}
 
-	public static Block blockCast(World world, Ray ray, int maxRange, Set<Material> solids) {
-		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, maxRange);
+	/**
+	 * Gets the first targeted block of specific material using a {@link BlockIterator}.
+	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
+	 * <p> Note 2: This method does not check for region protections. Use {@link SourceUtil#getSource(User, int, Set)} instead.
+	 * @param world the world to check in
+	 * @param ray the ray which holds the origin and direction
+	 * @param solids the set of materials that we are interested in
+	 * @return the target block or the last block in the iterator if no block satisfied the material check
+	 */
+	public static Block blockCast(World world, Ray ray, Set<Material> solids) {
+		int range = NumberConversions.floor(ray.direction.getNorm());
+		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, range);
 		while (it.hasNext()) {
 			Block closestBlock = it.next();
 			if (solids.contains(closestBlock.getType())) {
@@ -118,26 +149,43 @@ public final class WorldMethods {
 		return world.getBlockAt(ray.origin.toLocation(world));
 	}
 
-	public static Optional<Block> rayTraceBlocks(Location location, Vector direction, int range) {
+	/**
+	 * @see World#rayTraceBlocks(Location, Vector, double)
+	 */
+	public static Optional<Block> rayTraceBlocks(Location location, Vector direction, double range) {
 		RayTraceResult result = location.getWorld().rayTraceBlocks(location, direction, range);
 		if (result != null && result.getHitBlock() != null) return Optional.of(result.getHitBlock());
 		return Optional.empty();
 	}
 
-	public static Optional<LivingEntity> getTargetEntity(User user, int range) {
+	/**
+	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
+	 * @see World#rayTraceEntities(Location, Vector, double, Predicate)
+	 */
+	public static Optional<LivingEntity> getTargetEntity(User user, double range) {
 		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
 		return Optional.empty();
 	}
 
-	public static Optional<LivingEntity> getTargetEntity(User user, int range, int raySize) {
+	/**
+	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
+	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
+	 */
+	public static Optional<LivingEntity> getTargetEntity(User user, double range, int raySize) {
 		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
 		return Optional.empty();
 	}
 
+	/**
+	 * Accurately checks if an entity is standing on ground using {@link AABB}.
+	 * Note: For mobs you should prefer {@link Entity#isOnGround()}. This method is to be used for Players.
+	 * @param entity the entity to check
+	 * @return true if entity standing on ground, false otherwise
+	 */
 	public static boolean isOnGround(Entity entity) {
 		final double epsilon = 0.01;
 		Location location = entity.getLocation().subtract(0, epsilon, 0);
@@ -156,10 +204,14 @@ public final class WorldMethods {
 		return false;
 	}
 
-	public static double distanceAboveGround(Entity entity) {
-		return distanceAboveGround(entity, Collections.emptySet());
-	}
-
+	/**
+	 * Calculates the distance between an entity and the ground using {@link AABB}.
+	 * Uses a {@link BlockIterator} with a max range of 256 blocks.
+	 * By default it ignores all passable materials unless they are overriden in the provided set.
+	 * @param entity the entity to check
+	 * @param groundMaterials the set of materials that are considered ground
+	 * @return the distance in blocks between the entity and ground or 256 (max range).
+	 */
 	public static double distanceAboveGround(Entity entity, Set<Material> groundMaterials) {
 		Vector3 direction = Vector3.MINUS_J;
 		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), direction.toVector(), 0, 256);
@@ -167,7 +219,6 @@ public final class WorldMethods {
 		AABB checkBounds;
 		while (it.hasNext()) {
 			Block block = it.next();
-			if (block.isPassable()) continue;
 			entityBounds.min().add(direction);
 			if (groundMaterials.contains(block.getType())) {
 				checkBounds = AABB.BLOCK_BOUNDS;
@@ -178,6 +229,6 @@ public final class WorldMethods {
 				return entity.getLocation().distance(block.getLocation());
 			}
 		}
-		return Double.MAX_VALUE;
+		return 256;
 	}
 }

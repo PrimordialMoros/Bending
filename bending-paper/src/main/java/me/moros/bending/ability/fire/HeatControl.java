@@ -112,8 +112,8 @@ public class HeatControl implements Ability {
 	}
 
 	private boolean act(double range, double radius, Predicate<Block> predicate) {
-		Ray ray = new Ray(user.getEyeLocation(), user.getDirection());
-		Block b = WorldMethods.blockCast(user.getWorld(), ray, (int) range, Collections.emptySet());
+		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(range));
+		Block b = WorldMethods.blockCast(user.getWorld(), ray, Collections.emptySet());
 		boolean acted = false;
 		for (Block block : WorldMethods.getNearbyBlocks(b.getLocation(), radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;

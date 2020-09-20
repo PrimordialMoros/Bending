@@ -21,16 +21,17 @@ package me.moros.bending.storage;
 
 import java.util.Arrays;
 
+/**
+ * Enum holding the different types of supported storage and their schema file name.
+ */
 public enum StorageType {
 	// Remote databases
 	MARIADB("MariaDB", "mariadb.sql"),
 	MYSQL("MySQL", "mariadb.sql"),
 	POSTGRESQL("PostgreSQL", "postgre.sql"),
-
 	// Local databases
 	SQLITE("SQLite", "sqlite.sql"),
 	H2("H2", "h2.sql");
-
 
 	private final String name;
 	private final String path;
@@ -40,10 +41,6 @@ public enum StorageType {
 		this.path = schemaFileName;
 	}
 
-	public static StorageType parse(String name, StorageType def) {
-		return Arrays.stream(values()).filter(t -> name.equalsIgnoreCase(t.name)).findAny().orElse(def);
-	}
-
 	public String getSchemaPath() {
 		return path;
 	}
@@ -51,6 +48,16 @@ public enum StorageType {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	/**
+	 * Attempts to parse the given string and return a {@link StorageType} enum.
+	 * @param name the string to parse
+	 * @param def the default value
+	 * @return the parsed result or the default value if parsing was unsuccessful
+	 */
+	public static StorageType parse(String name, StorageType def) {
+		return Arrays.stream(values()).filter(t -> name.equalsIgnoreCase(t.name)).findAny().orElse(def);
 	}
 }
 
