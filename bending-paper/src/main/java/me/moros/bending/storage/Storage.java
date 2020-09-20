@@ -24,6 +24,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.user.player.BendingProfile;
+import me.moros.bending.model.user.player.PresetHolder;
 import me.moros.bending.storage.implementation.StorageImplementation;
 import me.moros.bending.util.Tasker;
 
@@ -46,16 +47,28 @@ public class Storage {
 		implementation.close();
 	}
 
+	/**
+	 * Creates a new profile for the given uuid or returns an existing one if possible.
+	 */
 	public BendingProfile createProfile(UUID uuid) {
 		return implementation.createProfile(uuid);
 	}
 
-	// Normally create profile handles all loading
-	// This is to be used when we want to load a profile that may not exist in the database yet
+	/**
+	 * This method will attempt to load a profile from the database and execute the consumer if found.
+	 * @param uuid the player's uuid
+	 * @param consumer the consumer to executre if a profile was found
+	 * @see #createProfile(UUID)
+	 */
 	public void loadProfileAsync(UUID uuid, Consumer<BendingProfile> consumer) {
 		Tasker.newChain().asyncFirst(() -> implementation.loadProfile(uuid)).asyncLast(p -> p.ifPresent(consumer)).execute();
 	}
 
+	/**
+	 * Asynchronously saves the given bendingPlayer's data to the database.
+	 * It updates the profile and stores the current elements and bound abilities.
+	 * @param bendingPlayer the BendingPlayer to save
+	 */
 	public void savePlayerAsync(BendingPlayer bendingPlayer) {
 		Tasker.newChain().async(() -> {
 			implementation.updateProfile(bendingPlayer.getProfile());
@@ -64,20 +77,26 @@ public class Storage {
 		}).execute();
 	}
 
+	/**
+	 * Adds all given elements to the database
+	 * @param elements the elements to add
+	 */
 	public void createElements(Set<Element> elements) {
 		implementation.createElements(elements);
 	}
 
+	/**
+	 * Adds all given abilities to the database
+	 * @param abilities the abilities to add
+	 */
 	public void createAbilities(Set<AbilityDescription> abilities) {
 		implementation.createAbilities(abilities);
 	}
 
-	//TODO should preset consumer be synced instead?
-	public void loadPresetAsync(int playerId, String name, Consumer<Preset> consumer) {
-		Tasker.newChain().asyncFirst(() -> implementation.loadPreset(playerId, name))
-			.abortIfNull().asyncLast(consumer::accept).execute();
-	}
-
+	/**
+	 *  This is currently loaded asynchronously using a LoadingCache
+	 *  @see PresetHolder
+	 */
 	public Preset loadPreset(int playerId, String name) {
 		return implementation.loadPreset(playerId, name);
 	}

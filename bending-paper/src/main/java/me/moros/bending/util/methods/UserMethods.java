@@ -26,7 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 
 /**
- * Utility class with useful methods that are {@link User} related
+ * Utility class with useful {@link User} related methods.
  */
 public final class UserMethods {
 	private static final Vector3 playerOffset = new Vector3(0, 1.2, 0);

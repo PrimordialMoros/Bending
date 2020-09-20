@@ -49,9 +49,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SqlStorage implements StorageImplementation {
+	private final HikariDataSource dataSource;
 	private final StorageType type;
 	private final Jdbi DB;
-	private final HikariDataSource dataSource;
 
 	public SqlStorage(StorageType type, HikariDataSource source) {
 		this.type = type;
@@ -335,8 +335,7 @@ public class SqlStorage implements StorageImplementation {
 		return false;
 	}
 
-	// Gets preset id
-	// Returns 0 if doesn't exist or when a problem occurs.
+	// Gets preset id and returns 0 if doesn't exist or when a problem occurs.
 	private int getPresetId(int playerId, String presetName) {
 		try {
 			return DB.withHandle(handle -> {

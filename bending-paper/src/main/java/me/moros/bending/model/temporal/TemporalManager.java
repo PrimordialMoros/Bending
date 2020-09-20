@@ -63,7 +63,6 @@ public class TemporalManager<K, V extends Temporary> {
 
 	/**
 	 * Only use this inside Temporary::revert
-	 *
 	 * @param key the key that marks the entry to remove
 	 */
 	public void removeEntry(K key) {

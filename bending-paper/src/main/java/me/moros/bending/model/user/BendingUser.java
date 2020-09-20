@@ -38,7 +38,6 @@ import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-// TODO add async thread to refresh cooldowns
 public class BendingUser implements User {
 	private final ElementHolder elementHolder = new ElementHolder();
 	private final ArrayDeque<AbilitySlotContainer> slotContainers = new ArrayDeque<>(2);
@@ -103,7 +102,7 @@ public class BendingUser implements User {
 		return Optional.empty(); // Non-player bending users don't have anything selected.
 	}
 
-	// Will add or replace the last container
+	// Adds or replaces the last container
 	@Override
 	public void addSlotContainer(AbilitySlotContainer slotContainer) {
 		removeLastSlotContainer();

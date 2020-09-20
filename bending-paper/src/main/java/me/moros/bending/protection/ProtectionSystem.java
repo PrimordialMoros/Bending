@@ -19,6 +19,8 @@
 
 package me.moros.bending.protection;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
@@ -32,16 +34,23 @@ import me.moros.bending.protection.instances.WorldGuardProtection;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the protection system which hooks into other region protection plugins.
  */
 public class ProtectionSystem extends Configurable {
+	/**
+	 * A multi-layered cache used to check if a User can build in a specific block location.
+	 * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
+	 * might not be thread-safe themselves and we load data from them when results aren't cached.
+	 */
+	private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
 	private final List<Protection> protections = new ArrayList<>();
-	private final ProtectionCache cache = new ProtectionCache();
 	private boolean allowHarmless;
 
 	public ProtectionSystem() {
@@ -58,10 +67,11 @@ public class ProtectionSystem extends Configurable {
 	}
 
 	/**
-	 * @see ProtectionCache#invalidate(User)
+	 * Remove the block protection cache for the specified user.
+	 * @param user the user to invalidate
 	 */
 	public void invalidate(User user) {
-		cache.invalidate(user);
+		cache.remove(user);
 	}
 
 	/**
@@ -79,7 +89,6 @@ public class ProtectionSystem extends Configurable {
 		return canBuild(user, block, desc != null && desc.isHarmless());
 	}
 
-
 	/**
 	 * Checks if a user can build at a block location. First it queries the cache.
 	 * If no result is found it computes it and adds it to the cache before returning the result.
@@ -92,11 +101,8 @@ public class ProtectionSystem extends Configurable {
 	 */
 	public boolean canBuild(User user, Block block, boolean isHarmless) {
 		if (isHarmless && allowHarmless) return true;
-		Optional<Boolean> result = cache.canBuild(user, block);
-		if (result.isPresent()) return result.get();
-		boolean allowed = canBuildPostCache(user, block);
-		cache.store(user, block, allowed);
-		return allowed;
+		Boolean result = cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
+		return result != null && result;
 	}
 
 	/**
@@ -124,6 +130,15 @@ public class ProtectionSystem extends Configurable {
 		} catch (PluginNotFoundException e) {
 			Bending.getLog().warning("ProtectMethod " + name + " not able to be used since plugin was not found.");
 		}
+	}
+
+	/**
+	 * Creates a block cache in which entries expire 5000ms after their last access time.
+	 * @return the created cache
+	 * @see Caffeine
+	 */
+	private static Cache<Block, Boolean> buildCache() {
+		return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
 	}
 
 	@FunctionalInterface

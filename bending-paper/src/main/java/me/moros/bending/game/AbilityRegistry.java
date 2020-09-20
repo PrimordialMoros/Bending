@@ -33,13 +33,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * Holds all the registered AbilityDescriptions for the current session.
+ */
 public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
 	private final Map<Element, Set<AbilityDescription>> passives = new HashMap<>();
-
-	public Stream<AbilityDescription> getPassives(Element element) {
-		return passives.getOrDefault(element, Collections.emptySet()).stream();
-	}
 
 	protected void registerAbilities(Collection<AbilityDescription> abilities) {
 		abilities.forEach(this::registerAbility);
@@ -56,7 +55,6 @@ public final class AbilityRegistry {
 
 	/**
 	 * Note: this will include hidden abilities. You will need to filter them.
-	 *
 	 * @return a stream of all the abilities in this registry
 	 */
 	public Stream<AbilityDescription> getAbilities() {
@@ -64,18 +62,30 @@ public final class AbilityRegistry {
 	}
 
 	/**
+	 * Note: this will include hidden passives. You will need to filter them.
+	 * @return a stream of all the passives in this registry
+	 */
+	public Stream<AbilityDescription> getPassives(Element element) {
+		return passives.getOrDefault(element, Collections.emptySet()).stream();
+	}
+
+	/**
 	 * @param name the name to match
-	 * @return the ability description that matches the specified name or null if not found
+	 * @return Optional ability description
+	 * @see #getDescriptionByName(String)
 	 */
 	public Optional<AbilityDescription> getAbilityDescription(String name) {
 		if (name == null || name.isEmpty()) return Optional.empty();
-		return Optional.ofNullable(abilities.get(name.toLowerCase()));
+		return Optional.ofNullable(getDescriptionByName(name));
 	}
 
 	/**
 	 * This should only be used by {@link Ability#getDescription}
+	 * @param name the name to match
+	 * @return the ability description that matches the specified name or null if not found
+	 * @see #getAbilityDescription(String)
 	 */
-	public AbilityDescription getAbilityDescription(Ability ability) {
-		return abilities.get(ability.getName().toLowerCase());
+	public AbilityDescription getDescriptionByName(String name) {
+		return abilities.get(name);
 	}
 }

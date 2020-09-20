@@ -101,7 +101,7 @@ public class Board {
 	protected void updateMisc(String text, boolean show, boolean isCombo) {
 		if (show) {
 			if (misc.isEmpty()) {
-				bendingSlots.getScore("  -----------  ").setScore(-10);
+				bendingSlots.getScore("  ------------  ").setScore(-10);
 			}
 			misc.add(text);
 			bendingSlots.getScore(text).setScore(isCombo ? -10 : -11);
@@ -110,7 +110,7 @@ public class Board {
 			misc.remove(text);
 			bendingBoard.resetScores(text);
 			if (misc.isEmpty()) {
-				bendingBoard.resetScores("  -----------  ");
+				bendingBoard.resetScores("  ------------  ");
 			}
 		}
 	}

@@ -48,7 +48,6 @@ public final class PlayerManager {
 
 	/**
 	 * UUID must correspond to an online player
-	 *
 	 * @param uuid the uuid of the player object
 	 * @return the BendingPlayer instance associated with the specified player
 	 */

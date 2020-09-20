@@ -27,6 +27,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Immutable and thread-safe representation of a sequence
+ */
 public final class Sequence {
 	private final List<AbilityAction> actions = new ArrayList<>();
 	private String instructions = "";
@@ -41,7 +44,7 @@ public final class Sequence {
 	}
 
 	/**
-	 * @return Unmodifiable and thread-safe view of this sequence's actions
+	 * @return Unmodifiable view of this sequence's actions
 	 */
 	public List<AbilityAction> getActions() {
 		return Collections.unmodifiableList(actions);

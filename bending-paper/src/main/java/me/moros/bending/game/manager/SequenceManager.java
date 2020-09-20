@@ -37,17 +37,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public final class SequenceManager {
+	private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
 	private final ExpiringMap<User, ActionBuffer> cache = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.ACCESSED)
 		.expiration(10, TimeUnit.SECONDS).build();
-	private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
 
 	public void clear() {
 		cache.clear();
 	}
 
 	public boolean registerSequence(AbilityDescription desc, Sequence sequence) {
-		// TODO lazy load and verify all descs are enabled
+		// TODO lazy load and verify all required abilities are enabled
 		registeredSequences.put(desc, sequence);
 		return false;
 	}
@@ -77,7 +77,6 @@ public final class SequenceManager {
 
 	/**
 	 * Note: this will include hidden abilities. You will need to filter them.
-	 *
 	 * @return a stream of all the registered sequences
 	 */
 	public Stream<AbilityDescription> getRegisteredSequences() {

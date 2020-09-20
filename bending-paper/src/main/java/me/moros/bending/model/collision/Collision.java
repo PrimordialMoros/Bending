@@ -21,7 +21,10 @@ package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.Ability;
 
-public class Collision {
+/**
+ * Represents a real collision between 2 abilities.
+ */
+public final class Collision {
 	private final Ability firstAbility;
 	private final Ability secondAbility;
 	private final boolean removeFirst;

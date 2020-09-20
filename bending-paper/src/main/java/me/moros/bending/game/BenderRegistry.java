@@ -19,7 +19,8 @@
 
 package me.moros.bending.game;
 
-import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.game.manager.PlayerManager;
+import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -32,10 +33,14 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * API for checking if an entity is a BendingUser
+ * If you only need BendingPlayers then use {@link PlayerManager}
+ */
 public final class BenderRegistry {
 	private static Predicate<UUID> isBendingUser = (id -> false);
-	private static Function<UUID, BendingUser> entityToUser = (id -> null);
-	private static Function<String, BendingUser> nameToUser = (name -> null);
+	private static Function<UUID, User> entityToUser = (id -> null);
+	private static Function<String, User> nameToUser = (name -> null);
 
 	public static boolean isBender(Entity entity) {
 		if (entity instanceof Player) {
@@ -46,7 +51,7 @@ public final class BenderRegistry {
 		return false;
 	}
 
-	public static Optional<BendingUser> getBendingUser(CommandSender entity) {
+	public static Optional<User> getBendingUser(CommandSender entity) {
 		if (entity instanceof Player) {
 			return Optional.of(Game.getPlayerManager().getPlayer(((Player) entity).getUniqueId()));
 		} else if (entity instanceof LivingEntity) {
@@ -55,7 +60,7 @@ public final class BenderRegistry {
 		return Optional.empty();
 	}
 
-	public static Optional<BendingUser> getBendingUserByName(String name) {
+	public static Optional<User> getBendingUserByName(String name) {
 		Player player = Bukkit.getPlayer(name);
 		if (player != null) {
 			return Optional.of(Game.getPlayerManager().getPlayer(player.getUniqueId()));
@@ -67,11 +72,11 @@ public final class BenderRegistry {
 		isBendingUser = Objects.requireNonNull(predicate);
 	}
 
-	public static void registerCache(Function<UUID, BendingUser> function) {
+	public static void registerCache(Function<UUID, User> function) {
 		entityToUser = Objects.requireNonNull(function);
 	}
 
-	public static void registerNameCache(Function<String, BendingUser> function) {
+	public static void registerNameCache(Function<String, User> function) {
 		nameToUser = Objects.requireNonNull(function);
 	}
 }

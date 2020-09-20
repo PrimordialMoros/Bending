@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 
-public class DummyCollider extends AABB {
+public final class DummyCollider extends AABB {
 	public DummyCollider() {
 		super(Vector3.ZERO, Vector3.ZERO);
 	}
@@ -99,6 +99,6 @@ public class DummyCollider extends AABB {
 
 	@Override
 	public String toString() {
-		return "Dummy Collider";
+		return "DummyCollider";
 	}
 }

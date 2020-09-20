@@ -41,8 +41,7 @@ import java.util.stream.Collectors;
 // TODO Expand system to include rounding, range checking etc and profile performance
 public final class AttributeSystem {
 	private final Map<User, List<UserModifier>> modifierMap = new HashMap<>();
-	// Converts a double into some other numeric type
-	static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>();
+	private static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>(); // Converts a double into some other numeric type
 
 	static {
 		converters.put(Double.class, AttributeConverter.DOUBLE);

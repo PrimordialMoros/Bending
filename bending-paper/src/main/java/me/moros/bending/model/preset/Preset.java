@@ -49,15 +49,10 @@ public class Preset {
 
 	/**
 	 * Returns an array of the ability names that this preset holds, names can be null!
-	 *
 	 * @return a copy of the names of the abilities that this preset holds.
 	 */
 	public String[] getAbilities() {
 		return Arrays.copyOf(abilities, 9);
-	}
-
-	public Preset createCopy(String name) {
-		return new Preset(0, name, getAbilities());
 	}
 
 	public boolean isEmpty() {

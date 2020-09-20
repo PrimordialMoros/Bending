@@ -28,7 +28,7 @@ import org.bukkit.World;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class DummyAbilityManager extends AbilityManager {
+public final class DummyAbilityManager extends AbilityManager {
 	public DummyAbilityManager(World world) {
 		super(world);
 	}

@@ -39,14 +39,11 @@ public class Sphere implements Collider {
 	public boolean intersects(AABB aabb) {
 		Vector3 min = aabb.min();
 		Vector3 max = aabb.max();
-
 		if (min == null || max == null) return false;
-
 		// Get the point closest to sphere center on the aabb.
 		double x = FastMath.max(min.getX(), FastMath.min(center.getX(), max.getX()));
 		double y = FastMath.max(min.getY(), FastMath.min(center.getY(), max.getY()));
 		double z = FastMath.max(min.getZ(), FastMath.min(center.getZ(), max.getZ()));
-
 		// Check if that point is inside of the sphere.
 		return contains(new Vector3(x, y, z));
 	}
@@ -64,7 +61,6 @@ public class Sphere implements Collider {
 	public boolean intersects(Ray ray) {
 		Vector3 m = ray.origin.subtract(center);
 		double b = m.dotProduct(ray.direction);
-		// Use quadratic equation to solve ray-sphere intersection.
 		return b * b - (m.dotProduct(m) - radius * radius) >= 0;
 	}
 
@@ -79,7 +75,6 @@ public class Sphere implements Collider {
 		} else if (collider instanceof Disk) {
 			return collider.intersects(this);
 		}
-
 		return false;
 	}
 

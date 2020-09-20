@@ -20,7 +20,7 @@
 package me.moros.bending.storage.sql;
 
 public enum SqlQueries {
-	// TODO add support for things other than postgre
+	// TODO current queries are only tested with postgresql, ELEMENTS_INSERT_NEW and ABILITIES_INSERT_NEW probably need changing
 	PLAYER_INSERT("INSERT INTO bending_players (uuid) VALUES(?)"),
 	PLAYER_SELECT_BY_UUID("SELECT player_id, board FROM bending_players WHERE uuid=? LIMIT 1"),
 	PLAYER_UPDATE_BOARD_FOR_ID("UPDATE bending_players SET board=? WHERE player_id=?"),
@@ -53,9 +53,7 @@ public enum SqlQueries {
 	}
 
 	/**
-	 * Get the SQL query this wraps.
-	 *
-	 * @return The query for this enumeration.
+	 * @return The SQL query for this enumeration.
 	 */
 	public String getQuery() {
 		return query;

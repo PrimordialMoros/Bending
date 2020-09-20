@@ -33,6 +33,10 @@ import me.moros.bending.model.ability.sequence.Sequence;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Used to initialize all ability descriptions, sequences and collisions
+ */
+// TODO split into sub categories
 public final class AbilityInitializer {
 	public static void loadAbilities() {
 		AbilityRegistry abilityRegistry = Game.getAbilityRegistry();

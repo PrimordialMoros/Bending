@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-public class PresetHolder {
+public final class PresetHolder {
 	private final AsyncLoadingCache<String, Preset> presetCache = Caffeine.newBuilder()
 		.maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
 		.buildAsync(this::loadPreset);
@@ -36,30 +36,30 @@ public class PresetHolder {
 	private final Set<String> presets;
 	private final int id;
 
-	PresetHolder(int id, Set<String> presets) {
+	protected PresetHolder(int id, Set<String> presets) {
 		this.id = id;
 		this.presets = presets;
 	}
 
-	Set<String> getPresets() {
+	protected Set<String> getPresets() {
 		return Collections.unmodifiableSet(presets);
 	}
 
-	boolean hasPreset(String name) {
+	protected boolean hasPreset(String name) {
 		return presets.contains(name);
 	}
 
-	Preset getPresetByName(String name) {
+	protected Preset getPresetByName(String name) {
 		if (!hasPreset(name)) return null;
 		return presetCache.synchronous().get(name);
 	}
 
-	boolean addPreset(String name) {
+	protected boolean addPreset(String name) {
 		Objects.requireNonNull(name);
 		return presets.add(name);
 	}
 
-	boolean removePreset(String name) {
+	protected boolean removePreset(String name) {
 		Objects.requireNonNull(name);
 		return presets.remove(name);
 	}

@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class ActionBuffer {
+public final class ActionBuffer {
 	private final AbilityAction[] elements;
 	private int start = 0;
 	private int end = 0;

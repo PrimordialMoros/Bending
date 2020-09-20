@@ -29,11 +29,9 @@ import java.util.Collections;
 import java.util.List;
 
 public interface Ability {
-	// return true if the ability was activated
-	boolean activate(User user, ActivationMethod method);
+	boolean activate(User user, ActivationMethod method); // return true if the ability was activated
 
-	// Return UpdateResult.Remove if the ability should be removed.
-	UpdateResult update();
+	UpdateResult update(); // Return UpdateResult.Remove if the ability should be removed.
 
 	void destroy();
 
@@ -50,7 +48,7 @@ public interface Ability {
 	}
 
 	default AbilityDescription getDescription() {
-		return Game.getAbilityRegistry().getAbilityDescription(this);
+		return Game.getAbilityRegistry().getDescriptionByName(getName());
 	}
 
 	default List<Collider> getColliders() {

@@ -25,6 +25,7 @@ import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,8 +65,8 @@ public enum Element {
 		return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
 	}
 
-	public static Set<String> getElementNames() {
-		return Arrays.stream(values()).map(Element::toString).collect(Collectors.toSet());
+	public static List<String> getElementNames() {
+		return Arrays.stream(values()).map(Element::toString).collect(Collectors.toList());
 	}
 
 	public static Set<Element> getAll() {

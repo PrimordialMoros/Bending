@@ -30,8 +30,7 @@ import org.apache.commons.math3.util.FastMath;
 public class OBB implements Collider {
 	private final Vector3 center;
 	private final RealMatrix basis;
-	// Half extents in local space.
-	private final Vector3 e;
+	private final Vector3 e; // Half extents in local space.
 
 	public OBB(Vector3 center, Vector3 halfExtents, Vector3 axis0, Vector3 axis1, Vector3 axis2) {
 		this.center = center;
@@ -88,7 +87,6 @@ public class OBB implements Collider {
 	public boolean intersects(OBB other) {
 		final double epsilon = 0.000001;
 		double ra, rb;
-
 		RealMatrix R = getRotationMatrix(other);
 		// translation
 		Vector3 t = other.center.subtract(center);
@@ -105,10 +103,8 @@ public class OBB implements Collider {
 		// test this box's axes
 		for (int i = 0; i < 3; ++i) {
 			Vector3 row = new Vector3(absR.getRow(i));
-
 			ra = e.component(i);
 			rb = other.e.dotProduct(row);
-
 			if (Math.abs(t.component(i)) > ra + rb) {
 				return false;
 			}
@@ -117,10 +113,8 @@ public class OBB implements Collider {
 		// test other box's axes
 		for (int i = 0; i < 3; ++i) {
 			Vector3 col = new Vector3(absR.getColumn(i));
-
 			ra = e.dotProduct(col);
 			rb = other.e.component(i);
-
 			Vector3 rotCol = new Vector3(R.getColumn(i));
 			if (Math.abs(t.dotProduct(rotCol)) > ra + rb) {
 				return false;
@@ -192,16 +186,13 @@ public class OBB implements Collider {
 	// Express the other box's basis in this box's coordinate frame.
 	private RealMatrix getRotationMatrix(OBB other) {
 		RealMatrix r = MatrixUtils.createRealMatrix(3, 3);
-
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 3; ++j) {
 				Vector3 a = new Vector3(basis.getRow(i));
 				Vector3 b = new Vector3(other.basis.getRow(j));
-
 				r.setEntry(i, j, a.dotProduct(b));
 			}
 		}
-
 		return r;
 	}
 
@@ -209,16 +200,13 @@ public class OBB implements Collider {
 	public Vector3 getClosestPosition(Vector3 target) {
 		Vector3 t = target.subtract(center);
 		Vector3 closest = center;
-
 		// Project target onto basis axes and move toward it.
 		for (int i = 0; i < 3; ++i) {
 			Vector3 axis = new Vector3(basis.getRow(i));
 			double r = e.component(i);
 			double dist = FastMath.max(-r, FastMath.min(t.dotProduct(axis), r));
-
 			closest = closest.add(axis.scalarMultiply(dist));
 		}
-
 		return closest;
 	}
 
@@ -232,7 +220,6 @@ public class OBB implements Collider {
 		double x = e.dotProduct(Vector3.PLUS_I);
 		double y = e.dotProduct(Vector3.PLUS_J);
 		double z = e.dotProduct(Vector3.PLUS_K);
-
 		return new Vector3(x, y, z);
 	}
 
@@ -244,11 +231,9 @@ public class OBB implements Collider {
 
 	public Vector3 getHalfDiagonal() {
 		Vector3 result = Vector3.ZERO;
-
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; i++) {
 			result = result.add(new Vector3(basis.getRow(i)).scalarMultiply(e.component(i)));
 		}
-
 		return result;
 	}
 }

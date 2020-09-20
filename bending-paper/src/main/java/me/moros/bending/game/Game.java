@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.manager.AbilityManager;
@@ -42,6 +43,10 @@ import org.bukkit.World;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * This object holds all the needed bending sub-systems.
+ * @see Bending#getGame
+ */
 public final class Game {
 	private static PlayerManager playerManager;
 	private static ProtectionSystem protectionSystem;

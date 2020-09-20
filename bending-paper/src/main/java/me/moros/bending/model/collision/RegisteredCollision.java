@@ -21,7 +21,10 @@ package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 
-public class RegisteredCollision {
+/**
+ * Represents a possible collision between 2 abilities.
+ */
+public final class RegisteredCollision {
 	private final AbilityDescription first;
 	private final AbilityDescription second;
 	private final boolean removeFirst;

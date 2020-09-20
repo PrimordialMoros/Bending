@@ -22,6 +22,9 @@ package me.moros.bending.model.ability.sequence;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
+/**
+ * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link ActivationMethod}
+ */
 public final class AbilityAction {
 	private final AbilityDescription desc;
 	private final ActivationMethod action;

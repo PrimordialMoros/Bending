@@ -26,32 +26,32 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class ElementHolder {
+public final class ElementHolder {
 	private final Set<Element> elements;
 
-	ElementHolder() {
+	protected ElementHolder() {
 		elements = EnumSet.noneOf(Element.class);
 	}
 
-	Set<Element> getElements() {
+	protected Set<Element> getElements() {
 		return Collections.unmodifiableSet(elements);
 	}
 
-	public boolean hasElement(Element element) {
+	protected boolean hasElement(Element element) {
 		return elements.contains(element);
 	}
 
-	public boolean addElement(Element element) {
+	protected boolean addElement(Element element) {
 		Objects.requireNonNull(element);
 		return elements.add(element);
 	}
 
-	public boolean removeElement(Element element) {
+	protected boolean removeElement(Element element) {
 		Objects.requireNonNull(element);
 		return elements.remove(element);
 	}
 
-	public void clear() {
+	protected void clear() {
 		elements.clear();
 	}
 }

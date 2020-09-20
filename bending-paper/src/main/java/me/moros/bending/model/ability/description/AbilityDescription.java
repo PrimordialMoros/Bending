@@ -168,7 +168,6 @@ public class AbilityDescription {
 
 	/**
 	 * Create a {@link AbilityDescriptionBuilder} with values matching that of this object
-	 *
 	 * @return a preconfigured builder
 	 */
 	public AbilityDescriptionBuilder builder() {

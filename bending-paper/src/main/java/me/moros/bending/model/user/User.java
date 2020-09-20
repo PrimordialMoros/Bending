@@ -31,6 +31,7 @@ import me.moros.bending.model.slots.AbilitySlotContainer;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -125,8 +126,7 @@ public interface User {
 	boolean hasPermission(String permission);
 
 	default boolean hasPermission(AbilityDescription desc) {
-		if (desc == null) return false;
-		return hasPermission(desc.getPermission());
+		return desc != null && hasPermission(desc.getPermission());
 	}
 
 	default boolean isSpectator() {
@@ -156,12 +156,15 @@ public interface User {
 	}
 
 	/**
-	 * @return Entity::isValid or Player::isOnline if user is a player
+	 * @return {@link Entity#isValid}
 	 */
 	default boolean isValid() {
 		return getEntity().isValid();
 	}
 
+	/**
+	 * @return {@link Entity#isDead()}
+	 */
 	default boolean isDead() {
 		return getEntity().isDead();
 	}
@@ -189,6 +192,10 @@ public interface User {
 		return Optional.empty();
 	}
 
+	/**
+	 * Checks bound abilities and clears any invalid ability slots.
+	 * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
+	 */
 	default void validateSlots() {
 		IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
 			if (!hasElement(desc.getElement()) || !hasPermission(desc)) setSlotAbilityInternal(i, null);

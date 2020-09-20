@@ -33,6 +33,9 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.util.Vector;
 
+/**
+ * Handles ability activation.
+ */
 public final class ActivationController {
 	public boolean activateAbility(User user, ActivationMethod method) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);

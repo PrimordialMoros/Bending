@@ -44,7 +44,6 @@ public final class BoardManager extends Configurable {
 
 	/**
 	 * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
-	 *
 	 * @param player the player to force toggle
 	 */
 	public void forceToggleScoreboard(Player player) {
@@ -75,7 +74,6 @@ public final class BoardManager extends Configurable {
 
 	/**
 	 * Checks if a player can use the bending board and creates a BendingBoardInstance if possible.
-	 *
 	 * @param player the player to check
 	 * @return true if player can use the bending board, false otherwise
 	 */

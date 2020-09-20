@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Utility class with useful methods that are {@link World} related. Note: This is not thread-safe.
+ * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
  */
 public final class WorldMethods {
 	/**
