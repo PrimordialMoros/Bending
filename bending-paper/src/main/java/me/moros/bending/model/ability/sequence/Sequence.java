@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.ability.sequence;
 
+import me.moros.bending.model.CircularQueue;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
@@ -76,5 +77,16 @@ public final class Sequence {
 			sb.append(desc.getName()).append(" (").append(actionString).append(")");
 		}
 		return sb.toString();
+	}
+
+	public boolean matches(CircularQueue<AbilityAction> queue) {
+		int size = queue.size();
+		if (size < size()) return false;
+		for (int i = 0; i < size(); i++) {
+			AbilityAction first = actions.get(size() - 1 - i);
+			AbilityAction second = queue.get(size - 1 - i);
+			if (!first.equals(second)) return false;
+		}
+		return true;
 	}
 }

@@ -24,7 +24,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
-import me.moros.bending.model.ability.sequence.ActionBuffer;
+import me.moros.bending.model.CircularQueue;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.user.User;
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 public final class SequenceManager {
 	private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
-	private final ExpiringMap<User, ActionBuffer> cache = ExpiringMap.builder()
+	private final ExpiringMap<User, CircularQueue<AbilityAction>> cache = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.ACCESSED)
 		.expiration(10, TimeUnit.SECONDS).build();
 
@@ -60,11 +60,12 @@ public final class SequenceManager {
 	public void registerAction(User user, ActivationMethod action) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null) return;
-		ActionBuffer buffer = cache.computeIfAbsent(user, u -> new ActionBuffer()).add(new AbilityAction(desc, action));
+		CircularQueue<AbilityAction> buffer = cache.computeIfAbsent(user, u -> new CircularQueue<>());
+		buffer.add(new AbilityAction(desc, action));
 		for (Map.Entry<AbilityDescription, Sequence> entry : registeredSequences.entrySet()) {
 			AbilityDescription sequenceDesc = entry.getKey();
 			Sequence sequence = entry.getValue();
-			if (buffer.matches(sequence)) {
+			if (sequence.matches(buffer)) {
 				if (!user.canBend(sequenceDesc)) continue;
 				Ability ability = sequenceDesc.createAbility();
 				if (ability.activate(user, ActivationMethod.SEQUENCE)) {
