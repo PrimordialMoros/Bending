@@ -32,15 +32,21 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 
 public class BlockListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockIgnite(BlockIgniteEvent event) {
-		//if (event.getCause() == BlockIgniteEvent.IgniteCause.SPREAD) {
 		if (TempBlock.manager.isTemp(event.getIgnitingBlock())) {
 			event.setCancelled(true);
 		}
-		//}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onBlockSpread(BlockSpreadEvent event) {
+		if (TempBlock.manager.isTemp(event.getSource())) {
+			event.setCancelled(true);
+		}
 	}
 
 	@EventHandler(ignoreCancelled = true)
@@ -52,7 +58,7 @@ public class BlockListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockBurn(BlockBurnEvent event) {
-		if (TempBlock.manager.isTemp(event.getBlock())) {
+		if (TempBlock.manager.isTemp(event.getIgnitingBlock())) {
 			event.setCancelled(true);
 		}
 	}

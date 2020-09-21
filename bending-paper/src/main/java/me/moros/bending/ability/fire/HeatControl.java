@@ -21,7 +21,6 @@ package me.moros.bending.ability.fire;
 
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -118,7 +117,7 @@ public class HeatControl implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(b.getLocation(), radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
-			TempBlock.create(block, Material.AIR);
+			block.setType(Material.AIR);
 		}
 		return acted;
 	}

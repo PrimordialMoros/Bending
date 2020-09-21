@@ -40,7 +40,7 @@ public final class ParticleUtil {
 	}
 
 	public static ParticleBuilder createAir(Location center) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR);
+		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8f);
 	}
 
 	public static ParticleBuilder createRGB(Location center, String hexVal) {

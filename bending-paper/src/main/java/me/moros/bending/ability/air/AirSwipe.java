@@ -38,6 +38,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
@@ -126,22 +127,13 @@ public class AirSwipe implements Ability {
 		charging = false;
 		user.setCooldown(this, userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
-		Vector3 lookingDir = user.getDirection();
-		Vector3 rotateAxis = lookingDir.crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I).crossProduct(lookingDir);
+		Vector3 dir = user.getDirection();
+		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I).crossProduct(dir);
 		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(userConfig.arcStep), RotationConvention.VECTOR_OPERATOR);
 		int steps = userConfig.arc / userConfig.arcStep;
-		double[] streamDir = lookingDir.toArray();
-		double[] streamDirInverse = lookingDir.toArray();
-		// Micro-optimization for constructing the arc with a series of equally spaced out rays
-		// We start from the center (direction user is facing) and then fanning outwards
-		// This way we can reuse the same rotation object without needing to recalculate the coefficients every time
-		streams.add(new AirStream(user, new Ray(origin, lookingDir.scalarMultiply(userConfig.range))));
-		for (int i = 0; i < steps / 2; i++) {
-			rotation.applyTo(streamDir, streamDir);
-			rotation.applyInverseTo(streamDirInverse, streamDirInverse);
-			streams.add(new AirStream(user, new Ray(origin, new Vector3(streamDir).scalarMultiply(userConfig.range))));
-			streams.add(new AirStream(user, new Ray(origin, new Vector3(streamDirInverse).scalarMultiply(userConfig.range))));
-		}
+		VectorMethods.createArc(dir, rotation, steps).forEach(
+			v -> streams.add(new AirStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
+		);
 	}
 
 	@Override
@@ -228,8 +220,8 @@ public class AirSwipe implements Ability {
 			damage = abilityNode.getNode("damage").getDouble(2.0);
 			range = abilityNode.getNode("range").getInt(14);
 			speed = abilityNode.getNode("speed").getDouble(0.8);
-			arc = abilityNode.getNode("arc").getInt(32);
-			arcStep = abilityNode.getNode("arc-step").getInt(4);
+			arc = abilityNode.getNode("arc").getInt(35);
+			arcStep = abilityNode.getNode("arc-step").getInt(5);
 			abilityCollisionRadius = abilityNode.getNode("ability-collision-radius").getDouble(0.5);
 
 			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(3.0);

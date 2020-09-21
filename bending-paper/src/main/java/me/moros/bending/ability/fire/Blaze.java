@@ -32,6 +32,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
@@ -58,22 +59,14 @@ public class Blaze implements Ability {
 		if (!Game.getProtectionSystem().canBuild(user, loc.toLocation(user.getWorld()).getBlock())) {
 			return false;
 		}
-		int arc = method == ActivationMethod.PUNCH ? userConfig.arc : 360;
-		int stepSize = method == ActivationMethod.PUNCH ? 2 : 10;
-		int steps = arc / stepSize;
+
 		Vector3 dir = user.getDirection().setY(0).normalize(Vector3.PLUS_I);
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(stepSize), RotationConvention.VECTOR_OPERATOR);
-		double[] streamDir = dir.toArray();
-		double[] streamDirInverse = dir.toArray();
-		// Micro-optimization for constructing the arc with a series of equally spaced out rays
-		// We start from the center (direction user is facing) and then fanning outwards
-		// This way we can reuse the same rotation object without needing to recalculate the coefficients every time
-		streams.add(new FireStream(new Ray(loc, dir)));
-		for (int i = 0; i < steps / 2; i++) {
-			rotation.applyTo(streamDir, streamDir);
-			rotation.applyInverseTo(streamDirInverse, streamDirInverse);
-			streams.add(new FireStream(new Ray(loc, new Vector3(streamDir))));
-			streams.add(new FireStream(new Ray(loc, new Vector3(streamDirInverse))));
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
+		if (method == ActivationMethod.PUNCH) {
+			int steps = userConfig.arc / 8;
+			VectorMethods.createArc(dir, rotation, steps).forEach(v -> streams.add(new FireStream(new Ray(loc, v))));
+		} else {
+			VectorMethods.rotate(dir, rotation, 36).forEach(v -> streams.add(new FireStream(new Ray(loc, v))));
 		}
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
@@ -115,7 +108,6 @@ public class Blaze implements Ability {
 		private final Vector3 direction;
 
 		FireStream(Ray ray) {
-			nextUpdate = 0;
 			origin = ray.origin;
 			direction = ray.direction.normalize();
 			location = origin.add(direction);
