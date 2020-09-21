@@ -146,6 +146,18 @@ public class Vector3 extends Vector3D {
 		return new Vector3(getX() * x, getY() * y, getZ() * z);
 	}
 
+	public Vector3 setX(double value) {
+		return new Vector3(value, getY(), getZ());
+	}
+
+	public Vector3 setY(double value) {
+		return new Vector3(getX(), value, getZ());
+	}
+
+	public Vector3 setZ(double value) {
+		return new Vector3(getX(), getY(), value);
+	}
+
 	public Vector3 crossProduct(final Vector<Euclidean3D> v) {
 		final Vector3 v3 = (Vector3) v;
 		return new Vector3(MathArrays.linearCombination(getY(), v3.getZ(), -getZ(), v3.getY()),

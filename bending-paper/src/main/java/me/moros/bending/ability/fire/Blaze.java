@@ -61,7 +61,7 @@ public class Blaze implements Ability {
 		int arc = method == ActivationMethod.PUNCH ? userConfig.arc : 360;
 		int stepSize = method == ActivationMethod.PUNCH ? 2 : 10;
 		int steps = arc / stepSize;
-		Vector3 dir = user.getDirection().multiply(1, 0, 1).normalize(Vector3.PLUS_I);
+		Vector3 dir = user.getDirection().setY(0).normalize(Vector3.PLUS_I);
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(stepSize), RotationConvention.VECTOR_OPERATOR);
 		double[] streamDir = dir.toArray();
 		double[] streamDirInverse = dir.toArray();
