@@ -96,6 +96,14 @@ public final class AbilityInitializer {
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
 		fire.add(fireKick);
 
+		AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+		fire.add(fireSpin);
+
+		AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+		fire.add(fireWheel);
+
 		fire.add(AbilityDescription.builder("Bolt", Bolt.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
@@ -120,6 +128,21 @@ public final class AbilityInitializer {
 			new AbilityAction(fireBlast, ActivationMethod.PUNCH),
 			new AbilityAction(fireBlast, ActivationMethod.SNEAK),
 			new AbilityAction(fireBlast, ActivationMethod.PUNCH)
+		));
+
+		sequences.put(fireSpin, new Sequence(
+			new AbilityAction(fireBlast, ActivationMethod.PUNCH),
+			new AbilityAction(fireBlast, ActivationMethod.PUNCH),
+			new AbilityAction(fireShield, ActivationMethod.PUNCH),
+			new AbilityAction(fireShield, ActivationMethod.SNEAK),
+			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE)
+		));
+
+		sequences.put(fireWheel, new Sequence(
+			new AbilityAction(fireShield, ActivationMethod.SNEAK),
+			new AbilityAction(fireShield, ActivationMethod.INTERACT_BLOCK),
+			new AbilityAction(fireShield, ActivationMethod.INTERACT_BLOCK),
+			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE)
 		));
 
 		int amount = sequenceManager.registerSequences(sequences);
@@ -229,38 +252,6 @@ public final class AbilityInitializer {
         spearDesc.setHidden(true);
         spearDesc.setDisplayName("Spear");
         abilityRegistry.registerAbility(spearDesc);
-
-        sequenceService.registerSequence(fireKick, new Sequence(true,
-                new AbilityAction(fireBlast, Action.Punch),
-                new AbilityAction(fireBlast, Action.Punch),
-                new AbilityAction(fireBlast, Action.Sneak),
-                new AbilityAction(fireBlast, Action.Punch)
-        ));
-
-        sequenceService.registerSequence(jetBlaze, new Sequence(true,
-                new AbilityAction(fireJet, Action.Sneak),
-                new AbilityAction(fireJet, Action.SneakRelease),
-                new AbilityAction(fireJet, Action.Sneak),
-                new AbilityAction(fireJet, Action.SneakRelease),
-                new AbilityAction(blaze, Action.Sneak),
-                new AbilityAction(blaze, Action.SneakRelease),
-                new AbilityAction(fireJet, Action.Punch)
-        ));
-
-        sequenceService.registerSequence(fireSpin, new Sequence(true,
-                new AbilityAction(fireBlast, Action.Punch),
-                new AbilityAction(fireBlast, Action.Punch),
-                new AbilityAction(fireShield, Action.Punch),
-                new AbilityAction(fireShield, Action.Sneak),
-                new AbilityAction(fireShield, Action.SneakRelease)
-        ));
-
-        sequenceService.registerSequence(fireWheel, new Sequence(true,
-                new AbilityAction(fireShield, Action.Sneak),
-                new AbilityAction(fireShield, Action.InteractBlock),
-                new AbilityAction(fireShield, Action.InteractBlock),
-                new AbilityAction(blaze, Action.SneakRelease)
-        ));
 
         sequenceService.registerSequence(airSweep, new Sequence(true,
                 new AbilityAction(airSwipe, Action.Punch),

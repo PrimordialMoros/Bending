@@ -41,8 +41,6 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -54,7 +52,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class FireKick implements Ability {
+public class FireSpin implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -74,16 +72,10 @@ public class FireKick implements Ability {
 
 		user.setCooldown(this, userConfig.cooldown);
 
-		Vector3 direction = user.getEyeLocation().add(user.getDirection()
-			.scalarMultiply(userConfig.range))
-			.subtract(user.getLocation()).normalize();
+		Vector3 origin = user.getLocation().add(Vector3.PLUS_J);
 
-		Vector3 origin = user.getLocation();
-		Vector3 dir = user.getDirection();
-		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I).crossProduct(dir);
-
-		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(6), RotationConvention.VECTOR_OPERATOR);
-		VectorMethods.createArc(direction, rotation, 11).forEach(
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
+		VectorMethods.rotate(Vector3.PLUS_I, rotation, 36).forEach(
 			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 		return true;
@@ -124,7 +116,7 @@ public class FireKick implements Ability {
 
 	@Override
 	public String getName() {
-		return "FireKick";
+		return "FireSpin";
 	}
 
 	private class FireStream extends ParticleStream {
@@ -136,14 +128,12 @@ public class FireKick implements Ability {
 
 		@Override
 		public void render() {
-			Location loc = getBukkitLocation();
-			ParticleUtil.createFire(user, loc).count(2).offset(0.25, 0.25, 0.25).spawn();
-			ParticleUtil.create(Particle.SMOKE_NORMAL, loc).count(1).offset(0.25, 0.25, 0.25).spawn();
+			ParticleUtil.createFire(user, getBukkitLocation()).count(1).offset(0.15, 0.15, 0.15).spawn();
 		}
 
 		@Override
 		public void postRender() {
-			if (ThreadLocalRandom.current().nextInt(6) == 0) {
+			if (ThreadLocalRandom.current().nextInt(12) == 0) {
 				SoundUtil.FIRE_SOUND.play(getBukkitLocation());
 			}
 		}
@@ -183,7 +173,7 @@ public class FireKick implements Ability {
 			cooldown = abilityNode.getNode("cooldown").getLong(6000);
 			damage = abilityNode.getNode("damage").getDouble(3.0);
 			range = abilityNode.getNode("range").getDouble(7.0);
-			speed = abilityNode.getNode("speed").getDouble(1.0);
+			speed = abilityNode.getNode("speed").getDouble(0.3);
 			collisionRadius = abilityNode.getNode("collision-radius").getDouble(0.5);
 
 			abilityNode.getNode("speed").setComment("How many blocks the streams advance with each tick.");

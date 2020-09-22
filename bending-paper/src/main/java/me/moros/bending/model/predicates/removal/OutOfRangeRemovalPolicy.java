@@ -27,17 +27,26 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class OutOfRangeRemovalPolicy implements RemovalPolicy {
-	private final Supplier<Vector3> fromSupplier;
 	private final double range;
+	private final Vector3 origin;
+	private final Supplier<Vector3> fromSupplier;
+
+	public OutOfRangeRemovalPolicy(double range, Vector3 origin, Supplier<Vector3> from) {
+		this.range = range;
+		this.origin = origin;
+		this.fromSupplier = Objects.requireNonNull(from);
+	}
 
 	public OutOfRangeRemovalPolicy(double range, Supplier<Vector3> from) {
 		this.range = range;
+		this.origin = null;
 		this.fromSupplier = Objects.requireNonNull(from);
 	}
 
 	@Override
 	public boolean shouldRemove(User user, AbilityDescription desc) {
 		if (range == 0) return false;
+		if (origin != null) return fromSupplier.get().distanceSq(origin) >= (range * range);
 		return fromSupplier.get().distanceSq(user.getLocation()) >= (range * range);
 	}
 }

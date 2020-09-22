@@ -134,7 +134,7 @@ public class FireBlast implements Ability, Burstable {
 		user.setCooldown(this, userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
-		stream = new FireStream(user, new Ray(origin, lookingDir), userConfig.abilityCollisionRadius * factor);
+		stream = new FireStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius * factor);
 		return true;
 	}
 
@@ -169,7 +169,7 @@ public class FireBlast implements Ability, Burstable {
 		factor = 1.0;
 		charging = false;
 		removalPolicy = CompositeRemovalPolicy.defaults().build();
-		stream = new FireStream(user, new Ray(location, direction), userConfig.abilityCollisionRadius);
+		stream = new FireStream(user, new Ray(location, direction), userConfig.collisionRadius);
 	}
 
 	@Override
@@ -257,8 +257,8 @@ public class FireBlast implements Ability, Burstable {
 		public double range;
 		@Attribute(Attributes.SPEED)
 		public double speed;
-		@Attribute(Attributes.ABILITY_COLLISION_RADIUS)
-		public double abilityCollisionRadius;
+		@Attribute(Attributes.COLLISION_RADIUS)
+		public double collisionRadius;
 		@Attribute(Attributes.RADIUS)
 		public double igniteRadius;
 		@Attribute(Attributes.STRENGTH)
@@ -275,7 +275,7 @@ public class FireBlast implements Ability, Burstable {
 			range = abilityNode.getNode("range").getDouble(20.0);
 			speed = abilityNode.getNode("speed").getDouble(0.8);
 			igniteRadius = abilityNode.getNode("ignite-radius").getDouble(1.5);
-			abilityCollisionRadius = abilityNode.getNode("ability-collision-radius").getDouble(1.4);
+			collisionRadius = abilityNode.getNode("collision-radius").getDouble(1.4);
 
 			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(1.5);
 			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2000);

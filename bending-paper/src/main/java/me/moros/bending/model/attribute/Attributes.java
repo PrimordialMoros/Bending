@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 public @interface Attributes {
 	Attribute[] value();
 
-	String ABILITY_COLLISION_RADIUS = "AbilityCollisionRadius";
+	String COLLISION_RADIUS = "CollisionRadius";
 	String RANGE = "Range";
 	String SELECTION = "Selection";
 	String COOLDOWN = "Cooldown";
@@ -43,7 +43,7 @@ public @interface Attributes {
 	String AMOUNT = "Amount";
 
 	String[] TYPES = {
-		Attributes.ABILITY_COLLISION_RADIUS, Attributes.RANGE,
+		Attributes.COLLISION_RADIUS, Attributes.RANGE,
 		Attributes.SELECTION, Attributes.COOLDOWN, Attributes.SPEED, Attributes.STRENGTH, Attributes.DAMAGE,
 		Attributes.CHARGE_TIME, Attributes.DURATION, Attributes.RADIUS, Attributes.HEIGHT, Attributes.AMOUNT
 	};

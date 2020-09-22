@@ -34,6 +34,7 @@ public class BendingEventBus {
 	}
 
 	public void postCooldownRemoveEvent(User user, AbilityDescription ability) {
+		if (!user.isValid()) return; // We post the event 1 tick later so this is needed for safety
 		Bukkit.getPluginManager().callEvent(new CooldownRemoveEvent(user, ability));
 	}
 

@@ -160,7 +160,7 @@ public class AirSwipe implements Ability {
 
 	private class AirStream extends ParticleStream {
 		public AirStream(User user, Ray ray) {
-			super(user, ray, userConfig.speed, userConfig.abilityCollisionRadius);
+			super(user, ray, userConfig.speed, userConfig.collisionRadius);
 			canCollide = Block::isLiquid;
 		}
 
@@ -203,8 +203,8 @@ public class AirSwipe implements Ability {
 		public int range;
 		@Attribute(Attributes.SPEED)
 		public double speed;
-		@Attribute(Attributes.ABILITY_COLLISION_RADIUS)
-		public double abilityCollisionRadius;
+		@Attribute(Attributes.COLLISION_RADIUS)
+		public double collisionRadius;
 		public int arc;
 		public int arcStep;
 		@Attribute(Attributes.CHARGE_TIME)
@@ -222,7 +222,7 @@ public class AirSwipe implements Ability {
 			speed = abilityNode.getNode("speed").getDouble(0.8);
 			arc = abilityNode.getNode("arc").getInt(35);
 			arcStep = abilityNode.getNode("arc-step").getInt(5);
-			abilityCollisionRadius = abilityNode.getNode("ability-collision-radius").getDouble(0.5);
+			collisionRadius = abilityNode.getNode("collision-radius").getDouble(0.5);
 
 			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(3.0);
 			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2500);
