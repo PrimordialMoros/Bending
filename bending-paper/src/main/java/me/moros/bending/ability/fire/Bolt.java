@@ -129,7 +129,6 @@ public class Bolt implements Ability {
 	public void dealDamage() {
 		Collider collider = new Sphere(new Vector3(targetLocation), 5);
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
-		destroy();
 	}
 
 	@Override

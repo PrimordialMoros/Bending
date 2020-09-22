@@ -19,12 +19,14 @@
 
 package me.moros.bending.game.manager;
 
+import me.moros.bending.Bending;
+import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.game.Game;
+import me.moros.bending.model.CircularQueue;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
-import me.moros.bending.model.CircularQueue;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.user.User;
 import net.jodah.expiringmap.ExpirationPolicy;
@@ -46,10 +48,27 @@ public final class SequenceManager {
 		cache.clear();
 	}
 
-	public boolean registerSequence(AbilityDescription desc, Sequence sequence) {
-		// TODO lazy load and verify all required abilities are enabled
-		registeredSequences.put(desc, sequence);
-		return false;
+	/**
+	 * Register ability sequences. This must be called after all Abilities have been registered in {@link AbilityRegistry}
+	 * Note: Some sequences may fail to register if they require a disabled or invalid ability.
+	 * @param sequences the map containing all the sequences
+	 * @return the amount of sequences that were registered.
+	 */
+	public int registerSequences(Map<AbilityDescription, Sequence> sequences) {
+		for (Map.Entry<AbilityDescription, Sequence> entry : sequences.entrySet()) {
+			AbilityDescription desc = entry.getKey();
+			if (!Game.getAbilityRegistry().isValid(desc)) continue;
+			Sequence sequence = entry.getValue();
+			boolean valid = sequence.getActions().stream()
+				.map(AbilityAction::getAbilityDescription)
+				.allMatch(Game.getAbilityRegistry()::isValid);
+			if (valid) {
+				registeredSequences.put(entry.getKey(), sequence);
+			} else {
+				Bending.getLog().warning(desc.getName() + " sequence will be disabled as it requires an invalid ability to activate.");
+			}
+		}
+		return registeredSequences.size();
 	}
 
 	public Optional<Sequence> getSequence(AbilityDescription desc) {

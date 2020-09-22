@@ -145,7 +145,7 @@ public class AirSwipe implements Ability {
 
 	@Override
 	public List<Collider> getColliders() {
-		return streams.stream().map(AirStream::getCollider).collect(Collectors.toList());
+		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
 	}
 
 	@Override

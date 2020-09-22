@@ -50,7 +50,6 @@ public final class SourceUtil {
 
 	/**
 	 * Attempts to find a possible source.
-	 *
 	 * @param user the user checking for a source
 	 * @param range the max range to check
 	 * @param materials a set of valid source materials

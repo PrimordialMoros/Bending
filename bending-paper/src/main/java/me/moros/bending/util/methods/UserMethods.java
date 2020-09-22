@@ -33,10 +33,10 @@ public final class UserMethods {
 
 	/**
 	 * Note: the returned value includes an offset and is ideal for showing charging particles
-	 * @see #getRightSide(User)
-	 * @see #getLeftSide(User)
 	 * @param user the user to check
 	 * @return a vector which represents the user's main hand location
+	 * @see #getRightSide(User)
+	 * @see #getLeftSide(User)
 	 */
 	public static Vector3 getMainHandSide(User user) {
 		Vector3 dir = user.getDirection().scalarMultiply(0.4);

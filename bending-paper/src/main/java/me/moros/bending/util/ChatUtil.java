@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
  */
 public class ChatUtil {
 	private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
+
 	/**
 	 * @see #sendMessage(CommandSender, Component)
 	 */

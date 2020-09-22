@@ -94,8 +94,8 @@ public class Storage {
 	}
 
 	/**
-	 *  This is currently loaded asynchronously using a LoadingCache
-	 *  @see PresetHolder
+	 * This is currently loaded asynchronously using a LoadingCache
+	 * @see PresetHolder
 	 */
 	public Preset loadPreset(int playerId, String name) {
 		return implementation.loadPreset(playerId, name);

@@ -224,7 +224,6 @@ public class FireBlast implements Ability, Burstable {
 
 		@Override
 		public boolean onEntityHit(Entity entity) {
-			if (entity.equals(user.getEntity())) return false;
 			if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
 				FireTick.LARGER.apply(entity, 30);

@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -46,12 +47,25 @@ public final class AbilityRegistry {
 	}
 
 	private boolean registerAbility(AbilityDescription desc) {
-		if (desc == null || !desc.getConfigNode().getNode("enabled").getBoolean(true)) return false;
+		if (desc == null) return false;
+		if (!desc.getConfigNode().getNode("enabled").getBoolean(true)) {
+			Bending.getLog().info(desc.getName() + " is disabled.");
+			return false;
+		}
 		abilities.put(desc.getName().toLowerCase(), desc);
 		if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
 			passives.computeIfAbsent(desc.getElement(), e -> new HashSet<>()).add(desc);
 		}
 		return true;
+	}
+
+	/**
+	 * Check if an ability is enabled and registered.
+	 * @param desc the ability to check
+	 * @return result
+	 */
+	public boolean isValid(AbilityDescription desc) {
+		return desc != null && abilities.containsKey(desc.getName().toLowerCase());
 	}
 
 	/**

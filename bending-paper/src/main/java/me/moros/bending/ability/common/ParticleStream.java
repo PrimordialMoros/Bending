@@ -47,17 +47,18 @@ public abstract class ParticleStream {
 	protected final double collisionRadius;
 	protected Collider collider;
 	protected boolean livingOnly;
+	protected boolean hitSelf;
 	protected Predicate<Block> canCollide = b -> false;
 
 	public ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
-		world = user.getWorld();
+		this.world = user.getWorld();
 		this.user = user;
 		this.ray = ray;
-		location = ray.origin;
+		this.location = ray.origin;
 		this.speed = speed;
-		maxRange = ray.direction.getNormSq();
+		this.maxRange = ray.direction.getNormSq();
 		this.collisionRadius = collisionRadius;
-		collider = new Sphere(location, collisionRadius);
+		this.collider = new Sphere(location, collisionRadius);
 		render();
 	}
 
@@ -71,7 +72,7 @@ public abstract class ParticleStream {
 		render();
 		postRender();
 		collider = new Sphere(location, collisionRadius);
-		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly);
+		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
 		if (hitEntity) return UpdateResult.REMOVE;
 		Block block = bukkitLocation.getBlock();
 		if (!MaterialUtil.isTransparent(block)) {
