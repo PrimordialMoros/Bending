@@ -310,11 +310,9 @@ public class BendingCommand extends BaseCommand {
 		}
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> {
-				ChatUtil.sendMessage(sender, ability.getDisplayName()
-					.append(TextComponent.of(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
-				);
-			});
+			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> ChatUtil.sendMessage(sender, ability.getDisplayName()
+				.append(TextComponent.of(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
+			));
 		}
 	}
 

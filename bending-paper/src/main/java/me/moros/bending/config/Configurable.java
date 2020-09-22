@@ -21,7 +21,7 @@ package me.moros.bending.config;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
-public abstract class Configurable implements Cloneable {
+public abstract class Configurable {
 	protected CommentedConfigurationNode config;
 
 	public Configurable() {
@@ -37,10 +37,5 @@ public abstract class Configurable implements Cloneable {
 	public void reload() {
 		config = ConfigManager.getConfig();
 		onConfigReload();
-	}
-
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
 	}
 }

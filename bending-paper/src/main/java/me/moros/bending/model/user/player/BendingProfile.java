@@ -65,11 +65,8 @@ public final class BendingProfile {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		BendingProfile that = (BendingProfile) o;
-		return id == that.id;
+	public boolean equals(Object obj) {
+		return obj instanceof BendingProfile && id == ((BendingProfile) obj).id;
 	}
 
 	@Override

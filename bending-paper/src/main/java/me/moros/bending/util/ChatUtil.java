@@ -27,10 +27,13 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import java.util.regex.Pattern;
+
 /**
  * Utility class to handle chat related functionality.
  */
 public class ChatUtil {
+	private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
 	/**
 	 * @see #sendMessage(CommandSender, Component)
 	 */
@@ -62,7 +65,7 @@ public class ChatUtil {
 	 * @return the sanitized output string
 	 */
 	public static String sanitizeInput(String input) {
-		final String output = input.replaceAll("[^A-Za-z]", "").toLowerCase();
+		String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
 		return output.length() > 16 ? output.substring(0, 16) : output;
 	}
 

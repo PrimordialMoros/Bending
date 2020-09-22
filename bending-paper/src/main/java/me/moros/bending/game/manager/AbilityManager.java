@@ -38,7 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,8 +92,8 @@ public class AbilityManager {
 	}
 
 	public void createPassives(User user) {
-		Set<AbilityDescription> userPassives = user.getElements().stream()
-			.flatMap(Game.getAbilityRegistry()::getPassives).collect(Collectors.toSet());
+		List<AbilityDescription> userPassives = user.getElements().stream()
+			.flatMap(Game.getAbilityRegistry()::getPassives).collect(Collectors.toList());
 		for (AbilityDescription passive : userPassives) {
 			destroyInstanceType(user, passive);
 			if (user.hasPermission(passive)) {
@@ -196,7 +195,9 @@ public class AbilityManager {
 
 	// Updates each ability every tick. Destroys the ability if ability.update() returns UpdateResult.Remove.
 	public void update() {
-		addQueue.forEach(i -> globalInstances.computeIfAbsent(i.getUser(), key -> new ArrayList<>()).add(i.getAbility()));
+		for (UserInstance i : addQueue) {
+			globalInstances.computeIfAbsent(i.getUser(), key -> new ArrayList<>()).add(i.getAbility());
+		}
 		addQueue.clear();
 		Iterator<Map.Entry<User, List<Ability>>> globalIterator = globalInstances.entrySet().iterator();
 		// Store the removed abilities here so any abilities added during Ability#destroy won't be concurrent.

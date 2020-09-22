@@ -74,7 +74,7 @@ public class AbilityDescription {
 		harmless = builder.harmless;
 		canBypassCooldown = builder.canBypassCooldown;
 		sourcesPlants = builder.sourcesPlants;
-		hashcode = Objects.hash(name, element);
+		hashcode = Objects.hash(name, type, element, activationMethods, cooldown, description, instructions, hidden, harmless);
 	}
 
 	public String getName() {

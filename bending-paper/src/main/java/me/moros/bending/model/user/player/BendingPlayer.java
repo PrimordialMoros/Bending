@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class BendingPlayer extends BendingUser {
+public final class BendingPlayer extends BendingUser {
 	private final BendingProfile profile;
 	private final PresetHolder presetHolder;
 
@@ -152,19 +152,6 @@ public class BendingPlayer extends BendingUser {
 	@Override
 	public void sendMessageKyori(TextComponent message) {
 		ChatUtil.sendMessage(getEntity(), message);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof BendingPlayer) {
-			return getEntity().equals(((BendingPlayer) obj).getEntity());
-		}
-		return getEntity().equals(obj);
-	}
-
-	@Override
-	public int hashCode() {
-		return getProfile().getInternalId();
 	}
 
 	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {

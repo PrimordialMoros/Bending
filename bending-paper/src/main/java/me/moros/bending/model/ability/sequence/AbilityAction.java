@@ -22,16 +22,20 @@ package me.moros.bending.model.ability.sequence;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
+import java.util.Objects;
+
 /**
  * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link ActivationMethod}
  */
 public final class AbilityAction {
 	private final AbilityDescription desc;
 	private final ActivationMethod action;
+	private final int hashcode;
 
 	public AbilityAction(AbilityDescription desc, ActivationMethod action) {
 		this.desc = desc;
 		this.action = action;
+		hashcode = Objects.hash(desc, action);
 	}
 
 	public AbilityDescription getAbilityDescription() {
@@ -49,6 +53,11 @@ public final class AbilityAction {
 			return action == otherAction.action && desc.equals(otherAction.desc);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return hashcode;
 	}
 
 	@Override

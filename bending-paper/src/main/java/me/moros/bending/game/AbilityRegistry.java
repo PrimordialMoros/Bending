@@ -26,6 +26,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.stream.Stream;
  */
 public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
-	private final Map<Element, Set<AbilityDescription>> passives = new HashMap<>();
+	private final EnumMap<Element, Set<AbilityDescription>> passives = new EnumMap<>(Element.class);
 
 	protected void registerAbilities(Collection<AbilityDescription> abilities) {
 		abilities.forEach(this::registerAbility);

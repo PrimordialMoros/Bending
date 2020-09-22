@@ -150,9 +150,9 @@ public class BendingUser implements User {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BendingUser) {
-			return entity.equals(((BendingUser) obj).entity);
+			return getEntity().equals(((BendingUser) obj).getEntity());
 		}
-		return entity.equals(obj);
+		return getEntity().equals(obj);
 	}
 
 	@Override

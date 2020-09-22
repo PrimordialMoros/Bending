@@ -85,23 +85,12 @@ public final class AttributeSystem {
 		Game.getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
 	}
 
-	public <T extends Configurable> T calculate(Ability ability, T oldConfig) {
-		T config;
-		try {
-			config = (T) oldConfig.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-			return oldConfig;
-		}
+	public <T extends Configurable> T calculate(Ability ability, T config) {
 		User user = ability.getUser();
-		if (user == null) {
+		if (user == null || !modifierMap.containsKey(user)) {
 			return config;
 		}
-		List<UserModifier> modifiers = modifierMap.get(user);
-		if (modifiers == null) {
-			return config;
-		}
-		List<UserModifier> activeModifiers = modifiers.stream()
+		List<UserModifier> activeModifiers = modifierMap.get(user).stream()
 			.filter(modifier -> modifier.policy.shouldModify(ability))
 			.collect(Collectors.toList());
 
