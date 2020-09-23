@@ -74,8 +74,9 @@ public final class AbilityInitializer {
 		fire.add(AbilityDescription.builder("FireBurst", FireBurst.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
-		fire.add(AbilityDescription.builder("HeatControl", HeatControl.class)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+		AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
+		fire.add(heatControl);
 
 		fire.add(AbilityDescription.builder("Blaze", Blaze.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
@@ -91,6 +92,10 @@ public final class AbilityInitializer {
 		AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).build();
 		fire.add(fireWall);
+
+		AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+		fire.add(fireWave);
 
 		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).setHarmless(true).build();
@@ -120,6 +125,12 @@ public final class AbilityInitializer {
 		abilityRegistry.registerAbilities(fire);
 
 		Map<AbilityDescription, Sequence> sequences = new HashMap<>();
+		sequences.put(fireWave, new Sequence(
+			new AbilityAction(heatControl, ActivationMethod.SNEAK),
+			new AbilityAction(fireWall, ActivationMethod.PUNCH),
+			new AbilityAction(fireWall, ActivationMethod.SNEAK_RELEASE)
+		));
+
 		sequences.put(jetBlast, new Sequence(
 			new AbilityAction(fireJet, ActivationMethod.SNEAK),
 			new AbilityAction(fireJet, ActivationMethod.SNEAK_RELEASE),

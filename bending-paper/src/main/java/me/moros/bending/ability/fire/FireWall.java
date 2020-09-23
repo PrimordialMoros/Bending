@@ -37,6 +37,7 @@ import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
@@ -50,6 +51,7 @@ import org.bukkit.block.Block;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FireWall implements Ability {
 	private static final Config config = new Config();
@@ -112,6 +114,9 @@ public class FireWall implements Ability {
 				Location location = block.getLocation().add(0.5, 0.5, 0.5);
 				ParticleUtil.createFire(user, location).count(3).offset(0.6, 0.6, 0.6).spawn();
 				ParticleUtil.create(Particle.SMOKE_NORMAL, location).count(1).offset(0.6, 0.6, 0.6).spawn();
+				if (ThreadLocalRandom.current().nextInt(12) == 0) {
+					SoundUtil.FIRE_SOUND.play(location);
+				}
 			}
 			nextRenderTime = time + 250;
 			if (applyDamage) {
@@ -127,9 +132,18 @@ public class FireWall implements Ability {
 		return UpdateResult.CONTINUE;
 	}
 
+	public void setWall(List<Block> blocks, OBB collider) {
+		if (blocks == null || blocks.isEmpty()) return;
+		this.blocks = blocks;
+		this.collider = collider;
+	}
+
+	public void updateDuration(long duration) {
+		removalPolicy = CompositeRemovalPolicy.defaults().add(new ExpireRemovalPolicy(duration)).build();
+	}
+
 	@Override
 	public void destroy() {
-
 	}
 
 	@Override
@@ -152,6 +166,18 @@ public class FireWall implements Ability {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
+	}
+
+	public double getWidth() {
+		return userConfig.width;
+	}
+
+	public double getHeight() {
+		return userConfig.height;
+	}
+
+	public double getRange() {
+		return userConfig.range;
 	}
 
 	public static class Config extends Configurable {
