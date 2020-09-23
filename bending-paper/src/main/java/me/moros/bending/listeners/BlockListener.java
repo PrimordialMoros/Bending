@@ -30,6 +30,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
@@ -86,6 +87,13 @@ public class BlockListener implements Listener {
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockForm(BlockFormEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onBlockFromTo(BlockFromToEvent event) {
+		if (TempBlock.manager.isTemp(event.getBlock()) || TempBlock.manager.isTemp(event.getToBlock())) {
 			event.setCancelled(true);
 		}
 	}
