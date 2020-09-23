@@ -36,23 +36,23 @@ public final class ParticleUtil {
 	public static final Color AIR = fromHex("EEEEEE");
 
 	public static ParticleBuilder createFire(User user, Location center) {
-		return UserMethods.getFireParticles(user).builder().location(center).receivers(DEFAULT_DIST).extra(0);
+		return UserMethods.getFireParticles(user).builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
 
 	public static ParticleBuilder createAir(Location center) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8f);
+		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8f).force(true);
 	}
 
 	public static ParticleBuilder createRGB(Location center, String hexVal) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal));
+		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
 	}
 
 	public static ParticleBuilder create(Particle effect, Location center) {
-		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0);
+		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
 
 	public static ParticleBuilder create(Particle effect, Location center, int range) {
-		return effect.builder().location(center).receivers(Math.min(range, DEFAULT_DIST)).extra(0);
+		return effect.builder().location(center).receivers(range).extra(0).force(true);
 	}
 
 	/**

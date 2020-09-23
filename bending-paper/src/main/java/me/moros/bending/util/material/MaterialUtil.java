@@ -24,8 +24,10 @@ import me.moros.bending.util.collision.AABBUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -47,6 +49,22 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.WET_SPONGE, Material.SPONGE);
 		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
 		COOKABLE.put(Material.STICK, Material.TORCH);
+	}
+
+	private static final Set<Material> containers = EnumSet.of(
+		Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL, Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
+		Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND, Material.BEACON, Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL,
+		Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE
+	);
+
+	private static final Set<Material> unbreakables = EnumSet.of(
+		Material.BARRIER, Material.BEDROCK, Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
+		Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
+	);
+
+	public static boolean isUnbreakable(Block block) {
+		return unbreakables.contains(block.getType()) || (block.getState() instanceof InventoryHolder) ||
+			containers.contains(block.getType()) || (block.getState() instanceof CreatureSpawner);
 	}
 
 	//TODO change to Paper's MaterialTagSet and split into better categories

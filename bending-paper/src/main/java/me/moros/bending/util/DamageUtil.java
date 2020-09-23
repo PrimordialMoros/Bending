@@ -41,7 +41,7 @@ public final class DamageUtil {
 		.expireAfterWrite(Duration.ofSeconds(60))
 		.build();
 
-	public static void damageEntity(Entity entity, User source, double damage, AbilityDescription desc) {
+	public static boolean damageEntity(Entity entity, User source, double damage, AbilityDescription desc) {
 		if (entity instanceof LivingEntity && damage > 0) {
 			LivingEntity targetEntity = (LivingEntity) entity;
 			LivingEntity sourceEntity = source.getEntity();
@@ -49,12 +49,14 @@ public final class DamageUtil {
 			targetEntity.damage(damage, sourceEntity);
 			targetEntity.setLastDamageCause(finalEvent);
 			if (desc != null && targetEntity instanceof Player) cache.put(targetEntity.getUniqueId(), desc.getName());
+			return true;
 		}
+		return false;
 	}
 
 
-	public static void damageEntity(Entity entity, User source, double damage) {
-		damageEntity(entity, source, damage, null);
+	public static boolean damageEntity(Entity entity, User source, double damage) {
+		return damageEntity(entity, source, damage, null);
 	}
 
 	public static String getBendingMessage(UUID uuid) {

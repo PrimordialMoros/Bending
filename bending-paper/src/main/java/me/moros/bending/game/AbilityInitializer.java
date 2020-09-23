@@ -88,6 +88,10 @@ public final class AbilityInitializer {
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		fire.add(fireJet);
 
+		AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).build();
+		fire.add(fireWall);
+
 		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).setHarmless(true).build();
 		fire.add(jetBlast);
@@ -105,6 +109,9 @@ public final class AbilityInitializer {
 		fire.add(fireWheel);
 
 		fire.add(AbilityDescription.builder("Bolt", Bolt.class)
+			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+
+		fire.add(AbilityDescription.builder("Combustion", Combustion.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
 		abilityRegistry.registerAbilities(air);
@@ -155,18 +162,8 @@ public final class AbilityInitializer {
 		/*
         CollisionService collisionService = Game.getCollisionService();
 
-		AbilityDescription blaze = registerAbility("Blaze", Blaze.class, Element.FIRE, ActivationMethod.Punch, ActivationMethod.Sneak);
-        AbilityDescription fireJet = registerAbility("FireJet", FireJet.class, Element.FIRE, ActivationMethod.Punch).setHarmless(true);
-        AbilityDescription fireShield = registerAbility("FireShield", FireShield.class, Element.FIRE, ActivationMethod.Punch, ActivationMethod.Sneak);
-        registerAbility("FireWall", FireWall.class, Element.FIRE, ActivationMethod.Punch);
-        registerAbility("HeatControl", HeatControl.class, Element.FIRE, ActivationMethod.Punch);
-        registerAbility("Lightning", Lightning.class, Element.FIRE, ActivationMethod.Sneak);
-        registerAbility("Combustion", Combustion.class, Element.FIRE, ActivationMethod.Sneak);
+	    registerAbility("Lightning", Lightning.class, Element.FIRE, ActivationMethod.Sneak);
 
-        AbilityDescription fireKick = registerAbility("FireKick", FireKick.class, Element.FIRE, ActivationMethod.Sequence);
-        AbilityDescription jetBlaze = registerAbility("JetBlaze", JetBlaze.class, Element.FIRE, ActivationMethod.Sequence);
-        AbilityDescription fireSpin = registerAbility("FireSpin", FireSpin.class, Element.FIRE, ActivationMethod.Sequence);
-        AbilityDescription fireWheel = registerAbility("FireWheel", FireWheel.class, Element.FIRE, ActivationMethod.Sequence);
 
         registerAbility("AirScooter", AirScooter.class, Element.AIR, ActivationMethod.Punch).setHarmless(true);
         AbilityDescription airBlast = registerAbility("AirBlast", AirBlast.class, Element.AIR, ActivationMethod.Punch, ActivationMethod.Sneak);

@@ -68,9 +68,6 @@ public final class ActivationController {
 			if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, JetBlast.class)) {
 				return;
 			}
-			//if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, JetBlaze.class)) {
-			//return;
-			//}
 		}
 
         /*if (Game.getAbilityInstanceManager().destroyInstanceType(user, AirScooter.class)) {
@@ -79,7 +76,7 @@ public final class ActivationController {
             }
         }*/
 
-		//Combustion.combust(user);
+		Combustion.explode(user);
 		FireBurst.activateCone(user);
 		AirBurst.activateCone(user);
 

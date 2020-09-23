@@ -46,6 +46,10 @@ public final class SoundUtil {
 		playSound(center, effect.getSound(), volume, pitch);
 	}
 
+	public static void playSound(Location center, Sound sound) {
+		playSound(center, sound, 1, 1);
+	}
+
 	public static void playSound(Location center, Sound sound, float volume, float pitch) {
 		center.getWorld().playSound(center, sound, volume, pitch);
 	}
