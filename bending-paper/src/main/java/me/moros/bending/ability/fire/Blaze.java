@@ -60,7 +60,7 @@ public class Blaze implements Ability {
 			return false;
 		}
 
-		Vector3 dir = user.getDirection().setY(0).normalize(Vector3.PLUS_I);
+		Vector3 dir = user.getDirection().setY(0).normalize();
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
 		if (method == ActivationMethod.PUNCH) {
 			int steps = userConfig.arc / 8;

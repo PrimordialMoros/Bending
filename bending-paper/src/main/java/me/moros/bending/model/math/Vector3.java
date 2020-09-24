@@ -105,6 +105,7 @@ public class Vector3 extends Vector3D {
 
 	@Override
 	public Vector3 add(final Vector<Euclidean3D> v) {
+		Vector3D.PLUS_I.add(Vector3D.ZERO);
 		final Vector3 v3 = (Vector3) v;
 		return new Vector3(getX() + v3.getX(), getY() + v3.getY(), getZ() + v3.getZ());
 	}
@@ -116,14 +117,15 @@ public class Vector3 extends Vector3D {
 	}
 
 	/**
-	 * @return Unit vector if normal is 0, normalized vector otherwise
+	 * Returns {@link #normalize(Vector3)} with {@link #PLUS_I} as default.
 	 */
 	@Override
 	public Vector3 normalize() {
-		return normalize(Vector3.ONE);
+		return normalize(Vector3.PLUS_I);
 	}
 
 	/**
+	 * Normalize or return default is vector norm is zero.
 	 * @param def the default vector to return if normal is 0
 	 * @return result
 	 */

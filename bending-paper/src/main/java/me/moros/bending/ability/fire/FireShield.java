@@ -166,7 +166,7 @@ public class FireShield implements Ability {
 		@Override
 		public void render() {
 			Rotation rotation = new Rotation(user.getDirection(), FastMath.toRadians(20), RotationConvention.VECTOR_OPERATOR);
-			double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize(Vector3.PLUS_I).toArray();
+			double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize().toArray();
 			for (int i = 0; i < 18; i++) {
 				for (double j = 0.2; j <= 1; j += 0.2) {
 					Vector3 loc = new Vector3(array).scalarMultiply(j * userConfig.diskRadius);

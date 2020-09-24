@@ -103,7 +103,7 @@ public class AirShield implements Ability {
 
 		CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
 			Vector3 toEntity = new Vector3(entity.getLocation()).subtract(center);
-			Vector3 normal = toEntity.setY(0).normalize(Vector3.PLUS_I);
+			Vector3 normal = toEntity.setY(0).normalize();
 			double strength = ((userConfig.radius - toEntity.getNorm()) / userConfig.radius) * userConfig.maxPush;
 			strength = FastMath.max(0, FastMath.min(1, strength));
 			entity.setVelocity(entity.getVelocity().add(normal.scalarMultiply(strength).toVector()));

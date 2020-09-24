@@ -128,7 +128,7 @@ public class AirSwipe implements Ability {
 		user.setCooldown(this, userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 dir = user.getDirection();
-		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I).crossProduct(dir);
+		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
 		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(userConfig.arcStep), RotationConvention.VECTOR_OPERATOR);
 		int steps = userConfig.arc / userConfig.arcStep;
 		VectorMethods.createArc(dir, rotation, steps).forEach(

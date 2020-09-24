@@ -80,7 +80,7 @@ public class FireWall implements Ability {
 		double hh = userConfig.height / 2.0;
 
 		AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
-		Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I);
+		Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
 		Vector3 location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.range));
 		if (!Game.getProtectionSystem().canBuild(user, location.toLocation(user.getWorld()).getBlock())) {
 			return false;

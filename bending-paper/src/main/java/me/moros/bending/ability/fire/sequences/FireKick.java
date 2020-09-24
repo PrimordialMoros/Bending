@@ -80,7 +80,7 @@ public class FireKick implements Ability {
 
 		Vector3 origin = user.getLocation();
 		Vector3 dir = user.getDirection();
-		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize(Vector3.PLUS_I).crossProduct(dir);
+		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
 
 		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(6), RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.createArc(direction, rotation, 11).forEach(

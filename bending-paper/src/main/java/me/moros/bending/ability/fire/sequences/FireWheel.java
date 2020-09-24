@@ -119,7 +119,7 @@ public class FireWheel implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction).normalize(Vector3.PLUS_I);
+		Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction).normalize();
 		Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.rotate(direction, rotation, 72).forEach(v ->
 			ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).count(1).spawn()

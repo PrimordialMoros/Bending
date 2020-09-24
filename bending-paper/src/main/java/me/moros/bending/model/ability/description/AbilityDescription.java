@@ -154,11 +154,10 @@ public class AbilityDescription {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof AbilityDescription) {
-			AbilityDescription desc = (AbilityDescription) obj;
-			return getName().equals(desc.getName()) && getElement() == desc.getElement();
-		}
-		return false;
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		AbilityDescription desc = (AbilityDescription) obj;
+		return getName().equals(desc.getName()) && getElement() == desc.getElement();
 	}
 
 	@Override
