@@ -28,6 +28,7 @@ import org.apache.commons.math3.util.MathArrays;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.util.NumberConversions;
 
 /**
  * Immutable 3D Vector implementation with built-in adapters for Bukkit
@@ -187,12 +188,16 @@ public class Vector3 extends Vector3D {
 		return new Vector3(Math.max(getX(), other.getX()), FastMath.max(getY(), other.getY()), FastMath.max(getZ(), other.getZ()));
 	}
 
+	public org.bukkit.util.Vector toVector() {
+		return new org.bukkit.util.Vector(getX(), getY(), getZ());
+	}
+
 	public Location toLocation(World world) {
 		return new Location(world, getX(), getY(), getZ());
 	}
 
-	public org.bukkit.util.Vector toVector() {
-		return new org.bukkit.util.Vector(getX(), getY(), getZ());
+	public Block toBlock(World world) {
+		return world.getBlockAt(NumberConversions.floor(getX()), NumberConversions.floor(getY()), NumberConversions.floor(getZ()));
 	}
 
 	public Vector3 clampVelocity() {

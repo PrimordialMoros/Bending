@@ -45,8 +45,7 @@ public class TempArmor implements Temporary {
 		this.snapshot = player.getInventory().getArmorContents().clone();
 		this.armor = armor.clone();
 		player.getInventory().setArmorContents(this.armor);
-		revertTime = System.currentTimeMillis() + duration;
-		manager.enqueue(this);
+		manager.addEntry(player, this, duration);
 	}
 
 	public static Optional<TempArmor> create(Player player, ItemStack[] armor, long duration) {

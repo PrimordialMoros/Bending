@@ -46,7 +46,6 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 import java.util.Collections;
@@ -58,10 +57,11 @@ public class FireWheel implements Ability {
 
 	private User user;
 	private Config userConfig;
+	private CompositeRemovalPolicy removalPolicy;
+
 	private Vector3 location;
 	private Vector3 direction;
 	private Disk collider;
-	private CompositeRemovalPolicy removalPolicy;
 
 	private enum CollisionResolution {NONE, RESOLVED, FAILURE}
 
@@ -74,15 +74,14 @@ public class FireWheel implements Ability {
 
 		location = location.add(new Vector3(0, userConfig.radius, 0));
 
-		Location bukkitLocation = location.toLocation(user.getWorld());
-		if (bukkitLocation.getBlock().isLiquid()) return false;
+		if (location.toBlock(user.getWorld()).isLiquid()) return false;
 
 		AABB bounds = new AABB(new Vector3(-0.1, -userConfig.radius, -userConfig.radius), new Vector3(0.1, userConfig.radius, userConfig.radius));
 		OBB obb = new OBB(bounds, new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getEntity().getLocation().getYaw()), RotationConvention.VECTOR_OPERATOR));
 		Sphere sphere = new Sphere(location, userConfig.radius);
 		collider = new Disk(obb, sphere);
 
-		CollisionResolution resolution = resolveInitialCollisions(WorldMethods.getNearbyBlocks(bukkitLocation, userConfig.radius * 5), userConfig.radius * 2);
+		CollisionResolution resolution = resolveInitialCollisions(WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), userConfig.radius * 5), userConfig.radius * 2);
 
 		if (resolution == CollisionResolution.FAILURE) {
 			return false;
@@ -101,13 +100,13 @@ public class FireWheel implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 
 		location = location.add(direction.scalarMultiply(userConfig.speed));
 
-		if (!Game.getProtectionSystem().canBuild(user, location.toLocation(user.getWorld()).getBlock())) {
+		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -115,7 +114,7 @@ public class FireWheel implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		if (location.subtract(new Vector3(0, userConfig.radius + 1, 0)).toLocation(user.getWorld()).getBlock().isLiquid()) {
+		if (location.subtract(new Vector3(0, userConfig.radius + 1, 0)).toBlock(user.getWorld()).isLiquid()) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -146,7 +145,7 @@ public class FireWheel implements Ability {
 		}
 		Disk checkCollider = collider.addPosition(location);
 		// Try to fall if the block below doesn't have a bounding box.
-		Block blockBelow = location.subtract(new Vector3(0, collider.getHalfExtents().getY() + 1, 0)).toLocation(user.getWorld()).getBlock();
+		Block blockBelow = location.subtract(new Vector3(0, collider.getHalfExtents().getY() + 1, 0)).toBlock(user.getWorld());
 		if (resolution == CollisionResolution.NONE && AABBUtils.getBlockBounds(blockBelow).getHalfExtents().getY() == 0) {
 			location = location.add(Vector3.MINUS_J);
 			checkCollider = collider.addPosition(location);

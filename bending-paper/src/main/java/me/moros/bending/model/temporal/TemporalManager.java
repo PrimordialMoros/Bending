@@ -19,34 +19,18 @@
 
 package me.moros.bending.model.temporal;
 
-import me.moros.bending.util.Tasker;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
-public class TemporalManager<K, V extends Temporary> {
-	private final Queue<V> QUEUE = new PriorityQueue<>(100, Comparator.comparingLong(V::getRevertTime));
-	private final Map<K, V> instances = new HashMap<>();
+public final class TemporalManager<K, V extends Temporary> {
+	private final ExpiringMap<K, V> instances;
 
 	public TemporalManager() {
-		Tasker.createTaskTimer(() -> {
-			final long currentTime = System.currentTimeMillis();
-			while (!QUEUE.isEmpty()) {
-				final V temp = QUEUE.peek();
-				if (currentTime > temp.getRevertTime()) {
-					QUEUE.poll();
-					temp.revert();
-				} else {
-					return;
-				}
-			}
-		}, 1, 1);
+		instances = ExpiringMap.builder().variableExpiration().build();
+		instances.addExpirationListener((key, value) -> value.revert());
 	}
 
 	public boolean isTemp(K key) {
@@ -58,25 +42,23 @@ public class TemporalManager<K, V extends Temporary> {
 	}
 
 	public void addEntry(K key, V value) {
-		instances.put(key, value);
+		instances.put(key, value, ExpirationPolicy.CREATED, 15, TimeUnit.MINUTES);
+	}
+
+	public void addEntry(K key, V value, long duration) {
+		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
 	}
 
 	/**
-	 * Only use this inside Temporary::revert
-	 * @param key the key that marks the entry to remove
+	 * You should use this inside {@link Temporary#revert}
+	 * @param key the key of the entry to remove
 	 */
 	public void removeEntry(K key) {
 		instances.remove(key);
 	}
 
-	public void enqueue(V value) {
-		QUEUE.add(value);
-	}
-
 	public void removeAll() {
-		QUEUE.clear();
-		List<V> list = new ArrayList<>(instances.values());
-		list.forEach(V::revert);
+		instances.values().forEach(Temporary::revert);
 		instances.clear();
 	}
 }

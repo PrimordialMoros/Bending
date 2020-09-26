@@ -34,8 +34,9 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 public class JetBlast implements Ability {
 	private static final Config config = new Config();
 
-	private FireJet jet;
 	private Config userConfig;
+
+	private FireJet jet;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {

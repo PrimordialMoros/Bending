@@ -40,7 +40,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Location;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,15 +50,15 @@ public class AirShield implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private long startTime;
 	private CompositeRemovalPolicy removalPolicy;
+
 	private long currentPoint;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		startTime = System.currentTimeMillis();
 
 		if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
@@ -69,6 +68,7 @@ public class AirShield implements Ability {
 			.add(Policies.NOT_SNEAKING)
 			.build();
 		if (userConfig.duration > 0 ) removalPolicy.add(new ExpireRemovalPolicy(userConfig.duration));
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 
@@ -79,7 +79,7 @@ public class AirShield implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (removalPolicy.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return UpdateResult.REMOVE;
 		}
 		currentPoint++;
@@ -93,11 +93,11 @@ public class AirShield implements Ability {
 			// Offset each stream so they aren't all lined up.
 			double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
 			double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
-			Location loc = center.add(new Vector3(x, y, z)).toLocation(user.getWorld());
-			ParticleUtil.createAir(loc).count(5).offset(0.2, 0.2, 0.2).spawn();
+			Vector3 loc = center.add(new Vector3(x, y, z));
+			ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5).offset(0.2, 0.2, 0.2).spawn();
 
 			if (ThreadLocalRandom.current().nextInt(12) == 0) {
-				SoundUtil.AIR_SOUND.play(loc);
+				SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
 			}
 		}
 

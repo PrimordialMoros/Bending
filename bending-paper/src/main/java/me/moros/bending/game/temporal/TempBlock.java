@@ -49,12 +49,8 @@ public class TempBlock implements Temporary {
 			snapshot = temp.snapshot;
 			temp.getRevertTask().ifPresent(RevertTask::execute);
 		});
-		manager.addEntry(block, this);
 		block.setBlockData(data);
-		if (duration > 0) {
-			revertTime = System.currentTimeMillis() + duration;
-			manager.enqueue(this);
-		}
+		manager.addEntry(block, this, duration);
 	}
 
 	public static Optional<TempBlock> create(Block block, Material data) {
@@ -82,7 +78,7 @@ public class TempBlock implements Temporary {
 				getRevertTask().ifPresent(RevertTask::execute);
 			});
 		}
-		manager.removeEntry(snapshot.getBlock());
+		manager.removeEntry(getBlock());
 	}
 
 	public Block getBlock() {
@@ -123,6 +119,6 @@ public class TempBlock implements Temporary {
 	}
 
 	public static boolean isTouchingTempBlock(Block block) {
-		return BlockMethods.MAIN_FACES.stream().anyMatch(face -> manager.isTemp(block.getRelative(face)));
+		return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(manager::isTemp);
 	}
 }

@@ -42,6 +42,7 @@ public class BottleReturn implements Ability {
 
 	private User user;
 	private Config userConfig;
+
 	private Vector3 location;
 	private BendingFallingBlock source;
 
@@ -70,7 +71,7 @@ public class BottleReturn implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		Block block = location.toLocation(user.getWorld()).getBlock();
+		Block block = location.toBlock(user.getWorld());
 		if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER && block.getType() != Material.ICE) {
 			return UpdateResult.REMOVE;
 		}

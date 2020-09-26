@@ -28,7 +28,6 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.slots.AbilitySlotContainer;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Tasker;
-import net.jodah.expiringmap.ExpirationListener;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.entity.LivingEntity;
@@ -47,9 +46,8 @@ public class BendingUser implements User {
 
 	protected BendingUser(LivingEntity entity) {
 		this.entity = entity;
-		ExpirationListener<AbilityDescription, Boolean> listener = (key, value) ->
-			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key));
-		cooldowns.addExpirationListener(listener);
+		cooldowns.addExpirationListener((key, value) ->
+			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
 		slotContainers.add(new AbilitySlotContainer(9));
 		bendingConditional = CompositeBendingConditional.defaults().build();
 	}

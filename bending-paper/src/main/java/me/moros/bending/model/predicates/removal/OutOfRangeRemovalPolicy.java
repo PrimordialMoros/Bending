@@ -44,7 +44,7 @@ public class OutOfRangeRemovalPolicy implements RemovalPolicy {
 	}
 
 	@Override
-	public boolean shouldRemove(User user, AbilityDescription desc) {
+	public boolean test(User user, AbilityDescription desc) {
 		if (range == 0) return false;
 		if (origin != null) return fromSupplier.get().distanceSq(origin) >= (range * range);
 		return fromSupplier.get().distanceSq(user.getLocation()) >= (range * range);

@@ -39,23 +39,27 @@ import java.util.function.Predicate;
 
 public abstract class ParticleStream {
 	protected final User user;
-	protected final Ray ray;
 	protected final World world;
+	protected final Ray ray;
+
+	protected Predicate<Block> canCollide = b -> false;
+	protected Collider collider;
 	protected Vector3 location;
+
 	protected final double speed;
 	protected final double maxRange;
 	protected final double collisionRadius;
-	protected Collider collider;
+
 	protected boolean livingOnly;
 	protected boolean hitSelf;
-	protected Predicate<Block> canCollide = b -> false;
 
 	public ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
-		this.world = user.getWorld();
 		this.user = user;
+		this.world = user.getWorld();
 		this.ray = ray;
-		this.location = ray.origin;
+
 		this.speed = speed;
+		this.location = ray.origin;
 		this.maxRange = ray.direction.getNormSq();
 		this.collisionRadius = collisionRadius;
 		this.collider = new Sphere(location, collisionRadius);
@@ -65,8 +69,8 @@ public abstract class ParticleStream {
 	// Return false to destroy this stream
 	public UpdateResult update() {
 		location = location.add(ray.direction.normalize().scalarMultiply(speed));
-		Location bukkitLocation = getBukkitLocation();
-		if (location.distanceSq(ray.origin) > maxRange || !Game.getProtectionSystem().canBuild(user, bukkitLocation.getBlock())) {
+		Block block = location.toBlock(user.getWorld());
+		if (location.distanceSq(ray.origin) > maxRange || !Game.getProtectionSystem().canBuild(user, block)) {
 			return UpdateResult.REMOVE;
 		}
 		render();
@@ -74,7 +78,6 @@ public abstract class ParticleStream {
 		collider = new Sphere(location, collisionRadius);
 		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
 		if (hitEntity) return UpdateResult.REMOVE;
-		Block block = bukkitLocation.getBlock();
 		if (!MaterialUtil.isTransparent(block)) {
 			AABB blockBounds = AABBUtils.getBlockBounds(block);
 			if (canCollide.test(block) || blockBounds.intersects(collider)) {

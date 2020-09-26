@@ -45,14 +45,15 @@ public class Pillar {
 	private final User user;
 	private final Block origin;
 	private final BlockFace direction;
+
+	private final List<Block> pillarBlocks = new ArrayList<>();
+
 	private final int length;
 	private final long interval;
 	private final long duration;
 
 	private int currentLength;
 	private long nextUpdateTime;
-
-	private final List<Block> pillarBlocks = new ArrayList<>();
 
 	private Pillar(User user, Block origin, BlockFace direction, int length, long interval, long duration) {
 		this.user = user;

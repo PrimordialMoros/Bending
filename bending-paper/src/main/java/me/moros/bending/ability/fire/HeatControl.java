@@ -53,6 +53,7 @@ public class HeatControl implements Ability {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
+
 	private long startTime;
 
 	@Override
@@ -133,7 +134,7 @@ public class HeatControl implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (System.currentTimeMillis() >= startTime + userConfig.cookDuration && cook()) {

@@ -39,24 +39,14 @@ public class AABB implements Collider {
 		return new AABB(min.add(pos), max.add(pos));
 	}
 
-	public AABB grow(double x, double y, double z) {
-		Vector3 change = new Vector3(x, y, z);
-		return new AABB(min.subtract(change), max.add(change));
+	public AABB grow(Vector3 diff) {
+		return new AABB(min.subtract(diff), max.add(diff));
 	}
 
-	public AABB scale(double x, double y, double z) {
+	public AABB scale(Vector3 diff) {
 		Vector3 extents = getHalfExtents();
-		Vector3 newExtents = extents.multiply(x, y, z);
-		Vector3 diff = newExtents.subtract(extents);
-		return grow(diff.getX(), diff.getY(), diff.getZ());
-	}
-
-	public AABB scale(double amount) {
-		Vector3 extents = getHalfExtents();
-		Vector3 newExtents = extents.scalarMultiply(amount);
-		Vector3 diff = newExtents.subtract(extents);
-
-		return grow(diff.getX(), diff.getY(), diff.getZ());
+		Vector3 newExtents = extents.multiply(diff);
+		return grow(newExtents.subtract(extents));
 	}
 
 	public Vector3 min() {

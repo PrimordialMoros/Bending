@@ -45,7 +45,7 @@ public class TempArmorStand implements Temporary {
 	public static void init() {
 	}
 
-	private TempArmorStand(Location location, Material material, boolean particles) {
+	public TempArmorStand(Location location, Material material, boolean particles, long duration) {
 		this.particles = particles;
 		headMaterial = material;
 		armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
@@ -56,17 +56,11 @@ public class TempArmorStand implements Temporary {
 			entity.setMetadata(Metadata.NO_INTERACT, Metadata.emptyMetadata());
 		});
 		showParticles();
-		manager.addEntry(armorStand, this);
+		manager.addEntry(armorStand, this, duration);
 	}
 
 	public TempArmorStand(Location location, Material material, long duration) {
 		this(location, material, true, duration);
-	}
-
-	public TempArmorStand(Location location, Material material, boolean particles, long duration) {
-		this(location, material, particles);
-		revertTime = System.currentTimeMillis() + duration;
-		manager.enqueue(this);
 	}
 
 	public void showParticles() {

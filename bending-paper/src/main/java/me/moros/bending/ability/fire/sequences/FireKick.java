@@ -59,6 +59,7 @@ public class FireKick implements Ability {
 
 	private User user;
 	private Config userConfig;
+
 	private final Set<Entity> affectedEntities = new HashSet<>();
 	private final List<ParticleStream> streams = new ArrayList<>();
 
@@ -67,7 +68,7 @@ public class FireKick implements Ability {
 		if (method != ActivationMethod.SEQUENCE) return false;
 		this.user = user;
 
-		if (!Game.getProtectionSystem().canBuild(user, user.getLocation().toLocation(user.getWorld()).getBlock())) {
+		if (!Game.getProtectionSystem().canBuild(user, user.getLocation().toBlock(user.getWorld()))) {
 			return false;
 		}
 		recalculateConfig();

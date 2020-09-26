@@ -22,8 +22,10 @@ package me.moros.bending.model.predicates.removal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
+import java.util.function.BiPredicate;
+
 @FunctionalInterface
-public interface RemovalPolicy {
-	boolean shouldRemove(User user, AbilityDescription desc);
+public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
+	boolean test(User user, AbilityDescription desc);
 }
 

@@ -32,6 +32,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
@@ -58,7 +59,9 @@ public class Bolt implements Ability {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
+
 	private Location targetLocation;
+
 	private long startTime;
 
 	@Override
@@ -67,7 +70,7 @@ public class Bolt implements Ability {
 		this.user = user;
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
-		if (user.getHeadBlock().isLiquid() || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 		removalPolicy = CompositeRemovalPolicy.defaults().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -81,7 +84,7 @@ public class Bolt implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {

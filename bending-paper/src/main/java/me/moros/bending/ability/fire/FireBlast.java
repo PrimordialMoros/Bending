@@ -66,13 +66,15 @@ public class FireBlast implements Ability, Burstable {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
-	private long renderInterval;
-	private int particleCount;
-	private boolean charging;
-	private long startTime;
-	private double factor = 1.0;
+
 	private final Set<Entity> affectedEntities = new HashSet<>();
 	private FireStream stream;
+
+	private boolean charging;
+	private double factor = 1.0;
+	private int particleCount;
+	private long renderInterval;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -107,7 +109,7 @@ public class FireBlast implements Ability, Burstable {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (charging) {

@@ -24,6 +24,7 @@ You can temporarily download builds from [actions](https://github.com/Primordial
 Main releases will be downloadable from [Github Releases](https://github.com/PrimordialMoros/Bending/releases) as well as other sources.
 
 ## Building
+
 This project requires Java 8 or newer and uses Gradle (which comes with a wrapper so you don't need to install it).
 
 It currently contains a single module `bending-paper` which targets PaperMC servers.
@@ -31,5 +32,7 @@ It currently contains a single module `bending-paper` which targets PaperMC serv
 Open a terminal and run `./gradlew build`
 
 ## Contributing - Developer Documentation
+
 See [Contributing](CONTRIBUTING.md)
+
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcome and appreciated.

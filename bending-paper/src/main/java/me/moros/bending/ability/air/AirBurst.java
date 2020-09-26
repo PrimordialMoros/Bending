@@ -37,21 +37,22 @@ public class AirBurst extends BurstAbility {
 
 	private User user;
 	private Config userConfig;
-	private long startTime;
+
 	private boolean released;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		this.released = false;
+		released = false;
 		if (method == ActivationMethod.FALL) {
 			if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
 				return false;
 			}
 			release(false);
 		}
-		this.startTime = System.currentTimeMillis();
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 

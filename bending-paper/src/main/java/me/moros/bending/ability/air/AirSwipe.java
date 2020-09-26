@@ -59,11 +59,13 @@ public class AirSwipe implements Ability {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
-	private boolean charging;
-	private long startTime;
-	private double factor = 1.0;
+
 	private final Set<Entity> affectedEntities = new HashSet<>();
 	private final List<AirStream> streams = new ArrayList<>();
+
+	private boolean charging;
+	private double factor = 1;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -98,7 +100,7 @@ public class AirSwipe implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (charging) {

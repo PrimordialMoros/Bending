@@ -34,6 +34,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -55,13 +56,15 @@ public class AirBlast implements Ability, Burstable {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
+
+	private AirStream stream;
 	private Vector3 origin;
 	private Vector3 direction;
+
 	private boolean launched;
 	private boolean selectedOrigin;
-	private long renderInterval;
 	private int particleCount;
-	private AirStream stream;
+	private long renderInterval;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -69,19 +72,20 @@ public class AirBlast implements Ability, Burstable {
 		recalculateConfig();
 		particleCount = 6;
 
-		if (user.getHeadBlock().isLiquid() || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 
 		removalPolicy = CompositeRemovalPolicy.defaults()
 			.add(new OutOfRangeRemovalPolicy(userConfig.selectOutOfRange, () -> origin))
+			.add(Policies.IN_LIQUID)
 			.build();
 
 		for (AirBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
 			if (!blast.launched) {
 				if (method == ActivationMethod.SNEAK_RELEASE) {
 					blast.selectOrigin();
-					if (!Game.getProtectionSystem().canBuild(user, blast.origin.toLocation(user.getWorld()).getBlock())) {
+					if (!Game.getProtectionSystem().canBuild(user, blast.origin.toBlock(user.getWorld()))) {
 						Game.getAbilityManager(user.getWorld()).destroyInstance(user, blast);
 					}
 				} else {
@@ -93,7 +97,7 @@ public class AirBlast implements Ability, Burstable {
 
 		if (method == ActivationMethod.SNEAK_RELEASE) {
 			selectOrigin();
-			return Game.getProtectionSystem().canBuild(user, origin.toLocation(user.getWorld()).getBlock());
+			return Game.getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
 		} else {
 			if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 				return false;
@@ -111,7 +115,7 @@ public class AirBlast implements Ability, Burstable {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 

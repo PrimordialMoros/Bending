@@ -26,6 +26,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -78,12 +79,13 @@ public final class WorldMethods {
 		double originY = location.getY();
 		double originZ = location.getZ();
 		List<Block> blocks = new ArrayList<>();
-		Vector pos = location.toVector();
+		Vector3 pos = new Vector3(location);
 		for (double x = originX - r; x <= originX + r; ++x) {
 			for (double y = originY - r; y <= originY + r; ++y) {
 				for (double z = originZ - r; z <= originZ + r; ++z) {
-					if (pos.distanceSquared(new Vector(x, y, z)) > radius * radius) continue;
-					Block block = location.getWorld().getBlockAt(NumberConversions.floor(x), NumberConversions.floor(y), NumberConversions.floor(z));
+					Vector3 loc = new Vector3(x, y, z);
+					if (pos.distanceSq(loc) > radius * radius) continue;
+					Block block = loc.toBlock(location.getWorld());
 					if (predicate.test(block)) {
 						blocks.add(block);
 						if (limit > 0 && blocks.size() >= limit) return blocks;
@@ -110,22 +112,21 @@ public final class WorldMethods {
 	 * @return the target location
 	 */
 	public static Location getTarget(World world, Ray ray, Set<Material> ignored) {
-		Location location = ray.origin.toLocation(world);
-		Vector direction = ray.direction.toVector().normalize();
+		Vector3 direction = ray.direction.normalize();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
-			location.add(direction);
-			Block center = location.getBlock();
+			Vector3 location = ray.origin.add(direction.scalarMultiply(i));
+			Block center = location.toBlock(world);
 			List<Block> blocks = Stream.concat(Stream.of(center), BlockMethods.CARDINAL_FACES.stream()
 				.map(center::getRelative)).collect(Collectors.toList()); // Construct stream with center and neighbouring blocks
 			for (Block block : blocks) {
 				if (ignored.contains(block.getType())) continue;
 				AABB blockBounds = AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
-					return location;
+					return location.toLocation(world);
 				}
 			}
 		}
-		return location;
+		return ray.origin.add(ray.direction).toLocation(world);
 	}
 
 	/**
@@ -146,7 +147,7 @@ public final class WorldMethods {
 				return closestBlock;
 			}
 		}
-		return world.getBlockAt(ray.origin.toLocation(world));
+		return ray.origin.add(ray.direction).toBlock(world);
 	}
 
 	/**
@@ -188,11 +189,11 @@ public final class WorldMethods {
 	 */
 	public static boolean isOnGround(Entity entity) {
 		final double epsilon = 0.01;
-		Location location = entity.getLocation().subtract(0, epsilon, 0);
-		AABB entityBounds = AABBUtils.getEntityBounds(entity).at(new Vector3(location));
+		Vector3 location = new Vector3(entity.getLocation().subtract(0, epsilon, 0));
+		AABB entityBounds = AABBUtils.getEntityBounds(entity).at(location);
 		for (int x = -1; x <= 1; ++x) {
 			for (int z = -1; z <= 1; ++z) {
-				Block checkBlock = location.clone().add(x, -epsilon, z).getBlock();
+				Block checkBlock = location.add(new Vector3(x, -epsilon, z)).toBlock(entity.getWorld());
 				if (checkBlock.isPassable() || MaterialUtil.isAir(checkBlock.getType())) continue;
 				AABB checkBounds = AABBUtils.getBlockBounds(checkBlock).at(new Vector3(checkBlock));
 				if (checkBlock.isPassable()) return false;
@@ -213,20 +214,14 @@ public final class WorldMethods {
 	 * @return the distance in blocks between the entity and ground or 256 (max range).
 	 */
 	public static double distanceAboveGround(Entity entity, Set<Material> groundMaterials) {
-		Vector3 direction = Vector3.MINUS_J;
-		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), direction.toVector(), 0, 256);
-		AABB entityBounds = AABBUtils.getEntityBounds(entity);
-		AABB checkBounds;
+		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
+		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 256, 0));
 		while (it.hasNext()) {
 			Block block = it.next();
-			entityBounds.min().add(direction);
-			if (groundMaterials.contains(block.getType())) {
-				checkBounds = AABB.BLOCK_BOUNDS;
-			} else {
-				checkBounds = AABBUtils.getBlockBounds(block);
-			}
+			if (block.getY() <= 0) break;
+			AABB checkBounds = groundMaterials.contains(block.getType()) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
 			if (checkBounds.intersects(entityBounds)) {
-				return entity.getLocation().distance(block.getLocation());
+				return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
 			}
 		}
 		return 256;

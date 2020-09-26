@@ -35,6 +35,8 @@ import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
@@ -59,7 +61,9 @@ public class FireShield implements Ability {
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
+
 	private Shield shield;
+
 	private long nextRenderTime;
 
 	@Override
@@ -71,15 +75,24 @@ public class FireShield implements Ability {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+		removalPolicy = CompositeRemovalPolicy.defaults()
+			.add(new SwappedSlotsRemovalPolicy(getDescription()))
+			.build();
 
+		long duration;
 		if (method == ActivationMethod.PUNCH) {
 			shield = new DiskShield();
+			duration = userConfig.shieldDuration;
 			user.setCooldown(this, userConfig.cooldown);
 		} else {
 			shield = new SphereShield();
+			duration = userConfig.diskDuration;
+			removalPolicy.add(Policies.NOT_SNEAKING);
 		}
 
+		if (duration > 0) {
+			removalPolicy.add(new ExpireRemovalPolicy(duration));
+		}
 		return true;
 	}
 
@@ -90,7 +103,7 @@ public class FireShield implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -104,7 +117,8 @@ public class FireShield implements Ability {
 			return false;
 		}, true);
 
-		return shield.update();
+		shield.update();
+		return UpdateResult.CONTINUE;
 	}
 
 	@Override
@@ -134,7 +148,7 @@ public class FireShield implements Ability {
 	}
 
 	private interface Shield {
-		UpdateResult update();
+		void update();
 
 		void render();
 
@@ -144,15 +158,13 @@ public class FireShield implements Ability {
 	private class DiskShield implements Shield {
 		private Disk disk;
 		private Vector3 location;
-		private final long endTime;
 
 		private DiskShield() {
-			endTime = System.currentTimeMillis() + userConfig.diskDuration;
 			update();
 		}
 
 		@Override
-		public UpdateResult update() {
+		public void update() {
 			location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.diskRange));
 			double r = userConfig.diskRadius;
 			AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
@@ -160,7 +172,6 @@ public class FireShield implements Ability {
 			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getEntity().getLocation().getYaw()), RotationConvention.VECTOR_OPERATOR);
 			rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getEntity().getLocation().getPitch()), RotationConvention.VECTOR_OPERATOR));
 			disk = new Disk(new OBB(aabb, rotation).addPosition(location), new Sphere(location, userConfig.diskRadius));
-			return System.currentTimeMillis() >= endTime ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 		}
 
 		@Override
@@ -196,9 +207,8 @@ public class FireShield implements Ability {
 		}
 
 		@Override
-		public UpdateResult update() {
+		public void update() {
 			sphere = new Sphere(user.getEyeLocation(), userConfig.shieldRadius);
-			return user.isSneaking() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 		}
 
 		@Override
@@ -227,6 +237,8 @@ public class FireShield implements Ability {
 
 		@Attribute(Attributes.RADIUS)
 		public double shieldRadius;
+		@Attribute(Attributes.DURATION)
+		public long shieldDuration;
 
 		@Override
 		public void onConfigReload() {
@@ -240,6 +252,7 @@ public class FireShield implements Ability {
 			diskRange = abilityNode.getNode("disk", "range").getDouble(1.5);
 
 			shieldRadius = abilityNode.getNode("shield", "radius").getDouble(3.0);
+			shieldDuration = abilityNode.getNode("shield", "duration").getLong(0);
 		}
 	}
 }

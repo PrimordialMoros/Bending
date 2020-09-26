@@ -30,7 +30,7 @@ public class ExpireRemovalPolicy implements RemovalPolicy {
 	}
 
 	@Override
-	public boolean shouldRemove(User user, AbilityDescription desc) {
+	public boolean test(User user, AbilityDescription desc) {
 		return System.currentTimeMillis() >= expireTime;
 	}
 }

@@ -26,7 +26,8 @@ public enum Policies implements RemovalPolicy {
 	DEAD((u, d) -> u.isDead()),
 	OFFLINE((u, d) -> !u.isValid()),
 	SNEAKING((u, d) -> u.isSneaking()),
-	NOT_SNEAKING((u, d) -> !u.isSneaking());
+	NOT_SNEAKING((u, d) -> !u.isSneaking()),
+	IN_LIQUID((u, d) -> u.getHeadBlock().isLiquid() || u.getLocBlock().isLiquid());
 
 	private final RemovalPolicy policy;
 
@@ -35,8 +36,8 @@ public enum Policies implements RemovalPolicy {
 	}
 
 	@Override
-	public boolean shouldRemove(User user, AbilityDescription desc) {
-		return policy.shouldRemove(user, desc);
+	public boolean test(User user, AbilityDescription desc) {
+		return policy.test(user, desc);
 	}
 }
 

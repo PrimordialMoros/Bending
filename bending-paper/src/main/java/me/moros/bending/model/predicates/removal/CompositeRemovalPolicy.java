@@ -35,8 +35,8 @@ public class CompositeRemovalPolicy implements RemovalPolicy {
 	}
 
 	@Override
-	public boolean shouldRemove(User user, AbilityDescription desc) {
-		return policies.stream().anyMatch(p -> p.shouldRemove(user, desc));
+	public boolean test(User user, AbilityDescription desc) {
+		return policies.stream().anyMatch(p -> p.test(user, desc));
 	}
 
 	public boolean add(RemovalPolicy policy) {

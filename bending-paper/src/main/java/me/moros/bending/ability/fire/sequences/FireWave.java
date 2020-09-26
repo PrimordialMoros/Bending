@@ -51,8 +51,10 @@ public class FireWave implements Ability {
 
 	private User user;
 	private Config userConfig;
+
 	private final Queue<WallInfo> walls = new ArrayDeque<>();
 	private FireWall wall;
+
 	private long nextTime;
 
 	@Override
@@ -70,7 +72,7 @@ public class FireWave implements Ability {
 		double hh = wall.getHeight() / 2.0;
 		for (double i = 0.5; i <= 2*userConfig.steps; i += 0.5) {
 			Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
-			if (!Game.getProtectionSystem().canBuild(user, currentPosition.toLocation(user.getWorld()).getBlock())) {
+			if (!Game.getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
 				break;
 			}
 			hh += 0.2;

@@ -49,6 +49,7 @@ public class Blaze implements Ability {
 
 	private User user;
 	private Config userConfig;
+
 	private final List<FireStream> streams = new ArrayList<>();
 
 	@Override
@@ -56,7 +57,7 @@ public class Blaze implements Ability {
 		this.user = user;
 		recalculateConfig();
 		Vector3 loc = user.getLocation();
-		if (!Game.getProtectionSystem().canBuild(user, loc.toLocation(user.getWorld()).getBlock())) {
+		if (!Game.getProtectionSystem().canBuild(user, loc.toBlock(user.getWorld()))) {
 			return false;
 		}
 
@@ -123,7 +124,7 @@ public class Blaze implements Ability {
 			}
 
 			location = location.add(direction);
-			Block block = location.toLocation(user.getWorld()).getBlock();
+			Block block = location.toBlock(user.getWorld());
 			if (!MaterialUtil.isIgnitable(block)) {
 				if (MaterialUtil.isIgnitable(block.getRelative(BlockFace.UP))) {
 					location.add(Vector3.PLUS_J);

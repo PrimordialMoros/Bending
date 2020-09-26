@@ -33,17 +33,12 @@ public final class DummyCollider extends AABB {
 	}
 
 	@Override
-	public AABB grow(double x, double y, double z) {
+	public AABB grow(Vector3 diff) {
 		return this;
 	}
 
 	@Override
-	public AABB scale(double x, double y, double z) {
-		return this;
-	}
-
-	@Override
-	public AABB scale(double amount) {
+	public AABB scale(Vector3 diff) {
 		return this;
 	}
 

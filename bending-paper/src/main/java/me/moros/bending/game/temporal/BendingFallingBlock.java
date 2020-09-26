@@ -31,29 +31,22 @@ import java.util.Optional;
 public class BendingFallingBlock implements Temporary {
 	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
 	private final FallingBlock fallingBlock;
-
 	private RevertTask revertTask;
 	private long revertTime;
 
 	public static void init() {
 	}
 
-	private BendingFallingBlock(Location location, BlockData data, Vector velocity, boolean gravity) {
+	public BendingFallingBlock(Location location, BlockData data, Vector velocity, boolean gravity, long duration) {
 		fallingBlock = location.getWorld().spawnFallingBlock(location, data);
 		fallingBlock.setVelocity(velocity);
 		fallingBlock.setGravity(gravity);
 		fallingBlock.setDropItem(false);
-		manager.addEntry(fallingBlock, this);
+		manager.addEntry(fallingBlock, this, duration);
 	}
 
 	public BendingFallingBlock(Location location, BlockData data, long duration) {
 		this(location, data, new Vector(), false, duration);
-	}
-
-	public BendingFallingBlock(Location location, BlockData data, Vector velocity, boolean gravity, long duration) {
-		this(location, data, velocity, gravity);
-		revertTime = System.currentTimeMillis() + duration;
-		manager.enqueue(this);
 	}
 
 	@Override

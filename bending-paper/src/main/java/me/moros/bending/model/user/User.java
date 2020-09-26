@@ -139,6 +139,10 @@ public interface User {
 		return getEntity().getEyeLocation().getBlock();
 	}
 
+	default Block getLocBlock() {
+		return getEntity().getLocation().getBlock();
+	}
+
 	default Vector3 getLocation() {
 		return new Vector3(getEntity().getLocation());
 	}

@@ -22,11 +22,11 @@ package me.moros.bending.model.temporal;
 import java.util.Optional;
 
 public interface Temporary {
+	void revert();
+
 	long getRevertTime();
 
 	void setRevertTime(long revertTime);
-
-	void revert();
 
 	Optional<RevertTask> getRevertTask();
 

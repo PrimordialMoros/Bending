@@ -13,6 +13,7 @@ Please provide any information necessary to recreate the bug you are experiencin
 You can create suggestions in [issues](https://github.com/PrimordialMoros/Bending/issues)
 
 ## Code Contributions
+
 ### Pull Requests
 
 Please fork this repository and contribute back using [pull requests](https://github.com/PrimordialMoros/Bending/pulls).
@@ -23,11 +24,14 @@ Please fork this repository and contribute back using [pull requests](https://gi
 - Uses a mixture of FP (recommended where possible as it makes code more concise and readable) and classic OOP as appropriate
 - If in doubt, try to emulate the surrounding code's style
 
-### Project Layout
+## Project Layout
+
 The project currently has a single module but it may be split into sub-modules (API and Implementation) in the future.
 
 `me.moros.bending` is the top level package.
-#### Sub-packages
+
+### Sub-packages
+
 - `ability` - Contains all ability implementations
 - `command` - Contains all plugin commands, this project uses [ACF](https://github.com/aikar/commands)
 - `game` - Contains all data and controllers for the main logic of the game

@@ -58,11 +58,13 @@ public class FireWall implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private OBB collider;
-	private List<Block> blocks;
-	private long nextRenderTime;
-	private boolean applyDamage;
 	private CompositeRemovalPolicy removalPolicy;
+
+	private List<Block> blocks;
+	private OBB collider;
+
+	private boolean applyDamage;
+	private long nextRenderTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -82,7 +84,7 @@ public class FireWall implements Ability {
 		AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
 		Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
 		Vector3 location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.range));
-		if (!Game.getProtectionSystem().canBuild(user, location.toLocation(user.getWorld()).getBlock())) {
+		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
 			return false;
 		}
 
@@ -105,7 +107,7 @@ public class FireWall implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (removalPolicy.shouldRemove(user, getDescription())) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		long time = System.currentTimeMillis();

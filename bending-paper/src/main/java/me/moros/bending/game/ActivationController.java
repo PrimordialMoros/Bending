@@ -69,12 +69,11 @@ public final class ActivationController {
 				return;
 			}
 		}
-
-        /*if (Game.getAbilityInstanceManager().destroyInstanceType(user, AirScooter.class)) {
-            if (user.getSelectedAbility().orElse(null) == Game.getAbilityRegistry().getAbilityByName("AirScooter")) {
-                return;
-            }
-        }*/
+		if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class)) {
+			if (desc != null && desc.getName().equalsIgnoreCase("AirScooter")) {
+				return;
+			}
+		}
 
 		Combustion.explode(user);
 		FireBurst.activateCone(user);
@@ -93,7 +92,7 @@ public final class ActivationController {
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
 		Game.getSequenceManager().registerAction(user, action);
 		activateAbility(user, action);
-		//Game.getAbilityInstanceManager().destroyInstanceType(user, AirScooter.class);
+		Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
 	}
 
 	public void onUserMove(User user, Vector velocity) {

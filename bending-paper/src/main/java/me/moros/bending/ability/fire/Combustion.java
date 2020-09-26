@@ -36,6 +36,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -67,12 +68,13 @@ public class Combustion implements Ability, Explosive {
 
 	private User user;
 	private Config userConfig;
-	private Vector3 location;
 	private CompositeRemovalPolicy removalPolicy;
+
+	private Vector3 location;
 	private Sphere collider;
+
 	private boolean hasExploded;
 	private double distanceTravelled;
-
 	private double randomBeamDistance;
 
 	@Override
@@ -80,7 +82,7 @@ public class Combustion implements Ability, Explosive {
 		this.user = user;
 		recalculateConfig();
 
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || Game.getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
 			return false;
 		}
 		location = user.getEyeLocation();
@@ -98,7 +100,7 @@ public class Combustion implements Ability, Explosive {
 
 	@Override
 	public UpdateResult update() {
-		if (hasExploded || removalPolicy.shouldRemove(user, getDescription())) {
+		if (hasExploded || removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -138,7 +140,7 @@ public class Combustion implements Ability, Explosive {
 					SoundUtil.COMBUSTION_SOUND.play(bukkitLocation);
 				}
 				if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
-					createExplosion(bukkitLocation, userConfig.power, userConfig.damage);
+					createExplosion(new Vector3(bukkitLocation), userConfig.power, userConfig.damage);
 					return false;
 				}
 			}
@@ -169,9 +171,9 @@ public class Combustion implements Ability, Explosive {
 	@Override
 	public void handleCollision(Collision collision) {
 		if (collision.getSecondAbility() instanceof Combustion) {
-			createExplosion(location.toLocation(user.getWorld()), userConfig.power * 2, userConfig.damage * 2);
+			createExplosion(location, userConfig.power * 2, userConfig.damage * 2);
 		} else if (collision.getSecondAbility() instanceof Explosive || collision.getSecondAbility().getDescription().getElement() == Element.EARTH) {
-			createExplosion(location.toLocation(user.getWorld()), userConfig.power, userConfig.damage);
+			createExplosion(location, userConfig.power, userConfig.damage);
 		}
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
@@ -183,33 +185,34 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	public void explode() {
-		createExplosion(location.toLocation(user.getWorld()), userConfig.power, userConfig.damage);
+		createExplosion(location, userConfig.power, userConfig.damage);
 	}
 
-	private void createExplosion(Location center, double size, double damage) {
+	private void createExplosion(Vector3 center, double size, double damage) {
 		if(hasExploded) return;
 		hasExploded = true;
+		Location loc = center.toLocation(user.getWorld());
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
-		ParticleUtil.create(Particle.FLAME, center, userConfig.particleRange).extra(0.5).count(20)
+		ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.5).count(20)
 			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
-		ParticleUtil.create(Particle.SMOKE_LARGE, center, userConfig.particleRange).extra(0.5).count(20)
+		ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.5).count(20)
 			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
-		ParticleUtil.create(Particle.FIREWORKS_SPARK, center, userConfig.particleRange).extra(0.5).count(20)
+		ParticleUtil.create(Particle.FIREWORKS_SPARK, loc, userConfig.particleRange).extra(0.5).count(20)
 			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
-		ParticleUtil.create(Particle.EXPLOSION_HUGE, center, userConfig.particleRange).extra(0.5).count(5)
+		ParticleUtil.create(Particle.EXPLOSION_HUGE, loc, userConfig.particleRange).extra(0.5).count(5)
 			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
-		SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE);
+		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE);
 
-		Sphere collider = new Sphere(new Vector3(center), size);
+		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
 			DamageUtil.damageEntity(entity, user, damage, getDescription());
 			FireTick.LARGER.apply(entity, userConfig.fireTick);
 			return true;
 		}, true, true);
 
-		if (userConfig.damageBlocks && !center.getBlock().isLiquid()) {
+		if (userConfig.damageBlocks && !loc.getBlock().isLiquid()) {
 			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-			for (Block block : WorldMethods.getNearbyBlocks(center, size, predicate)) {
+			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
 				if (!Game.getProtectionSystem().canBuild(user, block)) break;
 				boolean canIgnite = block.getRelative(BlockFace.DOWN).getType().isSolid();
 				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && canIgnite) ? Material.FIRE : Material.AIR;

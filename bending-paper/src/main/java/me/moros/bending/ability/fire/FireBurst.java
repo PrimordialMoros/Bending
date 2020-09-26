@@ -37,8 +37,9 @@ public class FireBurst extends BurstAbility {
 
 	private User user;
 	private Config userConfig;
-	private long startTime;
+
 	private boolean released;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {

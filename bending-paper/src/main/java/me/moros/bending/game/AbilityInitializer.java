@@ -70,6 +70,9 @@ public final class AbilityInitializer {
 		air.add(AbilityDescription.builder("AirShield", AirShield.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
 
+		air.add(AbilityDescription.builder("AirScooter", AirScooter.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
+
 		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
 		fire.add(fireBlast);
@@ -179,13 +182,7 @@ public final class AbilityInitializer {
 	    registerAbility("Lightning", Lightning.class, Element.FIRE, ActivationMethod.Sneak);
 
 
-        registerAbility("AirScooter", AirScooter.class, Element.AIR, ActivationMethod.Punch).setHarmless(true);
-        AbilityDescription airBlast = registerAbility("AirBlast", AirBlast.class, Element.AIR, ActivationMethod.Punch, ActivationMethod.Sneak);
-        AbilityDescription airShield = registerAbility("AirShield", AirShield.class, Element.AIR, ActivationMethod.Sneak);
         registerAbility("AirSpout", AirSpout.class, Element.AIR, ActivationMethod.Punch).setHarmless(true);
-        AbilityDescription airBurst = registerAbility("AirBurst", AirBurst.class, Element.AIR, ActivationMethod.Sneak, ActivationMethod.Fall);
-        AbilityDescription tornado = registerAbility("Tornado", Tornado.class, Element.AIR, ActivationMethod.Sneak);
-        AbilityDescription airSuction = registerAbility("AirSuction", AirSuction.class, Element.AIR, ActivationMethod.Punch, ActivationMethod.Sneak);
         registerAbility("Suffocate", Suffocate.class, Element.AIR, ActivationMethod.Sneak);
         AbilityDescription airSweep = registerAbility("AirSweep", AirSweep.class, Element.AIR, ActivationMethod.Sequence);
         AbilityDescription twister = registerAbility("Twister", Twister.class, Element.AIR, ActivationMethod.Sequence);

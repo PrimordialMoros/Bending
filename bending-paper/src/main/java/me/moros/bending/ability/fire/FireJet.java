@@ -28,6 +28,9 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
@@ -42,10 +45,13 @@ public class FireJet implements Ability {
 
 	private User user;
 	private Config userConfig;
+	private CompositeRemovalPolicy removalPolicy;
+
 	private Flight flight;
-	private long startTime;
+
 	private double speed;
 	private long duration;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -53,7 +59,7 @@ public class FireJet implements Ability {
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
 
-		Block block = user.getLocation().toLocation(user.getWorld()).getBlock();
+		Block block = user.getLocation().toBlock(user.getWorld());
 
 		boolean ignitable = MaterialUtil.isIgnitable(block);
 		if (!ignitable && !MaterialUtil.isAir(block.getType())) {
@@ -70,6 +76,12 @@ public class FireJet implements Ability {
 		flight = Flight.get(user);
 		user.setCooldown(this, userConfig.cooldown);
 		if (ignitable) TempBlock.create(block, Material.FIRE, 3000);
+
+		removalPolicy = CompositeRemovalPolicy.builder()
+			.add(Policies.IN_LIQUID)
+			.add(new ExpireRemovalPolicy(userConfig.duration))
+			.build();
+
 		return true;
 	}
 
@@ -80,18 +92,11 @@ public class FireJet implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		long time = System.currentTimeMillis();
-
-		if (System.currentTimeMillis() > startTime + duration) {
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-
-		if (user.getLocation().toLocation(user.getWorld()).getBlock().isLiquid()) {
-			return UpdateResult.REMOVE;
-		}
-
 		// scale down to 0.5 speed near the end
-		double factor = 1 - ((time - startTime) / (2.0 * duration));
+		double factor = 1 - ((System.currentTimeMillis() - startTime) / (2.0 * duration));
 
 		user.getEntity().setVelocity(user.getDirection().scalarMultiply(speed * factor).toVector());
 		user.getEntity().setFallDistance(0);
