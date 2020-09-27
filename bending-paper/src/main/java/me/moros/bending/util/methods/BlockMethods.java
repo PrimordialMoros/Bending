@@ -34,7 +34,10 @@ import org.bukkit.block.data.Lightable;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility class with useful {@link Block} related methods. Note: This is not thread-safe.
@@ -67,9 +70,9 @@ public final class BlockMethods {
 
 	/**
 	 * Attempts to extinguish nearby blocks. Fire will be put out while Lava will be turned to Obsidian or Cobblestone.
-	 * @param user the user trying to extinguish the block.
+	 * @param user the user trying to extinguish the block
 	 * @param center the location to check
-	 * @return true if Lava was cooled down, false otherwise.
+	 * @return true if Lava was cooled down, false otherwise
 	 */
 	public static boolean extinguish(User user, Location center) {
 		Block block = center.getBlock();
@@ -85,5 +88,24 @@ public final class BlockMethods {
 			result = true;
 		}
 		return result;
+	}
+
+	/**
+	 * @return {@link #combineFaces(Block, Set)} with {@link #MAIN_FACES} as the provided set
+	 */
+	public static List<Block> combineFaces(Block center) {
+		return combineFaces(center, MAIN_FACES);
+	}
+
+	/**
+	 * Creates a list of the center block and all surrounding blocks that share a {@link BlockFace}.
+	 * @param center the center block
+	 * @param faces a set containing various block faces to check
+	 * @return the combined list of blocks
+	 * @see #MAIN_FACES
+	 * @see #CARDINAL_FACES
+	 */
+	public static List<Block> combineFaces(Block center, Set<BlockFace> faces) {
+		return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
 	}
 }

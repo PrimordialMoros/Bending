@@ -23,6 +23,7 @@ import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
+import me.moros.bending.ability.water.*;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -96,8 +97,12 @@ public final class ActivationController {
 	}
 
 	public void onUserMove(User user, Vector velocity) {
-		//AirSpout.handleMovement(user, velocity);
-		//WaterSpout.handleMovement(user, velocity);
+		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirSpout.class).ifPresent(spout ->
+			spout.handleMovement(velocity.setY(0))
+		);
+		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterSpout.class).ifPresent(spout ->
+			spout.handleMovement(velocity.setY(0))
+		);
 	}
 
 	public boolean onFallDamage(User user) {

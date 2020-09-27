@@ -123,9 +123,7 @@ public class AirBlast implements Ability, Burstable {
 			if (!getDescription().equals(user.getSelectedAbility().orElse(null))) {
 				return UpdateResult.REMOVE;
 			}
-			ParticleUtil.createAir(origin.toLocation(user.getWorld())).count(4)
-				.offset(ThreadLocalRandom.current().nextDouble(), ThreadLocalRandom.current().nextDouble(), ThreadLocalRandom.current().nextDouble())
-				.spawn();
+			ParticleUtil.createAir(origin.toLocation(user.getWorld())).count(4).offset(0.5, 0.5, 0.5).spawn();
 		}
 
 		return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;

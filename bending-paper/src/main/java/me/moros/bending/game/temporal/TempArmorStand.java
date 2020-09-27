@@ -31,7 +31,6 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();
@@ -67,13 +66,8 @@ public class TempArmorStand implements Temporary {
 		if (!particles) return;
 		Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
 		BlockData data = headMaterial.createBlockData();
-		ParticleUtil.create(Particle.BLOCK_CRACK, center)
-			.offset(ThreadLocalRandom.current().nextDouble() / 4, ThreadLocalRandom.current().nextDouble() / 8, ThreadLocalRandom.current().nextDouble() / 4)
-			.count(4).data(data).spawn();
-
-		ParticleUtil.create(Particle.BLOCK_DUST, center)
-			.offset(ThreadLocalRandom.current().nextDouble() / 4, ThreadLocalRandom.current().nextDouble() / 8, ThreadLocalRandom.current().nextDouble() / 4)
-			.count(6).data(data).spawn();
+		ParticleUtil.create(Particle.BLOCK_CRACK, center).offset(0.25, 0.125, 0.25).count(4).data(data).spawn();
+		ParticleUtil.create(Particle.BLOCK_DUST, center).offset(0.25, 0.125, 0.25).count(6).data(data).spawn();
 	}
 
 	public ArmorStand getArmorStand() {

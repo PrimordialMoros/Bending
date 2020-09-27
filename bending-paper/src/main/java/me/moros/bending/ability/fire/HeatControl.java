@@ -28,7 +28,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
@@ -43,8 +42,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.util.NumberConversions;
 
-import java.util.Collections;
 import java.util.function.Predicate;
 
 public class HeatControl implements Ability {
@@ -112,8 +111,8 @@ public class HeatControl implements Ability {
 	}
 
 	private boolean act(double range, double radius, Predicate<Block> predicate) {
-		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(range));
-		Block b = WorldMethods.blockCast(user.getWorld(), ray, Collections.emptySet());
+		Block b = user.getEntity().getTargetBlockExact(NumberConversions.ceil(range));
+		if (b == null) return false;
 		boolean acted = false;
 		for (Block block : WorldMethods.getNearbyBlocks(b.getLocation(), radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;

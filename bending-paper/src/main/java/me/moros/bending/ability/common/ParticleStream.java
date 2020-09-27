@@ -31,7 +31,6 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -39,7 +38,6 @@ import java.util.function.Predicate;
 
 public abstract class ParticleStream {
 	protected final User user;
-	protected final World world;
 	protected final Ray ray;
 
 	protected Predicate<Block> canCollide = b -> false;
@@ -55,7 +53,6 @@ public abstract class ParticleStream {
 
 	public ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
 		this.user = user;
-		this.world = user.getWorld();
 		this.ray = ray;
 
 		this.speed = speed;
@@ -101,7 +98,7 @@ public abstract class ParticleStream {
 	}
 
 	public Location getBukkitLocation() {
-		return location.toLocation(world);
+		return location.toLocation(user.getWorld());
 	}
 
 	public Collider getCollider() {

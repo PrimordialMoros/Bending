@@ -70,7 +70,7 @@ public class FireWave implements Ability {
 		double yaw = user.getEntity().getLocation().getYaw();
 		double hw = wall.getWidth() / 2.0;
 		double hh = wall.getHeight() / 2.0;
-		for (double i = 0.5; i <= 2*userConfig.steps; i += 0.5) {
+		for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {
 			Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
 			if (!Game.getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
 				break;

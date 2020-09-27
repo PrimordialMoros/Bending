@@ -118,12 +118,12 @@ public class Combustion implements Ability, Explosive {
 		if (distanceTravelled >= randomBeamDistance) {
 			SoundUtil.playSound(bukkitLocation, SoundUtil.COMBUSTION_SOUND.getSound(), 1.5F, 0);
 			randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
-			int radius = ThreadLocalRandom.current().nextInt(5, 11);
-			Rotation rotation = new Rotation(user.getDirection(), FastMath.PI / 15, RotationConvention.VECTOR_OPERATOR);
-			VectorMethods.rotate(Vector3.ONE.scalarMultiply(0.2), rotation, 30).forEach(v -> {
+			double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
+			Rotation rotation = new Rotation(user.getDirection(), FastMath.PI / 10, RotationConvention.VECTOR_OPERATOR);
+			VectorMethods.rotate(Vector3.ONE, rotation, 20).forEach(v -> {
 				Vector3 velocity = v.scalarMultiply(radius);
-				ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation.clone().add(v.toVector()), userConfig.particleRange)
-					.count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.12).spawn();
+				ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation.clone().add(v.scalarMultiply(0.2).toVector()), userConfig.particleRange)
+					.count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
 			});
 		}
 		for (int i = 0; i < 5; i++) {
@@ -189,18 +189,17 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	private void createExplosion(Vector3 center, double size, double damage) {
-		if(hasExploded) return;
+		if (hasExploded) return;
 		hasExploded = true;
 		Location loc = center.toLocation(user.getWorld());
-		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.5).count(20)
-			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
+			.offset(1, 1, 1).spawn();
 		ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.5).count(20)
-			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
+			.offset(1, 1, 1).spawn();
 		ParticleUtil.create(Particle.FIREWORKS_SPARK, loc, userConfig.particleRange).extra(0.5).count(20)
-			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
+			.offset(1, 1, 1).spawn();
 		ParticleUtil.create(Particle.EXPLOSION_HUGE, loc, userConfig.particleRange).extra(0.5).count(5)
-			.offset(rand.nextDouble(), rand.nextDouble(), rand.nextDouble()).spawn();
+			.offset(1, 1, 1).spawn();
 		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE);
 
 		Sphere collider = new Sphere(center, size);

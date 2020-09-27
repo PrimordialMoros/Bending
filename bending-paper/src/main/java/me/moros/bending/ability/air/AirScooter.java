@@ -37,6 +37,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
@@ -45,18 +46,11 @@ import org.bukkit.block.Block;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 //TODO cleanup
 public class AirScooter implements Ability {
 	private static final Config config = new Config();
-
-	private static final Vector3[] DIRECTIONS = {
-		Vector3.ZERO, Vector3.PLUS_I, Vector3.MINUS_I, Vector3.PLUS_J, Vector3.MINUS_J, Vector3.PLUS_K, Vector3.MINUS_K
-	};
-	private static final Set<Material> groundMaterials = EnumSet.of(Material.WATER, Material.LAVA);
 
 	private User user;
 	private Config userConfig;
@@ -77,7 +71,7 @@ public class AirScooter implements Ability {
 		recalculateConfig();
 		heightSmoother = new HeightSmoother();
 
-		double dist = WorldMethods.distanceAboveGround(user.getEntity(), groundMaterials);
+		double dist = WorldMethods.distanceAboveGround(user.getEntity());
 		// Only activate AirScooter if the player is in the air and near the ground.
 		if ((dist < 0.5 || dist > 5) && !user.getLocation().toBlock(user.getWorld()).isLiquid()) {
 			return false;
@@ -165,7 +159,7 @@ public class AirScooter implements Ability {
 	private boolean move() {
 		Vector3 direction = user.getDirection().setY(0).normalize();
 		// How far the player is above the ground.
-		double height = WorldMethods.distanceAboveGround(user.getEntity(), groundMaterials);
+		double height = WorldMethods.distanceAboveGround(user.getEntity());
 		double maxHeight = 3.25;
 		double smoothedHeight = heightSmoother.add(height);
 		if (user.getLocation().toBlock(user.getWorld()).isLiquid()) {
@@ -208,8 +202,7 @@ public class AirScooter implements Ability {
 		Vector3 location = user.getLocation().add(currentDirection.scalarMultiply(s));
 		AABB playerBounds = AABBUtils.getEntityBounds(user.getEntity());
 		// Project the player forward and check all surrounding blocks for collision.
-		for (Vector3 direction : DIRECTIONS) {
-			Block block = location.add(direction).toBlock(user.getWorld());
+		for (Block block : BlockMethods.combineFaces(location.toBlock(user.getWorld()))) {
 			if (AABBUtils.getBlockBounds(block).intersects(playerBounds)) {
 				// Player will collide with a block soon, so try to raise the player over it.
 				return 2.25;

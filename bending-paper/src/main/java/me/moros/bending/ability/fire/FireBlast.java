@@ -53,6 +53,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -185,14 +186,16 @@ public class FireBlast implements Ability, Burstable {
 	}
 
 	private class FireStream extends ParticleStream {
-		private long nextRenderTime;
 		private final double displayRadius;
+		private final double range;
+		private long nextRenderTime;
 
 		public FireStream(User user, Ray ray, double collisionRadius) {
 			super(user, ray, userConfig.speed * factor, collisionRadius);
 			livingOnly = true;
 			displayRadius = FastMath.max(collisionRadius - 1, 1);
 			canCollide = Block::isLiquid;
+			range = ray.direction.getNorm();
 		}
 
 		@Override
@@ -239,12 +242,14 @@ public class FireBlast implements Ability, Burstable {
 			Vector reverse = ray.direction.scalarMultiply(-1).toVector();
 			double rayRange = userConfig.igniteRadius * factor + 2;
 			if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
+				List<Block> blocks = new ArrayList<>();
 				for (Block b : WorldMethods.getNearbyBlocks(getBukkitLocation(), userConfig.igniteRadius * factor)) {
 					if (!Game.getProtectionSystem().canBuild(user, b)) continue;
 					if (WorldMethods.rayTraceBlocks(b.getLocation(), reverse, rayRange).isPresent()) continue;
 					BlockMethods.lightBlock(b);
-					if (MaterialUtil.isIgnitable(b)) TempBlock.create(b, Material.FIRE, 10000);
+					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
+				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, 10000));
 			}
 			return true;
 		}

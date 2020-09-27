@@ -23,10 +23,10 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -39,12 +39,11 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
@@ -116,9 +115,7 @@ public final class WorldMethods {
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
 			Vector3 location = ray.origin.add(direction.scalarMultiply(i));
 			Block center = location.toBlock(world);
-			List<Block> blocks = Stream.concat(Stream.of(center), BlockMethods.CARDINAL_FACES.stream()
-				.map(center::getRelative)).collect(Collectors.toList()); // Construct stream with center and neighbouring blocks
-			for (Block block : blocks) {
+			for (Block block : BlockMethods.combineFaces(center)) {
 				if (ignored.contains(block.getType())) continue;
 				AABB blockBounds = AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
@@ -130,31 +127,37 @@ public final class WorldMethods {
 	}
 
 	/**
-	 * Gets the first targeted block of specific material using a {@link BlockIterator}.
-	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
-	 * <p> Note 2: This method does not check for region protections. Use {@link SourceUtil#getSource(User, int, Set)} instead.
+	 * @see #blockCast(World, Ray, double, Set)
+	 */
+	public static Optional<Block> blockCast(World world, Ray ray, double range) {
+		return blockCast(world, ray, range, Collections.emptySet());
+	}
+
+	/**
+	 * Ray trace blocks using a {@link BlockIterator}.
+	 * <p> Note: Passable blocks except liquids are automatically ignored.
 	 * @param world the world to check in
 	 * @param ray the ray which holds the origin and direction
-	 * @param solids the set of materials that we are interested in
-	 * @return the target block or the last block in the iterator if no block satisfied the material check
+	 * @param ignore the set of blocks that will be ignored, passable block types are also ignored.
+	 * @return Optional of the result block
 	 */
-	public static Block blockCast(World world, Ray ray, Set<Material> solids) {
-		int range = NumberConversions.floor(ray.direction.getNorm());
-		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, range);
+	public static Optional<Block> blockCast(World world, Ray ray, double range, Set<Block> ignore) {
+		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, NumberConversions.floor(range));
 		while (it.hasNext()) {
 			Block closestBlock = it.next();
-			if (solids.contains(closestBlock.getType())) {
-				return closestBlock;
+			if (closestBlock.isPassable() && !closestBlock.isLiquid()) continue;
+			if (!ignore.contains(closestBlock)) {
+				return Optional.of(closestBlock);
 			}
 		}
-		return ray.origin.add(ray.direction).toBlock(world);
+		return Optional.empty();
 	}
 
 	/**
 	 * @see World#rayTraceBlocks(Location, Vector, double)
 	 */
 	public static Optional<Block> rayTraceBlocks(Location location, Vector direction, double range) {
-		RayTraceResult result = location.getWorld().rayTraceBlocks(location, direction, range);
+		RayTraceResult result = location.getWorld().rayTraceBlocks(location, direction, range, FluidCollisionMode.ALWAYS, false);
 		if (result != null && result.getHitBlock() != null) return Optional.of(result.getHitBlock());
 		return Optional.empty();
 	}
@@ -208,18 +211,17 @@ public final class WorldMethods {
 	/**
 	 * Calculates the distance between an entity and the ground using {@link AABB}.
 	 * Uses a {@link BlockIterator} with a max range of 256 blocks.
-	 * By default it ignores all passable materials unless they are overriden in the provided set.
+	 * By default it ignores all passable materials except liquids.
 	 * @param entity the entity to check
-	 * @param groundMaterials the set of materials that are considered ground
 	 * @return the distance in blocks between the entity and ground or 256 (max range).
 	 */
-	public static double distanceAboveGround(Entity entity, Set<Material> groundMaterials) {
+	public static double distanceAboveGround(Entity entity) {
 		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
 		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 256, 0));
 		while (it.hasNext()) {
 			Block block = it.next();
 			if (block.getY() <= 0) break;
-			AABB checkBounds = groundMaterials.contains(block.getType()) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
+			AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
 			if (checkBounds.intersects(entityBounds)) {
 				return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
 			}

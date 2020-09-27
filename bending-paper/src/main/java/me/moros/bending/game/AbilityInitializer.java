@@ -24,6 +24,7 @@ import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
+import me.moros.bending.ability.water.*;
 import me.moros.bending.game.manager.SequenceManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -72,6 +73,12 @@ public final class AbilityInitializer {
 
 		air.add(AbilityDescription.builder("AirScooter", AirScooter.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
+
+		air.add(AbilityDescription.builder("AirSpout", AirSpout.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
+
+		water.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
 		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
@@ -182,7 +189,6 @@ public final class AbilityInitializer {
 	    registerAbility("Lightning", Lightning.class, Element.FIRE, ActivationMethod.Sneak);
 
 
-        registerAbility("AirSpout", AirSpout.class, Element.AIR, ActivationMethod.Punch).setHarmless(true);
         registerAbility("Suffocate", Suffocate.class, Element.AIR, ActivationMethod.Sneak);
         AbilityDescription airSweep = registerAbility("AirSweep", AirSweep.class, Element.AIR, ActivationMethod.Sequence);
         AbilityDescription twister = registerAbility("Twister", Twister.class, Element.AIR, ActivationMethod.Sequence);

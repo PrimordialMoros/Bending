@@ -41,11 +41,8 @@ public final class TemporalManager<K, V extends Temporary> {
 		return Optional.ofNullable(instances.get(key));
 	}
 
-	public void addEntry(K key, V value) {
-		instances.put(key, value, ExpirationPolicy.CREATED, 15, TimeUnit.MINUTES);
-	}
-
 	public void addEntry(K key, V value, long duration) {
+		if (duration == 0) duration = 600_000; // 10 minutes
 		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
 	}
 

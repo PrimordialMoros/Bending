@@ -67,7 +67,7 @@ public class AirShield implements Ability {
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
 			.add(Policies.NOT_SNEAKING)
 			.build();
-		if (userConfig.duration > 0 ) removalPolicy.add(new ExpireRemovalPolicy(userConfig.duration));
+		if (userConfig.duration > 0) removalPolicy.add(new ExpireRemovalPolicy(userConfig.duration));
 		startTime = System.currentTimeMillis();
 		return true;
 	}

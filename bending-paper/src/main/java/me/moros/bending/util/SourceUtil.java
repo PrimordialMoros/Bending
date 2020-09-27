@@ -21,15 +21,17 @@ package me.moros.bending.util;
 
 import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.Game;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
 import java.util.Optional;
 import java.util.Set;
@@ -55,8 +57,12 @@ public final class SourceUtil {
 	 * @param materials a set of valid source materials
 	 * @return an Optional source block
 	 */
-	public static Optional<Block> getSource(User user, int range, Set<Material> materials) {
-		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(range)), materials);
+	public static Optional<Block> getSource(User user, double range, Set<Material> materials) {
+		Location start = user.getEyeLocation().toLocation(user.getWorld());
+		Vector dir = user.getDirection().toVector();
+		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
+		if (result == null || result.getHitBlock() == null) return Optional.empty();
+		Block block = result.getHitBlock();
 		if (!Game.getProtectionSystem().canBuild(user, block) || !materials.contains(block.getType()) || !isBendableTempBlock(block)) {
 			return Optional.empty();
 		}
