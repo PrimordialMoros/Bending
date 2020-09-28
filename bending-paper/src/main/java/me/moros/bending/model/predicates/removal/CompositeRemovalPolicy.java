@@ -39,14 +39,6 @@ public class CompositeRemovalPolicy implements RemovalPolicy {
 		return policies.stream().anyMatch(p -> p.test(user, desc));
 	}
 
-	public boolean add(RemovalPolicy policy) {
-		return policies.add(policy);
-	}
-
-	public boolean remove(RemovalPolicy policy) {
-		return policies.remove(policy);
-	}
-
 	public static CompositePolicyBuilder builder() {
 		return new CompositePolicyBuilder();
 	}

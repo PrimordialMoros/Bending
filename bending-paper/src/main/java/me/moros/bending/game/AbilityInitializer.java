@@ -77,6 +77,9 @@ public final class AbilityInitializer {
 		air.add(AbilityDescription.builder("AirSpout", AirSpout.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
+		air.add(AbilityDescription.builder("AirBlade", AirBlade.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).build());
+
 		water.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 

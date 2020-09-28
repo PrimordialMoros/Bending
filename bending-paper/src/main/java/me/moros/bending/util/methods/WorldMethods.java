@@ -79,12 +79,56 @@ public final class WorldMethods {
 		double originZ = location.getZ();
 		List<Block> blocks = new ArrayList<>();
 		Vector3 pos = new Vector3(location);
-		for (double x = originX - r; x <= originX + r; ++x) {
-			for (double y = originY - r; y <= originY + r; ++y) {
-				for (double z = originZ - r; z <= originZ + r; ++z) {
+		for (double x = originX - r; x <= originX + r; x++) {
+			for (double y = originY - r; y <= originY + r; y++) {
+				for (double z = originZ - r; z <= originZ + r; z++) {
 					Vector3 loc = new Vector3(x, y, z);
 					if (pos.distanceSq(loc) > radius * radius) continue;
 					Block block = loc.toBlock(location.getWorld());
+					if (predicate.test(block)) {
+						blocks.add(block);
+						if (limit > 0 && blocks.size() >= limit) return blocks;
+					}
+				}
+			}
+		}
+		return blocks;
+	}
+
+	/**
+	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
+	 */
+	public static List<Block> getNearbyBlocks(World world, AABB box) {
+		return getNearbyBlocks(world, box, block -> true, 0);
+	}
+
+	/**
+	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
+	 */
+	public static List<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
+		return getNearbyBlocks(world, box, predicate, 0);
+	}
+
+
+	/**
+	 * Collects all blocks inside a bounding box that satisfy the given predicate.
+	 * Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+	 * @param world the world to check
+	 * @param box the bounding box to check
+	 * @param predicate the predicate that needs to be satisfied for every block
+	 * @param limit the amount of blocks to collect
+	 * @return all collected blocks
+	 */
+	public static List<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
+		if (box == AABBUtils.DUMMY_COLLIDER) return Collections.emptyList();
+		Vector3 min = box.min();
+		Vector3 max = box.max();
+		List<Block> blocks = new ArrayList<>();
+		for (double x = min.getX(); x <= max.getX(); x++) {
+			for (double y = min.getY(); y <= max.getY(); y++) {
+				for (double z = min.getZ(); z <= max.getZ(); z++) {
+					Vector3 loc = new Vector3(x, y, z);
+					Block block = loc.toBlock(world);
 					if (predicate.test(block)) {
 						blocks.add(block);
 						if (limit > 0 && blocks.size() >= limit) return blocks;

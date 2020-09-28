@@ -50,15 +50,15 @@ public class AABB implements Collider {
 	}
 
 	public Vector3 min() {
-		return this.min;
+		return min;
 	}
 
 	public Vector3 max() {
-		return this.max;
+		return max;
 	}
 
 	public Vector3 mid() {
-		return this.min.add(this.max().subtract(this.min()).scalarMultiply(0.5));
+		return min.add(max().subtract(min()).scalarMultiply(0.5));
 	}
 
 	public boolean contains(Vector3 test) {
@@ -111,7 +111,7 @@ public class AABB implements Collider {
 	@Override
 	public Vector3 getHalfExtents() {
 		Vector3 half = max.subtract(min).scalarMultiply(0.5);
-		return new Vector3(Math.abs(half.getX()), FastMath.abs(half.getY()), FastMath.abs(half.getZ()));
+		return new Vector3(FastMath.abs(half.getX()), FastMath.abs(half.getY()), FastMath.abs(half.getZ()));
 	}
 
 	@Override

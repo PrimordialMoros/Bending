@@ -24,13 +24,15 @@ import me.moros.bending.model.user.User;
 
 public class ExpireRemovalPolicy implements RemovalPolicy {
 	private final long expireTime;
+	private final boolean valid;
 
 	public ExpireRemovalPolicy(long duration) {
+		valid = duration > 0;
 		expireTime = System.currentTimeMillis() + duration;
 	}
 
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
-		return System.currentTimeMillis() >= expireTime;
+		return valid && System.currentTimeMillis() > expireTime;
 	}
 }

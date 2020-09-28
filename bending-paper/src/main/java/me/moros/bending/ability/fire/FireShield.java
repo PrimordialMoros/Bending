@@ -75,24 +75,18 @@ public class FireShield implements Ability {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults()
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.build();
-
-		long duration;
-		if (method == ActivationMethod.PUNCH) {
-			shield = new DiskShield();
-			duration = userConfig.shieldDuration;
-			user.setCooldown(this, userConfig.cooldown);
-		} else {
+		CompositeRemovalPolicy.CompositePolicyBuilder builder = CompositeRemovalPolicy.defaults()
+			.add(new SwappedSlotsRemovalPolicy(getDescription()));
+		if (method == ActivationMethod.SNEAK) {
 			shield = new SphereShield();
-			duration = userConfig.diskDuration;
-			removalPolicy.add(Policies.NOT_SNEAKING);
+			builder.add(new ExpireRemovalPolicy(userConfig.shieldDuration));
+			builder.add(Policies.NOT_SNEAKING);
+		} else {
+			shield = new DiskShield();
+			builder.add(new ExpireRemovalPolicy(userConfig.diskDuration));
 		}
-
-		if (duration > 0) {
-			removalPolicy.add(new ExpireRemovalPolicy(duration));
-		}
+		removalPolicy = builder.build();
+		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}
 
@@ -235,24 +229,24 @@ public class FireShield implements Ability {
 		@Attribute(Attributes.RANGE)
 		public double diskRange;
 
-		@Attribute(Attributes.RADIUS)
-		public double shieldRadius;
 		@Attribute(Attributes.DURATION)
 		public long shieldDuration;
+		@Attribute(Attributes.RADIUS)
+		public double shieldRadius;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireshield");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(500);
+			cooldown = abilityNode.getNode("cooldown").getLong(2000);
 			fireTicks = abilityNode.getNode("fire-ticks").getInt(40);
 
 			diskDuration = abilityNode.getNode("disk", "duration").getLong(1000);
 			diskRadius = abilityNode.getNode("disk", "radius").getDouble(2.0);
 			diskRange = abilityNode.getNode("disk", "range").getDouble(1.5);
 
-			shieldRadius = abilityNode.getNode("shield", "radius").getDouble(3.0);
 			shieldDuration = abilityNode.getNode("shield", "duration").getLong(0);
+			shieldRadius = abilityNode.getNode("shield", "radius").getDouble(3.0);
 		}
 	}
 }

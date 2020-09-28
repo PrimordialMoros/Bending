@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.fire.sequences;
+package me.moros.bending.ability.air;
 
 import me.moros.bending.ability.common.AbstractWheel;
 import me.moros.bending.config.Configurable;
@@ -48,14 +48,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FireWheel implements Ability {
+public class AirBlade implements Ability {
 	public static Config config = new Config();
 
 	private User user;
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
 
-	private Wheel wheel;
+	private Blade blade;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -67,11 +67,11 @@ public class FireWheel implements Ability {
 		location = location.add(new Vector3(0, userConfig.radius, 0));
 		if (location.toBlock(user.getWorld()).isLiquid()) return false;
 
-		wheel = new Wheel(user, new Ray(location, direction));
-		if (!wheel.resolveMovement(userConfig.radius)) return false;
+		blade = new Blade(user, new Ray(location, direction));
+		if (!blade.resolveMovement(userConfig.radius)) return false;
 
 		removalPolicy = CompositeRemovalPolicy.defaults()
-			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> wheel.getLocation())).build();
+			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> blade.getLocation())).build();
 
 		user.setCooldown(this, userConfig.cooldown);
 		return true;
@@ -87,8 +87,9 @@ public class FireWheel implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		return wheel.update();
+		return blade.update();
 	}
+
 
 	@Override
 	public void destroy() {
@@ -101,12 +102,12 @@ public class FireWheel implements Ability {
 
 	@Override
 	public String getName() {
-		return "FireWheel";
+		return "AirBlade";
 	}
 
 	@Override
 	public List<Collider> getColliders() {
-		return Collections.singletonList(wheel.getCollider());
+		return Collections.singletonList(blade.getCollider());
 	}
 
 	@Override
@@ -116,8 +117,8 @@ public class FireWheel implements Ability {
 		}
 	}
 
-	private class Wheel extends AbstractWheel {
-		public Wheel(User user, Ray ray) {
+	private class Blade extends AbstractWheel {
+		public Blade(User user, Ray ray) {
 			super(user, ray, userConfig.radius, userConfig.speed);
 		}
 
@@ -126,14 +127,14 @@ public class FireWheel implements Ability {
 			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction).normalize();
 			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
 			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 72).forEach(v ->
-				ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).spawn()
+				ParticleUtil.createAir(location.add(v).toLocation(user.getWorld())).spawn()
 			);
 		}
 
 		@Override
 		public void postRender() {
 			if (ThreadLocalRandom.current().nextInt(6) == 0) {
-				SoundUtil.FIRE_SOUND.play(location.toLocation(user.getWorld()));
+				SoundUtil.AIR_SOUND.play(location.toLocation(user.getWorld()));
 			}
 		}
 
@@ -158,15 +159,15 @@ public class FireWheel implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "sequences", "firewheel");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airblade");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			radius = abilityNode.getNode("radius").getDouble(1.0);
-			damage = abilityNode.getNode("damage").getDouble(4.0);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			speed = abilityNode.getNode("speed").getDouble(0.55);
+			cooldown = abilityNode.getNode("cooldown").getLong(4000);
+			radius = abilityNode.getNode("radius").getDouble(1.8);
+			damage = abilityNode.getNode("damage").getDouble(3.0);
+			range = abilityNode.getNode("range").getDouble(16.0);
+			speed = abilityNode.getNode("speed").getDouble(1.1);
 
-			abilityNode.getNode("speed").setComment("How many blocks the wheel advances every tick.");
+			abilityNode.getNode("speed").setComment("How many blocks the blade advances every tick.");
 		}
 	}
 }
