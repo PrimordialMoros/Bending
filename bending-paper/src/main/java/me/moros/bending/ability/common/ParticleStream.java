@@ -43,29 +43,30 @@ public abstract class ParticleStream {
 	protected Predicate<Block> canCollide = b -> false;
 	protected Collider collider;
 	protected Vector3 location;
+	protected Vector3 dir;
+
+	protected boolean livingOnly;
+	protected boolean hitSelf;
 
 	protected final double speed;
 	protected final double maxRange;
 	protected final double collisionRadius;
 
-	protected boolean livingOnly;
-	protected boolean hitSelf;
-
 	public ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
 		this.user = user;
 		this.ray = ray;
-
 		this.speed = speed;
 		this.location = ray.origin;
 		this.maxRange = ray.direction.getNormSq();
 		this.collisionRadius = collisionRadius;
 		this.collider = new Sphere(location, collisionRadius);
+		dir = ray.direction.normalize().scalarMultiply(speed);
 		render();
 	}
 
 	// Return false to destroy this stream
 	public UpdateResult update() {
-		location = location.add(ray.direction.normalize().scalarMultiply(speed));
+		location = location.add(dir);
 		Block block = location.toBlock(user.getWorld());
 		if (location.distanceSq(ray.origin) > maxRange || !Game.getProtectionSystem().canBuild(user, block)) {
 			return UpdateResult.REMOVE;

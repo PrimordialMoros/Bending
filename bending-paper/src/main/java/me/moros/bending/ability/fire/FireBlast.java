@@ -187,7 +187,6 @@ public class FireBlast implements Ability, Burstable {
 
 	private class FireStream extends ParticleStream {
 		private final double displayRadius;
-		private final double range;
 		private long nextRenderTime;
 
 		public FireStream(User user, Ray ray, double collisionRadius) {
@@ -195,7 +194,6 @@ public class FireBlast implements Ability, Burstable {
 			livingOnly = true;
 			displayRadius = FastMath.max(collisionRadius - 1, 1);
 			canCollide = Block::isLiquid;
-			range = ray.direction.getNorm();
 		}
 
 		@Override
