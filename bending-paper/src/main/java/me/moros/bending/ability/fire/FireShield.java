@@ -48,12 +48,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FireShield implements Ability {
 	private static final Config config = new Config();
@@ -86,6 +84,7 @@ public class FireShield implements Ability {
 			builder.add(new ExpireRemovalPolicy(userConfig.diskDuration));
 		}
 		removalPolicy = builder.build();
+
 		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}
@@ -176,7 +175,7 @@ public class FireShield implements Ability {
 				for (double j = 0.2; j <= 1; j += 0.2) {
 					Vector3 loc = new Vector3(array).scalarMultiply(j * userConfig.diskRadius);
 					ParticleUtil.createFire(user, location.add(loc).toLocation(user.getWorld()))
-						.offset(0.25, 0.25, 0.25).spawn();
+						.offset(0.2, 0.2, 0.2).spawn();
 				}
 				rotation.applyTo(array, array);
 			}
@@ -210,9 +209,6 @@ public class FireShield implements Ability {
 			for (Block block : WorldMethods.getNearbyBlocks(user.getHeadBlock().getLocation(), userConfig.shieldRadius)) {
 				Location loc = block.getLocation().add(0.5, 0.5, 0.5);
 				ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).spawn();
-				if (ThreadLocalRandom.current().nextInt(5) == 0) {
-					ParticleUtil.create(Particle.SMOKE_NORMAL, loc).offset(0.2, 0.2, 0.2).spawn();
-				}
 			}
 		}
 	}

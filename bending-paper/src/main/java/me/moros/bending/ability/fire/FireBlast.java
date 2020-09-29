@@ -68,7 +68,7 @@ public class FireBlast implements Ability, Burstable {
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
 
-	private final Set<Entity> affectedEntities = new HashSet<>();
+	private final Set<Entity> affectedEntities = new HashSet<>(); // Needed to ensure entities are hit by 1 burst stream only
 	private FireStream stream;
 
 	private boolean charging;

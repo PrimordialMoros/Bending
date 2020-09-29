@@ -69,11 +69,13 @@ public class Bolt implements Ability {
 		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) return false;
 		this.user = user;
 		recalculateConfig();
-		startTime = System.currentTimeMillis();
+
 		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 		removalPolicy = CompositeRemovalPolicy.defaults().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 

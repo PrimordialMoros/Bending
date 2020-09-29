@@ -41,7 +41,7 @@ public abstract class ParticleStream {
 	protected final Ray ray;
 
 	protected Predicate<Block> canCollide = b -> false;
-	protected Collider collider;
+	protected Sphere collider;
 	protected Vector3 location;
 	protected Vector3 dir;
 
@@ -73,9 +73,10 @@ public abstract class ParticleStream {
 		}
 		render();
 		postRender();
-		collider = new Sphere(location, collisionRadius);
+		// Use previous collider for entity checks for visual reasons
 		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
 		if (hitEntity) return UpdateResult.REMOVE;
+		collider = collider.at(location);
 		if (!MaterialUtil.isTransparent(block)) {
 			AABB blockBounds = AABBUtils.getBlockBounds(block);
 			if (canCollide.test(block) || blockBounds.intersects(collider)) {

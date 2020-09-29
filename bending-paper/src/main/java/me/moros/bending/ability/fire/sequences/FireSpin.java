@@ -63,22 +63,19 @@ public class FireSpin implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
-		if (method != ActivationMethod.SEQUENCE) return false;
 		this.user = user;
-
-		if (!Game.getProtectionSystem().canBuild(user, user.getLocation().toBlock(user.getWorld()))) {
+		recalculateConfig();
+		if (!Game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
-		recalculateConfig();
-
-		user.setCooldown(this, userConfig.cooldown);
 
 		Vector3 origin = user.getLocation().add(Vector3.PLUS_J);
-
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.rotate(Vector3.PLUS_I, rotation, 36).forEach(
 			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
+
+		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}
 

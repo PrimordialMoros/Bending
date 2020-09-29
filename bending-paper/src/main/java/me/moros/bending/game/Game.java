@@ -31,8 +31,6 @@ import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.Storage;
 import me.moros.bending.storage.StorageFactory;
@@ -123,10 +121,6 @@ public final class Game {
 	private static void loadStorage() {
 		storage.createElements(Element.getAll());
 		storage.createAbilities(Game.getAbilityRegistry().getAbilities().collect(Collectors.toSet()));
-	}
-
-	public static void addAbility(User user, Ability instance) {
-		worldManager.getInstanceForWorld(user.getWorld()).addAbility(user, instance);
 	}
 
 	public static Storage getStorage() {

@@ -72,7 +72,7 @@ public abstract class Spout {
 		if (distance > maxHeight) {
 			return UpdateResult.REMOVE;
 		}
-		flight.setFlying(distance <= height); // TODO add downward velocity for waterspouts
+		flight.setFlying(distance <= height);
 		// Create a bounding box for collision that extends through the spout from the ground to the player.
 		collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.getLocation());
 		render(distance);

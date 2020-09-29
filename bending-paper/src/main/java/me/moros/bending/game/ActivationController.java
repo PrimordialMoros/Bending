@@ -21,9 +21,11 @@ package me.moros.bending.game;
 
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
+import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
+import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -43,7 +45,7 @@ public final class ActivationController {
 		if (desc == null || !desc.isActivatedBy(method) || !user.canBend(desc)) return false;
 		Ability ability = desc.createAbility();
 		if (ability.activate(user, method)) {
-			Game.addAbility(user, ability);
+			Game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 			return true;
 		}
 		return false;
@@ -61,20 +63,18 @@ public final class ActivationController {
 	}
 
 	public void onUserSwing(User user) {
+		AbilityManager manager = Game.getAbilityManager(user.getWorld());
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
-		if (desc != null && desc.getName().equalsIgnoreCase("FireJet")) {
-			if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, FireJet.class)) {
-				return;
-			}
-			if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, JetBlast.class)) {
-				return;
-			}
-		}
-		if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class)) {
-			if (desc != null && desc.getName().equalsIgnoreCase("AirScooter")) {
-				return;
+		boolean removed = false;
+		if (desc != null) {
+			if (desc.getName().equals("FireJet")) {
+				removed |= manager.destroyInstanceType(user, FireJet.class);
+				removed |= manager.destroyInstanceType(user, JetBlast.class);
 			}
 		}
+		removed |= manager.destroyInstanceType(user, AirScooter.class);
+		removed |= manager.destroyInstanceType(user, AirWheel.class);
+		if (removed) return;
 
 		Combustion.explode(user);
 		FireBurst.activateCone(user);

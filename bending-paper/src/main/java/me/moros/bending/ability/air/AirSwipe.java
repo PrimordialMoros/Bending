@@ -32,6 +32,8 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -71,14 +73,11 @@ public class AirSwipe implements Ability {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		startTime = System.currentTimeMillis();
-		charging = true;
 
+		charging = true;
 		if (user.getHeadBlock().isLiquid() || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
-
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
 
 		for (AirSwipe swipe : Game.getAbilityManager(user.getWorld()).getUserInstances(user, AirSwipe.class).collect(Collectors.toList())) {
 			if (swipe.charging) {
@@ -89,7 +88,12 @@ public class AirSwipe implements Ability {
 		if (method == ActivationMethod.PUNCH) {
 			launch();
 		}
+		removalPolicy = CompositeRemovalPolicy.defaults()
+			.add(new SwappedSlotsRemovalPolicy(getDescription()))
+			.add(Policies.IN_LIQUID)
+			.build();
 
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 
@@ -104,9 +108,6 @@ public class AirSwipe implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		if (charging) {
-			if (!getDescription().equals(user.getSelectedAbility().orElse(null))) {
-				return UpdateResult.REMOVE;
-			}
 			if (user.isSneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
 				ParticleUtil.createAir(UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
 			} else if (!user.isSneaking()) {
@@ -136,6 +137,7 @@ public class AirSwipe implements Ability {
 		VectorMethods.createArc(dir, rotation, steps).forEach(
 			v -> streams.add(new AirStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
+		removalPolicy = CompositeRemovalPolicy.defaults().build();
 	}
 
 	@Override

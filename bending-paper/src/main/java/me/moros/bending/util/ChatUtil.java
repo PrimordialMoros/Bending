@@ -48,7 +48,7 @@ public class ChatUtil {
 	 * @param text the text message as a Component
 	 */
 	public static void sendMessage(CommandSender receiver, Component text) {
-		Bending.getAudiences().audience(receiver).sendMessage(text);
+		Bending.getAudiences().sender(receiver).sendMessage(text);
 	}
 
 	public static TextComponent brand(String text) {

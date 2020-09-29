@@ -22,6 +22,7 @@ package me.moros.bending.game;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
+import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
@@ -71,17 +72,23 @@ public final class AbilityInitializer {
 		air.add(AbilityDescription.builder("AirShield", AirShield.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
 
-		air.add(AbilityDescription.builder("AirScooter", AirScooter.class)
-			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
-
 		air.add(AbilityDescription.builder("AirSpout", AirSpout.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
-		air.add(AbilityDescription.builder("AirBlade", AirBlade.class)
-			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).build());
-
 		air.add(AbilityDescription.builder("AirPunch", AirPunch.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).build());
+
+		AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.SNEAK_RELEASE).build();
+		air.add(airBlade);
+
+		AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
+		air.add(airScooter);
+
+		AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel.class)
+			.setElement(Element.AIR).setActivation(ActivationMethod.SEQUENCE).build();
+		air.add(airWheel);
 
 		water.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
@@ -144,10 +151,20 @@ public final class AbilityInitializer {
 		abilityRegistry.registerAbilities(fire);
 
 		Map<AbilityDescription, Sequence> sequences = new HashMap<>();
+		sequences.put(airWheel, new Sequence(
+			new AbilityAction(airScooter, ActivationMethod.SNEAK),
+			new AbilityAction(airScooter, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(airScooter, ActivationMethod.SNEAK),
+			new AbilityAction(airScooter, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(airBlade, ActivationMethod.PUNCH)
+		));
+
 		sequences.put(fireWave, new Sequence(
 			new AbilityAction(heatControl, ActivationMethod.SNEAK),
-			new AbilityAction(fireWall, ActivationMethod.PUNCH),
-			new AbilityAction(fireWall, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(heatControl, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(heatControl, ActivationMethod.SNEAK),
+			new AbilityAction(heatControl, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(fireWall, ActivationMethod.PUNCH)
 		));
 
 		sequences.put(jetBlast, new Sequence(

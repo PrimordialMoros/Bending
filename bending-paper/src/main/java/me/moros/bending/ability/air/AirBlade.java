@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.common.AbstractWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
@@ -33,6 +34,8 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -55,25 +58,52 @@ public class AirBlade implements Ability {
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
 
+	private Vector3 origin;
+	private Vector3 direction;
 	private Blade blade;
+
+	private boolean charging;
+	private double factor = 1;
+	private long startTime;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
+		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, AirBlade.class)) {
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
-		Vector3 direction = user.getDirection().setY(0).normalize();
-		Vector3 location = user.getLocation().add(direction);
-		location = location.add(new Vector3(0, userConfig.radius, 0));
-		if (location.toBlock(user.getWorld()).isLiquid()) return false;
-
-		blade = new Blade(user, new Ray(location, direction));
-		if (!blade.resolveMovement(userConfig.radius)) return false;
+		charging = true;
+		direction = user.getDirection().setY(0).normalize();
+		double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
+		origin = user.getLocation().add(direction).add(new Vector3(0, maxRadius, 0));
 
 		removalPolicy = CompositeRemovalPolicy.defaults()
-			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> blade.getLocation())).build();
+			.add(new SwappedSlotsRemovalPolicy(getDescription()))
+			.add(new OutOfRangeRemovalPolicy(userConfig.prepareRange, () -> origin))
+			.add(Policies.IN_LIQUID)
+			.build();
 
-		user.setCooldown(this, userConfig.cooldown);
+		startTime = System.currentTimeMillis();
+
+		AirWheel wheel = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirWheel.class).orElse(null);
+		if (wheel != null) {
+			origin = wheel.getCenter();
+			factor = userConfig.chargeFactor;
+			charging = false;
+			blade = new Blade(user, new Ray(origin, direction), userConfig.speed * factor * 0.5);
+			removalPolicy = CompositeRemovalPolicy.defaults()
+				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
+			user.setCooldown(this, userConfig.cooldown);
+			Game.getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
+			return true;
+		}
+
+		if (method == ActivationMethod.SNEAK_RELEASE) {
+			launch();
+		}
 		return true;
 	}
 
@@ -87,9 +117,38 @@ public class AirBlade implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
+
+		if (charging) {
+			if (origin.toBlock(user.getWorld()).isLiquid()) {
+				return UpdateResult.REMOVE;
+			}
+			long time = System.currentTimeMillis();
+			if (user.isSneaking() && time > startTime + 100) {
+				double timeFactor = FastMath.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
+				Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction);
+				Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 10, RotationConvention.VECTOR_OPERATOR);
+				double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
+				VectorMethods.rotate(direction.scalarMultiply(r), rotation, 20).forEach(v ->
+					ParticleUtil.createAir(origin.add(v).toLocation(user.getWorld())).spawn()
+				);
+			} else if (!user.isSneaking()) {
+				launch();
+			}
+			return UpdateResult.CONTINUE;
+		}
+
 		return blade.update();
 	}
 
+	private void launch() {
+		double timeFactor = FastMath.min(1, (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime);
+		factor = FastMath.max(1, timeFactor * userConfig.chargeFactor);
+		charging = false;
+		blade = new Blade(user, new Ray(origin, direction));
+		removalPolicy = CompositeRemovalPolicy.defaults()
+			.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
+		user.setCooldown(this, userConfig.cooldown);
+	}
 
 	@Override
 	public void destroy() {
@@ -119,14 +178,19 @@ public class AirBlade implements Ability {
 
 	private class Blade extends AbstractWheel {
 		public Blade(User user, Ray ray) {
-			super(user, ray, userConfig.radius, userConfig.speed);
+			super(user, ray, userConfig.radius * factor * 0.5, userConfig.speed * factor * 0.5);
+		}
+
+		// When started from wheel
+		public Blade(User user, Ray ray, double speed) {
+			super(user, ray, 1.6, speed);
 		}
 
 		@Override
 		public void render() {
-			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction).normalize();
-			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
-			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 72).forEach(v ->
+			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
+			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
+			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 40).forEach(v ->
 				ParticleUtil.createAir(location.add(v).toLocation(user.getWorld())).spawn()
 			);
 		}
@@ -140,7 +204,7 @@ public class AirBlade implements Ability {
 
 		@Override
 		public boolean onEntityHit(Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage);
+			DamageUtil.damageEntity(entity, user, userConfig.damage * factor);
 			return true;
 		}
 	}
@@ -154,20 +218,33 @@ public class AirBlade implements Ability {
 		public double damage;
 		@Attribute(Attributes.RANGE)
 		public double range;
+		@Attribute(Attributes.RANGE)
+		public double prepareRange;
 		@Attribute(Attributes.SPEED)
 		public double speed;
+		@Attribute(Attributes.CHARGE_TIME)
+		public long maxChargeTime;
+		@Attribute(Attributes.STRENGTH)
+		public double chargeFactor;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airblade");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(4000);
-			radius = abilityNode.getNode("radius").getDouble(1.8);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			range = abilityNode.getNode("range").getDouble(16.0);
-			speed = abilityNode.getNode("speed").getDouble(1.1);
+			radius = abilityNode.getNode("radius").getDouble(1.2);
+			damage = abilityNode.getNode("damage").getDouble(2.0);
+			range = abilityNode.getNode("range").getDouble(12.0);
+			prepareRange = abilityNode.getNode("prepare-range").getDouble(8.0);
+			speed = abilityNode.getNode("speed").getDouble(0.8);
+
+			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(3.0);
+			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2000);
 
 			abilityNode.getNode("speed").setComment("How many blocks the blade advances every tick.");
+			abilityNode.getNode("charge").getNode("factor").setComment("How much the damage and range are multiplied by at full charge. Radius and speed are only affected by half that amount.");
+			abilityNode.getNode("charge").getNode("max-time").setComment("How many milliseconds it takes to fully charge");
+
 		}
 	}
 }

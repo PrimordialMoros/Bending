@@ -123,9 +123,9 @@ public class FireWheel implements Ability {
 
 		@Override
 		public void render() {
-			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction).normalize();
-			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
-			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 72).forEach(v ->
+			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
+			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
+			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 36).forEach(v ->
 				ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).spawn()
 			);
 		}

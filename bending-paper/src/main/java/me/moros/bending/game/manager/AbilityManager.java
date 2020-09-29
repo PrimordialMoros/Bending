@@ -83,10 +83,7 @@ public class AbilityManager {
 
 	public void changeOwner(Ability ability, User user) {
 		if (ability.getUser().equals(user)) return;
-		List<Ability> previousUserInstances = globalInstances.get(ability.getUser());
-		if (previousUserInstances != null) {
-			previousUserInstances.remove(ability);
-		}
+		globalInstances.getOrDefault(ability.getUser(), Collections.emptyList()).remove(ability);
 		globalInstances.computeIfAbsent(user, k -> new ArrayList<>()).add(ability);
 		ability.setUser(user);
 	}

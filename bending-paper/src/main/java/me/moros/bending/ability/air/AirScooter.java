@@ -35,6 +35,7 @@ import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -47,6 +48,7 @@ import org.bukkit.block.Block;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 //TODO cleanup
 public class AirScooter implements Ability {
@@ -58,25 +60,23 @@ public class AirScooter implements Ability {
 
 	private HeightSmoother heightSmoother;
 
+	public boolean canRender;
 	private double verticalPosition;
 	private int stuckCount;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class)) {
-			return false;
-		}
-
 		this.user = user;
 		recalculateConfig();
 		heightSmoother = new HeightSmoother();
 
 		double dist = WorldMethods.distanceAboveGround(user.getEntity());
 		// Only activate AirScooter if the player is in the air and near the ground.
-		if ((dist < 0.5 || dist > 5) && !user.getLocation().toBlock(user.getWorld()).isLiquid()) {
+		if ((dist < 0.5 || dist > 5) && !user.getLocBlock().isLiquid()) {
 			return false;
 		}
 
+		canRender = true;
 		removalPolicy = CompositeRemovalPolicy.defaults().add(Policies.SNEAKING).build();
 		return true;
 	}
@@ -114,7 +114,11 @@ public class AirScooter implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		render();
+		if (canRender) render();
+		if (ThreadLocalRandom.current().nextInt(4) == 0) {
+			SoundUtil.AIR_SOUND.play(user.getLocation().toLocation(user.getWorld()));
+		}
+
 		return UpdateResult.CONTINUE;
 	}
 
@@ -123,7 +127,7 @@ public class AirScooter implements Ability {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
-	public void render() {
+	private void render() {
 		verticalPosition += 0.25 * FastMath.PI;
 		for (int i = 0; i < 10; i++) {
 			double angle = i * FastMath.PI / 5;
@@ -162,7 +166,7 @@ public class AirScooter implements Ability {
 		double height = WorldMethods.distanceAboveGround(user.getEntity());
 		double maxHeight = 3.25;
 		double smoothedHeight = heightSmoother.add(height);
-		if (user.getLocation().toBlock(user.getWorld()).isLiquid()) {
+		if (user.getLocBlock().isLiquid()) {
 			height = 0.5;
 		} else {
 			// Destroy ability if player gets too far from ground.
@@ -182,11 +186,11 @@ public class AirScooter implements Ability {
 	}
 
 	private boolean isColliding() {
-		double playerSpeed = user.getEntity().getVelocity().setY(0).length();
+		double speed = user.getEntity().getVelocity().setY(0).length();
 		Vector3 direction = user.getDirection().setY(0).normalize(Vector3.ZERO);
 		// The location in front of the player, where the player will be in one second.
 		Vector3 front = user.getEyeLocation().subtract(new Vector3(0.0, 0.5, 0.0))
-			.add(direction.scalarMultiply(FastMath.max(userConfig.speed, playerSpeed)));
+			.add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
 
 		Block block = front.toBlock(user.getWorld());
 		if (block.getType() == Material.WATER) {

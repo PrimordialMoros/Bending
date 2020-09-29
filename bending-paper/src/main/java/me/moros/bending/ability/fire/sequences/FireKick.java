@@ -65,28 +65,23 @@ public class FireKick implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
-		if (method != ActivationMethod.SEQUENCE) return false;
 		this.user = user;
-
-		if (!Game.getProtectionSystem().canBuild(user, user.getLocation().toBlock(user.getWorld()))) {
+		recalculateConfig();
+		if (!Game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
-		recalculateConfig();
 
-		user.setCooldown(this, userConfig.cooldown);
-
-		Vector3 direction = user.getEyeLocation().add(user.getDirection()
-			.scalarMultiply(userConfig.range))
-			.subtract(user.getLocation()).normalize();
-
+		double height = user.getEntity().getEyeHeight();
+		Vector3 direction = user.getDirection().scalarMultiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
 		Vector3 origin = user.getLocation();
 		Vector3 dir = user.getDirection();
 		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
-
 		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(6), RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.createArc(direction, rotation, 11).forEach(
 			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
+
+		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}
 

@@ -27,7 +27,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
@@ -42,14 +41,12 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
 public class FireWave implements Ability {
 	private static final Config config = new Config();
 
-	private User user;
 	private Config userConfig;
 
 	private final Queue<WallInfo> walls = new ArrayDeque<>();
@@ -59,11 +56,10 @@ public class FireWave implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+		wall = new FireWall();
+		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.PUNCH)) return false;
 
-		wall = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, FireWall.class).orElse(null);
-		if (wall == null) return false;
+		recalculateConfig();
 
 		Vector3 origin = user.getEyeLocation().add(user.getDirection().scalarMultiply(wall.getRange()));
 		Vector3 direction = user.getDirection();
@@ -98,25 +94,25 @@ public class FireWave implements Ability {
 
 	@Override
 	public UpdateResult update() {
-		if (wall == null) return UpdateResult.REMOVE;
+		if (walls.isEmpty()) return UpdateResult.REMOVE;
 		long time = System.currentTimeMillis();
-		if (time < nextTime) {
-			return UpdateResult.CONTINUE;
+		if (time >= nextTime) {
+			nextTime = time + 250;
+			WallInfo info = walls.poll();
+			if (info == null) return UpdateResult.REMOVE;
+			wall.setWall(info.getBlocks(), info.getCollider());
 		}
-		nextTime = time + 250;
-		WallInfo info = walls.poll();
-		if (info == null) return UpdateResult.REMOVE;
-		wall.setWall(info.getBlocks(), info.getCollider());
-		return walls.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+		return wall.update();
 	}
 
 	@Override
 	public void destroy() {
+		wall.destroy();
 	}
 
 	@Override
 	public User getUser() {
-		return user;
+		return wall.getUser();
 	}
 
 	@Override
@@ -125,15 +121,7 @@ public class FireWave implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public void handleCollision(Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	private static class WallInfo {

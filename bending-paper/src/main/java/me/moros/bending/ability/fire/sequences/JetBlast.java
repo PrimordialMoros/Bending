@@ -41,16 +41,13 @@ public class JetBlast implements Ability {
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		jet = new FireJet();
-		if (user.isOnCooldown(jet.getDescription())) {
-			return false;
-		}
-		if (!jet.activate(user, ActivationMethod.PUNCH)) {
-			return false;
-		}
+		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.PUNCH)) return false;
+
 		recalculateConfig();
+
 		jet.setDuration(userConfig.duration);
 		jet.setSpeed(userConfig.speed);
-		user.setCooldown(jet, userConfig.cooldown);
+
 		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}

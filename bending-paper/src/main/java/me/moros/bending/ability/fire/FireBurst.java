@@ -45,8 +45,9 @@ public class FireBurst extends BurstAbility {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		this.startTime = System.currentTimeMillis();
-		this.released = false;
+
+		released = false;
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 

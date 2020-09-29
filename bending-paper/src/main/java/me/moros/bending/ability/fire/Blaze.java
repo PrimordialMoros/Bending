@@ -56,19 +56,20 @@ public class Blaze implements Ability {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		Vector3 loc = user.getLocation();
-		if (!Game.getProtectionSystem().canBuild(user, loc.toBlock(user.getWorld()))) {
+		if (!Game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
 
+		Vector3 origin = user.getLocation();
 		Vector3 dir = user.getDirection().setY(0).normalize();
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
 		if (method == ActivationMethod.PUNCH) {
 			int steps = userConfig.arc / 8;
-			VectorMethods.createArc(dir, rotation, steps).forEach(v -> streams.add(new FireStream(new Ray(loc, v))));
+			VectorMethods.createArc(dir, rotation, steps).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
 		} else {
-			VectorMethods.rotate(dir, rotation, 36).forEach(v -> streams.add(new FireStream(new Ray(loc, v))));
+			VectorMethods.rotate(dir, rotation, 36).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
 		}
+
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}

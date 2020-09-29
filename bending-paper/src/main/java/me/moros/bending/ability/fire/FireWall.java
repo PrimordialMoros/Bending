@@ -94,8 +94,10 @@ public class FireWall implements Ability {
 		double radius = collider.getHalfExtents().maxComponent() + 1;
 		blocks = WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
 		if (blocks.isEmpty()) return false;
-		nextRenderTime = 0;
+
 		removalPolicy = CompositeRemovalPolicy.defaults().add(new ExpireRemovalPolicy(userConfig.duration)).build();
+
+		nextRenderTime = 0;
 		user.setCooldown(this, userConfig.cooldown);
 		return true;
 	}

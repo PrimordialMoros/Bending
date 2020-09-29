@@ -55,12 +55,14 @@ public class FireJet implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
+		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, FireJet.class)) {
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
-		startTime = System.currentTimeMillis();
 
-		Block block = user.getLocation().toBlock(user.getWorld());
-
+		Block block = user.getLocBlock();
 		boolean ignitable = MaterialUtil.isIgnitable(block);
 		if (!ignitable && !MaterialUtil.isAir(block.getType())) {
 			return false;
@@ -74,7 +76,6 @@ public class FireJet implements Ability {
 		duration = userConfig.duration;
 
 		flight = Flight.get(user);
-		user.setCooldown(this, userConfig.cooldown);
 		if (ignitable) TempBlock.create(block, Material.FIRE, 3000);
 
 		removalPolicy = CompositeRemovalPolicy.builder()
@@ -82,6 +83,8 @@ public class FireJet implements Ability {
 			.add(new ExpireRemovalPolicy(userConfig.duration))
 			.build();
 
+		user.setCooldown(this, userConfig.cooldown);
+		startTime = System.currentTimeMillis();
 		return true;
 	}
 
@@ -131,8 +134,9 @@ public class FireJet implements Ability {
 		this.speed = newSpeed;
 	}
 
-	public void setDuration(long newDuration) {
-		this.duration = newDuration;
+	public void setDuration(long duration) {
+		this.duration = duration;
+		removalPolicy = CompositeRemovalPolicy.builder().add(Policies.IN_LIQUID).add(new ExpireRemovalPolicy(duration)).build();
 	}
 
 	public static class Config extends Configurable {
