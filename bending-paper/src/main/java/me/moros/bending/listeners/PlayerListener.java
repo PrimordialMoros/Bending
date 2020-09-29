@@ -23,6 +23,7 @@ import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
+import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -157,6 +158,13 @@ public class PlayerListener implements Listener {
 		if (event.getUser() instanceof BendingPlayer) {
 			AbilityDescription desc = event.getAbilityDescription();
 			Game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), desc, false);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onElementChange(ElementChangeEvent event) {
+		if (event.getUser() instanceof BendingPlayer && event.getResult() != ElementChangeEvent.Result.ADD) {
+			Game.getBoardManager().updateBoard((Player) event.getUser().getEntity());
 		}
 	}
 

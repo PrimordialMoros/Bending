@@ -42,8 +42,12 @@ public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
 	private final EnumMap<Element, Set<AbilityDescription>> passives = new EnumMap<>(Element.class);
 
-	protected void registerAbilities(Collection<AbilityDescription> abilities) {
-		abilities.forEach(this::registerAbility);
+	protected int registerAbilities(Collection<AbilityDescription> abilities) {
+		int counter = 0;
+		for (AbilityDescription desc : abilities) {
+			if (registerAbility(desc)) counter++;
+		}
+		return counter;
 	}
 
 	private boolean registerAbility(AbilityDescription desc) {

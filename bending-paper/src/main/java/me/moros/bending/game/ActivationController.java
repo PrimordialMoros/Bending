@@ -25,6 +25,7 @@ import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
+import me.moros.bending.ability.water.passives.*;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -109,6 +110,10 @@ public final class ActivationController {
 		activateAbility(user, ActivationMethod.FALL);
 
 		if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
+			return false;
+		}
+
+		if (user.hasElement(Element.WATER) && HydroSink.canHydroSink(user)) {
 			return false;
 		}
 
