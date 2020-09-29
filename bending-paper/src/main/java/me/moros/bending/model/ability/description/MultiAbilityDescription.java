@@ -21,7 +21,7 @@ package me.moros.bending.model.ability.description;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.ability.ActivationMethod;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 public class MultiAbilityDescription extends AbilityDescription {
@@ -37,8 +37,8 @@ public class MultiAbilityDescription extends AbilityDescription {
 	}
 
 	@Override
-	public TextComponent getDisplayName() {
-		return TextComponent.of(displayName, getElement().getColor());
+	public Component getDisplayName() {
+		return Component.text(displayName, getElement().getColor());
 	}
 
 	@Override

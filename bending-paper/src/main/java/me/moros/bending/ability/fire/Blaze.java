@@ -62,12 +62,12 @@ public class Blaze implements Ability {
 
 		Vector3 origin = user.getLocation();
 		Vector3 dir = user.getDirection().setY(0).normalize();
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
 		if (method == ActivationMethod.PUNCH) {
 			int steps = userConfig.arc / 8;
 			VectorMethods.createArc(dir, rotation, steps).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
 		} else {
-			VectorMethods.rotate(dir, rotation, 36).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
+			VectorMethods.rotate(dir, rotation, 40).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
 		}
 
 		user.setCooldown(getDescription(), userConfig.cooldown);

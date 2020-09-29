@@ -28,7 +28,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -209,6 +209,6 @@ public interface User {
 	default void sendMessageKyori(String message) {
 	}
 
-	default void sendMessageKyori(TextComponent message) {
+	default void sendMessageKyori(Component message) {
 	}
 }

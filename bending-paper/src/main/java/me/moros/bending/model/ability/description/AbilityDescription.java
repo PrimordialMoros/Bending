@@ -24,7 +24,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.user.User;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -81,8 +81,8 @@ public class AbilityDescription {
 		return name;
 	}
 
-	public TextComponent getDisplayName() {
-		return TextComponent.of(name, element.getColor());
+	public Component getDisplayName() {
+		return Component.text(name, element.getColor());
 	}
 
 	public Element getElement() {
@@ -271,25 +271,25 @@ public class AbilityDescription {
 		}
 	}
 
-	public static TextComponent getMeta(AbilityDescription desc) {
-		if (desc == null) return TextComponent.empty();
+	public static Component getMeta(AbilityDescription desc) {
+		if (desc == null) return Component.empty();
 		String type = "Ability";
 		if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
 			type = "Passive";
 		} else if (desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
 			type = "Sequence";
 		}
-		TextComponent details = TextComponent.builder()
-			.append(desc.getElement().getDisplayName()).append(TextComponent.newline())
-			.append("Type: ", NamedTextColor.DARK_AQUA)
-			.append(type, NamedTextColor.GREEN).append(TextComponent.newline())
-			.append("Permission: ", NamedTextColor.DARK_AQUA)
-			.append(desc.getPermission(), NamedTextColor.GREEN).append(TextComponent.newline()).append(TextComponent.newline())
-			.append("Click to view info about this ability.", NamedTextColor.GRAY).build();
+		Component details = desc.getDisplayName().append(Component.newline())
+			.append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
+			.append(desc.getElement().getDisplayName().append(Component.newline()))
+			.append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
+			.append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
+			.append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
+			.append(Component.text(desc.getPermission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
+			.append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY));
 
-		return TextComponent.builder(desc.getName(), desc.getElement().getColor())
-			.hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, details))
-			.clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, "/bending info " + desc.getName()))
-			.build();
+		return Component.text(desc.getName(), desc.getElement().getColor())
+			.hoverEvent(HoverEvent.showText(details))
+			.clickEvent(ClickEvent.runCommand("/bending info " + desc.getName()));
 	}
 }

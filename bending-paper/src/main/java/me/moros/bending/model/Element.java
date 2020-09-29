@@ -19,7 +19,7 @@
 
 package me.moros.bending.model;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -52,8 +52,8 @@ public enum Element {
 		return elementName;
 	}
 
-	public TextComponent getDisplayName() {
-		return TextComponent.of(elementName, color);
+	public Component getDisplayName() {
+		return Component.text(elementName, color);
 	}
 
 	public TextColor getColor() {

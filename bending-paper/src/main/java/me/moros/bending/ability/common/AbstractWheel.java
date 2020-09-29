@@ -49,7 +49,7 @@ public abstract class AbstractWheel {
 	protected final Ray ray;
 	protected Vector3 location;
 
-	protected double radius;
+	protected final double radius;
 	protected double entityCollisionRadius;
 
 	protected AbstractWheel(User user, Ray ray, double radius, double speed) {

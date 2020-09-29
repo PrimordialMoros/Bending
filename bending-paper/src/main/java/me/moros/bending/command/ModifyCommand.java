@@ -37,7 +37,7 @@ import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
@@ -65,7 +65,7 @@ public class ModifyCommand extends BaseCommand {
 		Game.getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
 		player.sendMessageKyori(
-			TextComponent.of("Successfully added modifier to " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
+			Component.text("Successfully added modifier to " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
 		);
 	}
 
@@ -77,7 +77,7 @@ public class ModifyCommand extends BaseCommand {
 		Game.getAttributeSystem().clearModifiers(bendingPlayer);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
 		player.sendMessageKyori(
-			TextComponent.of("Cleared attribute modifiers for " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
+			Component.text("Cleared attribute modifiers for " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
 		);
 	}
 }

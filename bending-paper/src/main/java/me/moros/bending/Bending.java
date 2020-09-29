@@ -32,7 +32,7 @@ import me.moros.bending.listeners.WorldListener;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.util.Tasker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bstats.bukkit.MetricsLite;
 import org.bukkit.NamespacedKey;
@@ -41,9 +41,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.logging.Logger;
 
 public class Bending extends JavaPlugin {
-	public static final TextComponent PREFIX = TextComponent.builder("[", NamedTextColor.DARK_GRAY)
-		.append("Bending", NamedTextColor.DARK_AQUA)
-		.append("] ", NamedTextColor.DARK_GRAY).build();
+	public static final Component PREFIX = Component.text("[", NamedTextColor.DARK_GRAY)
+		.append(Component.text("Bending", NamedTextColor.DARK_AQUA))
+		.append(Component.text("] ", NamedTextColor.DARK_GRAY));
 
 	private static Bending plugin;
 	private TimingManager timingManager;

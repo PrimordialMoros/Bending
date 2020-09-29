@@ -41,9 +41,9 @@ public abstract class Spout {
 	protected final World world;
 
 	protected Predicate<Block> validBlock = x -> true;
-	protected Set<Block> ignore = new HashSet<>();
+	protected final Set<Block> ignore = new HashSet<>();
 	protected AABB collider;
-	protected Flight flight;
+	protected final Flight flight;
 
 	protected final int height;
 	protected final double maxHeight;

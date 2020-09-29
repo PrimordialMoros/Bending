@@ -25,7 +25,7 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.util.ChatUtil;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -150,7 +150,7 @@ public final class BendingPlayer extends BendingUser {
 	}
 
 	@Override
-	public void sendMessageKyori(TextComponent message) {
+	public void sendMessageKyori(Component message) {
 		ChatUtil.sendMessage(getEntity(), message);
 	}
 

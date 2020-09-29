@@ -69,6 +69,7 @@ public class TempArmor implements Temporary {
 	public void revert() {
 		player.getInventory().setArmorContents(snapshot);
 		manager.removeEntry(player);
+		if (revertTask != null) revertTask.execute();
 	}
 
 	@Override
@@ -79,11 +80,6 @@ public class TempArmor implements Temporary {
 	@Override
 	public void setRevertTime(long revertTime) {
 		this.revertTime = revertTime;
-	}
-
-	@Override
-	public Optional<RevertTask> getRevertTask() {
-		return Optional.ofNullable(revertTask);
 	}
 
 	@Override

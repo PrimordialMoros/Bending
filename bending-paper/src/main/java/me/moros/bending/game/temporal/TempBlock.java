@@ -35,7 +35,6 @@ public class TempBlock implements Temporary {
 	private BlockState snapshot;
 	private final BlockData data;
 	private RevertTask revertTask;
-	private boolean noRevert;
 	private long revertTime;
 
 	public static void init() {
@@ -47,7 +46,7 @@ public class TempBlock implements Temporary {
 
 		manager.get(block).ifPresent(temp -> {
 			snapshot = temp.snapshot;
-			temp.getRevertTask().ifPresent(RevertTask::execute);
+			if (revertTask != null) revertTask.execute();
 		});
 		block.setBlockData(data);
 		manager.addEntry(block, this, duration);
@@ -72,13 +71,9 @@ public class TempBlock implements Temporary {
 
 	@Override
 	public void revert() {
-		if (!noRevert) {
-			snapshot.getWorld().getChunkAtAsync(getBlock()).thenAccept(result -> {
-				snapshot.update(true, false); //TODO check physics
-				getRevertTask().ifPresent(RevertTask::execute);
-			});
-		}
+		snapshot.getWorld().getChunkAtAsync(getBlock()).thenAccept(r -> snapshot.update(true, false));
 		manager.removeEntry(getBlock());
+		if (revertTask != null) revertTask.execute();
 	}
 
 	public Block getBlock() {
@@ -93,9 +88,8 @@ public class TempBlock implements Temporary {
 		return snapshot;
 	}
 
-	public void markForRemoval() {
-		setRevertTime(0);
-		noRevert = true;
+	public void removeWithoutReverting() {
+		manager.removeEntry(getBlock());
 	}
 
 	@Override
@@ -106,11 +100,6 @@ public class TempBlock implements Temporary {
 	@Override
 	public void setRevertTime(long revertTime) {
 		this.revertTime = revertTime;
-	}
-
-	@Override
-	public Optional<RevertTask> getRevertTask() {
-		return Optional.ofNullable(revertTask);
 	}
 
 	@Override

@@ -21,7 +21,6 @@ package me.moros.bending.util;
 
 import me.moros.bending.Bending;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
@@ -39,7 +38,7 @@ public class ChatUtil {
 	 * @see #sendMessage(CommandSender, Component)
 	 */
 	public static void sendMessage(CommandSender receiver, String text) {
-		sendMessage(receiver, TextComponent.of(text));
+		sendMessage(receiver, Component.text(text));
 	}
 
 	/**
@@ -51,11 +50,11 @@ public class ChatUtil {
 		Bending.getAudiences().sender(receiver).sendMessage(text);
 	}
 
-	public static TextComponent brand(String text) {
-		return brand(TextComponent.of(text));
+	public static Component brand(String text) {
+		return brand(Component.text(text));
 	}
 
-	public static TextComponent brand(TextComponent text) {
+	public static Component brand(Component text) {
 		return Bending.PREFIX.append(text);
 	}
 

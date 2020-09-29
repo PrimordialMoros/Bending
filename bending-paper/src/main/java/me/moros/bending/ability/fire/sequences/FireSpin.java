@@ -70,8 +70,8 @@ public class FireSpin implements Ability {
 		}
 
 		Vector3 origin = user.getLocation().add(Vector3.PLUS_J);
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
-		VectorMethods.rotate(Vector3.PLUS_I, rotation, 36).forEach(
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
+		VectorMethods.rotate(Vector3.PLUS_I, rotation, 40).forEach(
 			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 

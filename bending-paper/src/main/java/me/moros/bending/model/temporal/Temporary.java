@@ -19,16 +19,12 @@
 
 package me.moros.bending.model.temporal;
 
-import java.util.Optional;
-
 public interface Temporary {
 	void revert();
 
 	long getRevertTime();
 
 	void setRevertTime(long revertTime);
-
-	Optional<RevertTask> getRevertTask();
 
 	void setRevertTask(RevertTask task);
 

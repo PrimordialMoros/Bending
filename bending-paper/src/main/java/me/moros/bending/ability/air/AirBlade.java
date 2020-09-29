@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AirBlade implements Ability {
-	public static Config config = new Config();
+	public static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;

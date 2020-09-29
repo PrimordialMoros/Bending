@@ -72,7 +72,7 @@ public class Board {
 		if (desc.isPresent()) {
 			sb.append(ChatUtil.getLegacyColor(desc.get().getElement().getColor()));
 			if (bendingPlayer.isOnCooldown(desc.get())) sb.append(ChatColor.STRIKETHROUGH);
-			sb.append(desc.get().getDisplayName().content());
+			sb.append(desc.get().getName());
 		} else {
 			sb.append(ChatColor.GRAY).append("-- Slot ").append(slot).append(" --");
 		}

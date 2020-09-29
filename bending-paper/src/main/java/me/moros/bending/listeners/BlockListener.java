@@ -66,12 +66,11 @@ public class BlockListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event) {
-		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::markForRemoval);
+		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onBlockBreak(BlockBreakEvent event) {
-		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::markForRemoval);
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setDropItems(false);
 		} else if (MaterialUtil.isPlant(event.getBlock().getType())) {
@@ -82,6 +81,7 @@ public class BlockListener implements Listener {
 				}
 			});
 		}
+		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
 	}
 
 	@EventHandler(ignoreCancelled = true)

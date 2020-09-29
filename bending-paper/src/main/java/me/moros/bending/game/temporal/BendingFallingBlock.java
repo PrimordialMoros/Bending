@@ -26,8 +26,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.Vector;
 
-import java.util.Optional;
-
 public class BendingFallingBlock implements Temporary {
 	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
 	private final FallingBlock fallingBlock;
@@ -53,6 +51,7 @@ public class BendingFallingBlock implements Temporary {
 	public void revert() {
 		fallingBlock.remove();
 		manager.removeEntry(fallingBlock);
+		if (revertTask != null) revertTask.execute();
 	}
 
 	public FallingBlock getFallingBlock() {
@@ -67,11 +66,6 @@ public class BendingFallingBlock implements Temporary {
 	@Override
 	public void setRevertTime(long revertTime) {
 		this.revertTime = revertTime;
-	}
-
-	@Override
-	public Optional<Temporary.RevertTask> getRevertTask() {
-		return Optional.ofNullable(revertTask);
 	}
 
 	@Override

@@ -30,8 +30,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Optional;
-
 public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();
 	private final ArmorStand armorStand;
@@ -79,6 +77,7 @@ public class TempArmorStand implements Temporary {
 		showParticles();
 		armorStand.remove();
 		manager.removeEntry(armorStand);
+		if (revertTask != null) revertTask.execute();
 	}
 
 	@Override
@@ -89,11 +88,6 @@ public class TempArmorStand implements Temporary {
 	@Override
 	public void setRevertTime(long revertTime) {
 		this.revertTime = revertTime;
-	}
-
-	@Override
-	public Optional<RevertTask> getRevertTask() {
-		return Optional.ofNullable(revertTask);
 	}
 
 	@Override

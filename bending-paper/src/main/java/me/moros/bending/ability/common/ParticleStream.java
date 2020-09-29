@@ -43,7 +43,7 @@ public abstract class ParticleStream {
 	protected Predicate<Block> canCollide = b -> false;
 	protected Sphere collider;
 	protected Vector3 location;
-	protected Vector3 dir;
+	protected final Vector3 dir;
 
 	protected boolean livingOnly;
 	protected boolean hitSelf;
