@@ -120,6 +120,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters.class)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
+
 		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();
 		abilities.add(phaseChange);

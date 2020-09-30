@@ -68,11 +68,15 @@ public class PhaseChange implements PassiveAbility {
 	}
 
 	public static void freeze(User user) {
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+		}
 	}
 
 	public static void melt(User user) {
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+		}
 	}
 
 	public void freeze() {
@@ -105,8 +109,7 @@ public class PhaseChange implements PassiveAbility {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		AbilityDescription desc = user.getSelectedAbility().orElse(null);
-		if (desc == null || !desc.getName().equals("PhaseChange")) {
+		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
 			return UpdateResult.CONTINUE;
 		}
 
@@ -177,7 +180,6 @@ public class PhaseChange implements PassiveAbility {
 		public double meltRange;
 		@Attribute(Attributes.RADIUS)
 		public double meltRadius;
-
 
 		@Override
 		public void onConfigReload() {

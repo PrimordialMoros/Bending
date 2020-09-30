@@ -28,6 +28,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.PotionUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -65,10 +66,8 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	private void handlePotionEffect(PotionEffectType type, int amplifier) {
-		PotionEffect effect = user.getEntity().getPotionEffect(type);
-		if (effect == null || effect.getDuration() < 20 || effect.getAmplifier() < amplifier) {
-			effect = new PotionEffect(type, 100, amplifier, true, false);
-			user.getEntity().addPotionEffect(effect);
+		if (PotionUtil.canAddPotion(user, type, 20, amplifier)) {
+			user.getEntity().addPotionEffect(new PotionEffect(type, 100, amplifier, true, false));
 		}
 	}
 
@@ -90,7 +89,6 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public void handleCollision(Collision collision) {
-
 	}
 
 	public static class Config extends Configurable {

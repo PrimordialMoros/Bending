@@ -51,8 +51,10 @@ public class FastSwim implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		if (user.isSneaking() && MaterialUtil.isWater(user.getLocBlock())) {
-			user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
+		if (user.isSneaking() && user.getSelectedAbility().map(desc -> !desc.isActivatedBy(ActivationMethod.SNEAK)).orElse(true)) {
+			if (MaterialUtil.isWater(user.getLocBlock())) {
+				user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
+			}
 		}
 		return UpdateResult.CONTINUE;
 	}
