@@ -30,14 +30,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 
 public final class ConfigManager {
 	private static HoconConfigurationLoader loader;
 	private static CommentedConfigurationNode configRoot;
 
-	private static final List<Configurable> instances = new ArrayList<>();
+	private static final Collection<Configurable> instances = new ArrayList<>();
 
 	public static void init(String directory) {
 		Path path = Paths.get(directory, "bending.conf");

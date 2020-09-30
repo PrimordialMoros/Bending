@@ -28,15 +28,15 @@ import me.moros.bending.util.Tasker;
 import org.bukkit.World;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 // TODO implement BVH and cache static ability colliders
 // Also will need profiling
 public final class CollisionManager {
-	private final List<RegisteredCollision> collisions = new ArrayList<>();
+	private final Collection<RegisteredCollision> collisions = new ArrayList<>();
 	private final AbilityManager manager;
 
 	public CollisionManager(AbilityManager manager, World world) {
@@ -50,23 +50,23 @@ public final class CollisionManager {
 
 	private void run() {
 		if (manager.getInstanceCount() < 2) return;
-		List<Ability> instances = manager.getInstances().collect(Collectors.toList());
-		Map<Ability, List<Collider>> colliderCache = new HashMap<>();
+		Collection<Ability> instances = manager.getInstances().collect(Collectors.toList());
+		Map<Ability, Collection<Collider>> colliderCache = new HashMap<>();
 
 		for (RegisteredCollision registeredCollision : collisions) {
-			List<Ability> firstAbilities = instances.stream()
+			Collection<Ability> firstAbilities = instances.stream()
 				.filter(ability -> ability.getDescription().equals(registeredCollision.getFirst()))
 				.collect(Collectors.toList());
-			List<Ability> secondAbilities = instances.stream()
+			Collection<Ability> secondAbilities = instances.stream()
 				.filter(ability -> ability.getDescription().equals(registeredCollision.getSecond()))
 				.collect(Collectors.toList());
 
 			for (Ability first : firstAbilities) {
-				List<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::getColliders);
+				Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::getColliders);
 				if (firstColliders == null || firstColliders.isEmpty()) continue;
 				for (Ability second : secondAbilities) {
 					if (first.getUser().equals(second.getUser())) continue;
-					List<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::getColliders);
+					Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::getColliders);
 					if (secondColliders == null || secondColliders.isEmpty()) continue;
 					for (Collider firstCollider : firstColliders) {
 						for (Collider secondCollider : secondColliders) {

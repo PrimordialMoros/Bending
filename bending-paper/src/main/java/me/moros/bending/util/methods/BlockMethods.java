@@ -32,9 +32,9 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -93,7 +93,7 @@ public final class BlockMethods {
 	/**
 	 * @return {@link #combineFaces(Block, Set)} with {@link #MAIN_FACES} as the provided set
 	 */
-	public static List<Block> combineFaces(Block center) {
+	public static Collection<Block> combineFaces(Block center) {
 		return combineFaces(center, MAIN_FACES);
 	}
 
@@ -105,7 +105,7 @@ public final class BlockMethods {
 	 * @see #MAIN_FACES
 	 * @see #CARDINAL_FACES
 	 */
-	public static List<Block> combineFaces(Block center, Set<BlockFace> faces) {
+	public static Collection<Block> combineFaces(Block center, Set<BlockFace> faces) {
 		return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
 	}
 }

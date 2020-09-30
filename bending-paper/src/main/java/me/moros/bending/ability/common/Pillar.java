@@ -34,8 +34,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,8 +45,7 @@ public class Pillar {
 	private final User user;
 	private final Block origin;
 	private final BlockFace direction;
-
-	private final List<Block> pillarBlocks = new ArrayList<>();
+	private final Collection<Block> pillarBlocks;
 
 	private final int length;
 	private final long interval;
@@ -62,6 +61,7 @@ public class Pillar {
 		this.length = length;
 		this.interval = interval;
 		this.duration = duration;
+		this.pillarBlocks = new ArrayList<>();
 		nextUpdateTime = 0;
 	}
 
@@ -110,8 +110,8 @@ public class Pillar {
 		}
 	}
 
-	public List<Block> getPillarBlocks() {
-		return Collections.unmodifiableList(pillarBlocks);
+	public Collection<Block> getPillarBlocks() {
+		return Collections.unmodifiableCollection(pillarBlocks);
 	}
 
 	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length) {

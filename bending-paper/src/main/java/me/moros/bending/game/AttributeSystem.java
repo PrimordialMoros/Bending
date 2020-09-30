@@ -33,14 +33,14 @@ import me.moros.bending.model.user.User;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 // TODO Expand system to include rounding, range checking etc and profile performance
 public final class AttributeSystem {
-	private final Map<User, List<UserModifier>> modifierMap = new HashMap<>();
+	private final Map<User, Collection<UserModifier>> modifierMap = new HashMap<>();
 	private static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>(); // Converts a double into some other numeric type
 
 	static {
@@ -54,7 +54,7 @@ public final class AttributeSystem {
 
 	// Add a modifier that's only active according to some policy.
 	public UserModifier addModifier(User user, AttributeModifier modifier, ModifyPolicy policy) {
-		List<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
+		Collection<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
 		UserModifier userModifier = new UserModifier(modifier, policy);
 		modifiers.add(userModifier);
 		return userModifier;
@@ -69,7 +69,7 @@ public final class AttributeSystem {
 	}
 
 	public boolean removeModifier(User user, UserModifier modifier) {
-		List<UserModifier> modifiers = modifierMap.get(user);
+		Collection<UserModifier> modifiers = modifierMap.get(user);
 		if (modifiers == null) {
 			return false;
 		}
@@ -90,7 +90,7 @@ public final class AttributeSystem {
 		if (user == null || !modifierMap.containsKey(user)) {
 			return config;
 		}
-		List<UserModifier> activeModifiers = modifierMap.get(user).stream()
+		Collection<UserModifier> activeModifiers = modifierMap.get(user).stream()
 			.filter(modifier -> modifier.policy.shouldModify(ability))
 			.collect(Collectors.toList());
 
@@ -106,7 +106,7 @@ public final class AttributeSystem {
 		return config;
 	}
 
-	private boolean modifyField(Field field, Configurable config, List<UserModifier> userModifiers) {
+	private boolean modifyField(Field field, Configurable config, Collection<UserModifier> userModifiers) {
 		double value;
 		try {
 			value = ((Number) field.get(config)).doubleValue();
@@ -117,7 +117,7 @@ public final class AttributeSystem {
 
 		double addOperation = 0.0;
 		double multiplyOperation = 1.0;
-		List<Double> multiplicativeOperations = new ArrayList<>();
+		Collection<Double> multiplicativeOperations = new ArrayList<>();
 		for (UserModifier userModifier : userModifiers) {
 			AttributeModifier modifier = userModifier.modifier;
 			if (hasAttribute(field, modifier.getAttribute())) {

@@ -41,8 +41,8 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AirSpout implements Ability {
@@ -118,7 +118,7 @@ public class AirSpout implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(spout.getCollider());
 	}
 

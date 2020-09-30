@@ -25,7 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 public class TempArmor implements Temporary {
@@ -57,11 +57,11 @@ public class TempArmor implements Temporary {
 		return player;
 	}
 
-	public List<ItemStack> getSnapshot() {
+	public Collection<ItemStack> getSnapshot() {
 		return Arrays.asList(snapshot);
 	}
 
-	public List<ItemStack> getArmor() {
+	public Collection<ItemStack> getArmor() {
 		return Arrays.asList(armor);
 	}
 

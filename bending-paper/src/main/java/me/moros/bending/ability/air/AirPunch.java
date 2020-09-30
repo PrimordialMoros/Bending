@@ -47,8 +47,8 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AirPunch implements Ability {
@@ -96,7 +96,7 @@ public class AirPunch implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(stream.getCollider());
 	}
 

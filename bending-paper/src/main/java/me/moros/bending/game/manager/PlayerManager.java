@@ -30,7 +30,7 @@ import me.moros.bending.model.user.player.BendingProfile;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public final class PlayerManager {
 		return Objects.requireNonNull(players.get(uuid));
 	}
 
-	public List<BendingPlayer> getOnlinePlayers() {
+	public Collection<BendingPlayer> getOnlinePlayers() {
 		return players.values().stream().filter(BendingPlayer::isValid).collect(Collectors.toList());
 	}
 

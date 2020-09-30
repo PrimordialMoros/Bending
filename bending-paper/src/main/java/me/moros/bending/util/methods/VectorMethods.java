@@ -24,6 +24,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public final class VectorMethods {
 	 * @return a list comprising of all the directions for this arc
 	 * @see #rotateInverse(Vector3, Rotation, int)
 	 */
-	public static List<Vector3> createArc(Vector3 start, Rotation rotation, int rays) {
+	public static Collection<Vector3> createArc(Vector3 start, Rotation rotation, int rays) {
 		rays = FastMath.max(3, rays);
 		if (rays % 2 == 0) rays++;
 		int half = (rays - 1) / 2;
@@ -58,7 +59,7 @@ public final class VectorMethods {
 	 * @return a list comprising of all the directions for this arc
 	 * @see #rotateInverse(Vector3, Rotation, int)
 	 */
-	public static List<Vector3> rotate(Vector3 start, Rotation rotation, int times) {
+	public static Collection<Vector3> rotate(Vector3 start, Rotation rotation, int times) {
 		List<Vector3> arc = new ArrayList<>();
 		double[] vector = start.toArray();
 		for (int i = 0; i < times; i++) {
@@ -72,7 +73,7 @@ public final class VectorMethods {
 	 * Inversely repeat a rotation on a specific vector.
 	 * @see #rotate(Vector3, Rotation, int)
 	 */
-	public static List<Vector3> rotateInverse(Vector3 start, Rotation rotation, int times) {
+	public static Collection<Vector3> rotateInverse(Vector3 start, Rotation rotation, int times) {
 		List<Vector3> arc = new ArrayList<>();
 		double[] vector = start.toArray();
 		for (int i = 0; i < times; i++) {

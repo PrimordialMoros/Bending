@@ -25,8 +25,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public interface Ability {
 	boolean activate(User user, ActivationMethod method); // return true if the ability was activated
@@ -51,7 +51,7 @@ public interface Ability {
 		return Game.getAbilityRegistry().getAbilityDescription(this);
 	}
 
-	default List<Collider> getColliders() {
+	default Collection<Collider> getColliders() {
 		return Collections.emptyList();
 	}
 

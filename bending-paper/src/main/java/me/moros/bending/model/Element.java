@@ -24,8 +24,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,7 +65,7 @@ public enum Element {
 		return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
 	}
 
-	public static List<String> getElementNames() {
+	public static Collection<String> getElementNames() {
 		return Arrays.stream(values()).map(Element::toString).collect(Collectors.toList());
 	}
 

@@ -49,8 +49,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 public class Bolt implements Ability {
@@ -151,7 +151,7 @@ public class Bolt implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.emptyList();
 	}
 

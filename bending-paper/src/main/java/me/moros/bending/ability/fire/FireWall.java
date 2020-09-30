@@ -49,8 +49,8 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FireWall implements Ability {
@@ -60,7 +60,7 @@ public class FireWall implements Ability {
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
 
-	private List<Block> blocks;
+	private Collection<Block> blocks;
 	private OBB collider;
 
 	private boolean applyDamage;
@@ -136,7 +136,7 @@ public class FireWall implements Ability {
 		return UpdateResult.CONTINUE;
 	}
 
-	public void setWall(List<Block> blocks, OBB collider) {
+	public void setWall(Collection<Block> blocks, OBB collider) {
 		if (blocks == null || blocks.isEmpty()) return;
 		this.blocks = blocks;
 		this.collider = collider;
@@ -161,7 +161,7 @@ public class FireWall implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(collider);
 	}
 

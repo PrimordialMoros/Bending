@@ -32,18 +32,18 @@ import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.World;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbilityManager {
-	private final Map<User, List<Ability>> globalInstances = new HashMap<>();
-	private final List<UserInstance> addQueue = new ArrayList<>();
+	private final Map<User, Collection<Ability>> globalInstances = new HashMap<>();
+	private final Collection<UserInstance> addQueue = new ArrayList<>();
 
 	private final World world;
 
@@ -89,7 +89,7 @@ public class AbilityManager {
 	}
 
 	public void createPassives(User user) {
-		List<AbilityDescription> userPassives = user.getElements().stream()
+		Collection<AbilityDescription> userPassives = user.getElements().stream()
 			.flatMap(Game.getAbilityRegistry()::getPassives).collect(Collectors.toList());
 		for (AbilityDescription passive : userPassives) {
 			destroyInstanceType(user, passive);
@@ -118,7 +118,7 @@ public class AbilityManager {
 
 	public void destroyInstance(User user, Ability ability) {
 		if (!globalInstances.containsKey(user)) return;
-		List<Ability> abilities = globalInstances.get(user);
+		Collection<Ability> abilities = globalInstances.get(user);
 		abilities.remove(ability);
 		destroyAbility(ability);
 	}
@@ -129,7 +129,7 @@ public class AbilityManager {
 
 	public <T extends Ability> boolean destroyInstanceType(User user, Class<T> type) {
 		if (!globalInstances.containsKey(user)) return false;
-		List<Ability> abilities = globalInstances.get(user);
+		Collection<Ability> abilities = globalInstances.get(user);
 		boolean destroyed = false;
 		for (Iterator<Ability> iterator = abilities.iterator(); iterator.hasNext(); ) {
 			Ability ability = iterator.next();
@@ -144,7 +144,7 @@ public class AbilityManager {
 
 	// Get the number of active abilities.
 	public int getInstanceCount() {
-		return globalInstances.values().stream().mapToInt(List::size).sum();
+		return globalInstances.values().stream().mapToInt(Collection::size).sum();
 	}
 
 	private Stream<Ability> getQueuedInstances() {
@@ -168,7 +168,7 @@ public class AbilityManager {
 	}
 
 	public Stream<Ability> getInstances() {
-		return Stream.concat(getQueuedInstances(), globalInstances.values().stream().flatMap(List::stream));
+		return Stream.concat(getQueuedInstances(), globalInstances.values().stream().flatMap(Collection::stream));
 	}
 
 	public <T extends Ability> Stream<T> getInstances(Class<T> type) {
@@ -196,12 +196,12 @@ public class AbilityManager {
 			globalInstances.computeIfAbsent(i.getUser(), key -> new ArrayList<>()).add(i.getAbility());
 		}
 		addQueue.clear();
-		Iterator<Map.Entry<User, List<Ability>>> globalIterator = globalInstances.entrySet().iterator();
+		Iterator<Map.Entry<User, Collection<Ability>>> globalIterator = globalInstances.entrySet().iterator();
 		// Store the removed abilities here so any abilities added during Ability#destroy won't be concurrent.
-		List<Ability> removed = new ArrayList<>();
+		Collection<Ability> removed = new ArrayList<>();
 		while (globalIterator.hasNext()) {
-			Map.Entry<User, List<Ability>> entry = globalIterator.next();
-			List<Ability> instances = entry.getValue();
+			Map.Entry<User, Collection<Ability>> entry = globalIterator.next();
+			Collection<Ability> instances = entry.getValue();
 			Iterator<Ability> iterator = instances.iterator();
 			while (iterator.hasNext()) {
 				Ability ability = iterator.next();

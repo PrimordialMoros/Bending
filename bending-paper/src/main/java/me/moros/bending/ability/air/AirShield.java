@@ -41,8 +41,8 @@ import me.moros.bending.util.collision.CollisionUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AirShield implements Ability {
@@ -135,7 +135,7 @@ public class AirShield implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(new Sphere(getCenter(), userConfig.radius));
 	}
 

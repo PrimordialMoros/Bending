@@ -54,6 +54,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -142,7 +143,7 @@ public class FireBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		if (stream == null) return Collections.emptyList();
 		return Collections.singletonList(stream.getCollider());
 	}

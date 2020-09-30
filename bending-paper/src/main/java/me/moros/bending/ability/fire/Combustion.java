@@ -58,8 +58,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -165,7 +165,7 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(collider);
 	}
 

@@ -46,6 +46,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,7 @@ public class FireSpin implements Ability {
 	private Config userConfig;
 
 	private final Set<Entity> affectedEntities = new HashSet<>();
-	private final List<ParticleStream> streams = new ArrayList<>();
+	private final List<FireStream> streams = new ArrayList<>();
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -103,7 +104,7 @@ public class FireSpin implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
 	}
 

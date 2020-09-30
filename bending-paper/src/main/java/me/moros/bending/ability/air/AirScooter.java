@@ -46,8 +46,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 //TODO cleanup
@@ -146,7 +146,7 @@ public class AirScooter implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(new Sphere(user.getLocation(), userConfig.collisionRadius));
 	}
 

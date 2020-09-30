@@ -45,8 +45,8 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -57,7 +57,7 @@ public class WaterSpout implements Ability {
 	private Config userConfig;
 	private CompositeRemovalPolicy removalPolicy;
 
-	private final List<TempBlock> column = new ArrayList<>();
+	private final Collection<TempBlock> column = new ArrayList<>();
 	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || MaterialUtil.isIce(b);
 	private Spout spout;
 
@@ -126,7 +126,7 @@ public class WaterSpout implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(spout.getCollider());
 	}
 

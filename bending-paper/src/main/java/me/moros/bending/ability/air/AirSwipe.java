@@ -49,6 +49,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -148,7 +149,7 @@ public class AirSwipe implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
 	}
 

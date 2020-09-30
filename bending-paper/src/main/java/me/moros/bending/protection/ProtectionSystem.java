@@ -36,7 +36,7 @@ import org.bukkit.block.Block;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,7 +50,7 @@ public class ProtectionSystem extends Configurable {
 	 * might not be thread-safe themselves and we load data from them when results aren't cached.
 	 */
 	private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
-	private final List<Protection> protections = new ArrayList<>();
+	private final Collection<Protection> protections = new ArrayList<>();
 	private boolean allowHarmless;
 
 	public ProtectionSystem() {

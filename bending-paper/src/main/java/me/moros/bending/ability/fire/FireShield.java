@@ -50,8 +50,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class FireShield implements Ability {
 	private static final Config config = new Config();
@@ -129,7 +129,7 @@ public class FireShield implements Ability {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		return Collections.singletonList(shield.getCollider());
 	}
 

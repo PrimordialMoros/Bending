@@ -38,7 +38,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-import java.util.List;
+import java.util.Collection;
 
 public abstract class AbstractWheel {
 	protected final User user;
@@ -95,7 +95,7 @@ public abstract class AbstractWheel {
 
 	// Try to resolve wheel location by checking collider-block intersections.
 	public boolean resolveMovement(double maxResolution) {
-		List<Block> nearbyBlocks = WorldMethods.getNearbyBlocks(user.getWorld(), box.at(location));
+		Collection<Block> nearbyBlocks = WorldMethods.getNearbyBlocks(user.getWorld(), box.at(location));
 		Collider checkCollider = getCollider();
 		// Calculate top and bottom positions and add a small buffer
 		double topY = location.getY() + radius + 0.05;
@@ -126,7 +126,7 @@ public abstract class AbstractWheel {
 		return checkCollisions(nearbyBlocks);
 	}
 
-	private boolean checkCollisions(List<Block> nearbyBlocks) {
+	private boolean checkCollisions(Collection<Block> nearbyBlocks) {
 		// Check if there's any final collisions after all movements.
 		Collider checkCollider = getCollider();
 		return nearbyBlocks.stream().map(AABBUtils::getBlockBounds).noneMatch(checkCollider::intersects);

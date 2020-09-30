@@ -27,10 +27,10 @@ import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public abstract class BurstAbility implements Ability {
-	protected final List<Burstable> blasts = new ArrayList<>();
+	protected final Collection<Burstable> blasts = new ArrayList<>();
 
 	protected <T extends Burstable> void createCone(User user, Class<T> type, double range) {
 		createBurst(user, type, range, true);

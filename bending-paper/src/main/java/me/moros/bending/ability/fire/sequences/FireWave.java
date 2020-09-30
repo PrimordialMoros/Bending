@@ -41,7 +41,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
 import java.util.ArrayDeque;
-import java.util.List;
+import java.util.Collection;
 import java.util.Queue;
 
 public class FireWave implements Ability {
@@ -75,7 +75,7 @@ public class FireWave implements Ability {
 			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(yaw), RotationConvention.VECTOR_OPERATOR);
 			OBB collider = new OBB(new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5)), rotation).addPosition(currentPosition);
 			double radius = collider.getHalfExtents().maxComponent() + 1;
-			List<Block> blocks = WorldMethods.getNearbyBlocks(currentPosition.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
+			Collection<Block> blocks = WorldMethods.getNearbyBlocks(currentPosition.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
 			if (blocks.isEmpty()) break;
 			walls.offer(new WallInfo(blocks, collider));
 
@@ -125,15 +125,15 @@ public class FireWave implements Ability {
 	}
 
 	private static class WallInfo {
-		private final List<Block> blocks;
+		private final Collection<Block> blocks;
 		private final OBB collider;
 
-		private WallInfo(List<Block> blocks, OBB collider) {
+		private WallInfo(Collection<Block> blocks, OBB collider) {
 			this.blocks = blocks;
 			this.collider = collider;
 		}
 
-		private List<Block> getBlocks() {
+		private Collection<Block> getBlocks() {
 			return blocks;
 		}
 

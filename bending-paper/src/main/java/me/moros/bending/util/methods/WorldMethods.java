@@ -39,6 +39,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -52,14 +53,14 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static List<Block> getNearbyBlocks(Location location, double radius) {
+	public static Collection<Block> getNearbyBlocks(Location location, double radius) {
 		return getNearbyBlocks(location, radius, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static List<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate) {
+	public static Collection<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate) {
 		return getNearbyBlocks(location, radius, predicate, 0);
 	}
 
@@ -72,7 +73,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static List<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate, int limit) {
+	public static Collection<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate, int limit) {
 		int r = NumberConversions.ceil(radius) + 1;
 		double originX = location.getX();
 		double originY = location.getY();
@@ -98,17 +99,16 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static List<Block> getNearbyBlocks(World world, AABB box) {
+	public static Collection<Block> getNearbyBlocks(World world, AABB box) {
 		return getNearbyBlocks(world, box, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static List<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
+	public static Collection<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
 		return getNearbyBlocks(world, box, predicate, 0);
 	}
-
 
 	/**
 	 * Collects all blocks inside a bounding box that satisfy the given predicate.
@@ -119,7 +119,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static List<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
+	public static Collection<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
 		if (box == AABBUtils.DUMMY_COLLIDER) return Collections.emptyList();
 		Vector3 min = box.min();
 		Vector3 max = box.max();

@@ -45,8 +45,8 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -156,7 +156,7 @@ public class AirBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public List<Collider> getColliders() {
+	public Collection<Collider> getColliders() {
 		if (stream == null) return Collections.emptyList();
 		return Collections.singletonList(stream.getCollider());
 	}
