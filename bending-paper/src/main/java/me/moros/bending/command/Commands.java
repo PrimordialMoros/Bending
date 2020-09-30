@@ -28,7 +28,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.game.AttributeSystem;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
@@ -39,10 +38,8 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -65,13 +62,12 @@ public class Commands {
 		CommandCompletions<BukkitCommandCompletionContext> commandCompletions = Bending.getCommandManager().getCommandCompletions();
 		commandCompletions.registerAsyncCompletion("abilities", c -> {
 			Player player = c.getPlayer();
-			Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate();
 			Predicate<AbilityDescription> permissionPredicate = x -> true;
 			if (player != null) {
 				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
 				permissionPredicate = bendingPlayer::hasPermission;
 			}
-			return Game.getAbilityRegistry().getAbilities().filter(abilityPredicate)
+			return Game.getAbilityRegistry().getAbilities().filter(desc -> !desc.isHidden())
 				.filter(permissionPredicate).map(AbilityDescription::getName).collect(Collectors.toList());
 		});
 
@@ -103,14 +99,13 @@ public class Commands {
 			String name = c.popFirstArg();
 			if (name == null || name.isEmpty()) throw new InvalidCommandArgument("Could not find ability name");
 			Player player = c.getPlayer();
-			Predicate<AbilityDescription> abilityPredicate = getAbilityPredicate(FilterType.parse(c.getFlagValue("filter", "ALL")));
 			Predicate<AbilityDescription> permissionPredicate = x -> true;
 			if (player != null) {
 				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
 				permissionPredicate = bendingPlayer::hasPermission;
 			}
 			return Game.getAbilityRegistry().getAbilities()
-				.filter(abilityPredicate)
+				.filter(desc -> !desc.isHidden())
 				.filter(desc -> desc.getName().equalsIgnoreCase(name)) // TODO aliases for desc names?
 				.filter(permissionPredicate)
 				.findAny().orElseThrow(() -> new InvalidCommandArgument("Could not find ability " + name));
@@ -153,44 +148,5 @@ public class Commands {
 				throw new InvalidSlotException(value);
 			}
 		});
-	}
-
-	public static Predicate<AbilityDescription> getAbilityPredicate() {
-		return getAbilityPredicate(FilterType.ALL);
-	}
-
-	public static Predicate<AbilityDescription> getAbilityPredicate(FilterType type) {
-		List<Predicate<AbilityDescription>> predicates = new ArrayList<>();
-		predicates.add(desc -> !desc.isHidden());
-		switch (type) {
-			case NORMAL:
-				predicates.add(desc -> !desc.isActivatedBy(ActivationMethod.SEQUENCE) && !desc.isActivatedBy(ActivationMethod.PASSIVE));
-				break;
-			case PASSIVE:
-				predicates.add(desc -> desc.isActivatedBy(ActivationMethod.PASSIVE));
-				break;
-			case SEQUENCE:
-				predicates.add(desc -> desc.isActivatedBy(ActivationMethod.SEQUENCE));
-				break;
-		}
-		return predicates.stream().reduce(x -> true, Predicate::and);
-	}
-
-	public static FilterType getMainType(AbilityDescription desc) {
-		if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
-			return FilterType.PASSIVE;
-		} else if (desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			return FilterType.SEQUENCE;
-		} else {
-			return FilterType.NORMAL;
-		}
-	}
-
-	public enum FilterType {
-		ALL, NORMAL, PASSIVE, SEQUENCE;
-
-		private static FilterType parse(String name) {
-			return Arrays.stream(values()).filter(t -> name.equals(t.toString())).findAny().orElse(FilterType.ALL);
-		}
 	}
 }

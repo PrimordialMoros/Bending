@@ -23,18 +23,28 @@ public enum ActivationMethod {
 	PASSIVE("Passive"),
 	PUNCH("Click"),
 	PUNCH_ENTITY("Click Entity"),
-	INTERACT("Right Click Air"),
-	INTERACT_ENTITY("Right Click Entity"),
-	INTERACT_BLOCK("Right Click Block"),
+	INTERACT("Right Click Air", true),
+	INTERACT_ENTITY("Right Click Entity", true),
+	INTERACT_BLOCK("Right Click Block", true),
 	SNEAK("Hold Sneak"),
 	SNEAK_RELEASE("Release Sneak"),
 	FALL("Fall"),
 	SEQUENCE("Sequence");
 
 	private final String name;
+	private final boolean interact;
 
 	ActivationMethod(String name) {
+		this(name, false);
+	}
+
+	ActivationMethod(String name, boolean interact) {
 		this.name = name;
+		this.interact = interact;
+	}
+
+	public boolean isInteract() {
+		return interact;
 	}
 
 	@Override

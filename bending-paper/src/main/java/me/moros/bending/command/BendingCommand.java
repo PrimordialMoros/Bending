@@ -27,7 +27,6 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Conditions;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
@@ -197,8 +196,9 @@ public class BendingCommand extends BaseCommand {
 		// TODO Implement paginator
 		List<Component> output = new ArrayList<>(16);
 		List<Component> normal = Game.getAbilityRegistry().getAbilities()
-			.filter(d -> d.getElement() == element)
-			.filter(Commands.getAbilityPredicate(Commands.FilterType.NORMAL))
+			.filter(desc -> desc.getElement() == element)
+			.filter(desc -> !desc.isHidden())
+			.filter(desc -> !desc.isActivatedBy(ActivationMethod.SEQUENCE))
 			.filter(desc -> sender.hasPermission(desc.getPermission()))
 			.map(AbilityDescription::getMeta)
 			.collect(Collectors.toList());
@@ -241,11 +241,17 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.bind")
 	@CommandCompletion("@abilities @range:1-9")
 	@Description("Bind an ability to a slot")
-	public static void onBind(BendingPlayer player, @Flags("filter=NORMAL") AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
+	public static void onBind(BendingPlayer player, AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
 		if (!player.hasElement(ability.getElement())) {
 			player.sendMessageKyori(ability.getDisplayName()
 				.append(Component.text(" requires element ", NamedTextColor.YELLOW))
 				.append(Component.text(ability.getElement().toString(), ability.getElement().getColor()))
+			);
+			return;
+		}
+		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
+			player.sendMessageKyori(ability.getDisplayName()
+				.append(Component.text(" is a sequence and cannot be bound to a slot.", NamedTextColor.YELLOW))
 			);
 			return;
 		}

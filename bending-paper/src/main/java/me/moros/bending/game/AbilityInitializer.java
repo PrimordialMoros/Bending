@@ -119,6 +119,10 @@ public final class AbilityInitializer {
 
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
+
+		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange.class)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();
+		abilities.add(phaseChange);
 	}
 
 	private static void initEarth(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {

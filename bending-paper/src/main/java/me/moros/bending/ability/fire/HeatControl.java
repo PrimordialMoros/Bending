@@ -80,7 +80,7 @@ public class HeatControl implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		this.userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Game.getAttributeSystem().calculate(this, config);
 	}
 
 	private boolean melt() {

@@ -35,12 +35,22 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.util.Vector;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles ability activation.
  */
 public final class ActivationController {
+	private final Map<User, Boolean> ignoreSwing = ExpiringMap.builder()
+		.expiration(100, TimeUnit.MILLISECONDS)
+		.expirationPolicy(ExpirationPolicy.CREATED)
+		.build();
+
 	public boolean activateAbility(User user, ActivationMethod method) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null || !desc.isActivatedBy(method) || !user.canBend(desc)) return false;
@@ -64,6 +74,7 @@ public final class ActivationController {
 	}
 
 	public void onUserSwing(User user) {
+		if (ignoreSwing.containsKey(user)) return;
 		AbilityManager manager = Game.getAbilityManager(user.getWorld());
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		boolean removed = false;
@@ -77,6 +88,7 @@ public final class ActivationController {
 		removed |= manager.destroyInstanceType(user, AirWheel.class);
 		if (removed) return;
 
+		PhaseChange.freeze(user);
 		Combustion.explode(user);
 		FireBurst.activateCone(user);
 		AirBurst.activateCone(user);
@@ -92,6 +104,7 @@ public final class ActivationController {
 
 	public void onUserSneak(User user, boolean sneaking) {
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
+		if (action == ActivationMethod.SNEAK) PhaseChange.melt(user);
 		Game.getSequenceManager().registerAction(user, action);
 		activateAbility(user, action);
 		Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
@@ -108,36 +121,30 @@ public final class ActivationController {
 
 	public boolean onFallDamage(User user) {
 		activateAbility(user, ActivationMethod.FALL);
-
 		if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
 			return false;
 		}
-
 		if (user.hasElement(Element.WATER) && HydroSink.canHydroSink(user)) {
 			return false;
 		}
-
         /*if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
             Block block = user.getLocation().getBlock().getRelative(BlockFace.DOWN);
             Location location = block.getLocation().add(0.5, 0.5, 0.5);
             DensityShift.softenArea(user, location);
             return false;
         }*/
-
 		return !Flight.hasFlight(user);
 	}
 
-	public void onUserInteract(User user, boolean rightClickAir) {
-		if (rightClickAir) {
-			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT);
-		} else {
-			Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT_BLOCK);
-			activateAbility(user, ActivationMethod.INTERACT_BLOCK);
-		}
+	public void onUserInteract(User user, ActivationMethod method) {
+		if (!method.isInteract()) return;
+		ignoreNextSwing(user);
+		Game.getSequenceManager().registerAction(user, method);
+		activateAbility(user, method);
 	}
 
-	public void onUserInteractEntity(User user) {
-		Game.getSequenceManager().registerAction(user, ActivationMethod.INTERACT_ENTITY);
+	public void ignoreNextSwing(User user) {
+		ignoreSwing.put(user, true);
 	}
 
 	public boolean onFireTickDamage(User user) {

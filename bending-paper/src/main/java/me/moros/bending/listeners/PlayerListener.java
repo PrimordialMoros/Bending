@@ -25,6 +25,7 @@ import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.model.user.player.BendingProfile;
@@ -33,12 +34,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -111,18 +112,27 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.getHand() == EquipmentSlot.HAND) {
-			boolean rightClickAir = event.getAction() == Action.RIGHT_CLICK_AIR;
-			if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				Game.getActivationController().onUserInteract(Game.getPlayerManager()
-					.getPlayer(event.getPlayer().getUniqueId()), rightClickAir);
-			}
+		if (event.getHand() != EquipmentSlot.HAND) return;
+		BendingPlayer player = Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+		switch (event.getAction()) {
+			case RIGHT_CLICK_AIR:
+				Game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT);
+				break;
+			case RIGHT_CLICK_BLOCK:
+				Game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK);
+				break;
 		}
 	}
 
 	@EventHandler(ignoreCancelled = true)
+	public void onPlayDropItem(PlayerDropItemEvent event) {
+		Game.getActivationController().ignoreNextSwing(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+	}
+
+	@EventHandler(ignoreCancelled = true)
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-		Game.getActivationController().onUserInteractEntity(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+		if (event.getHand() != EquipmentSlot.HAND) return;
+		Game.getActivationController().onUserInteract(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), ActivationMethod.INTERACT_ENTITY);
 	}
 
 	@EventHandler(ignoreCancelled = true)

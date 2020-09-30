@@ -58,7 +58,7 @@ public class AirBurst extends BurstAbility {
 
 	@Override
 	public void recalculateConfig() {
-		this.userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Game.getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
