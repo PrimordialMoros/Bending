@@ -103,9 +103,9 @@ public class FireJet implements Ability {
 
 		user.getEntity().setVelocity(user.getDirection().scalarMultiply(speed * factor).toVector());
 		user.getEntity().setFallDistance(0);
-		ParticleUtil.createFire(user, user.getLocation().toLocation(user.getWorld())).count(10)
+		ParticleUtil.createFire(user, user.getEntity().getLocation()).count(10)
 			.offset(0.3, 0.3, 0.3).spawn();
-		ParticleUtil.create(Particle.SMOKE_NORMAL, user.getLocation().toLocation(user.getWorld())).count(5)
+		ParticleUtil.create(Particle.SMOKE_NORMAL, user.getEntity().getLocation()).count(5)
 			.offset(0.3, 0.3, 0.3).spawn();
 
 		return UpdateResult.CONTINUE;

@@ -171,7 +171,7 @@ public class WaterSpout implements Ability {
 				user.getEntity().setVelocity(user.getEntity().getVelocity().add(g));
 			}
 			if (ThreadLocalRandom.current().nextInt(8) == 0) {
-				SoundUtil.WATER_SOUND.play(user.getLocation().toLocation(user.getWorld()));
+				SoundUtil.WATER_SOUND.play(user.getEntity().getLocation());
 			}
 		}
 	}

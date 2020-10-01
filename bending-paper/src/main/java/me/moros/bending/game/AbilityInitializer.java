@@ -23,6 +23,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
+import me.moros.bending.ability.earth.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
@@ -129,6 +130,11 @@ public final class AbilityInitializer {
 	}
 
 	private static void initEarth(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+		abilities.add(AbilityDescription.builder("DensityShift", DensityShift.class)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+
+		abilities.add(AbilityDescription.builder("EarthCling", EarthCling.class)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 		// TODO add earth abilities
 	}
 

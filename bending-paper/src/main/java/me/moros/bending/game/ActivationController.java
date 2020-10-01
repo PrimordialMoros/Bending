@@ -22,6 +22,7 @@ package me.moros.bending.game;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
+import me.moros.bending.ability.earth.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
@@ -127,12 +128,9 @@ public final class ActivationController {
 		if (user.hasElement(Element.WATER) && HydroSink.canHydroSink(user)) {
 			return false;
 		}
-        /*if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
-            Block block = user.getLocation().getBlock().getRelative(BlockFace.DOWN);
-            Location location = block.getLocation().add(0.5, 0.5, 0.5);
-            DensityShift.softenArea(user, location);
-            return false;
-        }*/
+		if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
+			return false;
+		}
 		return !Flight.hasFlight(user);
 	}
 

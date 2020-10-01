@@ -23,7 +23,6 @@ import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.WaterMaterials;
@@ -53,8 +52,8 @@ public class HydroSink implements PassiveAbility {
 		if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
 			return false;
 		}
-		AbilityDescription desc = Game.getAbilityRegistry().getAbilityDescription("HydroSink").orElse(null);
-		if (desc == null || !user.canBend(desc)) return false;
+		if (!Game.getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false))
+			return false;
 
 		Block block = user.getLocBlock();
 		Block baseBlock = block.getRelative(BlockFace.DOWN);

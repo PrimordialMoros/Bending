@@ -23,7 +23,6 @@ import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 
@@ -50,9 +49,7 @@ public class GracefulDescent implements PassiveAbility {
 		if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
 			return false;
 		}
-
-		AbilityDescription desc = Game.getAbilityRegistry().getAbilityDescription("GracefulDescent").orElse(null);
-		return desc != null && user.canBend(desc);
+		return Game.getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
 	}
 
 	@Override

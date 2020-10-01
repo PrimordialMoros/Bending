@@ -58,7 +58,7 @@ public final class SourceUtil {
 	 * @return an Optional source block
 	 */
 	public static Optional<Block> getSource(User user, double range, Set<Material> materials) {
-		Location start = user.getEyeLocation().toLocation(user.getWorld());
+		Location start = user.getEntity().getEyeLocation();
 		Vector dir = user.getDirection().toVector();
 		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
 		if (result == null || result.getHitBlock() == null) return Optional.empty();

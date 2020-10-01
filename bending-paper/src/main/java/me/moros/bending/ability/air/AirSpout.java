@@ -37,7 +37,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
@@ -146,8 +145,8 @@ public class AirSpout implements Ability {
 			long time = System.currentTimeMillis();
 			if (time < nextRenderTime) return;
 			for (int i = 0; i < distance; i++) {
-				Location location = user.getLocation().toLocation(user.getWorld()).subtract(0, i, 0);
-				ParticleUtil.createAir(location).count(3).offset(0.4, 0.4, 0.4).spawn();
+				ParticleUtil.createAir(user.getEntity().getLocation().subtract(0, i, 0))
+					.count(3).offset(0.4, 0.4, 0.4).spawn();
 			}
 			nextRenderTime = time + 100;
 		}
@@ -155,7 +154,7 @@ public class AirSpout implements Ability {
 		@Override
 		public void postRender() {
 			if (ThreadLocalRandom.current().nextInt(8) == 0) {
-				SoundUtil.AIR_SOUND.play(user.getLocation().toLocation(user.getWorld()));
+				SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
 			}
 		}
 	}

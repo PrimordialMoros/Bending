@@ -116,7 +116,7 @@ public class AirScooter implements Ability {
 
 		if (canRender) render();
 		if (ThreadLocalRandom.current().nextInt(4) == 0) {
-			SoundUtil.AIR_SOUND.play(user.getLocation().toLocation(user.getWorld()));
+			SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
 		}
 
 		return UpdateResult.CONTINUE;
@@ -134,7 +134,7 @@ public class AirScooter implements Ability {
 			double x = 0.6 * FastMath.cos(angle) * FastMath.sin(verticalPosition);
 			double y = 0.6 * FastMath.cos(verticalPosition);
 			double z = 0.6 * FastMath.sin(angle) * FastMath.sin(verticalPosition);
-			ParticleUtil.createAir(user.getLocation().toLocation(user.getWorld()).add(x, y, z)).spawn();
+			ParticleUtil.createAir(user.getEntity().getLocation().add(x, y, z)).spawn();
 		}
 	}
 

@@ -31,6 +31,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockIterator;
@@ -66,7 +67,7 @@ public final class WorldMethods {
 
 	/**
 	 * Collects all blocks in a sphere that satisfy the given predicate.
-	 * Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+	 * <p> Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
 	 * @param location the center point
 	 * @param radius the radius of the sphere
 	 * @param predicate the predicate that needs to be satisfied for every block
@@ -112,7 +113,7 @@ public final class WorldMethods {
 
 	/**
 	 * Collects all blocks inside a bounding box that satisfy the given predicate.
-	 * Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+	 * <p> Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
 	 * @param world the world to check
 	 * @param box the bounding box to check
 	 * @param predicate the predicate that needs to be satisfied for every block
@@ -148,7 +149,7 @@ public final class WorldMethods {
 
 	/**
 	 * Gets the targeted location.
-	 * Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
+	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
 	 * @param world the world to check in
 	 * @param ray the ray which holds the origin and direction
 	 * @param ignored a set of materials that will be ignored
@@ -271,5 +272,24 @@ public final class WorldMethods {
 			}
 		}
 		return 256;
+	}
+
+	/**
+	 * Check if a user is against a wall made of blocks matching the given predicate.
+	 * <p> Note: Passable blocks and barriers are ignored.
+	 * @param user the user to check
+	 * @param predicate the type of blocks to accept
+	 * @return whether the user is against a wall
+	 */
+	public static boolean isAgainstWall(User user, Predicate<Block> predicate) {
+		Block origin = user.getLocBlock();
+		for (BlockFace face : BlockMethods.CARDINAL_FACES) {
+			Block relative = origin.getRelative(face);
+			if (relative.isPassable() || relative.getType() == Material.BARRIER) continue;
+			if (predicate.test(relative)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

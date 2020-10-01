@@ -17,10 +17,11 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.air.passives;
+package me.moros.bending.ability.earth.passives;
 
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
@@ -28,12 +29,16 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 
-public class AirAgility implements PassiveAbility {
+import java.util.function.Predicate;
+
+public class DensityShift implements PassiveAbility {
+	private static final Predicate<Block> CAN_SOFTEN = b -> MaterialUtil.isEarthbendable(b) && b.getRelative(BlockFace.UP).isPassable();
 	private static final Config config = new Config();
 
 	private User user;
@@ -53,28 +58,29 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		if (!user.isValid() || !user.canBend(getDescription())) {
-			return UpdateResult.CONTINUE;
-		}
-		if (userConfig.jumpAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier - 1);
-		}
-		if (userConfig.speedAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier - 1);
-		}
 		return UpdateResult.CONTINUE;
 	}
 
-	private void handlePotionEffect(PotionEffectType type, int amplifier) {
-		if (PotionUtil.canAddPotion(user, type, 20, amplifier)) {
-			user.getEntity().addPotionEffect(new PotionEffect(type, 100, amplifier, true, false));
+	public static boolean isSoftened(User user) {
+		if (!Game.getAbilityRegistry().getAbilityDescription("DensityShift").map(user::canBend).orElse(false)) {
+			return false;
 		}
+		DensityShift instance = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class).orElse(null);
+		if (instance == null) {
+			return false;
+		}
+		long duration = instance.userConfig.duration;
+		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
+		if (MaterialUtil.isEarthbendable(block)) {
+			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, CAN_SOFTEN)
+				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration));
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public void destroy() {
-		user.getEntity().removePotionEffect(PotionEffectType.JUMP);
-		user.getEntity().removePotionEffect(PotionEffectType.SPEED);
 	}
 
 	@Override
@@ -84,7 +90,7 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public String getName() {
-		return "AirAgility";
+		return "DensityShift";
 	}
 
 	@Override
@@ -92,17 +98,18 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.STRENGTH)
-		public int speedAmplifier;
-		@Attribute(Attributes.STRENGTH)
-		public int jumpAmplifier;
+		@Attribute(Attributes.DURATION)
+		public long duration;
+		@Attribute(Attributes.RADIUS)
+		public double radius;
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "passives", "airagility");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "passives", "densityshift");
 
-			speedAmplifier = abilityNode.getNode("speed-amplifier").getInt(2);
-			jumpAmplifier = abilityNode.getNode("jump-amplifier").getInt(2);
+			duration = abilityNode.getNode("duration").getLong(6000);
+			radius = abilityNode.getNode("radius").getDouble(2.0);
 		}
 	}
 }
+

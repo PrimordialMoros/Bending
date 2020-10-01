@@ -17,23 +17,30 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.air.passives;
+package me.moros.bending.ability.earth.passives;
 
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.util.Vector;
 
-public class AirAgility implements PassiveAbility {
+public class EarthCling implements PassiveAbility {
+	private static final BlockData STONE = Material.STONE.createBlockData();
 	private static final Config config = new Config();
 
 	private User user;
@@ -53,28 +60,33 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		if (!user.isValid() || !user.canBend(getDescription())) {
+		if (!user.isValid() || !user.isSneaking() || WorldMethods.isOnGround(user.getEntity())) {
 			return UpdateResult.CONTINUE;
 		}
-		if (userConfig.jumpAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier - 1);
+		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
+			return UpdateResult.CONTINUE;
 		}
-		if (userConfig.speedAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier - 1);
+		int counter = 2;
+		// TODO add earthglove and count available
+		if (counter > 0 && WorldMethods.isAgainstWall(user, MaterialUtil::isEarthbendable)) {
+			if (counter == 2) {
+				user.getEntity().setVelocity(new Vector());
+			} else {
+				Vector3 velocity = new Vector3(user.getEntity().getVelocity());
+				if (velocity.getY() < 0) {
+					user.getEntity().setVelocity(velocity.scalarMultiply(userConfig.speed).clampVelocity().toVector());
+					ParticleUtil.create(Particle.CRIT, user.getEntity().getEyeLocation()).count(2)
+						.offset(0.05, 0.4, 0.05);
+					ParticleUtil.create(Particle.BLOCK_CRACK, user.getEntity().getEyeLocation()).count(3)
+						.offset(0.1, 0.4, 0.1).data(STONE);
+				}
+			}
 		}
 		return UpdateResult.CONTINUE;
 	}
 
-	private void handlePotionEffect(PotionEffectType type, int amplifier) {
-		if (PotionUtil.canAddPotion(user, type, 20, amplifier)) {
-			user.getEntity().addPotionEffect(new PotionEffect(type, 100, amplifier, true, false));
-		}
-	}
-
 	@Override
 	public void destroy() {
-		user.getEntity().removePotionEffect(PotionEffectType.JUMP);
-		user.getEntity().removePotionEffect(PotionEffectType.SPEED);
 	}
 
 	@Override
@@ -84,7 +96,7 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public String getName() {
-		return "AirAgility";
+		return "EarthCling";
 	}
 
 	@Override
@@ -92,17 +104,15 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.STRENGTH)
-		public int speedAmplifier;
-		@Attribute(Attributes.STRENGTH)
-		public int jumpAmplifier;
+		@Attribute(Attributes.SPEED)
+		public double speed;
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "passives", "airagility");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "passives", "earthcling");
 
-			speedAmplifier = abilityNode.getNode("speed-amplifier").getInt(2);
-			jumpAmplifier = abilityNode.getNode("jump-amplifier").getInt(2);
+			speed = abilityNode.getNode("radius").getDouble(2.0);
 		}
 	}
 }
+

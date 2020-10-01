@@ -19,6 +19,7 @@
 
 package me.moros.bending.util.material;
 
+import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.util.collision.AABBUtils;
 import org.bukkit.Material;
@@ -201,6 +202,31 @@ public final class MaterialUtil {
 			default:
 				return data;
 		}
+	}
+
+	// Finds a suitable soft block type to replace a solid block
+	public static BlockData getSoftType(BlockData data) {
+		if (MaterialTags.SANDSTONES.isTagged(data.getMaterial())) {
+			return Material.SAND.createBlockData();
+		} else if (MaterialTags.RED_SANDSTONES.isTagged(data.getMaterial())) {
+			return Material.RED_SAND.createBlockData();
+		}
+		switch (data.getMaterial()) {
+			case STONE:
+			case GRANITE:
+			case POLISHED_GRANITE:
+			case DIORITE:
+			case POLISHED_DIORITE:
+			case ANDESITE:
+			case POLISHED_ANDESITE:
+				return Material.GRAVEL.createBlockData();
+			case DIRT:
+			case MYCELIUM:
+			case GRASS_BLOCK:
+			case GRASS_PATH:
+				return Material.COARSE_DIRT.createBlockData();
+		}
+		return Material.SAND.createBlockData();
 	}
 
 	public static boolean isAir(Block block) {
