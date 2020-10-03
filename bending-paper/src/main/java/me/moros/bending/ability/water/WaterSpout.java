@@ -66,9 +66,6 @@ public class WaterSpout implements Ability {
 		if (Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterSpout.class)) {
 			return false;
 		}
-		if (user.getHeadBlock().isLiquid()) {
-			return false;
-		}
 
 		this.user = user;
 		recalculateConfig();
@@ -97,10 +94,6 @@ public class WaterSpout implements Ability {
 	@Override
 	public UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-
-		if (user.getHeadBlock().isLiquid()) {
 			return UpdateResult.REMOVE;
 		}
 

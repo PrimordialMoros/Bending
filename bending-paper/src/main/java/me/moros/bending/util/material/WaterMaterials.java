@@ -25,9 +25,9 @@ import me.moros.bending.Bending;
 import org.bukkit.Material;
 
 public class WaterMaterials {
-	// TODO complete and validate, make them configurable
 	public static final MaterialSetTag PLANT_BENDABLE;
 	public static final MaterialSetTag ICE_BENDABLE;
+	public static final MaterialSetTag ALL;
 
 	static {
 		PLANT_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.FLOWERS.getValues());
@@ -38,5 +38,8 @@ public class WaterMaterials {
 			.add(Material.DEAD_BUSH, Material.CACTUS, Material.MELON, Material.VINE);
 
 		ICE_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.ICE.getValues());
+
+		ALL = new MaterialSetTag(Bending.getKey(), Material.WATER);
+		ALL.add(PLANT_BENDABLE, ICE_BENDABLE);
 	}
 }

@@ -27,11 +27,11 @@ import org.bukkit.Material;
 import java.util.EnumSet;
 
 public class EarthMaterials {
-	// TODO complete and validate, make them configurable
 	public static final MaterialSetTag EARTH_BENDABLE;
 	public static final MaterialSetTag SAND_BENDABLE;
 	public static final MaterialSetTag METAL_BENDABLE;
 	public static final MaterialSetTag LAVA_BENDABLE;
+	public static final MaterialSetTag ALL;
 
 	static {
 		EARTH_BENDABLE = new MaterialSetTag(Bending.getKey(), EnumSet.of(
@@ -55,5 +55,8 @@ public class EarthMaterials {
 		LAVA_BENDABLE = new MaterialSetTag(Bending.getKey(), EnumSet.of(
 			Material.LAVA, Material.MAGMA_BLOCK
 		));
+
+		ALL = new MaterialSetTag(Bending.getKey(), EARTH_BENDABLE.getValues());
+		ALL.add(SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE);
 	}
 }

@@ -28,6 +28,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.EnumSet;
@@ -167,11 +168,15 @@ public final class MaterialUtil {
 	}
 
 	public static boolean isWater(Block block) {
-		return isWater(block.getType());
+		return isWater(block.getType()) || isWaterLogged(block.getBlockData());
 	}
 
 	public static boolean isWater(Material type) {
 		return type == Material.WATER;
+	}
+
+	public static boolean isWaterLogged(BlockData data) {
+		return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
 	}
 
 	public static boolean isIce(Block block) {

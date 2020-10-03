@@ -19,6 +19,7 @@
 
 package me.moros.bending.util.collision;
 
+import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.CollisionCallback;
 import me.moros.bending.model.math.Vector3;
@@ -26,6 +27,7 @@ import me.moros.bending.model.user.User;
 import org.bukkit.GameMode;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -56,6 +58,9 @@ public final class CollisionUtil {
 		for (Entity entity : user.getWorld().getNearbyEntities(pos.toLocation(user.getWorld()), extent.getX(), extent.getY(), extent.getZ())) {
 			if (!selfCollision && entity.equals(user.getEntity())) continue;
 			if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) {
+				continue;
+			}
+			if (entity instanceof FallingBlock && BendingFallingBlock.manager.isTemp((FallingBlock) entity)) {
 				continue;
 			}
 			if (livingOnly && !(entity instanceof LivingEntity)) {

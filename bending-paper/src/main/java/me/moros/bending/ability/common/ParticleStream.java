@@ -20,6 +20,7 @@
 package me.moros.bending.ability.common;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -36,7 +37,7 @@ import org.bukkit.entity.Entity;
 
 import java.util.function.Predicate;
 
-public abstract class ParticleStream {
+public abstract class ParticleStream implements Updatable {
 	protected final User user;
 	protected final Ray ray;
 
@@ -64,7 +65,7 @@ public abstract class ParticleStream {
 		render();
 	}
 
-	// Return false to destroy this stream
+	@Override
 	public UpdateResult update() {
 		location = location.add(dir);
 		Block block = location.toBlock(user.getWorld());

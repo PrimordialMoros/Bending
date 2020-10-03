@@ -19,6 +19,7 @@
 
 package me.moros.bending.util;
 
+import com.destroystokyo.paper.MaterialSetTag;
 import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.user.User;
@@ -48,6 +49,13 @@ public final class SourceUtil {
 		PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
 		potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
 		waterBottle.setItemMeta(potionMeta);
+	}
+
+	/**
+	 * @see #getSource(User, double, Set)
+	 */
+	public static Optional<Block> getSource(User user, double range, MaterialSetTag materials) {
+		return getSource(user, range, materials.getValues());
 	}
 
 	/**

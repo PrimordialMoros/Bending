@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.water.passives;
 
+import me.moros.bending.ability.water.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -28,6 +29,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.material.MaterialUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
@@ -51,10 +53,11 @@ public class FastSwim implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		if (user.isSneaking() && user.getSelectedAbility().map(desc -> !desc.isActivatedBy(ActivationMethod.SNEAK)).orElse(true)) {
-			if (MaterialUtil.isWater(user.getLocBlock())) {
-				user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
-			}
+		if (!user.isSneaking() || !(user instanceof BendingPlayer) || !MaterialUtil.isWater(user.getLocBlock()))
+			return UpdateResult.CONTINUE;
+		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, WaterSpout.class)) return UpdateResult.CONTINUE;
+		if (user.getSelectedAbility().map(desc -> !desc.isActivatedBy(ActivationMethod.SNEAK)).orElse(true)) {
+			user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
 		}
 		return UpdateResult.CONTINUE;
 	}

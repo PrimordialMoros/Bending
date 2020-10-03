@@ -34,12 +34,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class BendingUser implements User {
 	private final ElementHolder elementHolder = new ElementHolder();
-	private final ArrayDeque<AbilitySlotContainer> slotContainers = new ArrayDeque<>(2);
+	private final Deque<AbilitySlotContainer> slotContainers = new ArrayDeque<>(2);
 	private final ExpiringMap<AbilityDescription, Boolean> cooldowns = ExpiringMap.builder().variableExpiration().build();
 	private final CompositeBendingConditional bendingConditional;
 	private final LivingEntity entity;
@@ -48,7 +49,7 @@ public class BendingUser implements User {
 		this.entity = entity;
 		cooldowns.addExpirationListener((key, value) ->
 			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
-		slotContainers.add(new AbilitySlotContainer(9));
+		slotContainers.addLast(new AbilitySlotContainer(9));
 		bendingConditional = CompositeBendingConditional.defaults().build();
 	}
 

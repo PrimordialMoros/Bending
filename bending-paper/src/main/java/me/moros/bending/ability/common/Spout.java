@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.common;
 
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -36,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class Spout {
+public abstract class Spout implements Updatable {
 	protected final User user;
 	protected final World world;
 
@@ -62,6 +63,7 @@ public abstract class Spout {
 		this.flight.setFlying(true);
 	}
 
+	@Override
 	public UpdateResult update() {
 		Block block = WorldMethods.blockCast(world, new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
 		if (block == null || !validBlock.test(block)) {

@@ -20,6 +20,7 @@
 package me.moros.bending.ability.common;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -40,7 +41,7 @@ import org.bukkit.entity.Entity;
 
 import java.util.Collection;
 
-public abstract class AbstractWheel {
+public abstract class AbstractWheel implements Updatable {
 	protected final User user;
 
 	private final Vector3 dir;
@@ -58,7 +59,7 @@ public abstract class AbstractWheel {
 		this.location = ray.origin;
 		this.radius = radius;
 		this.dir = ray.direction.normalize().scalarMultiply(speed);
-		box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius)).grow(new Vector3(0.5, 0.5, 0.5));
+		box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius)).grow(Vector3.HALF);
 		AABB bounds = new AABB(new Vector3(-0.15, -radius, -radius), new Vector3(0.15, radius, radius));
 		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
 		OBB obb = new OBB(bounds, new Rotation(Vector3.PLUS_J, angle, RotationConvention.VECTOR_OPERATOR));
@@ -76,6 +77,7 @@ public abstract class AbstractWheel {
 
 	protected abstract boolean onEntityHit(Entity entity);
 
+	@Override
 	public UpdateResult update() {
 		location = location.add(dir);
 		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {

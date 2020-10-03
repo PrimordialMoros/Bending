@@ -119,10 +119,14 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
+
+		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent.class)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
+		abilities.add(torrent);
 
 		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();

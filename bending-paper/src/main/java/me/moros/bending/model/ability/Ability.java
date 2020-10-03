@@ -28,10 +28,8 @@ import me.moros.bending.model.user.User;
 import java.util.Collection;
 import java.util.Collections;
 
-public interface Ability {
+public interface Ability extends Updatable {
 	boolean activate(User user, ActivationMethod method); // return true if the ability was activated
-
-	UpdateResult update(); // Return UpdateResult.Remove if the ability should be removed.
 
 	void destroy();
 

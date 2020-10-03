@@ -22,6 +22,7 @@ package me.moros.bending.game.temporal;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.Vector;
@@ -45,6 +46,14 @@ public class BendingFallingBlock implements Temporary {
 
 	public BendingFallingBlock(Location location, BlockData data, long duration) {
 		this(location, data, new Vector(), false, duration);
+	}
+
+	public BendingFallingBlock(Block block, BlockData data, Vector velocity, boolean gravity, long duration) {
+		this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
+	}
+
+	public BendingFallingBlock(Block block, BlockData data, long duration) {
+		this(block, data, new Vector(), false, duration);
 	}
 
 	@Override

@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.ability.sequence;
 
-import me.moros.bending.model.CircularQueue;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
@@ -32,28 +31,24 @@ import java.util.List;
  * Immutable and thread-safe representation of a sequence
  */
 public final class Sequence {
-	private final List<AbilityAction> actions = new ArrayList<>();
+	private final List<AbilityAction> sequence = new ArrayList<>();
 	private String instructions = "";
 
 	public Sequence(AbilityAction action, AbilityAction... actions) {
-		this.actions.add(action);
-		this.actions.addAll(Arrays.asList(actions));
-	}
-
-	public int size() {
-		return actions.size();
+		this.sequence.add(action);
+		this.sequence.addAll(Arrays.asList(actions));
 	}
 
 	/**
 	 * @return Unmodifiable view of this sequence's actions
 	 */
 	public List<AbilityAction> getActions() {
-		return Collections.unmodifiableList(actions);
+		return Collections.unmodifiableList(sequence);
 	}
 
 	public String getInstructions() {
 		if (instructions.isEmpty()) {
-			instructions = generateInstructions(this.actions);
+			instructions = generateInstructions(this.sequence);
 		}
 		return instructions;
 	}
@@ -79,12 +74,13 @@ public final class Sequence {
 		return sb.toString();
 	}
 
-	public boolean matches(CircularQueue<AbilityAction> queue) {
-		int size = queue.size();
-		if (size < size()) return false;
-		for (int i = 0; i < size(); i++) {
-			AbilityAction first = actions.get(size() - 1 - i);
-			AbilityAction second = queue.get(size - 1 - i);
+	public boolean matches(AbilityAction[] actions) {
+		int actionsLength = actions.length - 1;
+		int sequenceLength = sequence.size() - 1;
+		if (actionsLength < sequenceLength) return false;
+		for (int i = 0; i <= sequenceLength; i++) {
+			AbilityAction first = sequence.get(sequenceLength - i);
+			AbilityAction second = actions[actionsLength - i];
 			if (!first.equals(second)) return false;
 		}
 		return true;

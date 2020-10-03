@@ -17,26 +17,8 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.slots;
+package me.moros.bending.model.ability;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.preset.Preset;
-
-import java.util.Collection;
-
-public class MultiAbilitySlotContainer extends AbilitySlotContainer {
-
-	public MultiAbilitySlotContainer(Collection<AbilityDescription> abilities) {
-		super(abilities.size());
-		this.abilities = abilities.toArray(new AbilityDescription[0]);
-	}
-
-	@Override
-	public void setAbility(int slot, AbilityDescription desc) {
-	}
-
-	@Override
-	public Preset toPreset(String name) {
-		return Preset.EMPTY;
-	}
+public interface Updatable {
+	UpdateResult update();
 }

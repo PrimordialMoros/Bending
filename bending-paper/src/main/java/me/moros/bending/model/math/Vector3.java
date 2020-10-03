@@ -35,9 +35,14 @@ import org.bukkit.util.NumberConversions;
  */
 public class Vector3 extends Vector3D {
 	/**
-	 * Null vector (coordinates: 0, 0, 0).
+	 * Zero vector (coordinates: 0, 0, 0).
 	 */
 	public static final Vector3 ZERO = new Vector3(0, 0, 0);
+
+	/**
+	 * Half vector (coordinates: 0.5, 0.5, 0.5).
+	 */
+	public static final Vector3 HALF = new Vector3(0.5, 0.5, 0.5);
 
 	/**
 	 * Unit vector (coordinates: 1, 1, 1).
@@ -186,6 +191,10 @@ public class Vector3 extends Vector3D {
 
 	public Vector3 max(Vector3 other) {
 		return new Vector3(Math.max(getX(), other.getX()), FastMath.max(getY(), other.getY()), FastMath.max(getZ(), other.getZ()));
+	}
+
+	public Vector3 floor() {
+		return new Vector3(NumberConversions.floor(getX()), NumberConversions.floor(getY()), NumberConversions.floor(getZ()));
 	}
 
 	public org.bukkit.util.Vector toVector() {

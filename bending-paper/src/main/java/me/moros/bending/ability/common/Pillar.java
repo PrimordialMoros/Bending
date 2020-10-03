@@ -21,6 +21,7 @@ package me.moros.bending.ability.common;
 
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -41,7 +42,7 @@ import java.util.Optional;
 /**
  * You should validate that the pillar blocks have bendable materials
  */
-public class Pillar {
+public class Pillar implements Updatable {
 	private final User user;
 	private final Block origin;
 	private final BlockFace direction;
@@ -65,6 +66,7 @@ public class Pillar {
 		nextUpdateTime = 0;
 	}
 
+	@Override
 	public UpdateResult update() {
 		long time = System.currentTimeMillis();
 		if (time < nextUpdateTime) return UpdateResult.CONTINUE;

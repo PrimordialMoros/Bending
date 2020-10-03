@@ -79,8 +79,8 @@ public final class WorldMethods {
 		double originX = location.getX();
 		double originY = location.getY();
 		double originZ = location.getZ();
-		List<Block> blocks = new ArrayList<>();
 		Vector3 pos = new Vector3(location);
+		List<Block> blocks = new ArrayList<>();
 		for (double x = originX - r; x <= originX + r; x++) {
 			for (double y = originY - r; y <= originY + r; y++) {
 				for (double z = originZ - r; z <= originZ + r; z++) {

@@ -30,9 +30,7 @@ import java.util.Map;
 /**
  * This is a reference counting object that's used to manage a user's flight.
  * Every time a reference is acquired, it should eventually be released.
- * If the reference count drops to 0 then the user will lose flight.
- * Note: Actual flight and just fall damage prevention might need to be separated into two distinct things.
- * That would make it easier to take away Flight without removing fall damage protection at the same time.
+ * If the reference count drops below 1 then the user will lose flight.
  */
 public class Flight {
 	private static final Map<User, Flight> instances = new HashMap<>();
@@ -46,45 +44,31 @@ public class Flight {
 
 	private Flight(User user) {
 		this.user = user;
-		this.references = 0;
-		this.isFlying = false;
-		this.changedFlying = false;
-
+		references = 0;
+		isFlying = false;
+		changedFlying = false;
 		couldFly = user.getAllowFlight();
 		wasFlying = user.isFlying();
-
 		instances.put(user, this);
 	}
 
-	// Returns the Flight instance for a user. This will increment the flight counter.
+	// Returns the Flight instance for a user. This will also increment the flight counter.
 	// Call release() to decrement the counter.
 	// Call remove() to completely remove flight.
 	public static Flight get(User user) {
-		Flight flight = instances.get(user);
-		if (flight == null) {
-			flight = new Flight(user);
-
-			instances.put(user, flight);
-		}
-
-		flight.references++;
-		return flight;
+		return instances.computeIfAbsent(user, Flight::new).increment();
 	}
 
-	public static boolean hasFlight(User user) {
-		return instances.containsKey(user);
+	private Flight increment() {
+		++references;
+		return this;
 	}
 
-	public void setFlying(boolean flying) {
-		this.isFlying = flying;
-		user.setAllowFlight(flying);
-		user.setFlying(flying);
-
-		this.changedFlying = true;
-	}
-
-	public boolean isFlying() {
-		return this.isFlying;
+	public void setFlying(boolean value) {
+		isFlying = value;
+		user.setAllowFlight(value);
+		user.setFlying(value);
+		changedFlying = true;
 	}
 
 	public User getUser() {
@@ -92,38 +76,34 @@ public class Flight {
 	}
 
 	// Decrements the user's flight counter. If this goes below 1 then the user loses flight.
-	public Flight release() {
-		if (--references <= 0) {
-			remove(user);
-			return null;
-		}
-		return this;
+	public void release() {
+		if (--references < 1) remove(user);
+	}
+
+	public static boolean hasFlight(User user) {
+		return instances.containsKey(user);
 	}
 
 	// Completely releases flight for the user.
 	// This will set the user back to the state before any Flight was originally added.
 	public static void remove(User user) {
-		Flight flight = instances.get(user);
-
-		if (flight != null && flight.changedFlying) {
+		if (!instances.containsKey(user)) return;
+		Flight flight = instances.remove(user);
+		if (flight.changedFlying) {
 			user.setAllowFlight(flight.couldFly);
 			user.setFlying(flight.wasFlying);
 		}
-
-		instances.remove(user);
 	}
 
 	public static void removeAll() {
 		for (Map.Entry<User, Flight> entry : instances.entrySet()) {
 			User user = entry.getKey();
 			Flight flight = entry.getValue();
-
 			if (flight.changedFlying) {
 				user.setAllowFlight(flight.couldFly);
 				user.setFlying(flight.wasFlying);
 			}
 		}
-
 		instances.clear();
 	}
 
@@ -131,7 +111,6 @@ public class Flight {
 		for (Map.Entry<User, Flight> entry : instances.entrySet()) {
 			User user = entry.getKey();
 			Flight flight = entry.getValue();
-
 			if (flight.changedFlying && user.isFlying() != flight.isFlying) {
 				user.setFlying(flight.isFlying);
 			}

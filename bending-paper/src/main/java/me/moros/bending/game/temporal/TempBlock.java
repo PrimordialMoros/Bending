@@ -36,14 +36,15 @@ public class TempBlock implements Temporary {
 	private final BlockData data;
 	private RevertTask revertTask;
 	private long revertTime;
+	private final boolean bendable;
 
 	public static void init() {
 	}
 
-	private TempBlock(Block block, BlockData data, long duration) {
+	private TempBlock(Block block, BlockData data, long duration, boolean bendable) {
 		snapshot = block.getState();
 		this.data = data;
-
+		this.bendable = bendable;
 		manager.get(block).ifPresent(temp -> {
 			snapshot = temp.snapshot;
 			if (revertTask != null) revertTask.execute();
@@ -66,7 +67,12 @@ public class TempBlock implements Temporary {
 
 	public static Optional<TempBlock> create(Block block, BlockData data, long duration) {
 		if (block instanceof TileState) return Optional.empty();
-		return Optional.of(new TempBlock(block, data, duration));
+		return Optional.of(new TempBlock(block, data, duration, false));
+	}
+
+	public static Optional<TempBlock> create(Block block, BlockData data, long duration, boolean bendable) {
+		if (block instanceof TileState) return Optional.empty();
+		return Optional.of(new TempBlock(block, data, duration, bendable));
 	}
 
 	@Override
@@ -90,6 +96,10 @@ public class TempBlock implements Temporary {
 
 	public void removeWithoutReverting() {
 		manager.removeEntry(getBlock());
+	}
+
+	public boolean isBendable() {
+		return bendable;
 	}
 
 	@Override
