@@ -32,6 +32,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -53,15 +54,24 @@ public abstract class BlockStream implements State {
 	protected Vector3 direction;
 
 	private boolean started = false;
+	private int buffer;
+	private final int speed;
 
-	protected final boolean controllable;
+	protected boolean controllable;
 	protected double range;
 
-	public BlockStream(User user, Material material, double range, boolean controllable) {
+	/**
+	 * The maximum speed is 100 and represents movement of 1 block per tick.
+	 * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
+	 * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
+	 */
+	public BlockStream(User user, Material material, double range, boolean controllable, int speed) {
 		this.user = user;
 		this.material = material;
 		this.range = range;
 		this.controllable = controllable;
+		this.speed = FastMath.min(100, speed);
+		buffer = speed;
 	}
 
 	@Override
@@ -72,7 +82,6 @@ public abstract class BlockStream implements State {
 		chain.getChainStore().stream().filter(this::isValid).forEach(block -> {
 			if (TempBlock.create(block, material).isPresent()) stream.addLast(block);
 		});
-
 		started = !stream.isEmpty();
 	}
 
@@ -84,33 +93,41 @@ public abstract class BlockStream implements State {
 
 	@Override
 	public UpdateResult update() {
+		// Since this moves block by block, our only choice is to skip an update every x ticks based on our buffer speed
+		buffer += speed;
+		if (buffer < 100) return UpdateResult.CONTINUE;
 		if (!started || stream.stream().noneMatch(this::isValid)) return UpdateResult.REMOVE;
 
 		Block head = stream.getFirst();
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
-		if (current.distanceSq(user.getLocation()) > range * range) {
-			return UpdateResult.REMOVE;
-		}
 		if (controllable || direction == null) {
 			Vector3 targetLoc = new Vector3(WorldMethods.getTargetEntity(user, range).map(Entity::getLocation)
 				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
+			// Improve targeting when near
+			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
+				targetLoc = targetLoc.add(user.getDirection());
+			}
 			direction = targetLoc.subtract(current).normalize();
 		}
 
-		head = current.add(direction).toBlock(user.getWorld());
+		buffer -= 100; // Reduce buffer by one since we moved
+		current = current.add(direction);
+		head = current.toBlock(user.getWorld());
 		if (!Game.getProtectionSystem().canBuild(user, head)) {
 			return UpdateResult.REMOVE;
 		}
 
 		clean(stream.removeLast());
-		if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
-			if (material == Material.WATER && MaterialUtil.isWater(head)) {
-				ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))
-					.count(5).offset(0.25, 0.25, 0.25).spawn();
-			} else {
-				TempBlock.create(head, Material.WATER);
+		if (current.distanceSq(user.getLocation()) <= range * range) {
+			if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
+				if (material == Material.WATER && MaterialUtil.isWater(head)) {
+					ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))
+						.count(5).offset(0.25, 0.25, 0.25).spawn();
+				} else {
+					TempBlock.create(head, Material.WATER);
+				}
+				stream.addFirst(head);
 			}
-			stream.addFirst(head);
 		}
 
 		colliders.clear();

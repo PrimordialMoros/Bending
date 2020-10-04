@@ -39,7 +39,6 @@ import org.bukkit.util.NumberConversions;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Ring implements State {
 	private StateChain chain;
@@ -71,7 +70,12 @@ public class Ring implements State {
 	public void complete() {
 		if (!started) return;
 		chain.getChainStore().clear();
-		Stream.concat(ring.subList(index, ring.size()).stream(), ring.subList(0, index).stream()).forEach(chain.getChainStore()::add);
+		if (index <= 0) {
+			chain.getChainStore().addAll(ring);
+		} else {
+			chain.getChainStore().addAll(ring.subList(index, ring.size()));
+			chain.getChainStore().addAll(ring.subList(0, index));
+		}
 		chain.nextState();
 	}
 

@@ -48,7 +48,7 @@ public class SelectedSource implements State {
 	public void attemptRefresh(Block block) {
 		if (block.equals(this.block)) return;
 		Vector3 newOrigin = new Vector3(block).add(Vector3.HALF);
-		if (user.getLocation().distanceSq(newOrigin) > distanceSq) return;
+		if (user.getEyeLocation().distanceSq(newOrigin) > distanceSq) return;
 		this.block = block;
 		this.origin = newOrigin;
 		this.material = block.getType();
@@ -72,7 +72,7 @@ public class SelectedSource implements State {
 	@Override
 	public UpdateResult update() {
 		if (!started) return UpdateResult.REMOVE;
-		if (block.getType() != material || user.getLocation().distanceSq(origin) > distanceSq)
+		if (block.getType() != material || user.getEyeLocation().distanceSq(origin) > distanceSq)
 			return UpdateResult.REMOVE;
 		ParticleUtil.create(Particle.SMOKE_NORMAL, origin.toLocation(user.getWorld()).add(0, 0.5, 0)).spawn();
 		return UpdateResult.CONTINUE;

@@ -159,7 +159,7 @@ public class Torrent implements Ability {
 		private final Set<Entity> affectedEntities = new HashSet<>();
 
 		public TorrentStream(User user) {
-			super(user, Material.WATER, userConfig.range, true);
+			super(user, Material.WATER, userConfig.range, true, 70);
 		}
 
 		@Override
