@@ -49,7 +49,6 @@ public class Flight {
 		changedFlying = false;
 		couldFly = user.getAllowFlight();
 		wasFlying = user.isFlying();
-		instances.put(user, this);
 	}
 
 	// Returns the Flight instance for a user. This will also increment the flight counter.

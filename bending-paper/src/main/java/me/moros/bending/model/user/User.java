@@ -25,6 +25,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
@@ -157,6 +158,14 @@ public interface User {
 
 	default World getWorld() {
 		return getEntity().getWorld();
+	}
+
+	default Ray getRay() {
+		return new Ray(getEyeLocation(), getDirection());
+	}
+
+	default Ray getRay(double range) {
+		return new Ray(getEyeLocation(), getDirection().scalarMultiply(range));
 	}
 
 	/**

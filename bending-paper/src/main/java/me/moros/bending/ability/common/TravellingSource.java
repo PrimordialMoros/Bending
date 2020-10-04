@@ -102,7 +102,7 @@ public class TravellingSource implements State {
 		if (source == null || !isValid(source) || !Game.getProtectionSystem().canBuild(user, source)) {
 			return UpdateResult.REMOVE;
 		}
-		TempBlock.create(source, material);
+		TempBlock.create(source, material, 200);
 		return UpdateResult.CONTINUE;
 	}
 

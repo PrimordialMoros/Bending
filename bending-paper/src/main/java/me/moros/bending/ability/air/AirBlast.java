@@ -134,16 +134,14 @@ public class AirBlast implements Ability, Burstable {
 	}
 
 	private void selectOrigin() {
-		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(userConfig.selectRange));
-		origin = new Vector3(WorldMethods.getTarget(user.getWorld(), ray))
+		origin = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange)))
 			.subtract(user.getDirection().scalarMultiply(0.5));
 		selectedOrigin = true;
 	}
 
 	private boolean launch() {
 		launched = true;
-		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(userConfig.selectRange));
-		Vector3 target = new Vector3(WorldMethods.getTarget(user.getWorld(), ray));
+		Vector3 target = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (user.isSneaking()) {
 			Vector3 temp = new Vector3(origin.toArray());
 			origin = new Vector3(target.toArray());

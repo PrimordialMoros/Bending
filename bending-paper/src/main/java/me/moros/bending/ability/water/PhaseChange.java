@@ -95,7 +95,7 @@ public class PhaseChange implements PassiveAbility {
 	}
 
 	private boolean fillQueue(double range, double radius, Predicate<Block> predicate, Queue<Block> queue) {
-		Block center = WorldMethods.getTarget(user.getWorld(), new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(range))).getBlock();
+		Block center = WorldMethods.getTarget(user.getWorld(), user.getRay(range)).getBlock();
 		boolean acted = false;
 		for (Block block : WorldMethods.getNearbyBlocks(center.getLocation(), radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;

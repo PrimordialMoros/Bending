@@ -31,6 +31,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -39,6 +40,7 @@ import org.bukkit.entity.Entity;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 
 public abstract class BlockStream implements State {
@@ -90,7 +92,9 @@ public abstract class BlockStream implements State {
 			return UpdateResult.REMOVE;
 		}
 		if (controllable || direction == null) {
-			direction = user.getEyeLocation().add(user.getDirection().scalarMultiply(range)).subtract(current).normalize();
+			Vector3 targetLoc = new Vector3(WorldMethods.getTargetEntity(user, range).map(Entity::getLocation)
+				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
+			direction = targetLoc.subtract(current).normalize();
 		}
 
 		head = current.add(direction).toBlock(user.getWorld());

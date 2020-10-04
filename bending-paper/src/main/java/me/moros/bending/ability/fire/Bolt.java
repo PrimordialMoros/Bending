@@ -28,7 +28,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.Policies;
@@ -46,7 +45,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -141,9 +139,8 @@ public class Bolt implements Ability {
 	}
 
 	private void strike() {
-		Ray ray = new Ray(user.getEyeLocation(), user.getDirection().scalarMultiply(userConfig.range));
-		Optional<LivingEntity> target = WorldMethods.getTargetEntity(user, (int) userConfig.range);
-		targetLocation = target.map(LivingEntity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), ray));
+		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
+			.map(Entity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (!Game.getProtectionSystem().canBuild(user, targetLocation.getBlock())) return;
 		user.getWorld().strikeLightningEffect(targetLocation);
 		user.setCooldown(this, userConfig.cooldown);
