@@ -32,8 +32,9 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -58,7 +59,7 @@ public class FireWall implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Collection<Block> blocks;
 	private OBB collider;
@@ -95,7 +96,7 @@ public class FireWall implements Ability {
 		blocks = WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
 		if (blocks.isEmpty()) return false;
 
-		removalPolicy = CompositeRemovalPolicy.defaults().add(new ExpireRemovalPolicy(userConfig.duration)).build();
+		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
 
 		nextRenderTime = 0;
 		user.setCooldown(this, userConfig.cooldown);
@@ -143,7 +144,7 @@ public class FireWall implements Ability {
 	}
 
 	public void updateDuration(long duration) {
-		removalPolicy = CompositeRemovalPolicy.defaults().add(new ExpireRemovalPolicy(duration)).build();
+		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(duration)).build();
 	}
 
 	@Override

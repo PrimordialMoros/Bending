@@ -34,9 +34,9 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
@@ -58,7 +58,7 @@ public class FireShield implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Shield shield;
 
@@ -73,17 +73,18 @@ public class FireShield implements Ability {
 			return false;
 		}
 
-		CompositeRemovalPolicy.CompositePolicyBuilder builder = CompositeRemovalPolicy.defaults()
-			.add(new SwappedSlotsRemovalPolicy(getDescription()));
 		if (method == ActivationMethod.SNEAK) {
 			shield = new SphereShield();
-			builder.add(new ExpireRemovalPolicy(userConfig.shieldDuration));
-			builder.add(Policies.NOT_SNEAKING);
+			removalPolicy = Policies.builder()
+				.add(new SwappedSlotsRemovalPolicy(getDescription()))
+				.add(new ExpireRemovalPolicy(userConfig.shieldDuration))
+				.add(Policies.NOT_SNEAKING).build();
 		} else {
 			shield = new DiskShield();
-			builder.add(new ExpireRemovalPolicy(userConfig.diskDuration));
+			removalPolicy = Policies.builder()
+				.add(new SwappedSlotsRemovalPolicy(getDescription()))
+				.add(new ExpireRemovalPolicy(userConfig.diskDuration)).build();
 		}
-		removalPolicy = builder.build();
 
 		user.setCooldown(this, userConfig.cooldown);
 		return true;

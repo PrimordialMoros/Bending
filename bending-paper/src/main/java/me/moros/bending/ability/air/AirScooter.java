@@ -31,8 +31,8 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -56,7 +56,7 @@ public class AirScooter implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private HeightSmoother heightSmoother;
 
@@ -77,7 +77,7 @@ public class AirScooter implements Ability {
 		}
 
 		canRender = true;
-		removalPolicy = CompositeRemovalPolicy.defaults().add(Policies.SNEAKING).build();
+		removalPolicy = Policies.builder().add(Policies.SNEAKING).build();
 		return true;
 	}
 

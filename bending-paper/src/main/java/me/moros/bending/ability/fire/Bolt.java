@@ -31,8 +31,8 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
@@ -58,7 +58,7 @@ public class Bolt implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Location targetLocation;
 
@@ -73,7 +73,7 @@ public class Bolt implements Ability {
 		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
-		removalPolicy = CompositeRemovalPolicy.defaults().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 
 		startTime = System.currentTimeMillis();
 		return true;

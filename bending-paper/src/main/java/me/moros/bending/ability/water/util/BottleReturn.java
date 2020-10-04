@@ -19,74 +19,66 @@
 
 package me.moros.bending.ability.water.util;
 
+import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-// TODO refactor
+import java.util.Collections;
+import java.util.Objects;
+
 public class BottleReturn implements Ability {
 	public static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
 
-	private Vector3 location;
-	private BendingFallingBlock source;
+	private RemovalPolicy removalPolicy;
+	private StateChain states;
+	private final Block source;
 
-	public BottleReturn(Vector3 origin) {
-		this.location = origin;
+	public BottleReturn(Block source) {
+		this.source = Objects.requireNonNull(source);
 	}
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		source = new BendingFallingBlock(location.toLocation(user.getWorld()), Material.WATER.createBlockData(), 30000);
-		return true;
+		states = new StateChain(Collections.singletonList(source))
+			.addState(new TravellingSource(user, Material.WATER, 1.5, userConfig.maxDistance))
+			.start();
+		removalPolicy = Policies.builder().build();
+		return source.getType() == Material.WATER;
 	}
 
 	@Override
 	public UpdateResult update() {
-		location = new Vector3(source.getFallingBlock().getLocation());
-		Vector3 target = user.getEyeLocation();
-		double distSq = location.distanceSq(target);
-		if (distSq <= userConfig.speed * userConfig.speed) {
-			SourceUtil.fillBottle(user);
+		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		if (distSq > userConfig.maxDistance * userConfig.maxDistance) {
-			return UpdateResult.REMOVE;
-		}
-
-		Block block = location.toBlock(user.getWorld());
-		if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER && block.getType() != Material.ICE) {
-			return UpdateResult.REMOVE;
-		}
-
-		if (!Game.getProtectionSystem().canBuild(user, block)) {
-			return UpdateResult.REMOVE;
-		}
-
-		source.getFallingBlock().setVelocity(target.subtract(location).normalize().scalarMultiply(userConfig.speed).toVector());
-		return UpdateResult.CONTINUE;
+		UpdateResult result = states.update();
+		if (states.isComplete()) SourceUtil.fillBottle(user);
+		return result;
 	}
 
 	@Override
 	public void destroy() {
-		source.revert();
+		TempBlock.manager.get(source).filter(tb -> tb.getBlock().getType() == Material.WATER).ifPresent(TempBlock::revert);
 	}
 
 	@Override
@@ -110,8 +102,6 @@ public class BottleReturn implements Ability {
 
 	public static class Config extends Configurable {
 		public boolean enabled;
-		@Attribute(Attributes.SPEED)
-		public double speed;
 		@Attribute(Attributes.RANGE)
 		public double maxDistance;
 
@@ -120,7 +110,6 @@ public class BottleReturn implements Ability {
 			CommentedConfigurationNode abilityNode = config.getNode("properties", "bottlebending");
 
 			enabled = abilityNode.getNode("enabled").getBoolean(true);
-			speed = abilityNode.getNode("speed").getDouble(1.0);
 			maxDistance = abilityNode.getNode("max-distance").getDouble(40.0);
 		}
 	}

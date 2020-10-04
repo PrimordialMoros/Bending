@@ -22,7 +22,9 @@ package me.moros.bending.model.predicates.conditionals;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
+import java.util.function.BiPredicate;
+
 @FunctionalInterface
-public interface BendingConditional {
-	boolean canBend(User user, AbilityDescription desc);
+public interface BendingConditional extends BiPredicate<User, AbilityDescription> {
+	boolean test(User user, AbilityDescription desc);
 }

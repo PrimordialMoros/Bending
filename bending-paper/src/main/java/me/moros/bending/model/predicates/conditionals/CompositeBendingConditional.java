@@ -22,22 +22,21 @@ package me.moros.bending.model.predicates.conditionals;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 public class CompositeBendingConditional implements BendingConditional {
 	private final Set<BendingConditional> conditionals;
 
-	private CompositeBendingConditional(CompositeConditionalBuilder builder) {
+	CompositeBendingConditional(BendingConditions.ConditionBuilder builder) {
 		Objects.requireNonNull(builder);
-		this.conditionals = new HashSet<>(builder.conditionals);
+		this.conditionals = builder.getConditionals();
 	}
 
 	@Override
-	public boolean canBend(User user, AbilityDescription desc) {
+	public boolean test(User user, AbilityDescription desc) {
 		if (user == null || desc == null) return false;
-		return conditionals.stream().allMatch(cond -> cond.canBend(user, desc));
+		return conditionals.stream().allMatch(cond -> cond.test(user, desc));
 	}
 
 	public boolean hasConditional(BendingConditional conditional) {
@@ -50,39 +49,5 @@ public class CompositeBendingConditional implements BendingConditional {
 
 	public boolean remove(BendingConditional conditional) {
 		return conditionals.remove(conditional);
-	}
-
-	public static CompositeConditionalBuilder builder() {
-		return new CompositeConditionalBuilder();
-	}
-
-	public static CompositeConditionalBuilder defaults() {
-		return builder().add(BendingConditions.COOLDOWN)
-			.add(BendingConditions.ELEMENT)
-			.add(BendingConditions.WORLD)
-			.add(BendingConditions.PERMISSION)
-			.add(BendingConditions.GAMEMODE);
-	}
-
-	public static class CompositeConditionalBuilder {
-		private final Set<BendingConditional> conditionals;
-
-		private CompositeConditionalBuilder() {
-			conditionals = new HashSet<>();
-		}
-
-		public CompositeConditionalBuilder add(BendingConditional conditional) {
-			conditionals.add(Objects.requireNonNull(conditional));
-			return this;
-		}
-
-		public CompositeConditionalBuilder remove(BendingConditional conditional) {
-			conditionals.remove(Objects.requireNonNull(conditional));
-			return this;
-		}
-
-		public CompositeBendingConditional build() {
-			return new CompositeBendingConditional(this);
-		}
 	}
 }

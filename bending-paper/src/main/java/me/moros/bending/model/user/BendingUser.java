@@ -23,6 +23,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.slots.AbilitySlotContainer;
@@ -50,7 +51,7 @@ public class BendingUser implements User {
 		cooldowns.addExpirationListener((key, value) ->
 			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
 		slotContainers.addLast(new AbilitySlotContainer(9));
-		bendingConditional = CompositeBendingConditional.defaults().build();
+		bendingConditional = BendingConditions.builder().build();
 	}
 
 	@Override
@@ -133,7 +134,7 @@ public class BendingUser implements User {
 
 	@Override
 	public boolean canBend(AbilityDescription desc) {
-		return bendingConditional.canBend(this, desc);
+		return bendingConditional.test(this, desc);
 	}
 
 	@Override

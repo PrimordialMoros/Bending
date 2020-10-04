@@ -53,21 +53,20 @@ public class TempBlock implements Temporary {
 		manager.addEntry(block, this, duration);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material data) {
-		return create(block, data.createBlockData(), 0);
+	public static Optional<TempBlock> create(Block block, Material type) {
+		return create(block, type.createBlockData(), 0, false);
 	}
 
 	public static Optional<TempBlock> create(Block block, BlockData data) {
-		return create(block, data, 0);
+		return create(block, data, 0, false);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material data, long duration) {
-		return create(block, data.createBlockData(), duration);
+	public static Optional<TempBlock> create(Block block, Material type, long duration) {
+		return create(block, type.createBlockData(), duration, false);
 	}
 
 	public static Optional<TempBlock> create(Block block, BlockData data, long duration) {
-		if (block instanceof TileState) return Optional.empty();
-		return Optional.of(new TempBlock(block, data, duration, false));
+		return create(block, data, duration, false);
 	}
 
 	public static Optional<TempBlock> create(Block block, BlockData data, long duration, boolean bendable) {

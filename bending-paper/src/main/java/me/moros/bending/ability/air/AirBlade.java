@@ -32,9 +32,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
@@ -56,7 +56,7 @@ public class AirBlade implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Vector3 origin;
 	private Vector3 direction;
@@ -80,7 +80,7 @@ public class AirBlade implements Ability {
 		double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
 		origin = user.getLocation().add(direction).add(new Vector3(0, maxRadius, 0));
 
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
 			.add(new OutOfRangeRemovalPolicy(userConfig.prepareRange, () -> origin))
 			.add(Policies.IN_LIQUID)
@@ -94,7 +94,7 @@ public class AirBlade implements Ability {
 			factor = userConfig.chargeFactor;
 			charging = false;
 			blade = new Blade(user, new Ray(origin, direction), userConfig.speed * factor * 0.5);
-			removalPolicy = CompositeRemovalPolicy.defaults()
+			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 			user.setCooldown(this, userConfig.cooldown);
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
@@ -145,7 +145,7 @@ public class AirBlade implements Ability {
 		factor = FastMath.max(1, timeFactor * userConfig.chargeFactor);
 		charging = false;
 		blade = new Blade(user, new Ray(origin, direction));
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 		user.setCooldown(this, userConfig.cooldown);
 	}

@@ -32,9 +32,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -55,7 +55,7 @@ public class AirBlast implements Ability, Burstable {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private AirStream stream;
 	private Vector3 origin;
@@ -76,7 +76,7 @@ public class AirBlast implements Ability, Burstable {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.selectOutOfRange, () -> origin))
 			.add(Policies.IN_LIQUID)
 			.build();
@@ -187,7 +187,7 @@ public class AirBlast implements Ability, Burstable {
 		launched = true;
 		origin = location;
 		this.direction = direction;
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 		stream = new AirStream(user, new Ray(location, direction), userConfig.collisionRadius);
 	}
 

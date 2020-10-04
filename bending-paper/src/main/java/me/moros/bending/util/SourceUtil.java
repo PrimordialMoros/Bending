@@ -22,6 +22,7 @@ package me.moros.bending.util;
 import com.destroystokyo.paper.MaterialSetTag;
 import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -78,7 +79,7 @@ public final class SourceUtil {
 	}
 
 	private static boolean isBendableTempBlock(Block block) {
-		return true; //TODO implement this as functionality inside tempblock
+		return TempBlock.manager.get(block).map(TempBlock::isBendable).orElse(true);
 	}
 
 	public static boolean hasFullBottle(User user) {

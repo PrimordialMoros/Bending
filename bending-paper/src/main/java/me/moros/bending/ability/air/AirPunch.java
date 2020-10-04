@@ -31,7 +31,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -56,7 +57,7 @@ public class AirPunch implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private AirStream stream;
 
@@ -69,7 +70,7 @@ public class AirPunch implements Ability {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 
 		user.setCooldown(this, userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);

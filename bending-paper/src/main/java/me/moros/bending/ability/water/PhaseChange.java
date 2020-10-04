@@ -30,7 +30,8 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
@@ -49,7 +50,7 @@ public class PhaseChange implements PassiveAbility {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private final Queue<Block> freezeQueue = new ArrayDeque<>(24);
 	private final Queue<Block> meltQueue = new ArrayDeque<>(24);
@@ -58,7 +59,7 @@ public class PhaseChange implements PassiveAbility {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 		return true;
 	}
 

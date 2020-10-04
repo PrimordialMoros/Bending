@@ -31,8 +31,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -53,7 +54,7 @@ public class FireWheel implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Wheel wheel;
 
@@ -70,7 +71,7 @@ public class FireWheel implements Ability {
 		wheel = new Wheel(user, new Ray(location, direction));
 		if (!wheel.resolveMovement(userConfig.radius)) return false;
 
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> wheel.getLocation())).build();
 
 		user.setCooldown(this, userConfig.cooldown);

@@ -32,7 +32,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -55,7 +56,7 @@ public class WaterSpout implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private final Collection<TempBlock> column = new ArrayList<>();
 	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || MaterialUtil.isIce(b);
@@ -80,7 +81,7 @@ public class WaterSpout implements Ability {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 
 		spout = new BlockSpout(user);
 		return true;

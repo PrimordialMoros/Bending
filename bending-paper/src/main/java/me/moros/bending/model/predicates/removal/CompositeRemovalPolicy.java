@@ -22,55 +22,18 @@ package me.moros.bending.model.predicates.removal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public class CompositeRemovalPolicy implements RemovalPolicy {
 	private final Set<RemovalPolicy> policies;
 
-	private CompositeRemovalPolicy(CompositePolicyBuilder builder) {
-		Objects.requireNonNull(builder);
-		this.policies = builder.policies;
+	CompositeRemovalPolicy(Policies.PolicyBuilder builder) {
+		this.policies = builder.getPolicies();
 	}
 
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
+		if (user == null || desc == null) return true;
 		return policies.stream().anyMatch(p -> p.test(user, desc));
-	}
-
-	public static CompositePolicyBuilder builder() {
-		return new CompositePolicyBuilder();
-	}
-
-	/**
-	 * Basic composite removal policy to ensure abilities are removed if a user is dead or offline
-	 */
-	public static CompositePolicyBuilder defaults() {
-		return new CompositePolicyBuilder()
-			.add(Policies.DEAD)
-			.add(Policies.OFFLINE);
-	}
-
-	public static class CompositePolicyBuilder {
-		private final Set<RemovalPolicy> policies;
-
-		private CompositePolicyBuilder() {
-			policies = new HashSet<>();
-		}
-
-		public CompositePolicyBuilder add(RemovalPolicy policy) {
-			policies.add(policy);
-			return this;
-		}
-
-		public CompositePolicyBuilder remove(RemovalPolicy policy) {
-			policies.add(policy);
-			return this;
-		}
-
-		public CompositeRemovalPolicy build() {
-			return new CompositeRemovalPolicy(this);
-		}
 	}
 }

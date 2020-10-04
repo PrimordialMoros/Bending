@@ -34,9 +34,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -68,7 +68,7 @@ public class Combustion implements Ability, Explosive {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Vector3 location;
 	private Sphere collider;
@@ -86,7 +86,7 @@ public class Combustion implements Ability, Explosive {
 			return false;
 		}
 		location = user.getEyeLocation();
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range, user.getEyeLocation(), () -> location)).build();
 		collider = new Sphere(location, userConfig.collisionRadius);
 

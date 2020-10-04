@@ -41,12 +41,17 @@ public class TravellingSource implements State {
 
 	private boolean started = false;
 
-	protected double distanceSq;
+	private final double minDistanceSq, maxDistanceSq;
 
 	public TravellingSource(User user, Material material, double minDistance) {
+		this(user, material, minDistance, 0);
+	}
+
+	public TravellingSource(User user, Material material, double minDistance, double maxDistance) {
 		this.user = user;
 		this.material = material;
-		this.distanceSq = minDistance * minDistance;
+		this.minDistanceSq = minDistance * minDistance;
+		this.maxDistanceSq = maxDistance * maxDistance;
 	}
 
 	@Override
@@ -72,8 +77,11 @@ public class TravellingSource implements State {
 		Vector3 target = user.getEyeLocation().floor();
 		Vector3 location = new Vector3(source);
 
-		if (target.distanceSq(location) < distanceSq) {
-			//TempBlock.manager.get(block).ifPresent(TempBlock::revert);
+		double distSq = target.distanceSq(location);
+		if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
+			return UpdateResult.REMOVE;
+		}
+		if (target.distanceSq(location) < minDistanceSq) {
 			complete();
 			return UpdateResult.CONTINUE;
 		}

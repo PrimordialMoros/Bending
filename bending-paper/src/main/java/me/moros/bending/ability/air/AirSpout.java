@@ -31,7 +31,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -49,7 +50,7 @@ public class AirSpout implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Spout spout;
 
@@ -75,7 +76,7 @@ public class AirSpout implements Ability {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 
 		spout = new ParticleSpout(user);
 		return true;

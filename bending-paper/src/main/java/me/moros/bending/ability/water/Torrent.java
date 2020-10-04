@@ -36,8 +36,8 @@ import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
@@ -65,7 +65,7 @@ public class Torrent implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private StateChain states;
 
@@ -95,7 +95,7 @@ public class Torrent implements Ability {
 			.addState(new Ring(user, Material.WATER, RING_RADIUS))
 			.addState(new TorrentStream(user)).start();
 
-		removalPolicy = CompositeRemovalPolicy.defaults().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;
 	}
 

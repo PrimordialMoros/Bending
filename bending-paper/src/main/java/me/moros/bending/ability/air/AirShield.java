@@ -30,9 +30,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
@@ -50,7 +50,7 @@ public class AirShield implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private long currentPoint;
 	private long startTime;
@@ -63,7 +63,7 @@ public class AirShield implements Ability {
 		if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
 			.add(Policies.NOT_SNEAKING)
 			.add(new ExpireRemovalPolicy(userConfig.duration))

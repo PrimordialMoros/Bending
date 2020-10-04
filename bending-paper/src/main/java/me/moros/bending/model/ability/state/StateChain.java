@@ -85,6 +85,10 @@ public class StateChain implements Updatable {
 		finished = true;
 	}
 
+	public boolean isComplete() {
+		return finished && chainQueue.isEmpty();
+	}
+
 	public Collection<Block> getChainStore() {
 		return chainStore;
 	}

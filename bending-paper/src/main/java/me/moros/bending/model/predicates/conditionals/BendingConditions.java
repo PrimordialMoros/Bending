@@ -23,6 +23,10 @@ import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 public enum BendingConditions implements BendingConditional {
 	COOLDOWN((u, d) -> (d.canBypassCooldown() || !u.isOnCooldown(d))),
 	ELEMENT((u, d) -> u.hasElement(d.getElement())),
@@ -38,7 +42,45 @@ public enum BendingConditions implements BendingConditional {
 	}
 
 	@Override
-	public boolean canBend(User user, AbilityDescription desc) {
-		return predicate.canBend(user, desc);
+	public boolean test(User user, AbilityDescription desc) {
+		return predicate.test(user, desc);
+	}
+
+	/**
+	 * Constructs a new builder that includes {@link BendingConditions#ELEMENT}, {@link BendingConditions#WORLD},
+	 * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
+	 */
+	public static ConditionBuilder builder() {
+		return new ConditionBuilder().add(BendingConditions.COOLDOWN)
+			.add(BendingConditions.ELEMENT)
+			.add(BendingConditions.WORLD)
+			.add(BendingConditions.PERMISSION)
+			.add(BendingConditions.GAMEMODE);
+	}
+
+	public static class ConditionBuilder {
+		private final Set<BendingConditional> conditionals;
+
+		private ConditionBuilder() {
+			conditionals = new HashSet<>();
+		}
+
+		public ConditionBuilder add(BendingConditional conditional) {
+			conditionals.add(Objects.requireNonNull(conditional));
+			return this;
+		}
+
+		public ConditionBuilder remove(BendingConditional conditional) {
+			conditionals.remove(Objects.requireNonNull(conditional));
+			return this;
+		}
+
+		public CompositeBendingConditional build() {
+			return new CompositeBendingConditional(this);
+		}
+
+		Set<BendingConditional> getConditionals() {
+			return conditionals;
+		}
 	}
 }

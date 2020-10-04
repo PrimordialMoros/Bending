@@ -28,8 +28,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
@@ -51,7 +51,7 @@ public class HeatControl implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private long startTime;
 
@@ -68,7 +68,7 @@ public class HeatControl implements Ability {
 				user.setCooldown(this, userConfig.extinguishCooldown);
 			}
 		} else if (method == ActivationMethod.SNEAK) {
-			removalPolicy = CompositeRemovalPolicy.defaults()
+			removalPolicy = Policies.builder()
 				.add(Policies.NOT_SNEAKING)
 				.add(new SwappedSlotsRemovalPolicy(getDescription()))
 				.build();

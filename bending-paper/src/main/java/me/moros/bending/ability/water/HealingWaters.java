@@ -27,8 +27,8 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
@@ -50,7 +50,7 @@ public class HealingWaters implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private long startTime;
 	private long nextTime;
@@ -59,7 +59,7 @@ public class HealingWaters implements Ability {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		removalPolicy = CompositeRemovalPolicy.defaults().add(Policies.NOT_SNEAKING).build();
+		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 		startTime = System.currentTimeMillis();
 		nextTime = 0;
 		return true;

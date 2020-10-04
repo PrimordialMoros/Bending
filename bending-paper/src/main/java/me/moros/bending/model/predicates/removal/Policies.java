@@ -22,6 +22,9 @@ package me.moros.bending.model.predicates.removal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public enum Policies implements RemovalPolicy {
 	DEAD((u, d) -> u.isDead()),
 	OFFLINE((u, d) -> !u.isValid()),
@@ -38,6 +41,41 @@ public enum Policies implements RemovalPolicy {
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
 		return policy.test(user, desc);
+	}
+
+	/**
+	 * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
+	 */
+	public static PolicyBuilder builder() {
+		return new PolicyBuilder()
+			.add(Policies.DEAD)
+			.add(Policies.OFFLINE);
+	}
+
+	public static class PolicyBuilder {
+		private final Set<RemovalPolicy> policies;
+
+		private PolicyBuilder() {
+			policies = new HashSet<>();
+		}
+
+		public PolicyBuilder add(RemovalPolicy policy) {
+			policies.add(policy);
+			return this;
+		}
+
+		public PolicyBuilder remove(RemovalPolicy policy) {
+			policies.add(policy);
+			return this;
+		}
+
+		public RemovalPolicy build() {
+			return new CompositeRemovalPolicy(this);
+		}
+
+		Set<RemovalPolicy> getPolicies() {
+			return policies;
+		}
 	}
 }
 

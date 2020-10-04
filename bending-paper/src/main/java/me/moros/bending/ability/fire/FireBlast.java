@@ -34,7 +34,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
+import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -67,7 +68,7 @@ public class FireBlast implements Ability, Burstable {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private final Set<Entity> affectedEntities = new HashSet<>(); // Needed to ensure entities are hit by 1 burst stream only
 	private FireStream stream;
@@ -90,7 +91,7 @@ public class FireBlast implements Ability, Burstable {
 			return false;
 		}
 
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 
 		for (FireBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, FireBlast.class).collect(Collectors.toList())) {
 			if (blast.charging) {
@@ -172,7 +173,7 @@ public class FireBlast implements Ability, Burstable {
 		recalculateConfig();
 		factor = 1.0;
 		charging = false;
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 		stream = new FireStream(user, new Ray(location, direction), userConfig.collisionRadius);
 	}
 

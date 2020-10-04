@@ -31,8 +31,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
@@ -61,7 +61,7 @@ public class AirSwipe implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private final Set<Entity> affectedEntities = new HashSet<>();
 	private final List<AirStream> streams = new ArrayList<>();
@@ -89,7 +89,7 @@ public class AirSwipe implements Ability {
 		if (method == ActivationMethod.PUNCH) {
 			launch();
 		}
-		removalPolicy = CompositeRemovalPolicy.defaults()
+		removalPolicy = Policies.builder()
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
 			.add(Policies.IN_LIQUID)
 			.build();
@@ -138,7 +138,7 @@ public class AirSwipe implements Ability {
 		VectorMethods.createArc(dir, rotation, steps).forEach(
 			v -> streams.add(new AirStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
-		removalPolicy = CompositeRemovalPolicy.defaults().build();
+		removalPolicy = Policies.builder().build();
 	}
 
 	@Override

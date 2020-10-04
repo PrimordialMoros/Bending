@@ -28,9 +28,9 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.predicates.removal.CompositeRemovalPolicy;
 import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
+import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
@@ -45,7 +45,7 @@ public class FireJet implements Ability {
 
 	private User user;
 	private Config userConfig;
-	private CompositeRemovalPolicy removalPolicy;
+	private RemovalPolicy removalPolicy;
 
 	private Flight flight;
 
@@ -78,7 +78,7 @@ public class FireJet implements Ability {
 		flight = Flight.get(user);
 		if (ignitable) TempBlock.create(block, Material.FIRE, 3000);
 
-		removalPolicy = CompositeRemovalPolicy.builder()
+		removalPolicy = Policies.builder()
 			.add(Policies.IN_LIQUID)
 			.add(new ExpireRemovalPolicy(userConfig.duration))
 			.build();
@@ -136,7 +136,7 @@ public class FireJet implements Ability {
 
 	public void setDuration(long duration) {
 		this.duration = duration;
-		removalPolicy = CompositeRemovalPolicy.builder().add(Policies.IN_LIQUID).add(new ExpireRemovalPolicy(duration)).build();
+		removalPolicy = Policies.builder().add(Policies.IN_LIQUID).add(new ExpireRemovalPolicy(duration)).build();
 	}
 
 	public static class Config extends Configurable {
