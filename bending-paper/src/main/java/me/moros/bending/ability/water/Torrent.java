@@ -20,9 +20,6 @@
 package me.moros.bending.ability.water;
 
 import me.moros.bending.ability.common.BlockStream;
-import me.moros.bending.ability.common.Ring;
-import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
@@ -41,9 +38,7 @@ import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
@@ -54,53 +49,57 @@ import org.bukkit.entity.Entity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Torrent implements Ability {
 	private static final Config config = new Config();
-
-	private static final double RING_RADIUS = 2.8;
 
 	private User user;
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
 	private StateChain states;
+	private WaterRing ring;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.ALL);
-		for (Torrent torrent : Game.getAbilityManager(user.getWorld()).getUserInstances(user, Torrent.class).collect(Collectors.toList())) {
-			State state = torrent.getState();
-			if (state instanceof SelectedSource && source.isPresent()) {
-				((SelectedSource) torrent.getState()).attemptRefresh(source.get());
-			} else if (state instanceof Ring) {
-				state.complete();
-			} else if (state instanceof TorrentStream) {
-				((TorrentStream) state).freeze();
-			}
-			return false;
-		}
-		if (!source.isPresent()) {
+		Optional<Torrent> torrent = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, Torrent.class);
+		if (torrent.isPresent()) {
+			torrent.get().launch();
 			return false;
 		}
 
-		Block sourceBlock = source.get();
-		states = new StateChain().addState(new SelectedSource(user, sourceBlock, userConfig.maxSelectRange + 5))
-			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5))
-			.addState(new Ring(user, Material.WATER.createBlockData(), RING_RADIUS))
-			.addState(new TorrentStream(user)).start();
+		this.user = user;
+		recalculateConfig();
+
+		ring = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+		if (ring == null) {
+			ring = new WaterRing();
+			if (ring.activate(user, method)) {
+				Game.getAbilityManager(user.getWorld()).addAbility(user, ring);
+			} else {
+				return false;
+			}
+		}
+		if (ring.isReady()) {
+			List<Block> sources = ring.complete();
+			if (sources.isEmpty()) return false;
+			states = new StateChain(sources).addState(new TorrentStream(user)).start();
+		}
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;
 	}
 
-	public State getState() {
-		return states.getCurrent();
+	private void launch() {
+		if (states == null) {
+			if (ring.isReady()) states = new StateChain(ring.complete()).addState(new TorrentStream(user)).start();
+		} else {
+			State current = states.getCurrent();
+			if (current instanceof TorrentStream) ((TorrentStream) current).freeze();
+		}
 	}
 
 	@Override
@@ -113,23 +112,20 @@ public class Torrent implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		State state = getState();
-		if (state instanceof SelectedSource && user.isSneaking()) {
-			state.complete();
-			return UpdateResult.CONTINUE;
+		if (states != null) {
+			return states.update();
+		} else {
+			if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) return UpdateResult.REMOVE;
 		}
-		if (state instanceof TravellingSource || state instanceof Ring) {
-			if (Policies.NOT_SNEAKING.test(user, getDescription())) {
-				return UpdateResult.REMOVE;
-			}
-		}
-		return states.update();
+		return UpdateResult.CONTINUE;
 	}
 
 	@Override
 	public void destroy() {
-		State state = getState();
-		if (state instanceof BlockStream) ((BlockStream) state).cleanAll();
+		if (states != null) {
+			State current = states.getCurrent();
+			if (current instanceof TorrentStream) ((TorrentStream) current).cleanAll();
+		}
 	}
 
 	@Override
@@ -144,7 +140,10 @@ public class Torrent implements Ability {
 
 	@Override
 	public Collection<Collider> getColliders() {
-		if (getState() instanceof BlockStream) return ((BlockStream) getState()).getColliders();
+		if (states != null) {
+			State current = states.getCurrent();
+			if (current instanceof TorrentStream) return ((TorrentStream) current).getColliders();
+		}
 		return Collections.emptyList();
 	}
 
@@ -188,10 +187,6 @@ public class Torrent implements Ability {
 		public long cooldown;
 		@Attribute(Attributes.RANGE)
 		public double range;
-		@Attribute(Attributes.SELECTION)
-		public double selectRange;
-		@Attribute(Attributes.SELECTION)
-		public double maxSelectRange;
 		@Attribute(Attributes.DAMAGE)
 		public double damage;
 		@Attribute(Attributes.STRENGTH)
@@ -209,8 +204,6 @@ public class Torrent implements Ability {
 
 			cooldown = abilityNode.getNode("cooldown").getLong(0);
 			range = abilityNode.getNode("range").getDouble(32.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(16.0);
-			maxSelectRange = abilityNode.getNode("max-select-range").getDouble(20.0);
 			damage = abilityNode.getNode("damage").getDouble(2.0);
 			knockback = abilityNode.getNode("knockback").getDouble(1.0);
 			verticalPush = abilityNode.getNode("vertical-push").getDouble(0.2);
