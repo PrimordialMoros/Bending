@@ -35,6 +35,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.util.NumberConversions;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 public class Ring implements State {
 	private StateChain chain;
 	private final User user;
-	private final Material material;
+	private final BlockData data;
 	private Block lastBlock;
 	private List<Block> ring;
 
@@ -51,9 +52,9 @@ public class Ring implements State {
 	private double radius;
 	private int index = -1;
 
-	public Ring(User user, Material material, double radius) {
+	public Ring(User user, BlockData data, double radius) {
 		this.user = user;
-		this.material = material;
+		this.data = data;
 		this.radius = radius;
 	}
 
@@ -93,11 +94,11 @@ public class Ring implements State {
 			index = -1;
 			lastBlock = current;
 		}
-		if (material == Material.WATER && MaterialUtil.isWater(head)) {
+		if (data.getMaterial() == Material.WATER && MaterialUtil.isWater(head)) {
 			ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))
 				.count(5).offset(0.25, 0.25, 0.25).spawn();
 		} else if (MaterialUtil.isTransparent(head)) {
-			TempBlock.create(head, material, 600);
+			TempBlock.create(head, data, 600);
 		}
 		return UpdateResult.CONTINUE;
 	}

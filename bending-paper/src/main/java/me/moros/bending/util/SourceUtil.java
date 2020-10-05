@@ -72,14 +72,10 @@ public final class SourceUtil {
 		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
 		if (result == null || result.getHitBlock() == null) return Optional.empty();
 		Block block = result.getHitBlock();
-		if (!Game.getProtectionSystem().canBuild(user, block) || !materials.contains(block.getType()) || !isBendableTempBlock(block)) {
+		if (!Game.getProtectionSystem().canBuild(user, block) || !materials.contains(block.getType()) || !TempBlock.isBendable(block)) {
 			return Optional.empty();
 		}
 		return Optional.of(block);
-	}
-
-	private static boolean isBendableTempBlock(Block block) {
-		return TempBlock.manager.get(block).map(TempBlock::isBendable).orElse(true);
 	}
 
 	public static boolean hasFullBottle(User user) {

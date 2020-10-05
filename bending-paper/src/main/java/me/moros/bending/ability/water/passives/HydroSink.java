@@ -56,11 +56,9 @@ public class HydroSink implements PassiveAbility {
 			return false;
 
 		Block block = user.getLocBlock();
+		if (WaterMaterials.ALL.isTagged(block)) return false;
 		Block baseBlock = block.getRelative(BlockFace.DOWN);
-		return WaterMaterials.ICE_BENDABLE.isTagged(baseBlock) ||
-			WaterMaterials.PLANT_BENDABLE.isTagged(baseBlock) ||
-			WaterMaterials.ICE_BENDABLE.isTagged(block) ||
-			WaterMaterials.PLANT_BENDABLE.isTagged(block);
+		return block.isPassable() && WaterMaterials.ALL.isTagged(baseBlock);
 	}
 
 	@Override

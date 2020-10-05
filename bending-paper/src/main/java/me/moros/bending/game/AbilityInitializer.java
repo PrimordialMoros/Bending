@@ -151,7 +151,7 @@ public final class AbilityInitializer {
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
 		AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl.class)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
+			.setElement(Element.FIRE).setActivation(ActivationMethod.PASSIVE).build();
 		abilities.add(heatControl);
 
 		abilities.add(AbilityDescription.builder("Blaze", Blaze.class)

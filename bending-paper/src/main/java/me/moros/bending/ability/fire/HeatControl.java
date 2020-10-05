@@ -21,16 +21,14 @@ package me.moros.bending.ability.fire;
 
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
-import me.moros.bending.model.ability.Ability;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
-import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ParticleUtil;
@@ -38,20 +36,20 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.NumberConversions;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
-public class HeatControl implements Ability {
+public class HeatControl implements PassiveAbility {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
-	private RemovalPolicy removalPolicy;
 
 	private long startTime;
 
@@ -59,22 +57,7 @@ public class HeatControl implements Ability {
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-
-		if (method == ActivationMethod.PUNCH) {
-			if (melt()) {
-				user.setCooldown(this, userConfig.meltCooldown);
-			}
-			if (extinguish()) {
-				user.setCooldown(this, userConfig.extinguishCooldown);
-			}
-		} else if (method == ActivationMethod.SNEAK) {
-			removalPolicy = Policies.builder()
-				.add(Policies.NOT_SNEAKING)
-				.add(new SwappedSlotsRemovalPolicy(getDescription()))
-				.build();
-			startTime = System.currentTimeMillis();
-			return true;
-		}
+		startTime = System.currentTimeMillis();
 		return false;
 	}
 
@@ -83,12 +66,22 @@ public class HeatControl implements Ability {
 		userConfig = Game.getAttributeSystem().calculate(this, config);
 	}
 
-	private boolean melt() {
-		return act(userConfig.meltRange, userConfig.meltRadius, MaterialUtil::isIce);
-	}
-
-	private boolean extinguish() {
-		return act(userConfig.extinguishRange, userConfig.extinguishRadius, MaterialUtil::isFire);
+	@Override
+	public UpdateResult update() {
+		AbilityDescription selectedAbility = user.getSelectedAbility().orElse(null);
+		if (!user.canBend(selectedAbility) || !getDescription().equals(selectedAbility)) {
+			return UpdateResult.CONTINUE;
+		}
+		long time = System.currentTimeMillis();
+		if (!user.isSneaking()) {
+			startTime = time;
+		} else {
+			ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+			if (time > startTime + userConfig.cookInterval && cook()) {
+				startTime = System.currentTimeMillis();
+			}
+		}
+		return UpdateResult.CONTINUE;
 	}
 
 	private boolean cook() {
@@ -110,16 +103,32 @@ public class HeatControl implements Ability {
 		return false;
 	}
 
-	private boolean act(double range, double radius, Predicate<Block> predicate) {
-		Block b = user.getEntity().getTargetBlockExact(NumberConversions.ceil(range));
-		if (b == null) return false;
+	public void act() {
+		if (!user.canBend(getDescription())) return;
+		Predicate<Block> predicate = b -> MaterialUtil.isIce(b) || MaterialUtil.isFire(b);
 		boolean acted = false;
-		for (Block block : WorldMethods.getNearbyBlocks(b.getLocation(), radius, predicate)) {
+		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
+		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
-			block.setType(Material.AIR);
+			if (MaterialUtil.isIce(block)) {
+				Optional<TempBlock> tb = TempBlock.manager.get(block);
+				if (tb.isPresent()) {
+					tb.get().revert();
+				} else {
+					TempBlock.create(block, Material.WATER);
+				}
+			} else {
+				block.setType(Material.AIR);
+			}
 		}
-		return acted;
+		if (acted) user.setCooldown(this, userConfig.cooldown);
+	}
+
+	public static void act(User user) {
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("HeatControl")) {
+			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+		}
 	}
 
 	public static boolean canBurn(User user) {
@@ -129,19 +138,6 @@ public class HeatControl implements Ability {
 		}
 		user.getEntity().setFireTicks(0);
 		return false;
-	}
-
-	@Override
-	public UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (System.currentTimeMillis() >= startTime + userConfig.cookDuration && cook()) {
-			startTime = System.currentTimeMillis();
-		} else {
-			ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
-		}
-		return UpdateResult.CONTINUE;
 	}
 
 	@Override
@@ -164,41 +160,22 @@ public class HeatControl implements Ability {
 
 	public static class Config extends Configurable {
 		@Attribute(Attributes.COOLDOWN)
-		public long extinguishCooldown;
+		public long cooldown;
 		@Attribute(Attributes.RANGE)
-		public double extinguishRange;
+		public double range;
 		@Attribute(Attributes.RADIUS)
-		public double extinguishRadius;
-
-		@Attribute(Attributes.COOLDOWN)
-		public long meltCooldown;
-		@Attribute(Attributes.RANGE)
-		public double meltRange;
-		@Attribute(Attributes.RADIUS)
-		public double meltRadius;
-
-		@Attribute(Attributes.DURATION)
-		public long cookDuration;
+		public double radius;
+		@Attribute(Attributes.CHARGE_TIME)
+		public long cookInterval;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "heatcontrol");
 
-			CommentedConfigurationNode extinguishNode = abilityNode.getNode("extinguish");
-
-			extinguishCooldown = extinguishNode.getNode("cooldown").getLong(500);
-			extinguishRange = extinguishNode.getNode("range").getDouble(20.0);
-			extinguishRadius = extinguishNode.getNode("radius").getDouble(7.0);
-
-			CommentedConfigurationNode meltNode = abilityNode.getNode("melt");
-
-			meltCooldown = meltNode.getNode("cooldown").getLong(500);
-			meltRange = meltNode.getNode("range").getDouble(15.0);
-			meltRadius = meltNode.getNode("radius").getDouble(5.0);
-
-			CommentedConfigurationNode cookNode = abilityNode.getNode("cook");
-
-			cookDuration = cookNode.getNode("duration").getLong(1000);
+			cooldown = abilityNode.getNode("cooldown").getLong(500);
+			range = abilityNode.getNode("range").getDouble(20.0);
+			radius = abilityNode.getNode("radius").getDouble(7.0);
+			cookInterval = abilityNode.getNode("cook-interval").getLong(2000);
 		}
 	}
 }

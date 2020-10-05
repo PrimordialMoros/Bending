@@ -244,10 +244,7 @@ public final class MaterialUtil {
 
 	public static boolean isSourceBlock(Block block) {
 		BlockData blockData = block.getBlockData();
-		if (blockData instanceof Levelled) {
-			return ((Levelled) blockData).getLevel() == 0;
-		}
-		return false;
+		return blockData instanceof Levelled && ((Levelled) blockData).getLevel() == 0;
 	}
 
 	public static BlockData getLavaData(int level) {

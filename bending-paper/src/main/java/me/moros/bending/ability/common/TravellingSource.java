@@ -32,9 +32,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 
 public class TravellingSource implements State {
-	private final Material material;
+	private final BlockData data;
 	private StateChain chain;
 	private final User user;
 	private Block source;
@@ -43,13 +44,13 @@ public class TravellingSource implements State {
 
 	private final double minDistanceSq, maxDistanceSq;
 
-	public TravellingSource(User user, Material material, double minDistance) {
-		this(user, material, minDistance, 0);
+	public TravellingSource(User user, BlockData data, double minDistance) {
+		this(user, data, minDistance, 0);
 	}
 
-	public TravellingSource(User user, Material material, double minDistance, double maxDistance) {
+	public TravellingSource(User user, BlockData data, double minDistance, double maxDistance) {
 		this.user = user;
-		this.material = material;
+		this.data = data;
 		this.minDistanceSq = minDistance * minDistance;
 		this.maxDistanceSq = maxDistance * maxDistance;
 	}
@@ -59,6 +60,11 @@ public class TravellingSource implements State {
 		if (started) return;
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
+		if (source != null && data.getMaterial() == Material.WATER && !TempBlock.manager.isTemp(source)) {
+			if (BlockMethods.CARDINAL_FACES.stream().map(source::getRelative).filter(MaterialUtil::isSourceBlock).count() < 2) {
+				TempBlock.create(source, Material.AIR, 30000);
+			}
+		}
 		started = source != null;
 	}
 
@@ -102,7 +108,7 @@ public class TravellingSource implements State {
 		if (source == null || !isValid(source) || !Game.getProtectionSystem().canBuild(user, source)) {
 			return UpdateResult.REMOVE;
 		}
-		TempBlock.create(source, material, 200);
+		TempBlock.create(source, data, 200);
 		return UpdateResult.CONTINUE;
 	}
 
@@ -123,11 +129,11 @@ public class TravellingSource implements State {
 	}
 
 	private boolean isValid(Block block) {
-		if (material == Material.WATER) return MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block);
+		if (data.getMaterial() == Material.WATER) return MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block);
 		return MaterialUtil.isTransparent(block);
 	}
 
 	private void clean() {
-		TempBlock.manager.get(source).filter(tb -> material == tb.getBlock().getType()).ifPresent(TempBlock::revert);
+		TempBlock.manager.get(source).filter(tb -> data.getMaterial() == tb.getBlock().getType()).ifPresent(TempBlock::revert);
 	}
 }

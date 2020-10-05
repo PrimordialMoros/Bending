@@ -60,7 +60,7 @@ public class BottleReturn implements Ability {
 		this.user = user;
 		recalculateConfig();
 		states = new StateChain(Collections.singletonList(source))
-			.addState(new TravellingSource(user, Material.WATER, 1.5, userConfig.maxDistance))
+			.addState(new TravellingSource(user, Material.WATER.createBlockData(), 1.5, userConfig.maxDistance))
 			.start();
 		removalPolicy = Policies.builder().build();
 		return source.getType() == Material.WATER;

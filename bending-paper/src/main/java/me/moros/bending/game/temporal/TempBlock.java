@@ -57,12 +57,24 @@ public class TempBlock implements Temporary {
 		return create(block, type.createBlockData(), 0, false);
 	}
 
+	public static Optional<TempBlock> create(Block block, Material type, boolean bendable) {
+		return create(block, type.createBlockData(), 0, bendable);
+	}
+
 	public static Optional<TempBlock> create(Block block, BlockData data) {
 		return create(block, data, 0, false);
 	}
 
+	public static Optional<TempBlock> create(Block block, BlockData data, boolean bendable) {
+		return create(block, data, 0, bendable);
+	}
+
 	public static Optional<TempBlock> create(Block block, Material type, long duration) {
 		return create(block, type.createBlockData(), duration, false);
+	}
+
+	public static Optional<TempBlock> create(Block block, Material type, long duration, boolean bendable) {
+		return create(block, type.createBlockData(), duration, bendable);
 	}
 
 	public static Optional<TempBlock> create(Block block, BlockData data, long duration) {
@@ -118,5 +130,9 @@ public class TempBlock implements Temporary {
 
 	public static boolean isTouchingTempBlock(Block block) {
 		return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(manager::isTemp);
+	}
+
+	public static boolean isBendable(Block block) {
+		return manager.get(block).map(TempBlock::isBendable).orElse(true);
 	}
 }

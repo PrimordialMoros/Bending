@@ -89,6 +89,7 @@ public final class ActivationController {
 		removed |= manager.destroyInstanceType(user, AirWheel.class);
 		if (removed) return;
 
+		HeatControl.act(user);
 		PhaseChange.freeze(user);
 		Combustion.explode(user);
 		FireBurst.activateCone(user);

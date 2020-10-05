@@ -29,10 +29,10 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.material.MaterialUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
+// TODO maybe use dolphin's grace instead?
 public class FastSwim implements PassiveAbility {
 	private static final Config config = new Config();
 
@@ -53,8 +53,9 @@ public class FastSwim implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		if (!user.isSneaking() || !(user instanceof BendingPlayer) || !MaterialUtil.isWater(user.getLocBlock()))
+		if (!user.isValid() || !user.isSneaking() || !MaterialUtil.isWater(user.getLocBlock()) || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
+		}
 		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, WaterSpout.class)) return UpdateResult.CONTINUE;
 		if (user.getSelectedAbility().map(desc -> !desc.isActivatedBy(ActivationMethod.SNEAK)).orElse(true)) {
 			user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());

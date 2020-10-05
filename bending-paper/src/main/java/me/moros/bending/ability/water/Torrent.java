@@ -91,8 +91,8 @@ public class Torrent implements Ability {
 
 		Block sourceBlock = source.get();
 		states = new StateChain().addState(new SelectedSource(user, sourceBlock, userConfig.maxSelectRange + 5))
-			.addState(new TravellingSource(user, Material.WATER, RING_RADIUS - 0.5))
-			.addState(new Ring(user, Material.WATER, RING_RADIUS))
+			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5))
+			.addState(new Ring(user, Material.WATER.createBlockData(), RING_RADIUS))
 			.addState(new TorrentStream(user)).start();
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -176,7 +176,7 @@ public class Torrent implements Ability {
 			cleanAll();
 			for (Block block : WorldMethods.getNearbyBlocks(stream.getFirst().getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, MaterialUtil::isTransparent)) {
 				if (Game.getProtectionSystem().canBuild(user, block)) {
-					TempBlock.create(block, Material.ICE, userConfig.freezeDuration);
+					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 				}
 			}
 			stream.clear();

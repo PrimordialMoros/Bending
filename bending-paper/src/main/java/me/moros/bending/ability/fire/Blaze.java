@@ -42,7 +42,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Blaze implements Ability {
 	private static final Config config = new Config();
@@ -51,9 +53,12 @@ public class Blaze implements Ability {
 	private Config userConfig;
 
 	private final List<FireStream> streams = new ArrayList<>();
+	private final Set<Block> affectedBlocks = new HashSet<>();
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
+		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, Blaze.class)) return false;
+
 		this.user = user;
 		recalculateConfig();
 		if (!Game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
@@ -69,8 +74,6 @@ public class Blaze implements Ability {
 		} else {
 			VectorMethods.rotate(dir, rotation, 40).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
 		}
-
-		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 
@@ -87,6 +90,7 @@ public class Blaze implements Ability {
 
 	@Override
 	public void destroy() {
+		if (!affectedBlocks.isEmpty()) user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override
@@ -141,6 +145,11 @@ public class Blaze implements Ability {
 			if (!Game.getProtectionSystem().canBuild(user, block)) {
 				return UpdateResult.REMOVE;
 			}
+
+			if (affectedBlocks.contains(block)) {
+				return UpdateResult.CONTINUE;
+			}
+			affectedBlocks.add(block);
 			return TempBlock.create(block, Material.FIRE, 500).map(b -> UpdateResult.CONTINUE).orElse(UpdateResult.REMOVE);
 		}
 	}
