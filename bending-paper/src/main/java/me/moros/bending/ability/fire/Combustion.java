@@ -216,7 +216,7 @@ public class Combustion implements Ability, Explosive {
 				if (!Game.getProtectionSystem().canBuild(user, block)) break;
 				boolean canIgnite = block.getRelative(BlockFace.DOWN).getType().isSolid();
 				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && canIgnite) ? Material.FIRE : Material.AIR;
-				TempBlock.create(block, mat, userConfig.regenTime + ThreadLocalRandom.current().nextInt(1000));
+				TempBlock.create(block, mat, userConfig.regenTime + ThreadLocalRandom.current().nextInt(1000), true);
 			}
 		}
 	}

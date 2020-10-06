@@ -33,6 +33,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
@@ -65,27 +66,22 @@ public class PhaseChange implements PassiveAbility {
 
 	@Override
 	public UpdateResult update() {
-		AbilityDescription selectedAbility = user.getSelectedAbility().orElse(null);
-		if (!user.canBend(selectedAbility)) {
-			return UpdateResult.CONTINUE;
-		}
-
 		processQueue(freezeQueue, MaterialUtil::isWater, block -> {
 			Optional<TempBlock> tb = TempBlock.manager.get(block);
 			if (tb.isPresent()) {
 				tb.get().revert();
 			} else {
-				TempBlock.create(block, Material.ICE);
+				TempBlock.create(block, Material.ICE, true);
 			}
 		});
 
-		if (user.isSneaking() && getDescription().equals(selectedAbility)) {
+		if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
 			processQueue(meltQueue, MaterialUtil::isIce, block -> {
 				Optional<TempBlock> tb = TempBlock.manager.get(block);
 				if (tb.isPresent()) {
 					tb.get().revert();
 				} else {
-					TempBlock.create(block, Material.WATER);
+					TempBlock.create(block, Material.WATER, true);
 				}
 			});
 		}
@@ -95,9 +91,9 @@ public class PhaseChange implements PassiveAbility {
 
 	private boolean fillQueue(double range, double radius, Predicate<Block> predicate, Queue<Block> queue) {
 		if (!user.canBend(getDescription())) return false;
-		Block center = WorldMethods.getTarget(user.getWorld(), user.getRay(range)).getBlock();
+		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(range));
 		boolean acted = false;
-		for (Block block : WorldMethods.getNearbyBlocks(center.getLocation(), radius, predicate)) {
+		for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
 			queue.offer(block);
 			acted = true;

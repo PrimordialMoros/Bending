@@ -249,7 +249,7 @@ public class FireBlast implements Ability, Burstable {
 					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
-				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, 10000));
+				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, 10000, true));
 			}
 			return true;
 		}

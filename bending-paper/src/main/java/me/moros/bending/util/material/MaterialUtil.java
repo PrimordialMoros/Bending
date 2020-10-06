@@ -19,9 +19,9 @@
 
 package me.moros.bending.util.material;
 
+import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
-import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.Bending;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -31,13 +31,15 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public final class MaterialUtil {
 	public static final Map<Material, Material> COOKABLE = new HashMap<>();
+	public static final MaterialSetTag AIR;
+	public static final MaterialSetTag TRANSPARENT;
+	public static final MaterialSetTag CONTAINERS;
+	public static final MaterialSetTag UNBREAKABLES;
 
 	static {
 		COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
@@ -51,95 +53,68 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.WET_SPONGE, Material.SPONGE);
 		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
 		COOKABLE.put(Material.STICK, Material.TORCH);
+
+		AIR = new MaterialSetTag(Bending.getKey(), Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
+
+		TRANSPARENT = new MaterialSetTag(Bending.getKey(), AIR.getValues());
+		TRANSPARENT.add(MaterialSetTag.SIGNS.getValues());
+		TRANSPARENT.add(MaterialSetTag.FIRE.getValues());
+		TRANSPARENT.add(MaterialSetTag.SAPLINGS.getValues());
+		TRANSPARENT.add(MaterialSetTag.FLOWERS.getValues());
+		TRANSPARENT.add(MaterialSetTag.SMALL_FLOWERS.getValues());
+		TRANSPARENT.add(MaterialSetTag.TALL_FLOWERS.getValues());
+		TRANSPARENT.add(MaterialSetTag.CARPETS.getValues());
+		TRANSPARENT.add(MaterialSetTag.BUTTONS.getValues());
+		TRANSPARENT.add(MaterialSetTag.CROPS.getValues());
+		TRANSPARENT.add(MaterialTags.MUSHROOMS.getValues());
+		TRANSPARENT.add(Material.COBWEB, Material.GRASS, Material.TALL_GRASS, Material.SNOW, Material.LARGE_FERN,
+			Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH);
+		TRANSPARENT.endsWith("TORCH");
+
+		CONTAINERS = new MaterialSetTag(Bending.getKey(), Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST,
+			Material.BARREL, Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
+			Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND, Material.BEACON,
+			Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.GRINDSTONE,
+			Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE
+		);
+
+		UNBREAKABLES = new MaterialSetTag(Bending.getKey(), Material.BARRIER, Material.BEDROCK,
+			Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
+			Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
+		);
 	}
 
-	private static final Set<Material> containers = EnumSet.of(
-		Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL, Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
-		Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND, Material.BEACON, Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL,
-		Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE
-	);
-
-	private static final Set<Material> unbreakables = EnumSet.of(
-		Material.BARRIER, Material.BEDROCK, Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
-		Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
-	);
-
-	public static boolean isUnbreakable(Block block) {
-		return unbreakables.contains(block.getType()) || (block.getState() instanceof InventoryHolder) ||
-			containers.contains(block.getType()) || (block.getState() instanceof CreatureSpawner);
+	public static boolean isAir(Block block) {
+		return isAir(block.getType());
 	}
 
-	//TODO change to Paper's MaterialTagSet and split into better categories
-	public static final Set<Material> TRANSPARENT_MATERIALS = EnumSet.of(
-		Material.AIR, Material.CAVE_AIR, Material.OAK_SAPLING, Material.SPRUCE_SAPLING, Material.BIRCH_SAPLING,
-		Material.JUNGLE_SAPLING, Material.ACACIA_SAPLING, Material.DARK_OAK_SAPLING,
-		Material.COBWEB, Material.TALL_GRASS, Material.GRASS, Material.FERN, Material.DEAD_BUSH,
-		Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM,
-		Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP, Material.WHITE_TULIP, Material.PINK_TULIP,
-		Material.OXEYE_DAISY, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.TORCH, Material.FIRE,
-		Material.WHEAT, Material.SNOW, Material.SUGAR_CANE, Material.VINE, Material.SUNFLOWER, Material.LILAC,
-		Material.LARGE_FERN, Material.ROSE_BUSH, Material.PEONY, Material.CAVE_AIR, Material.VOID_AIR,
-		Material.ACACIA_SIGN, Material.ACACIA_WALL_SIGN, Material.BIRCH_SIGN, Material.BIRCH_WALL_SIGN,
-		Material.DARK_OAK_SIGN, Material.DARK_OAK_WALL_SIGN, Material.JUNGLE_SIGN, Material.JUNGLE_WALL_SIGN,
-		Material.OAK_SIGN, Material.OAK_WALL_SIGN
-	);
-
-	private static final Set<Material> FIRE = EnumSet.of(
-		Material.FIRE, Material.SOUL_FIRE
-	);
-
-	// These are materials that must be attached to a block.
-	private final static Set<Material> ATTACH_MATERIALS = EnumSet.of(
-		Material.ACACIA_SAPLING, Material.BIRCH_SAPLING, Material.DARK_OAK_SAPLING, Material.JUNGLE_SAPLING,
-		Material.SPRUCE_SAPLING, Material.GRASS, Material.POPPY, Material.DANDELION, Material.DEAD_BUSH,
-		Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.FIRE, Material.SOUL_FIRE, Material.SNOW, Material.TORCH,
-		Material.SUNFLOWER, Material.LILAC, Material.LARGE_FERN, Material.FERN, Material.ROSE_BUSH, Material.PEONY
-	);
-
-	// These are materials that fire can be placed on.
-	private static final Set<Material> IGNITABLE_MATERIALS = EnumSet.of(
-		Material.BEDROCK, Material.BOOKSHELF,
-		Material.BRICK, Material.CLAY, Material.BRICKS, Material.COAL_ORE, Material.COBBLESTONE,
-		Material.DIAMOND_ORE, Material.DIAMOND_BLOCK, Material.DIRT, Material.END_STONE, Material.REDSTONE_ORE,
-		Material.GOLD_BLOCK, Material.GRAVEL, Material.GRASS_BLOCK, Material.BROWN_MUSHROOM_BLOCK,
-		Material.RED_MUSHROOM_BLOCK, Material.LAPIS_BLOCK, Material.LAPIS_ORE, Material.OAK_LOG,
-		Material.ACACIA_LOG, Material.BIRCH_LOG, Material.DARK_OAK_LOG, Material.JUNGLE_LOG, Material.SPRUCE_LOG,
-		Material.MOSSY_COBBLESTONE, Material.MYCELIUM, Material.NETHER_BRICK, Material.NETHERRACK,
-		Material.OBSIDIAN, Material.SAND, Material.SANDSTONE, Material.STONE_BRICKS, Material.STONE,
-		Material.SOUL_SAND, Material.ACACIA_WOOD, Material.BIRCH_WOOD, Material.DARK_OAK_WOOD, Material.JUNGLE_WOOD,
-		Material.OAK_WOOD, Material.SPRUCE_WOOD, Material.BLACK_WOOL, Material.BLUE_WOOL, Material.BROWN_WOOL,
-		Material.CYAN_WOOL, Material.GRAY_WOOL, Material.GREEN_WOOL, Material.LIGHT_BLUE_WOOL, Material.LIGHT_GRAY_WOOL,
-		Material.LIME_WOOL, Material.MAGENTA_WOOL, Material.ORANGE_WOOL, Material.PINK_WOOL, Material.PURPLE_WOOL,
-		Material.RED_WOOL, Material.WHITE_WOOL, Material.YELLOW_WOOL, Material.ACACIA_LEAVES, Material.BIRCH_LEAVES,
-		Material.DARK_OAK_LEAVES, Material.JUNGLE_LEAVES, Material.OAK_LEAVES, Material.SPRUCE_LEAVES,
-		Material.MELON, Material.PUMPKIN, Material.JACK_O_LANTERN, Material.NOTE_BLOCK, Material.GLOWSTONE,
-		Material.IRON_BLOCK, Material.DISPENSER, Material.SPONGE, Material.IRON_ORE, Material.GOLD_ORE,
-		Material.COAL_BLOCK, Material.CRAFTING_TABLE, Material.HAY_BLOCK, Material.REDSTONE_LAMP,
-		Material.EMERALD_ORE, Material.EMERALD_BLOCK, Material.REDSTONE_BLOCK, Material.QUARTZ_BLOCK,
-		Material.NETHER_QUARTZ_ORE, Material.TERRACOTTA, Material.BLACK_TERRACOTTA, Material.BLUE_TERRACOTTA,
-		Material.BROWN_TERRACOTTA, Material.CYAN_TERRACOTTA, Material.GRAY_TERRACOTTA, Material.GREEN_TERRACOTTA,
-		Material.LIGHT_BLUE_TERRACOTTA, Material.LIGHT_GRAY_TERRACOTTA, Material.LIME_TERRACOTTA,
-		Material.MAGENTA_TERRACOTTA, Material.ORANGE_TERRACOTTA, Material.PINK_TERRACOTTA,
-		Material.PURPLE_TERRACOTTA, Material.RED_TERRACOTTA, Material.WHITE_TERRACOTTA, Material.YELLOW_TERRACOTTA
-	);
+	public static boolean isAir(Material type) {
+		return AIR.isTagged(type);
+	}
 
 	public static boolean isTransparent(Block block) {
-		return TRANSPARENT_MATERIALS.contains(block.getType());
+		return isTransparent(block.getType());
 	}
 
-	public static boolean isSolid(Block block) {
-		AABB blockBounds = AABBUtils.getBlockBounds(block);
-		// The block bounding box will have width if it's solid.
-		if (blockBounds.min() == null || blockBounds.max() == null) return false;
-		return blockBounds.min().distanceSq(blockBounds.max()) > 0;
+	public static boolean isTransparent(Material type) {
+		return TRANSPARENT.isTagged(type);
+	}
+
+	public static boolean isContainer(Block block) {
+		return CONTAINERS.isTagged(block.getType()) || (block.getState() instanceof InventoryHolder);
+	}
+
+	public static boolean isUnbreakable(Block block) {
+		return UNBREAKABLES.isTagged(block.getType()) || isContainer(block) || (block.getState() instanceof CreatureSpawner);
 	}
 
 	public static boolean isIgnitable(Block block) {
-		if (isAir(block) || ATTACH_MATERIALS.contains(block.getType())) {
-			return IGNITABLE_MATERIALS.contains(block.getRelative(BlockFace.DOWN).getType());
-		} else {
-			return false;
-		}
+		return (isIgnitable(block.getType()) && isTransparent(block))
+			|| (isAir(block) && block.getRelative(BlockFace.DOWN).getType().isSolid());
+	}
+
+	public static boolean isIgnitable(Material type) {
+		return type.isFlammable() || type.isBurnable();
 	}
 
 	public static boolean isEarthbendable(Block block) {
@@ -155,8 +130,8 @@ public final class MaterialUtil {
 		return isFire(block.getType());
 	}
 
-	public static boolean isFire(Material material) {
-		return FIRE.contains(material);
+	public static boolean isFire(Material type) {
+		return MaterialSetTag.FIRE.isTagged(type);
 	}
 
 	public static boolean isLava(Block block) {
@@ -183,8 +158,8 @@ public final class MaterialUtil {
 		return isIce(block.getType());
 	}
 
-	public static boolean isIce(Material material) {
-		return WaterMaterials.ICE_BENDABLE.isTagged(material);
+	public static boolean isIce(Material type) {
+		return WaterMaterials.ICE_BENDABLE.isTagged(type);
 	}
 
 	public static boolean isPlant(Block block) {
@@ -232,14 +207,6 @@ public final class MaterialUtil {
 				return Material.COARSE_DIRT.createBlockData();
 		}
 		return Material.SAND.createBlockData();
-	}
-
-	public static boolean isAir(Block block) {
-		return isAir(block.getType());
-	}
-
-	public static boolean isAir(Material material) {
-		return material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR;
 	}
 
 	public static boolean isSourceBlock(Block block) {

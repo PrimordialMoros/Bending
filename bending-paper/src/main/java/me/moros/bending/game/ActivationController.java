@@ -105,8 +105,8 @@ public final class ActivationController {
 	}
 
 	public void onUserSneak(User user, boolean sneaking) {
+		if (sneaking) PhaseChange.melt(user);
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
-		if (action == ActivationMethod.SNEAK) PhaseChange.melt(user);
 		Game.getSequenceManager().registerAction(user, action);
 		activateAbility(user, action);
 		Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);

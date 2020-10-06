@@ -141,10 +141,10 @@ public final class WorldMethods {
 	}
 
 	/**
-	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT_MATERIALS}.
+	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT}.
 	 */
 	public static Location getTarget(World world, Ray ray) {
-		return getTarget(world, ray, MaterialUtil.TRANSPARENT_MATERIALS);
+		return getTarget(world, ray, MaterialUtil.TRANSPARENT.getValues());
 	}
 
 	/**
@@ -156,17 +156,18 @@ public final class WorldMethods {
 	 * @return the target location
 	 */
 	public static Location getTarget(World world, Ray ray, Set<Material> ignored) {
-		Vector3 direction = ray.direction.normalize();
+		Location location = ray.origin.toLocation(world);
+		Vector direction = ray.direction.normalize().toVector();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
-			Vector3 location = ray.origin.add(direction.scalarMultiply(i));
-			Block center = location.toBlock(world);
+			Block center = location.getBlock();
 			for (Block block : BlockMethods.combineFaces(center)) {
 				if (ignored.contains(block.getType())) continue;
 				AABB blockBounds = AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
-					return location.toLocation(world);
+					return location;
 				}
 			}
+			location.add(direction);
 		}
 		return ray.origin.add(ray.direction).toLocation(world);
 	}

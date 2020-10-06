@@ -19,25 +19,19 @@
 
 package me.moros.bending.ability.water.passives;
 
-import me.moros.bending.ability.water.*;
-import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 // TODO maybe use dolphin's grace instead?
 public class FastSwim implements PassiveAbility {
-	private static final Config config = new Config();
-
 	private User user;
-	private Config userConfig;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -48,10 +42,25 @@ public class FastSwim implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
+	public UpdateResult update() {
+		if (!user.isValid() || !user.canBend(getDescription())) {
+			return UpdateResult.CONTINUE;
+		}
+
+		if (MaterialUtil.isWater(user.getLocBlock())) {
+			if (PotionUtil.canAddPotion(user, PotionEffectType.DOLPHINS_GRACE, 20, 1)) {
+				user.getEntity().addPotionEffect(
+					new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 100, 1, true, false)
+				);
+			}
+		}
+		return UpdateResult.CONTINUE;
+	}
+
+	/*@Override
 	public UpdateResult update() {
 		if (!user.isValid() || !user.isSneaking() || !MaterialUtil.isWater(user.getLocBlock()) || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
@@ -61,7 +70,7 @@ public class FastSwim implements PassiveAbility {
 			user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
 		}
 		return UpdateResult.CONTINUE;
-	}
+	}*/
 
 	@Override
 	public void destroy() {
@@ -79,16 +88,5 @@ public class FastSwim implements PassiveAbility {
 
 	@Override
 	public void handleCollision(Collision collision) {
-	}
-
-	public static class Config extends Configurable {
-		@Attribute(Attributes.SPEED)
-		public double speed;
-
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "passives", "fastswim");
-			speed = abilityNode.getNode("speed").getDouble(0.6);
-		}
 	}
 }

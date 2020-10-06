@@ -196,7 +196,7 @@ public class AirScooter implements Ability {
 		if (block.getType() == Material.WATER) {
 			return false;
 		}
-		return !MaterialUtil.isTransparent(block) || MaterialUtil.isSolid(block);
+		return !MaterialUtil.isTransparent(block) || !block.isPassable();
 	}
 
 	private double getPrediction() {

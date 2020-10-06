@@ -43,7 +43,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public class HeatControl implements PassiveAbility {
 	private static final Config config = new Config();
@@ -58,7 +57,7 @@ public class HeatControl implements PassiveAbility {
 		this.user = user;
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
-		return false;
+		return true;
 	}
 
 	@Override
@@ -105,10 +104,9 @@ public class HeatControl implements PassiveAbility {
 
 	public void act() {
 		if (!user.canBend(getDescription())) return;
-		Predicate<Block> predicate = b -> MaterialUtil.isIce(b) || MaterialUtil.isFire(b);
 		boolean acted = false;
 		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
-		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
+		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> MaterialUtil.isIce(b) || MaterialUtil.isFire(b))) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
 			if (MaterialUtil.isIce(block)) {
@@ -116,7 +114,7 @@ public class HeatControl implements PassiveAbility {
 				if (tb.isPresent()) {
 					tb.get().revert();
 				} else {
-					TempBlock.create(block, Material.WATER);
+					TempBlock.create(block, Material.WATER, true);
 				}
 			} else {
 				block.setType(Material.AIR);
