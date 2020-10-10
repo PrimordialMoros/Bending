@@ -62,7 +62,7 @@ public class HydroSink implements PassiveAbility {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -76,6 +76,6 @@ public class HydroSink implements PassiveAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 }

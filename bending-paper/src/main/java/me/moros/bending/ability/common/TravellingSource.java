@@ -45,7 +45,7 @@ public class TravellingSource implements State {
 	private final double minDistanceSq, maxDistanceSq;
 
 	public TravellingSource(User user, BlockData data, double minDistance) {
-		this(user, data, minDistance, 0);
+		this(user, data, minDistance, minDistance + 5);
 	}
 
 	public TravellingSource(User user, BlockData data, double minDistance, double maxDistance) {

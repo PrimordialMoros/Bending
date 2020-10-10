@@ -77,7 +77,7 @@ public class BottleReturn implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		TempBlock.manager.get(source).filter(tb -> tb.getBlock().getType() == Material.WATER).ifPresent(TempBlock::revert);
 	}
 
@@ -92,7 +92,7 @@ public class BottleReturn implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	@Override

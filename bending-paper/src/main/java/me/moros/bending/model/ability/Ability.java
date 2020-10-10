@@ -31,7 +31,7 @@ import java.util.Collections;
 public interface Ability extends Updatable {
 	boolean activate(User user, ActivationMethod method); // return true if the ability was activated
 
-	void destroy();
+	void onDestroy();
 
 	User getUser();
 
@@ -53,7 +53,7 @@ public interface Ability extends Updatable {
 		return Collections.emptyList();
 	}
 
-	void handleCollision(Collision collision);
+	void onCollision(Collision collision);
 
 	void recalculateConfig();
 }

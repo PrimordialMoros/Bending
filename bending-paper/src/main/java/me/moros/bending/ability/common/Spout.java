@@ -28,7 +28,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
@@ -39,7 +38,6 @@ import java.util.function.Predicate;
 
 public abstract class Spout implements Updatable {
 	protected final User user;
-	protected final World world;
 
 	protected Predicate<Block> validBlock = x -> true;
 	protected final Set<Block> ignore = new HashSet<>();
@@ -52,7 +50,6 @@ public abstract class Spout implements Updatable {
 
 	public Spout(User user, double height, double speed) {
 		this.user = user;
-		this.world = user.getWorld();
 
 		this.height = NumberConversions.ceil(height);
 		this.speed = speed;
@@ -65,7 +62,7 @@ public abstract class Spout implements Updatable {
 
 	@Override
 	public UpdateResult update() {
-		Block block = WorldMethods.blockCast(world, new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
+		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
 		if (block == null || !validBlock.test(block)) {
 			return UpdateResult.REMOVE;
 		}

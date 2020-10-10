@@ -35,7 +35,6 @@ public class TempBlock implements Temporary {
 	private BlockState snapshot;
 	private final BlockData data;
 	private RevertTask revertTask;
-	private long revertTime;
 	private final boolean bendable;
 
 	public static void init() {
@@ -111,16 +110,6 @@ public class TempBlock implements Temporary {
 
 	public boolean isBendable() {
 		return bendable;
-	}
-
-	@Override
-	public long getRevertTime() {
-		return revertTime;
-	}
-
-	@Override
-	public void setRevertTime(long revertTime) {
-		this.revertTime = revertTime;
 	}
 
 	@Override

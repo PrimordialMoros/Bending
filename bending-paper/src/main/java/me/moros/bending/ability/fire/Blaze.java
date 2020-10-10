@@ -89,7 +89,7 @@ public class Blaze implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		if (!affectedBlocks.isEmpty()) user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
@@ -104,7 +104,7 @@ public class Blaze implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	private class FireStream {

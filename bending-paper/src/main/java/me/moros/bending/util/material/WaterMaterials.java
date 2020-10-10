@@ -28,6 +28,7 @@ public class WaterMaterials {
 	public static final MaterialSetTag PLANT_BENDABLE;
 	public static final MaterialSetTag ICE_BENDABLE;
 	public static final MaterialSetTag ALL;
+	public static final MaterialSetTag WATER_ICE_SOURCES;
 
 	static {
 		PLANT_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.FLOWERS.getValues());
@@ -41,5 +42,8 @@ public class WaterMaterials {
 
 		ALL = new MaterialSetTag(Bending.getKey(), Material.WATER);
 		ALL.add(PLANT_BENDABLE, ICE_BENDABLE);
+
+		WATER_ICE_SOURCES = new MaterialSetTag(Bending.getKey(), Material.WATER);
+		WATER_ICE_SOURCES.add(ICE_BENDABLE);
 	}
 }

@@ -105,7 +105,6 @@ public class Board {
 			}
 			misc.add(text);
 			bendingSlots.getScore(text).setScore(isCombo ? -10 : -11);
-
 		} else {
 			misc.remove(text);
 			bendingBoard.resetScores(text);

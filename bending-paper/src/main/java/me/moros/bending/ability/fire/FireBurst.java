@@ -74,7 +74,7 @@ public class FireBurst extends BurstAbility {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class FireBurst extends BurstAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public boolean isCharged() {

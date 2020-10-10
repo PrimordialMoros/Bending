@@ -122,7 +122,7 @@ public class AirSwipe implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	private void launch() {
@@ -142,7 +142,7 @@ public class AirSwipe implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}

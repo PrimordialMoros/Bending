@@ -72,7 +72,7 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		user.getEntity().removePotionEffect(PotionEffectType.JUMP);
 		user.getEntity().removePotionEffect(PotionEffectType.SPEED);
 	}
@@ -88,7 +88,7 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public static class Config extends Configurable {

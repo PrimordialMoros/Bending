@@ -118,7 +118,7 @@ public class AirShield implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
 		long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
 		user.setCooldown(this, cooldown);
@@ -140,7 +140,7 @@ public class AirShield implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}

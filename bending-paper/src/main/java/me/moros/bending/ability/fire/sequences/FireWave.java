@@ -106,8 +106,8 @@ public class FireWave implements Ability {
 	}
 
 	@Override
-	public void destroy() {
-		wall.destroy();
+	public void onDestroy() {
+		wall.onDestroy();
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class FireWave implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	private static class WallInfo {

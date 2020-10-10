@@ -63,8 +63,8 @@ public class JetBlast implements Ability {
 	}
 
 	@Override
-	public void destroy() {
-		jet.destroy();
+	public void onDestroy() {
+		jet.onDestroy();
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class JetBlast implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public static class Config extends Configurable {

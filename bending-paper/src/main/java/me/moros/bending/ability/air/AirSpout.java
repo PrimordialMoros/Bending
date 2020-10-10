@@ -101,7 +101,7 @@ public class AirSpout implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		spout.getFlight().setFlying(false);
 		spout.getFlight().release();
 		user.setCooldown(this, userConfig.cooldown);
@@ -123,7 +123,7 @@ public class AirSpout implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}

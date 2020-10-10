@@ -135,7 +135,7 @@ public class Bolt implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	private void strike() {
@@ -153,7 +153,7 @@ public class Bolt implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	@Override

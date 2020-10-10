@@ -112,7 +112,7 @@ public class FireJet implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		flight.release();
 	}
 
@@ -127,7 +127,7 @@ public class FireJet implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public void setSpeed(double newSpeed) {

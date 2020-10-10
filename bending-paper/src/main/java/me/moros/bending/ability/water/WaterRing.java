@@ -101,7 +101,7 @@ public class WaterRing implements Ability {
 		List<Block> list = new ArrayList<>();
 		list.add(source.get());
 		states = new StateChain(list)
-			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5, config.maxSelectRange))
+			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5))
 			.start();
 
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
@@ -219,7 +219,7 @@ public class WaterRing implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		if (!completed) cleanAll();
 	}
 
@@ -234,7 +234,7 @@ public class WaterRing implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public static class Config extends Configurable {
@@ -242,8 +242,6 @@ public class WaterRing implements Ability {
 		public long duration;
 		@Attribute(Attributes.SELECTION)
 		public double selectRange;
-		@Attribute(Attributes.SELECTION)
-		public double maxSelectRange;
 		public boolean affectEntities;
 		@Attribute(Attributes.DAMAGE)
 		public double damage;
@@ -256,7 +254,6 @@ public class WaterRing implements Ability {
 
 			duration = abilityNode.getNode("duration").getLong(30000);
 			selectRange = abilityNode.getNode("select-range").getDouble(16.0);
-			maxSelectRange = abilityNode.getNode("max-select-range").getDouble(20.0);
 			affectEntities = abilityNode.getNode("affect-entities").getBoolean(true);
 			damage = abilityNode.getNode("damage").getDouble(1.0);
 			knockback = abilityNode.getNode("knockback").getDouble(1.0);

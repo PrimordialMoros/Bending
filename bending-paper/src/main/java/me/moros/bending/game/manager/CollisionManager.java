@@ -83,8 +83,8 @@ public final class CollisionManager {
 	private void handleCollision(Ability first, Ability second, Collider collider1, Collider collider2, RegisteredCollision collision) {
 		Collision firstCollision = new Collision(first, second, collision.shouldRemoveFirst(), collision.shouldRemoveSecond(), collider1, collider2);
 		Collision secondCollision = new Collision(second, first, collision.shouldRemoveSecond(), collision.shouldRemoveFirst(), collider2, collider1);
-		first.handleCollision(firstCollision);
-		second.handleCollision(secondCollision);
+		first.onCollision(firstCollision);
+		second.onCollision(secondCollision);
 	}
 
 	protected void registerCollision(AbilityDescription first, AbilityDescription second, boolean removeFirst, boolean removeSecond) {

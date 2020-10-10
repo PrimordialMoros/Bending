@@ -53,7 +53,7 @@ public class GracefulDescent implements PassiveAbility {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -67,6 +67,6 @@ public class GracefulDescent implements PassiveAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 }

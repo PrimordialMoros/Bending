@@ -41,9 +41,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class HealingWaters implements Ability {
 	private static final org.bukkit.attribute.Attribute healthAttribute = org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 	private static final Config config = new Config();
@@ -95,10 +92,8 @@ public class HealingWaters implements Ability {
 	}
 
 	private void removeNegativeEffects(LivingEntity livingEntity) {
-		List<PotionEffectType> remove = livingEntity.getActivePotionEffects().stream()
-			.map(PotionEffect::getType)
-			.filter(PotionUtil::isNegative).collect(Collectors.toList());
-		remove.forEach(livingEntity::removePotionEffect);
+		livingEntity.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
+			.forEach(livingEntity::removePotionEffect);
 	}
 
 	private boolean healEntity(LivingEntity livingEntity) {
@@ -126,7 +121,7 @@ public class HealingWaters implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		user.setCooldown(this, userConfig.cooldown);
 	}
 
@@ -141,7 +136,7 @@ public class HealingWaters implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public static class Config extends Configurable {

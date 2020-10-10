@@ -135,6 +135,10 @@ public final class AbilityInitializer {
 		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();
 		abilities.add(phaseChange);
+
+		AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl.class)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
+		abilities.add(iceCrawl);
 	}
 
 	private static void initEarth(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {

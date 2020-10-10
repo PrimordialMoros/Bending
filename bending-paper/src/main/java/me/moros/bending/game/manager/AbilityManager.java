@@ -224,7 +224,7 @@ public class AbilityManager {
 	}
 
 	private void destroyAbility(Ability ability) {
-		ability.destroy();
+		ability.onDestroy();
 		ability.getUser().removeLastSlotContainer(); // Needed to clean up multi abilities
 	}
 }

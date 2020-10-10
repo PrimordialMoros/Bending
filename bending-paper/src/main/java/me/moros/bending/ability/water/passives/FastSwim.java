@@ -73,7 +73,7 @@ public class FastSwim implements PassiveAbility {
 	}*/
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -87,6 +87,6 @@ public class FastSwim implements PassiveAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 }

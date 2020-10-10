@@ -73,14 +73,14 @@ public class DensityShift implements PassiveAbility {
 		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
 		if (MaterialUtil.isEarthbendable(block)) {
 			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, CAN_SOFTEN)
-				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration));
+				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration, true));
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class DensityShift implements PassiveAbility {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 	}
 
 	public static class Config extends Configurable {

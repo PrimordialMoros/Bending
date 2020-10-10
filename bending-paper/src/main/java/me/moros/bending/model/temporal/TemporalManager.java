@@ -47,7 +47,7 @@ public final class TemporalManager<K, V extends Temporary> {
 	}
 
 	/**
-	 * You should use this inside {@link Temporary#revert}
+	 * This is used inside {@link Temporary#revert}
 	 * @param key the key of the entry to remove
 	 */
 	public void removeEntry(K key) {

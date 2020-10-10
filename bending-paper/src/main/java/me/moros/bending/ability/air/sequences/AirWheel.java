@@ -101,8 +101,8 @@ public class AirWheel implements Ability {
 	}
 
 	@Override
-	public void destroy() {
-		scooter.destroy();
+	public void onDestroy() {
+		scooter.onDestroy();
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
@@ -119,7 +119,7 @@ public class AirWheel implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}

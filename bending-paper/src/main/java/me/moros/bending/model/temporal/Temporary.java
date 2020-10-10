@@ -22,10 +22,6 @@ package me.moros.bending.model.temporal;
 public interface Temporary {
 	void revert();
 
-	long getRevertTime();
-
-	void setRevertTime(long revertTime);
-
 	void setRevertTask(RevertTask task);
 
 	/**

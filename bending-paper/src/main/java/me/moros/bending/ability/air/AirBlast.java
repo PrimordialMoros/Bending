@@ -130,7 +130,7 @@ public class AirBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	private void selectOrigin() {
@@ -160,7 +160,7 @@ public class AirBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}

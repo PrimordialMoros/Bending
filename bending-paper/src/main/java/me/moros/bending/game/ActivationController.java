@@ -89,11 +89,12 @@ public final class ActivationController {
 		removed |= manager.destroyInstanceType(user, AirWheel.class);
 		if (removed) return;
 
-		HeatControl.act(user);
+		AirBurst.activateCone(user);
 		PhaseChange.freeze(user);
+		IceCrawl.launch(user);
+		HeatControl.act(user);
 		Combustion.explode(user);
 		FireBurst.activateCone(user);
-		AirBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
 			Game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH_ENTITY);

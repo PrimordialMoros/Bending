@@ -151,7 +151,7 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.getSecondAbility() instanceof Combustion) {
 			createExplosion(location, userConfig.power * 2, userConfig.damage * 2);
 		} else if (collision.getSecondAbility() instanceof Explosive || collision.getSecondAbility().getDescription().getElement() == Element.EARTH) {

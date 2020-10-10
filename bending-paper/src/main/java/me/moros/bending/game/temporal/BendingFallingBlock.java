@@ -31,7 +31,6 @@ public class BendingFallingBlock implements Temporary {
 	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
 	private final FallingBlock fallingBlock;
 	private RevertTask revertTask;
-	private long revertTime;
 
 	public static void init() {
 	}
@@ -65,16 +64,6 @@ public class BendingFallingBlock implements Temporary {
 
 	public FallingBlock getFallingBlock() {
 		return fallingBlock;
-	}
-
-	@Override
-	public long getRevertTime() {
-		return revertTime;
-	}
-
-	@Override
-	public void setRevertTime(long revertTime) {
-		this.revertTime = revertTime;
 	}
 
 	@Override

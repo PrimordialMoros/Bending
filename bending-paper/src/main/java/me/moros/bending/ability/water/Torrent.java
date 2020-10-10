@@ -121,7 +121,7 @@ public class Torrent implements Ability {
 	}
 
 	@Override
-	public void destroy() {
+	public void onDestroy() {
 		if (states != null) {
 			State current = states.getCurrent();
 			if (current instanceof TorrentStream) ((TorrentStream) current).cleanAll();
@@ -148,7 +148,7 @@ public class Torrent implements Ability {
 	}
 
 	@Override
-	public void handleCollision(Collision collision) {
+	public void onCollision(Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
