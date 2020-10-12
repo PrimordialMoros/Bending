@@ -23,6 +23,7 @@ import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.util.DamageUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -31,7 +32,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.PlayerInventory;
 
 public class TempArmorListener implements Listener {
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
 		if (event.isCancelled() || !(event.getClickedInventory() instanceof PlayerInventory) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
 			return;
@@ -43,7 +44,7 @@ public class TempArmorListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
 			event.getDrops().removeIf(item -> tempArmor.getArmor().contains(item));
@@ -55,7 +56,7 @@ public class TempArmorListener implements Listener {
 		if (newMessage != null) event.setDeathMessage(newMessage);
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerLogout(PlayerQuitEvent event) {
 		TempArmor.manager.get(event.getPlayer()).ifPresent(TempArmor::revert);
 	}

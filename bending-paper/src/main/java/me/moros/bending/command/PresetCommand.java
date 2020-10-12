@@ -49,7 +49,7 @@ public class PresetCommand extends BaseCommand {
 		if (presets.isEmpty()) {
 			Message.NO_PRESETS.send(player);
 		} else {
-			player.sendMessageKyori(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+			player.sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
 		}
 	}
 
@@ -69,7 +69,7 @@ public class PresetCommand extends BaseCommand {
 			Message.EMPTY_PRESET.send(player);
 			return;
 		}
-		player.addPreset(preset, result -> player.sendMessageKyori(result.getMessage(input)));
+		player.addPreset(preset, result -> player.sendMessage(result.getMessage(input)));
 	}
 
 	@Subcommand("remove|rm|r|delete|del|d")

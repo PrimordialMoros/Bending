@@ -20,7 +20,7 @@
 package me.moros.bending.locale;
 
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.ChatUtil;
+import me.moros.bending.util.AdventureUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.command.CommandSender;
@@ -140,11 +140,11 @@ public interface Message {
 		Component build();
 
 		default void send(CommandSender sender) {
-			ChatUtil.sendMessage(sender, build());
+			AdventureUtil.sendMessage(sender, build());
 		}
 
 		default void send(User user) {
-			user.sendMessageKyori(build());
+			user.sendMessage(build());
 		}
 	}
 
@@ -152,11 +152,11 @@ public interface Message {
 		Component build(A0 arg0);
 
 		default void send(CommandSender sender, A0 arg0) {
-			ChatUtil.sendMessage(sender, build(arg0));
+			AdventureUtil.sendMessage(sender, build(arg0));
 		}
 
 		default void send(User user, A0 arg0) {
-			user.sendMessageKyori(build(arg0));
+			user.sendMessage(build(arg0));
 		}
 	}
 
@@ -164,11 +164,11 @@ public interface Message {
 		Component build(A0 arg0, A1 arg1);
 
 		default void send(CommandSender sender, A0 arg0, A1 arg1) {
-			ChatUtil.sendMessage(sender, build(arg0, arg1));
+			AdventureUtil.sendMessage(sender, build(arg0, arg1));
 		}
 
 		default void send(User user, A0 arg0, A1 arg1) {
-			user.sendMessageKyori(build(arg0, arg1));
+			user.sendMessage(build(arg0, arg1));
 		}
 	}
 }

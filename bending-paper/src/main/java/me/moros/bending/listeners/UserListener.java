@@ -53,8 +53,8 @@ import org.bukkit.util.Vector;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PlayerListener implements Listener {
-	@EventHandler
+public class UserListener implements Listener {
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
 		Tasker.newChain().delay(3 * 20).async(event::allow); // After 3 seconds allow the player to login anyway
 		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on pre-login");
@@ -65,7 +65,7 @@ public class PlayerListener implements Listener {
 		timing.stopTiming();
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		UUID uuid = player.getUniqueId();
@@ -80,12 +80,12 @@ public class PlayerListener implements Listener {
 		timing.stopTiming();
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerLogout(PlayerQuitEvent event) {
 		Game.getActivationController().onPlayerLogout(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onFallDamage(EntityDamageEvent event) {
 		if (event.getCause() != DamageCause.FALL || !(event.getEntity() instanceof Player)) return;
 		Player player = (Player) event.getEntity();
@@ -94,7 +94,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onFireTickDamage(EntityDamageEvent event) {
 		if (event.getCause() != DamageCause.FIRE && event.getCause() != DamageCause.FIRE_TICK) return;
 		if (!(event.getEntity() instanceof Player)) return;
@@ -104,13 +104,13 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		final Vector velocity = event.getTo().clone().subtract(event.getFrom()).toVector();
 		Game.getActivationController().onUserMove(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), velocity);
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getHand() != EquipmentSlot.HAND) return;
 		BendingPlayer player = Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
@@ -124,38 +124,38 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayDropItem(PlayerDropItemEvent event) {
 		Game.getActivationController().ignoreNextSwing(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
 		if (event.getHand() != EquipmentSlot.HAND) return;
 		Game.getActivationController().onUserInteract(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), ActivationMethod.INTERACT_ENTITY);
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
 		Game.getActivationController().onUserSneak(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), event.isSneaking());
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerSwing(PlayerAnimationEvent event) {
 		Game.getActivationController().onUserSwing(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
 		Game.getBoardManager().forceToggleScoreboard(event.getPlayer());
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerSlotChange(final PlayerItemHeldEvent event) {
 		Game.getBoardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCooldownAdd(CooldownAddEvent event) {
 		if (event.getUser() instanceof BendingPlayer) {
 			AbilityDescription desc = event.getAbilityDescription();
@@ -163,7 +163,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCooldownRemove(CooldownRemoveEvent event) {
 		if (event.getUser() instanceof BendingPlayer) {
 			AbilityDescription desc = event.getAbilityDescription();
@@ -171,14 +171,14 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onElementChange(ElementChangeEvent event) {
 		if (event.getUser() instanceof BendingPlayer && event.getResult() != ElementChangeEvent.Result.ADD) {
 			Game.getBoardManager().updateBoard((Player) event.getUser().getEntity());
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onWorldChange(PlayerChangedWorldEvent event) {
 		Game.getAbilityManager(event.getFrom()).destroyUserInstances(Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}

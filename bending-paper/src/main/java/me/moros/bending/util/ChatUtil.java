@@ -19,45 +19,17 @@
 
 package me.moros.bending.util;
 
-import me.moros.bending.Bending;
-import me.moros.bending.locale.Message;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 
 import java.util.regex.Pattern;
 
 /**
  * Utility class to handle chat related functionality.
  */
-public class ChatUtil {
+public final class ChatUtil {
 	private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
-
-	/**
-	 * @see #sendMessage(CommandSender, Component)
-	 */
-	public static void sendMessage(CommandSender receiver, String text) {
-		sendMessage(receiver, Component.text(text));
-	}
-
-	/**
-	 * Sends a message to the provided sender using the <a href="https://github.com/KyoriPowered/adventure">Adventure</a> Framework.
-	 * @param receiver the message receiver
-	 * @param text the text message as a Component
-	 */
-	public static void sendMessage(CommandSender receiver, Component text) {
-		Bending.getAudiences().sender(receiver).sendMessage(text);
-	}
-
-	public static Component brand(String text) {
-		return brand(Component.text(text));
-	}
-
-	public static Component brand(Component text) {
-		return Message.PREFIX.append(text);
-	}
 
 	/**
 	 * Strip input of all non alphabetical values and limit to 16 characters long.

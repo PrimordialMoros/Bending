@@ -26,8 +26,8 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
 import me.moros.bending.game.Game;
 import me.moros.bending.listeners.BlockListener;
-import me.moros.bending.listeners.PlayerListener;
 import me.moros.bending.listeners.TempArmorListener;
+import me.moros.bending.listeners.UserListener;
 import me.moros.bending.listeners.WorldListener;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.util.Tasker;
@@ -68,7 +68,7 @@ public class Bending extends JavaPlugin {
 		ConfigManager.init(getConfigFolder());
 		game = new Game();
 
-		getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+		getServer().getPluginManager().registerEvents(new UserListener(), this);
 		getServer().getPluginManager().registerEvents(new BlockListener(), this);
 		getServer().getPluginManager().registerEvents(new TempArmorListener(), this);
 		getServer().getPluginManager().registerEvents(new WorldListener(), this);

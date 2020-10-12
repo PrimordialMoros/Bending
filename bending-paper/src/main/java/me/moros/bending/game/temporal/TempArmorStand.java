@@ -26,6 +26,7 @@ import me.moros.bending.util.ParticleUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,7 +39,7 @@ public class TempArmorStand implements Temporary {
 	public static void init() {
 	}
 
-	public TempArmorStand(Location location, Material material, boolean particles, long duration) {
+	public TempArmorStand(Location location, Material material, long duration, boolean particles) {
 		armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
 			entity.setInvulnerable(true);
 			entity.setVisible(false);
@@ -49,17 +50,18 @@ public class TempArmorStand implements Temporary {
 
 		if (particles) {
 			Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
+			BlockData data = material.createBlockData();
 			ParticleUtil.create(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
-				.data(material.createBlockData()).spawn();
+				.data(data).spawn();
 			ParticleUtil.create(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
-				.data(material.createBlockData()).spawn();
+				.data(data).spawn();
 		}
 
 		manager.addEntry(armorStand, this, duration);
 	}
 
 	public TempArmorStand(Location location, Material material, long duration) {
-		this(location, material, true, duration);
+		this(location, material, duration, true);
 	}
 
 	public ArmorStand getArmorStand() {

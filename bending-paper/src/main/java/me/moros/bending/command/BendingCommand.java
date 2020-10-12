@@ -41,7 +41,7 @@ import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.util.ChatUtil;
+import me.moros.bending.util.AdventureUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -161,7 +161,7 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.help")
 	@Description("View version info about the bending plugin")
 	public static void onVersion(CommandSender sender) {
-		ChatUtil.sendMessage(sender, getVersionInfo());
+		AdventureUtil.sendMessage(sender, getVersionInfo());
 	}
 
 
@@ -209,7 +209,7 @@ public class BendingCommand extends BaseCommand {
 			Message.ELEMENT_ABILITIES_EMPTY.send(sender, element.getDisplayName());
 			return;
 		}
-		output.forEach(text -> ChatUtil.sendMessage(sender, text));
+		output.forEach(text -> AdventureUtil.sendMessage(sender, text));
 	}
 
 	@Subcommand("bind|b")
@@ -238,7 +238,7 @@ public class BendingCommand extends BaseCommand {
 		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Message.BOUND_SLOTS.send(player, bendingPlayer.getEntity().getName());
 		IntStream.rangeClosed(1, 9).forEach(slot -> bendingPlayer.getStandardSlotAbility(slot)
-			.ifPresent(desc -> player.sendMessageKyori(
+			.ifPresent(desc -> player.sendMessage(
 				Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(AbilityDescription.getMeta(desc))
 			))
 		);
@@ -277,7 +277,7 @@ public class BendingCommand extends BaseCommand {
 		}
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> ChatUtil.sendMessage(sender, ability.getDisplayName()
+			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> AdventureUtil.sendMessage(sender, ability.getDisplayName()
 				.append(Component.text(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
 			));
 		}

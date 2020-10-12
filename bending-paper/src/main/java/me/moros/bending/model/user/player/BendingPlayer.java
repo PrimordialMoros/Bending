@@ -19,13 +19,13 @@
 
 package me.moros.bending.model.user.player;
 
+import me.moros.bending.Bending;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingUser;
-import me.moros.bending.util.ChatUtil;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -145,13 +145,8 @@ public final class BendingPlayer extends BendingUser {
 	}
 
 	@Override
-	public void sendMessageKyori(String message) {
-		ChatUtil.sendMessage(getEntity(), message);
-	}
-
-	@Override
-	public void sendMessageKyori(Component message) {
-		ChatUtil.sendMessage(getEntity(), message);
+	public Audience asAudience() {
+		return Bending.getAudiences().player(getProfile().getUniqueId());
 	}
 
 	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {

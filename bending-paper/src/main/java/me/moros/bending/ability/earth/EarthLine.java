@@ -47,7 +47,14 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.WorldMethods;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -58,7 +65,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -155,7 +161,7 @@ public class EarthLine implements Ability {
 	private void setPrisonMode() {
 		if (mode == Mode.NORMAL) {
 			mode = Mode.PRISON;
-			// TODO add some kind of indicator for current mode
+			user.asAudience().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
 		}
 	}
 
@@ -195,6 +201,7 @@ public class EarthLine implements Ability {
 
 	private class Line extends AbstractLine {
 		private boolean raisedSpikes = false;
+		private boolean imprisoned = false;
 
 		public Line(User user, Block source) {
 			super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.4 : 0.7, false);
@@ -220,16 +227,16 @@ public class EarthLine implements Ability {
 		@Override
 		public boolean onEntityHit(Entity entity) {
 			// TODO add metal/magma modifiers
-			if (!locked && target == null && mode == Mode.PRISON) {
-				target = (LivingEntity) entity;
-				target.setVelocity(new Vector(0, -2, 0));
-				locked = true;
-				return true;
-			}
-			if (mode == Mode.MAGMA) {
-				FireTick.LARGER.apply(entity, 40);
-			} else if (mode == Mode.NORMAL) {
-				raiseSpikes();
+			switch (mode) {
+				case NORMAL:
+					raiseSpikes();
+					break;
+				case PRISON:
+					imprisonTarget((LivingEntity) entity);
+					return true;
+				case MAGMA:
+					FireTick.LARGER.apply(entity, 40);
+					break;
 			}
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			return true;
@@ -263,6 +270,33 @@ public class EarthLine implements Ability {
 			// TODO add spikes
 		}
 
+		private void imprisonTarget(LivingEntity entity) {
+			if (imprisoned || !entity.isValid() || WorldMethods.distanceAboveGround(entity) > 1.2) return;
+			Material material = null;
+			Block blockToCheck = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
+			if (MaterialUtil.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first
+				material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
+			} else {
+				Location center = blockToCheck.getLocation().add(0.5, 0.5, 0.5);
+				for (Block block : WorldMethods.getNearbyBlocks(center, 1, b -> MaterialUtil.isEarthbendable(user, b), 1)) {
+					material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
+				}
+			}
+
+			if (material == null) return;
+
+			imprisoned = true;
+			entity.setVelocity(Vector3.MINUS_J.toVector());
+			Material mat = material;
+			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 4, RotationConvention.VECTOR_OPERATOR);
+			VectorMethods.rotate(Vector3.PLUS_I.scalarMultiply(0.8), rotation, 8).forEach(v -> {
+				Location loc = entity.getLocation().add(0, -1.1, 0);
+				new TempArmorStand(loc.add(v.toVector()), mat, userConfig.prisonDuration);
+				new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
+			});
+			// TODO add functionality to restrict movement
+		}
+
 		public void setControllable(boolean value) {
 			if (mode != Mode.MAGMA) controllable = value;
 		}
@@ -277,6 +311,8 @@ public class EarthLine implements Ability {
 		public double selectRange;
 		@Attribute(Attributes.DAMAGE)
 		public double damage;
+		@Attribute(Attributes.DURATION)
+		public long prisonDuration;
 
 		@Override
 		public void onConfigReload() {
@@ -286,6 +322,8 @@ public class EarthLine implements Ability {
 			range = abilityNode.getNode("range").getDouble(24.0);
 			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
 			damage = abilityNode.getNode("damage").getDouble(3.0);
+
+			prisonDuration = abilityNode.getNode("prison-duration").getLong(3000);
 		}
 	}
 }

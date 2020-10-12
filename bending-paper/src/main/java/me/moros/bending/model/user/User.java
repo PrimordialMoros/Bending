@@ -29,6 +29,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -215,9 +216,11 @@ public interface User {
 		}));
 	}
 
-	default void sendMessageKyori(String message) {
+	default Audience asAudience() {
+		return Audience.empty();
 	}
 
-	default void sendMessageKyori(Component message) {
+	default void sendMessage(Component message) {
+		asAudience().sendMessage(message);
 	}
 }

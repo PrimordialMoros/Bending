@@ -25,7 +25,7 @@ import org.apache.commons.math3.util.FastMath;
 
 public class AABB implements Collider {
 	public static final AABB PLAYER_BOUNDS = new AABB(new Vector3(-0.3, 0.0, -0.3), new Vector3(0.3, 1.8, 0.3));
-	public static final AABB BLOCK_BOUNDS = new AABB(new Vector3(0.0, 0.0, 0.0), new Vector3(1.0, 1.0, 1.0));
+	public static final AABB BLOCK_BOUNDS = new AABB(Vector3.ZERO, Vector3.ONE);
 
 	private final Vector3 min;
 	private final Vector3 max;

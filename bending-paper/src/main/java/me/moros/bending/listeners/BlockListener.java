@@ -36,40 +36,40 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 
 public class BlockListener implements Listener {
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockIgnite(BlockIgniteEvent event) {
 		if (TempBlock.manager.isTemp(event.getIgnitingBlock())) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockSpread(BlockSpreadEvent event) {
 		if (TempBlock.manager.isTemp(event.getSource())) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockFade(BlockFadeEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockBurn(BlockBurnEvent event) {
 		if (TempBlock.manager.isTemp(event.getIgnitingBlock())) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setDropItems(false);
@@ -84,14 +84,14 @@ public class BlockListener implements Listener {
 		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockForm(BlockFormEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setCancelled(true);
 		}
 	}
 
-	@EventHandler(ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockFromTo(BlockFromToEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock()) || TempBlock.manager.isTemp(event.getToBlock())) {
 			event.setCancelled(true);
