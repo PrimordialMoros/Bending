@@ -54,7 +54,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
@@ -214,8 +213,7 @@ public class Combustion implements Ability, Explosive {
 			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
 			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
 				if (!Game.getProtectionSystem().canBuild(user, block)) break;
-				boolean canIgnite = block.getRelative(BlockFace.DOWN).getType().isSolid();
-				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && canIgnite) ? Material.FIRE : Material.AIR;
+				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && MaterialUtil.isIgnitable(block)) ? Material.FIRE : Material.AIR;
 				TempBlock.create(block, mat, userConfig.regenTime + ThreadLocalRandom.current().nextInt(1000), true);
 			}
 		}

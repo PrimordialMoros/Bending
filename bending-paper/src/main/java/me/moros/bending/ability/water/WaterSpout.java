@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.water;
 
-import me.moros.bending.ability.common.Spout;
+import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
@@ -60,7 +60,7 @@ public class WaterSpout implements Ability {
 
 	private final Collection<TempBlock> column = new ArrayList<>();
 	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || MaterialUtil.isIce(b);
-	private Spout spout;
+	private AbstractSpout spout;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -83,7 +83,7 @@ public class WaterSpout implements Ability {
 
 		removalPolicy = Policies.builder().build();
 
-		spout = new BlockSpout(user);
+		spout = new Spout(user);
 		return true;
 	}
 
@@ -132,20 +132,20 @@ public class WaterSpout implements Ability {
 	}
 
 	public void handleMovement(Vector velocity) {
-		Spout.limitVelocity(user, velocity, userConfig.maxSpeed);
+		AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
 	}
 
-	private class BlockSpout extends Spout {
+	private class Spout extends AbstractSpout {
 		private BlockVector blockVector;
 		private final Vector g = new Vector(0, -0.1, 0); // Applied as extra gravity
 
-		public BlockSpout(User user) {
+		public Spout(User user) {
 			super(user, userConfig.height, userConfig.maxSpeed);
 			validBlock = predicate;
 		}
 
 		@Override
-		public void render(double distance) {
+		public void render() {
 			BlockVector userBlockVector = new BlockVector(user.getLocation().toVector());
 			if (userBlockVector.equals(blockVector)) return;
 			blockVector = userBlockVector;

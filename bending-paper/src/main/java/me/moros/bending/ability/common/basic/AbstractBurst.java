@@ -17,9 +17,8 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.math.Vector3;
@@ -29,7 +28,7 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public abstract class BurstAbility implements Ability {
+public abstract class AbstractBurst {
 	protected final Collection<Burstable> blasts = new ArrayList<>();
 
 	protected <T extends Burstable> void createCone(User user, Class<T> type, double range) {
@@ -63,7 +62,6 @@ public abstract class BurstAbility implements Ability {
 		}
 	}
 
-	// Return false if all blasts are finished.
 	protected UpdateResult updateBurst() {
 		blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
 		return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;

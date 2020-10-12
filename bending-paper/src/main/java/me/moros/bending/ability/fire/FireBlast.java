@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.fire;
 
-import me.moros.bending.ability.common.ParticleStream;
+import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;

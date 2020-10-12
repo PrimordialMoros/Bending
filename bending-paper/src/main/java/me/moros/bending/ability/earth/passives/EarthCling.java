@@ -68,7 +68,7 @@ public class EarthCling implements PassiveAbility {
 		}
 		int counter = 2;
 		// TODO add earthglove and count available
-		if (counter > 0 && WorldMethods.isAgainstWall(user, MaterialUtil::isEarthbendable)) {
+		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> MaterialUtil.isEarthbendable(user, b))) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());
 			} else {

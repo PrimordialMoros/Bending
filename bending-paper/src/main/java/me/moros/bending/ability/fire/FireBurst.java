@@ -19,9 +19,10 @@
 
 package me.moros.bending.ability.fire;
 
-import me.moros.bending.ability.common.BurstAbility;
+import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
@@ -32,7 +33,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.methods.UserMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
-public class FireBurst extends BurstAbility {
+public class FireBurst extends AbstractBurst implements Ability {
 	private static final Config config = new Config();
 
 	private User user;

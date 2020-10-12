@@ -22,6 +22,7 @@ package me.moros.bending.game;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
+import me.moros.bending.ability.earth.*;
 import me.moros.bending.ability.earth.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
@@ -92,6 +93,7 @@ public final class ActivationController {
 		AirBurst.activateCone(user);
 		PhaseChange.freeze(user);
 		IceCrawl.launch(user);
+		EarthLine.launch(user);
 		HeatControl.act(user);
 		Combustion.explode(user);
 		FireBurst.activateCone(user);
@@ -139,6 +141,9 @@ public final class ActivationController {
 	public void onUserInteract(User user, ActivationMethod method) {
 		if (!method.isInteract()) return;
 		ignoreNextSwing(user);
+
+		EarthLine.setPrisonMode(user);
+
 		Game.getSequenceManager().registerAction(user, method);
 		activateAbility(user, method);
 	}

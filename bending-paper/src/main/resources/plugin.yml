@@ -24,7 +24,7 @@ permissions:
     default: op
     children:
       bending.player: true
-      bending.fire.bluefire: true
+      bending.bluefire: true
       bending.command.reload: true
       bending.command.add: true
       bending.command.remove: true
@@ -66,6 +66,8 @@ permissions:
       bending.ability.Twister: true
   bending.earth:
     children:
+      bending.metal: true
+      bending.lava: true
       bending.command.choose.Earth: true
       bending.ability.Catapult: true
       bending.ability.Collapse: true

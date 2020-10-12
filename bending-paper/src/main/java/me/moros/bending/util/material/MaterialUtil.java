@@ -22,6 +22,7 @@ package me.moros.bending.util.material;
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.Bending;
+import me.moros.bending.model.user.User;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -117,13 +118,14 @@ public final class MaterialUtil {
 		return type.isFlammable() || type.isBurnable();
 	}
 
-	public static boolean isEarthbendable(Block block) {
-		return isEarthbendable(block.getType());
+	public static boolean isEarthbendable(User user, Block block) {
+		return isEarthbendable(user, block.getType());
 	}
 
-	public static boolean isEarthbendable(Material type) {
-		// TODO Implement checks for subelement materials, will need to pass extra info
-		return EarthMaterials.EARTH_BENDABLE.isTagged(type);
+	public static boolean isEarthbendable(User user, Material type) {
+		if (isMetal(type) && !user.hasPermission("bending.metal")) return false;
+		if (EarthMaterials.LAVA_BENDABLE.isTagged(type) && !user.hasPermission("bending.lava")) return false;
+		return EarthMaterials.EARTH_BENDABLE.isTagged(type) || EarthMaterials.SAND_BENDABLE.isTagged(type);
 	}
 
 	public static boolean isFire(Block block) {
@@ -170,8 +172,20 @@ public final class MaterialUtil {
 		return WaterMaterials.PLANT_BENDABLE.isTagged(type);
 	}
 
+	public static boolean isMetal(Block block) {
+		return isMetal(block.getType());
+	}
+
+	public static boolean isMetal(Material type) {
+		return EarthMaterials.METAL_BENDABLE.isTagged(type);
+	}
+
 	// Finds a suitable solid block type to replace a falling-type block with.
 	public static BlockData getSolidType(BlockData data) {
+		return getSolidType(data, data);
+	}
+
+	public static BlockData getSolidType(BlockData data, BlockData def) {
 		switch (data.getMaterial()) { // TODO implement concrete powder maybe (if it ever becomes bendable)?
 			case SAND:
 				return Material.SANDSTONE.createBlockData();
@@ -180,8 +194,12 @@ public final class MaterialUtil {
 			case GRAVEL:
 				return Material.STONE.createBlockData();
 			default:
-				return data;
+				return def;
 		}
+	}
+
+	public static BlockData getFocusedType(BlockData data) {
+		return data.getMaterial() == Material.STONE ? Material.COBBLESTONE.createBlockData() : getSolidType(data, Material.STONE.createBlockData());
 	}
 
 	// Finds a suitable soft block type to replace a solid block

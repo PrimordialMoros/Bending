@@ -17,17 +17,16 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.water;
+package me.moros.bending.ability.earth;
 
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
-import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.FireTick;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -41,31 +40,35 @@ import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
+import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.BlockMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class IceCrawl implements Ability {
+//TODO complete prison mode, add magma wall breaking
+public class EarthLine implements Ability {
+	private enum Mode {NORMAL, PRISON, MAGMA}
+
 	private static final Config config = new Config();
 
 	private User user;
@@ -73,27 +76,29 @@ public class IceCrawl implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private StateChain states;
-	private Line iceLine;
+	private Line earthLine;
+
+	private Mode mode = Mode.NORMAL;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
-		if (!source.isPresent()) return false;
-
-		Optional<IceCrawl> line = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
-		if (method == ActivationMethod.SNEAK && line.isPresent()) {
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, EarthMaterials.ALL).orElse(null);
+		if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) return false;
+		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
+		Optional<EarthLine> line = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class);
+		if (line.isPresent()) {
 			State state = line.get().states.getCurrent();
 			if (state instanceof SelectedSource) {
-				((SelectedSource) state).reselect(source.get());
+				((SelectedSource) state).reselect(source, fakeData);
 			}
 			return false;
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 5))
+			.addState(new SelectedSource(user, source, userConfig.selectRange + 5, fakeData))
 			.start();
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -110,35 +115,59 @@ public class IceCrawl implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		if (iceLine != null) {
-			return iceLine.update();
+		if (earthLine != null) {
+			earthLine.setControllable(user.isSneaking());
+			return earthLine.update();
 		} else {
 			return states.update();
 		}
 	}
 
 	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceCrawl")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
+			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
 		}
 	}
 
 	private void launch() {
-		if (iceLine != null) return;
+		if (earthLine != null) {
+			earthLine.raiseSpikes();
+			return;
+		}
 		State state = states.getCurrent();
 		if (state instanceof SelectedSource) {
 			state.complete();
-			Optional<Block> src = states.getChainStore().stream().findAny();
-			if (src.isPresent()) {
-				iceLine = new Line(user, src.get());
-				Policies.builder().build();
-				user.setCooldown(this, userConfig.cooldown);
-			}
+			Block source = states.getChainStore().stream().findAny().orElse(null);
+			if (source == null) return;
+			if (MaterialUtil.isLava(source)) mode = Mode.MAGMA;
+			earthLine = new Line(user, source);
+			Policies.builder().build();
+			user.setCooldown(this, userConfig.cooldown);
+		}
+	}
+
+	public static void setPrisonMode(User user) {
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
+			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::setPrisonMode);
+		}
+	}
+
+	private void setPrisonMode() {
+		if (mode == Mode.NORMAL) {
+			mode = Mode.PRISON;
+			// TODO add some kind of indicator for current mode
 		}
 	}
 
 	@Override
 	public void onDestroy() {
+		State state = states.getCurrent();
+		if (state instanceof SelectedSource) {
+			Block block = ((SelectedSource) state).getSelectedSource();
+			if (user instanceof BendingPlayer) {
+				((Player) user.getEntity()).sendBlockChange(block.getLocation(), block.getBlockData());
+			}
+		}
 	}
 
 	@Override
@@ -148,13 +177,13 @@ public class IceCrawl implements Ability {
 
 	@Override
 	public String getName() {
-		return "IceCrawl";
+		return "EarthLine";
 	}
 
 	@Override
 	public Collection<Collider> getColliders() {
-		if (iceLine == null) return Collections.emptyList();
-		return Collections.singletonList(iceLine.getCollider());
+		if (earthLine == null) return Collections.emptyList();
+		return Collections.singletonList(earthLine.getCollider());
 	}
 
 	@Override
@@ -165,8 +194,11 @@ public class IceCrawl implements Ability {
 	}
 
 	private class Line extends AbstractLine {
+		private boolean raisedSpikes = false;
+
 		public Line(User user, Block source) {
-			super(user, source, userConfig.range, 0.5, true);
+			super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.4 : 0.7, false);
+			if (mode != Mode.MAGMA) controllable = true;
 		}
 
 		@Override
@@ -174,52 +206,71 @@ public class IceCrawl implements Ability {
 			double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
 			double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
 			Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.getWorld());
-			new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
+			Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN).getType();
+			new TempArmorStand(spawnLoc, type, 700);
 		}
 
 		@Override
 		public void postRender() {
 			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				SoundUtil.ICE_SOUND.play(location.toLocation(user.getWorld()));
+				SoundUtil.EARTH_SOUND.play(location.toLocation(user.getWorld()));
 			}
 		}
 
 		@Override
 		public boolean onEntityHit(Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			if (entity.isValid() && entity instanceof LivingEntity) {
-				Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
-				new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
-				int potionDuration = NumberConversions.round(userConfig.freezeDuration / 50F);
-				((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, 5));
-				// TODO freeze entity movement
+			// TODO add metal/magma modifiers
+			if (!locked && target == null && mode == Mode.PRISON) {
+				target = (LivingEntity) entity;
+				target.setVelocity(new Vector(0, -2, 0));
+				locked = true;
+				return true;
 			}
+			if (mode == Mode.MAGMA) {
+				FireTick.LARGER.apply(entity, 40);
+			} else if (mode == Mode.NORMAL) {
+				raiseSpikes();
+			}
+			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			return true;
 		}
 
 		@Override
 		public boolean onBlockHit(Block block) {
-			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block.getLocation());
-				Location center = block.getLocation().add(0.5, 0.7, 0.5);
-				SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
-				ParticleUtil.create(Particle.CLOUD, center).count(8)
-					.offset(0.3, 0.3, 0.3).spawn();
-				return true;
-			} else if (MaterialUtil.isWater(block.getType())) { // Only check material, do not change waterlogged blocks
-				TempBlock.create(block, Material.ICE, userConfig.iceDuration);
+			if (MaterialUtil.isWater(block)) {
+				if (mode == Mode.MAGMA) {
+					Location center = block.getLocation().add(0.5, 0.7, 0.5);
+					SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
+					ParticleUtil.create(Particle.CLOUD, center).count(12)
+						.offset(0.3, 0.3, 0.3).spawn();
+					return true;
+				}
 			}
 			return false;
+		}
+
+		@Override
+		protected boolean isValidBlock(Block block) {
+			if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
+			if (mode != Mode.MAGMA && MaterialUtil.isLava(block)) return false;
+			if (mode == Mode.MAGMA && MaterialUtil.isMetal(block)) return false;
+			return MaterialUtil.isEarthbendable(user, block);
+		}
+
+		public void raiseSpikes() {
+			if (mode != Mode.NORMAL || raisedSpikes) return;
+			raisedSpikes = true;
+			// TODO add spikes
+		}
+
+		public void setControllable(boolean value) {
+			if (mode != Mode.MAGMA) controllable = value;
 		}
 	}
 
 	public static class Config extends Configurable {
 		@Attribute(Attributes.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.DURATION)
-		public long iceDuration;
-		@Attribute(Attributes.DURATION)
-		public long freezeDuration;
 		@Attribute(Attributes.RANGE)
 		public double range;
 		@Attribute(Attributes.SELECTION)
@@ -229,14 +280,12 @@ public class IceCrawl implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "icecrawl");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthline");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(5000);
-			iceDuration = abilityNode.getNode("ice-duration").getLong(8000);
-			freezeDuration = abilityNode.getNode("freeze-duration").getLong(2000);
+			cooldown = abilityNode.getNode("cooldown").getLong(3000);
 			range = abilityNode.getNode("range").getDouble(24.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(8.0);
-			damage = abilityNode.getNode("damage").getDouble(5.0);
+			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
+			damage = abilityNode.getNode("damage").getDouble(3.0);
 		}
 	}
 }

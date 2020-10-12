@@ -31,14 +31,12 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.game.Game;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.util.ChatUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
@@ -49,7 +47,7 @@ public class ModifyCommand extends BaseCommand {
 	@HelpCommand
 	@CommandPermission("bending.command.help")
 	public static void doHelp(CommandSender sender, CommandHelp help) {
-		ChatUtil.sendMessage(sender, ChatUtil.brand("Help"));
+		Message.HELP_HEADER.send(sender);
 		help.showHelp();
 	}
 
@@ -64,9 +62,7 @@ public class ModifyCommand extends BaseCommand {
 		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Game.getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
-		player.sendMessageKyori(
-			Component.text("Successfully added modifier to " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
-		);
+		Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.getEntity().getName());
 	}
 
 	@Subcommand("clear|c")
@@ -76,8 +72,6 @@ public class ModifyCommand extends BaseCommand {
 		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Game.getAttributeSystem().clearModifiers(bendingPlayer);
 		Game.getAttributeSystem().recalculate(bendingPlayer);
-		player.sendMessageKyori(
-			Component.text("Cleared attribute modifiers for " + bendingPlayer.getEntity().getName(), NamedTextColor.GREEN)
-		);
+		Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.getEntity().getName());
 	}
 }

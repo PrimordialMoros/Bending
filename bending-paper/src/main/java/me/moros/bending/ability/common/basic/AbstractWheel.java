@@ -17,9 +17,10 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
@@ -37,11 +38,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 
 import java.util.Collection;
 
-public abstract class AbstractWheel implements Updatable {
+public abstract class AbstractWheel implements Updatable, SimpleAbility {
 	protected final User user;
 
 	private final Vector3 dir;
@@ -66,17 +66,6 @@ public abstract class AbstractWheel implements Updatable {
 		collider = new Disk(obb, new Sphere(location, radius));
 	}
 
-	public Vector3 getLocation() {
-		return location;
-	}
-
-	protected abstract void render();
-
-	protected void postRender() {
-	}
-
-	protected abstract boolean onEntityHit(Entity entity);
-
 	@Override
 	public UpdateResult update() {
 		location = location.add(dir);
@@ -93,6 +82,20 @@ public abstract class AbstractWheel implements Updatable {
 		postRender();
 		boolean hit = CollisionUtil.handleEntityCollisions(user, collider.addPosition(location), this::onEntityHit, true);
 		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+	}
+
+	@Override
+	public boolean onBlockHit(Block block) {
+		return true;
+	}
+
+	@Override
+	public Collider getCollider() {
+		return collider.addPosition(location);
+	}
+
+	public Vector3 getLocation() {
+		return location;
 	}
 
 	// Try to resolve wheel location by checking collider-block intersections.
@@ -132,10 +135,6 @@ public abstract class AbstractWheel implements Updatable {
 		// Check if there's any final collisions after all movements.
 		Collider checkCollider = getCollider();
 		return nearbyBlocks.stream().map(AABBUtils::getBlockBounds).noneMatch(checkCollider::intersects);
-	}
-
-	public Collider getCollider() {
-		return collider.addPosition(location);
 	}
 }
 

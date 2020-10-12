@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
@@ -57,7 +57,7 @@ public abstract class BlockStream implements State {
 	private int buffer;
 	private final int speed;
 
-	protected boolean controllable;
+	protected boolean controllable = false;
 	protected double range;
 
 	/**
@@ -65,11 +65,10 @@ public abstract class BlockStream implements State {
 	 * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
 	 * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
 	 */
-	public BlockStream(User user, Material material, double range, boolean controllable, int speed) {
+	public BlockStream(User user, Material material, double range, int speed) {
 		this.user = user;
 		this.material = material;
 		this.range = range;
-		this.controllable = controllable;
 		this.speed = FastMath.min(100, speed);
 		buffer = speed;
 	}

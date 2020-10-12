@@ -23,6 +23,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
+import me.moros.bending.ability.earth.*;
 import me.moros.bending.ability.earth.passives.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
@@ -147,6 +148,9 @@ public final class AbilityInitializer {
 
 		abilities.add(AbilityDescription.builder("EarthCling", EarthCling.class)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+
+		abilities.add(AbilityDescription.builder("EarthLine", EarthLine.class)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 		// TODO add earth abilities
 	}
 

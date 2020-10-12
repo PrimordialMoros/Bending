@@ -75,6 +75,6 @@ public final class UserMethods {
 	 * @return th fire particle type
 	 */
 	public static Particle getFireParticles(User user) {
-		return user.hasPermission("bending.fire.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
+		return user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
 	}
 }

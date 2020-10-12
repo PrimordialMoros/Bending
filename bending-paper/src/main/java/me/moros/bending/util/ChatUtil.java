@@ -20,6 +20,7 @@
 package me.moros.bending.util;
 
 import me.moros.bending.Bending;
+import me.moros.bending.locale.Message;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -55,7 +56,7 @@ public class ChatUtil {
 	}
 
 	public static Component brand(Component text) {
-		return Bending.PREFIX.append(text);
+		return Message.PREFIX.append(text);
 	}
 
 	/**

@@ -28,6 +28,7 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Subcommand;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
@@ -46,16 +47,16 @@ public class PresetCommand extends BaseCommand {
 	public static void onPresetList(BendingPlayer player) {
 		Collection<String> presets = player.getPresets();
 		if (presets.isEmpty()) {
-			player.sendMessageKyori(Component.text("No presets found", NamedTextColor.YELLOW));
+			Message.NO_PRESETS.send(player);
 		} else {
-			presets.forEach(player::sendMessageKyori);
+			player.sendMessageKyori(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
 		}
 	}
 
 	@HelpCommand
 	@CommandPermission("bending.command.help")
 	public static void doHelp(CommandSender sender, CommandHelp help) {
-		ChatUtil.sendMessage(sender, ChatUtil.brand("Help"));
+		Message.HELP_HEADER.send(sender);
 		help.showHelp();
 	}
 
@@ -65,23 +66,10 @@ public class PresetCommand extends BaseCommand {
 		String input = ChatUtil.sanitizeInput(name);
 		Preset preset = player.createPresetFromSlots(input);
 		if (preset.isEmpty()) {
-			player.sendMessageKyori(Component.text("You can't create an empty preset!", NamedTextColor.YELLOW));
+			Message.EMPTY_PRESET.send(player);
 			return;
 		}
-		player.addPreset(preset, result -> {
-			switch (result) {
-				case EXISTS:
-					player.sendMessageKyori(Component.text("Preset " + input + " already exists!", NamedTextColor.YELLOW));
-					break;
-				case FAIL:
-					player.sendMessageKyori(Component.text("There was an error while saving preset " + input, NamedTextColor.RED));
-					break;
-				case SUCCESS:
-				default:
-					player.sendMessageKyori(Component.text("Successfully created preset " + input, NamedTextColor.GREEN));
-					break;
-			}
-		});
+		player.addPreset(preset, result -> player.sendMessageKyori(result.getMessage(input)));
 	}
 
 	@Subcommand("remove|rm|r|delete|del|d")
@@ -89,9 +77,9 @@ public class PresetCommand extends BaseCommand {
 	@Description("Remove an existing preset")
 	public static void onPresetRemove(BendingPlayer player, Preset preset) {
 		if (player.removePreset(preset)) {
-			player.sendMessageKyori(Component.text("Preset " + preset.getName() + " has been removed", NamedTextColor.GREEN));
+			Message.PRESET_REMOVE_SUCCESS.send(player, preset.getName());
 		} else {
-			player.sendMessageKyori(Component.text("Failed to remove preset " + preset.getName(), NamedTextColor.RED));
+			Message.PRESET_REMOVE_FAIL.send(player, preset.getName());
 		}
 	}
 
@@ -101,9 +89,9 @@ public class PresetCommand extends BaseCommand {
 	public static void onPresetBind(BendingPlayer player, Preset preset) {
 		int count = player.bindPreset(preset);
 		if (count > 0) {
-			player.sendMessageKyori(Component.text(count + " abilities were bound from the preset", NamedTextColor.GREEN));
+			Message.PRESET_BIND_SUCCESS.send(player, count, preset.getName());
 		} else {
-			player.sendMessageKyori(Component.text("No abilities could be bound from preset " + preset.getName(), NamedTextColor.YELLOW));
+			Message.PRESET_BIND_FAIL.send(player, preset.getName());
 		}
 	}
 }

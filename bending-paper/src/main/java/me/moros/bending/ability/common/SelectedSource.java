@@ -24,10 +24,14 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ParticleUtil;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
 
 public class SelectedSource implements State {
 	private StateChain chain;
@@ -36,22 +40,36 @@ public class SelectedSource implements State {
 	private Block block;
 	private Material material;
 
-	private boolean started = false;
+	private BlockData fakeData;
 	private final double distanceSq;
 
-	public SelectedSource(User user, Block block, double maxDistance) {
+	private boolean started = false;
+
+	public SelectedSource(User user, Block block, double maxDistance, BlockData data) {
 		this.user = user;
 		this.distanceSq = maxDistance * maxDistance;
-		attemptRefresh(block);
+		reselect(block, data);
 	}
 
-	public void attemptRefresh(Block block) {
-		if (block.equals(this.block)) return;
+	public SelectedSource(User user, Block block, double maxDistance) {
+		this(user, block, maxDistance, null);
+	}
+
+	public boolean reselect(Block block) {
+		return reselect(block, null);
+	}
+
+	public boolean reselect(Block block, BlockData data) {
+		if (block.equals(this.block)) return false;
 		Vector3 newOrigin = new Vector3(block).add(Vector3.HALF);
-		if (user.getEyeLocation().distanceSq(newOrigin) > distanceSq) return;
+		if (user.getEyeLocation().distanceSq(newOrigin) > distanceSq) return false;
+		fakeData = null;
+		renderSelected();
 		this.block = block;
 		this.origin = newOrigin;
 		this.material = block.getType();
+		this.fakeData = data;
+		return true;
 	}
 
 	@Override
@@ -64,6 +82,8 @@ public class SelectedSource implements State {
 	@Override
 	public void complete() {
 		if (!started) return;
+		fakeData = null;
+		renderSelected();
 		chain.getChainStore().clear();
 		chain.getChainStore().add(block);
 		chain.nextState();
@@ -72,9 +92,25 @@ public class SelectedSource implements State {
 	@Override
 	public UpdateResult update() {
 		if (!started) return UpdateResult.REMOVE;
-		if (block.getType() != material || user.getEyeLocation().distanceSq(origin) > distanceSq)
+		if (block.getType() != material || user.getEyeLocation().distanceSq(origin) > distanceSq) {
 			return UpdateResult.REMOVE;
-		ParticleUtil.create(Particle.SMOKE_NORMAL, origin.toLocation(user.getWorld()).add(0, 0.5, 0)).spawn();
+		}
+		Location loc = origin.toLocation(user.getWorld());
+		if (fakeData == null) {
+			ParticleUtil.create(Particle.SMOKE_NORMAL, loc.add(0, 0.5, 0)).spawn();
+		} else {
+			renderSelected();
+		}
 		return UpdateResult.CONTINUE;
+	}
+
+	public Block getSelectedSource() {
+		return block;
+	}
+
+	private void renderSelected() {
+		if (block != null && user instanceof BendingPlayer) {
+			((Player) user.getEntity()).sendBlockChange(block.getLocation(), fakeData == null ? block.getBlockData() : fakeData);
+		}
 	}
 }

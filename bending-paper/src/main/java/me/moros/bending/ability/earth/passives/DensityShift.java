@@ -38,7 +38,6 @@ import org.bukkit.block.BlockFace;
 import java.util.function.Predicate;
 
 public class DensityShift implements PassiveAbility {
-	private static final Predicate<Block> CAN_SOFTEN = b -> MaterialUtil.isEarthbendable(b) && b.getRelative(BlockFace.UP).isPassable();
 	private static final Config config = new Config();
 
 	private User user;
@@ -71,8 +70,9 @@ public class DensityShift implements PassiveAbility {
 		}
 		long duration = instance.userConfig.duration;
 		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (MaterialUtil.isEarthbendable(block)) {
-			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, CAN_SOFTEN)
+		if (MaterialUtil.isEarthbendable(user, block)) {
+			Predicate<Block> predicate = b -> MaterialUtil.isEarthbendable(user, b) && b.getRelative(BlockFace.UP).isPassable();
+			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, predicate)
 				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration, true));
 			return true;
 		}

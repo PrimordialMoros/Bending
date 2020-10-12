@@ -17,9 +17,10 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
@@ -40,13 +41,14 @@ import org.bukkit.util.NumberConversions;
 import java.util.Collections;
 import java.util.Optional;
 
-public abstract class Line implements Updatable {
+public abstract class AbstractLine implements Updatable, SimpleAbility {
 	protected final User user;
+
+	protected final Vector3 origin;
 
 	protected Vector3 location;
 	protected Vector3 targetLocation;
 	protected Vector3 direction;
-	protected Vector3 origin;
 	protected Collider collider;
 	protected LivingEntity target;
 
@@ -56,7 +58,7 @@ public abstract class Line implements Updatable {
 	protected boolean locked = false;
 	protected boolean controllable = false;
 
-	public Line(User user, Block source, double range, double speed, boolean followTarget) {
+	public AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
 		this.user = user;
 		this.location = new Vector3(source.getLocation().add(0.5, 1.25, 0.5));
 		this.origin = location;
@@ -71,22 +73,30 @@ public abstract class Line implements Updatable {
 			WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER)))
 		);
 		direction = targetLocation.subtract(location).setY(0).normalize();
-
-		collider = new Sphere(location, 1);
 	}
 
 	@Override
 	public UpdateResult update() {
 		if (locked) {
-			if (!isValidTarget() || targetLocation.distanceSq(new Vector3(target.getLocation())) > 5 * 5) {
-				locked = false;
-			} else {
+			if (isValidTarget()) {
 				targetLocation = new Vector3(target.getLocation());
 				direction = targetLocation.subtract(location).setY(0).normalize();
+			} else {
+				locked = false;
 			}
 		}
 
+		if (controllable) {
+			targetLocation = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range)));
+			direction = targetLocation.subtract(location).setY(0).normalize();
+		}
+
 		if (onBlockHit(location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN))) {
+			return UpdateResult.REMOVE;
+		}
+
+		collider = new Sphere(location, 1);
+		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true)) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -120,33 +130,23 @@ public abstract class Line implements Updatable {
 		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
 			return UpdateResult.REMOVE;
 		}
-		collider = new Sphere(location, 1);
-
-		boolean hit = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true);
-		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+		return UpdateResult.CONTINUE;
 	}
 
-	public abstract void render();
-
-	public void postRender() {
-	}
-
-	public abstract boolean onEntityHit(Entity entity);
-
-	public abstract boolean onBlockHit(Block block);
-
+	@Override
 	public Collider getCollider() {
 		return collider;
 	}
 
-	private boolean isValidBlock(Block block) {
-		if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
+	protected boolean isValidBlock(Block block) {
+		Block above = block.getRelative(BlockFace.UP);
+		if (!MaterialUtil.isTransparent(above) && !MaterialUtil.isWater(above)) return false;
 		return MaterialUtil.isWater(block) || MaterialUtil.isIce(block) || !block.isPassable();
 	}
 
-	private boolean isValidTarget() {
+	protected boolean isValidTarget() {
 		if (target == null || !target.isValid()) return false;
 		if (target instanceof Player && !((Player) target).isOnline()) return false;
-		return target.getWorld().equals(user.getWorld());
+		return target.getWorld().equals(user.getWorld()) && targetLocation.distanceSq(new Vector3(target.getLocation())) < 5 * 5;
 	}
 }

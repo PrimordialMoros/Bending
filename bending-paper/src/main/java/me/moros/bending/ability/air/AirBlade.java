@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.bending.ability.air.sequences.*;
-import me.moros.bending.ability.common.AbstractWheel;
+import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;

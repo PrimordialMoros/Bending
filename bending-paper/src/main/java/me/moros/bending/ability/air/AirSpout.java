@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.air;
 
-import me.moros.bending.ability.common.Spout;
+import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
@@ -52,7 +52,7 @@ public class AirSpout implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private Spout spout;
+	private AbstractSpout spout;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -78,7 +78,7 @@ public class AirSpout implements Ability {
 
 		removalPolicy = Policies.builder().build();
 
-		spout = new ParticleSpout(user);
+		spout = new Spout(user);
 		return true;
 	}
 
@@ -130,19 +130,19 @@ public class AirSpout implements Ability {
 	}
 
 	public void handleMovement(Vector velocity) {
-		Spout.limitVelocity(user, velocity, userConfig.maxSpeed);
+		AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
 	}
 
-	private class ParticleSpout extends Spout {
+	private class Spout extends AbstractSpout {
 		private long nextRenderTime;
 
-		public ParticleSpout(User user) {
+		public Spout(User user) {
 			super(user, userConfig.height, userConfig.maxSpeed);
 			nextRenderTime = 0;
 		}
 
 		@Override
-		public void render(double distance) {
+		public void render() {
 			long time = System.currentTimeMillis();
 			if (time < nextRenderTime) return;
 			for (int i = 0; i < distance; i++) {

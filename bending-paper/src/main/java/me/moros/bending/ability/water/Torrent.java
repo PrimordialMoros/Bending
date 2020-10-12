@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.water;
 
-import me.moros.bending.ability.common.BlockStream;
+import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
@@ -158,7 +158,8 @@ public class Torrent implements Ability {
 		private final Set<Entity> affectedEntities = new HashSet<>();
 
 		public TorrentStream(User user) {
-			super(user, Material.WATER, userConfig.range, true, 70);
+			super(user, Material.WATER, userConfig.range, 70);
+			controllable = true;
 		}
 
 		@Override

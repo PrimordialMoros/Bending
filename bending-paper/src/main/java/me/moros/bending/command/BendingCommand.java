@@ -33,6 +33,7 @@ import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.Bending;
 import me.moros.bending.game.Game;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -58,7 +59,7 @@ public class BendingCommand extends BaseCommand {
 	@HelpCommand
 	@CommandPermission("bending.command.help")
 	public static void doHelp(CommandSender sender, CommandHelp help) {
-		ChatUtil.sendMessage(sender, ChatUtil.brand("Help"));
+		Message.HELP_HEADER.send(sender);
 		help.showHelp();
 	}
 
@@ -70,10 +71,10 @@ public class BendingCommand extends BaseCommand {
 		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		if (bendingPlayer.getBendingConditional().hasConditional(BendingConditions.TOGGLED)) {
 			bendingPlayer.getBendingConditional().remove(BendingConditions.TOGGLED);
-			bendingPlayer.sendMessageKyori(Component.text("Your bending has been toggled back on.", NamedTextColor.GREEN));
+			Message.TOGGLE_ON.send(bendingPlayer);
 		} else {
 			bendingPlayer.getBendingConditional().add(BendingConditions.TOGGLED);
-			bendingPlayer.sendMessageKyori(Component.text("Your bending has been toggled back off.", NamedTextColor.RED));
+			Message.TOGGLE_OFF.send(bendingPlayer);
 		}
 	}
 
@@ -82,7 +83,7 @@ public class BendingCommand extends BaseCommand {
 	@Description("Reloads the plugin and its config")
 	public void onReload(CommandSender sender) {
 		Game.reload();
-		ChatUtil.sendMessage(sender, Component.text("Bending config reloaded.", NamedTextColor.GREEN));
+		Message.CONFIG_RELOAD.send(sender);
 	}
 
 	@Subcommand("choose|ch")
@@ -93,22 +94,13 @@ public class BendingCommand extends BaseCommand {
 		if (target == null && !(sender instanceof Player)) throw new UserException("You must be player!");
 		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) sender).getUniqueId() : target.getPlayer().getUniqueId());
 		if (target == null && !player.hasPermission("bending.command.choose." + element)) {
-			player.sendMessageKyori(Component.text(
-				"You don't have permission to choose the element of ", NamedTextColor.RED)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_CHOOSE_NO_PERMISSION.send(player, element.getDisplayName());
 			return;
 		}
 		if (player.setElement(element)) {
-			player.sendMessageKyori(Component.text(
-				"Your bending was set to the element of ", NamedTextColor.GRAY)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_CHOOSE_SUCCESS.send(player, element.getDisplayName());
 		} else {
-			player.sendMessageKyori(Component.text(
-				"Failed to choose element ", NamedTextColor.YELLOW)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_CHOOSE_FAIL.send(player, element.getDisplayName());
 		}
 	}
 
@@ -120,24 +112,15 @@ public class BendingCommand extends BaseCommand {
 		if (target == null && !(sender instanceof Player)) throw new UserException("You must be player!");
 		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) sender).getUniqueId() : target.getPlayer().getUniqueId());
 		if (target == null && !player.hasPermission("bending.command.add." + element)) {
-			player.sendMessageKyori(Component.text(
-				"You don't have permission to add the element of ", NamedTextColor.RED)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_ADD_NO_PERMISSION.send(player, element.getDisplayName());
 			return;
 		}
 		if (player.addElement(element)) {
 			Game.getAbilityManager(player.getWorld()).clearPassives(player);
 			Game.getAbilityManager(player.getWorld()).createPassives(player);
-			player.sendMessageKyori(Component.text(
-				"You now have the element of ", NamedTextColor.GRAY)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_ADD_SUCCESS.send(player, element.getDisplayName());
 		} else {
-			player.sendMessageKyori(Component.text(
-				"You already have the element of ", NamedTextColor.YELLOW)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_ADD_FAIL.send(player, element.getDisplayName());
 		}
 	}
 
@@ -151,15 +134,9 @@ public class BendingCommand extends BaseCommand {
 		if (player.removeElement(element)) {
 			Game.getAbilityManager(player.getWorld()).clearPassives(player);
 			Game.getAbilityManager(player.getWorld()).createPassives(player);
-			player.sendMessageKyori(Component.text(
-				"You no longer have the element of ", NamedTextColor.GRAY)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_REMOVE_SUCCESS.send(player, element.getDisplayName());
 		} else {
-			player.sendMessageKyori(Component.text(
-				"Failed to remove the element of ", NamedTextColor.YELLOW)
-				.append(Component.text(element.toString(), element.getColor()))
-			);
+			Message.ELEMENT_REMOVE_FAIL.send(player, element.getDisplayName());
 		}
 	}
 
@@ -168,15 +145,15 @@ public class BendingCommand extends BaseCommand {
 	@Description("Toggle bending board visibility")
 	public static void onBoard(BendingPlayer player) {
 		if (Game.isDisabledWorld(player.getWorld().getUID())) {
-			player.sendMessageKyori(Component.text("Bending Board is disabled!", NamedTextColor.RED));
+			Message.BOARD_DISABLED.send(player);
 			return;
 		}
 		if (Game.getBoardManager().toggleScoreboard(player.getEntity())) {
-			player.sendMessageKyori(Component.text("Toggled Bending Board on", NamedTextColor.GREEN));
 			player.getProfile().setBoard(true);
+			Message.BOARD_TOGGLED_ON.send(player);
 		} else {
-			player.sendMessageKyori(Component.text("Toggled Bending Board off", NamedTextColor.YELLOW));
 			player.getProfile().setBoard(false);
+			Message.BOARD_TOGGLED_OFF.send(player);
 		}
 	}
 
@@ -203,7 +180,7 @@ public class BendingCommand extends BaseCommand {
 			.map(AbilityDescription::getMeta)
 			.collect(Collectors.toList());
 		if (!normal.isEmpty()) {
-			output.add(Component.text("Abilities:", NamedTextColor.DARK_GRAY));
+			output.add(Message.ABILITIES.build());
 			output.addAll(normal);
 		}
 
@@ -214,7 +191,7 @@ public class BendingCommand extends BaseCommand {
 			.map(AbilityDescription::getMeta)
 			.collect(Collectors.toList());
 		if (!sequences.isEmpty()) {
-			output.add(Component.text("Sequences:", NamedTextColor.DARK_GRAY));
+			output.add(Message.SEQUENCES.build());
 			output.addAll(sequences);
 		}
 
@@ -224,14 +201,12 @@ public class BendingCommand extends BaseCommand {
 			.map(AbilityDescription::getMeta)
 			.collect(Collectors.toList());
 		if (!passives.isEmpty()) {
-			output.add(Component.text("Passives:", NamedTextColor.DARK_GRAY));
+			output.add(Message.PASSIVES.build());
 			output.addAll(passives);
 		}
 
 		if (output.isEmpty()) {
-			ChatUtil.sendMessage(sender, Component.text(
-				"No abilities found for ", NamedTextColor.DARK_GRAY).append(element.getDisplayName())
-			);
+			Message.ELEMENT_ABILITIES_EMPTY.send(sender, element.getDisplayName());
 			return;
 		}
 		output.forEach(text -> ChatUtil.sendMessage(sender, text));
@@ -243,23 +218,16 @@ public class BendingCommand extends BaseCommand {
 	@Description("Bind an ability to a slot")
 	public static void onBind(BendingPlayer player, AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
 		if (!player.hasElement(ability.getElement())) {
-			player.sendMessageKyori(ability.getDisplayName()
-				.append(Component.text(" requires element ", NamedTextColor.YELLOW))
-				.append(Component.text(ability.getElement().toString(), ability.getElement().getColor()))
-			);
+			Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.getDisplayName(), ability.getElement().getDisplayName());
 			return;
 		}
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			player.sendMessageKyori(ability.getDisplayName()
-				.append(Component.text(" is a sequence and cannot be bound to a slot.", NamedTextColor.YELLOW))
-			);
+			Message.ABILITY_BIND_SEQUENCE.send(player, ability.getDisplayName());
 			return;
 		}
 		if (slot == 0) slot = player.getHeldItemSlot();
 		player.setSlotAbility(slot, ability);
-		player.sendMessageKyori(ability.getDisplayName()
-			.append(Component.text(" was bound to slot " + slot, NamedTextColor.GREEN))
-		);
+		Message.ABILITY_BIND_SUCCESS.send(player, ability.getDisplayName(), slot);
 	}
 
 	@Subcommand("binds")
@@ -268,7 +236,7 @@ public class BendingCommand extends BaseCommand {
 	@Description("Show all bound abilities")
 	public static void onBinds(BendingPlayer player, @Optional OnlinePlayer target) {
 		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		player.sendMessageKyori(Component.text(bendingPlayer.getEntity().getName() + "'s bound abilities: ", NamedTextColor.DARK_AQUA));
+		Message.BOUND_SLOTS.send(player, bendingPlayer.getEntity().getName());
 		IntStream.rangeClosed(1, 9).forEach(slot -> bendingPlayer.getStandardSlotAbility(slot)
 			.ifPresent(desc -> player.sendMessageKyori(
 				Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(AbilityDescription.getMeta(desc))
@@ -283,11 +251,11 @@ public class BendingCommand extends BaseCommand {
 	public static void onClearBind(BendingPlayer player, @Default("0") @Conditions("slot") Integer slot) {
 		if (slot == 0) {
 			player.bindPreset(Preset.EMPTY);
-			player.sendMessageKyori(Component.text("Cleared all slots.", NamedTextColor.GREEN));
+			Message.CLEAR_ALL_SLOTS.send(player);
 			return;
 		}
 		player.setSlotAbility(slot, null);
-		player.sendMessageKyori(Component.text("Cleared ability slot " + slot, NamedTextColor.GREEN));
+		Message.CLEAR_SLOT.send(player, slot);
 	}
 
 	@Subcommand("info|i")
@@ -298,20 +266,13 @@ public class BendingCommand extends BaseCommand {
 		String description = ability.getDescription();
 		String instructions = ability.getInstructions();
 		if (description.isEmpty() && instructions.isEmpty()) {
-			ChatUtil.sendMessage(sender, Component.text(
-				"No description or instructions found for ", NamedTextColor.YELLOW)
-				.append(ability.getDisplayName())
-			);
+			Message.ABILITY_INFO_EMPTY.send(sender, ability.getDisplayName());
 		} else {
 			if (!description.isEmpty()) {
-				ChatUtil.sendMessage(sender, ability.getDisplayName()
-					.append(Component.text(" description: " + description, NamedTextColor.GRAY))
-				);
+				Message.ABILITY_INFO_DESCRIPTION.send(sender, ability.getDisplayName(), description);
 			}
 			if (!instructions.isEmpty()) {
-				ChatUtil.sendMessage(sender, ability.getDisplayName()
-					.append(Component.text(" instructions: " + description, NamedTextColor.GRAY))
-				);
+				Message.ABILITY_INFO_INSTRUCTIONS.send(sender, ability.getDisplayName(), instructions);
 			}
 		}
 
@@ -324,13 +285,10 @@ public class BendingCommand extends BaseCommand {
 
 	private static Component getVersionInfo() {
 		String link = "https://github.com/PrimordialMoros/Bending";
-		Component details = Component.text("Developed by: ", NamedTextColor.DARK_AQUA)
-			.append(Component.text(Bending.getAuthor(), NamedTextColor.GREEN)).append(Component.newline())
-			.append(Component.text("Source code: ", NamedTextColor.DARK_AQUA))
-			.append(Component.text(link, NamedTextColor.GREEN)).append(Component.newline())
-			.append(Component.text("Licensed under: ", NamedTextColor.DARK_AQUA))
-			.append(Component.text("AGPLv3", NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
-			.append(Component.text("Click to open link.", NamedTextColor.GRAY));
+		String content = "Developed by: {author}\n" + "Source code: {link}\n" + "Licensed under: AGPLv3\n\n" + "Click to open link.";
+		Component details = Component.text(content, NamedTextColor.DARK_AQUA)
+			.replaceFirstText("{author}", Component.text(Bending.getAuthor(), NamedTextColor.GREEN))
+			.replaceFirstText("{link}", Component.text(link, NamedTextColor.GREEN));
 
 		return Component.text("Version: ", NamedTextColor.DARK_AQUA)
 			.append(Component.text(Bending.getVersion(), NamedTextColor.GREEN))

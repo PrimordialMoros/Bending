@@ -17,23 +17,21 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.preset;
+package me.moros.bending.model.ability;
 
-import me.moros.bending.locale.Message;
-import net.kyori.adventure.text.Component;
+import me.moros.bending.model.collision.Collider;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 
-public enum PresetCreateResult {
-	SUCCESS(Message.PRESET_SUCCESS),
-	EXISTS(Message.PRESET_EXISTS),
-	FAIL(Message.PRESET_FAIL);
+public interface SimpleAbility {
+	void render();
 
-	private final Message.Args1<String> message;
-
-	PresetCreateResult(Message.Args1<String> message) {
-		this.message = message;
+	default void postRender() {
 	}
 
-	public Component getMessage(String name) {
-		return message.build(name);
-	}
+	boolean onEntityHit(Entity entity);
+
+	boolean onBlockHit(Block block);
+
+	Collider getCollider();
 }

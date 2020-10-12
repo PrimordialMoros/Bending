@@ -17,9 +17,10 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
@@ -33,11 +34,10 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 
 import java.util.function.Predicate;
 
-public abstract class ParticleStream implements Updatable {
+public abstract class ParticleStream implements Updatable, SimpleAbility {
 	protected final User user;
 	protected final Ray ray;
 
@@ -87,23 +87,11 @@ public abstract class ParticleStream implements Updatable {
 		return UpdateResult.CONTINUE;
 	}
 
-	public abstract void render();
-
-	public void postRender() {
-	}
-
-	public abstract boolean onEntityHit(Entity entity);
-
-	public abstract boolean onBlockHit(Block block);
-
-	public Vector3 getLocation() {
-		return location;
-	}
-
 	public Location getBukkitLocation() {
 		return location.toLocation(user.getWorld());
 	}
 
+	@Override
 	public Collider getCollider() {
 		return collider;
 	}

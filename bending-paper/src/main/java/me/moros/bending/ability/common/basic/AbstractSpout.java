@@ -17,8 +17,9 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common;
+package me.moros.bending.ability.common.basic;
 
+import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collider;
@@ -29,6 +30,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
@@ -36,19 +38,21 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class Spout implements Updatable {
+public abstract class AbstractSpout implements Updatable, SimpleAbility {
 	protected final User user;
+	protected final Set<Block> ignore = new HashSet<>();
+	protected final Flight flight;
 
 	protected Predicate<Block> validBlock = x -> true;
-	protected final Set<Block> ignore = new HashSet<>();
 	protected AABB collider;
-	protected final Flight flight;
 
 	protected final int height;
 	protected final double maxHeight;
 	protected final double speed;
 
-	public Spout(User user, double height, double speed) {
+	protected double distance;
+
+	public AbstractSpout(User user, double height, double speed) {
 		this.user = user;
 
 		this.height = NumberConversions.ceil(height);
@@ -67,29 +71,35 @@ public abstract class Spout implements Updatable {
 			return UpdateResult.REMOVE;
 		}
 		// Remove if player gets too far away from ground.
-		double distance = user.getLocation().getY() - block.getY();
+		distance = user.getLocation().getY() - block.getY();
 		if (distance > maxHeight) {
 			return UpdateResult.REMOVE;
 		}
 		flight.setFlying(distance <= height);
 		// Create a bounding box for collision that extends through the spout from the ground to the player.
 		collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.getLocation());
-		render(distance);
+		render();
 		postRender();
 		return UpdateResult.CONTINUE;
 	}
 
-	public abstract void render(double distance);
+	@Override
+	public boolean onEntityHit(Entity entity) {
+		return true;
+	}
 
-	public void postRender() {
+	@Override
+	public boolean onBlockHit(Block block) {
+		return true;
+	}
+
+	@Override
+	public Collider getCollider() {
+		return collider;
 	}
 
 	public Flight getFlight() {
 		return flight;
-	}
-
-	public Collider getCollider() {
-		return collider;
 	}
 
 	public static void limitVelocity(User user, Vector velocity, double speed) {

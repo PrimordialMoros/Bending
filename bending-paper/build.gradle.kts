@@ -83,7 +83,6 @@ tasks {
         options.isFork = true
         options.forkOptions.executable = "javac"
     }
-
     named<Copy>("processResources") {
         filesMatching("plugin.yml") {
             expand("pluginVersion" to project.version)
