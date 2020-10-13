@@ -125,7 +125,7 @@ public final class MaterialUtil {
 	public static boolean isEarthbendable(User user, Material type) {
 		if (isMetal(type) && !user.hasPermission("bending.metal")) return false;
 		if (EarthMaterials.LAVA_BENDABLE.isTagged(type) && !user.hasPermission("bending.lava")) return false;
-		return EarthMaterials.EARTH_BENDABLE.isTagged(type) || EarthMaterials.SAND_BENDABLE.isTagged(type);
+		return EarthMaterials.ALL.isTagged(type);
 	}
 
 	public static boolean isFire(Block block) {

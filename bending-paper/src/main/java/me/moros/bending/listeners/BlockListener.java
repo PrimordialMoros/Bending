@@ -20,9 +20,12 @@
 package me.moros.bending.listeners;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.material.MaterialUtil;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,6 +37,7 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 
 public class BlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -95,6 +99,16 @@ public class BlockListener implements Listener {
 	public void onBlockFromTo(BlockFromToEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock()) || TempBlock.manager.isTemp(event.getToBlock())) {
 			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onBlockChange(EntityChangeBlockEvent event) {
+		if (event.getEntityType() == EntityType.FALLING_BLOCK) {
+			BendingFallingBlock.manager.get((FallingBlock) event.getEntity()).ifPresent(bfb -> {
+				bfb.revert();
+				event.setCancelled(true);
+			});
 		}
 	}
 }

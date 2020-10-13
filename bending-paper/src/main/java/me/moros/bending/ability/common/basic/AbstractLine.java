@@ -57,6 +57,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 
 	protected boolean locked = false;
 	protected boolean controllable = false;
+	protected boolean skipVertical = false;
 
 	public AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
 		this.user = user;
@@ -106,17 +107,18 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		location = location.add(direction.scalarMultiply(speed));
 		Block baseBlock = location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN);
 
-		int y1 = NumberConversions.floor(targetLocation.getY());
-		int y2 = NumberConversions.floor(location.getY());
 		if (!isValidBlock(baseBlock)) {
 			if (isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
 				location = location.add(Vector3.PLUS_J);
 			} else if (isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
 				location = location.add(Vector3.MINUS_J);
 			} else {
+				onCollision();
 				return UpdateResult.REMOVE;
 			}
-		} else if (y1 != y2) { // Advance location vertically if possible to match target height
+		} else if (skipVertical) { // Advance location vertically if possible to match target height
+			int y1 = NumberConversions.floor(targetLocation.getY());
+			int y2 = NumberConversions.floor(location.getY());
 			if (y1 > y2 && isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
 				location = location.add(Vector3.PLUS_J);
 			} else if (y1 < y2 && isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
@@ -136,6 +138,9 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 	@Override
 	public Collider getCollider() {
 		return collider;
+	}
+
+	protected void onCollision() {
 	}
 
 	protected boolean isValidBlock(Block block) {

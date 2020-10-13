@@ -23,7 +23,9 @@ import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.FireTick;
@@ -35,6 +37,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.RemovalPolicy;
@@ -45,6 +48,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
+import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
@@ -65,13 +69,17 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.NumberConversions;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
-//TODO complete prison mode, add magma wall breaking
 public class EarthLine implements Ability {
 	private enum Mode {NORMAL, PRISON, MAGMA}
 
@@ -122,7 +130,7 @@ public class EarthLine implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		if (earthLine != null) {
-			earthLine.setControllable(user.isSneaking());
+			earthLine.setControllable(mode != Mode.MAGMA && user.isSneaking());
 			return earthLine.update();
 		} else {
 			return states.update();
@@ -145,7 +153,7 @@ public class EarthLine implements Ability {
 			state.complete();
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null) return;
-			if (MaterialUtil.isLava(source)) mode = Mode.MAGMA;
+			if (EarthMaterials.LAVA_BENDABLE.isTagged(source)) mode = Mode.MAGMA;
 			earthLine = new Line(user, source);
 			Policies.builder().build();
 			user.setCooldown(this, userConfig.cooldown);
@@ -205,7 +213,6 @@ public class EarthLine implements Ability {
 
 		public Line(User user, Block source) {
 			super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.4 : 0.7, false);
-			if (mode != Mode.MAGMA) controllable = true;
 		}
 
 		@Override
@@ -264,6 +271,24 @@ public class EarthLine implements Ability {
 			return MaterialUtil.isEarthbendable(user, block);
 		}
 
+		@Override
+		protected void onCollision() {
+			if (mode != Mode.MAGMA) return;
+			Location center = location.toLocation(user.getWorld());
+			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 0.5f);
+			ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
+			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit, true);
+			Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && MaterialUtil.isEarthbendable(user, b) && !MaterialUtil.isMetal(b);
+			List<Block> wall = new ArrayList<>(WorldMethods.getNearbyBlocks(center, 3, predicate));
+			Collections.shuffle(wall);
+			ThreadLocalRandom rnd = ThreadLocalRandom.current();
+			for (Block block : wall) {
+				Vector velocity = new Vector(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
+				TempBlock.create(block, Material.AIR, userConfig.regen);
+				new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
+			}
+		}
+
 		public void raiseSpikes() {
 			if (mode != Mode.NORMAL || raisedSpikes) return;
 			raisedSpikes = true;
@@ -313,6 +338,8 @@ public class EarthLine implements Ability {
 		public double damage;
 		@Attribute(Attributes.DURATION)
 		public long prisonDuration;
+		@Attribute(Attributes.DURATION)
+		public long regen;
 
 		@Override
 		public void onConfigReload() {
@@ -322,8 +349,8 @@ public class EarthLine implements Ability {
 			range = abilityNode.getNode("range").getDouble(24.0);
 			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
 			damage = abilityNode.getNode("damage").getDouble(3.0);
-
 			prisonDuration = abilityNode.getNode("prison-duration").getLong(3000);
+			regen = abilityNode.getNode("regen-time").getLong(20000);
 		}
 	}
 }

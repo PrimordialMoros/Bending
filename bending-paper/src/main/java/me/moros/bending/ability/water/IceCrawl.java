@@ -167,6 +167,7 @@ public class IceCrawl implements Ability {
 	private class Line extends AbstractLine {
 		public Line(User user, Block source) {
 			super(user, source, userConfig.range, 0.5, true);
+			skipVertical = true;
 		}
 
 		@Override
