@@ -29,7 +29,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-// TODO maybe use dolphin's grace instead?
 public class FastSwim implements PassiveAbility {
 	private User user;
 
@@ -59,18 +58,6 @@ public class FastSwim implements PassiveAbility {
 		}
 		return UpdateResult.CONTINUE;
 	}
-
-	/*@Override
-	public UpdateResult update() {
-		if (!user.isValid() || !user.isSneaking() || !MaterialUtil.isWater(user.getLocBlock()) || !user.canBend(getDescription())) {
-			return UpdateResult.CONTINUE;
-		}
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, WaterSpout.class)) return UpdateResult.CONTINUE;
-		if (user.getSelectedAbility().map(desc -> !desc.isActivatedBy(ActivationMethod.SNEAK)).orElse(true)) {
-			user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed).toVector());
-		}
-		return UpdateResult.CONTINUE;
-	}*/
 
 	@Override
 	public void onDestroy() {

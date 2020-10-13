@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.earth;
 
+import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
@@ -89,10 +90,11 @@ public class EarthLine implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
+	private final Collection<Pillar> spikes = new ArrayList<>();
+
 	private StateChain states;
 	private Line earthLine;
-
-	private Mode mode = Mode.NORMAL;
+	private Mode mode;
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
@@ -110,7 +112,7 @@ public class EarthLine implements Ability {
 			}
 			return false;
 		}
-
+		mode = Mode.NORMAL;
 		states = new StateChain()
 			.addState(new SelectedSource(user, source, userConfig.selectRange + 5, fakeData))
 			.start();
@@ -130,8 +132,17 @@ public class EarthLine implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		if (earthLine != null) {
+			if (earthLine.raisedSpikes) {
+				spikes.removeIf(p -> p.update() == UpdateResult.REMOVE);
+				return spikes.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+			}
 			earthLine.setControllable(mode != Mode.MAGMA && user.isSneaking());
-			return earthLine.update();
+			UpdateResult result = earthLine.update();
+			// Handle case where spikes are raised on entity collision and line is removed
+			if (result == UpdateResult.REMOVE && earthLine.raisedSpikes) {
+				return UpdateResult.CONTINUE;
+			}
+			return result;
 		} else {
 			return states.update();
 		}
@@ -207,6 +218,7 @@ public class EarthLine implements Ability {
 		}
 	}
 
+	// TODO add movement restriction in prison mode, metal/magma modifiers on damage
 	private class Line extends AbstractLine {
 		private boolean raisedSpikes = false;
 		private boolean imprisoned = false;
@@ -233,7 +245,6 @@ public class EarthLine implements Ability {
 
 		@Override
 		public boolean onEntityHit(Entity entity) {
-			// TODO add metal/magma modifiers
 			switch (mode) {
 				case NORMAL:
 					raiseSpikes();
@@ -292,7 +303,10 @@ public class EarthLine implements Ability {
 		public void raiseSpikes() {
 			if (mode != Mode.NORMAL || raisedSpikes) return;
 			raisedSpikes = true;
-			// TODO add spikes
+			Vector3 loc = location.add(Vector3.MINUS_J);
+			Predicate<Block> predicate = b -> MaterialUtil.isEarthbendable(user, b);
+			Pillar.buildPillar(user, loc.toBlock(user.getWorld()), BlockFace.UP, 1, 30000, predicate).ifPresent(spikes::add);
+			Pillar.buildPillar(user, loc.add(direction).toBlock(user.getWorld()), BlockFace.UP, 2, 30000, predicate).ifPresent(spikes::add);
 		}
 
 		private void imprisonTarget(LivingEntity entity) {
@@ -319,7 +333,6 @@ public class EarthLine implements Ability {
 				new TempArmorStand(loc.add(v.toVector()), mat, userConfig.prisonDuration);
 				new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
 			});
-			// TODO add functionality to restrict movement
 		}
 
 		public void setControllable(boolean value) {

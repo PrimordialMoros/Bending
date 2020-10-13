@@ -38,15 +38,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-/**
- * You should validate that the pillar blocks have bendable materials
- */
 public class Pillar implements Updatable {
 	private final User user;
 	private final Block origin;
 	private final BlockFace direction;
 	private final Collection<Block> pillarBlocks;
+	private final Predicate<Block> predicate;
 
 	private final int length;
 	private final long interval;
@@ -55,45 +54,47 @@ public class Pillar implements Updatable {
 	private int currentLength;
 	private long nextUpdateTime;
 
-	private Pillar(User user, Block origin, BlockFace direction, int length, long interval, long duration) {
+	private Pillar(User user, Block origin, BlockFace direction, int length, long interval, long duration, Predicate<Block> predicate) {
 		this.user = user;
 		this.origin = origin;
 		this.direction = direction;
 		this.length = length;
 		this.interval = interval;
 		this.duration = duration;
+		this.predicate = predicate;
 		this.pillarBlocks = new ArrayList<>();
+		currentLength = 0;
 		nextUpdateTime = 0;
 	}
 
 	@Override
 	public UpdateResult update() {
+		if (currentLength >= length) return UpdateResult.REMOVE;
+
 		long time = System.currentTimeMillis();
 		if (time < nextUpdateTime) return UpdateResult.CONTINUE;
 		nextUpdateTime = time + interval;
 
 		Block currentIndex = origin.getRelative(direction, ++currentLength);
-		if (currentLength >= length) return UpdateResult.REMOVE;
-
-		// Move entities into the air when standing on top of the RaiseEarth.
 		AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3(currentIndex));
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
 			entity.setVelocity(normalizeVelocity(entity.getVelocity()));
 			return false;
-		}, true, true);
+		}, true, true); // Push entities
 
 		return move(currentIndex) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
 	private boolean move(Block newBlock) {
-		if (newBlock.isPassable()) return false;
+		if (!newBlock.isPassable()) return false;
 		pillarBlocks.add(newBlock);
-		for (int i = 1; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			Block forwardBlock = newBlock.getRelative(direction.getOppositeFace(), i);
 			Block backwardBlock = forwardBlock.getRelative(direction.getOppositeFace());
-			TempBlock.create(forwardBlock, MaterialUtil.getSolidType(backwardBlock.getBlockData()), duration);
+			if (!predicate.test(backwardBlock)) return false;
+			TempBlock.create(forwardBlock, MaterialUtil.getSolidType(backwardBlock.getBlockData()), duration, true);
 		}
-		TempBlock.create(newBlock.getRelative(direction.getOppositeFace(), length), Material.AIR, duration);
+		TempBlock.create(newBlock.getRelative(direction.getOppositeFace(), length), Material.AIR, duration, true);
 		return true;
 	}
 
@@ -117,25 +118,41 @@ public class Pillar implements Updatable {
 	}
 
 	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length) {
-		return buildPillar(user, origin, direction, length, 100, 0);
+		return buildPillar(user, origin, direction, length, 100, 0, x -> true);
+	}
+
+	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, Predicate<Block> predicate) {
+		return buildPillar(user, origin, direction, length, 100, 0, predicate);
+	}
+
+	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, long duration) {
+		return buildPillar(user, origin, direction, length, 100, duration, x -> true);
+	}
+
+	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, long duration, Predicate<Block> predicate) {
+		return buildPillar(user, origin, direction, length, 100, duration, predicate);
 	}
 
 	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, long interval, long duration) {
+		return buildPillar(user, origin, direction, length, interval, duration, x -> true);
+	}
+
+	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length, long interval, long duration, Predicate<Block> predicate) {
 		if (user == null || origin == null || !BlockMethods.MAIN_FACES.contains(direction) || length < 1)
 			return Optional.empty();
 		int maxLength = validate(user, origin, direction, length);
 		if (maxLength < 1) return Optional.empty();
-		return Optional.of(new Pillar(user, origin, direction, maxLength, interval, duration));
+		return Optional.of(new Pillar(user, origin, direction, maxLength, interval, duration, predicate));
 	}
 
 	/**
 	 * Check region protections and return maximum valid length in blocks
 	 */
 	private static int validate(User user, Block origin, BlockFace direction, int max) {
-		if (Game.getProtectionSystem().canBuild(user, origin)) return 0;
-		for (int i = 1; i < max; i++) {
+		if (!Game.getProtectionSystem().canBuild(user, origin)) return 0;
+		for (int i = 1; i <= max; i++) {
 			Block forwardBlock = origin.getRelative(direction, i);
-			Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
+			Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i - 1);
 			if (!Game.getProtectionSystem().canBuild(user, forwardBlock) || !Game.getProtectionSystem().canBuild(user, backwardBlock)) {
 				return i;
 			}
