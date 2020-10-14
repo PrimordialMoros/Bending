@@ -36,7 +36,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Utility class to handle bending sourcing.
@@ -53,26 +53,26 @@ public final class SourceUtil {
 	}
 
 	/**
-	 * @see #getSource(User, double, Set)
+	 * @see #getSource(User, double, Predicate)
 	 */
 	public static Optional<Block> getSource(User user, double range, MaterialSetTag materials) {
-		return getSource(user, range, materials.getValues());
+		return getSource(user, range, materials::isTagged);
 	}
 
 	/**
 	 * Attempts to find a possible source.
 	 * @param user the user checking for a source
 	 * @param range the max range to check
-	 * @param materials a set of valid source materials
+	 * @param predicate the predicate to check
 	 * @return an Optional source block
 	 */
-	public static Optional<Block> getSource(User user, double range, Set<Material> materials) {
+	public static Optional<Block> getSource(User user, double range, Predicate<Block> predicate) {
 		Location start = user.getEntity().getEyeLocation();
 		Vector dir = user.getDirection().toVector();
 		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
 		if (result == null || result.getHitBlock() == null) return Optional.empty();
 		Block block = result.getHitBlock();
-		if (!Game.getProtectionSystem().canBuild(user, block) || !materials.contains(block.getType()) || !TempBlock.isBendable(block)) {
+		if (!Game.getProtectionSystem().canBuild(user, block) || !predicate.test(block) || !TempBlock.isBendable(block)) {
 			return Optional.empty();
 		}
 		return Optional.of(block);

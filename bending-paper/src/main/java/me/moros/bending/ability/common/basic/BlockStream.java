@@ -123,7 +123,7 @@ public abstract class BlockStream implements State {
 					ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))
 						.count(5).offset(0.25, 0.25, 0.25).spawn();
 				} else {
-					TempBlock.create(head, Material.WATER);
+					TempBlock.create(head, material);
 				}
 				stream.addFirst(head);
 			}

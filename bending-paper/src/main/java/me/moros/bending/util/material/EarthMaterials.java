@@ -22,7 +22,9 @@ package me.moros.bending.util.material;
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.Bending;
+import me.moros.bending.model.user.User;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 import java.util.EnumSet;
 
@@ -58,5 +60,23 @@ public class EarthMaterials {
 
 		ALL = new MaterialSetTag(Bending.getKey(), EARTH_BENDABLE.getValues());
 		ALL.add(SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE);
+	}
+
+	public static boolean isEarthbendable(User user, Block block) {
+		if (isMetalBendable(block) && !user.hasPermission("bending.metal")) return false;
+		if (isLavaBendable(block) && !user.hasPermission("bending.lava")) return false;
+		return ALL.isTagged(block);
+	}
+
+	public static boolean isSandBendable(Block block) {
+		return SAND_BENDABLE.isTagged(block);
+	}
+
+	public static boolean isMetalBendable(Block block) {
+		return METAL_BENDABLE.isTagged(block);
+	}
+
+	public static boolean isLavaBendable(Block block) {
+		return LAVA_BENDABLE.isTagged(block);
 	}
 }

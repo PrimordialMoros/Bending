@@ -21,12 +21,14 @@ package me.moros.bending.game.temporal;
 
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Waterlogged;
 
 import java.util.Optional;
 
@@ -82,6 +84,16 @@ public class TempBlock implements Temporary {
 
 	public static Optional<TempBlock> create(Block block, BlockData data, long duration, boolean bendable) {
 		if (block instanceof TileState) return Optional.empty();
+		if (block.getBlockData() instanceof Waterlogged) {
+			Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
+			if (waterData.isWaterlogged() && MaterialUtil.AIR.isTagged(data.getMaterial())) {
+				waterData.setWaterlogged(false);
+				data = waterData;
+			} else if (!waterData.isWaterlogged() && data.getMaterial() == Material.WATER) {
+				waterData.setWaterlogged(true);
+				data = waterData;
+			}
+		}
 		return Optional.of(new TempBlock(block, data, duration, bendable));
 	}
 

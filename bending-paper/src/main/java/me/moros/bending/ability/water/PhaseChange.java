@@ -31,6 +31,7 @@ import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Location;
@@ -76,7 +77,7 @@ public class PhaseChange implements PassiveAbility {
 		});
 
 		if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
-			processQueue(meltQueue, MaterialUtil::isIce, block -> {
+			processQueue(meltQueue, WaterMaterials::isIceBendable, block -> {
 				Optional<TempBlock> tb = TempBlock.manager.get(block);
 				if (tb.isPresent()) {
 					tb.get().revert();
@@ -119,7 +120,7 @@ public class PhaseChange implements PassiveAbility {
 	}
 
 	public void melt() {
-		if (fillQueue(userConfig.meltRange, userConfig.meltRadius, MaterialUtil::isIce, meltQueue)) {
+		if (fillQueue(userConfig.meltRange, userConfig.meltRadius, WaterMaterials::isIceBendable, meltQueue)) {
 			user.setCooldown(this, userConfig.cooldown);
 		}
 	}

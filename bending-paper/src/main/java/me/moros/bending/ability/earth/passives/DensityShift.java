@@ -29,6 +29,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -70,8 +71,8 @@ public class DensityShift implements PassiveAbility {
 		}
 		long duration = instance.userConfig.duration;
 		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (MaterialUtil.isEarthbendable(user, block)) {
-			Predicate<Block> predicate = b -> MaterialUtil.isEarthbendable(user, b) && b.getRelative(BlockFace.UP).isPassable();
+		if (EarthMaterials.isEarthbendable(user, block)) {
+			Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && b.getRelative(BlockFace.UP).isPassable();
 			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, predicate)
 				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration, true));
 			return true;

@@ -150,7 +150,7 @@ public class Blaze implements Ability {
 				return UpdateResult.CONTINUE;
 			}
 			affectedBlocks.add(block);
-			return TempBlock.create(block, Material.FIRE, 500).map(b -> UpdateResult.CONTINUE).orElse(UpdateResult.REMOVE);
+			return TempBlock.create(block, Material.FIRE, 500, true).map(b -> UpdateResult.CONTINUE).orElse(UpdateResult.REMOVE);
 		}
 	}
 

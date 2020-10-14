@@ -21,6 +21,7 @@ package me.moros.bending.util.methods;
 
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
@@ -81,5 +82,15 @@ public final class VectorMethods {
 			arc.add(new Vector3(vector));
 		}
 		return arc;
+	}
+
+	/**
+	 * Get an orthogonal vector
+	 */
+	public static Vector3 getOrthogonal(Vector3 axis, double radians, double length) {
+		double[] orthogonal = new Vector3(axis.getY(), -axis.getX(), 0).normalize().scalarMultiply(length).toArray();
+		Rotation rotation = new Rotation(axis, radians, RotationConvention.VECTOR_OPERATOR);
+		rotation.applyTo(orthogonal, orthogonal);
+		return new Vector3(orthogonal);
 	}
 }

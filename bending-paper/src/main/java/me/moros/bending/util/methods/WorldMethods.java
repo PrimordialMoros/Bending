@@ -243,7 +243,7 @@ public final class WorldMethods {
 		for (int x = -1; x <= 1; ++x) {
 			for (int z = -1; z <= 1; ++z) {
 				Block checkBlock = location.add(new Vector3(x, -epsilon, z)).toBlock(entity.getWorld());
-				if (checkBlock.isPassable() || MaterialUtil.isAir(checkBlock.getType())) continue;
+				if (checkBlock.isPassable() || MaterialUtil.isAir(checkBlock)) continue;
 				AABB checkBounds = AABBUtils.getBlockBounds(checkBlock).at(new Vector3(checkBlock));
 				if (checkBlock.isPassable()) return false;
 				if (entityBounds.intersects(checkBounds)) {

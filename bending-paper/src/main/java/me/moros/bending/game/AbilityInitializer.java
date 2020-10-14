@@ -151,6 +151,10 @@ public final class AbilityInitializer {
 
 		abilities.add(AbilityDescription.builder("EarthLine", EarthLine.class)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+
+		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel.class)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+
 		// TODO add earth abilities
 	}
 

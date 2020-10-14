@@ -37,6 +37,7 @@ import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
@@ -59,7 +60,7 @@ public class WaterSpout implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private final Collection<TempBlock> column = new ArrayList<>();
-	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || MaterialUtil.isIce(b);
+	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || WaterMaterials.isIceBendable(b);
 	private AbstractSpout spout;
 
 	@Override

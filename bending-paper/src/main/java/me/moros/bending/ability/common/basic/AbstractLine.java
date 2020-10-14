@@ -28,7 +28,6 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -143,11 +142,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 	protected void onCollision() {
 	}
 
-	protected boolean isValidBlock(Block block) {
-		Block above = block.getRelative(BlockFace.UP);
-		if (!MaterialUtil.isTransparent(above) && !MaterialUtil.isWater(above)) return false;
-		return MaterialUtil.isWater(block) || MaterialUtil.isIce(block) || !block.isPassable();
-	}
+	protected abstract boolean isValidBlock(Block block);
 
 	protected boolean isValidTarget() {
 		if (target == null || !target.isValid()) return false;

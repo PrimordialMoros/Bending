@@ -54,6 +54,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
@@ -207,10 +208,17 @@ public class IceCrawl implements Ability {
 				ParticleUtil.create(Particle.CLOUD, center).count(8)
 					.offset(0.3, 0.3, 0.3).spawn();
 				return true;
-			} else if (MaterialUtil.isWater(block.getType())) { // Only check material, do not change waterlogged blocks
-				TempBlock.create(block, Material.ICE, userConfig.iceDuration);
+			} else if (MaterialUtil.isWater(block)) {
+				TempBlock.create(block, Material.ICE, userConfig.iceDuration, true);
 			}
 			return false;
+		}
+
+		@Override
+		protected boolean isValidBlock(Block block) {
+			Block above = block.getRelative(BlockFace.UP);
+			if (!MaterialUtil.isTransparent(above) && !MaterialUtil.isWater(above)) return false;
+			return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();
 		}
 	}
 

@@ -22,7 +22,6 @@ package me.moros.bending.util.material;
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.Bending;
-import me.moros.bending.model.user.User;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -86,19 +85,11 @@ public final class MaterialUtil {
 	}
 
 	public static boolean isAir(Block block) {
-		return isAir(block.getType());
-	}
-
-	public static boolean isAir(Material type) {
-		return AIR.isTagged(type);
+		return AIR.isTagged(block);
 	}
 
 	public static boolean isTransparent(Block block) {
-		return isTransparent(block.getType());
-	}
-
-	public static boolean isTransparent(Material type) {
-		return TRANSPARENT.isTagged(type);
+		return TRANSPARENT.isTagged(block);
 	}
 
 	public static boolean isContainer(Block block) {
@@ -110,74 +101,26 @@ public final class MaterialUtil {
 	}
 
 	public static boolean isIgnitable(Block block) {
-		return (isIgnitable(block.getType()) && isTransparent(block))
-			|| (isAir(block) && block.getRelative(BlockFace.DOWN).getType().isSolid());
-	}
-
-	public static boolean isIgnitable(Material type) {
-		return type.isFlammable() || type.isBurnable();
-	}
-
-	public static boolean isEarthbendable(User user, Block block) {
-		return isEarthbendable(user, block.getType());
-	}
-
-	public static boolean isEarthbendable(User user, Material type) {
-		if (isMetal(type) && !user.hasPermission("bending.metal")) return false;
-		if (EarthMaterials.LAVA_BENDABLE.isTagged(type) && !user.hasPermission("bending.lava")) return false;
-		return EarthMaterials.ALL.isTagged(type);
+		if ((block.getType().isFlammable() || block.getType().isBurnable()) && isTransparent(block)) {
+			return true;
+		}
+		return isAir(block) && block.getRelative(BlockFace.DOWN).getType().isSolid();
 	}
 
 	public static boolean isFire(Block block) {
-		return isFire(block.getType());
-	}
-
-	public static boolean isFire(Material type) {
-		return MaterialSetTag.FIRE.isTagged(type);
+		return MaterialSetTag.FIRE.isTagged(block.getType());
 	}
 
 	public static boolean isLava(Block block) {
-		return isLava(block.getType());
-	}
-
-	public static boolean isLava(Material type) {
-		return type == Material.LAVA;
+		return block.getType() == Material.LAVA;
 	}
 
 	public static boolean isWater(Block block) {
-		return isWater(block.getType()) || isWaterLogged(block.getBlockData());
-	}
-
-	public static boolean isWater(Material type) {
-		return type == Material.WATER;
+		return block.getType() == Material.WATER || isWaterLogged(block.getBlockData());
 	}
 
 	public static boolean isWaterLogged(BlockData data) {
 		return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
-	}
-
-	public static boolean isIce(Block block) {
-		return isIce(block.getType());
-	}
-
-	public static boolean isIce(Material type) {
-		return WaterMaterials.ICE_BENDABLE.isTagged(type);
-	}
-
-	public static boolean isPlant(Block block) {
-		return isPlant(block.getType());
-	}
-
-	public static boolean isPlant(Material type) {
-		return WaterMaterials.PLANT_BENDABLE.isTagged(type);
-	}
-
-	public static boolean isMetal(Block block) {
-		return isMetal(block.getType());
-	}
-
-	public static boolean isMetal(Material type) {
-		return EarthMaterials.METAL_BENDABLE.isTagged(type);
 	}
 
 	// Finds a suitable solid block type to replace a falling-type block with.

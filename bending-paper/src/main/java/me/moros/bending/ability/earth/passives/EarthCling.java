@@ -31,7 +31,7 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
@@ -68,7 +68,7 @@ public class EarthCling implements PassiveAbility {
 		}
 		int counter = 2;
 		// TODO add earthglove and count available
-		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> MaterialUtil.isEarthbendable(user, b))) {
+		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b))) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());
 			} else {

@@ -33,6 +33,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -106,10 +107,10 @@ public class HeatControl implements PassiveAbility {
 		if (!user.canBend(getDescription())) return;
 		boolean acted = false;
 		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
-		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> MaterialUtil.isIce(b) || MaterialUtil.isFire(b))) {
+		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> WaterMaterials.isIceBendable(b) || MaterialUtil.isFire(b))) {
 			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
-			if (MaterialUtil.isIce(block)) {
+			if (WaterMaterials.isIceBendable(block)) {
 				Optional<TempBlock> tb = TempBlock.manager.get(block);
 				if (tb.isPresent()) {
 					tb.get().revert();

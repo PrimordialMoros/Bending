@@ -278,8 +278,8 @@ public class EarthLine implements Ability {
 		protected boolean isValidBlock(Block block) {
 			if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
 			if (mode != Mode.MAGMA && MaterialUtil.isLava(block)) return false;
-			if (mode == Mode.MAGMA && MaterialUtil.isMetal(block)) return false;
-			return MaterialUtil.isEarthbendable(user, block);
+			if (mode == Mode.MAGMA && EarthMaterials.isMetalBendable(block)) return false;
+			return EarthMaterials.isEarthbendable(user, block);
 		}
 
 		@Override
@@ -289,13 +289,13 @@ public class EarthLine implements Ability {
 			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 0.5f);
 			ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
 			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit, true);
-			Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && MaterialUtil.isEarthbendable(user, b) && !MaterialUtil.isMetal(b);
+			Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
 			List<Block> wall = new ArrayList<>(WorldMethods.getNearbyBlocks(center, 3, predicate));
 			Collections.shuffle(wall);
 			ThreadLocalRandom rnd = ThreadLocalRandom.current();
 			for (Block block : wall) {
 				Vector velocity = new Vector(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
-				TempBlock.create(block, Material.AIR, userConfig.regen);
+				TempBlock.create(block, Material.AIR, userConfig.regen, true);
 				new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
 			}
 		}
@@ -304,7 +304,7 @@ public class EarthLine implements Ability {
 			if (mode != Mode.NORMAL || raisedSpikes) return;
 			raisedSpikes = true;
 			Vector3 loc = location.add(Vector3.MINUS_J);
-			Predicate<Block> predicate = b -> MaterialUtil.isEarthbendable(user, b);
+			Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b);
 			Pillar.buildPillar(user, loc.toBlock(user.getWorld()), BlockFace.UP, 1, 30000, predicate).ifPresent(spikes::add);
 			Pillar.buildPillar(user, loc.add(direction).toBlock(user.getWorld()), BlockFace.UP, 2, 30000, predicate).ifPresent(spikes::add);
 		}
@@ -313,11 +313,11 @@ public class EarthLine implements Ability {
 			if (imprisoned || !entity.isValid() || WorldMethods.distanceAboveGround(entity) > 1.2) return;
 			Material material = null;
 			Block blockToCheck = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
-			if (MaterialUtil.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first
+			if (EarthMaterials.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first
 				material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
 			} else {
 				Location center = blockToCheck.getLocation().add(0.5, 0.5, 0.5);
-				for (Block block : WorldMethods.getNearbyBlocks(center, 1, b -> MaterialUtil.isEarthbendable(user, b), 1)) {
+				for (Block block : WorldMethods.getNearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
 					material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
 				}
 			}
@@ -363,7 +363,7 @@ public class EarthLine implements Ability {
 			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
 			damage = abilityNode.getNode("damage").getDouble(3.0);
 			prisonDuration = abilityNode.getNode("prison-duration").getLong(3000);
-			regen = abilityNode.getNode("regen-time").getLong(20000);
+			regen = abilityNode.getNode("revert-time").getLong(20000);
 		}
 	}
 }

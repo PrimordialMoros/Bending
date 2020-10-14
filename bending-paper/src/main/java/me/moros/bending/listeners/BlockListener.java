@@ -23,7 +23,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
@@ -77,7 +77,7 @@ public class BlockListener implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setDropItems(false);
-		} else if (MaterialUtil.isPlant(event.getBlock().getType())) {
+		} else if (WaterMaterials.PLANT_BENDABLE.isTagged(event.getBlock())) {
 			BendingPlayer player = Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 			player.getSelectedAbility().ifPresent(desc -> {
 				if (desc.canSourcePlant(player)) {
