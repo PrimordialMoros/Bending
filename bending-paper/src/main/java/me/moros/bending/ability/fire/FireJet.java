@@ -83,7 +83,7 @@ public class FireJet implements Ability {
 			.add(new ExpireRemovalPolicy(userConfig.duration))
 			.build();
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		startTime = System.currentTimeMillis();
 		return true;
 	}

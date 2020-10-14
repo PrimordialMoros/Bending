@@ -72,7 +72,7 @@ public class AirPunch implements Ability {
 
 		removalPolicy = Policies.builder().build();
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range);
 		stream = new AirStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius);

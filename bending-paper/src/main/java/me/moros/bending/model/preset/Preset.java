@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Preset {
-	public static final Preset EMPTY = new Preset(0, "", new String[9]);
+	public static final Preset EMPTY = new Preset(new String[9]);
 
 	private final int id;
 	private final String name;
@@ -37,6 +37,14 @@ public class Preset {
 		this.id = id;
 		this.name = name;
 		this.abilities = abilities;
+	}
+
+	/**
+	 * Creates a dummy preset with id 0 and an empty name.
+	 * @see #Preset(int, String, String[])
+	 */
+	public Preset(String[] abilities) {
+		this(0, "", abilities);
 	}
 
 	public int getInternalId() {

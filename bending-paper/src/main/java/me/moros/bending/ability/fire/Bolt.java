@@ -143,7 +143,7 @@ public class Bolt implements Ability {
 			.map(Entity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (!Game.getProtectionSystem().canBuild(user, targetLocation.getBlock())) return;
 		user.getWorld().strikeLightningEffect(targetLocation);
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		if (!isNearbyChannel()) dealDamage();
 	}
 

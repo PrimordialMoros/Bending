@@ -30,11 +30,11 @@ import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Subcommand;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.CommandUser;
 import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
 
@@ -55,8 +55,8 @@ public class PresetCommand extends BaseCommand {
 
 	@HelpCommand
 	@CommandPermission("bending.command.help")
-	public static void doHelp(CommandSender sender, CommandHelp help) {
-		Message.HELP_HEADER.send(sender);
+	public static void doHelp(CommandUser user, CommandHelp help) {
+		Message.HELP_HEADER.send(user);
 		help.showHelp();
 	}
 

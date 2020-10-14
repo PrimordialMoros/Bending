@@ -99,7 +99,7 @@ public class FireWall implements Ability {
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
 
 		nextRenderTime = 0;
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

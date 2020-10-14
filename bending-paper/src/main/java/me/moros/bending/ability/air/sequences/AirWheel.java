@@ -67,7 +67,7 @@ public class AirWheel implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		user.setCooldown(scooter, 1000); // Ensures airscooter won't be activated twice
+		user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
 		collider = new Sphere(user.getLocation(), userConfig.collisionRadius);
 		nextRenderTime = 0;
 		nextDamageTime = 0;

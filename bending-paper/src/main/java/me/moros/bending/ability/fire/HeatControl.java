@@ -121,7 +121,7 @@ public class HeatControl implements PassiveAbility {
 				block.setType(Material.AIR);
 			}
 		}
-		if (acted) user.setCooldown(this, userConfig.cooldown);
+		if (acted) user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	public static void act(User user) {

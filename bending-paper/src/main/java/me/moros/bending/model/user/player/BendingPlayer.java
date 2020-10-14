@@ -19,16 +19,13 @@
 
 package me.moros.bending.model.user.player;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingUser;
-import net.kyori.adventure.audience.Audience;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -54,8 +51,16 @@ public final class BendingPlayer extends BendingUser {
 		return (Player) super.getEntity();
 	}
 
-	private PlayerInventory getPlayerInventory() {
-		return getEntity().getInventory();
+	/**
+	 * @return a slot index in the 1-9 range (inclusive)
+	 */
+	public int getHeldItemSlot() {
+		return getEntity().getInventory().getHeldItemSlot() + 1;
+	}
+
+	@Override
+	public Optional<AbilityDescription> getSelectedAbility() {
+		return getSlotAbility(getHeldItemSlot());
 	}
 
 	@Override
@@ -63,16 +68,9 @@ public final class BendingPlayer extends BendingUser {
 		return getEntity().isOnline();
 	}
 
-	/**
-	 * @return a slot index in the 1-9 range (inclusive)
-	 */
-	public int getHeldItemSlot() {
-		return getPlayerInventory().getHeldItemSlot() + 1;
-	}
-
 	@Override
-	public Optional<AbilityDescription> getSelectedAbility() {
-		return getSlotAbility(getHeldItemSlot());
+	public boolean isSpectator() {
+		return getEntity().getGameMode() == GameMode.SPECTATOR;
 	}
 
 	@Override
@@ -100,16 +98,6 @@ public final class BendingPlayer extends BendingUser {
 		getEntity().setFlying(flying);
 	}
 
-	@Override
-	public boolean hasPermission(String permission) {
-		return getEntity().hasPermission(permission);
-	}
-
-	@Override
-	public boolean isSpectator() {
-		return getEntity().getGameMode() == GameMode.SPECTATOR;
-	}
-
 	// Presets
 	public Set<String> getPresets() {
 		return presetHolder.getPresets();
@@ -126,13 +114,9 @@ public final class BendingPlayer extends BendingUser {
 			return;
 		}
 		presetHolder.addPreset(name);
-		Game.getStorage().savePresetAsync(profile.getInternalId(), preset, result -> {
-			if (result) {
-				consumer.accept(PresetCreateResult.SUCCESS);
-			} else {
-				consumer.accept(PresetCreateResult.FAIL);
-			}
-		});
+		Game.getStorage().savePresetAsync(profile.getInternalId(), preset, result ->
+			consumer.accept(result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL)
+		);
 	}
 
 	public boolean removePreset(Preset preset) {
@@ -145,8 +129,8 @@ public final class BendingPlayer extends BendingUser {
 	}
 
 	@Override
-	public Audience asAudience() {
-		return Bending.getAudiences().player(getProfile().getUniqueId());
+	public boolean hasPermission(String permission) {
+		return getEntity().hasPermission(permission);
 	}
 
 	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {

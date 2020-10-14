@@ -96,7 +96,7 @@ public class AirBlade implements Ability {
 			blade = new Blade(user, new Ray(origin, direction), userConfig.speed * factor * 0.5);
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
-			user.setCooldown(this, userConfig.cooldown);
+			user.setCooldown(getDescription(), userConfig.cooldown);
 			Game.getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
 			return true;
 		}
@@ -147,7 +147,7 @@ public class AirBlade implements Ability {
 		blade = new Blade(user, new Ray(origin, direction));
 		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override

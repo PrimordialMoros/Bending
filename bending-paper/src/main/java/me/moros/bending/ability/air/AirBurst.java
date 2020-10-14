@@ -116,7 +116,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 		}
 		setRenderInterval(100);
 		setRenderParticleCount(1);
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	public static class Config extends Configurable {

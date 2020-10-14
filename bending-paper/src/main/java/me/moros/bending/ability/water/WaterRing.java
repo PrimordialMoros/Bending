@@ -101,7 +101,7 @@ public class WaterRing implements Ability {
 		List<Block> list = new ArrayList<>();
 		list.add(source.get());
 		states = new StateChain(list)
-			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5))
+			.addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5, userConfig.selectRange + 5))
 			.start();
 
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();

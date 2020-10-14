@@ -133,7 +133,7 @@ public class IceCrawl implements Ability {
 			if (src.isPresent()) {
 				iceLine = new Line(user, src.get());
 				Policies.builder().build();
-				user.setCooldown(this, userConfig.cooldown);
+				user.setCooldown(getDescription(), userConfig.cooldown);
 			}
 		}
 	}

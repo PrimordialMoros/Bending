@@ -115,13 +115,13 @@ public class PhaseChange implements PassiveAbility {
 
 	public void freeze() {
 		if (fillQueue(userConfig.freezeRange, userConfig.freezeRadius, MaterialUtil::isWater, freezeQueue)) {
-			user.setCooldown(this, userConfig.cooldown);
+			user.setCooldown(getDescription(), userConfig.cooldown);
 		}
 	}
 
 	public void melt() {
 		if (fillQueue(userConfig.meltRange, userConfig.meltRadius, WaterMaterials::isIceBendable, meltQueue)) {
-			user.setCooldown(this, userConfig.cooldown);
+			user.setCooldown(getDescription(), userConfig.cooldown);
 		}
 	}
 

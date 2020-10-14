@@ -36,8 +36,8 @@ import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
+import me.moros.bending.model.user.CommandUser;
 import me.moros.bending.model.user.player.BendingPlayer;
-import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 
@@ -46,8 +46,8 @@ import java.util.Arrays;
 public class ModifyCommand extends BaseCommand {
 	@HelpCommand
 	@CommandPermission("bending.command.help")
-	public static void doHelp(CommandSender sender, CommandHelp help) {
-		Message.HELP_HEADER.send(sender);
+	public static void doHelp(CommandUser user, CommandHelp help) {
+		Message.HELP_HEADER.send(user);
 		help.showHelp();
 	}
 

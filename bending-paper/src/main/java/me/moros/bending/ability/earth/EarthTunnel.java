@@ -121,7 +121,7 @@ public class EarthTunnel implements Ability {
 
 	@Override
 	public void onDestroy() {
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override

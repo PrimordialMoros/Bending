@@ -19,11 +19,9 @@
 
 package me.moros.bending.locale;
 
-import me.moros.bending.model.user.User;
-import me.moros.bending.util.AdventureUtil;
+import me.moros.bending.model.user.CommandUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import org.bukkit.command.CommandSender;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -37,7 +35,7 @@ public interface Message {
 		.append(text("Bending", DARK_AQUA))
 		.append(text("] ", DARK_GRAY));
 
-	Args0 HELP_HEADER = () -> brand(text("Help", DARK_AQUA));
+	Args0 HELP_HEADER = () -> brand(text("List of commands:", DARK_AQUA));
 
 	Args0 EMPTY_PRESET = () -> text("You can't create an empty preset!", YELLOW);
 	Args0 NO_PRESETS = () -> text("No presets found", YELLOW);
@@ -92,6 +90,9 @@ public interface Message {
 	Args0 BOARD_TOGGLED_ON = () -> text("Toggled Bending Board on", GREEN);
 	Args0 BOARD_TOGGLED_OFF = () -> text("Toggled Bending Board off", YELLOW);
 
+	Args1<Component> ELEMENT_ABILITIES_HEADER = element -> text("List of {element} abilities:", DARK_AQUA)
+		.replaceFirstText("{element}", element);
+
 	Args1<Component> ELEMENT_ABILITIES_EMPTY = element -> text("No abilities found for {element}", YELLOW)
 		.replaceFirstText("{element}", element);
 
@@ -128,10 +129,6 @@ public interface Message {
 		.replaceFirstText("{ability}", ability)
 		.replaceFirstText("{details}", text(details));
 
-	static Component brand(String message) {
-		return brand(text(message));
-	}
-
 	static Component brand(ComponentLike message) {
 		return PREFIX.asComponent().append(message);
 	}
@@ -139,11 +136,7 @@ public interface Message {
 	interface Args0 {
 		Component build();
 
-		default void send(CommandSender sender) {
-			AdventureUtil.sendMessage(sender, build());
-		}
-
-		default void send(User user) {
+		default void send(CommandUser user) {
 			user.sendMessage(build());
 		}
 	}
@@ -151,11 +144,7 @@ public interface Message {
 	interface Args1<A0> {
 		Component build(A0 arg0);
 
-		default void send(CommandSender sender, A0 arg0) {
-			AdventureUtil.sendMessage(sender, build(arg0));
-		}
-
-		default void send(User user, A0 arg0) {
+		default void send(CommandUser user, A0 arg0) {
 			user.sendMessage(build(arg0));
 		}
 	}
@@ -163,11 +152,7 @@ public interface Message {
 	interface Args2<A0, A1> {
 		Component build(A0 arg0, A1 arg1);
 
-		default void send(CommandSender sender, A0 arg0, A1 arg1) {
-			AdventureUtil.sendMessage(sender, build(arg0, arg1));
-		}
-
-		default void send(User user, A0 arg0, A1 arg1) {
+		default void send(CommandUser user, A0 arg0, A1 arg1) {
 			user.sendMessage(build(arg0, arg1));
 		}
 	}

@@ -167,7 +167,7 @@ public class EarthLine implements Ability {
 			if (EarthMaterials.LAVA_BENDABLE.isTagged(source)) mode = Mode.MAGMA;
 			earthLine = new Line(user, source);
 			Policies.builder().build();
-			user.setCooldown(this, userConfig.cooldown);
+			user.setCooldown(getDescription(), userConfig.cooldown);
 		}
 	}
 
@@ -180,7 +180,7 @@ public class EarthLine implements Ability {
 	private void setPrisonMode() {
 		if (mode == Mode.NORMAL) {
 			mode = Mode.PRISON;
-			user.asAudience().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
+			user.sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
 		}
 	}
 

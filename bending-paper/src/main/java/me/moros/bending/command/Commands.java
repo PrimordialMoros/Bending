@@ -35,6 +35,8 @@ import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.exception.command.InvalidSlotException;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.CommandUser;
+import me.moros.bending.model.user.CommandUserWrapper;
 import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.entity.Player;
 
@@ -83,6 +85,8 @@ public class Commands {
 
 	private static void registerCommandContexts() {
 		CommandContexts<BukkitCommandExecutionContext> commandContexts = Bending.getCommandManager().getCommandContexts();
+		commandContexts.registerIssuerOnlyContext(CommandUser.class, c -> new CommandUserWrapper(c.getSender()));
+
 		commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
 			Player player = c.getPlayer();
 			if (player == null) throw new UserException("You must be player!");

@@ -107,7 +107,7 @@ public class WaterSpout implements Ability {
 		spout.getFlight().setFlying(false);
 		spout.getFlight().release();
 		column.forEach(TempBlock::revert);
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override

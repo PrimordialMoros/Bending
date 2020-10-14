@@ -17,31 +17,21 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.util;
+package me.moros.bending.model.user;
 
 import me.moros.bending.Bending;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.command.CommandSender;
 
-/**
- * Utility class to handle any functionality related to <a href="https://github.com/KyoriPowered/adventure">Adventure Framework</a>.
- */
-public final class AdventureUtil {
-	/**
-	 * Sends a chat message to the provided sender.
-	 * @param sender the message receiver
-	 * @param text the text message as a Component
-	 */
-	public static void sendMessage(CommandSender sender, Component text) {
-		Bending.getAudiences().sender(sender).sendMessage(text);
+public class CommandUserWrapper implements CommandUser {
+	private final CommandSender sender;
+
+	public CommandUserWrapper(CommandSender sender) {
+		this.sender = sender;
 	}
 
-	/**
-	 * Sends an ActionBar message to the provided sender.
-	 * @param sender the message receiver
-	 * @param text the text message as a Component
-	 */
-	public static void sendActionBar(CommandSender sender, Component text) {
-		Bending.getAudiences().sender(sender).sendActionBar(text);
+	@Override
+	public Audience audience() {
+		return Bending.getAudiences().sender(sender);
 	}
 }

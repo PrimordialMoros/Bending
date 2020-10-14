@@ -29,7 +29,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.apache.commons.math3.util.FastMath;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -44,12 +43,10 @@ public class AbilityDescription {
 	private final Class<? extends Ability> type;
 	private final Element element;
 	private final EnumSet<ActivationMethod> activationMethods;
-	private final long cooldown;
 	private final String description;
 	private final String instructions;
 	private final boolean hidden;
 	private final boolean harmless;
-	private final boolean canBypassCooldown;
 	private final boolean sourcesPlants;
 	private final int hashcode;
 
@@ -59,7 +56,6 @@ public class AbilityDescription {
 		type = builder.type;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
-		cooldown = builder.cooldown;
 		if (builder.description.isEmpty()) {
 			description = getConfigNode().getNode("description").getString("");
 		} else {
@@ -72,9 +68,8 @@ public class AbilityDescription {
 		}
 		hidden = builder.hidden;
 		harmless = builder.harmless;
-		canBypassCooldown = builder.canBypassCooldown;
 		sourcesPlants = builder.sourcesPlants;
-		hashcode = Objects.hash(name, type, element, activationMethods, cooldown, description, instructions, hidden, harmless);
+		hashcode = Objects.hash(name, type, element, activationMethods, description, instructions, hidden, harmless);
 	}
 
 	public String getName() {
@@ -87,10 +82,6 @@ public class AbilityDescription {
 
 	public Element getElement() {
 		return element;
-	}
-
-	public long getCooldown() {
-		return cooldown;
 	}
 
 	public String getDescription() {
@@ -107,10 +98,6 @@ public class AbilityDescription {
 
 	public boolean isHarmless() {
 		return harmless;
-	}
-
-	public boolean canBypassCooldown() {
-		return canBypassCooldown;
 	}
 
 	public boolean canSourcePlant(User user) {
@@ -152,6 +139,27 @@ public class AbilityDescription {
 		return "bending.ability." + name;
 	}
 
+	public Component getMeta() {
+		String type = "Ability";
+		if (isActivatedBy(ActivationMethod.PASSIVE)) {
+			type = "Passive";
+		} else if (isActivatedBy(ActivationMethod.SEQUENCE)) {
+			type = "Sequence";
+		}
+		Component details = getDisplayName().append(Component.newline())
+			.append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
+			.append(getElement().getDisplayName().append(Component.newline()))
+			.append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
+			.append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
+			.append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
+			.append(Component.text(getPermission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
+			.append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY));
+
+		return Component.text(getName(), getElement().getColor())
+			.hoverEvent(HoverEvent.showText(details))
+			.clickEvent(ClickEvent.runCommand("/bending info " + getName()));
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
@@ -171,10 +179,10 @@ public class AbilityDescription {
 	 */
 	public AbilityDescriptionBuilder builder() {
 		return new AbilityDescriptionBuilder(name, type)
-			.setElement(element).setActivation(activationMethods).setCooldown(cooldown)
+			.setElement(element).setActivation(activationMethods)
 			.setDescription(description).setInstructions(instructions)
 			.setHidden(hidden).setHarmless(harmless)
-			.setCanBypassCooldown(canBypassCooldown).setSourcesPlants(sourcesPlants);
+			.setSourcesPlants(sourcesPlants);
 	}
 
 	public static <T extends Ability> AbilityDescriptionBuilder builder(String name, Class<T> type) {
@@ -186,12 +194,10 @@ public class AbilityDescription {
 		private final Class<? extends Ability> type;
 		private Element element;
 		private EnumSet<ActivationMethod> activationMethods;
-		private long cooldown = 0;
 		private String description = "";
 		private String instructions = "";
 		private boolean hidden = false;
 		private boolean harmless = false;
-		private boolean canBypassCooldown = false;
 		private boolean sourcesPlants = false;
 
 		public <T extends Ability> AbilityDescriptionBuilder(String name, Class<T> type) {
@@ -223,11 +229,6 @@ public class AbilityDescription {
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setCooldown(long cooldown) {
-			this.cooldown = FastMath.max(0, cooldown);
-			return this;
-		}
-
 		public AbilityDescriptionBuilder setDescription(String description) {
 			this.description = Objects.requireNonNull(description);
 			return this;
@@ -248,11 +249,6 @@ public class AbilityDescription {
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setCanBypassCooldown(boolean canBypassCooldown) {
-			this.canBypassCooldown = canBypassCooldown;
-			return this;
-		}
-
 		public AbilityDescriptionBuilder setSourcesPlants(boolean sourcesPlants) {
 			this.sourcesPlants = sourcesPlants;
 			return this;
@@ -269,27 +265,5 @@ public class AbilityDescription {
 			Objects.requireNonNull(activationMethods);
 			return new MultiAbilityDescription(this, displayName, parent, sub);
 		}
-	}
-
-	public static Component getMeta(AbilityDescription desc) {
-		if (desc == null) return Component.empty();
-		String type = "Ability";
-		if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
-			type = "Passive";
-		} else if (desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			type = "Sequence";
-		}
-		Component details = desc.getDisplayName().append(Component.newline())
-			.append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
-			.append(desc.getElement().getDisplayName().append(Component.newline()))
-			.append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
-			.append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
-			.append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
-			.append(Component.text(desc.getPermission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
-			.append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY));
-
-		return Component.text(desc.getName(), desc.getElement().getColor())
-			.hoverEvent(HoverEvent.showText(details))
-			.clickEvent(ClickEvent.runCommand("/bending info " + desc.getName()));
 	}
 }

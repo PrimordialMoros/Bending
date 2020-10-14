@@ -89,7 +89,7 @@ public class Combustion implements Ability, Explosive {
 			.add(new OutOfRangeRemovalPolicy(userConfig.range, user.getEyeLocation(), () -> location)).build();
 		collider = new Sphere(location, userConfig.collisionRadius);
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

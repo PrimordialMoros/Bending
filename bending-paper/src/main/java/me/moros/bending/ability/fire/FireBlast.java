@@ -136,7 +136,7 @@ public class FireBlast implements Ability, Burstable {
 		double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
 		charging = false;
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
 		stream = new FireStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius * factor);

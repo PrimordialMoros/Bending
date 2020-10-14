@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public enum BendingConditions implements BendingConditional {
-	COOLDOWN((u, d) -> (d.canBypassCooldown() || !u.isOnCooldown(d))),
+	COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
 	ELEMENT((u, d) -> u.hasElement(d.getElement())),
 	PERMISSION((u, d) -> u.hasPermission(d)),
 	WORLD((u, d) -> !Game.isDisabledWorld(u.getWorld().getUID())),

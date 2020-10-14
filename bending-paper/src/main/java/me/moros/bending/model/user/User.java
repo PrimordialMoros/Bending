@@ -23,26 +23,15 @@ import me.moros.bending.Bending;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-public interface User {
+public interface User extends BukkitUser {
 	ElementHolder getElementHolder();
 
 	default boolean hasElement(Element element) {
@@ -82,6 +71,10 @@ public interface User {
 		return true;
 	}
 
+	boolean isOnCooldown(AbilityDescription desc);
+
+	void setCooldown(AbilityDescription desc, long duration);
+
 	/**
 	 * Like setSlotAbility but won't call any events
 	 */
@@ -105,105 +98,10 @@ public interface User {
 
 	void removeLastSlotContainer();
 
-	boolean isOnCooldown(AbilityDescription desc);
-
-	void setCooldown(AbilityDescription desc, long duration);
-
-	default void setCooldown(AbilityDescription desc) {
-		if (desc != null) setCooldown(desc, desc.getCooldown());
-	}
-
-	default void setCooldown(Ability ability) {
-		if (ability != null) setCooldown(ability.getDescription());
-	}
-
-	default void setCooldown(Ability ability, long duration) {
-		if (ability != null) setCooldown(ability.getDescription(), duration);
-	}
-
-	boolean canBend(AbilityDescription desc);
-
 	CompositeBendingConditional getBendingConditional();
 
-	boolean hasPermission(String permission);
-
-	default boolean hasPermission(AbilityDescription desc) {
-		return desc != null && hasPermission(desc.getPermission());
-	}
-
-	default boolean isSpectator() {
-		return false;
-	}
-
-	LivingEntity getEntity();
-
-	default Block getHeadBlock() {
-		return getEntity().getEyeLocation().getBlock();
-	}
-
-	default Block getLocBlock() {
-		return getEntity().getLocation().getBlock();
-	}
-
-	default Vector3 getLocation() {
-		return new Vector3(getEntity().getLocation());
-	}
-
-	default Vector3 getEyeLocation() {
-		return new Vector3(getEntity().getEyeLocation());
-	}
-
-	default Vector3 getDirection() {
-		return new Vector3(getEntity().getLocation().getDirection());
-	}
-
-	default World getWorld() {
-		return getEntity().getWorld();
-	}
-
-	default Ray getRay() {
-		return new Ray(getEyeLocation(), getDirection());
-	}
-
-	default Ray getRay(double range) {
-		return new Ray(getEyeLocation(), getDirection().scalarMultiply(range));
-	}
-
-	/**
-	 * @return {@link Entity#isValid}
-	 */
-	default boolean isValid() {
-		return getEntity().isValid();
-	}
-
-	/**
-	 * @return {@link Entity#isDead()}
-	 */
-	default boolean isDead() {
-		return getEntity().isDead();
-	}
-
-	default boolean isSneaking() {
-		return true; // Non-players are always considered sneaking so they can charge abilities.
-	}
-
-	default boolean getAllowFlight() {
-		return true;
-	}
-
-	default boolean isFlying() {
-		return false;
-	}
-
-	default void setAllowFlight(boolean allow) {
-	}
-
-	default void setFlying(boolean flying) {
-	}
-
-	default Optional<Inventory> getInventory() {
-		if (getEntity() instanceof InventoryHolder) return Optional.of(((InventoryHolder) getEntity()).getInventory());
-		return Optional.empty();
+	default boolean canBend(AbilityDescription desc) {
+		return getBendingConditional().test(this, desc);
 	}
 
 	/**
@@ -214,13 +112,5 @@ public interface User {
 		IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
 			if (!hasElement(desc.getElement()) || !hasPermission(desc)) setSlotAbilityInternal(i, null);
 		}));
-	}
-
-	default Audience asAudience() {
-		return Audience.empty();
-	}
-
-	default void sendMessage(Component message) {
-		asAudience().sendMessage(message);
 	}
 }

@@ -104,7 +104,7 @@ public class AirSpout implements Ability {
 	public void onDestroy() {
 		spout.getFlight().setFlying(false);
 		spout.getFlight().release();
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override

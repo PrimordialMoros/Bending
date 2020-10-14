@@ -121,7 +121,7 @@ public class AirShield implements Ability {
 	public void onDestroy() {
 		double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
 		long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
-		user.setCooldown(this, cooldown);
+		user.setCooldown(getDescription(), cooldown);
 	}
 
 	@Override

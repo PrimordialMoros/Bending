@@ -86,7 +86,7 @@ public class FireShield implements Ability {
 				.add(new ExpireRemovalPolicy(userConfig.diskDuration)).build();
 		}
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

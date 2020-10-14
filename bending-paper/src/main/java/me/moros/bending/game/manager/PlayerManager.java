@@ -74,9 +74,9 @@ public final class PlayerManager {
 
 	public void createPlayer(Player player, BendingProfile profile) {
 		BendingPlayer.createPlayer(player, profile).ifPresent(p -> {
-			players.put(player.getUniqueId(), p);
-			profile.getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
-			p.bindPreset(new Preset(0, "temp", profile.getData().slots));
+			players.put(p.getProfile().getUniqueId(), p);
+			p.getProfile().getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
+			p.bindPreset(new Preset(p.getProfile().getData().slots));
 			Game.getBoardManager().canUseScoreboard(p.getEntity());
 			Game.getAbilityManager(p.getWorld()).createPassives(p);
 			Bending.getEventBus().postBendingPlayerLoadEvent(p.getEntity());

@@ -48,7 +48,7 @@ public class JetBlast implements Ability {
 		jet.setDuration(userConfig.duration);
 		jet.setSpeed(userConfig.speed);
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

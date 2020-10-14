@@ -148,7 +148,7 @@ public class AirBlast implements Ability, Burstable {
 			target = temp;
 		}
 		direction = target.subtract(origin).normalize();
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		stream = new AirStream(user, new Ray(origin, direction.scalarMultiply(userConfig.range)), userConfig.collisionRadius);
 		return true;
 	}

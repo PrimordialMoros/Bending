@@ -76,7 +76,7 @@ public class FireSpin implements Ability {
 			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

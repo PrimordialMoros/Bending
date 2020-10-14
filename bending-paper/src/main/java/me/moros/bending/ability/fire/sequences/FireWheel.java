@@ -74,7 +74,7 @@ public class FireWheel implements Ability {
 		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> wheel.getLocation())).build();
 
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

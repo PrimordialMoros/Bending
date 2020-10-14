@@ -83,7 +83,7 @@ public class FireWave implements Ability {
 		if (walls.isEmpty()) return false;
 		wall.updateDuration(userConfig.duration);
 		nextTime = 0;
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 

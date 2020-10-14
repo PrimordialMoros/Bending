@@ -129,7 +129,7 @@ public class AirSwipe implements Ability {
 		double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
 		charging = false;
-		user.setCooldown(this, userConfig.cooldown);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 dir = user.getDirection();
 		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
