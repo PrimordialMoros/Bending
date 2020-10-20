@@ -23,53 +23,55 @@ import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class DummyAbilityManager extends AbilityManager {
-	public DummyAbilityManager(World world) {
-		super(world);
+	public static final AbilityManager INSTANCE = new DummyAbilityManager();
+
+	private DummyAbilityManager() {
+		super();
 	}
 
 	@Override
-	public void addAbility(User user, Ability instance) {
+	public void addAbility(@NonNull User user, @NonNull Ability instance) {
 	}
 
 	@Override
-	public void changeOwner(Ability ability, User user) {
+	public void changeOwner(@NonNull Ability ability, @NonNull User user) {
 	}
 
 	@Override
-	public void createPassives(User user) {
+	public void createPassives(@NonNull User user) {
 	}
 
 	@Override
-	public void clearPassives(User user) {
+	public void clearPassives(@NonNull User user) {
 	}
 
 	@Override
-	public <T extends Ability> boolean hasAbility(User user, Class<T> type) {
+	public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
 		return false;
 	}
 
 	@Override
-	public boolean hasAbility(User user, AbilityDescription desc) {
+	public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
 		return false;
 	}
 
 	@Override
-	public void destroyInstance(User user, Ability ability) {
+	public void destroyInstance(@NonNull User user, @NonNull Ability ability) {
 	}
 
 	@Override
-	public boolean destroyInstanceType(User user, AbilityDescription desc) {
+	public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
 		return true;
 	}
 
 	@Override
-	public <T extends Ability> boolean destroyInstanceType(User user, Class<T> type) {
+	public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
 		return true;
 	}
 
@@ -79,32 +81,32 @@ public final class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
-	public Stream<Ability> getUserInstances(User user) {
+	public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
 		return Stream.empty();
 	}
 
 	@Override
-	public <T extends Ability> Stream<T> getUserInstances(User user, Class<T> type) {
+	public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
 		return Stream.empty();
 	}
 
 	@Override
-	public <T extends Ability> Optional<T> getFirstInstance(User user, Class<T> type) {
+	public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
 		return Optional.empty();
 	}
 
 	@Override
-	public Stream<Ability> getInstances() {
+	public @NonNull Stream<Ability> getInstances() {
 		return Stream.empty();
 	}
 
 	@Override
-	public <T extends Ability> Stream<T> getInstances(Class<T> type) {
+	public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
 		return Stream.empty();
 	}
 
 	@Override
-	public void destroyUserInstances(User user) {
+	public void destroyUserInstances(@NonNull User user) {
 	}
 
 	@Override

@@ -32,7 +32,6 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.Bending;
-import me.moros.bending.game.Game;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -40,8 +39,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.CommandUser;
-import me.moros.bending.model.user.player.BendingPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -67,7 +66,7 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.toggle")
 	@Description("Toggles bending")
 	public void onToggle(BendingPlayer player, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
-		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		if (bendingPlayer.getBendingConditional().hasConditional(BendingConditions.TOGGLED)) {
 			bendingPlayer.getBendingConditional().remove(BendingConditions.TOGGLED);
 			Message.TOGGLE_ON.send(bendingPlayer);
@@ -81,7 +80,7 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.reload")
 	@Description("Reloads the plugin and its config")
 	public void onReload(CommandUser user) {
-		Game.reload();
+		Bending.getGame().reload();
 		Message.CONFIG_RELOAD.send(user);
 	}
 
@@ -91,7 +90,7 @@ public class BendingCommand extends BaseCommand {
 	@Description("Choose an element")
 	public static void onElementChoose(CommandUser user, Element element, @Optional @CommandPermission("bending.command.choose.other") OnlinePlayer target) {
 		if (target == null && !(user instanceof Player)) throw new UserException("You must be player!");
-		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
+		BendingPlayer player = Bending.getGame().getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
 		if (target == null && !player.hasPermission("bending.command.choose." + element)) {
 			Message.ELEMENT_CHOOSE_NO_PERMISSION.send(player, element.getDisplayName());
 			return;
@@ -109,14 +108,14 @@ public class BendingCommand extends BaseCommand {
 	@Description("Add an element")
 	public static void onElementAdd(CommandUser user, Element element, @Optional @CommandPermission("bending.command.add.other") OnlinePlayer target) {
 		if (target == null && !(user instanceof Player)) throw new UserException("You must be player!");
-		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
+		BendingPlayer player = Bending.getGame().getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
 		if (target == null && !player.hasPermission("bending.command.add." + element)) {
 			Message.ELEMENT_ADD_NO_PERMISSION.send(player, element.getDisplayName());
 			return;
 		}
 		if (player.addElement(element)) {
-			Game.getAbilityManager(player.getWorld()).clearPassives(player);
-			Game.getAbilityManager(player.getWorld()).createPassives(player);
+			Bending.getGame().getAbilityManager(player.getWorld()).clearPassives(player);
+			Bending.getGame().getAbilityManager(player.getWorld()).createPassives(player);
 			Message.ELEMENT_ADD_SUCCESS.send(player, element.getDisplayName());
 		} else {
 			Message.ELEMENT_ADD_FAIL.send(player, element.getDisplayName());
@@ -129,10 +128,10 @@ public class BendingCommand extends BaseCommand {
 	@Description("Remove an element")
 	public static void onElementRemove(CommandUser user, Element element, @Optional @CommandPermission("bending.command.remove.other") OnlinePlayer target) {
 		if (target == null && !(user instanceof Player)) throw new UserException("You must be player!");
-		BendingPlayer player = Game.getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
+		BendingPlayer player = Bending.getGame().getPlayerManager().getPlayer((target == null) ? ((Player) user).getUniqueId() : target.getPlayer().getUniqueId());
 		if (player.removeElement(element)) {
-			Game.getAbilityManager(player.getWorld()).clearPassives(player);
-			Game.getAbilityManager(player.getWorld()).createPassives(player);
+			Bending.getGame().getAbilityManager(player.getWorld()).clearPassives(player);
+			Bending.getGame().getAbilityManager(player.getWorld()).createPassives(player);
 			Message.ELEMENT_REMOVE_SUCCESS.send(player, element.getDisplayName());
 		} else {
 			Message.ELEMENT_REMOVE_FAIL.send(player, element.getDisplayName());
@@ -143,11 +142,11 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.board")
 	@Description("Toggle bending board visibility")
 	public static void onBoard(BendingPlayer player) {
-		if (Game.isDisabledWorld(player.getWorld().getUID())) {
+		if (Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
 			Message.BOARD_DISABLED.send(player);
 			return;
 		}
-		if (Game.getBoardManager().toggleScoreboard(player.getEntity())) {
+		if (Bending.getGame().getBoardManager().toggleScoreboard(player.getEntity())) {
 			player.getProfile().setBoard(true);
 			Message.BOARD_TOGGLED_ON.send(player);
 		} else {
@@ -204,7 +203,7 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@players")
 	@Description("Show all bound abilities")
 	public static void onBinds(BendingPlayer player, @Optional OnlinePlayer target) {
-		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Message.BOUND_SLOTS.send(player, bendingPlayer.getEntity().getName());
 		for (int slot = 1; slot <= 9; slot++) {
 			Component meta = bendingPlayer.getStandardSlotAbility(slot).map(AbilityDescription::getMeta).orElse(null);
@@ -245,7 +244,7 @@ public class BendingCommand extends BaseCommand {
 		}
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Game.getSequenceManager().getSequence(ability).ifPresent(sequence -> user.sendMessage(ability.getDisplayName()
+			Bending.getGame().getSequenceManager().getSequence(ability).ifPresent(sequence -> user.sendMessage(ability.getDisplayName()
 				.append(Component.text(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
 			));
 		}
@@ -265,7 +264,7 @@ public class BendingCommand extends BaseCommand {
 	}
 
 	private static Collection<Component> collectAbilities(CommandUser user, Element element) {
-		Collection<Component> abilities = Game.getAbilityRegistry().getAbilities()
+		Collection<Component> abilities = Bending.getGame().getAbilityRegistry().getAbilities()
 			.filter(desc -> element == desc.getElement() && !desc.isHidden())
 			.filter(desc -> !desc.isActivatedBy(ActivationMethod.SEQUENCE))
 			.filter(desc -> user.hasPermission(desc.getPermission()))
@@ -281,7 +280,7 @@ public class BendingCommand extends BaseCommand {
 	}
 
 	private static Collection<Component> collectSequences(CommandUser user, Element element) {
-		Collection<Component> sequences = Game.getSequenceManager().getRegisteredSequences()
+		Collection<Component> sequences = Bending.getGame().getSequenceManager().getRegisteredSequences()
 			.filter(desc -> element == desc.getElement() && !desc.isHidden())
 			.filter(desc -> !desc.isHidden())
 			.filter(desc -> user.hasPermission(desc.getPermission()))
@@ -297,7 +296,7 @@ public class BendingCommand extends BaseCommand {
 	}
 
 	private static Collection<Component> collectPassives(CommandUser user, Element element) {
-		Collection<Component> passives = Game.getAbilityRegistry().getPassives(element)
+		Collection<Component> passives = Bending.getGame().getAbilityRegistry().getPassives(element)
 			.filter(desc -> !desc.isHidden())
 			.filter(desc -> user.hasPermission(desc.getPermission()))
 			.map(AbilityDescription::getMeta)

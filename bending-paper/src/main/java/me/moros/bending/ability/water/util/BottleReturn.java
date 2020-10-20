@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.water.util;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -37,6 +37,7 @@ import me.moros.bending.util.SourceUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class BottleReturn implements Ability {
 	}
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		states = new StateChain(Collections.singletonList(source))
@@ -67,7 +68,7 @@ public class BottleReturn implements Ability {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -82,22 +83,22 @@ public class BottleReturn implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "BottleReturn";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	public static class Config extends Configurable {

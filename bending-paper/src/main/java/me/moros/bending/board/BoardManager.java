@@ -19,13 +19,15 @@
 
 package me.moros.bending.board;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.util.ChatUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,8 +48,8 @@ public final class BoardManager extends Configurable {
 	 * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
 	 * @param player the player to force toggle
 	 */
-	public void forceToggleScoreboard(Player player) {
-		if (Game.isDisabledWorld(player.getWorld().getUID())) {
+	public void forceToggleScoreboard(@NonNull Player player) {
+		if (Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
 			UUID uuid = player.getUniqueId();
 			if (scoreboardPlayers.containsKey(uuid)) {
 				scoreboardPlayers.get(uuid).disableScoreboard();
@@ -58,8 +60,8 @@ public final class BoardManager extends Configurable {
 		}
 	}
 
-	public boolean toggleScoreboard(Player player) {
-		if (!enabled || Game.isDisabledWorld(player.getWorld().getUID())) {
+	public boolean toggleScoreboard(@NonNull Player player) {
+		if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
 			return false;
 		}
 		UUID uuid = player.getUniqueId();
@@ -77,8 +79,8 @@ public final class BoardManager extends Configurable {
 	 * @param player the player to check
 	 * @return true if player can use the bending board, false otherwise
 	 */
-	public boolean canUseScoreboard(Player player) {
-		if (!enabled || Game.isDisabledWorld(player.getWorld().getUID())) {
+	public boolean canUseScoreboard(@NonNull Player player) {
+		if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
 			return false;
 		}
 		UUID uuid = player.getUniqueId();
@@ -88,17 +90,17 @@ public final class BoardManager extends Configurable {
 		return true;
 	}
 
-	public void updateBoard(Player player) {
+	public void updateBoard(@NonNull Player player) {
 		if (canUseScoreboard(player)) {
 			scoreboardPlayers.get(player.getUniqueId()).updateAll();
 		}
 	}
 
-	public void updateBoardSlot(Player player, AbilityDescription desc) {
+	public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc) {
 		updateBoardSlot(player, desc, false);
 	}
 
-	public void updateBoardSlot(Player player, AbilityDescription desc, boolean cooldown) {
+	public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
 		if (canUseScoreboard(player)) {
 			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
 				String value = "  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName();
@@ -109,13 +111,13 @@ public final class BoardManager extends Configurable {
 		}
 	}
 
-	public void changeActiveSlot(Player player, int oldSlot, int newSlot) {
+	public void changeActiveSlot(@NonNull Player player, int oldSlot, int newSlot) {
 		if (canUseScoreboard(player)) {
 			scoreboardPlayers.get(player.getUniqueId()).setActiveSlot(++oldSlot, ++newSlot);
 		}
 	}
 
-	public void invalidate(UUID uuid) {
+	public void invalidate(@NonNull UUID uuid) {
 		scoreboardPlayers.remove(uuid);
 	}
 

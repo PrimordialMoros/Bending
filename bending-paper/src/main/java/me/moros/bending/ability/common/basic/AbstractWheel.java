@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
@@ -38,6 +38,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 
@@ -53,7 +54,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 	protected final double radius;
 	protected double entityCollisionRadius;
 
-	protected AbstractWheel(User user, Ray ray, double radius, double speed) {
+	public AbstractWheel(@NonNull User user, @NonNull Ray ray, double radius, double speed) {
 		this.user = user;
 		this.ray = ray;
 		this.location = ray.origin;
@@ -67,9 +68,9 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		location = location.add(dir);
-		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
 			return UpdateResult.REMOVE;
 		}
 		if (!resolveMovement(radius)) {
@@ -85,16 +86,16 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public boolean onBlockHit(Block block) {
+	public boolean onBlockHit(@NonNull Block block) {
 		return true;
 	}
 
 	@Override
-	public Collider getCollider() {
+	public @NonNull Collider getCollider() {
 		return collider.addPosition(location);
 	}
 
-	public Vector3 getLocation() {
+	public @NonNull Vector3 getLocation() {
 		return location;
 	}
 

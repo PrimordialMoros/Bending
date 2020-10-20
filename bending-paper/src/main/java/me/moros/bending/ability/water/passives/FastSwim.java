@@ -28,12 +28,13 @@ import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastSwim implements PassiveAbility {
 	private User user;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -44,7 +45,7 @@ public class FastSwim implements PassiveAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (!user.isValid() || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
 		}
@@ -64,16 +65,16 @@ public class FastSwim implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "FastSwim";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 }

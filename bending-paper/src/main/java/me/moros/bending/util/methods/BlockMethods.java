@@ -19,7 +19,7 @@
 
 package me.moros.bending.util.methods;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
@@ -31,6 +31,7 @@ import org.bukkit.block.Campfire;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +51,7 @@ public final class BlockMethods {
 	 * Attempts to light a block if it's a furnace, smoker, blast furance or campfire.
 	 * @param block the block to light
 	 */
-	public static void lightBlock(Block block) {
+	public static void lightBlock(@NonNull Block block) {
 		if (block.getType() == Material.FURNACE) {
 			Furnace furnace = (Furnace) block.getState();
 			furnace.setBurnTime((short) 800);
@@ -74,12 +75,12 @@ public final class BlockMethods {
 	 * @param center the location to check
 	 * @return true if Lava was cooled down, false otherwise
 	 */
-	public static boolean extinguish(User user, Location center) {
+	public static boolean extinguish(@NonNull User user, @NonNull Location center) {
 		Block block = center.getBlock();
-		if (!Game.getProtectionSystem().canBuild(user, block)) return false;
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 		boolean result = true;
 		for (Block b : WorldMethods.getNearbyBlocks(center, 1.2, MaterialUtil::isFire)) {
-			if (!Game.getProtectionSystem().canBuild(user, b)) continue;
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
 			b.setType(Material.AIR);
 			result = false;
 		}
@@ -93,7 +94,7 @@ public final class BlockMethods {
 	/**
 	 * @return {@link #combineFaces(Block, Set)} with {@link #MAIN_FACES} as the provided set
 	 */
-	public static Collection<Block> combineFaces(Block center) {
+	public static @NonNull Collection<@NonNull Block> combineFaces(@NonNull Block center) {
 		return combineFaces(center, MAIN_FACES);
 	}
 
@@ -105,7 +106,7 @@ public final class BlockMethods {
 	 * @see #MAIN_FACES
 	 * @see #CARDINAL_FACES
 	 */
-	public static Collection<Block> combineFaces(Block center, Set<BlockFace> faces) {
+	public static @NonNull Collection<@NonNull Block> combineFaces(@NonNull Block center, @NonNull Set<@NonNull BlockFace> faces) {
 		return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
 	}
 }

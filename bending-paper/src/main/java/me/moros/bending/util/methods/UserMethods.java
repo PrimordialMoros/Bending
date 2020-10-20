@@ -20,8 +20,8 @@
 package me.moros.bending.util.methods;
 
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 

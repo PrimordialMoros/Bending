@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Burstable;
@@ -44,6 +44,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,12 +68,12 @@ public class AirBlast implements Ability, Burstable {
 	private long renderInterval;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		particleCount = 6;
 
-		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 
@@ -81,12 +82,12 @@ public class AirBlast implements Ability, Burstable {
 			.add(Policies.IN_LIQUID)
 			.build();
 
-		for (AirBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
+		for (AirBlast blast : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
 			if (!blast.launched) {
 				if (method == ActivationMethod.SNEAK_RELEASE) {
 					blast.selectOrigin();
-					if (!Game.getProtectionSystem().canBuild(user, blast.origin.toBlock(user.getWorld()))) {
-						Game.getAbilityManager(user.getWorld()).destroyInstance(user, blast);
+					if (!Bending.getGame().getProtectionSystem().canBuild(user, blast.origin.toBlock(user.getWorld()))) {
+						Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, blast);
 					}
 				} else {
 					blast.launch();
@@ -97,9 +98,9 @@ public class AirBlast implements Ability, Burstable {
 
 		if (method == ActivationMethod.SNEAK_RELEASE) {
 			selectOrigin();
-			return Game.getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
+			return Bending.getGame().getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
 		} else {
-			if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 				return false;
 			}
 			origin = user.getEyeLocation();
@@ -110,11 +111,11 @@ public class AirBlast implements Ability, Burstable {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -154,31 +155,31 @@ public class AirBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (stream == null) return Collections.emptyList();
 		return Collections.singletonList(stream.getCollider());
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "AirBlast";
 	}
 
 	// Used to initialize the blast for bursts.
 	@Override
-	public void initialize(User user, Vector3 location, Vector3 direction) {
+	public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
 		this.user = user;
 		recalculateConfig();
 		selectedOrigin = false;
@@ -233,7 +234,7 @@ public class AirBlast implements Ability, Burstable {
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			double factor = entity.equals(user.getEntity()) ? userConfig.selfPush : userConfig.otherPush;
 			factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
 			// Reduce the push if the player is on the ground.
@@ -256,7 +257,7 @@ public class AirBlast implements Ability, Burstable {
 		}
 
 		@Override
-		public boolean onBlockHit(Block block) {
+		public boolean onBlockHit(@NonNull Block block) {
 			return BlockMethods.extinguish(user, getBukkitLocation());
 		}
 	}

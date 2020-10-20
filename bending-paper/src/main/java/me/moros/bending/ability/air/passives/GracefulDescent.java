@@ -19,18 +19,19 @@
 
 package me.moros.bending.ability.air.passives;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class GracefulDescent implements PassiveAbility {
 	private User user;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -41,15 +42,15 @@ public class GracefulDescent implements PassiveAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		return UpdateResult.CONTINUE;
 	}
 
 	public static boolean isGraceful(User user) {
-		if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
+		if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
 			return false;
 		}
-		return Game.getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
+		return Bending.getGame().getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
 	}
 
 	@Override
@@ -57,16 +58,16 @@ public class GracefulDescent implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "GracefulDescent";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 }

@@ -29,6 +29,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -54,35 +55,35 @@ public class TempBlock implements Temporary {
 		manager.addEntry(block, this, duration);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material type) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type) {
 		return create(block, type.createBlockData(), 0, false);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material type, boolean bendable) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, boolean bendable) {
 		return create(block, type.createBlockData(), 0, bendable);
 	}
 
-	public static Optional<TempBlock> create(Block block, BlockData data) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
 		return create(block, data, 0, false);
 	}
 
-	public static Optional<TempBlock> create(Block block, BlockData data, boolean bendable) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, boolean bendable) {
 		return create(block, data, 0, bendable);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material type, long duration) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, long duration) {
 		return create(block, type.createBlockData(), duration, false);
 	}
 
-	public static Optional<TempBlock> create(Block block, Material type, long duration, boolean bendable) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, long duration, boolean bendable) {
 		return create(block, type.createBlockData(), duration, bendable);
 	}
 
-	public static Optional<TempBlock> create(Block block, BlockData data, long duration) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration) {
 		return create(block, data, duration, false);
 	}
 
-	public static Optional<TempBlock> create(Block block, BlockData data, long duration, boolean bendable) {
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable) {
 		if (block instanceof TileState) return Optional.empty();
 		if (block.getBlockData() instanceof Waterlogged) {
 			Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
@@ -104,15 +105,15 @@ public class TempBlock implements Temporary {
 		if (revertTask != null) revertTask.execute();
 	}
 
-	public Block getBlock() {
+	public @NonNull Block getBlock() {
 		return snapshot.getBlock();
 	}
 
-	public BlockData getBlockData() {
+	public @NonNull BlockData getBlockData() {
 		return data;
 	}
 
-	public BlockState getSnapshot() {
+	public @NonNull BlockState getSnapshot() {
 		return snapshot;
 	}
 
@@ -125,15 +126,15 @@ public class TempBlock implements Temporary {
 	}
 
 	@Override
-	public void setRevertTask(RevertTask task) {
+	public void setRevertTask(@NonNull RevertTask task) {
 		this.revertTask = task;
 	}
 
-	public static boolean isTouchingTempBlock(Block block) {
+	public static boolean isTouchingTempBlock(@NonNull Block block) {
 		return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(manager::isTemp);
 	}
 
-	public static boolean isBendable(Block block) {
+	public static boolean isBendable(@NonNull Block block) {
 		return manager.get(block).map(TempBlock::isBendable).orElse(true);
 	}
 }

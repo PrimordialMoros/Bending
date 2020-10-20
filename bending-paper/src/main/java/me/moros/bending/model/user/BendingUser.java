@@ -21,18 +21,19 @@ package me.moros.bending.model.user;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicates.conditionals.BendingConditions;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.slots.AbilitySlotContainer;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Tasker;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -46,55 +47,56 @@ public class BendingUser extends CommandUserWrapper implements User {
 	private final CompositeBendingConditional bendingConditional;
 	private final LivingEntity entity;
 
-	protected BendingUser(LivingEntity entity) {
+	protected BendingUser(@NonNull LivingEntity entity) {
 		super(entity);
 		this.entity = entity;
 		cooldowns.addExpirationListener((key, value) ->
 			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
-		slotContainers.addLast(new AbilitySlotContainer(9));
+		slotContainers.addLast(new AbilitySlotContainer());
 		bendingConditional = BendingConditions.builder().build();
 	}
 
 	@Override
-	public LivingEntity getEntity() {
+	public @NonNull LivingEntity getEntity() {
 		return entity;
 	}
 
 	@Override
-	public ElementHolder getElementHolder() {
+	public @NonNull ElementHolder getElementHolder() {
 		return elementHolder;
 	}
 
-	public Preset createPresetFromSlots(String name) {
+	public @NonNull Preset createPresetFromSlots(String name) {
 		return slotContainers.getFirst().toPreset(name);
 	}
 
-	public int bindPreset(Preset preset) {
+	public int bindPreset(@NonNull Preset preset) {
 		slotContainers.getFirst().fromPreset(preset);
 		validateSlots();
-		if (this instanceof BendingPlayer) Game.getBoardManager().updateBoard((Player) getEntity());
+		if (this instanceof BendingPlayer) Bending.getGame().getBoardManager().updateBoard((Player) getEntity());
 		Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.MULTIPLE);
 		return preset.compare(createPresetFromSlots(""));
 	}
 
-	public Optional<AbilityDescription> getStandardSlotAbility(int slot) {
+	public Optional<AbilityDescription> getStandardSlotAbility(@IntRange(from = 1, to = 9) int slot) {
 		return Optional.ofNullable(slotContainers.getFirst().getAbility(slot));
 	}
 
 	@Override
-	public Optional<AbilityDescription> getSlotAbility(int slot) {
+	public Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot) {
 		return Optional.ofNullable(slotContainers.getLast().getAbility(slot));
 	}
 
 	@Override
-	public void setSlotAbilityInternal(int slot, AbilityDescription desc) {
+	public void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
 		slotContainers.getFirst().setAbility(slot, desc);
 	}
 
 	@Override
-	public void setSlotAbility(int slot, AbilityDescription desc) {
+	public void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
 		setSlotAbilityInternal(slot, desc);
-		if (this instanceof BendingPlayer) Game.getBoardManager().updateBoardSlot((Player) getEntity(), desc);
+		if (this instanceof BendingPlayer)
+			Bending.getGame().getBoardManager().updateBoardSlot((Player) getEntity(), desc);
 		Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.SINGLE);
 	}
 
@@ -105,7 +107,7 @@ public class BendingUser extends CommandUserWrapper implements User {
 
 	// Adds or replaces the last container
 	@Override
-	public void addSlotContainer(AbilitySlotContainer slotContainer) {
+	public void addSlotContainer(@NonNull AbilitySlotContainer slotContainer) {
 		removeLastSlotContainer();
 		slotContainers.addLast(slotContainer);
 	}
@@ -117,24 +119,24 @@ public class BendingUser extends CommandUserWrapper implements User {
 	}
 
 	@Override
-	public boolean isOnCooldown(AbilityDescription desc) {
+	public boolean isOnCooldown(@NonNull AbilityDescription desc) {
 		return cooldowns.containsKey(desc);
 	}
 
 	@Override
-	public void setCooldown(AbilityDescription desc, long duration) {
+	public void setCooldown(@NonNull AbilityDescription desc, long duration) {
 		if (duration <= 0) return;
 		if (!isOnCooldown(desc)) {
 			cooldowns.put(desc, false, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
-			Bending.getEventBus().postCooldownAddEvent(this, desc);
+			Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
 		} else if (duration > cooldowns.getExpectedExpiration(desc)) {
 			cooldowns.setExpiration(desc, duration, TimeUnit.MILLISECONDS);
-			Bending.getEventBus().postCooldownAddEvent(this, desc);
+			Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
 		}
 	}
 
 	@Override
-	public CompositeBendingConditional getBendingConditional() {
+	public @NonNull CompositeBendingConditional getBendingConditional() {
 		return bendingConditional;
 	}
 
@@ -149,5 +151,13 @@ public class BendingUser extends CommandUserWrapper implements User {
 	@Override
 	public int hashCode() {
 		return entity.hashCode();
+	}
+
+	public static Optional<BendingUser> createUser(@NonNull LivingEntity entity) {
+		if (entity instanceof Player) return Optional.empty();
+		if (Bending.getGame().getBenderRegistry().isBender(entity)) {
+			return Bending.getGame().getBenderRegistry().getBendingUser(entity);
+		}
+		return Optional.of(new BendingUser(entity));
 	}
 }

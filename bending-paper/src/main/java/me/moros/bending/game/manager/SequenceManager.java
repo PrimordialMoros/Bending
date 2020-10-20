@@ -21,7 +21,6 @@ package me.moros.bending.game.manager;
 
 import me.moros.bending.Bending;
 import me.moros.bending.game.AbilityRegistry;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -30,6 +29,7 @@ import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.user.User;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -55,14 +55,14 @@ public final class SequenceManager {
 	 * @param sequences the map containing all the sequences
 	 * @return the amount of sequences that were registered.
 	 */
-	public int registerSequences(Map<AbilityDescription, Sequence> sequences) {
+	public int registerSequences(@NonNull Map<@NonNull AbilityDescription, @NonNull Sequence> sequences) {
 		for (Map.Entry<AbilityDescription, Sequence> entry : sequences.entrySet()) {
 			AbilityDescription desc = entry.getKey();
-			if (!Game.getAbilityRegistry().isValid(desc)) continue;
+			if (!Bending.getGame().getAbilityRegistry().isRegistered(desc)) continue;
 			Sequence sequence = entry.getValue();
 			boolean valid = sequence.getActions().stream()
 				.map(AbilityAction::getAbilityDescription)
-				.allMatch(Game.getAbilityRegistry()::isValid);
+				.allMatch(Bending.getGame().getAbilityRegistry()::isRegistered);
 			if (valid) {
 				registeredSequences.put(entry.getKey(), sequence);
 			} else {
@@ -72,12 +72,11 @@ public final class SequenceManager {
 		return registeredSequences.size();
 	}
 
-	public Optional<Sequence> getSequence(AbilityDescription desc) {
-		if (desc == null) return Optional.empty();
+	public Optional<Sequence> getSequence(@NonNull AbilityDescription desc) {
 		return Optional.ofNullable(registeredSequences.get(desc));
 	}
 
-	public void registerAction(User user, ActivationMethod action) {
+	public void registerAction(@NonNull User user, @NonNull ActivationMethod action) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null) return;
 		Deque<AbilityAction> buffer = cache.computeIfAbsent(user, u -> new ArrayDeque<>(16));
@@ -89,8 +88,8 @@ public final class SequenceManager {
 			if (sequence.matches(buffer.toArray(new AbilityAction[0]))) {
 				if (!user.canBend(sequenceDesc)) continue;
 				Ability ability = sequenceDesc.createAbility();
-				if (ability.activate(user, ActivationMethod.SEQUENCE)) {
-					Game.getAbilityManager(user.getWorld()).addAbility(user, ability);
+				if (ability != null && ability.activate(user, ActivationMethod.SEQUENCE)) {
+					Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ability);
 				}
 				buffer.clear(); // Consume all actions in the buffer
 				return;

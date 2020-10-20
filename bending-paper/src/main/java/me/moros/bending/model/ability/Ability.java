@@ -19,25 +19,26 @@
 
 package me.moros.bending.model.ability;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
 
 public interface Ability extends Updatable {
-	boolean activate(User user, ActivationMethod method); // return true if the ability was activated
+	boolean activate(@NonNull User user, @NonNull ActivationMethod method); // return true if the ability was activated
 
 	void onDestroy();
 
-	User getUser();
+	@NonNull User getUser();
 
-	String getName();
+	@NonNull String getName();
 
-	default boolean setUser(User newUser) {
+	default boolean setUser(@NonNull User newUser) {
 		return false;
 	}
 
@@ -45,15 +46,15 @@ public interface Ability extends Updatable {
 		return false;
 	}
 
-	default AbilityDescription getDescription() {
-		return Game.getAbilityRegistry().getAbilityDescription(this);
+	default @NonNull AbilityDescription getDescription() {
+		return Bending.getGame().getAbilityRegistry().getAbilityDescription(this);
 	}
 
-	default Collection<Collider> getColliders() {
+	default @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.emptyList();
 	}
 
-	void onCollision(Collision collision);
+	void onCollision(@NonNull Collision collision);
 
 	void recalculateConfig();
 }

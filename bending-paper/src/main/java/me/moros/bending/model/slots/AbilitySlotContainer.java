@@ -19,19 +19,25 @@
 
 package me.moros.bending.model.slots;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.value.qual.IntRange;
 
 public class AbilitySlotContainer {
 	protected AbilityDescription[] abilities;
 
-	public AbilitySlotContainer(int size) {
+	protected AbilitySlotContainer(@IntRange(from = 1, to = 9) int size) {
 		this.abilities = new AbilityDescription[size];
 	}
 
-	public AbilityDescription getAbility(int slot) {
-		if (slot < 1 || slot > abilities.length) return null;
+	public AbilitySlotContainer() {
+		this(9);
+	}
+
+	public AbilityDescription getAbility(@IntRange(from = 1, to = 9) int slot) {
 		return abilities[slot - 1];
 	}
 
@@ -41,7 +47,7 @@ public class AbilitySlotContainer {
 	 * @param slot the slot to put the ability in
 	 * @param desc the ability description to put
 	 */
-	public void setAbility(int slot, AbilityDescription desc) {
+	public void setAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
 		abilities[slot - 1] = desc;
 	}
 
@@ -50,7 +56,7 @@ public class AbilitySlotContainer {
 	 * @param name the name of the preset to be created
 	 * @return the constructed preset
 	 */
-	public Preset toPreset(String name) {
+	public @NonNull Preset toPreset(@NonNull String name) {
 		String[] copy = new String[9];
 		for (int slot = 0; slot < 9; slot++) {
 			AbilityDescription desc = abilities[slot];
@@ -59,10 +65,10 @@ public class AbilitySlotContainer {
 		return new Preset(0, name, copy);
 	}
 
-	public void fromPreset(Preset preset) {
+	public void fromPreset(@NonNull Preset preset) {
 		String[] presetAbilities = preset.getAbilities();
 		for (int slot = 0; slot < 9; slot++) {
-			abilities[slot] = Game.getAbilityRegistry().getAbilityDescription(presetAbilities[slot]).orElse(null);
+			abilities[slot] = Bending.getGame().getAbilityRegistry().getAbilityDescription(presetAbilities[slot]).orElse(null);
 		}
 	}
 }

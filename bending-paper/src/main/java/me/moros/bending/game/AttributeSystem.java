@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -30,6 +31,7 @@ import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -40,8 +42,8 @@ import java.util.stream.Collectors;
 
 // TODO Expand system to include rounding, range checking etc and profile performance
 public final class AttributeSystem {
-	private final Map<User, Collection<UserModifier>> modifierMap = new HashMap<>();
 	private static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>(); // Converts a double into some other numeric type
+	private final Map<User, Collection<UserModifier>> modifierMap = new HashMap<>();
 
 	static {
 		converters.put(Double.class, AttributeConverter.DOUBLE);
@@ -53,22 +55,22 @@ public final class AttributeSystem {
 	}
 
 	// Add a modifier that's only active according to some policy.
-	public UserModifier addModifier(User user, AttributeModifier modifier, ModifyPolicy policy) {
+	public @NonNull UserModifier addModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
 		Collection<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
 		UserModifier userModifier = new UserModifier(modifier, policy);
 		modifiers.add(userModifier);
 		return userModifier;
 	}
 
-	public void clearModifiers(User user) {
+	public void clearModifiers(@NonNull User user) {
 		modifierMap.remove(user);
 	}
 
-	public boolean removeModifier(User user, AttributeModifier modifier, ModifyPolicy policy) {
+	public boolean removeModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
 		return removeModifier(user, new UserModifier(modifier, policy));
 	}
 
-	public boolean removeModifier(User user, UserModifier modifier) {
+	public boolean removeModifier(@NonNull User user, @NonNull UserModifier modifier) {
 		Collection<UserModifier> modifiers = modifierMap.get(user);
 		if (modifiers == null) {
 			return false;
@@ -81,13 +83,13 @@ public final class AttributeSystem {
 	}
 
 	// Recalculates all of the config values for the user's instances.
-	public void recalculate(User user) {
-		Game.getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
+	public void recalculate(@NonNull User user) {
+		Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
 	}
 
-	public <T extends Configurable> T calculate(Ability ability, T config) {
+	public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
 		User user = ability.getUser();
-		if (user == null || !modifierMap.containsKey(user)) {
+		if (!modifierMap.containsKey(user)) {
 			return config;
 		}
 		Collection<UserModifier> activeModifiers = modifierMap.get(user).stream()
@@ -163,11 +165,11 @@ public final class AttributeSystem {
 		}
 	}
 
-	public static ModifyPolicy getElementPolicy(Element element) {
+	public static @NonNull ModifyPolicy getElementPolicy(@NonNull Element element) {
 		return ability -> ability.getDescription().getElement() == element;
 	}
 
-	public static ModifyPolicy getAbilityPolicy(AbilityDescription desc) {
+	public static @NonNull ModifyPolicy getAbilityPolicy(@NonNull AbilityDescription desc) {
 		return ability -> ability.getDescription().equals(desc);
 	}
 }

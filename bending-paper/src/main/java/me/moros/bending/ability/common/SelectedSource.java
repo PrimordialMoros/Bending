@@ -23,8 +23,8 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ParticleUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,6 +32,8 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SelectedSource implements State {
 	private StateChain chain;
@@ -45,21 +47,21 @@ public class SelectedSource implements State {
 
 	private boolean started = false;
 
-	public SelectedSource(User user, Block block, double maxDistance, BlockData data) {
+	public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance, @Nullable BlockData data) {
 		this.user = user;
 		this.distanceSq = maxDistance * maxDistance;
 		reselect(block, data);
 	}
 
-	public SelectedSource(User user, Block block, double maxDistance) {
+	public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance) {
 		this(user, block, maxDistance, null);
 	}
 
-	public boolean reselect(Block block) {
+	public boolean reselect(@NonNull Block block) {
 		return reselect(block, null);
 	}
 
-	public boolean reselect(Block block, BlockData data) {
+	public boolean reselect(@NonNull Block block, @Nullable BlockData data) {
 		if (block.equals(this.block)) return false;
 		Vector3 newOrigin = new Vector3(block).add(Vector3.HALF);
 		if (user.getEyeLocation().distanceSq(newOrigin) > distanceSq) return false;
@@ -73,7 +75,7 @@ public class SelectedSource implements State {
 	}
 
 	@Override
-	public void start(StateChain chain) {
+	public void start(@NonNull StateChain chain) {
 		if (started) return;
 		this.chain = chain;
 		started = true;
@@ -90,7 +92,7 @@ public class SelectedSource implements State {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (!started) return UpdateResult.REMOVE;
 		if (block.getType() != material || user.getEyeLocation().distanceSq(origin) > distanceSq) {
 			return UpdateResult.REMOVE;
@@ -104,7 +106,7 @@ public class SelectedSource implements State {
 		return UpdateResult.CONTINUE;
 	}
 
-	public Block getSelectedSource() {
+	public @NonNull Block getSelectedSource() {
 		return block;
 	}
 

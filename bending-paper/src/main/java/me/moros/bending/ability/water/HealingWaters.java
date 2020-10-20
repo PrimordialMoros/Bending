@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -40,6 +40,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HealingWaters implements Ability {
 	private static final org.bukkit.attribute.Attribute healthAttribute = org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
@@ -53,7 +54,7 @@ public class HealingWaters implements Ability {
 	private long nextTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
@@ -64,11 +65,11 @@ public class HealingWaters implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -126,17 +127,17 @@ public class HealingWaters implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "HealingWaters";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

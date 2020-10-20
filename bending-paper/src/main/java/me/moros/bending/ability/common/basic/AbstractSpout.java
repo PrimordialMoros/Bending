@@ -33,6 +33,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,7 +53,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
 	protected double distance;
 
-	public AbstractSpout(User user, double height, double speed) {
+	public AbstractSpout(@NonNull User user, double height, double speed) {
 		this.user = user;
 
 		this.height = NumberConversions.ceil(height);
@@ -65,7 +66,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
 		if (block == null || !validBlock.test(block)) {
 			return UpdateResult.REMOVE;
@@ -84,25 +85,25 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public boolean onEntityHit(Entity entity) {
+	public boolean onEntityHit(@NonNull Entity entity) {
 		return true;
 	}
 
 	@Override
-	public boolean onBlockHit(Block block) {
+	public boolean onBlockHit(@NonNull Block block) {
 		return true;
 	}
 
 	@Override
-	public Collider getCollider() {
+	public @NonNull Collider getCollider() {
 		return collider;
 	}
 
-	public Flight getFlight() {
+	public @NonNull Flight getFlight() {
 		return flight;
 	}
 
-	public static void limitVelocity(User user, Vector velocity, double speed) {
+	public static void limitVelocity(@NonNull User user, @NonNull Vector velocity, double speed) {
 		if (velocity.lengthSquared() > speed * speed) {
 			user.getEntity().setVelocity(velocity.normalize().multiply(speed));
 		}

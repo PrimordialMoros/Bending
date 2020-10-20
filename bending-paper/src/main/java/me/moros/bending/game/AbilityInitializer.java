@@ -29,16 +29,16 @@ import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
-import me.moros.bending.game.manager.SequenceManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,11 +46,8 @@ import java.util.Map;
  */
 // TODO register collisions
 public final class AbilityInitializer {
-	public static void loadAbilities() {
-		AbilityRegistry abilityRegistry = Game.getAbilityRegistry();
-		SequenceManager sequenceManager = Game.getSequenceManager();
-
-		List<AbilityDescription> abilities = new ArrayList<>(40);
+	public static void loadAbilities(@NonNull Game game) {
+		Collection<AbilityDescription> abilities = new ArrayList<>(40);
 		Map<AbilityDescription, Sequence> sequences = new HashMap<>();
 
 		initAir(abilities, sequences);
@@ -58,13 +55,13 @@ public final class AbilityInitializer {
 		initEarth(abilities, sequences);
 		initFire(abilities, sequences);
 
-		int abilityAmount = abilityRegistry.registerAbilities(abilities);
-		int sequenceAmount = sequenceManager.registerSequences(sequences);
+		int abilityAmount = game.getAbilityRegistry().registerAbilities(abilities);
+		int sequenceAmount = game.getSequenceManager().registerSequences(sequences);
 		Bending.getLog().info("Registered " + abilityAmount + " abilities!");
 		Bending.getLog().info("Registered " + sequenceAmount + " sequences!");
 	}
 
-	private static void initAir(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private static void initAir(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("AirAgility", AirAgility.class)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
 			.setHidden(true).setHarmless(true).build());
@@ -112,7 +109,7 @@ public final class AbilityInitializer {
 		));
 	}
 
-	private static void initWater(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private static void initWater(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("FastSwim", FastSwim.class)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
@@ -142,7 +139,7 @@ public final class AbilityInitializer {
 		abilities.add(iceCrawl);
 	}
 
-	private static void initEarth(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private static void initEarth(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("DensityShift", DensityShift.class)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
@@ -158,7 +155,7 @@ public final class AbilityInitializer {
 		// TODO add earth abilities
 	}
 
-	private static void initFire(List<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast.class)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
 		abilities.add(fireBlast);

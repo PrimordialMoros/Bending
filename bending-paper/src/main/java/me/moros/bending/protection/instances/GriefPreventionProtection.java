@@ -20,12 +20,13 @@
 package me.moros.bending.protection.instances;
 
 import me.moros.bending.model.exception.PluginNotFoundException;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class GriefPreventionProtection implements Protection {
 	public GriefPreventionProtection() throws PluginNotFoundException {
@@ -35,7 +36,7 @@ public class GriefPreventionProtection implements Protection {
 	}
 
 	@Override
-	public boolean canBuild(User user, Block block) {
+	public boolean canBuild(@NonNull User user, @NonNull Block block) {
 		if (!(user instanceof BendingPlayer)) return true;
 		String reason = GriefPrevention.instance.allowBuild(((BendingPlayer) user).getEntity(), block.getLocation());
 		Claim claim = GriefPrevention.instance.dataStore.getClaimAt(block.getLocation(), true, null);
@@ -43,7 +44,7 @@ public class GriefPreventionProtection implements Protection {
 	}
 
 	@Override
-	public String getName() {
+	public String toString() {
 		return "GriefPrevention";
 	}
 }

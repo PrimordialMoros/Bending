@@ -22,6 +22,7 @@ package me.moros.bending.model.ability.state;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.Queue;
 public class StateChain implements Updatable {
 	private final Collection<Block> chainStore;
 	private final Queue<State> chainQueue;
-	private State currentState;
+	private State currentState = DummyState.INSTANCE;
 
 	private boolean started = false;
 	private boolean finished = false;
@@ -40,12 +41,12 @@ public class StateChain implements Updatable {
 		this(new ArrayList<>());
 	}
 
-	public StateChain(Collection<Block> store) {
+	public StateChain(@NonNull Collection<@NonNull Block> store) {
 		chainStore = store;
 		chainQueue = new ArrayDeque<>();
 	}
 
-	public StateChain addState(State state) {
+	public @NonNull StateChain addState(@NonNull State state) {
 		if (started) {
 			throw new RuntimeException("State is executing");
 		}
@@ -53,16 +54,19 @@ public class StateChain implements Updatable {
 		return this;
 	}
 
-	public StateChain start() {
+	public @NonNull StateChain start() {
 		if (started) {
 			throw new RuntimeException("State is executing");
+		}
+		if (chainQueue.isEmpty()) {
+			throw new RuntimeException("Chain is empty");
 		}
 		started = true;
 		nextState();
 		return this;
 	}
 
-	public State getCurrent() {
+	public @NonNull State getCurrent() {
 		return currentState;
 	}
 
@@ -76,7 +80,7 @@ public class StateChain implements Updatable {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (!started || finished) return UpdateResult.REMOVE;
 		return currentState.update();
 	}
@@ -93,7 +97,7 @@ public class StateChain implements Updatable {
 		return finished;
 	}
 
-	public Collection<Block> getChainStore() {
+	public @NonNull Collection<@NonNull Block> getChainStore() {
 		return chainStore;
 	}
 }

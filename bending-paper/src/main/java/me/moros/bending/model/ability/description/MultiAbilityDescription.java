@@ -23,13 +23,14 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.ability.ActivationMethod;
 import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MultiAbilityDescription extends AbilityDescription {
 	private final String parent;
 	private final String sub;
 	private final String displayName;
 
-	public MultiAbilityDescription(AbilityDescriptionBuilder builder, String displayName, String parent, String sub) {
+	MultiAbilityDescription(@NonNull AbilityDescriptionBuilder builder, @NonNull String displayName, @NonNull String parent, @NonNull String sub) {
 		super(builder);
 		this.displayName = displayName;
 		this.parent = parent.toLowerCase();
@@ -37,12 +38,12 @@ public class MultiAbilityDescription extends AbilityDescription {
 	}
 
 	@Override
-	public Component getDisplayName() {
+	public @NonNull Component getDisplayName() {
 		return Component.text(displayName, getElement().getColor());
 	}
 
 	@Override
-	public CommentedConfigurationNode getConfigNode() {
+	public @NonNull CommentedConfigurationNode getConfigNode() {
 		CommentedConfigurationNode elementNode = ConfigManager.getConfig().getNode("abilities", getElement().toString().toLowerCase());
 
 		CommentedConfigurationNode node = elementNode;

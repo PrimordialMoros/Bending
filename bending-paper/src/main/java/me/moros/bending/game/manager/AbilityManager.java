@@ -21,15 +21,14 @@ package me.moros.bending.game.manager;
 
 import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.MultiAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
-import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,10 +44,7 @@ public class AbilityManager {
 	private final Map<User, Collection<Ability>> globalInstances = new HashMap<>();
 	private final Collection<UserInstance> addQueue = new ArrayList<>();
 
-	private final World world;
-
-	protected AbilityManager(World world) {
-		this.world = world;
+	protected AbilityManager() {
 	}
 
 	private static class UserInstance {
@@ -71,7 +67,7 @@ public class AbilityManager {
 
 	// Add a new ability instance that should be updated every tick
 	// This is deferred until next update to prevent concurrent modifications.
-	public void addAbility(User user, Ability instance) {
+	public void addAbility(@NonNull User user, @NonNull Ability instance) {
 		if (instance instanceof MultiAbility) {
 			user.addSlotContainer(((MultiAbility) instance).getSlots());
 			if (user instanceof BendingPlayer) {
@@ -81,53 +77,55 @@ public class AbilityManager {
 		addQueue.add(new UserInstance(user, instance));
 	}
 
-	public void changeOwner(Ability ability, User user) {
+	public void changeOwner(@NonNull Ability ability, @NonNull User user) {
 		if (ability.getUser().equals(user)) return;
 		globalInstances.getOrDefault(ability.getUser(), Collections.emptyList()).remove(ability);
 		globalInstances.computeIfAbsent(user, k -> new ArrayList<>()).add(ability);
 		ability.setUser(user);
 	}
 
-	public void createPassives(User user) {
+	public void createPassives(@NonNull User user) {
 		Collection<AbilityDescription> userPassives = user.getElements().stream()
-			.flatMap(Game.getAbilityRegistry()::getPassives).collect(Collectors.toList());
+			.flatMap(Bending.getGame().getAbilityRegistry()::getPassives).collect(Collectors.toList());
 		for (AbilityDescription passive : userPassives) {
 			destroyInstanceType(user, passive);
 			if (user.hasPermission(passive)) {
 				Ability ability = passive.createAbility();
-				if (ability.activate(user, ActivationMethod.PASSIVE)) {
+				if (ability != null && ability.activate(user, ActivationMethod.PASSIVE)) {
 					addAbility(user, ability);
 				}
 			}
 		}
 	}
 
-	public void clearPassives(User user) {
+	public void clearPassives(@NonNull User user) {
 		getUserInstances(user)
 			.filter(a -> a.getDescription().isActivatedBy(ActivationMethod.PASSIVE))
 			.forEach(this::destroyAbility);
 	}
 
-	public <T extends Ability> boolean hasAbility(User user, Class<T> type) {
+	public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
 		return getUserInstances(user, type).findAny().isPresent();
 	}
 
-	public boolean hasAbility(User user, AbilityDescription desc) {
-		return hasAbility(user, desc.createAbility().getClass());
+	public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
+		Ability instance = desc.createAbility();
+		return instance != null && hasAbility(user, instance.getClass());
 	}
 
-	public void destroyInstance(User user, Ability ability) {
+	public void destroyInstance(@NonNull User user, @NonNull Ability ability) {
 		if (!globalInstances.containsKey(user)) return;
 		Collection<Ability> abilities = globalInstances.get(user);
 		abilities.remove(ability);
 		destroyAbility(ability);
 	}
 
-	public boolean destroyInstanceType(User user, AbilityDescription desc) {
-		return destroyInstanceType(user, desc.createAbility().getClass());
+	public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
+		Ability instance = desc.createAbility();
+		return instance != null && destroyInstanceType(user, instance.getClass());
 	}
 
-	public <T extends Ability> boolean destroyInstanceType(User user, Class<T> type) {
+	public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
 		if (!globalInstances.containsKey(user)) return false;
 		Collection<Ability> abilities = globalInstances.get(user);
 		boolean destroyed = false;
@@ -147,37 +145,37 @@ public class AbilityManager {
 		return globalInstances.values().stream().mapToInt(Collection::size).sum();
 	}
 
-	private Stream<Ability> getQueuedInstances() {
+	private @NonNull Stream<Ability> getQueuedInstances() {
 		return addQueue.stream().map(UserInstance::getAbility);
 	}
 
-	private Stream<Ability> getQueuedUserInstances(User user) {
+	private @NonNull Stream<Ability> getQueuedUserInstances(@NonNull User user) {
 		return addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility);
 	}
 
-	public Stream<Ability> getUserInstances(User user) {
+	public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
 		return Stream.concat(getQueuedUserInstances(user), globalInstances.getOrDefault(user, Collections.emptyList()).stream());
 	}
 
-	public <T extends Ability> Stream<T> getUserInstances(User user, Class<T> type) {
+	public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
 		return getUserInstances(user).filter(a -> a.getClass() == type).map(type::cast);
 	}
 
-	public <T extends Ability> Optional<T> getFirstInstance(User user, Class<T> type) {
+	public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
 		return getUserInstances(user, type).findFirst();
 	}
 
-	public Stream<Ability> getInstances() {
+	public @NonNull Stream<Ability> getInstances() {
 		return Stream.concat(getQueuedInstances(), globalInstances.values().stream().flatMap(Collection::stream));
 	}
 
-	public <T extends Ability> Stream<T> getInstances(Class<T> type) {
+	public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
 		return getInstances().filter(a -> a.getClass() == type).map(type::cast);
 	}
 
 	// Destroy every instance created by a user.
 	// Calls destroy on the ability before removing it.
-	public void destroyUserInstances(User user) {
+	public void destroyUserInstances(@NonNull User user) {
 		if (!globalInstances.containsKey(user)) return;
 		globalInstances.get(user).forEach(this::destroyAbility);
 		globalInstances.remove(user);
@@ -223,7 +221,7 @@ public class AbilityManager {
 		removed.forEach(this::destroyAbility);
 	}
 
-	private void destroyAbility(Ability ability) {
+	private void destroyAbility(@NonNull Ability ability) {
 		ability.onDestroy();
 		ability.getUser().removeLastSlotContainer(); // Needed to clean up multi abilities
 	}

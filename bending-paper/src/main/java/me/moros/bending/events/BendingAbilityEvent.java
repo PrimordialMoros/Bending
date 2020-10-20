@@ -17,24 +17,21 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.preset;
+package me.moros.bending.events;
 
-import me.moros.bending.locale.Message;
-import net.kyori.adventure.text.Component;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public enum PresetCreateResult {
-	SUCCESS(Message.PRESET_SUCCESS),
-	EXISTS(Message.PRESET_EXISTS),
-	FAIL(Message.PRESET_FAIL);
+public abstract class BendingAbilityEvent extends BendingUserEvent {
+	protected final AbilityDescription desc;
 
-	private final Message.Args1<String> message;
-
-	PresetCreateResult(Message.Args1<String> message) {
-		this.message = message;
+	public BendingAbilityEvent(@NonNull User user, @NonNull AbilityDescription desc) {
+		super(user);
+		this.desc = desc;
 	}
 
-	public @NonNull Component getMessage(@NonNull String name) {
-		return message.build(name);
+	public @NonNull AbilityDescription getAbility() {
+		return desc;
 	}
 }

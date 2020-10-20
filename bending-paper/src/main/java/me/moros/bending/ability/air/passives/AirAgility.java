@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.air.passives;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
@@ -32,6 +32,7 @@ import me.moros.bending.util.PotionUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirAgility implements PassiveAbility {
 	private static final Config config = new Config();
@@ -40,7 +41,7 @@ public class AirAgility implements PassiveAbility {
 	private Config userConfig;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -48,11 +49,11 @@ public class AirAgility implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (!user.isValid() || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
 		}
@@ -78,17 +79,17 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "AirAgility";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.water.passives;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
@@ -28,12 +28,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HydroSink implements PassiveAbility {
 	private User user;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -44,15 +45,15 @@ public class HydroSink implements PassiveAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		return UpdateResult.CONTINUE;
 	}
 
 	public static boolean canHydroSink(User user) {
-		if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
+		if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
 			return false;
 		}
-		if (!Game.getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false))
+		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false))
 			return false;
 
 		Block block = user.getLocBlock();
@@ -66,16 +67,16 @@ public class HydroSink implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "HydroSink";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 }

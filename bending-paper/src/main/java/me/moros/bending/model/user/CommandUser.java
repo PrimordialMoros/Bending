@@ -21,13 +21,14 @@ package me.moros.bending.model.user;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import net.kyori.adventure.audience.ForwardingAudience;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface CommandUser extends ForwardingAudience.Single {
 	default boolean hasPermission(String permission) {
 		return true;
 	}
 
-	default boolean hasPermission(AbilityDescription desc) {
-		return desc != null && hasPermission(desc.getPermission());
+	default boolean hasPermission(@NonNull AbilityDescription desc) {
+		return hasPermission(desc.getPermission());
 	}
 }

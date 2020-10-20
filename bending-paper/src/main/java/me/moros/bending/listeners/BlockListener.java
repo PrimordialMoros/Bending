@@ -22,7 +22,7 @@ package me.moros.bending.listeners;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
@@ -38,8 +38,15 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BlockListener implements Listener {
+	private final Game game;
+
+	public BlockListener(@NonNull Game game) {
+		this.game = game;
+	}
+
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockIgnite(BlockIgniteEvent event) {
 		if (TempBlock.manager.isTemp(event.getIgnitingBlock())) {
@@ -78,9 +85,9 @@ public class BlockListener implements Listener {
 		if (TempBlock.manager.isTemp(event.getBlock())) {
 			event.setDropItems(false);
 		} else if (WaterMaterials.PLANT_BENDABLE.isTagged(event.getBlock())) {
-			BendingPlayer player = Game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+			BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 			player.getSelectedAbility().ifPresent(desc -> {
-				if (desc.canSourcePlant(player)) {
+				if (desc.canSourcePlant() && !player.isOnCooldown(desc)) {
 					event.setCancelled(true);
 				}
 			});

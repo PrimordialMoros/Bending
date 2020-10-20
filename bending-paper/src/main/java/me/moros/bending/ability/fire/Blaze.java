@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -40,6 +40,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,12 +57,12 @@ public class Blaze implements Ability {
 	private final Set<Block> affectedBlocks = new HashSet<>();
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, Blaze.class)) return false;
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Blaze.class)) return false;
 
 		this.user = user;
 		recalculateConfig();
-		if (!Game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
 
@@ -79,11 +80,11 @@ public class Blaze implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
 		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
@@ -94,17 +95,17 @@ public class Blaze implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "Blaze";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	private class FireStream {
@@ -142,7 +143,7 @@ public class Blaze implements Ability {
 				}
 			}
 
-			if (!Game.getProtectionSystem().canBuild(user, block)) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 				return UpdateResult.REMOVE;
 			}
 

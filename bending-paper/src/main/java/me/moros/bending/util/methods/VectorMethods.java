@@ -23,6 +23,7 @@ import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +42,7 @@ public final class VectorMethods {
 	 * @return a list comprising of all the directions for this arc
 	 * @see #rotateInverse(Vector3, Rotation, int)
 	 */
-	public static Collection<Vector3> createArc(Vector3 start, Rotation rotation, int rays) {
+	public static @NonNull Collection<@NonNull Vector3> createArc(@NonNull Vector3 start, @NonNull Rotation rotation, int rays) {
 		rays = FastMath.max(3, rays);
 		if (rays % 2 == 0) rays++;
 		int half = (rays - 1) / 2;
@@ -60,7 +61,7 @@ public final class VectorMethods {
 	 * @return a list comprising of all the directions for this arc
 	 * @see #rotateInverse(Vector3, Rotation, int)
 	 */
-	public static Collection<Vector3> rotate(Vector3 start, Rotation rotation, int times) {
+	public static @NonNull Collection<@NonNull Vector3> rotate(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
 		List<Vector3> arc = new ArrayList<>();
 		double[] vector = start.toArray();
 		for (int i = 0; i < times; i++) {
@@ -74,7 +75,7 @@ public final class VectorMethods {
 	 * Inversely repeat a rotation on a specific vector.
 	 * @see #rotate(Vector3, Rotation, int)
 	 */
-	public static Collection<Vector3> rotateInverse(Vector3 start, Rotation rotation, int times) {
+	public static @NonNull Collection<@NonNull Vector3> rotateInverse(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
 		List<Vector3> arc = new ArrayList<>();
 		double[] vector = start.toArray();
 		for (int i = 0; i < times; i++) {
@@ -87,7 +88,7 @@ public final class VectorMethods {
 	/**
 	 * Get an orthogonal vector
 	 */
-	public static Vector3 getOrthogonal(Vector3 axis, double radians, double length) {
+	public static @NonNull Vector3 getOrthogonal(@NonNull Vector3 axis, double radians, double length) {
 		double[] orthogonal = new Vector3(axis.getY(), -axis.getX(), 0).normalize().scalarMultiply(length).toArray();
 		Rotation rotation = new Rotation(axis, radians, RotationConvention.VECTOR_OPERATOR);
 		rotation.applyTo(orthogonal, orthogonal);

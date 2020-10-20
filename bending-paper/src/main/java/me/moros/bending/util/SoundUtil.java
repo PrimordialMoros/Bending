@@ -21,6 +21,7 @@ package me.moros.bending.util;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to provide a list of pre-configured sounds.
@@ -42,15 +43,15 @@ public final class SoundUtil {
 	public static final SoundEffect COMBUSTION_SOUND = new SoundEffect(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1, 0);
 	public static final SoundEffect LIGHTNING_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 0);
 
-	public static void playSound(Location center, SoundEffect effect, float volume, float pitch) {
+	public static void playSound(@NonNull Location center, @NonNull SoundEffect effect, float volume, float pitch) {
 		playSound(center, effect.getSound(), volume, pitch);
 	}
 
-	public static void playSound(Location center, Sound sound) {
+	public static void playSound(@NonNull Location center, @NonNull Sound sound) {
 		playSound(center, sound, 1, 1);
 	}
 
-	public static void playSound(Location center, Sound sound, float volume, float pitch) {
+	public static void playSound(@NonNull Location center, @NonNull Sound sound, float volume, float pitch) {
 		center.getWorld().playSound(center, sound, volume, pitch);
 	}
 }

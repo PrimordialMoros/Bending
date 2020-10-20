@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -40,6 +40,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,11 +57,11 @@ public class AirShield implements Ability {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
-		if (!Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 		removalPolicy = Policies.builder()
@@ -74,12 +75,12 @@ public class AirShield implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+	public @NonNull UpdateResult update() {
+		if (removalPolicy.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return UpdateResult.REMOVE;
 		}
 		currentPoint++;
@@ -125,24 +126,24 @@ public class AirShield implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "AirShield";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(new Sphere(getCenter(), userConfig.radius));
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 

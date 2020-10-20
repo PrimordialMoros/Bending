@@ -19,15 +19,15 @@
 
 package me.moros.bending.game;
 
+import me.moros.bending.Bending;
 import me.moros.bending.game.manager.PlayerManager;
-import me.moros.bending.model.user.User;
+import me.moros.bending.model.user.BendingUser;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -38,45 +38,41 @@ import java.util.function.Predicate;
  * If you only need BendingPlayers then use {@link PlayerManager}
  */
 public final class BenderRegistry {
-	private static Predicate<UUID> isBendingUser = (id -> false);
-	private static Function<UUID, User> entityToUser = (id -> null);
-	private static Function<String, User> nameToUser = (name -> null);
+	private Predicate<UUID> isBendingUser = (id -> false);
+	private Function<UUID, BendingUser> entityToUser = (id -> null);
+	private Function<String, BendingUser> nameToUser = (name -> null);
 
-	public static boolean isBender(Entity entity) {
+	public boolean isBender(@NonNull LivingEntity entity) {
 		if (entity instanceof Player) {
 			return true;
-		} else if (entity instanceof LivingEntity) {
-			return isBendingUser.test(entity.getUniqueId());
 		}
-		return false;
+		return isBendingUser.test(entity.getUniqueId());
 	}
 
-	public static Optional<User> getBendingUser(CommandSender entity) {
+	public Optional<BendingUser> getBendingUser(@NonNull LivingEntity entity) {
 		if (entity instanceof Player) {
-			return Optional.of(Game.getPlayerManager().getPlayer(((Player) entity).getUniqueId()));
-		} else if (entity instanceof LivingEntity) {
-			return Optional.ofNullable(entityToUser.apply(((LivingEntity) entity).getUniqueId()));
+			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(entity.getUniqueId()));
 		}
-		return Optional.empty();
+		return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
 	}
 
-	public static Optional<User> getBendingUserByName(String name) {
+	public Optional<BendingUser> getBendingUserByName(@NonNull String name) {
 		Player player = Bukkit.getPlayer(name);
 		if (player != null) {
-			return Optional.of(Game.getPlayerManager().getPlayer(player.getUniqueId()));
+			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()));
 		}
 		return Optional.ofNullable(nameToUser.apply(name));
 	}
 
-	public static void registerPredicate(Predicate<UUID> predicate) {
-		isBendingUser = Objects.requireNonNull(predicate);
+	public void registerPredicate(@NonNull Predicate<@NonNull UUID> predicate) {
+		isBendingUser = predicate;
 	}
 
-	public static void registerCache(Function<UUID, User> function) {
-		entityToUser = Objects.requireNonNull(function);
+	public void registerCache(@NonNull Function<@NonNull UUID, @Nullable BendingUser> function) {
+		entityToUser = function;
 	}
 
-	public static void registerNameCache(Function<String, User> function) {
-		nameToUser = Objects.requireNonNull(function);
+	public void registerNameCache(@NonNull Function<@NonNull String, @Nullable BendingUser> function) {
+		nameToUser = function;
 	}
 }

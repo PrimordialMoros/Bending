@@ -26,16 +26,18 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
 import me.moros.bending.game.Game;
 import me.moros.bending.listeners.BlockListener;
-import me.moros.bending.listeners.TempArmorListener;
 import me.moros.bending.listeners.UserListener;
 import me.moros.bending.listeners.WorldListener;
 import me.moros.bending.protection.WorldGuardFlag;
+import me.moros.bending.storage.BendingStorage;
+import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.MetricsLite;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class Bending extends JavaPlugin {
@@ -66,12 +68,13 @@ public class Bending extends JavaPlugin {
 		timingManager = TimingManager.of(this);
 		Tasker.init(this);
 		ConfigManager.init(getConfigFolder());
-		game = new Game();
 
-		getServer().getPluginManager().registerEvents(new UserListener(), this);
-		getServer().getPluginManager().registerEvents(new BlockListener(), this);
-		getServer().getPluginManager().registerEvents(new TempArmorListener(), this);
-		getServer().getPluginManager().registerEvents(new WorldListener(), this);
+		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
+		game = new Game(storage);
+
+		getServer().getPluginManager().registerEvents(new UserListener(game), this);
+		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
+		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
 
 		commandManager = new PaperCommandManager(this);
 		commandManager.enableUnstableAPI("help");
@@ -80,7 +83,7 @@ public class Bending extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		Game.cleanup();
+		if (game != null) game.cleanup();
 		getServer().getScheduler().cancelTasks(this);
 	}
 
@@ -92,15 +95,15 @@ public class Bending extends JavaPlugin {
 	}
 
 	public static BendingEventBus getEventBus() {
-		return getPlugin().eventBus;
+		return plugin.eventBus;
 	}
 
 	public static TimingManager getTimingManager() {
-		return getPlugin().timingManager;
+		return plugin.timingManager;
 	}
 
 	public static PaperCommandManager getCommandManager() {
-		return getPlugin().commandManager;
+		return plugin.commandManager;
 	}
 
 	public static Bending getPlugin() {
@@ -108,30 +111,30 @@ public class Bending extends JavaPlugin {
 	}
 
 	public static BukkitAudiences getAudiences() {
-		return getPlugin().audiences;
+		return plugin.audiences;
 	}
 
 	public static String getAuthor() {
-		return getPlugin().author;
+		return plugin.author;
 	}
 
 	public static String getVersion() {
-		return getPlugin().version;
+		return plugin.version;
 	}
 
 	public static Logger getLog() {
-		return getPlugin().log;
+		return plugin.log;
 	}
 
 	public static NamespacedKey getKey() {
-		return getPlugin().key;
+		return plugin.key;
 	}
 
 	public static Game getGame() {
-		return getPlugin().game;
+		return plugin.game;
 	}
 
 	public static String getConfigFolder() {
-		return getPlugin().getDataFolder().toString();
+		return plugin.getDataFolder().toString();
 	}
 }

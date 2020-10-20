@@ -19,10 +19,12 @@
 
 package me.moros.bending.model.temporal;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public interface Temporary {
 	void revert();
 
-	void setRevertTask(RevertTask task);
+	void setRevertTask(@NonNull RevertTask task);
 
 	/**
 	 * Currently only TempBlock respects revert tasks

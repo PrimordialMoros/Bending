@@ -20,13 +20,12 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Ray {
-	public final Vector3 origin;
-	public final Vector3 direction;
-	public final Vector3 invDir;
+	public final Vector3 origin, direction, invDir;
 
-	public Ray(Vector3 origin, Vector3 direction) {
+	public Ray(@NonNull Vector3 origin, @NonNull Vector3 direction) {
 		this.origin = origin;
 		this.direction = direction;
 		double invX = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getX();

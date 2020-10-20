@@ -19,10 +19,10 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
@@ -60,6 +60,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -77,14 +78,14 @@ public class IceCrawl implements Ability {
 	private Line iceLine;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
 		if (!source.isPresent()) return false;
 
-		Optional<IceCrawl> line = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
+		Optional<IceCrawl> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
 		if (method == ActivationMethod.SNEAK && line.isPresent()) {
 			State state = line.get().states.getCurrent();
 			if (state instanceof SelectedSource) {
@@ -103,11 +104,11 @@ public class IceCrawl implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -120,7 +121,7 @@ public class IceCrawl implements Ability {
 
 	public static void launch(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceCrawl")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
 		}
 	}
 
@@ -143,25 +144,25 @@ public class IceCrawl implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "IceCrawl";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (iceLine == null) return Collections.emptyList();
 		return Collections.singletonList(iceLine.getCollider());
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
@@ -187,7 +188,7 @@ public class IceCrawl implements Ability {
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			if (entity.isValid() && entity instanceof LivingEntity) {
 				Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
@@ -200,7 +201,7 @@ public class IceCrawl implements Ability {
 		}
 
 		@Override
-		public boolean onBlockHit(Block block) {
+		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isLava(block)) {
 				BlockMethods.extinguish(user, block.getLocation());
 				Location center = block.getLocation().add(0.5, 0.7, 0.5);
@@ -215,7 +216,7 @@ public class IceCrawl implements Ability {
 		}
 
 		@Override
-		protected boolean isValidBlock(Block block) {
+		protected boolean isValidBlock(@NonNull Block block) {
 			Block above = block.getRelative(BlockFace.UP);
 			if (!MaterialUtil.isTransparent(above) && !MaterialUtil.isWater(above)) return false;
 			return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();

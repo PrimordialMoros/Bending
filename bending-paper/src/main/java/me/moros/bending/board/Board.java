@@ -19,9 +19,9 @@
 
 package me.moros.bending.board;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -65,7 +65,7 @@ public class Board {
 
 	protected void updateSlot(int slot) {
 		if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) return;
-		BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+		BendingPlayer bendingPlayer = Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
 		StringBuilder sb = new StringBuilder(slot == selectedSlot ? ">" : "  ");
 
 		Optional<AbilityDescription> desc = bendingPlayer.getSlotAbility(slot);

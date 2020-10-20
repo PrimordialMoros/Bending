@@ -20,8 +20,8 @@
 package me.moros.bending.util;
 
 import com.destroystokyo.paper.MaterialSetTag;
+import me.moros.bending.Bending;
 import me.moros.bending.ability.water.util.*;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
 import org.bukkit.FluidCollisionMode;
@@ -34,6 +34,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -55,7 +56,7 @@ public final class SourceUtil {
 	/**
 	 * @see #getSource(User, double, Predicate)
 	 */
-	public static Optional<Block> getSource(User user, double range, MaterialSetTag materials) {
+	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull MaterialSetTag materials) {
 		return getSource(user, range, materials::isTagged);
 	}
 
@@ -66,27 +67,27 @@ public final class SourceUtil {
 	 * @param predicate the predicate to check
 	 * @return an Optional source block
 	 */
-	public static Optional<Block> getSource(User user, double range, Predicate<Block> predicate) {
+	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
 		Location start = user.getEntity().getEyeLocation();
 		Vector dir = user.getDirection().toVector();
 		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
 		if (result == null || result.getHitBlock() == null) return Optional.empty();
 		Block block = result.getHitBlock();
-		if (!Game.getProtectionSystem().canBuild(user, block) || !predicate.test(block) || !TempBlock.isBendable(block)) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block) || !predicate.test(block) || !TempBlock.isBendable(block)) {
 			return Optional.empty();
 		}
 		return Optional.of(block);
 	}
 
-	public static boolean hasFullBottle(User user) {
+	public static boolean hasFullBottle(@NonNull User user) {
 		return user.getInventory().map(i -> i.containsAtLeast(waterBottle, 1)).orElse(false);
 	}
 
-	public static boolean hasEmptyBottle(User user) {
+	public static boolean hasEmptyBottle(@NonNull User user) {
 		return user.getInventory().map(i -> i.containsAtLeast(emptyBottle, 1)).orElse(false);
 	}
 
-	public static boolean fillBottle(User user) {
+	public static boolean fillBottle(@NonNull User user) {
 		if (!BottleReturn.config.enabled || !hasEmptyBottle(user)) return false;
 		if (user.getInventory().isPresent()) {
 			return user.getInventory().get().removeItem(emptyBottle).isEmpty() && user.getInventory().get().addItem(waterBottle).isEmpty();
@@ -94,9 +95,9 @@ public final class SourceUtil {
 		return false;
 	}
 
-	public static boolean emptyBottle(User user) {
+	public static boolean emptyBottle(@NonNull User user) {
 		if (!BottleReturn.config.enabled || !hasFullBottle(user)) return false;
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, BottleReturn.class)) return false;
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, BottleReturn.class)) return false;
 		if (user.getInventory().isPresent()) {
 			return user.getInventory().get().removeItem(waterBottle).isEmpty() && user.getInventory().get().addItem(emptyBottle).isEmpty();
 		}

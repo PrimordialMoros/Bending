@@ -20,13 +20,14 @@
 package me.moros.bending.model.collision;
 
 import me.moros.bending.model.math.Vector3;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Collider {
-	boolean intersects(Collider collider);
+	boolean intersects(@NonNull Collider collider);
 
-	Vector3 getPosition();
+	@NonNull Vector3 getPosition();
 
-	Vector3 getHalfExtents();
+	@NonNull Vector3 getHalfExtents();
 
-	boolean contains(Vector3 point);
+	boolean contains(@NonNull Vector3 point);
 }

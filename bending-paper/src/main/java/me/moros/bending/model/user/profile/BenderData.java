@@ -17,24 +17,28 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.preset;
+package me.moros.bending.model.user.profile;
 
-import me.moros.bending.locale.Message;
-import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public enum PresetCreateResult {
-	SUCCESS(Message.PRESET_SUCCESS),
-	EXISTS(Message.PRESET_EXISTS),
-	FAIL(Message.PRESET_FAIL);
+import java.util.Collections;
+import java.util.Set;
 
-	private final Message.Args1<String> message;
+/**
+ * Holds data from the database that are needed to construct the BendingPlayer object
+ */
+public final class BenderData {
+	public final String[] slots;
+	public final Set<String> elements;
+	public final Set<String> presets;
 
-	PresetCreateResult(Message.Args1<String> message) {
-		this.message = message;
+	public BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements, @NonNull Set<@NonNull String> presets) {
+		this.slots = slots;
+		this.elements = elements;
+		this.presets = presets;
 	}
 
-	public @NonNull Component getMessage(@NonNull String name) {
-		return message.build(name);
+	public BenderData() {
+		this(new String[9], Collections.emptySet(), Collections.emptySet());
 	}
 }

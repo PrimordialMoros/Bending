@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
@@ -29,8 +29,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -42,6 +42,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class HeatControl implements PassiveAbility {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
@@ -63,13 +64,13 @@ public class HeatControl implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		AbilityDescription selectedAbility = user.getSelectedAbility().orElse(null);
-		if (!user.canBend(selectedAbility) || !getDescription().equals(selectedAbility)) {
+		if (selectedAbility == null || !user.canBend(selectedAbility) || !getDescription().equals(selectedAbility)) {
 			return UpdateResult.CONTINUE;
 		}
 		long time = System.currentTimeMillis();
@@ -108,7 +109,7 @@ public class HeatControl implements PassiveAbility {
 		boolean acted = false;
 		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
 		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> WaterMaterials.isIceBendable(b) || MaterialUtil.isFire(b))) {
-			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
 			if (WaterMaterials.isIceBendable(block)) {
 				Optional<TempBlock> tb = TempBlock.manager.get(block);
@@ -126,7 +127,7 @@ public class HeatControl implements PassiveAbility {
 
 	public static void act(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("HeatControl")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
 		}
 	}
 
@@ -144,17 +145,17 @@ public class HeatControl implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "HeatControl";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

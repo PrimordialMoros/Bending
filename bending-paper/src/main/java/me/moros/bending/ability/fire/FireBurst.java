@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -32,6 +32,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.methods.UserMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireBurst extends AbstractBurst implements Ability {
 	private static final Config config = new Config();
@@ -43,7 +44,7 @@ public class FireBurst extends AbstractBurst implements Ability {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
@@ -54,11 +55,11 @@ public class FireBurst extends AbstractBurst implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (!released) {
 			boolean charged = isCharged();
 			if (charged) {
@@ -79,17 +80,17 @@ public class FireBurst extends AbstractBurst implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "FireBurst";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public boolean isCharged() {
@@ -97,7 +98,7 @@ public class FireBurst extends AbstractBurst implements Ability {
 	}
 
 	public static void activateCone(User user) {
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
+		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
 			.ifPresent(b -> b.release(true));
 	}
 

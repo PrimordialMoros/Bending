@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.fire.sequences;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -30,6 +30,7 @@ import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class JetBlast implements Ability {
 	private static final Config config = new Config();
@@ -39,7 +40,7 @@ public class JetBlast implements Ability {
 	private FireJet jet;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		jet = new FireJet();
 		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.PUNCH)) return false;
 
@@ -54,11 +55,11 @@ public class JetBlast implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		return jet.update();
 	}
 
@@ -68,17 +69,17 @@ public class JetBlast implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return jet.getUser();
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "JetBlast";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

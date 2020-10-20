@@ -17,26 +17,25 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user.player;
+package me.moros.bending.model.ability.state;
 
-import java.util.Collections;
-import java.util.Set;
+import me.moros.bending.model.ability.UpdateResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-/**
- * Holds data from the database that are needed to construct the BendingPlayer object
- */
-public final class BenderData {
-	public final String[] slots;
-	public final Set<String> elements;
-	public final Set<String> presets;
+public final class DummyState implements State {
+	public static final State INSTANCE = new DummyState();
 
-	public BenderData(String[] slots, Set<String> elements, Set<String> presets) {
-		this.slots = slots;
-		this.elements = elements;
-		this.presets = presets;
+	private DummyState() {
 	}
 
-	public BenderData() {
-		this(new String[9], Collections.emptySet(), Collections.emptySet());
+	public void start(@NonNull StateChain chain) {
+	}
+
+	public void complete() {
+	}
+
+	@Override
+	public @NonNull UpdateResult update() {
+		return UpdateResult.REMOVE;
 	}
 }

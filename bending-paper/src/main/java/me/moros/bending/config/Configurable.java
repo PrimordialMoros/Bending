@@ -27,9 +27,7 @@ public abstract class Configurable {
 	public Configurable() {
 		ConfigManager.add(this);
 		config = ConfigManager.getConfig();
-		if (config != null) {
-			onConfigReload();
-		}
+		onConfigReload();
 	}
 
 	public abstract void onConfigReload();

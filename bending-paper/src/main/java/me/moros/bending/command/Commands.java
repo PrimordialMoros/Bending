@@ -26,7 +26,6 @@ import co.aikar.commands.CommandContexts;
 import co.aikar.commands.InvalidCommandArgument;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AttributeSystem;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attributes;
@@ -35,9 +34,9 @@ import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.exception.command.InvalidSlotException;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.CommandUser;
 import me.moros.bending.model.user.CommandUserWrapper;
-import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -66,17 +65,17 @@ public class Commands {
 			Player player = c.getPlayer();
 			Predicate<AbilityDescription> permissionPredicate = x -> true;
 			if (player != null) {
-				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+				BendingPlayer bendingPlayer = Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
 				permissionPredicate = bendingPlayer::hasPermission;
 			}
-			return Game.getAbilityRegistry().getAbilities().filter(desc -> !desc.isHidden())
+			return Bending.getGame().getAbilityRegistry().getAbilities().filter(desc -> !desc.isHidden())
 				.filter(permissionPredicate).map(AbilityDescription::getName).collect(Collectors.toList());
 		});
 
 		commandCompletions.registerAsyncCompletion("presets", c -> {
 			Player player = c.getPlayer();
 			if (player == null) return Collections.emptyList();
-			return Game.getPlayerManager().getPlayer(player.getUniqueId()).getPresets();
+			return Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()).getPresets();
 		});
 
 		commandCompletions.registerStaticCompletion("elements", Element.getElementNames());
@@ -90,7 +89,7 @@ public class Commands {
 		commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
 			Player player = c.getPlayer();
 			if (player == null) throw new UserException("You must be player!");
-			return Game.getPlayerManager().getPlayer(player.getUniqueId());
+			return Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
 		});
 
 		commandContexts.registerContext(Element.class, c -> {
@@ -105,10 +104,10 @@ public class Commands {
 			Player player = c.getPlayer();
 			Predicate<AbilityDescription> permissionPredicate = x -> true;
 			if (player != null) {
-				BendingPlayer bendingPlayer = Game.getPlayerManager().getPlayer(player.getUniqueId());
+				BendingPlayer bendingPlayer = Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
 				permissionPredicate = bendingPlayer::hasPermission;
 			}
-			return Game.getAbilityRegistry().getAbilities()
+			return Bending.getGame().getAbilityRegistry().getAbilities()
 				.filter(desc -> !desc.isHidden())
 				.filter(desc -> desc.getName().equalsIgnoreCase(name)) // TODO aliases for desc names?
 				.filter(permissionPredicate)
@@ -119,7 +118,7 @@ public class Commands {
 			Player player = c.getPlayer();
 			if (player == null) throw new UserException("You must be player!");
 			String name = c.popFirstArg().toLowerCase();
-			return Game.getPlayerManager().getPlayer(player.getUniqueId()).getPresetByName(name)
+			return Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()).getPresetByName(name)
 				.orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
 		});
 
@@ -129,7 +128,7 @@ public class Commands {
 			if (element.isPresent()) {
 				return AttributeSystem.getElementPolicy(element.get());
 			}
-			AbilityDescription desc = Game.getAbilityRegistry().getAbilityDescription(name)
+			AbilityDescription desc = Bending.getGame().getAbilityRegistry().getAbilityDescription(name)
 				.orElseThrow(() -> new InvalidCommandArgument("Invalid policy. Policy must be an element or ability name"));
 			return AttributeSystem.getAbilityPolicy(desc);
 		});

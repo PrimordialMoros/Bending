@@ -20,8 +20,9 @@
 package me.moros.bending.model.collision;
 
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface CollisionCallback {
-	boolean onCollision(Entity e);
+	boolean onCollision(@NonNull Entity e);
 }

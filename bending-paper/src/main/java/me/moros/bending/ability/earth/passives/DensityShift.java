@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.earth.passives;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
@@ -35,6 +35,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Predicate;
 
@@ -45,7 +46,7 @@ public class DensityShift implements PassiveAbility {
 	private Config userConfig;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -53,19 +54,19 @@ public class DensityShift implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		return UpdateResult.CONTINUE;
 	}
 
 	public static boolean isSoftened(User user) {
-		if (!Game.getAbilityRegistry().getAbilityDescription("DensityShift").map(user::canBend).orElse(false)) {
+		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("DensityShift").map(user::canBend).orElse(false)) {
 			return false;
 		}
-		DensityShift instance = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class).orElse(null);
+		DensityShift instance = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class).orElse(null);
 		if (instance == null) {
 			return false;
 		}
@@ -85,17 +86,17 @@ public class DensityShift implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "DensityShift";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

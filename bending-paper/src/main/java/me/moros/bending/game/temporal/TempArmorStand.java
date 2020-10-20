@@ -29,6 +29,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();
@@ -39,7 +40,7 @@ public class TempArmorStand implements Temporary {
 	public static void init() {
 	}
 
-	public TempArmorStand(Location location, Material material, long duration, boolean particles) {
+	public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration, boolean particles) {
 		armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
 			entity.setInvulnerable(true);
 			entity.setVisible(false);
@@ -60,11 +61,11 @@ public class TempArmorStand implements Temporary {
 		manager.addEntry(armorStand, this, duration);
 	}
 
-	public TempArmorStand(Location location, Material material, long duration) {
+	public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
 		this(location, material, duration, true);
 	}
 
-	public ArmorStand getArmorStand() {
+	public @NonNull ArmorStand getArmorStand() {
 		return armorStand;
 	}
 
@@ -76,7 +77,7 @@ public class TempArmorStand implements Temporary {
 	}
 
 	@Override
-	public void setRevertTask(RevertTask task) {
+	public void setRevertTask(@NonNull RevertTask task) {
 		this.revertTask = task;
 	}
 }

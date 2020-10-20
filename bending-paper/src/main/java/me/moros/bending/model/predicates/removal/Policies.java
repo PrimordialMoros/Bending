@@ -21,6 +21,7 @@ package me.moros.bending.model.predicates.removal;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,7 @@ public enum Policies implements RemovalPolicy {
 	/**
 	 * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
 	 */
-	public static PolicyBuilder builder() {
+	public static @NonNull PolicyBuilder builder() {
 		return new PolicyBuilder()
 			.add(Policies.DEAD)
 			.add(Policies.OFFLINE);
@@ -59,21 +60,21 @@ public enum Policies implements RemovalPolicy {
 			policies = new HashSet<>();
 		}
 
-		public PolicyBuilder add(RemovalPolicy policy) {
+		public PolicyBuilder add(@NonNull RemovalPolicy policy) {
 			policies.add(policy);
 			return this;
 		}
 
-		public PolicyBuilder remove(RemovalPolicy policy) {
-			policies.add(policy);
+		public PolicyBuilder remove(@NonNull RemovalPolicy policy) {
+			policies.remove(policy);
 			return this;
 		}
 
-		public RemovalPolicy build() {
+		public @NonNull RemovalPolicy build() {
 			return new CompositeRemovalPolicy(this);
 		}
 
-		Set<RemovalPolicy> getPolicies() {
+		@NonNull Set<@NonNull RemovalPolicy> getPolicies() {
 			return policies;
 		}
 	}

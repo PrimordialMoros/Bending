@@ -20,21 +20,17 @@
 package me.moros.bending.events;
 
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BindChangeEvent extends BendingEvent {
-	private final User user;
+public class BindChangeEvent extends BendingUserEvent {
 	private final Result result;
 
-	public BindChangeEvent(User user, Result result) {
-		this.user = user;
+	public BindChangeEvent(@NonNull User user, @NonNull Result result) {
+		super(user);
 		this.result = result;
 	}
 
-	public User getUser() {
-		return user;
-	}
-
-	public Result getResult() {
+	public @NonNull Result getResult() {
 		return result;
 	}
 

@@ -17,7 +17,10 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user.player;
+package me.moros.bending.model.user.profile;
+
+import org.checkerframework.checker.index.qual.Positive;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -33,22 +36,22 @@ public final class BendingProfile {
 	private final BenderData data;
 	private boolean board;
 
-	public BendingProfile(UUID uuid, int id, BenderData data, boolean board) {
+	public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data, boolean board) {
 		this.uuid = uuid;
 		this.id = id;
 		this.data = data;
 		this.board = board;
 	}
 
-	public BendingProfile(UUID uuid, int id, BenderData data) {
+	public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data) {
 		this(uuid, id, data, true);
 	}
 
-	public UUID getUniqueId() {
+	public @NonNull UUID getUniqueId() {
 		return uuid;
 	}
 
-	public int getInternalId() {
+	public @Positive int getInternalId() {
 		return id;
 	}
 
@@ -60,7 +63,7 @@ public final class BendingProfile {
 		board = value;
 	}
 
-	public BenderData getData() {
+	public @NonNull BenderData getData() {
 		return data;
 	}
 

@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -45,6 +45,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,8 +65,8 @@ public class Torrent implements Ability {
 	private WaterRing ring;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		Optional<Torrent> torrent = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, Torrent.class);
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		Optional<Torrent> torrent = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Torrent.class);
 		if (torrent.isPresent()) {
 			torrent.get().launch();
 			return false;
@@ -74,11 +75,11 @@ public class Torrent implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		ring = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+		ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
 		if (ring == null) {
 			ring = new WaterRing();
 			if (ring.activate(user, method)) {
-				Game.getAbilityManager(user.getWorld()).addAbility(user, ring);
+				Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
 			} else {
 				return false;
 			}
@@ -104,18 +105,19 @@ public class Torrent implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (states != null) {
 			return states.update();
 		} else {
-			if (!Game.getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) return UpdateResult.REMOVE;
+			if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class))
+				return UpdateResult.REMOVE;
 		}
 		return UpdateResult.CONTINUE;
 	}
@@ -129,17 +131,17 @@ public class Torrent implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "Torrent";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (states != null) {
 			State current = states.getCurrent();
 			if (current instanceof TorrentStream) return ((TorrentStream) current).getColliders();
@@ -148,22 +150,22 @@ public class Torrent implements Ability {
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
 	private class TorrentStream extends BlockStream {
 		private final Set<Entity> affectedEntities = new HashSet<>();
 
-		public TorrentStream(User user) {
+		public TorrentStream(@NonNull User user) {
 			super(user, Material.WATER, userConfig.range, 70);
 			controllable = true;
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			if (affectedEntities.contains(entity)) return false;
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
@@ -175,7 +177,7 @@ public class Torrent implements Ability {
 		public void freeze() {
 			cleanAll();
 			for (Block block : WorldMethods.getNearbyBlocks(stream.getFirst().getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, MaterialUtil::isTransparent)) {
-				if (Game.getProtectionSystem().canBuild(user, block)) {
+				if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 				}
 			}

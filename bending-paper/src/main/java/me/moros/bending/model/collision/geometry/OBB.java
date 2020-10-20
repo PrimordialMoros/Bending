@@ -25,6 +25,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 // Oriented bounding box
 public class OBB implements Collider {
@@ -33,19 +34,19 @@ public class OBB implements Collider {
 	private final RealMatrix basis;
 	private final Vector3 e; // Half extents in local space.
 
-	public OBB(Vector3 center, RealMatrix basis, Vector3 halfExtents) {
+	public OBB(@NonNull Vector3 center, @NonNull RealMatrix basis, @NonNull Vector3 halfExtents) {
 		this.center = center;
 		this.basis = basis;
 		this.e = halfExtents;
 	}
 
-	public OBB(AABB aabb) {
+	public OBB(@NonNull AABB aabb) {
 		this.center = aabb.getPosition();
 		this.basis = MatrixUtils.createRealIdentityMatrix(3);
 		this.e = aabb.getHalfExtents();
 	}
 
-	public OBB(AABB aabb, Rotation rotation) {
+	public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
 		double[] arr = new double[3];
 		rotation.applyTo(aabb.getPosition().toArray(), arr);
 		this.center = new Vector3(arr);
@@ -53,16 +54,16 @@ public class OBB implements Collider {
 		this.e = aabb.getHalfExtents();
 	}
 
-	public OBB addPosition(Vector3 position) {
+	public @NonNull OBB addPosition(@NonNull Vector3 position) {
 		return new OBB(center.add(position), basis, e);
 	}
 
-	public OBB at(Vector3 position) {
+	public @NonNull OBB at(@NonNull Vector3 position) {
 		return new OBB(position, basis, e);
 	}
 
 	@Override
-	public boolean intersects(Collider collider) {
+	public boolean intersects(@NonNull Collider collider) {
 		if (collider instanceof Sphere) {
 			return ((Sphere) collider).intersects(this);
 		} else if (collider instanceof AABB) {
@@ -75,7 +76,7 @@ public class OBB implements Collider {
 		return false;
 	}
 
-	public boolean intersects(OBB other) {
+	public boolean intersects(@NonNull OBB other) {
 		double ra, rb;
 		RealMatrix R = getRotationMatrix(other);
 		// translation
@@ -187,7 +188,7 @@ public class OBB implements Collider {
 	}
 
 	// Returns the position closest to the target that lies on/in the OBB.
-	public Vector3 getClosestPosition(Vector3 target) {
+	public @NonNull Vector3 getClosestPosition(@NonNull Vector3 target) {
 		Vector3 t = target.subtract(center);
 		Vector3 closest = center;
 		// Project target onto basis axes and move toward it.
@@ -201,12 +202,12 @@ public class OBB implements Collider {
 	}
 
 	@Override
-	public Vector3 getPosition() {
+	public @NonNull Vector3 getPosition() {
 		return center;
 	}
 
 	@Override
-	public Vector3 getHalfExtents() {
+	public @NonNull Vector3 getHalfExtents() {
 		double x = e.dotProduct(Vector3.PLUS_I);
 		double y = e.dotProduct(Vector3.PLUS_J);
 		double z = e.dotProduct(Vector3.PLUS_K);
@@ -214,7 +215,7 @@ public class OBB implements Collider {
 	}
 
 	@Override
-	public boolean contains(Vector3 point) {
+	public boolean contains(@NonNull Vector3 point) {
 		return getClosestPosition(point).distanceSq(point) <= epsilon;
 	}
 }

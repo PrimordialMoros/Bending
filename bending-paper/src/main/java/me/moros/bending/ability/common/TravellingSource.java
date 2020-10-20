@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.State;
@@ -33,6 +33,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TravellingSource implements State {
 	private final BlockData data;
@@ -44,7 +45,7 @@ public class TravellingSource implements State {
 
 	private final double minDistanceSq, maxDistanceSq;
 
-	public TravellingSource(User user, BlockData data, double minDistance, double maxDistance) {
+	public TravellingSource(@NonNull User user, @NonNull BlockData data, double minDistance, double maxDistance) {
 		this.user = user;
 		this.data = data;
 		this.minDistanceSq = minDistance * minDistance;
@@ -52,7 +53,7 @@ public class TravellingSource implements State {
 	}
 
 	@Override
-	public void start(StateChain chain) {
+	public void start(@NonNull StateChain chain) {
 		if (started) return;
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
@@ -73,7 +74,7 @@ public class TravellingSource implements State {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		clean();
 		if (!started) return UpdateResult.REMOVE;
 		Vector3 target = user.getEyeLocation().floor();
@@ -101,7 +102,7 @@ public class TravellingSource implements State {
 				source = nextBlock;
 			}
 		}
-		if (source == null || !isValid(source) || !Game.getProtectionSystem().canBuild(user, source)) {
+		if (source == null || !isValid(source) || !Bending.getGame().getProtectionSystem().canBuild(user, source)) {
 			return UpdateResult.REMOVE;
 		}
 		TempBlock.create(source, data, 200);

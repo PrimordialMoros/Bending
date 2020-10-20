@@ -9,6 +9,7 @@ configure<JavaPluginConvention> {
 }
 
 dependencies {
+    implementation("org.checkerframework", "checker-qual", "3.7.0")
     implementation("com.github.ben-manes.caffeine", "caffeine", "2.8.5") {
         exclude(module = "error_prone_annotations")
         exclude(module = "checker-qual")
@@ -49,6 +50,7 @@ tasks {
         archiveBaseName.set(rootProject.name)
         dependencies {
             relocate("org.bstats", "me.moros.bending.bstats")
+            relocate("org.checkerframework", "me.moros.bending.internal.checker")
             relocate("com.zaxxer", "me.moros.bending.internal.hikari")
             relocate("net.kyori", "me.moros.bending.internal.kyori")
             relocate("ninja.leaping", "me.moros.bending.internal.configurate")

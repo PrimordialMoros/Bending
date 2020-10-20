@@ -30,6 +30,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,51 +85,51 @@ public final class MaterialUtil {
 		);
 	}
 
-	public static boolean isAir(Block block) {
+	public static boolean isAir(@NonNull Block block) {
 		return AIR.isTagged(block);
 	}
 
-	public static boolean isTransparent(Block block) {
+	public static boolean isTransparent(@NonNull Block block) {
 		return TRANSPARENT.isTagged(block);
 	}
 
-	public static boolean isContainer(Block block) {
+	public static boolean isContainer(@NonNull Block block) {
 		return CONTAINERS.isTagged(block.getType()) || (block.getState() instanceof InventoryHolder);
 	}
 
-	public static boolean isUnbreakable(Block block) {
+	public static boolean isUnbreakable(@NonNull Block block) {
 		return UNBREAKABLES.isTagged(block.getType()) || isContainer(block) || (block.getState() instanceof CreatureSpawner);
 	}
 
-	public static boolean isIgnitable(Block block) {
+	public static boolean isIgnitable(@NonNull Block block) {
 		if ((block.getType().isFlammable() || block.getType().isBurnable()) && isTransparent(block)) {
 			return true;
 		}
 		return isAir(block) && block.getRelative(BlockFace.DOWN).getType().isSolid();
 	}
 
-	public static boolean isFire(Block block) {
+	public static boolean isFire(@NonNull Block block) {
 		return MaterialSetTag.FIRE.isTagged(block.getType());
 	}
 
-	public static boolean isLava(Block block) {
+	public static boolean isLava(@NonNull Block block) {
 		return block.getType() == Material.LAVA;
 	}
 
-	public static boolean isWater(Block block) {
+	public static boolean isWater(@NonNull Block block) {
 		return block.getType() == Material.WATER || isWaterLogged(block.getBlockData());
 	}
 
-	public static boolean isWaterLogged(BlockData data) {
+	public static boolean isWaterLogged(@NonNull BlockData data) {
 		return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
 	}
 
 	// Finds a suitable solid block type to replace a falling-type block with.
-	public static BlockData getSolidType(BlockData data) {
+	public static @NonNull BlockData getSolidType(@NonNull BlockData data) {
 		return getSolidType(data, data);
 	}
 
-	public static BlockData getSolidType(BlockData data, BlockData def) {
+	public static @NonNull BlockData getSolidType(@NonNull BlockData data, BlockData def) {
 		switch (data.getMaterial()) { // TODO implement concrete powder maybe (if it ever becomes bendable)?
 			case SAND:
 				return Material.SANDSTONE.createBlockData();
@@ -141,12 +142,12 @@ public final class MaterialUtil {
 		}
 	}
 
-	public static BlockData getFocusedType(BlockData data) {
+	public static @NonNull BlockData getFocusedType(@NonNull BlockData data) {
 		return data.getMaterial() == Material.STONE ? Material.COBBLESTONE.createBlockData() : getSolidType(data, Material.STONE.createBlockData());
 	}
 
 	// Finds a suitable soft block type to replace a solid block
-	public static BlockData getSoftType(BlockData data) {
+	public static @NonNull BlockData getSoftType(@NonNull BlockData data) {
 		if (MaterialTags.SANDSTONES.isTagged(data.getMaterial())) {
 			return Material.SAND.createBlockData();
 		} else if (MaterialTags.RED_SANDSTONES.isTagged(data.getMaterial())) {
@@ -170,16 +171,16 @@ public final class MaterialUtil {
 		return Material.SAND.createBlockData();
 	}
 
-	public static boolean isSourceBlock(Block block) {
+	public static boolean isSourceBlock(@NonNull Block block) {
 		BlockData blockData = block.getBlockData();
 		return blockData instanceof Levelled && ((Levelled) blockData).getLevel() == 0;
 	}
 
-	public static BlockData getLavaData(int level) {
+	public static @NonNull BlockData getLavaData(int level) {
 		return Material.LAVA.createBlockData(d -> ((Levelled) d).setLevel((level < 0 || level > ((Levelled) d).getMaximumLevel()) ? 0 : level));
 	}
 
-	public static BlockData getWaterData(int level) {
+	public static @NonNull BlockData getWaterData(int level) {
 		return Material.WATER.createBlockData(d -> ((Levelled) d).setLevel((level < 0 || level > ((Levelled) d).getMaximumLevel()) ? 0 : level));
 	}
 }

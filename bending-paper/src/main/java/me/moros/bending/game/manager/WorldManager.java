@@ -21,10 +21,11 @@ package me.moros.bending.game.manager;
 
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.DummyAbilityManager;
-import me.moros.bending.model.user.player.BendingPlayer;
+import me.moros.bending.model.user.BendingPlayer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +36,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class WorldManager extends Configurable {
-	private static final AbilityManager dummy = new DummyAbilityManager(null);
 	private static final Set<UUID> disabledWorlds = new HashSet<>();
 
 	private final Map<World, WorldInstance> worlds = new ConcurrentHashMap<>();
@@ -47,10 +47,8 @@ public final class WorldManager extends Configurable {
 		}
 	}
 
-	public AbilityManager getInstanceForWorld(World world) {
-		if (world == null || isDisabledWorld(world.getUID())) {
-			return dummy;
-		}
+	public @NonNull AbilityManager getInstanceForWorld(@NonNull World world) {
+		if (isDisabledWorld(world.getUID())) return DummyAbilityManager.INSTANCE;
 		return worlds.computeIfAbsent(world, WorldInstance::new).getAbilityManager();
 	}
 
@@ -62,7 +60,7 @@ public final class WorldManager extends Configurable {
 		worlds.values().forEach(w -> w.getAbilityManager().update());
 	}
 
-	public void remove(World world) {
+	public void remove(@NonNull World world) {
 		worlds.remove(world);
 	}
 
@@ -74,11 +72,11 @@ public final class WorldManager extends Configurable {
 		worlds.values().forEach(w -> w.getAbilityManager().destroyAllInstances());
 	}
 
-	public void createPassives(BendingPlayer player) {
+	public void createPassives(@NonNull BendingPlayer player) {
 		getInstanceForWorld(player.getWorld()).createPassives(player);
 	}
 
-	public boolean isDisabledWorld(UUID worldID) {
+	public boolean isDisabledWorld(@NonNull UUID worldID) {
 		return disabledWorlds.contains(worldID);
 	}
 
@@ -87,8 +85,8 @@ public final class WorldManager extends Configurable {
 		private final CollisionManager collisions;
 
 		private WorldInstance(World world) {
-			abilities = new AbilityManager(world);
-			collisions = new CollisionManager(abilities, world);
+			abilities = new AbilityManager();
+			collisions = new CollisionManager(abilities);
 		}
 
 		private AbilityManager getAbilityManager() {

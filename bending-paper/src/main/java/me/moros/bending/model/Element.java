@@ -22,13 +22,13 @@ package me.moros.bending.model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An immutable and thread-safe object that represents a bending element
@@ -52,24 +52,24 @@ public enum Element {
 		return elementName;
 	}
 
-	public Component getDisplayName() {
+	public @NonNull Component getDisplayName() {
 		return Component.text(elementName, color);
 	}
 
-	public TextColor getColor() {
+	public @NonNull TextColor getColor() {
 		return color;
 	}
 
-	public static Optional<Element> getElementByName(String value) {
-		if (value == null || value.isEmpty()) return Optional.empty();
-		return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
+	public static Optional<Element> getElementByName(@NonNull String value) {
+		if (value.isEmpty()) return Optional.empty();
+		return getAll().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
 	}
 
 	public static Collection<String> getElementNames() {
-		return Arrays.stream(values()).map(Element::toString).collect(Collectors.toList());
+		return Arrays.asList("Air", "Water", "Earth", "Fire");
 	}
 
-	public static Set<Element> getAll() {
+	public static @NonNull Set<@NonNull Element> getAll() {
 		return EnumSet.allOf(Element.class);
 	}
 }

@@ -19,10 +19,10 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -46,6 +46,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,8 +68,8 @@ public class AirBlade implements Ability {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, AirBlade.class)) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirBlade.class)) {
 			return false;
 		}
 
@@ -88,7 +89,7 @@ public class AirBlade implements Ability {
 
 		startTime = System.currentTimeMillis();
 
-		AirWheel wheel = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirWheel.class).orElse(null);
+		AirWheel wheel = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirWheel.class).orElse(null);
 		if (wheel != null) {
 			origin = wheel.getCenter();
 			factor = userConfig.chargeFactor;
@@ -97,7 +98,7 @@ public class AirBlade implements Ability {
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
 			return true;
 		}
 
@@ -109,11 +110,11 @@ public class AirBlade implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -155,24 +156,24 @@ public class AirBlade implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "AirBlade";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(blade.getCollider());
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
@@ -203,7 +204,7 @@ public class AirBlade implements Ability {
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor);
 			return true;
 		}

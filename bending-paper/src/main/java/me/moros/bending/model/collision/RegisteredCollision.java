@@ -20,6 +20,7 @@
 package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a possible collision between 2 abilities.
@@ -30,18 +31,18 @@ public final class RegisteredCollision {
 	private final boolean removeFirst;
 	private final boolean removeSecond;
 
-	public RegisteredCollision(AbilityDescription first, AbilityDescription second, boolean removeFirst, boolean removeSecond) {
+	public RegisteredCollision(@NonNull AbilityDescription first, @NonNull AbilityDescription second, boolean removeFirst, boolean removeSecond) {
 		this.first = first;
 		this.second = second;
 		this.removeFirst = removeFirst;
 		this.removeSecond = removeSecond;
 	}
 
-	public AbilityDescription getFirst() {
+	public @NonNull AbilityDescription getFirst() {
 		return first;
 	}
 
-	public AbilityDescription getSecond() {
+	public @NonNull AbilityDescription getSecond() {
 		return second;
 	}
 

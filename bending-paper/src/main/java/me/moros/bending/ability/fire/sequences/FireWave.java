@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.fire.sequences;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -39,6 +39,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -55,7 +56,7 @@ public class FireWave implements Ability {
 	private long nextTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		wall = new FireWall();
 		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.PUNCH)) return false;
 
@@ -68,7 +69,7 @@ public class FireWave implements Ability {
 		double hh = wall.getHeight() / 2.0;
 		for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {
 			Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
-			if (!Game.getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
 				break;
 			}
 			hh += 0.2;
@@ -89,11 +90,11 @@ public class FireWave implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (walls.isEmpty()) return UpdateResult.REMOVE;
 		long time = System.currentTimeMillis();
 		if (time >= nextTime) {
@@ -111,17 +112,17 @@ public class FireWave implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return wall.getUser();
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "FireWave";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	private static class WallInfo {

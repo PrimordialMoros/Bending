@@ -24,6 +24,7 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,15 +32,15 @@ import java.util.Collection;
 public abstract class AbstractBurst {
 	protected final Collection<Burstable> blasts = new ArrayList<>();
 
-	protected <T extends Burstable> void createCone(User user, Class<T> type, double range) {
+	protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Class<T> type, double range) {
 		createBurst(user, type, range, true);
 	}
 
-	protected <T extends Burstable> void createSphere(User user, Class<T> type, double range) {
+	protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Class<T> type, double range) {
 		createBurst(user, type, range, false);
 	}
 
-	private <T extends Burstable> void createBurst(User user, Class<T> type, double range, boolean cone) {
+	private <T extends Burstable> void createBurst(@NonNull User user, @NonNull Class<T> type, double range, boolean cone) {
 		for (double theta = 0; theta < FastMath.PI; theta += FastMath.toRadians(10)) {
 			for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.toRadians(10)) {
 				double x = FastMath.cos(phi) * FastMath.sin(theta);
@@ -62,7 +63,7 @@ public abstract class AbstractBurst {
 		}
 	}
 
-	protected UpdateResult updateBurst() {
+	protected @NonNull UpdateResult updateBurst() {
 		blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
 		return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}

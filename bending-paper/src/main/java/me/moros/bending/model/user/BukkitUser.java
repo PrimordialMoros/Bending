@@ -27,41 +27,42 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
 public interface BukkitUser extends CommandUser {
-	LivingEntity getEntity();
+	@NonNull LivingEntity getEntity();
 
-	default Block getHeadBlock() {
+	default @NonNull Block getHeadBlock() {
 		return getEntity().getEyeLocation().getBlock();
 	}
 
-	default Block getLocBlock() {
+	default @NonNull Block getLocBlock() {
 		return getEntity().getLocation().getBlock();
 	}
 
-	default Vector3 getLocation() {
+	default @NonNull Vector3 getLocation() {
 		return new Vector3(getEntity().getLocation());
 	}
 
-	default Vector3 getEyeLocation() {
+	default @NonNull Vector3 getEyeLocation() {
 		return new Vector3(getEntity().getEyeLocation());
 	}
 
-	default Vector3 getDirection() {
+	default @NonNull Vector3 getDirection() {
 		return new Vector3(getEntity().getLocation().getDirection());
 	}
 
-	default World getWorld() {
+	default @NonNull World getWorld() {
 		return getEntity().getWorld();
 	}
 
-	default Ray getRay() {
+	default @NonNull Ray getRay() {
 		return new Ray(getEyeLocation(), getDirection());
 	}
 
-	default Ray getRay(double range) {
+	default @NonNull Ray getRay(double range) {
 		return new Ray(getEyeLocation(), getDirection().scalarMultiply(range));
 	}
 

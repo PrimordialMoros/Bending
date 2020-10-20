@@ -22,12 +22,13 @@ package me.moros.bending.game.manager;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.model.user.player.BendingProfile;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.storage.BendingStorage;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -41,54 +42,51 @@ import java.util.stream.Collectors;
 
 public final class PlayerManager {
 	private final Map<UUID, BendingPlayer> players = new ConcurrentHashMap<>();
-	private final AsyncLoadingCache<UUID, BendingProfile> cache = Caffeine.newBuilder()
-		.maximumSize(100)
-		.expireAfterWrite(Duration.ofMinutes(2))
-		.buildAsync(Game.getStorage()::createProfile);
+	private final AsyncLoadingCache<UUID, BendingProfile> cache;
+
+	public PlayerManager(@NonNull BendingStorage storage) {
+		cache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2)).buildAsync(storage::createProfile);
+	}
 
 	/**
 	 * UUID must correspond to an online player
 	 * @param uuid the uuid of the player object
 	 * @return the BendingPlayer instance associated with the specified player
 	 */
-	public BendingPlayer getPlayer(UUID uuid) {
+	public @NonNull BendingPlayer getPlayer(@NonNull UUID uuid) {
 		return Objects.requireNonNull(players.get(uuid));
 	}
 
-	public Collection<BendingPlayer> getOnlinePlayers() {
+	public @NonNull Collection<@NonNull BendingPlayer> getOnlinePlayers() {
 		return players.values().stream().filter(BendingPlayer::isValid).collect(Collectors.toList());
 	}
 
-	public void invalidatePlayer(BendingPlayer bendingPlayer) {
-		UUID uuid = bendingPlayer.getProfile().getUniqueId();
-		Game.getProtectionSystem().invalidate(bendingPlayer);
-		Game.getBoardManager().invalidate(uuid);
+	public void invalidatePlayer(@NonNull UUID uuid) {
 		players.remove(uuid);
 		cache.synchronous().invalidate(uuid);
 	}
 
-	public boolean playerExists(UUID uuid) {
-		if (uuid == null) return false;
+	public boolean playerExists(@NonNull UUID uuid) {
 		return players.containsKey(uuid);
 	}
 
-	public void createPlayer(Player player, BendingProfile profile) {
+	public void createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
 		BendingPlayer.createPlayer(player, profile).ifPresent(p -> {
 			players.put(p.getProfile().getUniqueId(), p);
 			p.getProfile().getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
 			p.bindPreset(new Preset(p.getProfile().getData().slots));
-			Game.getBoardManager().canUseScoreboard(p.getEntity());
-			Game.getAbilityManager(p.getWorld()).createPassives(p);
-			Bending.getEventBus().postBendingPlayerLoadEvent(p.getEntity());
+			Bending.getGame().getBoardManager().canUseScoreboard(p.getEntity());
+			Bending.getGame().getAbilityManager(p.getWorld()).createPassives(p);
+			Bending.getEventBus().postBendingPlayerLoadEvent(p);
 		});
 		Bending.getLog().info(profile.toString()); // TODO remove debug message
 	}
 
-	public Optional<BendingProfile> getProfile(UUID uuid) {
+	public Optional<BendingProfile> getProfile(@NonNull UUID uuid) {
 		return Optional.ofNullable(cache.synchronous().get(uuid));
 	}
 
-	public CompletableFuture<BendingProfile> getProfileAsync(UUID uuid) {
+	public CompletableFuture<BendingProfile> getProfileAsync(@NonNull UUID uuid) {
 		return cache.getIfPresent(uuid);
 	}
 }

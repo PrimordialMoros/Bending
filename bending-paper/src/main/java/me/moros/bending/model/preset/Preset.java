@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.preset;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -33,7 +35,7 @@ public class Preset {
 	 * Presets loaded from db have a positive id.
 	 * New presets must use a non positive id as they will acquire a real one when they get saved.
 	 */
-	public Preset(int id, String name, String[] abilities) {
+	public Preset(int id, @NonNull String name, @NonNull String[] abilities) {
 		this.id = id;
 		this.name = name;
 		this.abilities = abilities;
@@ -43,7 +45,7 @@ public class Preset {
 	 * Creates a dummy preset with id 0 and an empty name.
 	 * @see #Preset(int, String, String[])
 	 */
-	public Preset(String[] abilities) {
+	public Preset(@NonNull String[] abilities) {
 		this(0, "", abilities);
 	}
 
@@ -51,7 +53,7 @@ public class Preset {
 		return id;
 	}
 
-	public String getName() {
+	public @NonNull String getName() {
 		return name;
 	}
 
@@ -59,7 +61,7 @@ public class Preset {
 	 * Returns an array of the ability names that this preset holds, names can be null!
 	 * @return a copy of the names of the abilities that this preset holds.
 	 */
-	public String[] getAbilities() {
+	public @NonNull String[] getAbilities() {
 		return Arrays.copyOf(abilities, 9);
 	}
 
@@ -70,7 +72,7 @@ public class Preset {
 		return true;
 	}
 
-	public int compare(Preset preset) {
+	public int compare(@NonNull Preset preset) {
 		String[] otherAbilities = preset.getAbilities();
 		int count = 0;
 		for (int slot = 0; slot < 9; slot++) {

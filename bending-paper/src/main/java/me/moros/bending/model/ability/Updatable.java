@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.ability;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public interface Updatable {
-	UpdateResult update();
+	@NonNull UpdateResult update();
 }

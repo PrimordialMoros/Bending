@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.config.ConfigManager;
@@ -32,11 +33,11 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.protection.ProtectionSystem;
-import me.moros.bending.storage.Storage;
-import me.moros.bending.storage.StorageFactory;
+import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,48 +47,62 @@ import java.util.stream.Collectors;
  * @see Bending#getGame
  */
 public final class Game {
-	private static PlayerManager playerManager;
-	private static ProtectionSystem protectionSystem;
+	private final BendingStorage storage;
+	private final ProtectionSystem protectionSystem;
 
-	private static AbilityRegistry abilityRegistry;
-	private static WorldManager worldManager;
-	private static SequenceManager sequenceManager;
-	private static AttributeSystem attributeSystem;
-	private static ActivationController activationController;
-	private static BoardManager boardManager;
+	private final AbilityRegistry abilityRegistry;
+	private final SequenceManager sequenceManager;
+	private final WorldManager worldManager;
 
-	private static Storage storage;
+	private final AttributeSystem attributeSystem;
+	private final ActivationController activationController;
+	private final BoardManager boardManager;
 
-	public Game() {
-		storage = StorageFactory.createInstance();
-		worldManager = new WorldManager();
-		abilityRegistry = new AbilityRegistry();
+	private final BenderRegistry benderRegistry;
+	private final PlayerManager playerManager;
+
+	public Game(@NonNull BendingStorage storage) {
+		this.storage = storage;
 		protectionSystem = new ProtectionSystem();
+
+		abilityRegistry = new AbilityRegistry();
+		AbilityInitializer.loadAbilities(this);
+
 		sequenceManager = new SequenceManager();
+		worldManager = new WorldManager();
+
 		attributeSystem = new AttributeSystem();
-		activationController = new ActivationController();
-
-		AbilityInitializer.loadAbilities();
-		loadStorage();
-
-		playerManager = new PlayerManager();
-		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
+		activationController = new ActivationController(this);
 		boardManager = new BoardManager();
 
-		setupTemporary();
+		AbilityInitializer.loadAbilities(this);
+		loadStorage();
+
+		TempArmor.init();
+		TempBlock.init();
+		TempArmorStand.init();
+		BendingFallingBlock.init();
+
+		benderRegistry = new BenderRegistry();
+		playerManager = new PlayerManager(storage);
+
+		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
+
 		Tasker.createTaskTimer(this::update, 1, 1);
 	}
 
 	private void update() {
+		MCTiming timing = Bending.getTimingManager().ofStart("Bending Update");
 		worldManager.update();
 		Flight.updateAll();
+		timing.stopTiming();
 	}
 
-	public static boolean isDisabledWorld(UUID worldID) {
+	public boolean isDisabledWorld(@NonNull UUID worldID) {
 		return worldManager.isDisabledWorld(worldID);
 	}
 
-	public static void reload() {
+	public void reload() {
 		worldManager.destroyAllInstances();
 		sequenceManager.clear();
 		worldManager.clearCollisions();
@@ -96,7 +111,7 @@ public final class Game {
 		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
 	}
 
-	public static void cleanup() {
+	public void cleanup() {
 		worldManager.destroyAllInstances();
 		removeTemporary();
 		Flight.removeAll();
@@ -104,62 +119,59 @@ public final class Game {
 		storage.close();
 	}
 
-	private static void setupTemporary() {
-		TempArmor.init();
-		TempBlock.init();
-		TempArmorStand.init();
-		BendingFallingBlock.init();
-	}
-
-	private static void removeTemporary() {
+	private void removeTemporary() {
 		TempArmor.manager.removeAll();
 		TempBlock.manager.removeAll();
 		TempArmorStand.manager.removeAll();
 		BendingFallingBlock.manager.removeAll();
 	}
 
-	private static void loadStorage() {
+	private void loadStorage() {
 		storage.createElements(Element.getAll());
-		storage.createAbilities(Game.getAbilityRegistry().getAbilities().collect(Collectors.toSet()));
+		storage.createAbilities(getAbilityRegistry().getAbilities().collect(Collectors.toSet()));
 	}
 
-	public static Storage getStorage() {
+	public @NonNull BendingStorage getStorage() {
 		return storage;
 	}
 
-	public static SequenceManager getSequenceManager() {
-		return sequenceManager;
-	}
-
-	public static PlayerManager getPlayerManager() {
-		return playerManager;
-	}
-
-	public static ProtectionSystem getProtectionSystem() {
+	public @NonNull ProtectionSystem getProtectionSystem() {
 		return protectionSystem;
 	}
 
-	public static AbilityRegistry getAbilityRegistry() {
+	public @NonNull AbilityRegistry getAbilityRegistry() {
 		return abilityRegistry;
 	}
 
-	public static AbilityManager getAbilityManager(World world) {
+	public @NonNull SequenceManager getSequenceManager() {
+		return sequenceManager;
+	}
+
+	public @NonNull AbilityManager getAbilityManager(@NonNull World world) {
 		return worldManager.getInstanceForWorld(world);
 	}
 
-	public static void clearWorld(World world) {
-		if (world != null && worldManager != null) worldManager.remove(world);
+	public void clearWorld(@NonNull World world) {
+		worldManager.remove(world);
 	}
 
-	public static AttributeSystem getAttributeSystem() {
+	public @NonNull AttributeSystem getAttributeSystem() {
 		return attributeSystem;
 	}
 
-	public static ActivationController getActivationController() {
+	public @NonNull ActivationController getActivationController() {
 		return activationController;
 	}
 
-	public static BoardManager getBoardManager() {
+	public @NonNull BoardManager getBoardManager() {
 		return boardManager;
+	}
+
+	public @NonNull BenderRegistry getBenderRegistry() {
+		return benderRegistry;
+	}
+
+	public @NonNull PlayerManager getPlayerManager() {
+		return playerManager;
 	}
 }

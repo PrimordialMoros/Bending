@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
@@ -36,6 +36,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -58,7 +59,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 	protected boolean controllable = false;
 	protected boolean skipVertical = false;
 
-	public AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
+	public AbstractLine(@NonNull User user, @NonNull Block source, double range, double speed, boolean followTarget) {
 		this.user = user;
 		this.location = new Vector3(source.getLocation().add(0.5, 1.25, 0.5));
 		this.origin = location;
@@ -76,7 +77,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (locked) {
 			if (isValidTarget()) {
 				targetLocation = new Vector3(target.getLocation());
@@ -128,21 +129,21 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		if (location.distanceSq(origin) > range * range) {
 			return UpdateResult.REMOVE;
 		}
-		if (!Game.getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
 			return UpdateResult.REMOVE;
 		}
 		return UpdateResult.CONTINUE;
 	}
 
 	@Override
-	public Collider getCollider() {
+	public @NonNull Collider getCollider() {
 		return collider;
 	}
 
 	protected void onCollision() {
 	}
 
-	protected abstract boolean isValidBlock(Block block);
+	protected abstract boolean isValidBlock(@NonNull Block block);
 
 	protected boolean isValidTarget() {
 		if (target == null || !target.isValid()) return false;

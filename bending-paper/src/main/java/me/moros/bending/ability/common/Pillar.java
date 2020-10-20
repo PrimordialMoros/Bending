@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
@@ -33,6 +33,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +69,7 @@ public class Pillar implements Updatable {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (currentLength >= length) return UpdateResult.REMOVE;
 
 		long time = System.currentTimeMillis();
@@ -149,11 +150,11 @@ public class Pillar implements Updatable {
 	 * Check region protections and return maximum valid length in blocks
 	 */
 	private static int validate(User user, Block origin, BlockFace direction, int max) {
-		if (!Game.getProtectionSystem().canBuild(user, origin)) return 0;
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, origin)) return 0;
 		for (int i = 1; i <= max; i++) {
 			Block forwardBlock = origin.getRelative(direction, i);
 			Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i - 1);
-			if (!Game.getProtectionSystem().canBuild(user, forwardBlock) || !Game.getProtectionSystem().canBuild(user, backwardBlock)) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
 				return i;
 			}
 		}

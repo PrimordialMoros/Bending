@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -53,6 +53,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,20 +81,20 @@ public class FireBlast implements Ability, Burstable {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
 		charging = true;
 		particleCount = 6;
 
-		if (user.getHeadBlock().isLiquid() || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (user.getHeadBlock().isLiquid() || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 
 		removalPolicy = Policies.builder().build();
 
-		for (FireBlast blast : Game.getAbilityManager(user.getWorld()).getUserInstances(user, FireBlast.class).collect(Collectors.toList())) {
+		for (FireBlast blast : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, FireBlast.class).collect(Collectors.toList())) {
 			if (blast.charging) {
 				blast.launch();
 				return false;
@@ -107,11 +108,11 @@ public class FireBlast implements Ability, Burstable {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -144,31 +145,31 @@ public class FireBlast implements Ability, Burstable {
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (stream == null) return Collections.emptyList();
 		return Collections.singletonList(stream.getCollider());
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "FireBlast";
 	}
 
 	// Used to initialize the blast for bursts.
 	@Override
-	public void initialize(User user, Vector3 location, Vector3 direction) {
+	public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
 		this.user = user;
 		recalculateConfig();
 		factor = 1.0;
@@ -228,7 +229,7 @@ public class FireBlast implements Ability, Burstable {
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
 				FireTick.LARGER.apply(entity, 30);
@@ -238,13 +239,13 @@ public class FireBlast implements Ability, Burstable {
 		}
 
 		@Override
-		public boolean onBlockHit(Block block) {
+		public boolean onBlockHit(@NonNull Block block) {
 			Vector reverse = ray.direction.scalarMultiply(-1).toVector();
 			double rayRange = userConfig.igniteRadius * factor + 2;
 			if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
 				List<Block> blocks = new ArrayList<>();
 				for (Block b : WorldMethods.getNearbyBlocks(getBukkitLocation(), userConfig.igniteRadius * factor)) {
-					if (!Game.getProtectionSystem().canBuild(user, b)) continue;
+					if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
 					if (WorldMethods.rayTraceBlocks(b.getLocation(), reverse, rayRange).isPresent()) continue;
 					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);

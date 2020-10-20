@@ -20,6 +20,7 @@
 package me.moros.bending.model.ability;
 
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum FireTick implements FireTickMethod {
 	OVERWRITE(Entity::setFireTicks),
@@ -35,7 +36,7 @@ public enum FireTick implements FireTickMethod {
 	}
 
 	@Override
-	public void apply(Entity entity, int amount) {
+	public void apply(@NonNull Entity entity, int amount) {
 		method.apply(entity, amount);
 	}
 }

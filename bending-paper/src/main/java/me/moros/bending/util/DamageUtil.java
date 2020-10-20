@@ -28,6 +28,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -41,7 +43,7 @@ public final class DamageUtil {
 		.expireAfterWrite(Duration.ofSeconds(60))
 		.build();
 
-	public static boolean damageEntity(Entity entity, User source, double damage, AbilityDescription desc) {
+	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage, @Nullable AbilityDescription desc) {
 		if (entity instanceof LivingEntity && damage > 0) {
 			LivingEntity targetEntity = (LivingEntity) entity;
 			LivingEntity sourceEntity = source.getEntity();
@@ -55,11 +57,11 @@ public final class DamageUtil {
 	}
 
 
-	public static boolean damageEntity(Entity entity, User source, double damage) {
+	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage) {
 		return damageEntity(entity, source, damage, null);
 	}
 
-	public static String getBendingMessage(UUID uuid) {
+	public static String getBendingMessage(@NonNull UUID uuid) {
 		return cache.getIfPresent(uuid);
 	}
 

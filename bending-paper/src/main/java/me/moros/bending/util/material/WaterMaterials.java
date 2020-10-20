@@ -24,6 +24,7 @@ import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.Bending;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterMaterials {
 	public static final MaterialSetTag PLANT_BENDABLE;
@@ -48,15 +49,15 @@ public class WaterMaterials {
 		WATER_ICE_SOURCES.add(ICE_BENDABLE);
 	}
 
-	public static boolean isWaterBendable(Block block) {
+	public static boolean isWaterBendable(@NonNull Block block) {
 		return ALL.isTagged(block);
 	}
 
-	public static boolean isIceBendable(Block block) {
+	public static boolean isIceBendable(@NonNull Block block) {
 		return ICE_BENDABLE.isTagged(block);
 	}
 
-	public static boolean isPlantBendable(Block block) {
+	public static boolean isPlantBendable(@NonNull Block block) {
 		return PLANT_BENDABLE.isTagged(block);
 	}
 }

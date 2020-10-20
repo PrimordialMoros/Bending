@@ -25,6 +25,7 @@ import me.moros.bending.util.methods.UserMethods;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to provide create and render {@link Particle}.
@@ -35,23 +36,23 @@ public final class ParticleUtil {
 	public static final int DEFAULT_DIST = 32;
 	public static final Color AIR = fromHex("EEEEEE");
 
-	public static ParticleBuilder createFire(User user, Location center) {
+	public static ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
 		return UserMethods.getFireParticles(user).builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
 
-	public static ParticleBuilder createAir(Location center) {
+	public static ParticleBuilder createAir(@NonNull Location center) {
 		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8f).force(true);
 	}
 
-	public static ParticleBuilder createRGB(Location center, String hexVal) {
+	public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
 		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
 	}
 
-	public static ParticleBuilder create(Particle effect, Location center) {
+	public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
 		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
 
-	public static ParticleBuilder create(Particle effect, Location center, int range) {
+	public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
 		return effect.builder().location(center).receivers(range).extra(0).force(true);
 	}
 
@@ -60,7 +61,7 @@ public final class ParticleUtil {
 	 * Make sure you have collected the receivers in a sync thread first.
 	 * @param pb the particle effect builder that holds the particle data to display
 	 */
-	public static void displayAsync(ParticleBuilder pb) {
+	public static void displayAsync(@NonNull ParticleBuilder pb) {
 		if (pb.hasReceivers()) Tasker.newChain().async(pb::spawn).execute();
 	}
 
@@ -69,7 +70,7 @@ public final class ParticleUtil {
 	 * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
 	 * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
 	 */
-	public static Color fromHex(String hexValue) {
+	public static Color fromHex(@NonNull String hexValue) {
 		if (hexValue.length() < 6) return Color.BLACK;
 		int r = Integer.valueOf(hexValue.substring(0, 2), 16);
 		int g = Integer.valueOf(hexValue.substring(2, 4), 16);

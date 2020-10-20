@@ -24,6 +24,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
 	private final EnumMap<Element, Set<AbilityDescription>> passives = new EnumMap<>(Element.class);
 
-	protected int registerAbilities(Collection<AbilityDescription> abilities) {
+	protected int registerAbilities(@NonNull Collection<@NonNull AbilityDescription> abilities) {
 		int counter = 0;
 		for (AbilityDescription desc : abilities) {
 			if (registerAbility(desc)) counter++;
@@ -50,8 +51,7 @@ public final class AbilityRegistry {
 		return counter;
 	}
 
-	private boolean registerAbility(AbilityDescription desc) {
-		if (desc == null) return false;
+	private boolean registerAbility(@NonNull AbilityDescription desc) {
 		if (!desc.getConfigNode().getNode("enabled").getBoolean(true)) {
 			Bending.getLog().info(desc.getName() + " is disabled.");
 			return false;
@@ -68,8 +68,8 @@ public final class AbilityRegistry {
 	 * @param desc the ability to check
 	 * @return result
 	 */
-	public boolean isValid(AbilityDescription desc) {
-		return desc != null && abilities.containsKey(desc.getName().toLowerCase());
+	public boolean isRegistered(@NonNull AbilityDescription desc) {
+		return abilities.containsKey(desc.getName().toLowerCase());
 	}
 
 	/**

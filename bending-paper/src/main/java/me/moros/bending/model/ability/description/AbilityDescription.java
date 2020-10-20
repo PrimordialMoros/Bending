@@ -23,13 +23,15 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -50,8 +52,7 @@ public class AbilityDescription {
 	private final boolean sourcesPlants;
 	private final int hashcode;
 
-	public AbilityDescription(AbilityDescriptionBuilder builder) {
-		Objects.requireNonNull(builder);
+	protected AbilityDescription(@NonNull AbilityDescriptionBuilder builder) {
 		name = builder.name;
 		type = builder.type;
 		element = builder.element;
@@ -72,23 +73,23 @@ public class AbilityDescription {
 		hashcode = Objects.hash(name, type, element, activationMethods, description, instructions, hidden, harmless);
 	}
 
-	public String getName() {
+	public @NonNull String getName() {
 		return name;
 	}
 
-	public Component getDisplayName() {
+	public @NonNull Component getDisplayName() {
 		return Component.text(name, element.getColor());
 	}
 
-	public Element getElement() {
+	public @NonNull Element getElement() {
 		return element;
 	}
 
-	public String getDescription() {
+	public @NonNull String getDescription() {
 		return description;
 	}
 
-	public String getInstructions() {
+	public @NonNull String getInstructions() {
 		return instructions;
 	}
 
@@ -100,20 +101,19 @@ public class AbilityDescription {
 		return harmless;
 	}
 
-	public boolean canSourcePlant(User user) {
-		return sourcesPlants && !user.isOnCooldown(this);
+	public boolean canSourcePlant() {
+		return sourcesPlants;
 	}
 
-	public boolean isActivatedBy(ActivationMethod method) {
+	public boolean isActivatedBy(@NonNull ActivationMethod method) {
 		return activationMethods.contains(method);
 	}
 
-	public boolean isAbility(Ability ability) {
-		if (ability == null) return false;
+	public boolean isAbility(@NonNull Ability ability) {
 		return type.isAssignableFrom(ability.getClass());
 	}
 
-	public Ability createAbility() {
+	public @Nullable Ability createAbility() {
 		try {
 			return type.getDeclaredConstructor().newInstance();
 		} catch (ReflectiveOperationException e) {
@@ -122,7 +122,7 @@ public class AbilityDescription {
 		}
 	}
 
-	public CommentedConfigurationNode getConfigNode() {
+	public @NonNull CommentedConfigurationNode getConfigNode() {
 		CommentedConfigurationNode elementNode = ConfigManager.getConfig().getNode("abilities", getElement().toString().toLowerCase());
 		CommentedConfigurationNode node;
 		if (isActivatedBy(ActivationMethod.SEQUENCE)) {
@@ -135,11 +135,11 @@ public class AbilityDescription {
 		return node;
 	}
 
-	public String getPermission() {
+	public @NonNull String getPermission() {
 		return "bending.ability." + name;
 	}
 
-	public Component getMeta() {
+	public @NonNull Component getMeta() {
 		String type = "Ability";
 		if (isActivatedBy(ActivationMethod.PASSIVE)) {
 			type = "Passive";
@@ -177,7 +177,7 @@ public class AbilityDescription {
 	 * Create a {@link AbilityDescriptionBuilder} with values matching that of this object
 	 * @return a preconfigured builder
 	 */
-	public AbilityDescriptionBuilder builder() {
+	public @NonNull AbilityDescriptionBuilder builder() {
 		return new AbilityDescriptionBuilder(name, type)
 			.setElement(element).setActivation(activationMethods)
 			.setDescription(description).setInstructions(instructions)
@@ -185,7 +185,7 @@ public class AbilityDescription {
 			.setSourcesPlants(sourcesPlants);
 	}
 
-	public static <T extends Ability> AbilityDescriptionBuilder builder(String name, Class<T> type) {
+	public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Class<T> type) {
 		return new AbilityDescriptionBuilder(name, type);
 	}
 
@@ -200,70 +200,66 @@ public class AbilityDescription {
 		private boolean harmless = false;
 		private boolean sourcesPlants = false;
 
-		public <T extends Ability> AbilityDescriptionBuilder(String name, Class<T> type) {
-			this.name = Objects.requireNonNull(name);
-			this.type = Objects.requireNonNull(type);
+		public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Class<T> type) {
+			this.name = name;
+			this.type = type;
 		}
 
-		public AbilityDescriptionBuilder setElement(Element element) {
-			this.element = Objects.requireNonNull(element);
+		public @NonNull AbilityDescriptionBuilder setElement(@NonNull Element element) {
+			this.element = element;
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setActivation(Collection<ActivationMethod> methods) {
-			if (methods == null || methods.isEmpty()) throw new NullPointerException();
-			for (ActivationMethod m : methods) {
-				Objects.requireNonNull(m);
-			}
+		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull Collection<@NonNull ActivationMethod> methods) {
 			activationMethods = EnumSet.copyOf(methods);
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setActivation(ActivationMethod method, ActivationMethod... methods) {
-			activationMethods = EnumSet.of(Objects.requireNonNull(method));
-			if (methods != null) {
-				for (ActivationMethod m : methods) {
-					activationMethods.add(Objects.requireNonNull(m));
-				}
-			}
+		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull ActivationMethod method, @NonNull ActivationMethod @NonNull ... methods) {
+			Collection<ActivationMethod> c = Arrays.asList(methods);
+			c.add(method);
+			return setActivation(c);
+		}
+
+		public @NonNull AbilityDescriptionBuilder setDescription(@NonNull String description) {
+			this.description = description;
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setDescription(String description) {
-			this.description = Objects.requireNonNull(description);
+		public @NonNull AbilityDescriptionBuilder setInstructions(@NonNull String instructions) {
+			this.instructions = instructions;
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setInstructions(String instructions) {
-			this.instructions = Objects.requireNonNull(instructions);
-			return this;
-		}
-
-		public AbilityDescriptionBuilder setHidden(boolean hidden) {
+		public @NonNull AbilityDescriptionBuilder setHidden(boolean hidden) {
 			this.hidden = hidden;
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setHarmless(boolean harmless) {
+		public @NonNull AbilityDescriptionBuilder setHarmless(boolean harmless) {
 			this.harmless = harmless;
 			return this;
 		}
 
-		public AbilityDescriptionBuilder setSourcesPlants(boolean sourcesPlants) {
+		public @NonNull AbilityDescriptionBuilder setSourcesPlants(boolean sourcesPlants) {
 			this.sourcesPlants = sourcesPlants;
 			return this;
 		}
 
-		public AbilityDescription build() {
-			Objects.requireNonNull(element);
-			Objects.requireNonNull(activationMethods);
+		public @NonNull AbilityDescription build() {
+			validate();
 			return new AbilityDescription(this);
 		}
 
-		public AbilityDescription buildMulti(String displayName, String parent, String sub) {
-			Objects.requireNonNull(element);
-			Objects.requireNonNull(activationMethods);
+		public @NonNull AbilityDescription buildMulti(@NonNull String displayName, @NonNull String parent, @NonNull String sub) {
+			validate();
 			return new MultiAbilityDescription(this, displayName, parent, sub);
+		}
+
+		private void validate() {
+			Objects.requireNonNull(element, "Element cannot be null");
+			Objects.requireNonNull(activationMethods, "Activation Methods cannot be null");
+			if (activationMethods.isEmpty()) throw new IllegalStateException("Activation methods cannot be empty");
 		}
 	}
 }

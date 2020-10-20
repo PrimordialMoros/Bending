@@ -30,14 +30,14 @@ import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.CommandUser;
-import me.moros.bending.model.user.player.BendingPlayer;
 
 import java.util.Arrays;
 
@@ -59,9 +59,9 @@ public class ModifyCommand extends BaseCommand {
 			.filter(attr -> attr.equalsIgnoreCase(type))
 			.findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
 		AttributeModifier modifier = new AttributeModifier(validType, operation, amount);
-		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		Game.getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
-		Game.getAttributeSystem().recalculate(bendingPlayer);
+		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+		Bending.getGame().getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
+		Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
 		Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.getEntity().getName());
 	}
 
@@ -69,9 +69,9 @@ public class ModifyCommand extends BaseCommand {
 	@CommandCompletion("@players")
 	@Description("Clear all existing modifiers for a player")
 	public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
-		BendingPlayer bendingPlayer = target == null ? player : Game.getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		Game.getAttributeSystem().clearModifiers(bendingPlayer);
-		Game.getAttributeSystem().recalculate(bendingPlayer);
+		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+		Bending.getGame().getAttributeSystem().clearModifiers(bendingPlayer);
+		Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
 		Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.getEntity().getName());
 	}
 }

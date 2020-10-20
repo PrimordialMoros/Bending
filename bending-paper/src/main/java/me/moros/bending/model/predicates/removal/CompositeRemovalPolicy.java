@@ -20,14 +20,16 @@
 package me.moros.bending.model.predicates.removal;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.predicates.removal.Policies.PolicyBuilder;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
 
 public class CompositeRemovalPolicy implements RemovalPolicy {
 	private final Set<RemovalPolicy> policies;
 
-	CompositeRemovalPolicy(Policies.PolicyBuilder builder) {
+	CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
 		this.policies = builder.getPolicies();
 	}
 

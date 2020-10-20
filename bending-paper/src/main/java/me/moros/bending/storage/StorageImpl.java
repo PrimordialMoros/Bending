@@ -17,20 +17,22 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.storage.implementation.sql;
+package me.moros.bending.storage;
 
 import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.user.player.BenderData;
-import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.model.user.player.BendingProfile;
-import me.moros.bending.storage.StorageType;
-import me.moros.bending.storage.implementation.StorageImplementation;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.PresetHolder;
+import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.storage.sql.SqlStreamReader;
+import me.moros.bending.util.Tasker;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Batch;
 import org.jdbi.v3.core.statement.PreparedBatch;
@@ -46,32 +48,38 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class SqlStorage implements StorageImplementation {
+public final class StorageImpl implements BendingStorage {
 	private final HikariDataSource dataSource;
 	private final StorageType type;
+	private Logger logger;
 	private final Jdbi DB;
 
-	public SqlStorage(StorageType type, HikariDataSource source) {
+	public StorageImpl(StorageType type, HikariDataSource source) {
 		this.type = type;
 		dataSource = source;
 		DB = Jdbi.create(dataSource);
 	}
 
 	@Override
-	public StorageType getType() {
+	public @NonNull StorageType getType() {
 		return type;
 	}
 
 	@Override
-	public void init() {
+	public boolean init(@NonNull Logger logger) {
+		this.logger = logger;
 		Collection<String> statements;
 		try (InputStream stream = Bending.getPlugin().getResource(type.getSchemaPath())) {
+			if (stream == null) return false;
 			statements = SqlStreamReader.parseQueries(stream);
 		} catch (IOException e) {
-			e.printStackTrace();
-			return;
+			this.logger.log(Level.SEVERE, e.getMessage(), e);
+			return false;
 		}
 		if (!tableExists("bending_players")) {
 			DB.useHandle(handle -> {
@@ -80,6 +88,7 @@ public class SqlStorage implements StorageImplementation {
 				batch.execute();
 			});
 		}
+		return true;
 	}
 
 	@Override
@@ -87,8 +96,11 @@ public class SqlStorage implements StorageImplementation {
 		dataSource.close();
 	}
 
+	/**
+	 * Creates a new profile for the given uuid or returns an existing one if possible.
+	 */
 	@Override
-	public BendingProfile createProfile(UUID uuid) {
+	public @NonNull BendingProfile createProfile(@NonNull UUID uuid) {
 		return loadProfile(uuid).orElseGet(() ->
 			DB.withHandle(handle -> {
 				int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid)
@@ -98,39 +110,35 @@ public class SqlStorage implements StorageImplementation {
 		);
 	}
 
-	@Override
-	public Optional<BendingProfile> loadProfile(UUID uuid) {
-		try {
-			return DB.withHandle(handle -> {
-				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().findOne();
-				if (!result.isPresent()) return Optional.empty();
-				int id = (int) result.get().get("player_id");
-				boolean board = (boolean) result.get().getOrDefault("board", true);
-				BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
-				return Optional.of(new BendingProfile(uuid, id, data, board));
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Optional.empty();
+	/**
+	 * This method will attempt to load a profile from the database and execute the consumer if found.
+	 * @param uuid the player's uuid
+	 * @param consumer the consumer to executre if a profile was found
+	 * @see #createProfile(UUID)
+	 */
+	public void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer) {
+		Tasker.newChain().asyncFirst(() -> loadProfile(uuid)).asyncLast(p -> p.ifPresent(consumer)).execute();
 	}
 
-	@Override
-	public boolean updateProfile(BendingProfile profile) {
-		try {
-			DB.useHandle(handle ->
-				handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.getQuery())
-					.bind(0, profile.hasBoard()).bind(1, profile.getInternalId()).execute()
-			);
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
+	/**
+	 * Asynchronously saves the given bendingPlayer's data to the database.
+	 * It updates the profile and stores the current elements and bound abilities.
+	 * @param bendingPlayer the BendingPlayer to save
+	 */
+	public void savePlayerAsync(@NonNull BendingPlayer bendingPlayer) {
+		Tasker.newChain().async(() -> {
+			updateProfile(bendingPlayer.getProfile());
+			saveElements(bendingPlayer);
+			saveSlots(bendingPlayer);
+		}).execute();
 	}
 
+	/**
+	 * Adds all given elements to the database
+	 * @param elements the elements to add
+	 */
 	@Override
-	public boolean createElements(Set<Element> elements) {
+	public boolean createElements(@NonNull Set<@NonNull Element> elements) {
 		try {
 			DB.useHandle(handle -> {
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.ELEMENTS_INSERT_NEW.getQuery());
@@ -141,13 +149,17 @@ public class SqlStorage implements StorageImplementation {
 			});
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		return false;
 	}
 
+	/**
+	 * Adds all given abilities to the database
+	 * @param abilities the abilities to add
+	 */
 	@Override
-	public boolean createAbilities(Set<AbilityDescription> abilities) {
+	public boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities) {
 		try {
 			DB.useHandle(handle -> {
 				PreparedBatch batch = handle.prepareBatch(SqlQueries.ABILITIES_INSERT_NEW.getQuery());
@@ -158,13 +170,75 @@ public class SqlStorage implements StorageImplementation {
 			});
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		return false;
 	}
 
+	/**
+	 * This is currently loaded asynchronously using a LoadingCache
+	 * @see PresetHolder
+	 */
 	@Override
-	public boolean saveElements(BendingPlayer player) {
+	public @Nullable Preset loadPreset(int playerId, @NonNull String name) {
+		int presetId = getPresetId(playerId, name);
+		if (presetId == 0) return null;
+		String[] abilities = new String[9];
+		try {
+			return DB.withHandle(handle -> {
+				Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT_BY_ID.getQuery()).bind(0, presetId);
+				for (Map<String, Object> map : query.mapToMap()) {
+					int slot = (int) map.get("slot");
+					String abilityName = (String) map.get("ability_name");
+					abilities[slot - 1] = abilityName;
+				}
+				return new Preset(presetId, name, abilities);
+			});
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer) {
+		Tasker.newChain().asyncFirst(() -> savePreset(playerId, preset))
+			.abortIfNull().asyncLast(consumer::accept).execute();
+	}
+
+	public void deletePresetAsync(int presetId) {
+		Tasker.newChain().asyncFirst(() -> deletePreset(presetId)).execute();
+	}
+
+	private Optional<BendingProfile> loadProfile(UUID uuid) {
+		try {
+			return DB.withHandle(handle -> {
+				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().findOne();
+				if (!result.isPresent()) return Optional.empty();
+				int id = (int) result.get().get("player_id");
+				boolean board = (boolean) result.get().getOrDefault("board", true);
+				BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
+				return Optional.of(new BendingProfile(uuid, id, data, board));
+			});
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}
+		return Optional.empty();
+	}
+
+	private boolean updateProfile(BendingProfile profile) {
+		try {
+			DB.useHandle(handle ->
+				handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.getQuery())
+					.bind(0, profile.hasBoard()).bind(1, profile.getInternalId()).execute()
+			);
+			return true;
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}
+		return false;
+	}
+
+	private boolean saveElements(BendingPlayer player) {
 		int id = player.getProfile().getInternalId();
 		try {
 			DB.useHandle(handle -> {
@@ -177,13 +251,12 @@ public class SqlStorage implements StorageImplementation {
 			});
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		return false;
 	}
 
-	@Override
-	public boolean saveSlots(BendingPlayer player) {
+	private boolean saveSlots(BendingPlayer player) {
 		int id = player.getProfile().getInternalId();
 		Preset temp = player.createPresetFromSlots("");
 		try {
@@ -204,30 +277,7 @@ public class SqlStorage implements StorageImplementation {
 		return false;
 	}
 
-	// Returns null if doesn't exist or when a problem occurs.
-	@Override
-	public Preset loadPreset(int playerId, String name) {
-		int presetId = getPresetId(playerId, name);
-		if (presetId == 0) return null;
-		String[] abilities = new String[9];
-		try {
-			return DB.withHandle(handle -> {
-				Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT_BY_ID.getQuery()).bind(0, presetId);
-				for (Map<String, Object> map : query.mapToMap()) {
-					int slot = (int) map.get("slot");
-					String abilityName = (String) map.get("ability_name");
-					abilities[slot - 1] = abilityName;
-				}
-				return new Preset(presetId, name, abilities);
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	public boolean savePreset(int playerId, Preset preset) {
+	private boolean savePreset(int playerId, Preset preset) {
 		if (preset.getInternalId() > 0) return false; // Must be a new preset!
 		if (!deletePreset(playerId, preset.getName())) return false; // needed for overwriting
 		try {
@@ -255,8 +305,7 @@ public class SqlStorage implements StorageImplementation {
 		return false;
 	}
 
-	@Override
-	public boolean deletePreset(int presetId) {
+	private boolean deletePreset(int presetId) {
 		if (presetId <= 0) return false; // It won't exist
 		try {
 			DB.useHandle(handle ->
@@ -269,7 +318,6 @@ public class SqlStorage implements StorageImplementation {
 		return false;
 	}
 
-	// Helper methods
 	private int getAbilityId(String name) {
 		if (name == null) return 0;
 		try {

@@ -29,19 +29,22 @@ import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
 import me.moros.bending.game.manager.AbilityManager;
+import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,32 +55,40 @@ public final class ActivationController {
 		.expiration(100, TimeUnit.MILLISECONDS)
 		.expirationPolicy(ExpirationPolicy.CREATED)
 		.build();
+	private final Game game;
 
-	public boolean activateAbility(User user, ActivationMethod method) {
+	public ActivationController(@NonNull Game game) {
+		this.game = game;
+	}
+
+	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null || !desc.isActivatedBy(method) || !user.canBend(desc)) return false;
 		Ability ability = desc.createAbility();
-		if (ability.activate(user, method)) {
-			Game.getAbilityManager(user.getWorld()).addAbility(user, ability);
+		if (ability != null && ability.activate(user, method)) {
+			game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 			return true;
 		}
 		return false;
 	}
 
-	public void onPlayerLogout(BendingPlayer player) {
+	public void onPlayerLogout(@NonNull BendingPlayer player) {
+		TempArmor.manager.get(player.getEntity()).ifPresent(TempArmor::revert);
 		player.removeLastSlotContainer();
-		Game.getAttributeSystem().clearModifiers(player);
-
-		Game.getStorage().savePlayerAsync(player);
+		game.getAttributeSystem().clearModifiers(player);
+		game.getStorage().savePlayerAsync(player);
 		Flight.remove(player);
 
-		Game.getPlayerManager().invalidatePlayer(player);
-		Game.getAbilityManager(player.getWorld()).clearPassives(player);
+		UUID uuid = player.getProfile().getUniqueId();
+		game.getBoardManager().invalidate(uuid);
+		game.getPlayerManager().invalidatePlayer(uuid);
+		game.getProtectionSystem().invalidate(player);
+		game.getAbilityManager(player.getWorld()).clearPassives(player);
 	}
 
-	public void onUserSwing(User user) {
+	public void onUserSwing(@NonNull User user) {
 		if (ignoreSwing.containsKey(user)) return;
-		AbilityManager manager = Game.getAbilityManager(user.getWorld());
+		AbilityManager manager = game.getAbilityManager(user.getWorld());
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		boolean removed = false;
 		if (desc != null) {
@@ -99,32 +110,32 @@ public final class ActivationController {
 		FireBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
-			Game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH_ENTITY);
+			game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH_ENTITY);
 		} else {
-			Game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH);
+			game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH);
 		}
 
 		activateAbility(user, ActivationMethod.PUNCH);
 	}
 
-	public void onUserSneak(User user, boolean sneaking) {
+	public void onUserSneak(@NonNull User user, boolean sneaking) {
 		if (sneaking) PhaseChange.melt(user);
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
-		Game.getSequenceManager().registerAction(user, action);
+		game.getSequenceManager().registerAction(user, action);
 		activateAbility(user, action);
-		Game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
+		game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
 	}
 
-	public void onUserMove(User user, Vector velocity) {
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirSpout.class).ifPresent(spout ->
+	public void onUserMove(@NonNull User user, @NonNull Vector velocity) {
+		game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirSpout.class).ifPresent(spout ->
 			spout.handleMovement(velocity.setY(0))
 		);
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterSpout.class).ifPresent(spout ->
+		game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterSpout.class).ifPresent(spout ->
 			spout.handleMovement(velocity.setY(0))
 		);
 	}
 
-	public boolean onFallDamage(User user) {
+	public boolean onFallDamage(@NonNull User user) {
 		activateAbility(user, ActivationMethod.FALL);
 		if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
 			return false;
@@ -138,21 +149,21 @@ public final class ActivationController {
 		return !Flight.hasFlight(user);
 	}
 
-	public void onUserInteract(User user, ActivationMethod method) {
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method) {
 		if (!method.isInteract()) return;
 		ignoreNextSwing(user);
 
 		EarthLine.setPrisonMode(user);
 
-		Game.getSequenceManager().registerAction(user, method);
+		game.getSequenceManager().registerAction(user, method);
 		activateAbility(user, method);
 	}
 
-	public void ignoreNextSwing(User user) {
+	public void ignoreNextSwing(@NonNull User user) {
 		ignoreSwing.put(user, true);
 	}
 
-	public boolean onFireTickDamage(User user) {
+	public boolean onFireTickDamage(@NonNull User user) {
 		return HeatControl.canBurn(user);
 	}
 }

@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.earth;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -39,6 +39,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -58,8 +59,8 @@ public class EarthTunnel implements Ability {
 	private int angle = 0;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, EarthTunnel.class)) return false;
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthTunnel.class)) return false;
 
 		this.user = user;
 		recalculateConfig();
@@ -76,11 +77,11 @@ public class EarthTunnel implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -90,7 +91,7 @@ public class EarthTunnel implements Ability {
 			}
 			Vector3 offset = VectorMethods.getOrthogonal(user.getDirection(), FastMath.toRadians(angle), radius);
 			Block current = center.add(offset).toBlock(user.getWorld());
-			if (!Game.getProtectionSystem().canBuild(user, current)) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
 				return UpdateResult.REMOVE;
 			}
 			if (predicate.test(current)) {
@@ -125,17 +126,17 @@ public class EarthTunnel implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "EarthTunnel";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

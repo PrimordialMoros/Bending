@@ -22,8 +22,9 @@ package me.moros.bending.model.predicates.removal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class OutOfRangeRemovalPolicy implements RemovalPolicy {
@@ -31,16 +32,16 @@ public class OutOfRangeRemovalPolicy implements RemovalPolicy {
 	private final Vector3 origin;
 	private final Supplier<Vector3> fromSupplier;
 
-	public OutOfRangeRemovalPolicy(double range, Vector3 origin, Supplier<Vector3> from) {
-		this.range = range;
+	public OutOfRangeRemovalPolicy(double range, @NonNull Vector3 origin, @NonNull Supplier<Vector3> from) {
+		this.range = FastMath.abs(range);
 		this.origin = origin;
-		this.fromSupplier = Objects.requireNonNull(from);
+		this.fromSupplier = from;
 	}
 
-	public OutOfRangeRemovalPolicy(double range, Supplier<Vector3> from) {
-		this.range = range;
+	public OutOfRangeRemovalPolicy(double range, @NonNull Supplier<Vector3> from) {
+		this.range = FastMath.abs(range);
 		this.origin = null;
-		this.fromSupplier = Objects.requireNonNull(from);
+		this.fromSupplier = from;
 	}
 
 	@Override

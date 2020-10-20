@@ -20,29 +20,30 @@
 package me.moros.bending.events;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingEventBus {
-	public void postBendingPlayerLoadEvent(Player player) {
+	public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {
 		Bukkit.getPluginManager().callEvent(new BendingPlayerLoadEvent(player));
 	}
 
-	public void postCooldownAddEvent(User user, AbilityDescription ability) {
-		Bukkit.getPluginManager().callEvent(new CooldownAddEvent(user, ability));
+	public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
+		Bukkit.getPluginManager().callEvent(new CooldownAddEvent(user, desc, duration));
 	}
 
-	public void postCooldownRemoveEvent(User user, AbilityDescription ability) {
+	public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
 		if (!user.isValid()) return; // We post the event 1 tick later so this is needed for safety
-		Bukkit.getPluginManager().callEvent(new CooldownRemoveEvent(user, ability));
+		Bukkit.getPluginManager().callEvent(new CooldownRemoveEvent(user, desc));
 	}
 
-	public void postElementChangeEvent(User user, ElementChangeEvent.Result result) {
+	public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
 		Bukkit.getPluginManager().callEvent(new ElementChangeEvent(user, result));
 	}
 
-	public void postBindChangeEvent(User user, BindChangeEvent.Result result) {
+	public void postBindChangeEvent(@NonNull User user, BindChangeEvent.Result result) {
 		Bukkit.getPluginManager().callEvent(new BindChangeEvent(user, result));
 	}
 }

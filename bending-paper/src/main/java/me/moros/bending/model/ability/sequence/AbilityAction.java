@@ -21,6 +21,7 @@ package me.moros.bending.model.ability.sequence;
 
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
@@ -32,17 +33,17 @@ public final class AbilityAction {
 	private final ActivationMethod action;
 	private final int hashcode;
 
-	public AbilityAction(AbilityDescription desc, ActivationMethod action) {
+	public AbilityAction(@NonNull AbilityDescription desc, @NonNull ActivationMethod action) {
 		this.desc = desc;
 		this.action = action;
 		hashcode = Objects.hash(desc, action);
 	}
 
-	public AbilityDescription getAbilityDescription() {
+	public @NonNull AbilityDescription getAbilityDescription() {
 		return desc;
 	}
 
-	public ActivationMethod getAction() {
+	public @NonNull ActivationMethod getAction() {
 		return action;
 	}
 

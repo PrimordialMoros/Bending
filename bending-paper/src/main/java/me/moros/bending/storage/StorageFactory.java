@@ -19,23 +19,21 @@
 
 package me.moros.bending.storage;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
-import me.moros.bending.storage.implementation.sql.SqlStorage;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
 
 /**
  * Factory class that constructs and returns a Hikari-based database storage.
- * @see Storage
- * @see SqlStorage
+ * @see BendingStorage
+ * @see StorageImpl
  */
 public final class StorageFactory {
 	// TODO implement database redundancy
-	public static Storage createInstance() {
+	public static @Nullable BendingStorage createInstance() {
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");
 		String configValue = storageNode.getNode("engine").getString("");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
@@ -44,50 +42,25 @@ public final class StorageFactory {
 		}
 		Bending.getLog().info("Loading storage provider... [" + engine + "]");
 
-		return new Storage(createHikari(engine));
-	}
+		CommentedConfigurationNode connectionNode = storageNode.getNode("connection");
+		String host = connectionNode.getNode("host").getString("localhost");
+		int port = connectionNode.getNode("port").getInt(engine == StorageType.POSTGRESQL ? 5432 : 3306);
+		String username = connectionNode.getNode("username").getString("bending");
+		String password = connectionNode.getNode("password").getString("password");
+		String database = connectionNode.getNode("database").getString("bending");
 
-	private static SqlStorage createHikari(StorageType engine) {
-		boolean postgre = engine == StorageType.POSTGRESQL;
-
-		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage").getNode("connection");
-		String host = storageNode.getNode("host").getString("localhost");
-		int port = storageNode.getNode("port").getInt(postgre ? 5432 : 3306);
-		String username = storageNode.getNode("username").getString("bending");
-		String password = storageNode.getNode("password").getString("password");
-		String database = storageNode.getNode("database").getString("bending");
-
-		HikariConfig config = new HikariConfig();
-		config.setMaximumPoolSize(5);
-		config.setMinimumIdle(3);
-		config.setPoolName(engine.name() + " Bending Hikari Connection Pool");
-		config.addDataSourceProperty("serverName", host);
-		config.addDataSourceProperty("portNumber", port);
-		config.addDataSourceProperty("databaseName", database);
-		config.addDataSourceProperty("user", username);
-		config.addDataSourceProperty("password", password);
-
-		String path = Bending.getConfigFolder() + File.separator;
-		switch (engine) {
-			case POSTGRESQL:
-				config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-				break;
-			case MARIADB:
-				config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-				break;
-			case MYSQL:
-				config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-				break;
-			case H2:
-				config.setDriverClassName("org.h2.Driver");
-				config.setJdbcUrl("jdbc:h2:./" + path + "bending-h2;MODE=PostgreSQL");
-				break;
-			case SQLITE:
-				config.setDriverClassName("org.sqlite.JDBC");
-				config.setJdbcUrl("jdbc:sqlite:" + path + "bending-sqlite.db?autoReconnect=true");
-				break;
+		String path = "";
+		if (engine == StorageType.H2) {
+			path = Bending.getConfigFolder() + File.separator + "bending-h2";
+		} else if (engine == StorageType.SQLITE) {
+			path = Bending.getConfigFolder() + File.separator + "bending-sqlite.db";
 		}
-		return new SqlStorage(engine, new HikariDataSource(config));
+
+		return ConnectionBuilder.create(StorageImpl::new, engine)
+			.setLogger(Bending.getLog()).setPath(path)
+			.setDatabase(database).setHost(host).setPort(port)
+			.setUsername(username).setPassword(password)
+			.build(engine.name() + " Bending Hikari Connection Pool");
 	}
 }
 

@@ -17,15 +17,14 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user.player;
+package me.moros.bending.model.user;
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.preset.Preset;
 
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
 public final class PresetHolder {
@@ -36,36 +35,34 @@ public final class PresetHolder {
 	private final Set<String> presets;
 	private final int id;
 
-	protected PresetHolder(int id, Set<String> presets) {
+	PresetHolder(int id, Set<String> presets) {
 		this.id = id;
 		this.presets = presets;
 	}
 
-	protected Set<String> getPresets() {
+	Set<String> getPresets() {
 		return Collections.unmodifiableSet(presets);
 	}
 
-	protected boolean hasPreset(String name) {
+	boolean hasPreset(String name) {
 		return presets.contains(name);
 	}
 
-	protected Preset getPresetByName(String name) {
+	Preset getPresetByName(String name) {
 		if (!hasPreset(name)) return null;
 		return presetCache.synchronous().get(name);
 	}
 
-	protected boolean addPreset(String name) {
-		Objects.requireNonNull(name);
+	boolean addPreset(String name) {
 		return presets.add(name);
 	}
 
-	protected boolean removePreset(String name) {
-		Objects.requireNonNull(name);
+	boolean removePreset(String name) {
 		return presets.remove(name);
 	}
 
 	private Preset loadPreset(String name) {
 		if (!hasPreset(name)) return null;
-		return Game.getStorage().loadPreset(id, name);
+		return Bending.getGame().getStorage().loadPreset(id, name);
 	}
 }

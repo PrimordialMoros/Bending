@@ -30,12 +30,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class CollisionUtil {
 	/**
 	 * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision disabled
 	 */
-	public static boolean handleEntityCollisions(User user, Collider collider, CollisionCallback callback, boolean livingOnly) {
+	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly) {
 		return handleEntityCollisions(user, collider, callback, livingOnly, false);
 	}
 
@@ -50,7 +51,7 @@ public final class CollisionUtil {
 	 * @param selfCollision whether the collider can collider with the user
 	 * @return true if it hit at least one entity
 	 */
-	public static boolean handleEntityCollisions(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
+	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
 		final double buffer = 4.0; // Buffer needed to check for nearby entities that have locations outside the check range but still intersect
 		Vector3 extent = collider.getHalfExtents().add(new Vector3(buffer, buffer, buffer));
 		Vector3 pos = collider.getPosition();

@@ -17,15 +17,16 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user.player;
+package me.moros.bending.model.user;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
-import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.model.user.profile.BendingProfile;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -42,12 +43,12 @@ public final class BendingPlayer extends BendingUser {
 		presetHolder = new PresetHolder(profile.getInternalId(), presets);
 	}
 
-	public BendingProfile getProfile() {
+	public @NonNull BendingProfile getProfile() {
 		return profile;
 	}
 
 	@Override
-	public Player getEntity() {
+	public @NonNull Player getEntity() {
 		return (Player) super.getEntity();
 	}
 
@@ -99,42 +100,42 @@ public final class BendingPlayer extends BendingUser {
 	}
 
 	// Presets
-	public Set<String> getPresets() {
+	public @NonNull Set<@NonNull String> getPresets() {
 		return presetHolder.getPresets();
 	}
 
-	public Optional<Preset> getPresetByName(String name) {
+	public Optional<Preset> getPresetByName(@NonNull String name) {
 		return Optional.ofNullable(presetHolder.getPresetByName(name.toLowerCase()));
 	}
 
-	public void addPreset(Preset preset, Consumer<PresetCreateResult> consumer) {
+	public void addPreset(@NonNull Preset preset, @NonNull Consumer<PresetCreateResult> consumer) {
 		String name = preset.getName().toLowerCase();
 		if (preset.getInternalId() > 0 || presetHolder.hasPreset(name)) {
 			consumer.accept(PresetCreateResult.EXISTS);
 			return;
 		}
 		presetHolder.addPreset(name);
-		Game.getStorage().savePresetAsync(profile.getInternalId(), preset, result ->
+		Bending.getGame().getStorage().savePresetAsync(profile.getInternalId(), preset, result ->
 			consumer.accept(result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL)
 		);
 	}
 
-	public boolean removePreset(Preset preset) {
+	public boolean removePreset(@NonNull Preset preset) {
 		String name = preset.getName().toLowerCase();
 		if (preset.getInternalId() <= 0 || !presetHolder.hasPreset(name)) {
 			return false;
 		}
-		Game.getStorage().deletePresetAsync(preset.getInternalId());
+		Bending.getGame().getStorage().deletePresetAsync(preset.getInternalId());
 		return presetHolder.removePreset(name);
 	}
 
 	@Override
-	public boolean hasPermission(String permission) {
+	public boolean hasPermission(@NonNull String permission) {
 		return getEntity().hasPermission(permission);
 	}
 
-	public static Optional<BendingPlayer> createPlayer(Player player, BendingProfile profile) {
-		if (Game.getPlayerManager().playerExists(player.getUniqueId())) return Optional.empty();
+	public static Optional<BendingPlayer> createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
+		if (Bending.getGame().getPlayerManager().playerExists(player.getUniqueId())) return Optional.empty();
 		BendingPlayer bendingPlayer = new BendingPlayer(player, profile, new HashSet<>(profile.getData().presets));
 		return Optional.of(bendingPlayer);
 	}

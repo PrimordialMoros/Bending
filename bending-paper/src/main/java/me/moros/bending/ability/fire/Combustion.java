@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -56,6 +56,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -77,11 +78,11 @@ public class Combustion implements Ability, Explosive {
 	private double randomBeamDistance;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
-		if (Policies.IN_LIQUID.test(user, getDescription()) || Game.getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
 			return false;
 		}
 		location = user.getEyeLocation();
@@ -95,11 +96,11 @@ public class Combustion implements Ability, Explosive {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (hasExploded || removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -133,7 +134,7 @@ public class Combustion implements Ability, Explosive {
 			ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
 			if (i % 2 != 0) {
 				Block block = bukkitLocation.getBlock();
-				if (!Game.getProtectionSystem().canBuild(user, block)) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 					return false;
 				}
 				if (ThreadLocalRandom.current().nextInt(3) == 0) {
@@ -154,34 +155,34 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "Combustion";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(collider);
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.getSecondAbility() instanceof Combustion) {
 			createExplosion(location, userConfig.power * 2, userConfig.damage * 2);
 		} else if (collision.getSecondAbility() instanceof Explosive || collision.getSecondAbility().getDescription().getElement() == Element.EARTH) {
 			createExplosion(location, userConfig.power, userConfig.damage);
 		}
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
 	public static void explode(User user) {
-		Game.getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
+		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
 	}
 
 	public void explode() {
@@ -212,7 +213,7 @@ public class Combustion implements Ability, Explosive {
 		if (userConfig.damageBlocks && !loc.getBlock().isLiquid()) {
 			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
 			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
-				if (!Game.getProtectionSystem().canBuild(user, block)) break;
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) break;
 				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && MaterialUtil.isIgnitable(block)) ? Material.FIRE : Material.AIR;
 				TempBlock.create(block, mat, userConfig.regenTime + ThreadLocalRandom.current().nextInt(1000), true);
 			}

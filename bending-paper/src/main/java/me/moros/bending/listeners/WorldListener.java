@@ -24,10 +24,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldUnloadEvent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WorldListener implements Listener {
+	private final Game game;
+
+	public WorldListener(@NonNull Game game) {
+		this.game = game;
+	}
+
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onWorldUnload(WorldUnloadEvent event) {
-		Game.clearWorld(event.getWorld());
+		game.clearWorld(event.getWorld());
 	}
 }

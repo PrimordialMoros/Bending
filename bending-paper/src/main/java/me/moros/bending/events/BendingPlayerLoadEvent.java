@@ -19,16 +19,16 @@
 
 package me.moros.bending.events;
 
-import org.bukkit.entity.Player;
+import me.moros.bending.model.user.BendingPlayer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingPlayerLoadEvent extends BendingEvent {
-	private final Player player;
-
-	public BendingPlayerLoadEvent(Player player) {
-		this.player = player;
+public class BendingPlayerLoadEvent extends BendingUserEvent {
+	public BendingPlayerLoadEvent(@NonNull BendingPlayer player) {
+		super(player);
 	}
 
-	public Player getPlayer() {
-		return player;
+	@Override
+	public @NonNull BendingPlayer getUser() {
+		return (BendingPlayer) super.getUser();
 	}
 }

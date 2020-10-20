@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -39,6 +39,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireJet implements Ability {
 	private static final Config config = new Config();
@@ -54,8 +55,8 @@ public class FireJet implements Ability {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, FireJet.class)) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireJet.class)) {
 			return false;
 		}
 
@@ -68,7 +69,7 @@ public class FireJet implements Ability {
 			return false;
 		}
 
-		if (!Game.getProtectionSystem().canBuild(user, block)) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return false;
 		}
 
@@ -90,11 +91,11 @@ public class FireJet implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -117,17 +118,17 @@ public class FireJet implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "FireJet";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public void setSpeed(double newSpeed) {

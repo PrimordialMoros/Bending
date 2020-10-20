@@ -21,6 +21,8 @@ package me.moros.bending.model.temporal;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -33,16 +35,17 @@ public final class TemporalManager<K, V extends Temporary> {
 		instances.addExpirationListener((key, value) -> value.revert());
 	}
 
-	public boolean isTemp(K key) {
+	public boolean isTemp(@Nullable K key) {
+		if (key == null) return false;
 		return instances.containsKey(key);
 	}
 
-	public Optional<V> get(K key) {
+	public Optional<V> get(@NonNull K key) {
 		return Optional.ofNullable(instances.get(key));
 	}
 
-	public void addEntry(K key, V value, long duration) {
-		if (duration == 0) duration = 600_000; // 10 minutes
+	public void addEntry(@NonNull K key, @NonNull V value, long duration) {
+		if (duration <= 0) duration = 600_000; // 10 minutes
 		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
 	}
 
@@ -50,7 +53,7 @@ public final class TemporalManager<K, V extends Temporary> {
 	 * This is used inside {@link Temporary#revert}
 	 * @param key the key of the entry to remove
 	 */
-	public void removeEntry(K key) {
+	public void removeEntry(@NonNull K key) {
 		instances.remove(key);
 	}
 

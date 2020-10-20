@@ -22,6 +22,7 @@ package me.moros.bending.util;
 import me.moros.bending.model.user.User;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,19 +46,19 @@ public final class PotionUtil {
 		PotionEffectType.SLOW_DIGGING, PotionEffectType.WEAKNESS, PotionEffectType.WITHER
 	));
 
-	public static boolean isPositive(PotionEffectType type) {
+	public static boolean isPositive(@NonNull PotionEffectType type) {
 		return POSITIVE.contains(type);
 	}
 
-	public static boolean isNeutral(PotionEffectType type) {
+	public static boolean isNeutral(@NonNull PotionEffectType type) {
 		return NEUTRAL.contains(type);
 	}
 
-	public static boolean isNegative(PotionEffectType type) {
+	public static boolean isNegative(@NonNull PotionEffectType type) {
 		return NEGATIVE.contains(type);
 	}
 
-	public static boolean canAddPotion(User user, PotionEffectType type, int minDuration, int minAmplifier) {
+	public static boolean canAddPotion(@NonNull User user, @NonNull PotionEffectType type, int minDuration, int minAmplifier) {
 		PotionEffect effect = user.getEntity().getPotionEffect(type);
 		return effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < minAmplifier;
 	}

@@ -20,16 +20,16 @@
 package me.moros.bending.model.predicates.conditionals;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.predicates.conditionals.BendingConditions.ConditionBuilder;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class CompositeBendingConditional implements BendingConditional {
 	private final Set<BendingConditional> conditionals;
 
-	CompositeBendingConditional(BendingConditions.ConditionBuilder builder) {
-		Objects.requireNonNull(builder);
+	CompositeBendingConditional(@NonNull ConditionBuilder builder) {
 		this.conditionals = builder.getConditionals();
 	}
 
@@ -39,15 +39,15 @@ public class CompositeBendingConditional implements BendingConditional {
 		return conditionals.stream().allMatch(cond -> cond.test(user, desc));
 	}
 
-	public boolean hasConditional(BendingConditional conditional) {
+	public boolean hasConditional(@NonNull BendingConditional conditional) {
 		return conditionals.contains(conditional);
 	}
 
-	public boolean add(BendingConditional conditional) {
+	public boolean add(@NonNull BendingConditional conditional) {
 		return conditionals.add(conditional);
 	}
 
-	public boolean remove(BendingConditional conditional) {
+	public boolean remove(@NonNull BendingConditional conditional) {
 		return conditionals.remove(conditional);
 	}
 }

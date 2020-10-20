@@ -21,9 +21,9 @@ package me.moros.bending.protection.instances;
 
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+@FunctionalInterface
 public interface Protection {
-	boolean canBuild(User user, Block block);
-
-	String getName();
+	boolean canBuild(@NonNull User user, @NonNull Block block);
 }

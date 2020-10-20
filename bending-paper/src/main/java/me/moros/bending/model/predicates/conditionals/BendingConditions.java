@@ -19,19 +19,19 @@
 
 package me.moros.bending.model.predicates.conditionals;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public enum BendingConditions implements BendingConditional {
 	COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
 	ELEMENT((u, d) -> u.hasElement(d.getElement())),
 	PERMISSION((u, d) -> u.hasPermission(d)),
-	WORLD((u, d) -> !Game.isDisabledWorld(u.getWorld().getUID())),
+	WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID())),
 	TOGGLED((u, d) -> false),
 	GAMEMODE((u, d) -> !u.isSpectator());
 
@@ -50,7 +50,7 @@ public enum BendingConditions implements BendingConditional {
 	 * Constructs a new builder that includes {@link BendingConditions#ELEMENT}, {@link BendingConditions#WORLD},
 	 * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
 	 */
-	public static ConditionBuilder builder() {
+	public static @NonNull ConditionBuilder builder() {
 		return new ConditionBuilder().add(BendingConditions.COOLDOWN)
 			.add(BendingConditions.ELEMENT)
 			.add(BendingConditions.WORLD)
@@ -65,21 +65,21 @@ public enum BendingConditions implements BendingConditional {
 			conditionals = new HashSet<>();
 		}
 
-		public ConditionBuilder add(BendingConditional conditional) {
-			conditionals.add(Objects.requireNonNull(conditional));
+		public @NonNull ConditionBuilder add(@NonNull BendingConditional conditional) {
+			conditionals.add(conditional);
 			return this;
 		}
 
-		public ConditionBuilder remove(BendingConditional conditional) {
-			conditionals.remove(Objects.requireNonNull(conditional));
+		public @NonNull ConditionBuilder remove(@NonNull BendingConditional conditional) {
+			conditionals.remove(conditional);
 			return this;
 		}
 
-		public CompositeBendingConditional build() {
+		public @NonNull CompositeBendingConditional build() {
 			return new CompositeBendingConditional(this);
 		}
 
-		Set<BendingConditional> getConditionals() {
+		@NonNull Set<@NonNull BendingConditional> getConditionals() {
 			return conditionals;
 		}
 	}

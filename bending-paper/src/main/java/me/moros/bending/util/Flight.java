@@ -23,6 +23,7 @@ import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class Flight {
 	// Returns the Flight instance for a user. This will also increment the flight counter.
 	// Call release() to decrement the counter.
 	// Call remove() to completely remove flight.
-	public static Flight get(User user) {
+	public static @NonNull Flight get(@NonNull User user) {
 		return instances.computeIfAbsent(user, Flight::new).increment();
 	}
 
@@ -70,7 +71,7 @@ public class Flight {
 		changedFlying = true;
 	}
 
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
@@ -79,13 +80,13 @@ public class Flight {
 		if (--references < 1) remove(user);
 	}
 
-	public static boolean hasFlight(User user) {
+	public static boolean hasFlight(@NonNull User user) {
 		return instances.containsKey(user);
 	}
 
 	// Completely releases flight for the user.
 	// This will set the user back to the state before any Flight was originally added.
-	public static void remove(User user) {
+	public static void remove(@NonNull User user) {
 		if (!instances.containsKey(user)) return;
 		Flight flight = instances.remove(user);
 		if (flight.changedFlying) {

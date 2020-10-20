@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
@@ -46,6 +46,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -63,12 +64,12 @@ public class Bolt implements Ability {
 	private long startTime;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
-		if (Game.getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) return false;
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) return false;
 		this.user = user;
 		recalculateConfig();
 
-		if (Policies.IN_LIQUID.test(user, getDescription()) || !Game.getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (Policies.IN_LIQUID.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -79,11 +80,11 @@ public class Bolt implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -121,7 +122,7 @@ public class Bolt implements Ability {
 	}
 
 	public boolean isNearbyChannel() {
-		Optional<Bolt> instance = Game.getAbilityManager(user.getWorld()).getInstances(Bolt.class)
+		Optional<Bolt> instance = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(Bolt.class)
 			.filter(b -> !b.getUser().equals(user))
 			.filter(b -> b.getUser().getLocation().distanceSq(new Vector3(targetLocation)) < 4 * 4)
 			.findAny();
@@ -141,28 +142,28 @@ public class Bolt implements Ability {
 	private void strike() {
 		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
 			.map(Entity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
-		if (!Game.getProtectionSystem().canBuild(user, targetLocation.getBlock())) return;
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.getBlock())) return;
 		user.getWorld().strikeLightningEffect(targetLocation);
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		if (!isNearbyChannel()) dealDamage();
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "Bolt";
 	}
 

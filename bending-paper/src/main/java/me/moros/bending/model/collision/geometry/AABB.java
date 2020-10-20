@@ -22,6 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AABB implements Collider {
 	public static final AABB PLAYER_BOUNDS = new AABB(new Vector3(-0.3, 0.0, -0.3), new Vector3(0.3, 1.8, 0.3));
@@ -30,44 +31,44 @@ public class AABB implements Collider {
 	private final Vector3 min;
 	private final Vector3 max;
 
-	public AABB(Vector3 min, Vector3 max) {
+	public AABB(@NonNull Vector3 min, @NonNull Vector3 max) {
 		this.min = min;
 		this.max = max;
 	}
 
-	public AABB at(Vector3 pos) {
+	public @NonNull AABB at(@NonNull Vector3 pos) {
 		return new AABB(min.add(pos), max.add(pos));
 	}
 
-	public AABB grow(Vector3 diff) {
+	public @NonNull AABB grow(@NonNull Vector3 diff) {
 		return new AABB(min.subtract(diff), max.add(diff));
 	}
 
-	public AABB scale(Vector3 diff) {
+	public @NonNull AABB scale(@NonNull Vector3 diff) {
 		Vector3 extents = getHalfExtents();
 		Vector3 newExtents = extents.multiply(diff);
 		return grow(newExtents.subtract(extents));
 	}
 
-	public Vector3 min() {
+	public @NonNull Vector3 min() {
 		return min;
 	}
 
-	public Vector3 max() {
+	public @NonNull Vector3 max() {
 		return max;
 	}
 
-	public Vector3 mid() {
+	public @NonNull Vector3 mid() {
 		return min.add(max().subtract(min()).scalarMultiply(0.5));
 	}
 
-	public boolean contains(Vector3 test) {
+	public boolean contains(@NonNull Vector3 test) {
 		return (test.getX() >= min.getX() && test.getX() <= max.getX()) &&
 			(test.getY() >= min.getY() && test.getY() <= max.getY()) &&
 			(test.getZ() >= min.getZ() && test.getZ() <= max.getZ());
 	}
 
-	public boolean intersects(AABB other) {
+	public boolean intersects(@NonNull AABB other) {
 		return (max.getX() > other.min.getX() &&
 			min.getX() < other.max.getX() &&
 			max.getY() > other.min.getY() &&
@@ -76,11 +77,11 @@ public class AABB implements Collider {
 			min.getZ() < other.max.getZ());
 	}
 
-	public boolean intersects(Sphere sphere) {
+	public boolean intersects(@NonNull Sphere sphere) {
 		return sphere.intersects(this);
 	}
 
-	public boolean intersects(Ray ray) {
+	public boolean intersects(@NonNull Ray ray) {
 		Vector3 t0 = min.subtract(ray.origin).multiply(ray.invDir);
 		Vector3 t1 = max.subtract(ray.origin).multiply(ray.invDir);
 		Vector3 tmin = t0.min(t1);
@@ -89,7 +90,7 @@ public class AABB implements Collider {
 	}
 
 	@Override
-	public boolean intersects(Collider collider) {
+	public boolean intersects(@NonNull Collider collider) {
 		if (collider instanceof Sphere) {
 			return intersects((Sphere) collider);
 		} else if (collider instanceof AABB) {
@@ -104,12 +105,12 @@ public class AABB implements Collider {
 	}
 
 	@Override
-	public Vector3 getPosition() {
+	public @NonNull Vector3 getPosition() {
 		return mid();
 	}
 
 	@Override
-	public Vector3 getHalfExtents() {
+	public @NonNull Vector3 getHalfExtents() {
 		Vector3 half = max.subtract(min).scalarMultiply(0.5);
 		return new Vector3(FastMath.abs(half.getX()), FastMath.abs(half.getY()), FastMath.abs(half.getZ()));
 	}

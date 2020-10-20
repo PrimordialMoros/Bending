@@ -21,21 +21,10 @@ package me.moros.bending.events;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class CooldownRemoveEvent extends BendingEvent {
-	private final User user;
-	private final AbilityDescription desc;
-
-	public CooldownRemoveEvent(User user, AbilityDescription desc) {
-		this.user = user;
-		this.desc = desc;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public AbilityDescription getAbilityDescription() {
-		return desc;
+public class CooldownRemoveEvent extends BendingAbilityEvent {
+	public CooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
+		super(user, desc);
 	}
 }

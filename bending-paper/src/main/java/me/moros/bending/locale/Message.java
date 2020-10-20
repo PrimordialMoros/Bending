@@ -22,6 +22,7 @@ package me.moros.bending.locale;
 import me.moros.bending.model.user.CommandUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -134,25 +135,25 @@ public interface Message {
 	}
 
 	interface Args0 {
-		Component build();
+		@NonNull Component build();
 
-		default void send(CommandUser user) {
+		default void send(@NonNull CommandUser user) {
 			user.sendMessage(build());
 		}
 	}
 
 	interface Args1<A0> {
-		Component build(A0 arg0);
+		@NonNull Component build(@NonNull A0 arg0);
 
-		default void send(CommandUser user, A0 arg0) {
+		default void send(@NonNull CommandUser user, @NonNull A0 arg0) {
 			user.sendMessage(build(arg0));
 		}
 	}
 
 	interface Args2<A0, A1> {
-		Component build(A0 arg0, A1 arg1);
+		@NonNull Component build(@NonNull A0 arg0, @NonNull A1 arg1);
 
-		default void send(CommandUser user, A0 arg0, A1 arg1) {
+		default void send(@NonNull CommandUser user, @NonNull A0 arg0, @NonNull A1 arg1) {
 			user.sendMessage(build(arg0, arg1));
 		}
 	}

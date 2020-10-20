@@ -17,43 +17,36 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.storage.implementation;
+package me.moros.bending.storage;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.user.player.BendingPlayer;
-import me.moros.bending.model.user.player.BendingProfile;
-import me.moros.bending.storage.StorageType;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.profile.BendingProfile;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-public interface StorageImplementation {
-	StorageType getType();
+/**
+ * Handles all Storage tasks and their concurrency
+ */
+public interface BendingStorage extends Storage {
+	BendingProfile createProfile(@NonNull UUID uuid);
 
-	void init();
+	void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer);
 
-	void close();
+	void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
 
-	BendingProfile createProfile(UUID uuid);
+	boolean createElements(@NonNull Set<@NonNull Element> elements);
 
-	Optional<BendingProfile> loadProfile(UUID uuid);
+	boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities);
 
-	boolean updateProfile(BendingProfile profile);
+	Preset loadPreset(int playerId, @NonNull String name);
 
-	boolean createElements(Set<Element> elements);
+	void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer);
 
-	boolean createAbilities(Set<AbilityDescription> abilities);
-
-	boolean saveElements(BendingPlayer bendingPlayer);
-
-	boolean saveSlots(BendingPlayer bendingPlayer);
-
-	Preset loadPreset(int playerId, String name);
-
-	boolean savePreset(int playerId, Preset preset);
-
-	boolean deletePreset(int presetId);
+	void deletePresetAsync(int presetId);
 }

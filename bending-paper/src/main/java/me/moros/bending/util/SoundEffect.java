@@ -21,6 +21,7 @@ package me.moros.bending.util;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
@@ -33,17 +34,17 @@ public class SoundEffect {
 	private final float volume;
 	private final float pitch;
 
-	public SoundEffect(Sound sound) {
+	public SoundEffect(@NonNull Sound sound) {
 		this(sound, 1, 1);
 	}
 
-	public SoundEffect(Sound sound, float volume, float pitch) {
+	public SoundEffect(@NonNull Sound sound, float volume, float pitch) {
 		this.sound = Objects.requireNonNull(sound);
 		this.volume = volume;
 		this.pitch = pitch;
 	}
 
-	public Sound getSound() {
+	public @NonNull Sound getSound() {
 		return sound;
 	}
 
@@ -55,7 +56,7 @@ public class SoundEffect {
 		return pitch;
 	}
 
-	public void play(Location center) {
+	public void play(@NonNull Location center) {
 		SoundUtil.playSound(center, sound, volume, pitch);
 	}
 }

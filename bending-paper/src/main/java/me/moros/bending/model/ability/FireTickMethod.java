@@ -20,8 +20,9 @@
 package me.moros.bending.model.ability;
 
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface FireTickMethod {
-	void apply(Entity user, int amount);
+	void apply(@NonNull Entity user, int amount);
 }

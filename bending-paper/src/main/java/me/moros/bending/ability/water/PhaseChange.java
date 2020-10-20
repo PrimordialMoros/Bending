@@ -19,8 +19,8 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
@@ -37,6 +37,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class PhaseChange implements PassiveAbility {
 	private final Queue<Block> meltQueue = new ArrayDeque<>(32);
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 		return true;
@@ -62,11 +63,11 @@ public class PhaseChange implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		processQueue(freezeQueue, MaterialUtil::isWater, block -> {
 			Optional<TempBlock> tb = TempBlock.manager.get(block);
 			if (tb.isPresent()) {
@@ -95,7 +96,7 @@ public class PhaseChange implements PassiveAbility {
 		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(range));
 		boolean acted = false;
 		for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
-			if (!Game.getProtectionSystem().canBuild(user, block)) continue;
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			queue.offer(block);
 			acted = true;
 		}
@@ -127,13 +128,13 @@ public class PhaseChange implements PassiveAbility {
 
 	public static void freeze(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
 		}
 	}
 
 	public static void melt(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
 		}
 	}
 
@@ -142,17 +143,17 @@ public class PhaseChange implements PassiveAbility {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "PhaseChange";
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

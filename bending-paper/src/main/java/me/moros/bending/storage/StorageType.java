@@ -19,6 +19,8 @@
 
 package me.moros.bending.storage;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Arrays;
 
 /**
@@ -41,7 +43,7 @@ public enum StorageType {
 		this.path = schemaFileName;
 	}
 
-	public String getSchemaPath() {
+	public @NonNull String getSchemaPath() {
 		return path;
 	}
 
@@ -56,8 +58,7 @@ public enum StorageType {
 	 * @param def the default value
 	 * @return the parsed result or the default value if parsing was unsuccessful
 	 */
-	public static StorageType parse(String name, StorageType def) {
+	public static @NonNull StorageType parse(@NonNull String name, @NonNull StorageType def) {
 		return Arrays.stream(values()).filter(t -> name.equalsIgnoreCase(t.name)).findAny().orElse(def);
 	}
 }
-

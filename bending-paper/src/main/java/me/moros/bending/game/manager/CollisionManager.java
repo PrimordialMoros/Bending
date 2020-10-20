@@ -19,13 +19,15 @@
 
 package me.moros.bending.game.manager;
 
+import me.moros.bending.Bending;
+import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
 import me.moros.bending.util.Tasker;
-import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +41,7 @@ public final class CollisionManager {
 	private final Collection<RegisteredCollision> collisions = new ArrayList<>();
 	private final AbilityManager manager;
 
-	public CollisionManager(AbilityManager manager, World world) {
+	public CollisionManager(@NonNull AbilityManager manager) {
 		this.manager = manager;
 		Tasker.createTaskTimer(this::run, 5, 1);
 	}
@@ -63,11 +65,11 @@ public final class CollisionManager {
 
 			for (Ability first : firstAbilities) {
 				Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::getColliders);
-				if (firstColliders == null || firstColliders.isEmpty()) continue;
+				if (firstColliders.isEmpty()) continue;
 				for (Ability second : secondAbilities) {
 					if (first.getUser().equals(second.getUser())) continue;
 					Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::getColliders);
-					if (secondColliders == null || secondColliders.isEmpty()) continue;
+					if (secondColliders.isEmpty()) continue;
 					for (Collider firstCollider : firstColliders) {
 						for (Collider secondCollider : secondColliders) {
 							if (firstCollider.intersects(secondCollider)) {
@@ -87,8 +89,10 @@ public final class CollisionManager {
 		second.onCollision(secondCollision);
 	}
 
-	protected void registerCollision(AbilityDescription first, AbilityDescription second, boolean removeFirst, boolean removeSecond) {
-		if (first == null || second == null) return;
-		collisions.add(new RegisteredCollision(first, second, removeFirst, removeSecond));
+	protected void registerCollision(@NonNull AbilityDescription first, @NonNull AbilityDescription second, boolean removeFirst, boolean removeSecond) {
+		AbilityRegistry registry = Bending.getGame().getAbilityRegistry();
+		if (registry.isRegistered(first) && registry.isRegistered(second)) {
+			collisions.add(new RegisteredCollision(first, second, removeFirst, removeSecond));
+		}
 	}
 }

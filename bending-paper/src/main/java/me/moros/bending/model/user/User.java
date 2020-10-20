@@ -21,25 +21,26 @@ package me.moros.bending.model.user;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.ElementChangeEvent;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 public interface User extends BukkitUser {
-	ElementHolder getElementHolder();
+	@NonNull ElementHolder getElementHolder();
 
-	default boolean hasElement(Element element) {
-		if (element == null) return false;
+	default boolean hasElement(@NonNull Element element) {
 		return getElementHolder().hasElement(element);
 	}
 
-	default boolean addElement(Element element) {
+	default boolean addElement(@NonNull Element element) {
 		if (getElementHolder().addElement(element)) {
 			Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
 			return true;
@@ -47,7 +48,7 @@ public interface User extends BukkitUser {
 		return false;
 	}
 
-	default boolean removeElement(Element element) {
+	default boolean removeElement(@NonNull Element element) {
 		if (getElementHolder().removeElement(element)) {
 			validateSlots();
 			Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
@@ -56,51 +57,50 @@ public interface User extends BukkitUser {
 		return false;
 	}
 
-	default Set<Element> getElements() {
+	default @NonNull Set<@NonNull Element> getElements() {
 		return getElementHolder().getElements();
 	}
 
-	default boolean setElement(Element element) {
-		if (element == null) return false;
+	default boolean setElement(@NonNull Element element) {
 		getElementHolder().clear();
 		getElementHolder().addElement(element);
 		validateSlots();
-		Game.getAbilityManager(getWorld()).clearPassives(this);
-		Game.getAbilityManager(getWorld()).createPassives(this);
+		Bending.getGame().getAbilityManager(getWorld()).clearPassives(this);
+		Bending.getGame().getAbilityManager(getWorld()).createPassives(this);
 		Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
 		return true;
 	}
 
-	boolean isOnCooldown(AbilityDescription desc);
+	boolean isOnCooldown(@NonNull AbilityDescription desc);
 
-	void setCooldown(AbilityDescription desc, long duration);
+	void setCooldown(@NonNull AbilityDescription desc, long duration);
 
 	/**
 	 * Like setSlotAbility but won't call any events
 	 */
-	void setSlotAbilityInternal(int slot, AbilityDescription desc);
+	void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
 	/**
 	 * This is to be used when setting individual slots.
 	 * If you want to bind or change multiple slots then use dummy presets
 	 */
-	void setSlotAbility(int slot, AbilityDescription desc);
+	void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
-	Optional<AbilityDescription> getSlotAbility(int slot);
+	Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot);
 
 	Optional<AbilityDescription> getSelectedAbility();
 
-	default void clearSlot(int slot) {
+	default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
 		setSlotAbility(slot, null);
 	}
 
-	void addSlotContainer(AbilitySlotContainer slotContainer);
+	void addSlotContainer(@NonNull AbilitySlotContainer slotContainer);
 
 	void removeLastSlotContainer();
 
-	CompositeBendingConditional getBendingConditional();
+	@NonNull CompositeBendingConditional getBendingConditional();
 
-	default boolean canBend(AbilityDescription desc) {
+	default boolean canBend(@NonNull AbilityDescription desc) {
 		return getBendingConditional().test(this, desc);
 	}
 

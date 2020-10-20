@@ -20,7 +20,8 @@
 package me.moros.bending.model.ability;
 
 import me.moros.bending.model.slots.AbilitySlotContainer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface MultiAbility extends Ability {
-	AbilitySlotContainer getSlots();
+	@NonNull AbilitySlotContainer getSlots();
 }

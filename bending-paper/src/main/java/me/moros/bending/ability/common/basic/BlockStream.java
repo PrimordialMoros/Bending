@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.State;
@@ -37,6 +37,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public abstract class BlockStream implements State {
 	 * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
 	 * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
 	 */
-	public BlockStream(User user, Material material, double range, int speed) {
+	public BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
 		this.user = user;
 		this.material = material;
 		this.range = range;
@@ -74,7 +75,7 @@ public abstract class BlockStream implements State {
 	}
 
 	@Override
-	public void start(StateChain chain) {
+	public void start(@NonNull StateChain chain) {
 		if (started) return;
 		this.chain = chain;
 		stream = new ArrayDeque<>();
@@ -91,7 +92,7 @@ public abstract class BlockStream implements State {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		// Since this moves block by block, our only choice is to skip an update every x ticks based on our buffer speed
 		buffer += speed;
 		if (buffer < 100) return UpdateResult.CONTINUE;
@@ -112,7 +113,7 @@ public abstract class BlockStream implements State {
 		buffer -= 100; // Reduce buffer by one since we moved
 		current = current.add(direction);
 		head = current.toBlock(user.getWorld());
-		if (!Game.getProtectionSystem().canBuild(user, head)) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, head)) {
 			return UpdateResult.REMOVE;
 		}
 
@@ -140,13 +141,13 @@ public abstract class BlockStream implements State {
 		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
-	public abstract boolean onEntityHit(Entity entity);
+	public abstract boolean onEntityHit(@NonNull Entity entity);
 
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return colliders;
 	}
 
-	public boolean isValid(Block block) {
+	public boolean isValid(@NonNull Block block) {
 		if (material == Material.WATER) return MaterialUtil.isWater(block);
 		return material == block.getType();
 	}
@@ -155,7 +156,7 @@ public abstract class BlockStream implements State {
 		stream.forEach(this::clean);
 	}
 
-	private void clean(Block block) {
+	private void clean(@NonNull Block block) {
 		TempBlock.manager.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 }

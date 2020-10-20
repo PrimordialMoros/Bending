@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.game.Game;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
@@ -34,6 +34,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Predicate;
 
@@ -53,7 +54,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 	protected final double maxRange;
 	protected final double collisionRadius;
 
-	public ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
+	public ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
 		this.user = user;
 		this.ray = ray;
 		this.speed = speed;
@@ -66,10 +67,10 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		location = location.add(dir);
 		Block block = location.toBlock(user.getWorld());
-		if (location.distanceSq(ray.origin) > maxRange || !Game.getProtectionSystem().canBuild(user, block)) {
+		if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return UpdateResult.REMOVE;
 		}
 		render();
@@ -87,12 +88,12 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 		return UpdateResult.CONTINUE;
 	}
 
-	public Location getBukkitLocation() {
+	public @NonNull Location getBukkitLocation() {
 		return location.toLocation(user.getWorld());
 	}
 
 	@Override
-	public Collider getCollider() {
+	public @NonNull Collider getCollider() {
 		return collider;
 	}
 }

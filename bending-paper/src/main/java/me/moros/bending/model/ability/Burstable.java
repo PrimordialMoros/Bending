@@ -21,9 +21,10 @@ package me.moros.bending.model.ability;
 
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Burstable extends Ability {
-	void initialize(User user, Vector3 location, Vector3 direction);
+	void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction);
 
 	void setRenderInterval(long interval);
 

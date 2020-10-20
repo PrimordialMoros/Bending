@@ -38,6 +38,7 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,14 +55,14 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static Collection<Block> getNearbyBlocks(Location location, double radius) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius) {
 		return getNearbyBlocks(location, radius, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static Collection<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
 		return getNearbyBlocks(location, radius, predicate, 0);
 	}
 
@@ -74,7 +75,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static Collection<Block> getNearbyBlocks(Location location, double radius, Predicate<Block> predicate, int limit) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
 		int r = NumberConversions.ceil(radius) + 1;
 		double originX = location.getX();
 		double originY = location.getY();
@@ -100,14 +101,14 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static Collection<Block> getNearbyBlocks(World world, AABB box) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box) {
 		return getNearbyBlocks(world, box, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static Collection<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
 		return getNearbyBlocks(world, box, predicate, 0);
 	}
 
@@ -120,7 +121,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static Collection<Block> getNearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
+	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
 		if (box == AABBUtils.DUMMY_COLLIDER) return Collections.emptyList();
 		Vector3 min = box.min();
 		Vector3 max = box.max();
@@ -143,7 +144,7 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT}.
 	 */
-	public static Location getTarget(World world, Ray ray) {
+	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray) {
 		return getTarget(world, ray, MaterialUtil.TRANSPARENT.getValues());
 	}
 
@@ -155,7 +156,7 @@ public final class WorldMethods {
 	 * @param ignored a set of materials that will be ignored
 	 * @return the target location
 	 */
-	public static Location getTarget(World world, Ray ray, Set<Material> ignored) {
+	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
 		Location location = ray.origin.toLocation(world);
 		Vector direction = ray.direction.normalize().toVector();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
@@ -175,7 +176,7 @@ public final class WorldMethods {
 	/**
 	 * @see #blockCast(World, Ray, double, Set)
 	 */
-	public static Optional<Block> blockCast(World world, Ray ray, double range) {
+	public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range) {
 		return blockCast(world, ray, range, Collections.emptySet());
 	}
 
@@ -187,7 +188,7 @@ public final class WorldMethods {
 	 * @param ignore the set of blocks that will be ignored, passable block types are also ignored.
 	 * @return Optional of the result block
 	 */
-	public static Optional<Block> blockCast(World world, Ray ray, double range, Set<Block> ignore) {
+	public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range, @NonNull Set<@NonNull Block> ignore) {
 		BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, NumberConversions.floor(range));
 		while (it.hasNext()) {
 			Block closestBlock = it.next();
@@ -202,7 +203,7 @@ public final class WorldMethods {
 	/**
 	 * @see World#rayTraceBlocks(Location, Vector, double)
 	 */
-	public static Optional<Block> rayTraceBlocks(Location location, Vector direction, double range) {
+	public static Optional<Block> rayTraceBlocks(@NonNull Location location, @NonNull Vector direction, double range) {
 		RayTraceResult result = location.getWorld().rayTraceBlocks(location, direction, range, FluidCollisionMode.ALWAYS, false);
 		if (result != null && result.getHitBlock() != null) return Optional.of(result.getHitBlock());
 		return Optional.empty();
@@ -212,7 +213,7 @@ public final class WorldMethods {
 	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
 	 * @see World#rayTraceEntities(Location, Vector, double, Predicate)
 	 */
-	public static Optional<LivingEntity> getTargetEntity(User user, double range) {
+	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range) {
 		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
@@ -223,7 +224,7 @@ public final class WorldMethods {
 	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
 	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
 	 */
-	public static Optional<LivingEntity> getTargetEntity(User user, double range, int raySize) {
+	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range, int raySize) {
 		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(user.getEntity()));
 		if (result != null && result.getHitEntity() instanceof LivingEntity)
 			return Optional.of((LivingEntity) result.getHitEntity());
@@ -236,7 +237,7 @@ public final class WorldMethods {
 	 * @param entity the entity to check
 	 * @return true if entity standing on ground, false otherwise
 	 */
-	public static boolean isOnGround(Entity entity) {
+	public static boolean isOnGround(@NonNull Entity entity) {
 		final double epsilon = 0.01;
 		Vector3 location = new Vector3(entity.getLocation().subtract(0, epsilon, 0));
 		AABB entityBounds = AABBUtils.getEntityBounds(entity).at(location);
@@ -261,7 +262,7 @@ public final class WorldMethods {
 	 * @param entity the entity to check
 	 * @return the distance in blocks between the entity and ground or 256 (max range).
 	 */
-	public static double distanceAboveGround(Entity entity) {
+	public static double distanceAboveGround(@NonNull Entity entity) {
 		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
 		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 256, 0));
 		while (it.hasNext()) {
@@ -282,7 +283,7 @@ public final class WorldMethods {
 	 * @param predicate the type of blocks to accept
 	 * @return whether the user is against a wall
 	 */
-	public static boolean isAgainstWall(User user, Predicate<Block> predicate) {
+	public static boolean isAgainstWall(@NonNull User user, @NonNull Predicate<Block> predicate) {
 		Block origin = user.getLocBlock();
 		for (BlockFace face : BlockMethods.CARDINAL_FACES) {
 			Block relative = origin.getRelative(face);

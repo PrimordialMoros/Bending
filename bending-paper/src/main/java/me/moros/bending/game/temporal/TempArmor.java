@@ -23,6 +23,7 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,20 +48,20 @@ public class TempArmor implements Temporary {
 		manager.addEntry(player, this, duration);
 	}
 
-	public static Optional<TempArmor> create(Player player, ItemStack[] armor, long duration) {
+	public static Optional<TempArmor> create(@NonNull Player player, @NonNull ItemStack[] armor, long duration) {
 		if (manager.isTemp(player)) return Optional.empty();
 		return Optional.of(new TempArmor(player, armor, duration));
 	}
 
-	public Player getPlayer() {
+	public @NonNull Player getPlayer() {
 		return player;
 	}
 
-	public Collection<ItemStack> getSnapshot() {
+	public @NonNull Collection<ItemStack> getSnapshot() {
 		return Arrays.asList(snapshot);
 	}
 
-	public Collection<ItemStack> getArmor() {
+	public @NonNull Collection<ItemStack> getArmor() {
 		return Arrays.asList(armor);
 	}
 
@@ -72,7 +73,7 @@ public class TempArmor implements Temporary {
 	}
 
 	@Override
-	public void setRevertTask(RevertTask task) {
+	public void setRevertTask(@NonNull RevertTask task) {
 		this.revertTask = task;
 	}
 }

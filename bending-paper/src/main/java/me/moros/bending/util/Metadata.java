@@ -21,6 +21,8 @@ package me.moros.bending.util;
 
 import me.moros.bending.Bending;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to provide and construct metadata for the {@link Bending} plugin.
@@ -33,7 +35,7 @@ public final class Metadata {
 		return new FixedMetadataValue(Bending.getPlugin(), "");
 	}
 
-	public static FixedMetadataValue customMetadata(Object obj) {
+	public static @NonNull FixedMetadataValue customMetadata(@Nullable Object obj) {
 		return new FixedMetadataValue(Bending.getPlugin(), obj);
 	}
 }

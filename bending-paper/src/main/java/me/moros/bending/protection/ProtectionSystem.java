@@ -33,6 +33,8 @@ import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -70,14 +72,14 @@ public class ProtectionSystem extends Configurable {
 	 * Remove the block protection cache for the specified user.
 	 * @param user the user to invalidate
 	 */
-	public void invalidate(User user) {
+	public void invalidate(@NonNull User user) {
 		cache.remove(user);
 	}
 
 	/**
 	 * @see #canBuild(User, Block, boolean)
 	 */
-	public boolean canBuild(User user, Block block) {
+	public boolean canBuild(@NonNull User user, @NonNull Block block) {
 		return canBuild(user, block, false);
 	}
 
@@ -85,7 +87,7 @@ public class ProtectionSystem extends Configurable {
 	 * Uses {@link AbilityDescription#isHarmless}
 	 * @see #canBuild(User, Block, boolean)
 	 */
-	public boolean canBuild(User user, Block block, AbilityDescription desc) {
+	public boolean canBuild(@NonNull User user, @NonNull Block block, @Nullable AbilityDescription desc) {
 		return canBuild(user, block, desc != null && desc.isHarmless());
 	}
 
@@ -99,7 +101,7 @@ public class ProtectionSystem extends Configurable {
 	 * @return the result.
 	 * @see #canBuildPostCache(User, Block)
 	 */
-	public boolean canBuild(User user, Block block, boolean isHarmless) {
+	public boolean canBuild(@NonNull User user, @NonNull Block block, boolean isHarmless) {
 		if (isHarmless && allowHarmless) return true;
 		Boolean result = cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
 		return result != null && result;
@@ -120,7 +122,7 @@ public class ProtectionSystem extends Configurable {
 	 * @param name the name of the protection to register
 	 * @param creator the factory function that creates the protection instance
 	 */
-	public void registerProtectMethod(String name, ProtectionFactory creator) {
+	public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
 		CommentedConfigurationNode node = ConfigManager.getConfig().getNode("protection", name);
 		if (!node.getBoolean(true)) return;
 		try {
@@ -143,6 +145,6 @@ public class ProtectionSystem extends Configurable {
 
 	@FunctionalInterface
 	public interface ProtectionFactory {
-		Protection create() throws PluginNotFoundException;
+		@NonNull Protection create() throws PluginNotFoundException;
 	}
 }

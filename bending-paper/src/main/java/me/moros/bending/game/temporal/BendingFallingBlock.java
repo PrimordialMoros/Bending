@@ -26,6 +26,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingFallingBlock implements Temporary {
 	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
@@ -35,7 +36,7 @@ public class BendingFallingBlock implements Temporary {
 	public static void init() {
 	}
 
-	public BendingFallingBlock(Location location, BlockData data, Vector velocity, boolean gravity, long duration) {
+	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector velocity, boolean gravity, long duration) {
 		fallingBlock = location.getWorld().spawnFallingBlock(location, data);
 		fallingBlock.setVelocity(velocity);
 		fallingBlock.setGravity(gravity);
@@ -43,15 +44,15 @@ public class BendingFallingBlock implements Temporary {
 		manager.addEntry(fallingBlock, this, duration);
 	}
 
-	public BendingFallingBlock(Location location, BlockData data, long duration) {
+	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
 		this(location, data, new Vector(), false, duration);
 	}
 
-	public BendingFallingBlock(Block block, BlockData data, Vector velocity, boolean gravity, long duration) {
+	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector velocity, boolean gravity, long duration) {
 		this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
 	}
 
-	public BendingFallingBlock(Block block, BlockData data, long duration) {
+	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, long duration) {
 		this(block, data, new Vector(), false, duration);
 	}
 
@@ -62,12 +63,12 @@ public class BendingFallingBlock implements Temporary {
 		if (revertTask != null) revertTask.execute();
 	}
 
-	public FallingBlock getFallingBlock() {
+	public @NonNull FallingBlock getFallingBlock() {
 		return fallingBlock;
 	}
 
 	@Override
-	public void setRevertTask(Temporary.RevertTask task) {
+	public void setRevertTask(@NonNull RevertTask task) {
 		this.revertTask = task;
 	}
 }

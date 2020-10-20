@@ -25,6 +25,7 @@ import co.aikar.taskchain.TaskChainFactory;
 import me.moros.bending.Bending;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to provide task chains and create repeating tasks.
@@ -41,11 +42,11 @@ public final class Tasker {
 		return taskChainFactory.newChain();
 	}
 
-	public static <T> TaskChain<T> newSharedChain(String name) {
+	public static <T> TaskChain<T> newSharedChain(@NonNull String name) {
 		return taskChainFactory.newSharedChain(name);
 	}
 
-	public static BukkitTask createTaskTimer(Runnable runnable, long delay, long period) {
+	public static BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
 		return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, delay, period);
 	}
 }

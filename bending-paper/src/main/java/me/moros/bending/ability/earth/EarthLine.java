@@ -19,11 +19,11 @@
 
 package me.moros.bending.ability.earth;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
@@ -43,8 +43,8 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -72,6 +72,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,14 +98,14 @@ public class EarthLine implements Ability {
 	private Mode mode;
 
 	@Override
-	public boolean activate(User user, ActivationMethod method) {
+	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
 
 		Block source = SourceUtil.getSource(user, userConfig.selectRange, EarthMaterials.ALL).orElse(null);
 		if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) return false;
 		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
-		Optional<EarthLine> line = Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class);
+		Optional<EarthLine> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class);
 		if (line.isPresent()) {
 			State state = line.get().states.getCurrent();
 			if (state instanceof SelectedSource) {
@@ -123,11 +124,11 @@ public class EarthLine implements Ability {
 
 	@Override
 	public void recalculateConfig() {
-		userConfig = Game.getAttributeSystem().calculate(this, config);
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
-	public UpdateResult update() {
+	public @NonNull UpdateResult update() {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
@@ -150,7 +151,7 @@ public class EarthLine implements Ability {
 
 	public static void launch(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
 		}
 	}
 
@@ -173,7 +174,7 @@ public class EarthLine implements Ability {
 
 	public static void setPrisonMode(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
-			Game.getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::setPrisonMode);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::setPrisonMode);
 		}
 	}
 
@@ -196,25 +197,25 @@ public class EarthLine implements Ability {
 	}
 
 	@Override
-	public User getUser() {
+	public @NonNull User getUser() {
 		return user;
 	}
 
 	@Override
-	public String getName() {
+	public @NonNull String getName() {
 		return "EarthLine";
 	}
 
 	@Override
-	public Collection<Collider> getColliders() {
+	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (earthLine == null) return Collections.emptyList();
 		return Collections.singletonList(earthLine.getCollider());
 	}
 
 	@Override
-	public void onCollision(Collision collision) {
+	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
-			Game.getAbilityManager(user.getWorld()).destroyInstance(user, this);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
@@ -244,7 +245,7 @@ public class EarthLine implements Ability {
 		}
 
 		@Override
-		public boolean onEntityHit(Entity entity) {
+		public boolean onEntityHit(@NonNull Entity entity) {
 			switch (mode) {
 				case NORMAL:
 					raiseSpikes();
@@ -261,7 +262,7 @@ public class EarthLine implements Ability {
 		}
 
 		@Override
-		public boolean onBlockHit(Block block) {
+		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isWater(block)) {
 				if (mode == Mode.MAGMA) {
 					Location center = block.getLocation().add(0.5, 0.7, 0.5);
@@ -275,7 +276,7 @@ public class EarthLine implements Ability {
 		}
 
 		@Override
-		protected boolean isValidBlock(Block block) {
+		protected boolean isValidBlock(@NonNull Block block) {
 			if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
 			if (mode != Mode.MAGMA && MaterialUtil.isLava(block)) return false;
 			if (mode == Mode.MAGMA && EarthMaterials.isMetalBendable(block)) return false;

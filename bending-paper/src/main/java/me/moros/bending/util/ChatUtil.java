@@ -22,6 +22,7 @@ package me.moros.bending.util;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.regex.Pattern;
 
@@ -37,12 +38,12 @@ public final class ChatUtil {
 	 * @param input input the input string to sanitize
 	 * @return the sanitized output string
 	 */
-	public static String sanitizeInput(String input) {
+	public static @NonNull String sanitizeInput(@NonNull String input) {
 		String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
 		return output.length() > 16 ? output.substring(0, 16) : output;
 	}
 
-	public static ChatColor getLegacyColor(TextColor color) {
+	public static @NonNull ChatColor getLegacyColor(@NonNull TextColor color) {
 		return ChatColor.valueOf(NamedTextColor.nearestTo(color).toString().toUpperCase());
 	}
 }

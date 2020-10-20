@@ -22,16 +22,17 @@ package me.moros.bending.model.user;
 import me.moros.bending.Bending;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.command.CommandSender;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CommandUserWrapper implements CommandUser {
-	private final CommandSender sender;
+	private final Audience audience;
 
-	public CommandUserWrapper(CommandSender sender) {
-		this.sender = sender;
+	public CommandUserWrapper(@NonNull CommandSender sender) {
+		this.audience = Bending.getAudiences().sender(sender);
 	}
 
 	@Override
-	public Audience audience() {
-		return Bending.getAudiences().sender(sender);
+	public @NonNull Audience audience() {
+		return audience;
 	}
 }

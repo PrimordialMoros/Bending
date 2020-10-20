@@ -30,11 +30,12 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.moros.bending.model.exception.PluginNotFoundException;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.player.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WorldGuardProtection implements Protection {
 	private final WorldGuardPlugin worldGuard;
@@ -48,7 +49,7 @@ public class WorldGuardProtection implements Protection {
 	}
 
 	@Override
-	public boolean canBuild(User user, Block block) {
+	public boolean canBuild(@NonNull User user, @NonNull Block block) {
 		RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
 		Location adaptedLocation = BukkitAdapter.adapt(block.getLocation());
@@ -76,7 +77,7 @@ public class WorldGuardProtection implements Protection {
 	}
 
 	@Override
-	public String getName() {
+	public String toString() {
 		return "WorldGuard";
 	}
 }

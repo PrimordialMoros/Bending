@@ -23,35 +23,32 @@ import me.moros.bending.model.Element;
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Objects;
 import java.util.Set;
 
 public final class ElementHolder {
 	private final Set<Element> elements;
 
-	protected ElementHolder() {
+	ElementHolder() {
 		elements = EnumSet.noneOf(Element.class);
 	}
 
-	protected Set<Element> getElements() {
+	Set<Element> getElements() {
 		return Collections.unmodifiableSet(elements);
 	}
 
-	protected boolean hasElement(Element element) {
+	boolean hasElement(Element element) {
 		return elements.contains(element);
 	}
 
-	protected boolean addElement(Element element) {
-		Objects.requireNonNull(element);
+	boolean addElement(Element element) {
 		return elements.add(element);
 	}
 
-	protected boolean removeElement(Element element) {
-		Objects.requireNonNull(element);
+	boolean removeElement(Element element) {
 		return elements.remove(element);
 	}
 
-	protected void clear() {
+	void clear() {
 		elements.clear();
 	}
 }

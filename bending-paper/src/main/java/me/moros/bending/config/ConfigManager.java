@@ -23,6 +23,7 @@ package me.moros.bending.config;
 import me.moros.bending.Bending;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,7 +40,7 @@ public final class ConfigManager {
 
 	private static final Collection<Configurable> instances = new ArrayList<>();
 
-	public static void init(String directory) {
+	public static void init(@NonNull String directory) {
 		Path path = Paths.get(directory, "bending.conf");
 		URL url = Objects.requireNonNull(Bending.class.getClassLoader().getResource("default.conf"));
 		loader = HoconConfigurationLoader.builder()
@@ -75,11 +76,11 @@ public final class ConfigManager {
 		}
 	}
 
-	public static CommentedConfigurationNode getConfig() {
+	public static @NonNull CommentedConfigurationNode getConfig() {
 		return configRoot;
 	}
 
-	public static void add(Configurable c) {
+	public static void add(@NonNull Configurable c) {
 		instances.add(c);
 	}
 }
