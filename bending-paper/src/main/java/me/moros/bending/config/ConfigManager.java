@@ -49,7 +49,7 @@ public final class ConfigManager {
 			Files.createDirectories(path.getParent());
 			configRoot = loader.load().mergeValuesFrom(HoconConfigurationLoader.builder().setURL(url).build().load());
 		} catch (IOException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 		}
 	}
 
@@ -57,7 +57,7 @@ public final class ConfigManager {
 		try {
 			configRoot = loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 		}
 	}
 
@@ -72,7 +72,7 @@ public final class ConfigManager {
 			Bending.getLog().info("Saving bending config");
 			loader.save(configRoot);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 		}
 	}
 

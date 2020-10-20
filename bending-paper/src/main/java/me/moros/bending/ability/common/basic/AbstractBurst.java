@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.math.Vector3;
@@ -54,7 +55,7 @@ public abstract class AbstractBurst {
 				try {
 					blast = type.getDeclaredConstructor().newInstance();
 				} catch (ReflectiveOperationException e) {
-					e.printStackTrace();
+					Bending.getLog().warn(e.getMessage());
 					return;
 				}
 				blast.initialize(user, user.getLocation().add(Vector3.PLUS_J).add(direction), direction.scalarMultiply(range));

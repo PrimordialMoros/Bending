@@ -38,7 +38,7 @@ public final class StorageFactory {
 		String configValue = storageNode.getNode("engine").getString("");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {
-			Bending.getLog().warning("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
+			Bending.getLog().warn("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
 		}
 		Bending.getLog().info("Loading storage provider... [" + engine + "]");
 

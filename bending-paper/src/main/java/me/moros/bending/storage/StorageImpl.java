@@ -31,6 +31,7 @@ import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.storage.sql.SqlStreamReader;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.logging.PluginLogger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.Jdbi;
@@ -49,14 +50,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public final class StorageImpl implements BendingStorage {
 	private final HikariDataSource dataSource;
 	private final StorageType type;
-	private Logger logger;
+	private PluginLogger logger;
 	private final Jdbi DB;
 
 	public StorageImpl(StorageType type, HikariDataSource source) {
@@ -71,14 +70,14 @@ public final class StorageImpl implements BendingStorage {
 	}
 
 	@Override
-	public boolean init(@NonNull Logger logger) {
+	public boolean init(@NonNull PluginLogger logger) {
 		this.logger = logger;
 		Collection<String> statements;
 		try (InputStream stream = Bending.getPlugin().getResource(type.getSchemaPath())) {
 			if (stream == null) return false;
 			statements = SqlStreamReader.parseQueries(stream);
 		} catch (IOException e) {
-			this.logger.log(Level.SEVERE, e.getMessage(), e);
+			this.logger.severe(e.getMessage());
 			return false;
 		}
 		if (!tableExists("bending_players")) {
@@ -149,7 +148,7 @@ public final class StorageImpl implements BendingStorage {
 			});
 			return true;
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return false;
 	}
@@ -170,7 +169,7 @@ public final class StorageImpl implements BendingStorage {
 			});
 			return true;
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return false;
 	}
@@ -195,7 +194,7 @@ public final class StorageImpl implements BendingStorage {
 				return new Preset(presetId, name, abilities);
 			});
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return null;
 	}
@@ -220,7 +219,7 @@ public final class StorageImpl implements BendingStorage {
 				return Optional.of(new BendingProfile(uuid, id, data, board));
 			});
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return Optional.empty();
 	}
@@ -233,7 +232,7 @@ public final class StorageImpl implements BendingStorage {
 			);
 			return true;
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return false;
 	}
@@ -251,7 +250,7 @@ public final class StorageImpl implements BendingStorage {
 			});
 			return true;
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.severe(e.getMessage());
 		}
 		return false;
 	}
@@ -272,7 +271,7 @@ public final class StorageImpl implements BendingStorage {
 			});
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return false;
 	}
@@ -300,7 +299,7 @@ public final class StorageImpl implements BendingStorage {
 			});
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return false;
 	}
@@ -313,7 +312,7 @@ public final class StorageImpl implements BendingStorage {
 			);
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return false;
 	}
@@ -325,7 +324,7 @@ public final class StorageImpl implements BendingStorage {
 				(int) handle.createQuery(SqlQueries.ABILITIES_SELECT_ID_BY_NAME.getQuery()).bind(0, name).mapToMap().one().get("ability_id")
 			);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return 0;
 	}
@@ -342,7 +341,7 @@ public final class StorageImpl implements BendingStorage {
 				}
 			});
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return slots;
 	}
@@ -354,7 +353,7 @@ public final class StorageImpl implements BendingStorage {
 					.mapToMap().stream().map(r -> (String) r.get("element_name")).collect(Collectors.toSet())
 			);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return Collections.emptySet();
 	}
@@ -366,7 +365,7 @@ public final class StorageImpl implements BendingStorage {
 					.mapToMap().stream().map(r -> (String) r.get("preset_name")).collect(Collectors.toSet())
 			);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return Collections.emptySet();
 	}
@@ -378,7 +377,7 @@ public final class StorageImpl implements BendingStorage {
 			);
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return false;
 	}
@@ -392,7 +391,7 @@ public final class StorageImpl implements BendingStorage {
 				return (int) query.mapToMap().one().get("preset_id");
 			});
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return 0;
 	}
@@ -405,7 +404,7 @@ public final class StorageImpl implements BendingStorage {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		return false;
 	}

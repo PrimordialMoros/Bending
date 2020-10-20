@@ -66,7 +66,7 @@ public final class SequenceManager {
 			if (valid) {
 				registeredSequences.put(entry.getKey(), sequence);
 			} else {
-				Bending.getLog().warning(desc.getName() + " sequence will be disabled as it requires an invalid ability to activate.");
+				Bending.getLog().warn(desc.getName() + " sequence will be disabled as it requires an invalid ability to activate.");
 			}
 		}
 		return registeredSequences.size();

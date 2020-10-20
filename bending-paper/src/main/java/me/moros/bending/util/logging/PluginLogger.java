@@ -17,15 +17,10 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.storage;
+package me.moros.bending.util.logging;
 
-import me.moros.bending.util.logging.PluginLogger;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-public interface Storage {
-	@NonNull StorageType getType();
-
-	boolean init(@NonNull PluginLogger logger);
-
-	void close();
+public interface PluginLogger {
+	void info(String s);
+	void warn(String s);
+	void severe(String s);
 }

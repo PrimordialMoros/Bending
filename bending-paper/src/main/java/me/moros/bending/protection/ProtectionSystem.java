@@ -130,7 +130,7 @@ public class ProtectionSystem extends Configurable {
 			protections.add(method);
 			Bending.getLog().info("Registered bending protection for " + name);
 		} catch (PluginNotFoundException e) {
-			Bending.getLog().warning("ProtectMethod " + name + " not able to be used since plugin was not found.");
+			Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
 		}
 	}
 

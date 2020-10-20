@@ -32,13 +32,15 @@ import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.logging.BendingLogger;
+import me.moros.bending.util.logging.PluginLogger;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.MetricsLite;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.logging.Logger;
 
 public class Bending extends JavaPlugin {
 	private static Bending plugin;
@@ -49,7 +51,7 @@ public class Bending extends JavaPlugin {
 	private NamespacedKey key;
 	private String author;
 	private String version;
-	private Logger log;
+	private PluginLogger logger;
 
 	private BendingEventBus eventBus;
 	private Game game;
@@ -58,7 +60,7 @@ public class Bending extends JavaPlugin {
 	public void onEnable() {
 		new MetricsLite(this, 8717);
 		plugin = this;
-		log = getLogger();
+		logger = new BendingLogger(LoggerFactory.getLogger(getClass()));
 		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
 		key = new NamespacedKey(this, "bending-core");
@@ -122,8 +124,8 @@ public class Bending extends JavaPlugin {
 		return plugin.version;
 	}
 
-	public static Logger getLog() {
-		return plugin.log;
+	public static PluginLogger getLog() {
+		return plugin.logger;
 	}
 
 	public static NamespacedKey getKey() {

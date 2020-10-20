@@ -113,7 +113,7 @@ public final class AttributeSystem {
 		try {
 			value = ((Number) field.get(config)).doubleValue();
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 			return false;
 		}
 
@@ -139,7 +139,7 @@ public final class AttributeSystem {
 		try {
 			field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 			return false;
 		}
 

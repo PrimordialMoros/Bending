@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.ability.description;
 
+import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -117,7 +118,7 @@ public class AbilityDescription {
 		try {
 			return type.getDeclaredConstructor().newInstance();
 		} catch (ReflectiveOperationException e) {
-			e.printStackTrace();
+			Bending.getLog().warn(e.getMessage());
 			return null;
 		}
 	}

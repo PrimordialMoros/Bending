@@ -22,20 +22,20 @@ package me.moros.bending.storage;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.Bending;
+import me.moros.bending.util.logging.PluginLogger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.logging.Logger;
 
 public class ConnectionBuilder<T extends Storage> {
 	private static final Set<String> poolNames = new HashSet<>();
 
 	private final BiFunction<StorageType, HikariDataSource, T> constructor;
 	private final StorageType engine;
-	private Logger logger;
+	private PluginLogger logger;
 	private String path = "";
 	private String host = "localhost";
 	private String database = "";
@@ -49,7 +49,7 @@ public class ConnectionBuilder<T extends Storage> {
 		this.logger = Bending.getLog();
 	}
 
-	public ConnectionBuilder<T> setLogger(@NonNull Logger logger) {
+	public ConnectionBuilder<T> setLogger(@NonNull PluginLogger logger) {
 		this.logger = logger;
 		return this;
 	}
@@ -86,15 +86,15 @@ public class ConnectionBuilder<T extends Storage> {
 
 	public @Nullable T build(@NonNull String poolName) {
 		if (poolNames.contains(poolName)) {
-			logger.warning(poolName + " is already registered!");
+			logger.warn(poolName + " is already registered!");
 			return null;
 		}
 		if (host.isEmpty() || database.isEmpty() || username.isEmpty() || password.isEmpty()) {
-			logger.warning("Connection info is invalid! One or more values is empty!");
+			logger.warn("Connection info is invalid! One or more values is empty!");
 			return null;
 		}
-		if ((engine == StorageType.H2 || engine == StorageType.SQLITE) && path == null) {
-			logger.warning("Connection path is missing!");
+		if ((engine == StorageType.H2 || engine == StorageType.SQLITE) && path.isEmpty()) {
+			logger.warn("Connection path is missing!");
 			return null;
 		}
 

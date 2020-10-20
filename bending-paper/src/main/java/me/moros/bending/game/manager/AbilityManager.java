@@ -207,7 +207,7 @@ public class AbilityManager {
 				try (MCTiming timing = Bending.getTimingManager().of(ability.getName()).startTiming()) {
 					result = ability.update();
 				} catch (Exception e) {
-					e.printStackTrace();
+					Bending.getLog().warn(e.getMessage());
 				}
 				if (result == UpdateResult.REMOVE) {
 					removed.add(ability);
