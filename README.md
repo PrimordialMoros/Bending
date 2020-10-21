@@ -27,8 +27,6 @@ Main releases will be downloadable from [Github Releases](https://github.com/Pri
 
 This project requires Java 8 or newer and uses Gradle (which comes with a wrapper so you don't need to install it).
 
-It currently contains a single module `bending-paper` which targets PaperMC servers.
-
 Open a terminal and run `./gradlew build`
 
 ## Contributing - Developer Documentation
