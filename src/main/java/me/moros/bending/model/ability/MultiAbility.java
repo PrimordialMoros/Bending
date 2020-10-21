@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.ability;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.slots.AbilitySlotContainer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface MultiAbility extends Ability {
 	@NonNull AbilitySlotContainer getSlots();

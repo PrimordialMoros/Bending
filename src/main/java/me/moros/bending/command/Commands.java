@@ -19,16 +19,16 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BukkitCommandCompletionContext;
-import co.aikar.commands.BukkitCommandExecutionContext;
-import co.aikar.commands.CommandCompletions;
-import co.aikar.commands.CommandContexts;
-import co.aikar.commands.InvalidCommandArgument;
+import me.moros.atlas.acf.BukkitCommandCompletionContext;
+import me.moros.atlas.acf.BukkitCommandExecutionContext;
+import me.moros.atlas.acf.CommandCompletions;
+import me.moros.atlas.acf.CommandContexts;
+import me.moros.atlas.acf.InvalidCommandArgument;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AttributeSystem;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.attribute.Attributes;
+import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.exception.command.InvalidSlotException;
@@ -79,7 +79,7 @@ public class Commands {
 		});
 
 		commandCompletions.registerStaticCompletion("elements", Element.getElementNames());
-		commandCompletions.registerStaticCompletion("attributes", Arrays.asList(Attributes.TYPES));
+		commandCompletions.registerStaticCompletion("attributes", Arrays.asList(Attribute.TYPES));
 	}
 
 	private static void registerCommandContexts() {

@@ -19,20 +19,19 @@
 
 package me.moros.bending.ability.air.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirAgility implements PassiveAbility {
 	private static final Config config = new Config();
@@ -93,9 +92,9 @@ public class AirAgility implements PassiveAbility {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public int speedAmplifier;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public int jumpAmplifier;
 
 		@Override

@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.ability;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum FireTick implements FireTickMethod {
 	OVERWRITE(Entity::setFireTicks),

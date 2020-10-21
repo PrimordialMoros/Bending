@@ -19,19 +19,20 @@
 
 package me.moros.bending.model.ability.description;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
+import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
+import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -216,8 +217,9 @@ public class AbilityDescription {
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull ActivationMethod method, @NonNull ActivationMethod @NonNull ... methods) {
-			Collection<ActivationMethod> c = Arrays.asList(methods);
+		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull ActivationMethod method, @Nullable ActivationMethod @NonNull ... methods) {
+			Collection<ActivationMethod> c = new ArrayList<>();
+			if (methods != null) c.addAll(Arrays.asList(methods));
 			c.add(method);
 			return setActivation(c);
 		}

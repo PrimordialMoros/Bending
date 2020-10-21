@@ -19,8 +19,9 @@
 
 package me.moros.bending;
 
-import co.aikar.commands.PaperCommandManager;
-import co.aikar.commands.lib.timings.TimingManager;
+import me.moros.atlas.acf.PaperCommandManager;
+import me.moros.atlas.acf.lib.timings.TimingManager;
+import me.moros.atlas.kyori.adventure.platform.bukkit.BukkitAudiences;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
@@ -32,9 +33,8 @@ import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
-import me.moros.bending.util.logging.BendingLogger;
-import me.moros.bending.util.logging.PluginLogger;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import me.moros.storage.logging.Logger;
+import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.MetricsLite;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -51,7 +51,7 @@ public class Bending extends JavaPlugin {
 	private NamespacedKey key;
 	private String author;
 	private String version;
-	private PluginLogger logger;
+	private Logger logger;
 
 	private BendingEventBus eventBus;
 	private Game game;
@@ -60,7 +60,7 @@ public class Bending extends JavaPlugin {
 	public void onEnable() {
 		new MetricsLite(this, 8717);
 		plugin = this;
-		logger = new BendingLogger(LoggerFactory.getLogger(getClass()));
+		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass()));
 		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
 		key = new NamespacedKey(this, "bending-core");
@@ -124,7 +124,7 @@ public class Bending extends JavaPlugin {
 		return plugin.version;
 	}
 
-	public static PluginLogger getLog() {
+	public static Logger getLog() {
 		return plugin.logger;
 	}
 

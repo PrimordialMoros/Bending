@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -26,7 +28,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.FireTick;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -43,13 +44,11 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -216,20 +215,20 @@ public class FireShield implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public int fireTicks;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long diskDuration;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double diskRadius;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double diskRange;
 
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long shieldDuration;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double shieldRadius;
 
 		@Override

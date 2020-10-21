@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
@@ -34,7 +35,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;

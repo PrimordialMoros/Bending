@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
@@ -28,7 +32,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -45,9 +48,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.VectorMethods;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -56,7 +56,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -240,14 +239,14 @@ public class WaterRing implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long duration;
-		@Attribute(Attributes.SELECTION)
+		@Attribute(Attribute.SELECTION)
 		public double selectRange;
 		public boolean affectEntities;
-		@Attribute(Attributes.DAMAGE)
+		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public double knockback;
 
 		@Override

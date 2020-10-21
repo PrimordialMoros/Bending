@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.common.basic.AbstractWheel;
@@ -27,7 +29,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -41,12 +42,10 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -211,21 +210,21 @@ public class AirBlade implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double radius;
-		@Attribute(Attributes.DAMAGE)
+		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double prepareRange;
-		@Attribute(Attributes.SPEED)
+		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attributes.CHARGE_TIME)
+		@Attribute(Attribute.CHARGE_TIME)
 		public long maxChargeTime;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public double chargeFactor;
 
 		@Override

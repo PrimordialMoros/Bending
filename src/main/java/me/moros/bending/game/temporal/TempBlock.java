@@ -19,6 +19,7 @@
 
 package me.moros.bending.game.temporal;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.material.MaterialUtil;
@@ -29,7 +30,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 

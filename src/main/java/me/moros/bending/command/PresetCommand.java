@@ -19,22 +19,22 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Subcommand;
+import me.moros.atlas.acf.BaseCommand;
+import me.moros.atlas.acf.CommandHelp;
+import me.moros.atlas.acf.annotation.CommandAlias;
+import me.moros.atlas.acf.annotation.CommandCompletion;
+import me.moros.atlas.acf.annotation.CommandPermission;
+import me.moros.atlas.acf.annotation.Default;
+import me.moros.atlas.acf.annotation.Description;
+import me.moros.atlas.acf.annotation.HelpCommand;
+import me.moros.atlas.acf.annotation.Subcommand;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.CommandUser;
 import me.moros.bending.util.ChatUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Collection;
 

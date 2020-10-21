@@ -19,6 +19,7 @@
 
 package me.moros.bending.game;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.Element;
@@ -27,11 +28,9 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.AttributeConverter;
 import me.moros.bending.model.attribute.AttributeModifier;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public final class AttributeSystem {
 			.collect(Collectors.toList());
 
 		for (Field field : config.getClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(Attribute.class) || field.isAnnotationPresent(Attributes.class)) {
+			if (field.isAnnotationPresent(Attribute.class)) {
 				boolean wasAccessible = field.isAccessible();
 				field.setAccessible(true);
 				modifyField(field, config, activeModifiers);

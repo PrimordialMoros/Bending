@@ -19,8 +19,11 @@
 
 package me.moros.bending.protection;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.Cache;
+import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
@@ -31,10 +34,7 @@ import me.moros.bending.protection.instances.GriefPreventionProtection;
 import me.moros.bending.protection.instances.Protection;
 import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
 import java.util.ArrayList;

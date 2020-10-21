@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.water;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.config.Configurable;
@@ -29,7 +31,6 @@ import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
@@ -40,12 +41,10 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -186,19 +185,19 @@ public class Torrent implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attributes.DAMAGE)
+		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public double knockback;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public double verticalPush;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double freezeRadius;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public int freezeDuration;
 
 		@Override

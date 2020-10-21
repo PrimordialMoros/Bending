@@ -19,15 +19,15 @@
 
 package me.moros.bending.model.user;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.cf.common.value.qual.IntRange;
 import me.moros.bending.Bending;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.Optional;
 import java.util.Set;

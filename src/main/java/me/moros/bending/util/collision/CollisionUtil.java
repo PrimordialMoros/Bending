@@ -19,6 +19,7 @@
 
 package me.moros.bending.util.collision;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.CollisionCallback;
@@ -30,7 +31,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class CollisionUtil {
 	/**

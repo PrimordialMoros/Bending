@@ -19,6 +19,11 @@
 
 package me.moros.bending.model.user;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.cf.common.value.qual.IntRange;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -27,13 +32,8 @@ import me.moros.bending.model.predicates.conditionals.CompositeBendingConditiona
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.slots.AbilitySlotContainer;
 import me.moros.bending.util.Tasker;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

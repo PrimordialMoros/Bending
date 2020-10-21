@@ -19,13 +19,13 @@
 
 package me.moros.bending.ability.air.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class GracefulDescent implements PassiveAbility {
 	private User user;

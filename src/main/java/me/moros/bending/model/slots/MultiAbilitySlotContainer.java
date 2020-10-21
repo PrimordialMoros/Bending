@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.slots;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.cf.common.value.qual.IntRange;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.common.value.qual.IntRange;
 
 import java.util.Collection;
 

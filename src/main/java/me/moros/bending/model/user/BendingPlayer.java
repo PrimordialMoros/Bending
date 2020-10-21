@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.user;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
@@ -26,7 +27,6 @@ import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.profile.BendingProfile;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.Optional;

@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.earth.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -26,19 +28,16 @@ import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthCling implements PassiveAbility {
 	private static final BlockData STONE = Material.STONE.createBlockData();
@@ -105,7 +104,7 @@ public class EarthCling implements PassiveAbility {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.SPEED)
+		@Attribute(Attribute.SPEED)
 		public double speed;
 
 		@Override

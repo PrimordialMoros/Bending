@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.temporal;
 
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

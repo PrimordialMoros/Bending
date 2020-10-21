@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.water.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
@@ -28,7 +29,6 @@ import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastSwim implements PassiveAbility {
 	private User user;

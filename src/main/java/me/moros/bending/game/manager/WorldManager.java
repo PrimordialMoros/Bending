@@ -19,13 +19,13 @@
 
 package me.moros.bending.game.manager;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.DummyAbilityManager;
 import me.moros.bending.model.user.BendingPlayer;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.HashSet;

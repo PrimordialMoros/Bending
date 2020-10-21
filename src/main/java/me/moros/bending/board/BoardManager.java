@@ -19,6 +19,8 @@
 
 package me.moros.bending.board;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.ActivationMethod;
@@ -26,8 +28,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.util.ChatUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

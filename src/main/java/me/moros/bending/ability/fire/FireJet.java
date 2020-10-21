@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -26,7 +28,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicates.removal.Policies;
@@ -35,11 +36,9 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireJet implements Ability {
 	private static final Config config = new Config();
@@ -141,11 +140,11 @@ public class FireJet implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.SPEED)
+		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		private long duration;
 
 		@Override

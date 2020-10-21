@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.water.util;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
@@ -28,16 +30,13 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.predicates.removal.Policies;
 import me.moros.bending.model.predicates.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -103,7 +102,7 @@ public class BottleReturn implements Ability {
 
 	public static class Config extends Configurable {
 		public boolean enabled;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double maxDistance;
 
 		@Override

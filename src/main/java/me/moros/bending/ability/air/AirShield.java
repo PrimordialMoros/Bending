@@ -19,13 +19,14 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -38,9 +39,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -148,14 +147,13 @@ public class AirShield implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long duration;
-		@Attribute(Attributes.RADIUS)
-		@Attribute(Attributes.COLLISION_RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double radius;
-		@Attribute(Attributes.STRENGTH)
+		@Attribute(Attribute.STRENGTH)
 		public double maxPush;
 
 		@Override

@@ -19,9 +19,9 @@
 
 package me.moros.bending.events;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BendingEvent extends Event {
 	private static final HandlerList handlers = new HandlerList();

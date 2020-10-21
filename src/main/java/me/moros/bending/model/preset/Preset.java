@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.preset;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Objects;

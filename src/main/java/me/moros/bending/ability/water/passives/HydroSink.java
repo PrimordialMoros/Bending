@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.water.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
@@ -28,7 +29,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HydroSink implements PassiveAbility {
 	private User user;

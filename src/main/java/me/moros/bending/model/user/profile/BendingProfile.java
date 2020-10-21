@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.user.profile;
 
-import org.checkerframework.checker.index.qual.Positive;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.index.qual.Positive;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.UUID;

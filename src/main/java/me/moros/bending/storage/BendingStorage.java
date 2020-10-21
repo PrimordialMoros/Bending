@@ -19,12 +19,13 @@
 
 package me.moros.bending.storage;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.BendingProfile;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.storage.Storage;
 
 import java.util.Set;
 import java.util.UUID;

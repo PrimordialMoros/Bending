@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.earth;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -26,7 +28,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicates.removal.Policies;
@@ -35,11 +36,9 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.VectorMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -140,13 +139,13 @@ public class EarthTunnel implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public int radius;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long regen;
 
 		@Override

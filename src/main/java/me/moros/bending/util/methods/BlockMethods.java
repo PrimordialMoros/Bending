@@ -19,6 +19,7 @@
 
 package me.moros.bending.util.methods;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
@@ -31,7 +32,6 @@ import org.bukkit.block.Campfire;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;

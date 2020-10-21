@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.user;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import org.bukkit.World;
@@ -27,7 +28,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 

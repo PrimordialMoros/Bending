@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.fire.sequences;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -27,7 +29,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.FireTick;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -37,14 +38,12 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -155,15 +154,15 @@ public class FireSpin implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.DAMAGE)
+		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attributes.SPEED)
+		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attributes.COLLISION_RADIUS)
+		@Attribute(Attribute.COLLISION_RADIUS)
 		public double collisionRadius;
 
 		@Override

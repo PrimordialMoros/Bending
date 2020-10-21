@@ -19,11 +19,11 @@
 
 package me.moros.bending.events;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingEventBus {
 	public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {

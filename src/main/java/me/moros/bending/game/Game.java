@@ -19,7 +19,8 @@
 
 package me.moros.bending.game;
 
-import co.aikar.commands.lib.timings.MCTiming;
+import me.moros.atlas.acf.lib.timings.MCTiming;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.config.ConfigManager;
@@ -37,7 +38,6 @@ import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -66,9 +66,8 @@ public final class Game {
 		protectionSystem = new ProtectionSystem();
 
 		abilityRegistry = new AbilityRegistry();
+		sequenceManager = new SequenceManager(this);
 		AbilityInitializer.loadAbilities(this);
-
-		sequenceManager = new SequenceManager();
 		worldManager = new WorldManager();
 
 		attributeSystem = new AttributeSystem();

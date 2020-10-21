@@ -20,6 +20,7 @@
 package me.moros.bending.util;
 
 import com.destroystokyo.paper.MaterialSetTag;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.temporal.TempBlock;
@@ -34,7 +35,6 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;

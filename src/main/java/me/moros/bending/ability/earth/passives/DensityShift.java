@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.earth.passives;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -26,16 +28,13 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Predicate;
 
@@ -100,9 +99,9 @@ public class DensityShift implements PassiveAbility {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long duration;
-		@Attribute(Attributes.RADIUS)
+		@Attribute(Attribute.RADIUS)
 		public double radius;
 
 		@Override

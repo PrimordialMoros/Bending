@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.earth;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
@@ -35,7 +39,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -54,9 +57,6 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -72,7 +72,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -342,17 +341,17 @@ public class EarthLine implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.RANGE)
+		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attributes.SELECTION)
+		@Attribute(Attribute.SELECTION)
 		public double selectRange;
-		@Attribute(Attributes.DAMAGE)
+		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long prisonDuration;
-		@Attribute(Attributes.DURATION)
+		@Attribute(Attribute.DURATION)
 		public long regen;
 
 		@Override

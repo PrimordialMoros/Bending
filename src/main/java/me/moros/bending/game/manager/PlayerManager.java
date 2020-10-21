@@ -19,8 +19,9 @@
 
 package me.moros.bending.game.manager;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
+import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.preset.Preset;
@@ -28,7 +29,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.BendingStorage;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Duration;
 import java.util.Collection;

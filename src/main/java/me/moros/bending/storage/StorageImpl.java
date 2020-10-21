@@ -19,7 +19,13 @@
 
 package me.moros.bending.storage;
 
-import com.zaxxer.hikari.HikariDataSource;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.hikari.HikariDataSource;
+import me.moros.atlas.jdbi.v3.core.Jdbi;
+import me.moros.atlas.jdbi.v3.core.statement.Batch;
+import me.moros.atlas.jdbi.v3.core.statement.PreparedBatch;
+import me.moros.atlas.jdbi.v3.core.statement.Query;
 import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -29,15 +35,10 @@ import me.moros.bending.model.user.PresetHolder;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.sql.SqlQueries;
-import me.moros.bending.storage.sql.SqlStreamReader;
 import me.moros.bending.util.Tasker;
-import me.moros.bending.util.logging.PluginLogger;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.statement.Batch;
-import org.jdbi.v3.core.statement.PreparedBatch;
-import org.jdbi.v3.core.statement.Query;
+import me.moros.storage.SqlStreamReader;
+import me.moros.storage.StorageType;
+import me.moros.storage.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,15 +54,16 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public final class StorageImpl implements BendingStorage {
-	private final HikariDataSource dataSource;
+	private final HikariDataSource source;
 	private final StorageType type;
-	private PluginLogger logger;
+	private final Logger logger;
 	private final Jdbi DB;
 
-	public StorageImpl(StorageType type, HikariDataSource source) {
+	public StorageImpl(@NonNull StorageType type, @NonNull Logger logger, @NonNull HikariDataSource source) {
 		this.type = type;
-		dataSource = source;
-		DB = Jdbi.create(dataSource);
+		this.logger = logger;
+		this.source = source;
+		DB = Jdbi.create(this.source);
 	}
 
 	@Override
@@ -69,9 +71,7 @@ public final class StorageImpl implements BendingStorage {
 		return type;
 	}
 
-	@Override
-	public boolean init(@NonNull PluginLogger logger) {
-		this.logger = logger;
+	public boolean init() {
 		Collection<String> statements;
 		try (InputStream stream = Bending.getPlugin().getResource(type.getSchemaPath())) {
 			if (stream == null) return false;
@@ -92,7 +92,7 @@ public final class StorageImpl implements BendingStorage {
 
 	@Override
 	public void close() {
-		dataSource.close();
+		source.close();
 	}
 
 	/**
@@ -397,7 +397,7 @@ public final class StorageImpl implements BendingStorage {
 	}
 
 	private boolean tableExists(String table) {
-		try (ResultSet rs = dataSource.getConnection().getMetaData().getTables(null, null, "%", null)) {
+		try (ResultSet rs = source.getConnection().getMetaData().getTables(null, null, "%", null)) {
 			while (rs.next()) {
 				if (rs.getString(3).equalsIgnoreCase(table)) {
 					return true;

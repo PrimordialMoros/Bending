@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.exception.command;
 
-import co.aikar.commands.InvalidCommandArgument;
+import me.moros.atlas.acf.InvalidCommandArgument;
 
 public final class UserException extends InvalidCommandArgument {
 	public UserException(String message) {

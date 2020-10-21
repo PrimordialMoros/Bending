@@ -19,10 +19,10 @@
 
 package me.moros.bending.model;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
+import me.moros.atlas.kyori.adventure.text.format.TextColor;
 
 import java.util.Arrays;
 import java.util.Collection;

@@ -19,8 +19,8 @@
 
 package me.moros.bending.events;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.BendingPlayer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingPlayerLoadEvent extends BendingUserEvent {
 	public BendingPlayerLoadEvent(@NonNull BendingPlayer player) {

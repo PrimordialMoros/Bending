@@ -19,6 +19,7 @@
 
 package me.moros.bending.game.manager;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.model.ability.Ability;
@@ -27,7 +28,6 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
 import me.moros.bending.util.Tasker;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;

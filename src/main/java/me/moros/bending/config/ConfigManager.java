@@ -20,10 +20,10 @@
 package me.moros.bending.config;
 
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.net.URL;

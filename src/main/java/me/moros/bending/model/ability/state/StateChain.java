@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.ability.state;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.UpdateResult;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

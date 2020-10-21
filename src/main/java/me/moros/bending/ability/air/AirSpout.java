@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.air;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
@@ -26,7 +28,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -37,10 +38,8 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -162,11 +161,11 @@ public class AirSpout implements Ability {
 	}
 
 	public static class Config extends Configurable {
-		@Attribute(Attributes.COOLDOWN)
+		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attributes.HEIGHT)
+		@Attribute(Attribute.HEIGHT)
 		public double height;
-		@Attribute(Attributes.SPEED)
+		@Attribute(Attribute.SPEED)
 		public double maxSpeed;
 
 		@Override

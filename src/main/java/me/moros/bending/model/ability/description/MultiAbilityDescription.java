@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.ability.description;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.ability.ActivationMethod;
-import net.kyori.adventure.text.Component;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MultiAbilityDescription extends AbilityDescription {
 	private final String parent;

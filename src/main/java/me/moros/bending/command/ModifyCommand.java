@@ -19,21 +19,21 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
+import me.moros.atlas.acf.BaseCommand;
+import me.moros.atlas.acf.CommandHelp;
+import me.moros.atlas.acf.InvalidCommandArgument;
+import me.moros.atlas.acf.annotation.CommandAlias;
+import me.moros.atlas.acf.annotation.CommandCompletion;
+import me.moros.atlas.acf.annotation.CommandPermission;
+import me.moros.atlas.acf.annotation.Description;
+import me.moros.atlas.acf.annotation.HelpCommand;
+import me.moros.atlas.acf.annotation.Optional;
+import me.moros.atlas.acf.annotation.Subcommand;
+import me.moros.atlas.acf.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
+import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.AttributeModifier;
-import me.moros.bending.model.attribute.Attributes;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.BendingPlayer;
@@ -55,7 +55,7 @@ public class ModifyCommand extends BaseCommand {
 	@CommandCompletion("@elements|@abilities @attributes @players")
 	@Description("Add a new modifier to the specified player")
 	public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
-		String validType = Arrays.stream(Attributes.TYPES)
+		String validType = Arrays.stream(Attribute.TYPES)
 			.filter(attr -> attr.equalsIgnoreCase(type))
 			.findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
 		AttributeModifier modifier = new AttributeModifier(validType, operation, amount);

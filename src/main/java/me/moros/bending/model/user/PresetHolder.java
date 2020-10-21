@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.user;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
+import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.preset.Preset;
 

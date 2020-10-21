@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
@@ -36,7 +37,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.Optional;

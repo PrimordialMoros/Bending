@@ -19,13 +19,13 @@
 
 package me.moros.bending.locale;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.ComponentLike;
 import me.moros.bending.model.user.CommandUser;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static me.moros.atlas.kyori.adventure.text.Component.text;
+import static me.moros.atlas.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * WIP Locale support

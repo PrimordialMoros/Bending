@@ -19,7 +19,8 @@
 
 package me.moros.bending.listeners;
 
-import co.aikar.commands.lib.timings.MCTiming;
+import me.moros.atlas.acf.lib.timings.MCTiming;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
@@ -54,7 +55,6 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.UUID;

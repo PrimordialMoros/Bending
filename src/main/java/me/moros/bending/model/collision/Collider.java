@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.collision;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Collider {
 	boolean intersects(@NonNull Collider collider);

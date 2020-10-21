@@ -19,9 +19,9 @@
 
 package me.moros.bending.util;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 

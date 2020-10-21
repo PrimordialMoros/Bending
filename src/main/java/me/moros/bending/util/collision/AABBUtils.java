@@ -19,12 +19,12 @@
 
 package me.moros.bending.util.collision;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.DummyCollider;
 import me.moros.bending.model.math.Vector3;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AABBUtils {
 	public static final DummyCollider DUMMY_COLLIDER = new DummyCollider();

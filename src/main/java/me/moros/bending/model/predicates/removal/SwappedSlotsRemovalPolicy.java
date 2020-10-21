@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.predicates.removal;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class SwappedSlotsRemovalPolicy implements RemovalPolicy {
 	private final AbilityDescription expected;

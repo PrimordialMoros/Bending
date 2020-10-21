@@ -19,10 +19,12 @@
 
 package me.moros.bending.storage;
 
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.storage.ConnectionBuilder;
+import me.moros.storage.StorageType;
 
 import java.io.File;
 
@@ -38,9 +40,8 @@ public final class StorageFactory {
 		String configValue = storageNode.getNode("engine").getString("");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {
-			Bending.getLog().warn("Failed to load storage type: " + engine.toString() + ". Defaulting to H2.");
+			Bending.getLog().warn("Failed to parse: " + configValue + ". Defaulting to H2.");
 		}
-		Bending.getLog().info("Loading storage provider... [" + engine + "]");
 
 		CommentedConfigurationNode connectionNode = storageNode.getNode("connection");
 		String host = connectionNode.getNode("host").getString("localhost");
@@ -56,11 +57,12 @@ public final class StorageFactory {
 			path = Bending.getConfigFolder() + File.separator + "bending-sqlite.db";
 		}
 
+		String poolName = engine.name() + " Bending Hikari Connection Pool";
+
 		return ConnectionBuilder.create(StorageImpl::new, engine)
-			.setLogger(Bending.getLog()).setPath(path)
-			.setDatabase(database).setHost(host).setPort(port)
+			.setPath(path).setDatabase(database).setHost(host).setPort(port)
 			.setUsername(username).setPassword(password)
-			.build(engine.name() + " Bending Hikari Connection Pool");
+			.build(poolName, Bending.getLog());
 	}
 }
 

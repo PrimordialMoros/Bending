@@ -19,6 +19,7 @@
 
 package me.moros.bending.game.temporal;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Metadata;
@@ -29,7 +30,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();

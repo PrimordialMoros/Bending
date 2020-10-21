@@ -19,13 +19,13 @@
 
 package me.moros.bending.ability.common.basic;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;

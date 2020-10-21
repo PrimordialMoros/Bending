@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.user.profile;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.Set;

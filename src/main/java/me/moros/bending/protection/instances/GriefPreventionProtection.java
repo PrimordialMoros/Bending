@@ -19,6 +19,7 @@
 
 package me.moros.bending.protection.instances;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -26,7 +27,6 @@ import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class GriefPreventionProtection implements Protection {
 	public GriefPreventionProtection() throws PluginNotFoundException {

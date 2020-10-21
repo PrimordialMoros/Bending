@@ -19,11 +19,11 @@
 
 package me.moros.bending.model;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.stream.Stream;

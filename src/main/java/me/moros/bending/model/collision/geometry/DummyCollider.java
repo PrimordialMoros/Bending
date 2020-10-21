@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.collision.geometry;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class DummyCollider extends AABB {
 	public DummyCollider() {

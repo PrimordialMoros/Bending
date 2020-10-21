@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.user;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.kyori.adventure.audience.Audience;
 import me.moros.bending.Bending;
-import net.kyori.adventure.audience.Audience;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CommandUserWrapper implements CommandUser {
 	private final Audience audience;

@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.predicates.removal;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Supplier;
 

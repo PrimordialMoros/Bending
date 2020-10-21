@@ -19,6 +19,9 @@
 
 package me.moros.bending.game;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
@@ -38,10 +41,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
 import java.util.UUID;
