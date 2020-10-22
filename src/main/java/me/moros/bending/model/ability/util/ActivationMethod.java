@@ -17,27 +17,38 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.model.ability.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import org.bukkit.entity.Entity;
+public enum ActivationMethod {
+	PASSIVE("Passive"),
+	PUNCH("Click"),
+	PUNCH_ENTITY("Click Entity"),
+	INTERACT("Right Click Air", true),
+	INTERACT_ENTITY("Right Click Entity", true),
+	INTERACT_BLOCK("Right Click Block", true),
+	SNEAK("Hold Sneak"),
+	SNEAK_RELEASE("Release Sneak"),
+	FALL("Fall"),
+	SEQUENCE("Sequence");
 
-public enum FireTick implements FireTickMethod {
-	OVERWRITE(Entity::setFireTicks),
-	LARGER((e, a) -> {
-		if (e.getFireTicks() < a) e.setFireTicks(a);
-	}),
-	ACCUMULATE((e, a) -> e.setFireTicks(e.getFireTicks() + a));
+	private final String name;
+	private final boolean interact;
 
-	private final FireTickMethod method;
+	ActivationMethod(String name) {
+		this(name, false);
+	}
 
-	FireTick(FireTickMethod method) {
-		this.method = method;
+	ActivationMethod(String name, boolean interact) {
+		this.name = name;
+		this.interact = interact;
+	}
+
+	public boolean isInteract() {
+		return interact;
 	}
 
 	@Override
-	public void apply(@NonNull Entity entity, int amount) {
-		method.apply(entity, amount);
+	public String toString() {
+		return name;
 	}
 }
-

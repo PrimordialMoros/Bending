@@ -26,18 +26,20 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Explosive;
-import me.moros.bending.model.ability.FireTick;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -62,7 +64,7 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-public class Combustion implements Ability, Explosive {
+public class Combustion extends AbilityInstance implements Ability, Explosive {
 	private static final Config config = new Config();
 
 	private User user;
@@ -75,6 +77,10 @@ public class Combustion implements Ability, Explosive {
 	private boolean hasExploded;
 	private double distanceTravelled;
 	private double randomBeamDistance;
+
+	public Combustion(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -150,17 +156,8 @@ public class Combustion implements Ability, Explosive {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "Combustion";
 	}
 
 	@Override

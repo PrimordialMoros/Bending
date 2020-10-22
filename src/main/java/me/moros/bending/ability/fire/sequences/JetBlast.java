@@ -25,22 +25,32 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 
-public class JetBlast implements Ability {
+public class JetBlast extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
+	private static AbilityDescription jetDesc;
 
 	private Config userConfig;
 
 	private FireJet jet;
 
+	public JetBlast(@NonNull AbilityDescription desc) {
+		super(desc);
+		if (jetDesc == null) {
+			jetDesc = Bending.getGame().getAbilityRegistry()
+				.getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
+		}
+	}
+
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		jet = new FireJet();
+		jet = new FireJet(jetDesc);
 		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.PUNCH)) return false;
 
 		recalculateConfig();
@@ -70,15 +80,6 @@ public class JetBlast implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return jet.getUser();
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "JetBlast";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

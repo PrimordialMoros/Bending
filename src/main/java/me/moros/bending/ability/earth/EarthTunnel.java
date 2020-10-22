@@ -25,13 +25,14 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
@@ -43,7 +44,7 @@ import org.bukkit.block.Block;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class EarthTunnel implements Ability {
+public class EarthTunnel extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -56,6 +57,10 @@ public class EarthTunnel implements Ability {
 	private double distance = 0;
 	private int radius = 0;
 	private int angle = 0;
+
+	public EarthTunnel(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -127,15 +132,6 @@ public class EarthTunnel implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "EarthTunnel";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

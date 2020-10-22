@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.listeners;
+package me.moros.bending.listener;
 
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -27,7 +27,7 @@ import me.moros.bending.events.CooldownRemoveEvent;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;

@@ -25,10 +25,11 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.math.Vector3;
@@ -44,8 +45,9 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
 
-public class FireWave implements Ability {
+public class FireWave extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
+	private static AbilityDescription wallDesc;
 
 	private Config userConfig;
 
@@ -54,9 +56,17 @@ public class FireWave implements Ability {
 
 	private long nextTime;
 
+	public FireWave(@NonNull AbilityDescription desc) {
+		super(desc);
+		if (wallDesc == null) {
+			wallDesc = Bending.getGame().getAbilityRegistry()
+				.getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
+		}
+	}
+
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		wall = new FireWall();
+		wall = new FireWall(wallDesc);
 		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.PUNCH)) return false;
 
 		recalculateConfig();
@@ -113,15 +123,6 @@ public class FireWave implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return wall.getUser();
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FireWave";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	private static class WallInfo {

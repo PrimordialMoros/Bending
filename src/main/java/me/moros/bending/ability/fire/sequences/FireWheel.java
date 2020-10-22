@@ -25,16 +25,18 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -49,7 +51,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FireWheel implements Ability {
+public class FireWheel extends AbilityInstance implements Ability {
 	public static final Config config = new Config();
 
 	private User user;
@@ -57,6 +59,10 @@ public class FireWheel implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private Wheel wheel;
+
+	public FireWheel(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -92,17 +98,8 @@ public class FireWheel implements Ability {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FireWheel";
 	}
 
 	@Override

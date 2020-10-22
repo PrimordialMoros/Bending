@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.listeners;
+package me.moros.bending.listener;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.Game;

@@ -17,9 +17,23 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.model.predicate.removal;
 
-public enum UpdateResult {
-	CONTINUE,
-	REMOVE
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
+
+public class SwappedSlotsRemovalPolicy implements RemovalPolicy {
+	private final AbilityDescription expected;
+
+	public SwappedSlotsRemovalPolicy(@NonNull AbilityDescription expected) {
+		this.expected = expected;
+	}
+
+	@Override
+	public boolean test(User user, AbilityDescription desc) {
+		if (!(user instanceof BendingPlayer)) return false;
+		return !expected.equals(user.getSelectedAbility().orElse(null));
+	}
 }

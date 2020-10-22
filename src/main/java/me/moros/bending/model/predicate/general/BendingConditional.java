@@ -17,24 +17,14 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.listeners;
+package me.moros.bending.model.predicate.general;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.game.Game;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.world.WorldUnloadEvent;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.User;
 
-public class WorldListener implements Listener {
-	private final Game game;
+import java.util.function.BiPredicate;
 
-	public WorldListener(@NonNull Game game) {
-		this.game = game;
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onWorldUnload(WorldUnloadEvent event) {
-		game.clearWorld(event.getWorld());
-	}
+@FunctionalInterface
+public interface BendingConditional extends BiPredicate<User, AbilityDescription> {
+	boolean test(User user, AbilityDescription desc);
 }

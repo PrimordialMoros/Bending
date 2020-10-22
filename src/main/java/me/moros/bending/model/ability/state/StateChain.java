@@ -21,7 +21,7 @@ package me.moros.bending.model.ability.state;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.util.UpdateResult;
 import org.bukkit.block.Block;
 
 import java.util.ArrayDeque;

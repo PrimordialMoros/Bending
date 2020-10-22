@@ -20,6 +20,7 @@
 package me.moros.bending.model.ability;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.model.ability.util.UpdateResult;
 
 public interface Updatable {
 	@NonNull UpdateResult update();

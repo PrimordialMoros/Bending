@@ -17,25 +17,15 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.removal;
+package me.moros.bending.model.predicate.removal;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.predicates.removal.Policies.PolicyBuilder;
 import me.moros.bending.model.user.User;
 
-import java.util.Set;
+import java.util.function.BiPredicate;
 
-public class CompositeRemovalPolicy implements RemovalPolicy {
-	private final Set<RemovalPolicy> policies;
-
-	CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
-		this.policies = builder.getPolicies();
-	}
-
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		if (user == null || desc == null) return true;
-		return policies.stream().anyMatch(p -> p.test(user, desc));
-	}
+@FunctionalInterface
+public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
+	boolean test(User user, AbilityDescription desc);
 }
+

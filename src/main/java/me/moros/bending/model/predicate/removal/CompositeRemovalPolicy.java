@@ -17,37 +17,25 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.removal;
+package me.moros.bending.model.predicate.removal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.Policies.PolicyBuilder;
 import me.moros.bending.model.user.User;
-import org.apache.commons.math3.util.FastMath;
 
-import java.util.function.Supplier;
+import java.util.Set;
 
-public class OutOfRangeRemovalPolicy implements RemovalPolicy {
-	private final double range;
-	private final Vector3 origin;
-	private final Supplier<Vector3> fromSupplier;
+public class CompositeRemovalPolicy implements RemovalPolicy {
+	private final Set<RemovalPolicy> policies;
 
-	public OutOfRangeRemovalPolicy(double range, @NonNull Vector3 origin, @NonNull Supplier<Vector3> from) {
-		this.range = FastMath.abs(range);
-		this.origin = origin;
-		this.fromSupplier = from;
-	}
-
-	public OutOfRangeRemovalPolicy(double range, @NonNull Supplier<Vector3> from) {
-		this.range = FastMath.abs(range);
-		this.origin = null;
-		this.fromSupplier = from;
+	CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
+		this.policies = builder.getPolicies();
 	}
 
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
-		if (range == 0) return false;
-		if (origin != null) return fromSupplier.get().distanceSq(origin) >= (range * range);
-		return fromSupplier.get().distanceSq(user.getLocation()) >= (range * range);
+		if (user == null || desc == null) return true;
+		return policies.stream().anyMatch(p -> p.test(user, desc));
 	}
 }

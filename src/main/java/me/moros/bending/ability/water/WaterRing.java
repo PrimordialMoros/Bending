@@ -28,17 +28,18 @@ import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.StateChain;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -67,7 +68,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class WaterRing implements Ability {
+public class WaterRing extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private static final double RING_RADIUS = 2.8;
@@ -88,6 +89,10 @@ public class WaterRing implements Ability {
 	private double radius = RING_RADIUS;
 	private int index = 0;
 	private int sources = 0;
+
+	public WaterRing(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -227,15 +232,6 @@ public class WaterRing implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "WaterRing";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

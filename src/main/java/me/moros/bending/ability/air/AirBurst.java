@@ -25,10 +25,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.methods.UserMethods;
@@ -41,6 +41,10 @@ public class AirBurst extends AbstractBurst implements Ability {
 
 	private boolean released;
 	private long startTime;
+
+	public AirBurst(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -80,21 +84,8 @@ public class AirBurst extends AbstractBurst implements Ability {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "AirBurst";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public boolean isCharged() {

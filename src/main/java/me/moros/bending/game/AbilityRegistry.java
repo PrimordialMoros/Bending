@@ -22,9 +22,8 @@ package me.moros.bending.game;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -91,20 +90,9 @@ public final class AbilityRegistry {
 	/**
 	 * @param name the name to match
 	 * @return Optional ability description
-	 * @see #getAbilityDescription(Ability)
 	 */
 	public Optional<AbilityDescription> getAbilityDescription(String name) {
 		if (name == null || name.isEmpty()) return Optional.empty();
 		return Optional.ofNullable(abilities.get(name.toLowerCase()));
-	}
-
-	/**
-	 * This should only be used by {@link Ability#getDescription}
-	 * @param ability the ability to match
-	 * @return the ability description that matches the specified ability by name or null if not found
-	 * @see #getAbilityDescription(String)
-	 */
-	public AbilityDescription getAbilityDescription(Ability ability) {
-		return abilities.get(ability.getName().toLowerCase());
 	}
 }

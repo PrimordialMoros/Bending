@@ -23,10 +23,10 @@ import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.MultiAbility;
-import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 
@@ -204,7 +204,7 @@ public class AbilityManager {
 			while (iterator.hasNext()) {
 				Ability ability = iterator.next();
 				UpdateResult result = UpdateResult.REMOVE;
-				try (MCTiming timing = Bending.getTimingManager().of(ability.getName()).startTiming()) {
+				try (MCTiming timing = Bending.getTimingManager().of(ability.getDescription().getName()).startTiming()) {
 					result = ability.update();
 				} catch (Exception e) {
 					Bending.getLog().warn(e.getMessage());

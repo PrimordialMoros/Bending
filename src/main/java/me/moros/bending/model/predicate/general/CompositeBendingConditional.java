@@ -17,42 +17,37 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.model.predicate.general;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.predicate.general.BendingConditions.ConditionBuilder;
 import me.moros.bending.model.user.User;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Set;
 
-public interface Ability extends Updatable {
-	boolean activate(@NonNull User user, @NonNull ActivationMethod method); // return true if the ability was activated
+public class CompositeBendingConditional implements BendingConditional {
+	private final Set<BendingConditional> conditionals;
 
-	void recalculateConfig();
-
-	@NonNull AbilityDescription getDescription();
-
-	@NonNull User getUser();
-
-	default boolean setUser(@NonNull User newUser) {
-		return false;
+	CompositeBendingConditional(@NonNull ConditionBuilder builder) {
+		this.conditionals = builder.getConditionals();
 	}
 
-	default boolean isStatic() {
-		return false;
+	@Override
+	public boolean test(User user, AbilityDescription desc) {
+		if (user == null || desc == null) return false;
+		return conditionals.stream().allMatch(cond -> cond.test(user, desc));
 	}
 
-	default @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.emptyList();
+	public boolean hasConditional(@NonNull BendingConditional conditional) {
+		return conditionals.contains(conditional);
 	}
 
-	default void onCollision(@NonNull Collision collision) {
+	public boolean add(@NonNull BendingConditional conditional) {
+		return conditionals.add(conditional);
 	}
 
-	default void onDestroy() {
+	public boolean remove(@NonNull BendingConditional conditional) {
+		return conditionals.remove(conditional);
 	}
 }

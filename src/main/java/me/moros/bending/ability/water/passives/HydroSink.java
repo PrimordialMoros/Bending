@@ -21,17 +21,22 @@ package me.moros.bending.ability.water.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
-import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
-public class HydroSink implements PassiveAbility {
+public class HydroSink extends AbilityInstance implements PassiveAbility {
 	private User user;
+
+	public HydroSink(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -63,20 +68,7 @@ public class HydroSink implements PassiveAbility {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "HydroSink";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 }

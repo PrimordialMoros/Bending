@@ -25,8 +25,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -44,8 +46,9 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.Collection;
 import java.util.Collections;
 
-public class AirWheel implements Ability {
+public class AirWheel extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
+	private static AbilityDescription scooterDesc;
 
 	private User user;
 	private Config userConfig;
@@ -57,9 +60,18 @@ public class AirWheel implements Ability {
 	private long nextRenderTime;
 	private long nextDamageTime;
 
+	public AirWheel(@NonNull AbilityDescription desc) {
+		super(desc);
+		if (scooterDesc == null) {
+			scooterDesc = Bending.getGame().getAbilityRegistry()
+				.getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
+		}
+	}
+
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		scooter = new AirScooter();
+
+		scooter = new AirScooter(scooterDesc);
 		if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.PUNCH))
 			return false;
 		scooter.canRender = false;
@@ -133,11 +145,6 @@ public class AirWheel implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "AirWheel";
 	}
 
 	public static class Config extends Configurable {

@@ -31,10 +31,10 @@ import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,41 +62,41 @@ public final class AbilityInitializer {
 	}
 
 	private static void initAir(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
-		abilities.add(AbilityDescription.builder("AirAgility", AirAgility.class)
+		abilities.add(AbilityDescription.builder("AirAgility", AirAgility::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
 			.setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("GracefulDescent", GracefulDescent.class)
+		abilities.add(AbilityDescription.builder("GracefulDescent", GracefulDescent::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
 			.setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("AirSwipe", AirSwipe.class)
+		abilities.add(AbilityDescription.builder("AirSwipe", AirSwipe::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("AirBlast", AirBlast.class)
+		abilities.add(AbilityDescription.builder("AirBlast", AirBlast::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK_RELEASE).build());
 
-		abilities.add(AbilityDescription.builder("AirBurst", AirBurst.class)
+		abilities.add(AbilityDescription.builder("AirBurst", AirBurst::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
 
-		abilities.add(AbilityDescription.builder("AirShield", AirShield.class)
+		abilities.add(AbilityDescription.builder("AirShield", AirShield::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("AirSpout", AirSpout.class)
+		abilities.add(AbilityDescription.builder("AirSpout", AirSpout::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("AirPunch", AirPunch.class)
+		abilities.add(AbilityDescription.builder("AirPunch", AirPunch::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).build());
 
-		AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade.class)
+		AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.SNEAK_RELEASE).build();
 		abilities.add(airBlade);
 
-		AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter.class)
+		AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(airScooter);
 
-		AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel.class)
+		AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(airWheel);
 
@@ -110,102 +110,102 @@ public final class AbilityInitializer {
 	}
 
 	private static void initWater(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
-		abilities.add(AbilityDescription.builder("FastSwim", FastSwim.class)
+		abilities.add(AbilityDescription.builder("FastSwim", FastSwim::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("HydroSink", HydroSink.class)
+		abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout.class)
+		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters.class)
+		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
 
-		AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing.class)
+		AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
 		abilities.add(waterRing);
 
-		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent.class)
+		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
 		abilities.add(torrent);
 
-		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange.class)
+		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();
 		abilities.add(phaseChange);
 
-		AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl.class)
+		AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
 		abilities.add(iceCrawl);
 	}
 
 	private static void initEarth(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
-		abilities.add(AbilityDescription.builder("DensityShift", DensityShift.class)
+		abilities.add(AbilityDescription.builder("DensityShift", DensityShift::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("EarthCling", EarthCling.class)
+		abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("EarthLine", EarthLine.class)
+		abilities.add(AbilityDescription.builder("EarthLine", EarthLine::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel.class)
+		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
 		// TODO add earth abilities
 	}
 
 	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
-		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast.class)
+		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
 		abilities.add(fireBlast);
 
-		abilities.add(AbilityDescription.builder("FireBurst", FireBurst.class)
+		abilities.add(AbilityDescription.builder("FireBurst", FireBurst::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
-		AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl.class)
+		AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PASSIVE).build();
 		abilities.add(heatControl);
 
-		abilities.add(AbilityDescription.builder("Blaze", Blaze.class)
+		abilities.add(AbilityDescription.builder("Blaze", Blaze::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
-		AbilityDescription fireShield = AbilityDescription.builder("FireShield", FireShield.class)
+		AbilityDescription fireShield = AbilityDescription.builder("FireShield", FireShield::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
 		abilities.add(fireShield);
 
-		AbilityDescription fireJet = AbilityDescription.builder("FireJet", FireJet.class)
+		AbilityDescription fireJet = AbilityDescription.builder("FireJet", FireJet::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(fireJet);
 
-		AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall.class)
+		AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH).build();
 		abilities.add(fireWall);
 
-		AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave.class)
+		AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(fireWave);
 
-		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast.class)
+		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).setHarmless(true).build();
 		abilities.add(jetBlast);
 
-		AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick.class)
+		AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(fireKick);
 
-		AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin.class)
+		AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(fireSpin);
 
-		AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel.class)
+		AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(fireWheel);
 
-		abilities.add(AbilityDescription.builder("Bolt", Bolt.class)
+		abilities.add(AbilityDescription.builder("Bolt", Bolt::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("Combustion", Combustion.class)
+		abilities.add(AbilityDescription.builder("Combustion", Combustion::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
 
 		sequences.put(fireWave, new Sequence(

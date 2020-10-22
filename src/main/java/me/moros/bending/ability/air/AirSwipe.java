@@ -25,16 +25,18 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
-import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -56,7 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class AirSwipe implements Ability {
+public class AirSwipe extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -69,6 +71,10 @@ public class AirSwipe implements Ability {
 	private boolean charging;
 	private double factor = 1;
 	private long startTime;
+
+	public AirSwipe(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -121,10 +127,6 @@ public class AirSwipe implements Ability {
 		return (charging || !streams.isEmpty()) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
-	@Override
-	public void onDestroy() {
-	}
-
 	private void launch() {
 		double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
@@ -156,11 +158,6 @@ public class AirSwipe implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "AirSwipe";
 	}
 
 	private class AirStream extends ParticleStream {

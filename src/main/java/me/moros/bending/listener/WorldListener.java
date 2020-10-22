@@ -17,12 +17,24 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.listener;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import org.bukkit.entity.Entity;
+import me.moros.bending.game.Game;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldUnloadEvent;
 
-@FunctionalInterface
-public interface FireTickMethod {
-	void apply(@NonNull Entity user, int amount);
+public class WorldListener implements Listener {
+	private final Game game;
+
+	public WorldListener(@NonNull Game game) {
+		this.game = game;
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onWorldUnload(WorldUnloadEvent event) {
+		game.clearWorld(event.getWorld());
+	}
 }

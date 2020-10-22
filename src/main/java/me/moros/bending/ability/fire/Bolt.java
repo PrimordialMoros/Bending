@@ -24,16 +24,17 @@ import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
-import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -47,11 +48,9 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
-public class Bolt implements Ability {
+public class Bolt extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -61,6 +60,10 @@ public class Bolt implements Ability {
 	private Location targetLocation;
 
 	private long startTime;
+
+	public Bolt(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -134,10 +137,6 @@ public class Bolt implements Ability {
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
 	}
 
-	@Override
-	public void onDestroy() {
-	}
-
 	private void strike() {
 		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
 			.map(Entity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
@@ -148,22 +147,8 @@ public class Bolt implements Ability {
 	}
 
 	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "Bolt";
 	}
 
 	public static class Config extends Configurable {

@@ -20,18 +20,23 @@
 package me.moros.bending.ability.water.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
-import me.moros.bending.model.ability.UpdateResult;
-import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class FastSwim implements PassiveAbility {
+public class FastSwim extends AbilityInstance implements PassiveAbility {
 	private User user;
+
+	public FastSwim(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -61,20 +66,7 @@ public class FastSwim implements PassiveAbility {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FastSwim";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 }

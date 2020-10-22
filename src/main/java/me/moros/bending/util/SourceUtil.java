@@ -22,7 +22,6 @@ package me.moros.bending.util;
 import com.destroystokyo.paper.MaterialSetTag;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.water.util.*;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
 import org.bukkit.FluidCollisionMode;
@@ -38,6 +37,8 @@ import org.bukkit.util.Vector;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+
+// TODO remake sourcing from bottles
 
 /**
  * Utility class to handle bending sourcing.
@@ -88,7 +89,7 @@ public final class SourceUtil {
 	}
 
 	public static boolean fillBottle(@NonNull User user) {
-		if (!BottleReturn.config.enabled || !hasEmptyBottle(user)) return false;
+		if (!hasEmptyBottle(user)) return false;
 		if (user.getInventory().isPresent()) {
 			return user.getInventory().get().removeItem(emptyBottle).isEmpty() && user.getInventory().get().addItem(waterBottle).isEmpty();
 		}
@@ -96,8 +97,7 @@ public final class SourceUtil {
 	}
 
 	public static boolean emptyBottle(@NonNull User user) {
-		if (!BottleReturn.config.enabled || !hasFullBottle(user)) return false;
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, BottleReturn.class)) return false;
+		if (!hasFullBottle(user)) return false;
 		if (user.getInventory().isPresent()) {
 			return user.getInventory().get().removeItem(waterBottle).isEmpty() && user.getInventory().get().addItem(emptyBottle).isEmpty();
 		}

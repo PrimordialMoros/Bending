@@ -25,9 +25,11 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.FireTick;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -55,7 +57,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class FireKick implements Ability {
+public class FireKick extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -63,6 +65,10 @@ public class FireKick implements Ability {
 
 	private final Set<Entity> affectedEntities = new HashSet<>();
 	private final List<FireStream> streams = new ArrayList<>();
+
+	public FireKick(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -98,11 +104,6 @@ public class FireKick implements Ability {
 	}
 
 	@Override
-	public void onDestroy() {
-
-	}
-
-	@Override
 	public void onCollision(@NonNull Collision collision) {
 		if (collision.shouldRemoveFirst()) {
 			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
@@ -117,11 +118,6 @@ public class FireKick implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FireKick";
 	}
 
 	private class FireStream extends ParticleStream {

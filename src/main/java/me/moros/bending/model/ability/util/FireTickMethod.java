@@ -17,14 +17,12 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.conditionals;
+package me.moros.bending.model.ability.util;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
-
-import java.util.function.BiPredicate;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.bukkit.entity.Entity;
 
 @FunctionalInterface
-public interface BendingConditional extends BiPredicate<User, AbilityDescription> {
-	boolean test(User user, AbilityDescription desc);
+public interface FireTickMethod {
+	void apply(@NonNull Entity user, int amount);
 }

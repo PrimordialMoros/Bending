@@ -24,11 +24,12 @@ import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -38,11 +39,15 @@ import org.bukkit.block.BlockFace;
 
 import java.util.function.Predicate;
 
-public class DensityShift implements PassiveAbility {
+public class DensityShift extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
+
+	public DensityShift(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -81,21 +86,8 @@ public class DensityShift implements PassiveAbility {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "DensityShift";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {

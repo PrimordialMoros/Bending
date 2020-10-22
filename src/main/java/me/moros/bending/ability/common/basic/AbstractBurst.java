@@ -21,8 +21,10 @@ package me.moros.bending.ability.common.basic;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
@@ -30,8 +32,12 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public abstract class AbstractBurst {
+public abstract class AbstractBurst extends AbilityInstance {
 	protected final Collection<Burstable> blasts = new ArrayList<>();
+
+	protected AbstractBurst(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Class<T> type, double range) {
 		createBurst(user, type, range, true);

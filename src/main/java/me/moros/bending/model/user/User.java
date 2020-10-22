@@ -26,7 +26,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.predicates.conditionals.CompositeBendingConditional;
+import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.slots.AbilitySlotContainer;
 
 import java.util.Optional;

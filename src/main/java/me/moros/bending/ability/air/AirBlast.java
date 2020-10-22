@@ -25,17 +25,19 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.OutOfRangeRemovalPolicy;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -50,7 +52,7 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class AirBlast implements Ability, Burstable {
+public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	private static final Config config = new Config();
 
 	private User user;
@@ -65,6 +67,10 @@ public class AirBlast implements Ability, Burstable {
 	private boolean selectedOrigin;
 	private int particleCount;
 	private long renderInterval;
+
+	public AirBlast(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -129,10 +135,6 @@ public class AirBlast implements Ability, Burstable {
 		return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
-	@Override
-	public void onDestroy() {
-	}
-
 	private void selectOrigin() {
 		origin = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange)))
 			.subtract(user.getDirection().scalarMultiply(0.5));
@@ -169,11 +171,6 @@ public class AirBlast implements Ability, Burstable {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "AirBlast";
 	}
 
 	// Used to initialize the blast for bursts.

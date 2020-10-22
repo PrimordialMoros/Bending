@@ -26,17 +26,17 @@ import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
 import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
 import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
-import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * AbilityDescription is immutable and thread-safe.
@@ -44,7 +44,7 @@ import java.util.Objects;
  */
 public class AbilityDescription {
 	private final String name;
-	private final Class<? extends Ability> type;
+	private final Function<AbilityDescription, ? extends Ability> constructor;
 	private final Element element;
 	private final EnumSet<ActivationMethod> activationMethods;
 	private final String description;
@@ -54,9 +54,9 @@ public class AbilityDescription {
 	private final boolean sourcesPlants;
 	private final int hashcode;
 
-	protected AbilityDescription(@NonNull AbilityDescriptionBuilder builder) {
+	protected AbilityDescription(AbilityDescriptionBuilder builder) {
 		name = builder.name;
-		type = builder.type;
+		constructor = builder.constructor;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
 		if (builder.description.isEmpty()) {
@@ -72,7 +72,7 @@ public class AbilityDescription {
 		hidden = builder.hidden;
 		harmless = builder.harmless;
 		sourcesPlants = builder.sourcesPlants;
-		hashcode = Objects.hash(name, type, element, activationMethods, description, instructions, hidden, harmless);
+		hashcode = Objects.hash(name, constructor, element, activationMethods, description, instructions, hidden, harmless);
 	}
 
 	public @NonNull String getName() {
@@ -111,17 +111,8 @@ public class AbilityDescription {
 		return activationMethods.contains(method);
 	}
 
-	public boolean isAbility(@NonNull Ability ability) {
-		return type.isAssignableFrom(ability.getClass());
-	}
-
-	public @Nullable Ability createAbility() {
-		try {
-			return type.getDeclaredConstructor().newInstance();
-		} catch (ReflectiveOperationException e) {
-			Bending.getLog().warn(e.getMessage());
-			return null;
-		}
+	public @NonNull Ability createAbility() {
+		return constructor.apply(this);
 	}
 
 	public @NonNull CommentedConfigurationNode getConfigNode() {
@@ -180,20 +171,20 @@ public class AbilityDescription {
 	 * @return a preconfigured builder
 	 */
 	public @NonNull AbilityDescriptionBuilder builder() {
-		return new AbilityDescriptionBuilder(name, type)
+		return new AbilityDescriptionBuilder(name, constructor)
 			.setElement(element).setActivation(activationMethods)
 			.setDescription(description).setInstructions(instructions)
 			.setHidden(hidden).setHarmless(harmless)
 			.setSourcesPlants(sourcesPlants);
 	}
 
-	public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Class<T> type) {
-		return new AbilityDescriptionBuilder(name, type);
+	public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
+		return new AbilityDescriptionBuilder(name, constructor);
 	}
 
 	public static class AbilityDescriptionBuilder {
 		private final String name;
-		private final Class<? extends Ability> type;
+		private final Function<AbilityDescription, ? extends Ability> constructor;
 		private Element element;
 		private EnumSet<ActivationMethod> activationMethods;
 		private String description = "";
@@ -202,9 +193,9 @@ public class AbilityDescription {
 		private boolean harmless = false;
 		private boolean sourcesPlants = false;
 
-		public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Class<T> type) {
+		public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
 			this.name = name;
-			this.type = type;
+			this.constructor = constructor;
 		}
 
 		public @NonNull AbilityDescriptionBuilder setElement(@NonNull Element element) {

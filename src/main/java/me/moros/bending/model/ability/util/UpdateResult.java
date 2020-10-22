@@ -17,15 +17,9 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.removal;
+package me.moros.bending.model.ability.util;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
-
-import java.util.function.BiPredicate;
-
-@FunctionalInterface
-public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-	boolean test(User user, AbilityDescription desc);
+public enum UpdateResult {
+	CONTINUE,
+	REMOVE
 }
-

@@ -26,17 +26,19 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
-import me.moros.bending.model.ability.FireTick;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -63,7 +65,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class FireBlast implements Ability, Burstable {
+public class FireBlast extends AbilityInstance implements Ability, Burstable {
 	private static final Config config = new Config();
 
 	private User user;
@@ -78,6 +80,10 @@ public class FireBlast implements Ability, Burstable {
 	private int particleCount;
 	private long renderInterval;
 	private long startTime;
+
+	public FireBlast(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -128,10 +134,6 @@ public class FireBlast implements Ability, Burstable {
 		return (charging || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
-	@Override
-	public void onDestroy() {
-	}
-
 	private boolean launch() {
 		double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
@@ -159,11 +161,6 @@ public class FireBlast implements Ability, Burstable {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FireBlast";
 	}
 
 	// Used to initialize the blast for bursts.

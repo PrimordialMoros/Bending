@@ -20,8 +20,8 @@
 package me.moros.bending.model.ability.sequence;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 import java.util.ArrayList;
 import java.util.Arrays;

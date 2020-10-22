@@ -20,7 +20,7 @@
 package me.moros.bending.model.ability.state;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.util.UpdateResult;
 
 public final class DummyState implements State {
 	public static final State INSTANCE = new DummyState();

@@ -26,17 +26,19 @@ import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
-import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -53,8 +55,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class Torrent implements Ability {
+public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
+	private static AbilityDescription ringDesc;
 
 	private User user;
 	private Config userConfig;
@@ -62,6 +65,14 @@ public class Torrent implements Ability {
 
 	private StateChain states;
 	private WaterRing ring;
+
+	public Torrent(@NonNull AbilityDescription desc) {
+		super(desc);
+		if (ringDesc == null) {
+			ringDesc = Bending.getGame().getAbilityRegistry()
+				.getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+		}
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -76,7 +87,7 @@ public class Torrent implements Ability {
 
 		ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
 		if (ring == null) {
-			ring = new WaterRing();
+			ring = new WaterRing(ringDesc);
 			if (ring.activate(user, method)) {
 				Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
 			} else {
@@ -132,11 +143,6 @@ public class Torrent implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "Torrent";
 	}
 
 	@Override

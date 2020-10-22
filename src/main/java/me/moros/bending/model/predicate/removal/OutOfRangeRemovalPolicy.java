@@ -17,37 +17,37 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.conditionals;
+package me.moros.bending.model.predicate.removal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.predicates.conditionals.BendingConditions.ConditionBuilder;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import org.apache.commons.math3.util.FastMath;
 
-import java.util.Set;
+import java.util.function.Supplier;
 
-public class CompositeBendingConditional implements BendingConditional {
-	private final Set<BendingConditional> conditionals;
+public class OutOfRangeRemovalPolicy implements RemovalPolicy {
+	private final double range;
+	private final Vector3 origin;
+	private final Supplier<Vector3> fromSupplier;
 
-	CompositeBendingConditional(@NonNull ConditionBuilder builder) {
-		this.conditionals = builder.getConditionals();
+	public OutOfRangeRemovalPolicy(double range, @NonNull Vector3 origin, @NonNull Supplier<Vector3> from) {
+		this.range = FastMath.abs(range);
+		this.origin = origin;
+		this.fromSupplier = from;
+	}
+
+	public OutOfRangeRemovalPolicy(double range, @NonNull Supplier<Vector3> from) {
+		this.range = FastMath.abs(range);
+		this.origin = null;
+		this.fromSupplier = from;
 	}
 
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
-		if (user == null || desc == null) return false;
-		return conditionals.stream().allMatch(cond -> cond.test(user, desc));
-	}
-
-	public boolean hasConditional(@NonNull BendingConditional conditional) {
-		return conditionals.contains(conditional);
-	}
-
-	public boolean add(@NonNull BendingConditional conditional) {
-		return conditionals.add(conditional);
-	}
-
-	public boolean remove(@NonNull BendingConditional conditional) {
-		return conditionals.remove(conditional);
+		if (range == 0) return false;
+		if (origin != null) return fromSupplier.get().distanceSq(origin) >= (range * range);
+		return fromSupplier.get().distanceSq(user.getLocation()) >= (range * range);
 	}
 }

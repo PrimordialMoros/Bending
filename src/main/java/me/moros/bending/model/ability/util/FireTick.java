@@ -17,22 +17,27 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicates.removal;
+package me.moros.bending.model.ability.util;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.bukkit.entity.Entity;
 
-public class ExpireRemovalPolicy implements RemovalPolicy {
-	private final long expireTime;
-	private final boolean valid;
+public enum FireTick implements FireTickMethod {
+	OVERWRITE(Entity::setFireTicks),
+	LARGER((e, a) -> {
+		if (e.getFireTicks() < a) e.setFireTicks(a);
+	}),
+	ACCUMULATE((e, a) -> e.setFireTicks(e.getFireTicks() + a));
 
-	public ExpireRemovalPolicy(long duration) {
-		valid = duration > 0;
-		expireTime = System.currentTimeMillis() + duration;
+	private final FireTickMethod method;
+
+	FireTick(FireTickMethod method) {
+		this.method = method;
 	}
 
 	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		return valid && System.currentTimeMillis() > expireTime;
+	public void apply(@NonNull Entity entity, int amount) {
+		method.apply(entity, amount);
 	}
 }
+

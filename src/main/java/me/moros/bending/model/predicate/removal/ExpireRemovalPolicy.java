@@ -17,38 +17,22 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.model.predicate.removal;
 
-public enum ActivationMethod {
-	PASSIVE("Passive"),
-	PUNCH("Click"),
-	PUNCH_ENTITY("Click Entity"),
-	INTERACT("Right Click Air", true),
-	INTERACT_ENTITY("Right Click Entity", true),
-	INTERACT_BLOCK("Right Click Block", true),
-	SNEAK("Hold Sneak"),
-	SNEAK_RELEASE("Release Sneak"),
-	FALL("Fall"),
-	SEQUENCE("Sequence");
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.User;
 
-	private final String name;
-	private final boolean interact;
+public class ExpireRemovalPolicy implements RemovalPolicy {
+	private final long expireTime;
+	private final boolean valid;
 
-	ActivationMethod(String name) {
-		this(name, false);
-	}
-
-	ActivationMethod(String name, boolean interact) {
-		this.name = name;
-		this.interact = interact;
-	}
-
-	public boolean isInteract() {
-		return interact;
+	public ExpireRemovalPolicy(long duration) {
+		valid = duration > 0;
+		expireTime = System.currentTimeMillis() + duration;
 	}
 
 	@Override
-	public String toString() {
-		return name;
+	public boolean test(User user, AbilityDescription desc) {
+		return valid && System.currentTimeMillis() > expireTime;
 	}
 }

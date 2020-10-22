@@ -26,10 +26,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.User;
 
 import java.util.ArrayDeque;

@@ -24,9 +24,11 @@ import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
-import me.moros.bending.model.ability.FireTick;
-import me.moros.bending.model.ability.UpdateResult;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -35,10 +37,10 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicates.removal.ExpireRemovalPolicy;
-import me.moros.bending.model.predicates.removal.Policies;
-import me.moros.bending.model.predicates.removal.RemovalPolicy;
-import me.moros.bending.model.predicates.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -53,7 +55,7 @@ import org.bukkit.block.Block;
 import java.util.Collection;
 import java.util.Collections;
 
-public class FireShield implements Ability {
+public class FireShield extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -63,6 +65,10 @@ public class FireShield implements Ability {
 	private Shield shield;
 
 	private long nextRenderTime;
+
+	public FireShield(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -116,17 +122,8 @@ public class FireShield implements Ability {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "FireShield";
 	}
 
 	@Override

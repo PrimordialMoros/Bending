@@ -23,14 +23,14 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.bending.config.ConfigManager;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 public class MultiAbilityDescription extends AbilityDescription {
 	private final String parent;
 	private final String sub;
 	private final String displayName;
 
-	MultiAbilityDescription(@NonNull AbilityDescriptionBuilder builder, @NonNull String displayName, @NonNull String parent, @NonNull String sub) {
+	MultiAbilityDescription(AbilityDescriptionBuilder builder, String displayName, String parent, String sub) {
 		super(builder);
 		this.displayName = displayName;
 		this.parent = parent.toLowerCase();

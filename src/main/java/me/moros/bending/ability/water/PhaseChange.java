@@ -24,12 +24,12 @@ import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
-import me.moros.bending.model.ability.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -44,7 +44,7 @@ import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class PhaseChange implements PassiveAbility {
+public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 
 	private User user;
@@ -52,6 +52,10 @@ public class PhaseChange implements PassiveAbility {
 
 	private final Queue<Block> freezeQueue = new ArrayDeque<>(32);
 	private final Queue<Block> meltQueue = new ArrayDeque<>(32);
+
+	public PhaseChange(@NonNull AbilityDescription desc) {
+		super(desc);
+	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
@@ -138,21 +142,8 @@ public class PhaseChange implements PassiveAbility {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
-	}
-
-	@Override
-	public @NonNull String getName() {
-		return "PhaseChange";
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
 	}
 
 	public static class Config extends Configurable {
