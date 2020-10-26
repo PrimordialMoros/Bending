@@ -1,4 +1,4 @@
-Before starting please take a look at [project tasks](https://github.com/PrimordialMoros/Bending/projects) and the [wiki](https://github.com/PrimordialMoros/Bending/wiki)
+Before starting please take a look at [project tasks](https://github.com/PrimordialMoros/Bending/projects) and the [wiki](https://github.com/PrimordialMoros/Bending/wiki).
 
 ## Reporting bugs
 
@@ -10,7 +10,7 @@ Please provide any information necessary to recreate the bug you are experiencin
 
 ## Suggestions
 
-You can create suggestions in [issues](https://github.com/PrimordialMoros/Bending/issues)
+You can create suggestions in [issues](https://github.com/PrimordialMoros/Bending/issues).
 
 ## Code Contributions
 
@@ -21,7 +21,7 @@ Please fork this repository and contribute back using [pull requests](https://gi
 ### Code Style
 
 - Follow java naming conventions
-- Uses a mixture of FP (recommended where possible as it makes code more concise and readable) and classic OOP as appropriate
+- Use a mixture of FP (recommended where possible as it makes code more concise and readable) and classic OOP as appropriate
 - If in doubt, try to emulate the surrounding code's style
 
 ## Project Layout
@@ -40,4 +40,4 @@ The project currently has a single module but it may be split into sub-modules (
 - `storage` - Contains everything related to persistent storage (databases)
 - `util` - Contains all utility classes
 
-(A more detailed diagram will be posted in the future to explain how systems interact with each other)
+A more detailed diagram will be posted in the future to explain how systems interact with each other.

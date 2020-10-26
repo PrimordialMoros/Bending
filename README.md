@@ -13,13 +13,15 @@ This project is a modern implementation of bending that is best described by:
 - Robust, flexible API
 - Transparent development process
 
-For a full list of features check out the [features list](https://github.com/PrimordialMoros/Bending/wiki/Features)
+For a full list of features check out the [features list](https://github.com/PrimordialMoros/Bending/wiki/Features).
+
+Support and project discussion is available on [Discord](https://discord.gg/sjwncgE).
 
 ## Download
 
 This project is still under development. A build server will be created soon to host development builds.
 
-You can temporarily download builds from [actions](https://github.com/PrimordialMoros/Bending/actions)
+You can temporarily download builds from [actions](https://github.com/PrimordialMoros/Bending/actions).
 
 Main releases will be downloadable from [Github Releases](https://github.com/PrimordialMoros/Bending/releases) as well as other sources.
 
@@ -27,10 +29,10 @@ Main releases will be downloadable from [Github Releases](https://github.com/Pri
 
 This project requires Java 8 or newer and uses Gradle (which comes with a wrapper so you don't need to install it).
 
-Open a terminal and run `./gradlew build`
+Open a terminal and run `./gradlew build`.
 
 ## Contributing - Developer Documentation
 
-See [Contributing](CONTRIBUTING.md)
+See [Contributing](CONTRIBUTING.md).
 
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcome and appreciated.
