@@ -39,6 +39,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.predicate.general.BendingConditions;
@@ -244,9 +245,11 @@ public class BendingCommand extends BaseCommand {
 		}
 
 		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Bending.getGame().getSequenceManager().getSequence(ability).ifPresent(sequence -> user.sendMessage(ability.getDisplayName()
+			Sequence sequence = Bending.getGame().getSequenceManager().getSequence(ability);
+			if (sequence == null) return;
+			user.sendMessage(ability.getDisplayName()
 				.append(Component.text(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
-			));
+			);
 		}
 	}
 

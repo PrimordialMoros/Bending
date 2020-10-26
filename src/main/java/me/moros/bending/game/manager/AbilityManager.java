@@ -91,7 +91,7 @@ public class AbilityManager {
 			destroyInstanceType(user, passive);
 			if (user.hasPermission(passive)) {
 				Ability ability = passive.createAbility();
-				if (ability != null && ability.activate(user, ActivationMethod.PASSIVE)) {
+				if (ability.activate(user, ActivationMethod.PASSIVE)) {
 					addAbility(user, ability);
 				}
 			}
@@ -109,8 +109,7 @@ public class AbilityManager {
 	}
 
 	public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
-		Ability instance = desc.createAbility();
-		return instance != null && hasAbility(user, instance.getClass());
+		return hasAbility(user, desc.createAbility().getClass());
 	}
 
 	public void destroyInstance(@NonNull User user, @NonNull Ability ability) {
@@ -121,8 +120,7 @@ public class AbilityManager {
 	}
 
 	public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
-		Ability instance = desc.createAbility();
-		return instance != null && destroyInstanceType(user, instance.getClass());
+		return destroyInstanceType(user, desc.createAbility().getClass());
 	}
 
 	public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {

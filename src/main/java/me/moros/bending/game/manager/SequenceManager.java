@@ -20,6 +20,7 @@
 package me.moros.bending.game.manager;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
@@ -36,7 +37,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -78,8 +78,8 @@ public final class SequenceManager {
 		return registeredSequences.size();
 	}
 
-	public Optional<Sequence> getSequence(@NonNull AbilityDescription desc) {
-		return Optional.ofNullable(registeredSequences.get(desc));
+	public @Nullable Sequence getSequence(@NonNull AbilityDescription desc) {
+		return registeredSequences.get(desc);
 	}
 
 	public void registerAction(@NonNull User user, @NonNull ActivationMethod action) {
@@ -94,7 +94,7 @@ public final class SequenceManager {
 			if (sequence.matches(buffer.toArray(new AbilityAction[0]))) {
 				if (!user.canBend(sequenceDesc)) continue;
 				Ability ability = sequenceDesc.createAbility();
-				if (ability != null && ability.activate(user, ActivationMethod.SEQUENCE)) {
+				if (ability.activate(user, ActivationMethod.SEQUENCE)) {
 					game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 				}
 				buffer.clear(); // Consume all actions in the buffer

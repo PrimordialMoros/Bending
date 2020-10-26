@@ -40,13 +40,13 @@ import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageType;
 import me.moros.storage.logging.Logger;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -64,30 +64,22 @@ public final class StorageImpl implements BendingStorage {
 		this.logger = logger;
 		this.source = source;
 		DB = Jdbi.create(this.source);
+		if (!tableExists("bending_players")) init();
+	}
+
+	private void init() {
+		InputStream stream = Objects.requireNonNull(Bending.getPlugin().getResource(type.getSchemaPath()), "Null schema.");
+		Collection<String> statements = SqlStreamReader.parseQueries(stream);
+		DB.useHandle(handle -> {
+			Batch batch = handle.createBatch();
+			statements.forEach(batch::add);
+			batch.execute();
+		});
 	}
 
 	@Override
 	public @NonNull StorageType getType() {
 		return type;
-	}
-
-	public boolean init() {
-		Collection<String> statements;
-		try (InputStream stream = Bending.getPlugin().getResource(type.getSchemaPath())) {
-			if (stream == null) return false;
-			statements = SqlStreamReader.parseQueries(stream);
-		} catch (IOException e) {
-			this.logger.severe(e.getMessage());
-			return false;
-		}
-		if (!tableExists("bending_players")) {
-			DB.useHandle(handle -> {
-				Batch batch = handle.createBatch();
-				statements.forEach(batch::add);
-				batch.execute();
-			});
-		}
-		return true;
 	}
 
 	@Override
@@ -100,13 +92,15 @@ public final class StorageImpl implements BendingStorage {
 	 */
 	@Override
 	public @NonNull BendingProfile createProfile(@NonNull UUID uuid) {
-		return loadProfile(uuid).orElseGet(() ->
-			DB.withHandle(handle -> {
+		BendingProfile profile = loadProfile(uuid);
+		if (profile == null) {
+			profile = DB.withHandle(handle -> {
 				int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid)
 					.executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
 				return new BendingProfile(uuid, id, new BenderData());
-			})
-		);
+			});
+		}
+		return profile;
 	}
 
 	/**
@@ -116,7 +110,7 @@ public final class StorageImpl implements BendingStorage {
 	 * @see #createProfile(UUID)
 	 */
 	public void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer) {
-		Tasker.newChain().asyncFirst(() -> loadProfile(uuid)).asyncLast(p -> p.ifPresent(consumer)).execute();
+		Tasker.newChain().asyncFirst(() -> loadProfile(uuid)).abortIfNull().asyncLast(consumer::accept).execute();
 	}
 
 	/**
@@ -208,20 +202,22 @@ public final class StorageImpl implements BendingStorage {
 		Tasker.newChain().asyncFirst(() -> deletePreset(presetId)).execute();
 	}
 
-	private Optional<BendingProfile> loadProfile(UUID uuid) {
+	private BendingProfile loadProfile(UUID uuid) {
+		BendingProfile profile = null;
 		try {
 			return DB.withHandle(handle -> {
-				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery()).bind(0, uuid).mapToMap().findOne();
-				if (!result.isPresent()) return Optional.empty();
+				Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery())
+					.bind(0, uuid).mapToMap().findOne();
+				if (!result.isPresent()) return null;
 				int id = (int) result.get().get("player_id");
 				boolean board = (boolean) result.get().getOrDefault("board", true);
 				BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
-				return Optional.of(new BendingProfile(uuid, id, data, board));
+				return new BendingProfile(uuid, id, data, board);
 			});
 		} catch (Exception e) {
 			logger.severe(e.getMessage());
 		}
-		return Optional.empty();
+		return null;
 	}
 
 	private boolean updateProfile(BendingProfile profile) {

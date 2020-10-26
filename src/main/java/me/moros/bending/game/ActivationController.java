@@ -65,7 +65,7 @@ public final class ActivationController {
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
 		if (desc == null || !desc.isActivatedBy(method) || !user.canBend(desc)) return false;
 		Ability ability = desc.createAbility();
-		if (ability != null && ability.activate(user, method)) {
+		if (ability.activate(user, method)) {
 			game.getAbilityManager(user.getWorld()).addAbility(user, ability);
 			return true;
 		}
