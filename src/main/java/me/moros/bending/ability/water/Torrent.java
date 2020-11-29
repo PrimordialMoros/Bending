@@ -54,10 +54,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 	private static AbilityDescription ringDesc;
+	private static final Predicate<Block> predicate = b -> MaterialUtil.isTransparent(b) || b.getType() == Material.WATER;
 
 	private User user;
 	private Config userConfig;
@@ -181,7 +183,9 @@ public class Torrent extends AbilityInstance implements Ability {
 
 		public void freeze() {
 			cleanAll();
-			for (Block block : WorldMethods.getNearbyBlocks(stream.getFirst().getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, MaterialUtil::isTransparent)) {
+			Block head = stream.getFirst();
+			if (head == null) return;
+			for (Block block : WorldMethods.getNearbyBlocks(head.getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, predicate)) {
 				if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 				}

@@ -28,6 +28,7 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -91,7 +92,8 @@ public final class SourceUtil {
 	public static boolean fillBottle(@NonNull User user) {
 		if (!hasEmptyBottle(user)) return false;
 		if (user.getInventory().isPresent()) {
-			return user.getInventory().get().removeItem(emptyBottle).isEmpty() && user.getInventory().get().addItem(waterBottle).isEmpty();
+			Inventory inventory = user.getInventory().get();
+			return inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
 		}
 		return false;
 	}
@@ -99,7 +101,8 @@ public final class SourceUtil {
 	public static boolean emptyBottle(@NonNull User user) {
 		if (!hasFullBottle(user)) return false;
 		if (user.getInventory().isPresent()) {
-			return user.getInventory().get().removeItem(waterBottle).isEmpty() && user.getInventory().get().addItem(emptyBottle).isEmpty();
+			Inventory inventory = user.getInventory().get();
+			return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
 		}
 		return false;
 	}

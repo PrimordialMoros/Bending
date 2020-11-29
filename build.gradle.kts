@@ -27,7 +27,7 @@ dependencies {
     implementation("me.moros", "atlas-core", "1.0.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit-lite", "1.7")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
-    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.3-R0.1-SNAPSHOT")
+    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.4-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1")
     compileOnly("com.github.TownyAdvanced", "Towny", "0.96.2.0")
     compileOnly("com.sk89q.worldedit", "worldedit-core", "7.0.0-SNAPSHOT")
@@ -41,15 +41,11 @@ tasks {
         archiveBaseName.set(rootProject.name)
         dependencies {
             relocate("org.bstats", "me.moros.bending.bstats")
-            relocate("org.checkerframework", "me.moros.atlas.cf")
-            relocate("org.h2", "me.moros.atlas.cf")
-            relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
-            relocate("ninja.leaping.configurate", "me.moros.atlas.configurate")
             relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
         }
-        minimize {
-            exclude(dependency("me.moros.atlas:.*:.*"))
-        }
+        //minimize {
+            //exclude(dependency("me.moros.atlas:.*:.*"))
+        //}
     }
     build {
         dependsOn(shadowJar)

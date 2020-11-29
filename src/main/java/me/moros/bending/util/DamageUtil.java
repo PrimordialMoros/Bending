@@ -43,22 +43,25 @@ public final class DamageUtil {
 		.expireAfterWrite(Duration.ofSeconds(60))
 		.build();
 
+	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage) {
+		return damageEntity(entity, source, damage, "");
+	}
+
 	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage, @Nullable AbilityDescription desc) {
+		return damageEntity(entity, source, damage, desc == null ? "" : desc.getName());
+	}
+
+	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage, @NonNull String abilityName) {
 		if (entity instanceof LivingEntity && damage > 0) {
 			LivingEntity targetEntity = (LivingEntity) entity;
 			LivingEntity sourceEntity = source.getEntity();
 			EntityDamageByEntityEvent finalEvent = new EntityDamageByEntityEvent(sourceEntity, entity, EntityDamageEvent.DamageCause.CUSTOM, damage);
 			targetEntity.damage(damage, sourceEntity);
 			targetEntity.setLastDamageCause(finalEvent);
-			if (desc != null && targetEntity instanceof Player) cache.put(targetEntity.getUniqueId(), desc.getName());
+			if (!abilityName.isEmpty() && targetEntity instanceof Player) cache.put(targetEntity.getUniqueId(),abilityName);
 			return true;
 		}
 		return false;
-	}
-
-
-	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage) {
-		return damageEntity(entity, source, damage, null);
 	}
 
 	public static String getBendingMessage(@NonNull UUID uuid) {
