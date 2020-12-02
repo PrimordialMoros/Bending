@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.fire;
+package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
@@ -34,61 +34,38 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Flight;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 
-public class FireJet extends AbilityInstance implements Ability {
+import java.util.Optional;
+
+public class WaterWave extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private Flight flight;
-
-	private double speed;
-	private long duration;
+	private boolean ice = false;
 	private long startTime;
 
-	public FireJet(@NonNull AbilityDescription desc) {
+	public WaterWave(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireJet.class)) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterWave.class)) {
 			return false;
 		}
 
 		this.user = user;
 		recalculateConfig();
 
-		Block block = user.getLocBlock();
-		boolean ignitable = MaterialUtil.isIgnitable(block);
-		if (!ignitable && !MaterialUtil.isAir(block)) {
-			return false;
-		}
-
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-			return false;
-		}
-
-		speed = userConfig.speed;
-		duration = userConfig.duration;
-
-		flight = Flight.get(user);
-		if (ignitable) TempBlock.create(block, Material.FIRE, 3000, true);
-
-		removalPolicy = Policies.builder()
-			.add(Policies.IN_LIQUID)
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.build();
-
-		user.setCooldown(getDescription(), userConfig.cooldown);
+		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
 		startTime = System.currentTimeMillis();
 		return true;
 	}
@@ -103,20 +80,41 @@ public class FireJet extends AbilityInstance implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		// scale down to 0.5 speed near the end
-		double factor = 1 - ((System.currentTimeMillis() - startTime) / (2.0 * duration));
 
-		user.getEntity().setVelocity(user.getDirection().scalarMultiply(speed * factor).toVector());
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+			return UpdateResult.REMOVE;
+		}
+
+		// scale down to 0.33 * speed near the end
+		double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
+
+		user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());
 		user.getEntity().setFallDistance(0);
-		ParticleUtil.createFire(user, user.getEntity().getLocation()).count(10)
-			.offset(0.3, 0.3, 0.3).extra(0.03).spawn();
 
+		Location center = user.getEntity().getLocation().subtract(0, 1, 0);
+		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, MaterialUtil::isTransparent)) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
+			Optional<TempBlock> tb = TempBlock.create(block,  Material.WATER, 1000);
+			if (ice) {
+				tb.ifPresent(t -> t.setRevertTask(() -> TempBlock.create(block, Material.ICE, 1000)));
+			}
+		}
 		return UpdateResult.CONTINUE;
+	}
+
+	public void freeze() {
+		ice = true;
+	}
+
+	public static void freeze(User user) {
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
+		}
 	}
 
 	@Override
 	public void onDestroy() {
-		flight.release();
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	@Override
@@ -124,30 +122,24 @@ public class FireJet extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public void setSpeed(double newSpeed) {
-		this.speed = newSpeed;
-	}
-
-	public void setDuration(long duration) {
-		this.duration = duration;
-		removalPolicy = Policies.builder().add(Policies.IN_LIQUID).add(new ExpireRemovalPolicy(duration)).build();
-	}
-
 	public static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
+		@Attribute(Attribute.DURATION)
+		public long duration;
 		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attribute.DURATION)
-		private long duration;
+		@Attribute(Attribute.RADIUS)
+		public double radius;
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "firejet");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "waterring", "waterwave");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(7000);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			duration = abilityNode.getNode("duration").getLong(2000);
+			cooldown = abilityNode.getNode("cooldown").getLong(6000);
+			duration = abilityNode.getNode("duration").getLong(2500);
+			speed = abilityNode.getNode("speed").getDouble(1.2);
+			radius = abilityNode.getNode("radius").getDouble(1.7);
 		}
 	}
 }

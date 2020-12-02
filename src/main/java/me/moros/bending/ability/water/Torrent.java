@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+// TODO apply cooldown
 public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 	private static AbilityDescription ringDesc;
@@ -167,7 +168,7 @@ public class Torrent extends AbilityInstance implements Ability {
 		private final Set<Entity> affectedEntities = new HashSet<>();
 
 		public TorrentStream(@NonNull User user) {
-			super(user, Material.WATER, userConfig.range, 70);
+			super(user, Material.WATER, userConfig.range, 90);
 			controllable = true;
 		}
 

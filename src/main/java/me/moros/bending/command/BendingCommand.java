@@ -248,7 +248,7 @@ public class BendingCommand extends BaseCommand {
 			Sequence sequence = Bending.getGame().getSequenceManager().getSequence(ability);
 			if (sequence == null) return;
 			user.sendMessage(ability.getDisplayName()
-				.append(Component.text(": " + sequence.getInstructions(), NamedTextColor.DARK_GRAY))
+				.append(Component.text(": " + sequence.getInstructions(), NamedTextColor.GRAY))
 			);
 		}
 	}

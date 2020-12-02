@@ -103,6 +103,7 @@ public final class ActivationController {
 
 		AirBurst.activateCone(user);
 		PhaseChange.freeze(user);
+		WaterWave.freeze(user);
 		IceCrawl.launch(user);
 		WaterRing.launchShard(user);
 		EarthLine.launch(user);

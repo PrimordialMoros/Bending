@@ -76,9 +76,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WaterRing extends AbilityInstance implements Ability {
+	public static final double RING_RADIUS = 2.8;
+
 	private static final Config config = new Config();
 
-	private static final double RING_RADIUS = 2.8;
+	private static AbilityDescription waveDesc;
 
 	private User user;
 	private Config userConfig;
@@ -87,7 +89,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 	private Block lastBlock;
 	private StateChain states;
 	private final List<Block> ring = new ArrayList<>(24);
-	private final List<IceShard> shards = new ArrayList<>(16);
+	private final Collection<IceShard> shards = new ArrayList<>(16);
 	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.CREATED)
 		.expiration(250, TimeUnit.MILLISECONDS).build();
@@ -97,18 +99,25 @@ public class WaterRing extends AbilityInstance implements Ability {
 	private double radius = RING_RADIUS;
 	private int index = 0;
 	private int sources = 0;
-	private long sneakStartTime = 0;
 	private long nextShardTime = 0;
+	private long ringNextShrinkTime = 0;
+	private long sneakStartTime = 0;
 
 	public WaterRing(@NonNull AbilityDescription desc) {
 		super(desc);
+		if (waveDesc == null) {
+			waveDesc = Bending.getGame().getAbilityRegistry()
+				.getAbilityDescription("WaterWave").orElseThrow(RuntimeException::new);
+		}
 	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		if (method == ActivationMethod.PUNCH && user.isSneaking()) {
-			if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class)) {
-				return false;
+			if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterRing")) {
+				if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class)) {
+					return false;
+				}
 			}
 		}
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
@@ -197,12 +206,40 @@ public class WaterRing extends AbilityInstance implements Ability {
 			Collections.rotate(ring, index);
 			lastBlock = current;
 		}
+
+		if (user.isSneaking()) {
+			long time = System.currentTimeMillis();
+			if (sneakStartTime == 0) {
+				sneakStartTime = time;
+				ringNextShrinkTime = time + 250;
+			} else {
+				if (ringNextShrinkTime > time && radius > 1.3) {
+					setRadius(radius - 0.3);
+					ringNextShrinkTime = time + 250;
+				}
+				if (time > sneakStartTime + userConfig.chargeTime) {
+					if (!complete().isEmpty()) {
+						WaterWave wave = new WaterWave(waveDesc);
+						if (wave.activate(user, ActivationMethod.SNEAK)) {
+							Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, wave);
+						}
+					}
+					return UpdateResult.REMOVE;
+				}
+			}
+		} else {
+			sneakStartTime = 0;
+			if (radius < RING_RADIUS) {
+				setRadius(FastMath.min(radius + 0.3, RING_RADIUS));
+			}
+		}
+
 		if (ring.stream().noneMatch(b -> Bending.getGame().getProtectionSystem().canBuild(user, b)))
 			return UpdateResult.REMOVE;
 		Collections.rotate(ring, 1);
 		index = ++index % ring.size();
 
-		for (int i = 0; i < NumberConversions.ceil(sources * 0.8); i++) {
+		for (int i = 0; i < FastMath.min(ring.size(), NumberConversions.ceil(sources * 0.8)); i++) {
 			Block block = ring.get(i);
 			if (MaterialUtil.isWater(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
@@ -214,17 +251,6 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		if (userConfig.affectEntities) {
 			CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), radius + 2), this::checkCollisions, false);
-		}
-
-		if (user.isSneaking()) {
-			if (sneakStartTime == 0) {
-				sneakStartTime = System.currentTimeMillis();
-			}
-			if (sneakStartTime + userConfig.duration < System.currentTimeMillis()) {
-				// TODO add function when someone has sneaked for duration
-			}
-		} else {
-			sneakStartTime = 0;
 		}
 
 		shards.removeIf(shard -> shard.update() == UpdateResult.REMOVE);
@@ -250,9 +276,15 @@ public class WaterRing extends AbilityInstance implements Ability {
 	}
 
 	public void setRadius(double radius) {
-		if (radius < 2 || radius > 8) return;
+		if (radius < 1 || radius > 8 || this.radius == radius) return;
 		this.radius = radius;
-		lastBlock = null;
+		cleanAll();
+		ring.clear();
+		ring.addAll(createRing());
+	}
+
+	public double getRadius() {
+		return radius;
 	}
 
 	private Collection<Block> createRing() {
@@ -381,6 +413,9 @@ public class WaterRing extends AbilityInstance implements Ability {
 		public double shardDamage;
 		@Attribute(Attribute.AMOUNT)
 		public double shardAmount;
+		// Wave
+		@Attribute(Attribute.CHARGE_TIME)
+		public long chargeTime;
 
 		@Override
 		public void onConfigReload() {
@@ -397,6 +432,9 @@ public class WaterRing extends AbilityInstance implements Ability {
 			shardRange = shardsNode.getNode("range").getDouble(16.0);
 			shardDamage = shardsNode.getNode("damage").getDouble(0.5);
 			shardAmount = shardsNode.getNode("amount").getInt(10);
+
+			CommentedConfigurationNode waveNode = abilityNode.getNode("waterwave");
+			chargeTime = waveNode.getNode("charge-time").getLong(1250);
 		}
 	}
 }

@@ -31,6 +31,9 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ParticleUtil;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 
 public class JetBlast extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -58,6 +61,8 @@ public class JetBlast extends AbilityInstance implements Ability {
 		jet.setDuration(userConfig.duration);
 		jet.setSpeed(userConfig.speed);
 
+		user.getWorld().playSound(user.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 4, 0);
+
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
@@ -69,6 +74,8 @@ public class JetBlast extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull UpdateResult update() {
+		ParticleUtil.create(Particle.SMOKE_NORMAL, jet.getUser().getEntity().getLocation()).count(5)
+			.offset(0.3, 0.3, 0.3).spawn();
 		return jet.update();
 	}
 

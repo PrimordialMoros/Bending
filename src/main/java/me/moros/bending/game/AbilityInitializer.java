@@ -126,6 +126,10 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
 		abilities.add(waterRing);
 
+		AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHidden(true).setSourcesPlants(true).build();
+		abilities.add(waterWave);
+
 		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
 		abilities.add(torrent);

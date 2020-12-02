@@ -203,14 +203,10 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				if (factor < 1.2) {
 					ParticleUtil.createFire(user, loc)
 						.count(particleCount).offset(0.25, 0.25, 0.25).extra(0.04).spawn();
-					ParticleUtil.create(Particle.SMOKE_NORMAL, loc)
-						.count(particleCount / 2).offset(0.25, 0.25, 0.25).spawn();
 				} else {
 					for (Block block : WorldMethods.getNearbyBlocks(loc, displayRadius)) {
 						ParticleUtil.createFire(user, block.getLocation())
 							.count(particleCount).offset(0.5, 0.5, 0.5).extra(0.06).spawn();
-						ParticleUtil.create(Particle.SMOKE_NORMAL, block.getLocation())
-							.count(particleCount / 2).offset(0.5, 0.5, 0.5).spawn();
 					}
 				}
 				nextRenderTime = time + renderInterval;
