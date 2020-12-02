@@ -123,8 +123,8 @@ public class FireWall extends AbilityInstance implements Ability {
 		if (time > nextRenderTime) {
 			for (Block block : blocks) {
 				Location location = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleUtil.createFire(user, location).count(3).offset(0.6, 0.6, 0.6).spawn();
-				ParticleUtil.create(Particle.SMOKE_NORMAL, location).count(1).offset(0.6, 0.6, 0.6).spawn();
+				ParticleUtil.createFire(user, location).count(3).offset(0.6, 0.6, 0.6).extra(0.01).spawn();
+				ParticleUtil.create(Particle.SMOKE_NORMAL, location).offset(0.6, 0.6, 0.6).spawn();
 				if (ThreadLocalRandom.current().nextInt(12) == 0) {
 					SoundUtil.FIRE_SOUND.play(location);
 				}

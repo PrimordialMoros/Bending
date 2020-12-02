@@ -96,9 +96,9 @@ public class FireBurst extends AbstractBurst implements Ability {
 		if (released || !isCharged()) return;
 		released = true;
 		if (cone) {
-			createCone(user, FireBlast.class, userConfig.coneRange);
+			createCone(user, () -> new FireBlast(getDescription()), userConfig.coneRange);
 		} else {
-			createSphere(user, FireBlast.class, userConfig.sphereRange);
+			createSphere(user, () -> new FireBlast(getDescription()), userConfig.sphereRange);
 		}
 		setRenderInterval(100);
 		setRenderParticleCount(1);

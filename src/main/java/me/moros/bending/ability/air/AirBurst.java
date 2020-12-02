@@ -101,9 +101,9 @@ public class AirBurst extends AbstractBurst implements Ability {
 		if (released || !isCharged()) return;
 		released = true;
 		if (cone) {
-			createCone(user, AirBlast.class, userConfig.coneRange);
+			createCone(user, () -> new AirBlast(getDescription()), userConfig.coneRange);
 		} else {
-			createSphere(user, AirBlast.class, userConfig.sphereRange);
+			createSphere(user, () -> new AirBlast(getDescription()), userConfig.sphereRange);
 		}
 		setRenderInterval(100);
 		setRenderParticleCount(1);

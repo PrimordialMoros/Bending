@@ -332,7 +332,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		@Override
 		public void render() {
 			ParticleUtil.create(Particle.SNOW_SHOVEL, getBukkitLocation())
-				.count(1).offset(0.25, 0.25, 0.25).spawn();
+				.offset(0.25, 0.25, 0.25).spawn();
 		}
 
 		@Override

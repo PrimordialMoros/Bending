@@ -123,7 +123,8 @@ public class FireSpin extends AbilityInstance implements Ability {
 
 		@Override
 		public void render() {
-			ParticleUtil.createFire(user, getBukkitLocation()).count(1).offset(0.15, 0.15, 0.15).spawn();
+			ParticleUtil.createFire(user, getBukkitLocation())
+				.offset(0.15, 0.15, 0.15).extra(0.01).spawn();
 		}
 
 		@Override

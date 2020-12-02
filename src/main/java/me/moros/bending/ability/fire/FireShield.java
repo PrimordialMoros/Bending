@@ -173,7 +173,7 @@ public class FireShield extends AbilityInstance implements Ability {
 				for (double j = 0.2; j <= 1; j += 0.2) {
 					Vector3 loc = new Vector3(array).scalarMultiply(j * userConfig.diskRadius);
 					ParticleUtil.createFire(user, location.add(loc).toLocation(user.getWorld()))
-						.offset(0.2, 0.2, 0.2).spawn();
+						.offset(0.2, 0.2, 0.2).extra(0.01).spawn();
 				}
 				rotation.applyTo(array, array);
 			}
@@ -206,7 +206,7 @@ public class FireShield extends AbilityInstance implements Ability {
 		public void render() {
 			for (Block block : WorldMethods.getNearbyBlocks(user.getHeadBlock().getLocation(), userConfig.shieldRadius)) {
 				Location loc = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).spawn();
+				ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
 			}
 		}
 	}

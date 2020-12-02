@@ -20,7 +20,6 @@
 package me.moros.bending.ability.common.basic;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -31,6 +30,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 public abstract class AbstractBurst extends AbilityInstance {
 	protected final Collection<Burstable> blasts = new ArrayList<>();
@@ -39,15 +39,15 @@ public abstract class AbstractBurst extends AbilityInstance {
 		super(desc);
 	}
 
-	protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Class<T> type, double range) {
-		createBurst(user, type, range, true);
+	protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
+		createBurst(user, constructor, range, true);
 	}
 
-	protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Class<T> type, double range) {
-		createBurst(user, type, range, false);
+	protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
+		createBurst(user, constructor, range, false);
 	}
 
-	private <T extends Burstable> void createBurst(@NonNull User user, @NonNull Class<T> type, double range, boolean cone) {
+	private <T extends Burstable> void createBurst(User user, Supplier<T> constructor, double range, boolean cone) {
 		for (double theta = 0; theta < FastMath.PI; theta += FastMath.toRadians(10)) {
 			for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.toRadians(10)) {
 				double x = FastMath.cos(phi) * FastMath.sin(theta);
@@ -57,13 +57,7 @@ public abstract class AbstractBurst extends AbilityInstance {
 				if (cone && Vector3.angle(direction, user.getDirection()) > FastMath.toRadians(30)) {
 					continue;
 				}
-				T blast;
-				try {
-					blast = type.getDeclaredConstructor().newInstance();
-				} catch (ReflectiveOperationException e) {
-					Bending.getLog().warn(e.getMessage());
-					return;
-				}
+				T blast = constructor.get();
 				blast.initialize(user, user.getLocation().add(Vector3.PLUS_J).add(direction), direction.scalarMultiply(range));
 				blasts.add(blast);
 			}
