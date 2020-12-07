@@ -156,6 +156,10 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
+		AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
+		abilities.add(catapult);
+
 		// TODO add earth abilities
 	}
 

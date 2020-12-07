@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BendingUser extends CommandUserWrapper implements User {
 	private final ElementHolder elementHolder = new ElementHolder();
-	private final Deque<AbilitySlotContainer> slotContainers = new ArrayDeque<>(2);
+	private final AbilitySlotContainer slotContainer;
 	private final ExpiringMap<AbilityDescription, Boolean> cooldowns = ExpiringMap.builder().variableExpiration().build();
 	private final CompositeBendingConditional bendingConditional;
 	private final LivingEntity entity;
@@ -52,7 +52,7 @@ public class BendingUser extends CommandUserWrapper implements User {
 		this.entity = entity;
 		cooldowns.addExpirationListener((key, value) ->
 			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
-		slotContainers.addLast(new AbilitySlotContainer());
+		slotContainer = new AbilitySlotContainer();
 		bendingConditional = BendingConditions.builder().build();
 	}
 
@@ -67,29 +67,25 @@ public class BendingUser extends CommandUserWrapper implements User {
 	}
 
 	public @NonNull Preset createPresetFromSlots(String name) {
-		return slotContainers.getFirst().toPreset(name);
+		return slotContainer.toPreset(name);
 	}
 
 	public int bindPreset(@NonNull Preset preset) {
-		slotContainers.getFirst().fromPreset(preset);
+		slotContainer.fromPreset(preset);
 		validateSlots();
 		if (this instanceof BendingPlayer) Bending.getGame().getBoardManager().updateBoard((Player) getEntity());
 		Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.MULTIPLE);
 		return preset.compare(createPresetFromSlots(""));
 	}
 
-	public Optional<AbilityDescription> getStandardSlotAbility(@IntRange(from = 1, to = 9) int slot) {
-		return Optional.ofNullable(slotContainers.getFirst().getAbility(slot));
-	}
-
 	@Override
 	public Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot) {
-		return Optional.ofNullable(slotContainers.getLast().getAbility(slot));
+		return Optional.ofNullable(slotContainer.getAbility(slot));
 	}
 
 	@Override
 	public void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
-		slotContainers.getFirst().setAbility(slot, desc);
+		slotContainer.setAbility(slot, desc);
 	}
 
 	@Override
@@ -103,19 +99,6 @@ public class BendingUser extends CommandUserWrapper implements User {
 	@Override
 	public Optional<AbilityDescription> getSelectedAbility() {
 		return Optional.empty(); // Non-player bending users don't have anything selected.
-	}
-
-	// Adds or replaces the last container
-	@Override
-	public void addSlotContainer(@NonNull AbilitySlotContainer slotContainer) {
-		removeLastSlotContainer();
-		slotContainers.addLast(slotContainer);
-	}
-
-	// Removes any multi ability containers while keeping the original standard slot container
-	@Override
-	public void removeLastSlotContainer() {
-		if (slotContainers.size() > 1) slotContainers.pollLast();
 	}
 
 	@Override

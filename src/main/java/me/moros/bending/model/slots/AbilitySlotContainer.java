@@ -43,7 +43,6 @@ public class AbilitySlotContainer {
 
 	/**
 	 * Sets the given slot to a specific ability
-	 * This has no effect on MultiAbilitySlotContainer
 	 * @param slot the slot to put the ability in
 	 * @param desc the ability description to put
 	 */

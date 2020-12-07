@@ -23,11 +23,9 @@ import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.MultiAbility;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 
 import java.util.ArrayList;
@@ -68,12 +66,6 @@ public class AbilityManager {
 	// Add a new ability instance that should be updated every tick
 	// This is deferred until next update to prevent concurrent modifications.
 	public void addAbility(@NonNull User user, @NonNull Ability instance) {
-		if (instance instanceof MultiAbility) {
-			user.addSlotContainer(((MultiAbility) instance).getSlots());
-			if (user instanceof BendingPlayer) {
-				((BendingPlayer) user).getEntity().getInventory().setHeldItemSlot(0);
-			}
-		}
 		addQueue.add(new UserInstance(user, instance));
 	}
 
@@ -221,6 +213,5 @@ public class AbilityManager {
 
 	private void destroyAbility(@NonNull Ability ability) {
 		ability.onDestroy();
-		ability.getUser().removeLastSlotContainer(); // Needed to clean up multi abilities
 	}
 }

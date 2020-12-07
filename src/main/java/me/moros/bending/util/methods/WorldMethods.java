@@ -246,7 +246,6 @@ public final class WorldMethods {
 				Block checkBlock = location.add(new Vector3(x, -epsilon, z)).toBlock(entity.getWorld());
 				if (checkBlock.isPassable() || MaterialUtil.isAir(checkBlock)) continue;
 				AABB checkBounds = AABBUtils.getBlockBounds(checkBlock).at(new Vector3(checkBlock));
-				if (checkBlock.isPassable()) return false;
 				if (entityBounds.intersects(checkBounds)) {
 					return true;
 				}
@@ -257,14 +256,15 @@ public final class WorldMethods {
 
 	/**
 	 * Calculates the distance between an entity and the ground using {@link AABB}.
-	 * Uses a {@link BlockIterator} with a max range of 256 blocks.
+	 * Uses a {@link BlockIterator} with the max world height as the range.
 	 * By default it ignores all passable materials except liquids.
 	 * @param entity the entity to check
-	 * @return the distance in blocks between the entity and ground or 256 (max range).
+	 * @return the distance in blocks between the entity and ground or the max world height.
 	 */
 	public static double distanceAboveGround(@NonNull Entity entity) {
+		int maxHeight = entity.getWorld().getMaxHeight();
 		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
-		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 256, 0));
+		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, maxHeight, 0));
 		while (it.hasNext()) {
 			Block block = it.next();
 			if (block.getY() <= 0) break;
@@ -273,7 +273,7 @@ public final class WorldMethods {
 				return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
 			}
 		}
-		return 256;
+		return maxHeight;
 	}
 
 	/**

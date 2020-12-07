@@ -245,11 +245,6 @@ public class AbilityDescription {
 			return new AbilityDescription(this);
 		}
 
-		public @NonNull AbilityDescription buildMulti(@NonNull String displayName, @NonNull String parent, @NonNull String sub) {
-			validate();
-			return new MultiAbilityDescription(this, displayName, parent, sub);
-		}
-
 		private void validate() {
 			Objects.requireNonNull(element, "Element cannot be null");
 			Objects.requireNonNull(activationMethods, "Activation Methods cannot be null");

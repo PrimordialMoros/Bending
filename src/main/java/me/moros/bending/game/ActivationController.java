@@ -74,7 +74,6 @@ public final class ActivationController {
 
 	public void onPlayerLogout(@NonNull BendingPlayer player) {
 		TempArmor.manager.get(player.getEntity()).ifPresent(TempArmor::revert);
-		player.removeLastSlotContainer();
 		game.getAttributeSystem().clearModifiers(player);
 		game.getStorage().savePlayerAsync(player);
 		Flight.remove(player);

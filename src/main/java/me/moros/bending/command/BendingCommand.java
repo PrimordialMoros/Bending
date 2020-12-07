@@ -207,7 +207,7 @@ public class BendingCommand extends BaseCommand {
 		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
 		Message.BOUND_SLOTS.send(player, bendingPlayer.getEntity().getName());
 		for (int slot = 1; slot <= 9; slot++) {
-			Component meta = bendingPlayer.getStandardSlotAbility(slot).map(AbilityDescription::getMeta).orElse(null);
+			Component meta = bendingPlayer.getSlotAbility(slot).map(AbilityDescription::getMeta).orElse(null);
 			if (meta != null) player.sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(meta));
 		}
 	}
