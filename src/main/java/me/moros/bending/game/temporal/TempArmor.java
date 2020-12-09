@@ -20,20 +20,23 @@
 package me.moros.bending.game.temporal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 public class TempArmor implements Temporary {
 	public static final TemporalManager<Player, TempArmor> manager = new TemporalManager<>();
 	private final Player player;
 	private final ItemStack[] snapshot;
-	private final ItemStack[] armor;
 
 	private RevertTask revertTask;
 
@@ -42,9 +45,8 @@ public class TempArmor implements Temporary {
 
 	private TempArmor(Player player, ItemStack[] armor, long duration) {
 		this.player = player;
-		this.snapshot = player.getInventory().getArmorContents().clone();
-		this.armor = armor.clone();
-		player.getInventory().setArmorContents(this.armor);
+		this.snapshot = copyFilteredArmor(player.getInventory().getArmorContents());
+		player.getInventory().setArmorContents(applyMetaToArmor(armor));
 		manager.addEntry(player, this, duration);
 	}
 
@@ -61,10 +63,6 @@ public class TempArmor implements Temporary {
 		return Arrays.asList(snapshot);
 	}
 
-	public @NonNull Collection<ItemStack> getArmor() {
-		return Arrays.asList(armor);
-	}
-
 	@Override
 	public void revert() {
 		player.getInventory().setArmorContents(snapshot);
@@ -75,5 +73,30 @@ public class TempArmor implements Temporary {
 	@Override
 	public void setRevertTask(@NonNull RevertTask task) {
 		this.revertTask = task;
+	}
+
+	private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
+		for (ItemStack item : armorItems) {
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName("Bending Armor");
+			meta.setLore(Collections.singletonList(ChatColor.GRAY + "Temporary"));
+			meta.setUnbreakable(true);
+			Bending.getLayer().addArmorKey(meta);
+			item.setItemMeta(meta);
+		}
+		return armorItems;
+	}
+
+	private ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
+		ItemStack[] copy = new ItemStack[armorItems.length];
+		for (int i = 0; i < armorItems.length; i++) {
+			ItemStack item = armorItems[i];
+			if (item != null && item.getItemMeta() != null) {
+				if (!Bending.getLayer().hasArmorKey(item.getItemMeta())) {
+					copy[i] = item;
+				}
+			}
+		}
+		return copy;
 	}
 }

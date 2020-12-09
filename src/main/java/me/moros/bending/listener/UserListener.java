@@ -53,7 +53,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import java.util.Optional;
@@ -99,8 +101,8 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPlayerDeath(PlayerDeathEvent event) {
+		event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
 		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
-			event.getDrops().removeIf(item -> tempArmor.getArmor().contains(item));
 			event.getDrops().addAll(tempArmor.getSnapshot());
 			tempArmor.revert();
 			// TODO ensure drops don't get duplicated
@@ -109,16 +111,23 @@ public class UserListener implements Listener {
 		if (newMessage != null) event.setDeathMessage(newMessage);
 	}
 
-
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
-		if (event.isCancelled() || !(event.getClickedInventory() instanceof PlayerInventory) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
+		ItemStack item = event.getCurrentItem();
+		if (item == null || !(event.getClickedInventory() instanceof PlayerInventory)) {
 			return;
 		}
-		PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
-		if (inventory.getHolder() instanceof Player) {
-			Player player = ((Player) inventory.getHolder()).getPlayer();
-			if (TempArmor.manager.isTemp(player)) event.setCancelled(true);
+
+		ItemMeta meta = item.getItemMeta();
+		if (meta != null && Bending.getLayer().hasArmorKey(meta)) {
+			PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
+			if (inventory.getHolder() instanceof Player) {
+				Player player = ((Player) inventory.getHolder()).getPlayer();
+				if (!TempArmor.manager.isTemp(player) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
+					inventory.remove(item);
+				}
+			}
+			event.setCancelled(true);
 		}
 	}
 

@@ -32,11 +32,11 @@ import me.moros.bending.listener.WorldListener;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
+import me.moros.bending.util.PersistentDataLayer;
 import me.moros.bending.util.Tasker;
 import me.moros.storage.logging.Logger;
 import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.MetricsLite;
-import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class Bending extends JavaPlugin {
 	private PaperCommandManager commandManager;
 
 	private BukkitAudiences audiences;
-	private NamespacedKey key;
+	private PersistentDataLayer layer;
 	private String author;
 	private String version;
 	private Logger logger;
@@ -63,7 +63,7 @@ public class Bending extends JavaPlugin {
 		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass()));
 		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
-		key = new NamespacedKey(this, "bending-core");
+		layer = new PersistentDataLayer(this);
 		eventBus = new BendingEventBus();
 		audiences = BukkitAudiences.create(this);
 
@@ -128,8 +128,8 @@ public class Bending extends JavaPlugin {
 		return plugin.logger;
 	}
 
-	public static NamespacedKey getKey() {
-		return plugin.key;
+	public static PersistentDataLayer getLayer() {
+		return plugin.layer;
 	}
 
 	public static Game getGame() {

@@ -33,19 +33,19 @@ public class WaterMaterials {
 	public static final MaterialSetTag WATER_ICE_SOURCES;
 
 	static {
-		PLANT_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.FLOWERS.getValues());
+		PLANT_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), MaterialSetTag.FLOWERS.getValues());
 		PLANT_BENDABLE.add(MaterialSetTag.SAPLINGS.getValues())
 			.add(MaterialSetTag.CROPS.getValues())
 			.add(MaterialSetTag.LEAVES.getValues())
 			.add(MaterialTags.MUSHROOMS, MaterialTags.MUSHROOM_BLOCKS, MaterialTags.PUMPKINS)
 			.add(Material.DEAD_BUSH, Material.CACTUS, Material.MELON, Material.VINE);
 
-		ICE_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.ICE.getValues());
+		ICE_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), MaterialSetTag.ICE.getValues());
 
-		ALL = new MaterialSetTag(Bending.getKey(), Material.WATER);
+		ALL = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.WATER);
 		ALL.add(PLANT_BENDABLE, ICE_BENDABLE);
 
-		WATER_ICE_SOURCES = new MaterialSetTag(Bending.getKey(), Material.WATER);
+		WATER_ICE_SOURCES = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.WATER);
 		WATER_ICE_SOURCES.add(ICE_BENDABLE);
 	}
 

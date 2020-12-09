@@ -38,10 +38,13 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public class EarthTunnel extends AbilityInstance implements Ability {
@@ -99,6 +102,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 				return UpdateResult.REMOVE;
 			}
 			if (predicate.test(current)) {
+				extract(current);
 				TempBlock.create(current, Material.AIR, userConfig.regen, true);
 			}
 			if (angle >= 360) {
@@ -124,6 +128,47 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		return UpdateResult.CONTINUE;
 	}
 
+	// TODO tweak drop rates
+	private void extract(Block block) {
+		if (!userConfig.extractOres || !TempBlock.isBendable(block)) return;
+		Material mat = block.getType().name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
+		TempBlock.manager.get(block).ifPresent(tb -> tb.overwriteSnapshot(mat.createBlockData()));
+
+		Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
+		int rand = ThreadLocalRandom.current().nextInt(100);
+		int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;
+
+		switch (block.getType()) {
+			case COAL_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.COAL, factor));
+				break;
+			case LAPIS_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.LAPIS_LAZULI, 9 * factor));
+				break;
+			case REDSTONE_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.REDSTONE, 5 * factor));
+				break;
+			case DIAMOND_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.DIAMOND, factor));
+				break;
+			case EMERALD_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.EMERALD, factor));
+				break;
+			case NETHER_QUARTZ_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.QUARTZ, factor));
+				break;
+			case IRON_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.IRON_INGOT, factor));
+				break;
+			case GOLD_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.GOLD_INGOT, factor));
+				break;
+			case NETHER_GOLD_ORE:
+				block.getWorld().dropItem(dropLocation, new ItemStack(Material.GOLD_NUGGET, 6 * factor));
+				break;
+		}
+	}
+
 	@Override
 	public void onDestroy() {
 		user.setCooldown(getDescription(), userConfig.cooldown);
@@ -143,6 +188,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		public int radius;
 		@Attribute(Attribute.DURATION)
 		public long regen;
+		public boolean extractOres;
 
 		@Override
 		public void onConfigReload() {
@@ -152,6 +198,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 			range = abilityNode.getNode("range").getDouble(10.0);
 			radius = abilityNode.getNode("radius").getInt(1);
 			regen = abilityNode.getNode("revert-time").getLong(0);
+			extractOres = abilityNode.getNode("extract-ores").getBoolean(true);
 		}
 	}
 }

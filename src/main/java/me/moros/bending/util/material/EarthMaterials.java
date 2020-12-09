@@ -37,7 +37,7 @@ public class EarthMaterials {
 	public static final MaterialSetTag ALL;
 
 	static {
-		EARTH_BENDABLE = new MaterialSetTag(Bending.getKey(), EnumSet.of(
+		EARTH_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
 			Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.GRASS_PATH,
 			Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
 			Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
@@ -48,18 +48,18 @@ public class EarthMaterials {
 		));
 		EARTH_BENDABLE.add(MaterialSetTag.STONE_BRICKS.getValues());
 
-		SAND_BENDABLE = new MaterialSetTag(Bending.getKey(), MaterialSetTag.SAND.getValues());
+		SAND_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), MaterialSetTag.SAND.getValues());
 		SAND_BENDABLE.add(MaterialTags.SANDSTONES, MaterialTags.RED_SANDSTONES);
 
-		METAL_BENDABLE = new MaterialSetTag(Bending.getKey(), EnumSet.of(
+		METAL_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
 			Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.QUARTZ_BLOCK
 		));
 
-		LAVA_BENDABLE = new MaterialSetTag(Bending.getKey(), EnumSet.of(
+		LAVA_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
 			Material.LAVA, Material.MAGMA_BLOCK
 		));
 
-		ALL = new MaterialSetTag(Bending.getKey(), EARTH_BENDABLE.getValues());
+		ALL = new MaterialSetTag(Bending.getLayer().getCoreKey(), EARTH_BENDABLE.getValues());
 		ALL.add(SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE);
 	}
 

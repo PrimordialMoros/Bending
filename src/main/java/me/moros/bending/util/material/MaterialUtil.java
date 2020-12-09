@@ -55,9 +55,9 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
 		COOKABLE.put(Material.STICK, Material.TORCH);
 
-		AIR = new MaterialSetTag(Bending.getKey(), Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
+		AIR = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
 
-		TRANSPARENT = new MaterialSetTag(Bending.getKey(), AIR.getValues());
+		TRANSPARENT = new MaterialSetTag(Bending.getLayer().getCoreKey(), AIR.getValues());
 		TRANSPARENT.add(MaterialSetTag.SIGNS.getValues());
 		TRANSPARENT.add(MaterialSetTag.FIRE.getValues());
 		TRANSPARENT.add(MaterialSetTag.SAPLINGS.getValues());
@@ -72,14 +72,14 @@ public final class MaterialUtil {
 			Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH);
 		TRANSPARENT.endsWith("TORCH");
 
-		CONTAINERS = new MaterialSetTag(Bending.getKey(), Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST,
+		CONTAINERS = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST,
 			Material.BARREL, Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
 			Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND, Material.BEACON,
 			Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.GRINDSTONE,
 			Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE
 		);
 
-		UNBREAKABLES = new MaterialSetTag(Bending.getKey(), Material.BARRIER, Material.BEDROCK,
+		UNBREAKABLES = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.BARRIER, Material.BEDROCK,
 			Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
 			Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
 		);

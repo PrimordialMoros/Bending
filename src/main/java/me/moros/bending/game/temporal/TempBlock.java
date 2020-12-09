@@ -117,6 +117,10 @@ public class TempBlock implements Temporary {
 		return snapshot;
 	}
 
+	public void overwriteSnapshot(@NonNull BlockData newData) {
+		this.snapshot.setBlockData(newData);
+	}
+
 	public void removeWithoutReverting() {
 		manager.removeEntry(getBlock());
 	}
