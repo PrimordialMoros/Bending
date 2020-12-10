@@ -81,7 +81,11 @@ public class AirPunch extends AbilityInstance implements Ability {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range);
-		stream = new AirStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius);
+
+		Vector3 userVelocity = new Vector3(user.getEntity().getVelocity());
+		double length = userVelocity.subtract(user.getDirection()).getNorm();
+		double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
+		stream = new AirStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius, factor);
 		return true;
 	}
 
@@ -116,8 +120,11 @@ public class AirPunch extends AbilityInstance implements Ability {
 	}
 
 	private class AirStream extends ParticleStream {
-		public AirStream(User user, Ray ray, double collisionRadius) {
-			super(user, ray, userConfig.speed, collisionRadius);
+		private final double factor;
+
+		public AirStream(User user, Ray ray, double collisionRadius, double factor) {
+			super(user, ray, userConfig.speed * factor, collisionRadius);
+			this.factor = factor;
 			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
@@ -140,7 +147,8 @@ public class AirPunch extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+			entity.setVelocity(entity.getLocation().subtract(getBukkitLocation()).toVector().normalize().multiply(factor));
 			return true;
 		}
 

@@ -89,7 +89,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 
 		if (controllable) {
 			targetLocation = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range)));
-			direction = targetLocation.subtract(location).setY(0).normalize();
+			direction = targetLocation.subtract(origin).setY(0).normalize();
 		}
 
 		if (onBlockHit(location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN))) {

@@ -25,7 +25,6 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -79,9 +78,9 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
 		if (hitEntity) return UpdateResult.REMOVE;
 		collider = collider.at(location);
+		if (canCollide.test(block) && onBlockHit(block)) return UpdateResult.REMOVE;
 		if (!MaterialUtil.isTransparent(block)) {
-			AABB blockBounds = AABBUtils.getBlockBounds(block);
-			if (canCollide.test(block) || blockBounds.intersects(collider)) {
+			if (AABBUtils.getBlockBounds(block).intersects(collider)) {
 				if (onBlockHit(block)) return UpdateResult.REMOVE;
 			}
 		}

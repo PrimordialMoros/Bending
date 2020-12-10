@@ -161,7 +161,6 @@ public final class WorldMethods {
 		Vector direction = ray.direction.normalize().toVector();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
 			Block center = location.getBlock();
-			if (ignored.contains(center.getType())) continue;
 			for (Block block : BlockMethods.combineFaces(center)) {
 				if (ignored.contains(block.getType())) continue;
 				if (AABBUtils.getBlockBounds(block).intersects(ray)) {
