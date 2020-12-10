@@ -159,11 +159,12 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthArmor", EarthArmor::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+
 		AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(catapult);
-
-		// TODO add earth abilities
 	}
 
 	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {

@@ -100,10 +100,6 @@ public class Catapult extends AbilityInstance implements Ability {
 	}
 
 	@Override
-	public void onDestroy() {
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
 	}

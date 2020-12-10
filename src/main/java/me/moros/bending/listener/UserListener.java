@@ -105,7 +105,6 @@ public class UserListener implements Listener {
 		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
 			event.getDrops().addAll(tempArmor.getSnapshot());
 			tempArmor.revert();
-			// TODO ensure drops don't get duplicated
 		});
 		String newMessage = DamageUtil.getBendingMessage(event.getEntity().getUniqueId());
 		if (newMessage != null) event.setDeathMessage(newMessage);

@@ -48,6 +48,10 @@ public final class ParticleUtil {
 		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
 	}
 
+	public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
+		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal), size).force(true);
+	}
+
 	public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
 		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
