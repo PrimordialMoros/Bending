@@ -39,6 +39,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 
 import java.util.Collection;
 
@@ -76,11 +77,13 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 		if (!resolveMovement(radius)) {
 			return UpdateResult.REMOVE;
 		}
-		if (location.subtract(new Vector3(0, radius + 0.25, 0)).toBlock(user.getWorld()).isLiquid()) {
+		Block base = location.subtract(new Vector3(0, radius + 0.25, 0)).toBlock(user.getWorld());
+		if (base.isLiquid()) {
 			return UpdateResult.REMOVE;
 		}
 		render();
 		postRender();
+		onBlockHit(base.getRelative(BlockFace.UP));
 		boolean hit = CollisionUtil.handleEntityCollisions(user, collider.addPosition(location), this::onEntityHit, true);
 		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}

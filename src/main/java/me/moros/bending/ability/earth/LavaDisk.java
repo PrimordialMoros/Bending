@@ -48,6 +48,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -253,14 +254,11 @@ public class LavaDisk extends AbilityInstance implements Ability {
 	private boolean isLocationSafe() {
 		if (location.getY() <= 2 || location.getY() >= user.getWorld().getMaxHeight() - 1)
 			return false;
-		if (MaterialUtil.isWater(location.toBlock(user.getWorld()))) {
-			Location center = location.toLocation(user.getWorld());
-			ParticleUtil.create(Particle.CLOUD, center)
-				.count(16).offset(0.5, 0.5, 0.5).extra(0.03).spawn();
-			SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
+		Block block = location.toBlock(user.getWorld());
+		if (MaterialUtil.isWater(block)) {
+			BlockMethods.playLavaExtinguishEffect(block);
 			return false;
 		}
-		Block block = location.toBlock(user.getWorld());
 		return MaterialUtil.isTransparent(block) || damageBlock(block);
 	}
 

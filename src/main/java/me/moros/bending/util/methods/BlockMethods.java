@@ -22,9 +22,12 @@ package me.moros.bending.util.methods;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.BlastFurnace;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -37,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,25 +74,36 @@ public final class BlockMethods {
 	}
 
 	/**
-	 * Attempts to extinguish nearby blocks. Fire will be put out while Lava will be turned to Obsidian or Cobblestone.
-	 * @param user the user trying to extinguish the block
-	 * @param center the location to check
-	 * @return true if Lava was cooled down, false otherwise
+	 * Plays an extinguish particle and sound effect at the given block location.
+	 * @param block the block to play the effect at
 	 */
-	public static boolean extinguish(@NonNull User user, @NonNull Location center) {
-		Block block = center.getBlock();
+	public static void playLavaExtinguishEffect(@NonNull Block block) {
+		Location center = block.getLocation().add(0.5, 0.7, 0.5);
+		SoundUtil.LAVA_EXTINGUISH_SOUND.play(center);
+		ParticleUtil.create(Particle.CLOUD, center).count(8)
+			.offset(0.3, 0.3, 0.3).spawn();
+	}
+
+	/**
+	 * Attempts to extinguish the given block if it's Fire or cool it down if it's Lava.
+	 * @param user the user trying to extinguish the block
+	 * @param block the block to extinguish
+	 * @return true if lava was cooled down, false otherwise
+	 */
+	public static boolean extinguish(@NonNull User user, @NonNull Block block) {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
-		boolean result = true;
-		for (Block b : WorldMethods.getNearbyBlocks(center, 1.2, MaterialUtil::isFire)) {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
-			b.setType(Material.AIR);
-			result = false;
-		}
 		if (MaterialUtil.isLava(block)) {
 			block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
-			result = true;
+			if (ThreadLocalRandom.current().nextBoolean()) playLavaExtinguishEffect(block);
+			return true;
 		}
-		return result;
+		if (MaterialUtil.isFire(block)) {
+			block.setType(Material.AIR);
+			if (ThreadLocalRandom.current().nextInt(4) == 0) {
+				SoundUtil.FIRE_EXTINGUISH_SOUND.play(block.getLocation());
+			}
+		}
+		return false;
 	}
 
 	/**

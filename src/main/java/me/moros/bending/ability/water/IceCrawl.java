@@ -44,7 +44,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -52,8 +51,6 @@ import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -198,11 +195,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block.getLocation());
-				Location center = block.getLocation().add(0.5, 0.7, 0.5);
-				SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
-				ParticleUtil.create(Particle.CLOUD, center).count(8)
-					.offset(0.3, 0.3, 0.3).spawn();
+				BlockMethods.extinguish(user, block);
 				return true;
 			} else if (MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.ICE, userConfig.iceDuration, true);

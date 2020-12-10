@@ -44,7 +44,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import java.util.Arrays;
@@ -74,6 +73,9 @@ public class AirScooter extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
+
+		if (Policies.IN_LIQUID.test(user, getDescription())) return false;
+
 		heightSmoother = new HeightSmoother();
 
 		double dist = WorldMethods.distanceAboveGround(user.getEntity());
@@ -194,7 +196,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 			.add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
 
 		Block block = front.toBlock(user.getWorld());
-		if (block.getType() == Material.WATER) {
+		if (MaterialUtil.isWater(block)) {
 			return false;
 		}
 		return !MaterialUtil.isTransparent(block) || !block.isPassable();

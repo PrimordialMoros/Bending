@@ -42,6 +42,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
@@ -201,7 +202,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		public AirStream(User user, Ray ray, double collisionRadius) {
 			super(user, ray, userConfig.speed, collisionRadius);
-			canCollide = Block::isLiquid;
+			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
 		}
 
 		@Override
@@ -254,7 +255,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return BlockMethods.extinguish(user, getBukkitLocation());
+			return MaterialUtil.isWater(block) || BlockMethods.extinguish(user, block);
 		}
 	}
 

@@ -41,7 +41,11 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.block.Block;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -92,19 +96,22 @@ public class AirShield extends AbilityInstance implements Ability {
 		Vector3 center = getCenter();
 		double height = userConfig.radius * 2;
 		double spacing = height / 8;
-		for (int i = 1; i < 8; ++i) {
+		for (int i = 1; i < 8; i++) {
 			double y = (i * spacing) - userConfig.radius;
 			double factor = 1 - (y * y) / (userConfig.radius * userConfig.radius);
-			if (factor <= 0.2) continue; // Don't render the end points that are tightly coupled.
-			// Offset each stream so they aren't all lined up.
+			if (factor <= 0.2) continue;
 			double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
 			double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
 			Vector3 loc = center.add(new Vector3(x, y, z));
-			ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5).offset(0.2, 0.2, 0.2).spawn();
-
+			ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5)
+				.offset(0.2, 0.2, 0.2).extra(0.03).spawn();
 			if (ThreadLocalRandom.current().nextInt(12) == 0) {
 				SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
 			}
+		}
+
+		for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
+			BlockMethods.extinguish(user, b);
 		}
 
 		CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {

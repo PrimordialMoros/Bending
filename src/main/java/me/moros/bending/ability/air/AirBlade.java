@@ -43,10 +43,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 import java.util.Collection;
@@ -202,6 +205,14 @@ public class AirBlade extends AbilityInstance implements Ability {
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor);
+			return true;
+		}
+
+		@Override
+		public boolean onBlockHit(@NonNull Block block) {
+			if (MaterialUtil.isFire(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+				block.setType(Material.AIR);
+			}
 			return true;
 		}
 	}

@@ -56,10 +56,8 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
@@ -383,11 +381,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block.getLocation());
-				Location center = getBukkitLocation();
-				SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
-				ParticleUtil.create(Particle.CLOUD, center).count(8)
-					.offset(0.3, 0.3, 0.3).spawn();
+				BlockMethods.extinguish(user, block);
 				return true;
 			}
 			return false;

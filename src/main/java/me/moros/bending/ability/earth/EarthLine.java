@@ -56,6 +56,7 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -264,10 +265,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isWater(block)) {
 				if (mode == Mode.MAGMA) {
-					Location center = block.getLocation().add(0.5, 0.7, 0.5);
-					SoundUtil.playSound(center, Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
-					ParticleUtil.create(Particle.CLOUD, center).count(12)
-						.offset(0.3, 0.3, 0.3).spawn();
+					BlockMethods.playLavaExtinguishEffect(block);
 					return true;
 				}
 			}

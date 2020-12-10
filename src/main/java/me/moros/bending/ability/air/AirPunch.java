@@ -40,6 +40,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
@@ -126,7 +127,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 			super(user, ray, userConfig.speed * factor, collisionRadius);
 			this.factor = factor;
 			livingOnly = true;
-			canCollide = Block::isLiquid;
+			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
 		}
 
 		@Override
@@ -154,7 +155,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return BlockMethods.extinguish(user, getBukkitLocation());
+			return MaterialUtil.isWater(block) || BlockMethods.extinguish(user, block);
 		}
 	}
 

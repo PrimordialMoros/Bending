@@ -38,10 +38,12 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.block.Block;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -101,6 +103,9 @@ public class AirWheel extends AbilityInstance implements Ability {
 			render();
 			nextRenderTime = time + 100;
 		}
+
+		Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
+		BlockMethods.extinguish(user, base);
 
 		if (time > nextDamageTime) {
 			CollisionUtil.handleEntityCollisions(user, collider, entity -> {

@@ -40,6 +40,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -242,7 +243,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
-				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, 10000, true));
+				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true));
 			}
 			return true;
 		}

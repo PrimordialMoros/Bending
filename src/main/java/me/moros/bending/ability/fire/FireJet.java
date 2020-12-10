@@ -34,6 +34,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -81,7 +82,7 @@ public class FireJet extends AbilityInstance implements Ability {
 		duration = userConfig.duration;
 
 		flight = Flight.get(user);
-		if (ignitable) TempBlock.create(block, Material.FIRE, 3000, true);
+		if (ignitable) TempBlock.create(block, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true);
 
 		removalPolicy = Policies.builder()
 			.add(Policies.IN_LIQUID)
