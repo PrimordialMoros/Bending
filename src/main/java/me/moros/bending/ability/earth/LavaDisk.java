@@ -66,7 +66,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class LavaDisk extends AbilityInstance implements Ability {
-	private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
+	private static final String[] colors = { "2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00" };
 	private static final Config config = new Config();
 
 	private User user;

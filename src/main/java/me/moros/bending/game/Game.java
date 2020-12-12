@@ -67,7 +67,6 @@ public final class Game {
 
 		abilityRegistry = new AbilityRegistry();
 		sequenceManager = new SequenceManager(this);
-		AbilityInitializer.loadAbilities(this);
 		worldManager = new WorldManager();
 
 		attributeSystem = new AttributeSystem();

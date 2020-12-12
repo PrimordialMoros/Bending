@@ -38,6 +38,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public abstract class BlockStream implements State {
 		Block head = stream.getFirst();
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
 		if (controllable || direction == null) {
-			Vector3 targetLoc = new Vector3(WorldMethods.getTargetEntity(user, range).map(Entity::getLocation)
+			Vector3 targetLoc = new Vector3(WorldMethods.getTargetEntity(user, range).map(LivingEntity::getEyeLocation)
 				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
 			// Improve targeting when near
 			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
@@ -118,7 +119,7 @@ public abstract class BlockStream implements State {
 		}
 
 		clean(stream.removeLast());
-		if (current.distanceSq(user.getLocation()) <= range * range) {
+		if (current.distanceSq(user.getEyeLocation()) <= range * range) {
 			if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
 				if (material == Material.WATER && MaterialUtil.isWater(head)) {
 					ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))

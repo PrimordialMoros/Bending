@@ -150,6 +150,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+
 		abilities.add(AbilityDescription.builder("EarthLine", EarthLine::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 

@@ -58,7 +58,8 @@ public final class DamageUtil {
 			EntityDamageByEntityEvent finalEvent = new EntityDamageByEntityEvent(sourceEntity, entity, EntityDamageEvent.DamageCause.CUSTOM, damage);
 			targetEntity.damage(damage, sourceEntity);
 			targetEntity.setLastDamageCause(finalEvent);
-			if (!abilityName.isEmpty() && targetEntity instanceof Player) cache.put(targetEntity.getUniqueId(),abilityName);
+			if (!abilityName.isEmpty() && targetEntity instanceof Player)
+				cache.put(targetEntity.getUniqueId(), abilityName);
 			return true;
 		}
 		return false;

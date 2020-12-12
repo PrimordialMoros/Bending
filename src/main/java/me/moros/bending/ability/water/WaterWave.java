@@ -94,7 +94,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		Location center = user.getEntity().getLocation().subtract(0, 1, 0);
 		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, MaterialUtil::isTransparent)) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			Optional<TempBlock> tb = TempBlock.create(block,  Material.WATER, 1000);
+			Optional<TempBlock> tb = TempBlock.create(block, Material.WATER, 1000);
 			if (ice) {
 				tb.ifPresent(t -> t.setRevertTask(() -> TempBlock.create(block, Material.ICE, 1000)));
 			}

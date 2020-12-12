@@ -39,7 +39,6 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 
 public class FireJet extends AbilityInstance implements Ability {

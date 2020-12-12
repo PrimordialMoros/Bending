@@ -35,8 +35,6 @@ import me.moros.bending.util.Tasker;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 

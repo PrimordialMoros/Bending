@@ -105,6 +105,7 @@ public final class ActivationController {
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);
 		WaterRing.launchShard(user);
+		EarthBlast.launch(user);
 		EarthLine.launch(user);
 		HeatControl.act(user);
 		Combustion.explode(user);
