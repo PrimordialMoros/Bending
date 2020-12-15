@@ -47,6 +47,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	private final Material material;
 
 	private Block current;
+	private Block previousBlock;
 	private Collider collider;
 	private Vector3 firstDestination;
 	protected Vector3 target;
@@ -56,6 +57,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	private int buffer;
 	private final int speed;
 
+	protected boolean allowUnderWater = false;
 	protected double range;
 
 	/**
@@ -108,7 +110,9 @@ public abstract class AbstractBlockShot implements Updatable {
 			return UpdateResult.REMOVE;
 		}
 
+
 		current = currentVector.toBlock(user.getWorld());
+		previousBlock = current;
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
 			return UpdateResult.REMOVE;
 		}
@@ -116,7 +120,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false)) {
 			return UpdateResult.REMOVE;
 		}
-		if (MaterialUtil.isTransparent(current) || MaterialUtil.isWater(current)) {
+		if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
 			if (!current.isLiquid()) current.breakNaturally(new ItemStack(Material.AIR));
 			if (material == Material.WATER && MaterialUtil.isWater(current)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
@@ -137,6 +141,10 @@ public abstract class AbstractBlockShot implements Updatable {
 		settingUp = false;
 	}
 
+	public Block getPreviousBlock() {
+		return previousBlock;
+	}
+
 	public Vector3 getCurrent() {
 		return new Vector3(current);
 	}
@@ -153,6 +161,10 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public void clean() {
-		TempBlock.manager.get(current).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
+		clean(current);
+	}
+
+	public void clean(@NonNull Block block) {
+		TempBlock.manager.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 }

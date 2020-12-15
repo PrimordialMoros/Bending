@@ -130,7 +130,7 @@ public class TempBlock implements Temporary {
 	}
 
 	@Override
-	public void setRevertTask(@NonNull RevertTask task) {
+	public void setRevertTask(RevertTask task) {
 		this.revertTask = task;
 	}
 

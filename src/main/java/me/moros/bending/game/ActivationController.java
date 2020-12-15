@@ -101,6 +101,7 @@ public final class ActivationController {
 		if (removed) return;
 
 		AirBurst.activateCone(user);
+		WaterManipulation.launch(user);
 		PhaseChange.freeze(user);
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);

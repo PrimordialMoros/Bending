@@ -21,10 +21,12 @@ package me.moros.bending.util.methods;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -123,5 +125,19 @@ public final class BlockMethods {
 	 */
 	public static @NonNull Collection<@NonNull Block> combineFaces(@NonNull Block center, @NonNull Set<@NonNull BlockFace> faces) {
 		return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
+	}
+
+	public static boolean isInfiniteWater(@NonNull Block block) {
+		int sources = 0;
+		for (BlockFace face : CARDINAL_FACES) {
+			Block adjacent = block.getRelative(face);
+			if (!TempBlock.isBendable(adjacent)) continue;
+			if (MaterialUtil.isWater(adjacent) && MaterialUtil.isSourceBlock(adjacent)) {
+				sources++;
+			} else if (WaterMaterials.isIceBendable(adjacent)) {
+				sources++;
+			}
+		}
+		return sources >= 2;
 	}
 }

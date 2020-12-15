@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.earth;
+package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
@@ -44,25 +44,30 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
-import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Predicate;
+import java.util.Deque;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class EarthBlast extends AbilityInstance implements Ability {
+public class WaterManipulation extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -70,9 +75,10 @@ public class EarthBlast extends AbilityInstance implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private StateChain states;
-	private Blast blast;
+	private Manip manip;
+	private final Deque<Block> trail = new ArrayDeque<>(2);
 
-	public EarthBlast(@NonNull AbilityDescription desc) {
+	public WaterManipulation(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
 
@@ -81,23 +87,21 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.ALL).orElse(null);
 		if (source == null) return false;
-		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 
-		Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
-			.filter(eb -> eb.blast == null).collect(Collectors.toList());
-		for (EarthBlast eblast : eblasts) {
-			State state = eblast.states.getCurrent();
+		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+			.filter(m -> m.manip == null).collect(Collectors.toList());
+		for (WaterManipulation manip : manips) {
+			State state = manip.states.getCurrent();
 			if (state instanceof SelectedSource) {
-				((SelectedSource) state).reselect(source, fakeData);
+				((SelectedSource) state).reselect(source);
 				return false;
 			}
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 5, fakeData))
+			.addState(new SelectedSource(user, source, userConfig.selectRange + 5))
 			.start();
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;
@@ -113,24 +117,51 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		if (blast != null) {
-			return blast.update();
+		if (manip != null) {
+			if (ThreadLocalRandom.current().nextInt(5) == 0) {
+				SoundUtil.WATER_SOUND.play(manip.getCurrent().toLocation(user.getWorld()));
+			}
+
+			Block previous = manip.getPreviousBlock();
+			if (previous != null) {
+				if (!trail.isEmpty()) manip.clean(trail.peekFirst());
+				if (trail.size() == 2) manip.clean(trail.removeLast());
+				trail.addFirst(previous);
+				TempBlock.manager.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
+			}
+
+			return manip.update();
 		} else {
 			return states.update();
 		}
 	}
 
+	private void renderTrail(Block block, int level) {
+		if (MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block)) {
+			if (!block.isLiquid()) block.breakNaturally(new ItemStack(Material.AIR));
+			if (MaterialUtil.isWater(block)) {
+				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
+					.count(5).offset(0.25, 0.25, 0.25).spawn();
+			} else {
+				Optional<TempBlock> tempBlock = TempBlock.create(block, MaterialUtil.getWaterData(level), true);
+				if (level == 7 && tempBlock.isPresent()) {
+					tempBlock.get().setRevertTask(() -> renderTrail(block, level - 1));
+				}
+			}
+		}
+	}
+
 	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthBlast")) {
-			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterManipulation")) {
+			Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
 				.collect(Collectors.toList());
 			redirectAny(user);
-			for (EarthBlast eblast : eblasts) {
-				if (eblast.blast == null) {
-					eblast.launch();
+			for (WaterManipulation manip : manips) {
+				if (manip.manip == null) {
+					manip.launch();
 					return;
 				} else {
-					eblast.blast.redirect();
+					manip.manip.redirect();
 				}
 			}
 		}
@@ -141,30 +172,31 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		if (state instanceof SelectedSource) {
 			state.complete();
 			Block source = states.getChainStore().stream().findAny().orElse(null);
-			if (source == null) return;
-			if (EarthMaterials.isEarthbendable(user, source) && !EarthMaterials.isLavaBendable(source)) {
-				blast = new Blast(user, source);
-				SoundUtil.EARTH_SOUND.play(source.getLocation());
+			if (source == null || !TempBlock.isBendable(source)) return;
+			if (WaterMaterials.ALL.isTagged(source)) {
+				manip = new Manip(user, source);
 				Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
-				TempBlock.create(source, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+				if (!BlockMethods.isInfiniteWater(source)) {
+					source.setType(Material.AIR);
+				}
 			}
 		}
 	}
 
 	private static void redirectAny(@NonNull User user) {
-		Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
-			.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
-		for (EarthBlast eb : blasts) {
-			Vector3 center = eb.blast.getCurrent().add(Vector3.HALF);
+		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
+			.filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
+		for (WaterManipulation manip : manips) {
+			Vector3 center = manip.manip.getCurrent().add(Vector3.HALF);
 			double dist = center.distanceSq(user.getEyeLocation());
 			if (dist < config.rMin * config.rMin || dist > config.rMax * config.rMax) continue;
 			Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
 			if (selectSphere.intersects(user.getRay(dist))) {
 				Vector3 dir = center.subtract(user.getEyeLocation());
 				if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.rMax + 2).isPresent()) {
-					Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(eb, user);
-					eb.blast.redirect();
+					Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(manip, user);
+					manip.manip.redirect();
 				}
 			}
 		}
@@ -179,7 +211,13 @@ public class EarthBlast extends AbilityInstance implements Ability {
 				((Player) user.getEntity()).sendBlockChange(block.getLocation(), block.getBlockData());
 			}
 		}
-		if (blast != null) blast.clean();
+		if (manip != null) {
+			trail.forEach(b -> {
+				TempBlock.manager.get(b).ifPresent(tb -> tb.setRevertTask(null));
+				manip.clean(b);
+			});
+			manip.clean();
+		}
 	}
 
 	@Override
@@ -195,8 +233,8 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
-		if (blast == null) return Collections.emptyList();
-		return Collections.singletonList(blast.getCollider());
+		if (manip == null) return Collections.emptyList();
+		return Collections.singletonList(manip.getCollider());
 	}
 
 	@Override
@@ -206,10 +244,10 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	private class Blast extends AbstractBlockShot {
-		public Blast(User user, Block block) {
+	private class Manip extends AbstractBlockShot {
+		public Manip(User user, Block block) {
 			super(user, block, userConfig.range, 100);
-			allowUnderWater = false;
+			allowUnderWater = true;
 		}
 
 		@Override
@@ -239,7 +277,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthblast");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "watermanipulation");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(750);
 			range = abilityNode.getNode("range").getDouble(32.0);

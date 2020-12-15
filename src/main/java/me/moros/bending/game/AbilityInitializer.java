@@ -116,6 +116,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setSourcesPlants(true).build());
+
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).setHarmless(true).build());
 
