@@ -35,8 +35,11 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
@@ -49,6 +52,7 @@ public class Catapult extends AbilityInstance implements Ability {
 	private Config userConfig;
 
 	private Block base;
+	private Pillar pillar;
 
 	private long startTime;
 
@@ -58,6 +62,8 @@ public class Catapult extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (!WorldMethods.isOnGround(user.getEntity())) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -65,7 +71,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, base) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
-		if (!EarthMaterials.isEarthbendable(user, base) || !TempBlock.isBendable(base)) {
+		if (base.isLiquid() || !EarthMaterials.isEarthbendable(user, base) || !TempBlock.isBendable(base)) {
 			return false;
 		}
 		launch();
@@ -81,16 +87,18 @@ public class Catapult extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull UpdateResult update() {
 		if (System.currentTimeMillis() > startTime + 250) {
-			Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b);
-			Pillar.buildPillar(user, base, BlockFace.UP, 1, 5000, predicate);
-			return UpdateResult.REMOVE;
+			return pillar == null ? UpdateResult.REMOVE : pillar.update();
 		}
 		return UpdateResult.CONTINUE;
 	}
 
 	public boolean launch() {
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		double power = user.isSneaking() ? userConfig.power / 2 : userConfig.power;
+		double power = user.isSneaking() ? userConfig.power * 0.666 : userConfig.power;
+
+		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
+		pillar = Pillar.buildPillar(user, base, BlockFace.UP, 1, BendingProperties.EARTHBENDING_REVERT_TIME, predicate).orElse(null);
+		SoundUtil.EARTH_SOUND.play(base.getLocation());
 
 		Collider collider = new Sphere(new Vector3(user.getLocBlock()).add(Vector3.HALF), 1.5);
 		return CollisionUtil.handleEntityCollisions(user, collider, e -> {
@@ -115,7 +123,7 @@ public class Catapult extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "catapult");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(2000);
-			power = abilityNode.getNode("power").getDouble(1.5);
+			power = abilityNode.getNode("power").getDouble(2.4);
 		}
 	}
 }

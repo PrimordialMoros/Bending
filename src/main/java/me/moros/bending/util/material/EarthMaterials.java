@@ -35,6 +35,7 @@ public class EarthMaterials {
 	public static final MaterialSetTag METAL_BENDABLE;
 	public static final MaterialSetTag LAVA_BENDABLE;
 	public static final MaterialSetTag ALL;
+	public static final MaterialSetTag EARTH_SAND_SOURCES;
 
 	static {
 		EARTH_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
@@ -61,6 +62,9 @@ public class EarthMaterials {
 
 		ALL = new MaterialSetTag(Bending.getLayer().getCoreKey(), EARTH_BENDABLE.getValues());
 		ALL.add(SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE);
+
+		EARTH_SAND_SOURCES = new MaterialSetTag(Bending.getLayer().getCoreKey(), EARTH_BENDABLE.getValues());
+		EARTH_SAND_SOURCES.add(SAND_BENDABLE);
 	}
 
 	public static boolean isEarthbendable(@NonNull User user, @NonNull Block block) {

@@ -42,7 +42,11 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
+import java.util.Collections;
+
 public abstract class AbstractBlockShot implements Updatable {
+	private static final AABB BOX = new AABB(new Vector3(-0.25, -0.25, -0.25), new Vector3(1.25, 1.25, 1.25));
+
 	private final User user;
 	private final Material material;
 
@@ -50,6 +54,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	private Block previousBlock;
 	private Collider collider;
 	private Vector3 firstDestination;
+
 	protected Vector3 target;
 	protected Vector3 direction;
 
@@ -101,7 +106,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		Vector3 dest = settingUp ? firstDestination : target;
 		Vector3 currentVector = getCurrent().add(Vector3.HALF);
 		direction = dest.subtract(currentVector).normalize();
-		currentVector = currentVector.add(direction);
+		currentVector = currentVector.add(direction).floor().add(Vector3.HALF);
 
 		if (currentVector.distanceSq(user.getEyeLocation()) > range * range) {
 			return UpdateResult.REMOVE;
@@ -116,7 +121,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
 			return UpdateResult.REMOVE;
 		}
-		collider = AABB.BLOCK_BOUNDS.at(getCurrent());
+		collider = BOX.at(getCurrent());
 		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false)) {
 			return UpdateResult.REMOVE;
 		}
@@ -137,7 +142,8 @@ public abstract class AbstractBlockShot implements Updatable {
 
 	public void redirect() {
 		target = new Vector3(WorldMethods.getTargetEntity(user, range)
-			.map(LivingEntity::getEyeLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range))));
+			.map(LivingEntity::getEyeLocation)
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
 		settingUp = false;
 	}
 

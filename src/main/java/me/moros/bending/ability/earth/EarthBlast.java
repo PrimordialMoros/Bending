@@ -81,7 +81,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
 		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
 		if (source == null) return false;
 		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
@@ -142,7 +142,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			state.complete();
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null) return;
-			if (EarthMaterials.isEarthbendable(user, source) && !EarthMaterials.isLavaBendable(source)) {
+			if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
 				blast = new Blast(user, source);
 				SoundUtil.EARTH_SOUND.play(source.getLocation());
 				Policies.builder().build();

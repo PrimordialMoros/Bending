@@ -83,6 +83,8 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthArmor.class)) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -167,7 +169,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
 		if (user instanceof BendingPlayer) {
 			Player player = (Player) user.getEntity();
-			TempArmor.create(player, new ItemStack[]{ head, chest, leggings, boots }, userConfig.duration);
+			TempArmor.create(player, new ItemStack[]{ boots, leggings, chest, head }, userConfig.duration);
 		}
 		if (PotionUtil.canAddPotion(user, PotionEffectType.DAMAGE_RESISTANCE, 20, resistance)) {
 			user.getEntity().addPotionEffect(
@@ -175,6 +177,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 			);
 		}
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
+		user.setCooldown(getDescription(), userConfig.cooldown);
 		formed = true;
 	}
 

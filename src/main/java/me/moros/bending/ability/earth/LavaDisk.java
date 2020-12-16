@@ -209,7 +209,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 			return false;
 		}
 		// TODO add fire ignition to specific blocks, add extra material types to destroy
-		if (EarthMaterials.EARTH_BENDABLE.isTagged(block) || EarthMaterials.SAND_BENDABLE.isTagged(block)) {
+		if (EarthMaterials.EARTH_SAND_SOURCES.isTagged(block)) {
 			currentPower -= block.getType().getHardness();
 			TempBlock.create(block, Material.AIR, 30000, true);
 			ParticleUtil.create(Particle.LAVA, block.getLocation())

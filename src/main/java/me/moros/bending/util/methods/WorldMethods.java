@@ -35,6 +35,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
@@ -145,7 +146,7 @@ public final class WorldMethods {
 	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT}.
 	 */
 	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray) {
-		return getTarget(world, ray, MaterialUtil.TRANSPARENT.getValues());
+		return getTarget(world, ray, Collections.emptySet());
 	}
 
 	/**
@@ -153,7 +154,7 @@ public final class WorldMethods {
 	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
 	 * @param world the world to check in
 	 * @param ray the ray which holds the origin and direction
-	 * @param ignored a set of materials that will be ignored
+	 * @param ignored an extra set of materials that will be ignored (transparent materials are already ignored)
 	 * @return the target location
 	 */
 	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
@@ -162,7 +163,7 @@ public final class WorldMethods {
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
 			Block center = location.getBlock();
 			for (Block block : BlockMethods.combineFaces(center)) {
-				if (ignored.contains(block.getType())) continue;
+				if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) continue;
 				if (AABBUtils.getBlockBounds(block).intersects(ray)) {
 					return location;
 				}
@@ -237,17 +238,12 @@ public final class WorldMethods {
 	 * @return true if entity standing on ground, false otherwise
 	 */
 	public static boolean isOnGround(@NonNull Entity entity) {
-		final double epsilon = 0.01;
-		Vector3 location = new Vector3(entity.getLocation().subtract(0, epsilon, 0));
-		AABB entityBounds = AABBUtils.getEntityBounds(entity).at(location);
-		for (int x = -1; x <= 1; ++x) {
-			for (int z = -1; z <= 1; ++z) {
-				Block checkBlock = location.add(new Vector3(x, -epsilon, z)).toBlock(entity.getWorld());
-				if (checkBlock.isPassable() || MaterialUtil.isAir(checkBlock)) continue;
-				AABB checkBounds = AABBUtils.getBlockBounds(checkBlock).at(new Vector3(checkBlock));
-				if (entityBounds.intersects(checkBounds)) {
-					return true;
-				}
+		if (!(entity instanceof Player)) return entity.isOnGround();
+		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 0.05, 0));
+		AABB floorBounds = new AABB(new Vector3(-1, -0.1, -1), new Vector3(1, 0.1, 1)).at(new Vector3(entity.getLocation()));
+		for (Block block : getNearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
+			if (entityBounds.intersects(AABBUtils.getBlockBounds(block))) {
+				return true;
 			}
 		}
 		return false;

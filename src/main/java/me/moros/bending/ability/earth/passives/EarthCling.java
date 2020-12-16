@@ -72,7 +72,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		}
 		int counter = 2;
 		// TODO add earthglove and count available
-		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b))) {
+		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());
 			} else {

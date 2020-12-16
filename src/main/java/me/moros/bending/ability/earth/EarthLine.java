@@ -302,7 +302,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			if (mode != Mode.NORMAL || raisedSpikes) return;
 			raisedSpikes = true;
 			Vector3 loc = location.add(Vector3.MINUS_J);
-			Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b);
+			Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
 			Pillar.buildPillar(user, loc.toBlock(user.getWorld()), BlockFace.UP, 1, 30000, predicate).ifPresent(spikes::add);
 			Pillar.buildPillar(user, loc.add(direction).toBlock(user.getWorld()), BlockFace.UP, 2, 30000, predicate).ifPresent(spikes::add);
 		}

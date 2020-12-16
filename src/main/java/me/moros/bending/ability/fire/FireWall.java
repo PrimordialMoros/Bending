@@ -132,6 +132,7 @@ public class FireWall extends AbilityInstance implements Ability {
 			nextRenderTime = time + 250;
 			if (applyDamage) {
 				CollisionUtil.handleEntityCollisions(user, collider, entity -> {
+					entity.setVelocity(Vector3.ZERO.toVector());
 					DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 					FireTick.ACCUMULATE.apply(entity, 20);
 					return true;

@@ -167,6 +167,10 @@ public final class MaterialUtil {
 			case GRASS_BLOCK:
 			case GRASS_PATH:
 				return Material.COARSE_DIRT.createBlockData();
+			case SAND:
+				return Material.SAND.createBlockData();
+			case RED_SAND:
+				return Material.RED_SAND.createBlockData();
 		}
 		return Material.SAND.createBlockData();
 	}
