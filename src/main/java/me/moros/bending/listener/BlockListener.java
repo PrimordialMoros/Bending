@@ -24,6 +24,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.util.Metadata;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
@@ -112,10 +113,11 @@ public class BlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockChange(EntityChangeBlockEvent event) {
 		if (event.getEntityType() == EntityType.FALLING_BLOCK) {
-			BendingFallingBlock.manager.get((FallingBlock) event.getEntity()).ifPresent(bfb -> {
-				bfb.revert();
+			FallingBlock fb = (FallingBlock) event.getEntity();
+			if (fb.hasMetadata(Metadata.FALLING_BLOCK)) {
 				event.setCancelled(true);
-			});
+			}
+			BendingFallingBlock.manager.get(fb).ifPresent(BendingFallingBlock::revert);
 		}
 	}
 }

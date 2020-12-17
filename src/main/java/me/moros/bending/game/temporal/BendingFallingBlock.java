@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.util.Metadata;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -41,6 +42,7 @@ public class BendingFallingBlock implements Temporary {
 		fallingBlock.setVelocity(velocity.clampVelocity().toVector());
 		fallingBlock.setGravity(gravity);
 		fallingBlock.setDropItem(false);
+		fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
 		manager.addEntry(fallingBlock, this, duration);
 	}
 
