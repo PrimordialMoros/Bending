@@ -20,13 +20,13 @@
 package me.moros.bending.game.temporal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.util.Vector;
 
 public class BendingFallingBlock implements Temporary {
 	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
@@ -36,24 +36,24 @@ public class BendingFallingBlock implements Temporary {
 	public static void init() {
 	}
 
-	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector velocity, boolean gravity, long duration) {
+	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
 		fallingBlock = location.getWorld().spawnFallingBlock(location, data);
-		fallingBlock.setVelocity(velocity);
+		fallingBlock.setVelocity(velocity.clampVelocity().toVector());
 		fallingBlock.setGravity(gravity);
 		fallingBlock.setDropItem(false);
 		manager.addEntry(fallingBlock, this, duration);
 	}
 
 	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
-		this(location, data, new Vector(), false, duration);
+		this(location, data, Vector3.ZERO, false, duration);
 	}
 
-	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector velocity, boolean gravity, long duration) {
+	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
 		this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
 	}
 
 	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, long duration) {
-		this(block, data, new Vector(), false, duration);
+		this(block, data, Vector3.ZERO, false, duration);
 	}
 
 	@Override

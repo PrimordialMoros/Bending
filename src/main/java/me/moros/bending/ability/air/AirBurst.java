@@ -93,8 +93,10 @@ public class AirBurst extends AbstractBurst implements Ability {
 	}
 
 	public static void activateCone(User user) {
-		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
-			.ifPresent(b -> b.release(true));
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("AirBurst")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+				.ifPresent(b -> b.release(true));
+		}
 	}
 
 	private void release(boolean cone) {
@@ -115,12 +117,11 @@ public class AirBurst extends AbstractBurst implements Ability {
 		public long cooldown;
 		@Attribute(Attribute.CHARGE_TIME)
 		public int chargeTime;
-
 		@Attribute(Attribute.RANGE)
 		public double sphereRange;
 		@Attribute(Attribute.RANGE)
 		public double coneRange;
-		public int fallThreshold;
+		public double fallThreshold;
 
 		@Override
 		public void onConfigReload() {
@@ -128,9 +129,9 @@ public class AirBurst extends AbstractBurst implements Ability {
 
 			cooldown = abilityNode.getNode("cooldown").getLong(0);
 			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
-			coneRange = abilityNode.getNode("cone-range").getDouble(16);
-			sphereRange = abilityNode.getNode("sphere-range").getDouble(12);
-			fallThreshold = abilityNode.getNode("fall-threshold").getInt(10);
+			coneRange = abilityNode.getNode("cone-range").getDouble(16.0);
+			sphereRange = abilityNode.getNode("sphere-range").getDouble(12.0);
+			fallThreshold = abilityNode.getNode("fall-threshold").getDouble(12.0);
 		}
 	}
 }

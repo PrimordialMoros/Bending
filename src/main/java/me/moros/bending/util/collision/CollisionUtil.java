@@ -40,7 +40,6 @@ public final class CollisionUtil {
 		return handleEntityCollisions(user, collider, callback, livingOnly, false);
 	}
 
-
 	/**
 	 * Checks a collider to see if it's hitting any entities near it.
 	 * By default it ignores Spectators and invisible armor stands.
@@ -57,23 +56,24 @@ public final class CollisionUtil {
 		Vector3 pos = collider.getPosition();
 		boolean hit = false;
 		for (Entity entity : user.getWorld().getNearbyEntities(pos.toLocation(user.getWorld()), extent.getX(), extent.getY(), extent.getZ())) {
+			if (livingOnly && !(entity instanceof LivingEntity)) continue;
 			if (!selfCollision && entity.equals(user.getEntity())) continue;
-			if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) {
-				continue;
-			}
-			if (entity instanceof FallingBlock && BendingFallingBlock.manager.isTemp((FallingBlock) entity)) {
-				continue;
-			}
-			if (livingOnly && !(entity instanceof LivingEntity)) {
-				continue;
-			}
-			if (entity instanceof ArmorStand && !((ArmorStand) entity).isVisible()) {
-				continue;
-			}
+			if (!isValidEntity(entity)) continue;
 			if (collider.intersects(AABBUtils.getEntityBounds(entity))) {
 				hit |= callback.onCollision(entity);
 			}
 		}
 		return hit;
+	}
+
+	private static boolean isValidEntity(Entity entity) {
+		if (entity instanceof Player) {
+			return ((Player) entity).getGameMode() != GameMode.SPECTATOR;
+		} else if (entity instanceof FallingBlock) {
+			return !BendingFallingBlock.manager.isTemp((FallingBlock) entity);
+		} else if (entity instanceof ArmorStand) {
+			return ((ArmorStand) entity).isVisible();
+		}
+		return true;
 	}
 }

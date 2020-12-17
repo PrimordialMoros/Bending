@@ -43,8 +43,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Blaze extends AbilityInstance implements Ability {
@@ -53,7 +53,7 @@ public class Blaze extends AbilityInstance implements Ability {
 	private User user;
 	private Config userConfig;
 
-	private final List<FireStream> streams = new ArrayList<>();
+	private final Collection<FireStream> streams = new ArrayList<>();
 	private final Set<Block> affectedBlocks = new HashSet<>();
 
 	public Blaze(@NonNull AbilityDescription desc) {

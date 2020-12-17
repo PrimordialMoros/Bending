@@ -171,6 +171,9 @@ public final class AbilityInitializer {
 		AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(catapult);
+
+		abilities.add(AbilityDescription.builder("Shockwave", Shockwave::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
 	}
 
 	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {

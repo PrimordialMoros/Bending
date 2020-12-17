@@ -108,6 +108,7 @@ public final class ActivationController {
 		WaterRing.launchShard(user);
 		EarthBlast.launch(user);
 		EarthLine.launch(user);
+		Shockwave.activateCone(user);
 		HeatControl.act(user);
 		Combustion.explode(user);
 		FireBurst.activateCone(user);

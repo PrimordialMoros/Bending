@@ -55,7 +55,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
-import org.bukkit.util.Vector;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -106,7 +105,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		BlockState state = block.getState();
 		long delay = ThreadLocalRandom.current().nextInt(5000, 10000) + userConfig.cooldown;
 		TempBlock.create(block, Material.AIR, delay, true);
-		fallingBlock = new BendingFallingBlock(block, state.getBlockData(), new Vector(0, 0.2, 0), false, 10000);
+		fallingBlock = new BendingFallingBlock(block, state.getBlockData(), new Vector3(0, 0.2, 0), false, 10000);
 
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(5000)).build();
 		return true;

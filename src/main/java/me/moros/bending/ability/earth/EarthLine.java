@@ -73,7 +73,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -292,7 +291,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			Collections.shuffle(wall);
 			ThreadLocalRandom rnd = ThreadLocalRandom.current();
 			for (Block block : wall) {
-				Vector velocity = new Vector(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
+				Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
 				TempBlock.create(block, Material.AIR, userConfig.regen, true);
 				new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
 			}

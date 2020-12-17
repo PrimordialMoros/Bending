@@ -88,8 +88,10 @@ public class FireBurst extends AbstractBurst implements Ability {
 	}
 
 	public static void activateCone(User user) {
-		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
-			.ifPresent(b -> b.release(true));
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("FireBurst")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
+				.ifPresent(b -> b.release(true));
+		}
 	}
 
 	private void release(boolean cone) {
