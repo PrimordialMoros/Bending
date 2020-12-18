@@ -45,6 +45,7 @@ import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -75,12 +76,24 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 
 		boolean wall = method == ActivationMethod.SNEAK;
 		if (wall) {
-			raiseWall();
+			raiseWall(userConfig.wallMaxHeight, userConfig.wallWidth);
 		} else {
 			getTopValid(origin, userConfig.columnMaxHeight).ifPresent(b -> createPillar(b, userConfig.columnMaxHeight));
 		}
 		if (!pillars.isEmpty()) {
 			user.setCooldown(getDescription(), wall ? userConfig.wallCooldown : userConfig.columnCooldown);
+			removalPolicy = Policies.builder().build();
+			return true;
+		}
+		return false;
+	}
+
+	public boolean activate(@NonNull User user, @NonNull Block source, int height, int width) {
+		this.user = user;
+		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		origin = source;
+		raiseWall(height, width);
+		if (!pillars.isEmpty()) {
 			removalPolicy = Policies.builder().build();
 			return true;
 		}
@@ -109,9 +122,8 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 			.ifPresent(pillars::add);
 	}
 
-	private void raiseWall() {
-		double w = (userConfig.wallWidth - 1) / 2.0;
-		int height = userConfig.wallMaxHeight;
+	private void raiseWall(int height, int width) {
+		double w = (width - 1) / 2.0;
 		Vector3 side = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
 		Vector3 center = new Vector3(origin).add(Vector3.HALF);
 		for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
@@ -138,6 +150,13 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 			if (!predicate.test(check)) return Optional.of(check.getRelative(BlockFace.DOWN));
 		}
 		return Optional.empty();
+	}
+
+	/**
+	 * @return an unmodifiable view of the pillars
+	 */
+	public @NonNull Collection<Pillar> getPillars() {
+		return Collections.unmodifiableCollection(pillars);
 	}
 
 	@Override

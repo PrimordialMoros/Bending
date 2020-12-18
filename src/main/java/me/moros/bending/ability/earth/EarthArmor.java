@@ -60,7 +60,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-//TODO add secondary temp wall feature
 public class EarthArmor extends AbilityInstance implements Ability {
 	private enum Mode {ROCK, IRON, GOLD}
 

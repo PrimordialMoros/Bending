@@ -125,8 +125,12 @@ public class Pillar implements Updatable {
 		}
 	}
 
-	public Collection<Block> getPillarBlocks() {
+	public @NonNull Collection<Block> getPillarBlocks() {
 		return Collections.unmodifiableCollection(pillarBlocks);
+	}
+
+	public @NonNull Block getOrigin() {
+		return origin;
 	}
 
 	public static Optional<Pillar> buildPillar(User user, Block origin, BlockFace direction, int length) {

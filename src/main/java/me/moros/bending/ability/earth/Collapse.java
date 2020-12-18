@@ -58,6 +58,8 @@ public class Collapse extends AbilityInstance implements Ability {
 	private Predicate<Block> predicate;
 	private final Collection<Pillar> pillars = new ArrayList<>();
 
+	private int height;
+
 	public Collapse(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
@@ -71,6 +73,8 @@ public class Collapse extends AbilityInstance implements Ability {
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
 		if (!source.isPresent()) return false;
 		Block origin = source.get();
+
+		height = userConfig.maxHeight;
 
 		boolean sneak = method == ActivationMethod.SNEAK;
 		if (sneak) {
@@ -100,6 +104,21 @@ public class Collapse extends AbilityInstance implements Ability {
 		return false;
 	}
 
+	public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
+		this.user = user;
+		recalculateConfig();
+		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		this.height = height;
+		for (Block block : sources) {
+			getBottomValid(block).flatMap(this::createPillar).ifPresent(pillars::add);
+		}
+		if (!pillars.isEmpty()) {
+			removalPolicy = Policies.builder().build();
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public void recalculateConfig() {
 		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
@@ -116,11 +135,11 @@ public class Collapse extends AbilityInstance implements Ability {
 
 	private Optional<Pillar> createPillar(Block block) {
 		if (!predicate.test(block) || !TempBlock.isBendable(block)) return Optional.empty();
-		return Pillar.buildPillar(user, block, BlockFace.DOWN, userConfig.maxHeight, 125, BendingProperties.EARTHBENDING_REVERT_TIME, predicate);
+		return Pillar.buildPillar(user, block, BlockFace.DOWN, height, 125, BendingProperties.EARTHBENDING_REVERT_TIME, predicate);
 	}
 
 	private Optional<Block> getBottomValid(Block block) {
-		for (int i = 1; i <= userConfig.maxHeight; i++) {
+		for (int i = 1; i <= height; i++) {
 			Block check = block.getRelative(BlockFace.DOWN, i);
 			if (!predicate.test(check)) return Optional.of(check.getRelative(BlockFace.UP));
 		}

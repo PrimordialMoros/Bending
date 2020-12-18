@@ -162,8 +162,13 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("EarthArmor", EarthArmor::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).setHarmless(true).build());
+		AbilityDescription earthArmor = AbilityDescription.builder("EarthArmor", EarthArmor::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).build();
+		abilities.add(earthArmor);
+
+		AbilityDescription earthArmorWall = AbilityDescription.builder("EarthArmorWall", EarthArmorWall::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).setHidden(true).build();
+		abilities.add(earthArmorWall);
 
 		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
@@ -180,6 +185,12 @@ public final class AbilityInitializer {
 
 		abilities.add(AbilityDescription.builder("Shockwave", Shockwave::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
+
+
+		sequences.put(earthArmorWall, new Sequence(
+			new AbilityAction(earthArmor, ActivationMethod.SNEAK),
+			new AbilityAction(earthArmor, ActivationMethod.SNEAK_RELEASE)
+		));
 	}
 
 	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
