@@ -50,6 +50,7 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -190,7 +191,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 	}
 
 	private void release(boolean cone) {
-		if (released || !isCharged()) return;
+		if (released || !isCharged() || !WorldMethods.isOnGround(user.getEntity())) return;
 		released = true;
 		range = cone ? userConfig.coneRange : userConfig.ringRange;
 

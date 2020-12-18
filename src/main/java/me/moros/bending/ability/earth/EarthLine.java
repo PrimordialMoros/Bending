@@ -106,7 +106,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, EarthMaterials.ALL).orElse(null);
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
 		if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) return false;
 		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 		Optional<EarthLine> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class);

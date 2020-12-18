@@ -27,12 +27,14 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ public class Pillar implements Updatable {
 	private final User user;
 	private final Block origin;
 	private final BlockFace direction;
+	private final BlockFace opposite;
 	private final Collection<Block> pillarBlocks;
 	private final Predicate<Block> predicate;
 
@@ -59,11 +62,12 @@ public class Pillar implements Updatable {
 		this.user = user;
 		this.origin = origin;
 		this.direction = direction;
+		this.opposite = direction.getOppositeFace();
 		this.length = length;
 		this.interval = interval;
 		this.duration = duration;
 		this.predicate = predicate;
-		this.pillarBlocks = new ArrayList<>();
+		this.pillarBlocks = new ArrayList<>(length);
 		currentLength = 0;
 		nextUpdateTime = 0;
 	}
@@ -87,15 +91,22 @@ public class Pillar implements Updatable {
 	}
 
 	private boolean move(Block newBlock) {
-		if (!newBlock.isPassable()) return false;
-		pillarBlocks.add(newBlock);
+		if (!MaterialUtil.isTransparent(newBlock) || MaterialUtil.isLava(newBlock)) return false;
+		if (!newBlock.isLiquid()) newBlock.breakNaturally(new ItemStack(Material.AIR));
+
 		for (int i = 0; i < length; i++) {
-			Block forwardBlock = newBlock.getRelative(direction.getOppositeFace(), i);
-			Block backwardBlock = forwardBlock.getRelative(direction.getOppositeFace());
-			if (!predicate.test(backwardBlock)) return false;
+			Block forwardBlock = newBlock.getRelative(opposite, i);
+			Block backwardBlock = forwardBlock.getRelative(opposite);
+			if (!predicate.test(backwardBlock)) {
+				SoundUtil.EARTH_SOUND.play(forwardBlock.getLocation());
+				TempBlock.create(forwardBlock, Material.AIR, duration, true);
+				return false;
+			}
 			TempBlock.create(forwardBlock, MaterialUtil.getSolidType(backwardBlock.getBlockData()), duration, true);
 		}
-		TempBlock.create(newBlock.getRelative(direction.getOppositeFace(), length), Material.AIR, duration, true);
+		pillarBlocks.add(newBlock);
+		TempBlock.create(newBlock.getRelative(opposite, length), Material.AIR, duration, true);
+		SoundUtil.EARTH_SOUND.play(newBlock.getLocation());
 		return true;
 	}
 
@@ -143,6 +154,7 @@ public class Pillar implements Updatable {
 			return Optional.empty();
 		int maxLength = validate(user, origin, direction, length);
 		if (maxLength < 1) return Optional.empty();
+		if (origin.getRelative(direction.getOppositeFace(), maxLength).isPassable()) return Optional.empty();
 		return Optional.of(new Pillar(user, origin, direction, maxLength, interval, duration, predicate));
 	}
 
@@ -151,9 +163,9 @@ public class Pillar implements Updatable {
 	 */
 	private static int validate(User user, Block origin, BlockFace direction, int max) {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, origin)) return 0;
-		for (int i = 1; i <= max; i++) {
-			Block forwardBlock = origin.getRelative(direction, i);
-			Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i - 1);
+		for (int i = 0; i < max; i++) {
+			Block forwardBlock = origin.getRelative(direction, i + 1);
+			Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
 				return i;
 			}
