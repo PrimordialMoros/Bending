@@ -78,7 +78,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 			} else {
 				Vector3 velocity = new Vector3(user.getEntity().getVelocity());
 				if (velocity.getY() < 0) {
-					user.getEntity().setVelocity(velocity.scalarMultiply(userConfig.speed).clampVelocity().toVector());
+					user.getEntity().setVelocity(velocity.scalarMultiply(userConfig.speed).clampVelocity());
 					ParticleUtil.create(Particle.CRIT, user.getEntity().getEyeLocation()).count(2)
 						.offset(0.05, 0.4, 0.05);
 					ParticleUtil.create(Particle.BLOCK_CRACK, user.getEntity().getEyeLocation()).count(3)

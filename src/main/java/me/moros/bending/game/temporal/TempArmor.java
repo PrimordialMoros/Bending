@@ -23,8 +23,8 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import me.moros.bending.model.user.User;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -33,9 +33,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+@SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
-	public static final TemporalManager<Player, TempArmor> manager = new TemporalManager<>();
-	private final Player player;
+	public static final TemporalManager<LivingEntity, TempArmor> manager = new TemporalManager<>();
+	private final LivingEntity entity;
 	private final ItemStack[] snapshot;
 
 	private RevertTask revertTask;
@@ -43,20 +44,21 @@ public class TempArmor implements Temporary {
 	public static void init() {
 	}
 
-	private TempArmor(Player player, ItemStack[] armor, long duration) {
-		this.player = player;
-		this.snapshot = copyFilteredArmor(player.getInventory().getArmorContents());
-		player.getInventory().setArmorContents(applyMetaToArmor(armor));
-		manager.addEntry(player, this, duration);
+	private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
+		this.entity = entity;
+		this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
+		entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
+		manager.addEntry(entity, this, duration);
 	}
 
-	public static Optional<TempArmor> create(@NonNull Player player, @NonNull ItemStack[] armor, long duration) {
-		if (manager.isTemp(player)) return Optional.empty();
-		return Optional.of(new TempArmor(player, armor, duration));
+	public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
+		if (manager.isTemp(user.getEntity())) return Optional.empty();
+		if (user.getEntity().getEquipment() == null) return Optional.empty();
+		return Optional.of(new TempArmor(user.getEntity(), armor, duration));
 	}
 
-	public @NonNull Player getPlayer() {
-		return player;
+	public @NonNull LivingEntity getPlayer() {
+		return entity;
 	}
 
 	public @NonNull Collection<ItemStack> getSnapshot() {
@@ -65,8 +67,8 @@ public class TempArmor implements Temporary {
 
 	@Override
 	public void revert() {
-		player.getInventory().setArmorContents(snapshot);
-		manager.removeEntry(player);
+		entity.getEquipment().setArmorContents(snapshot);
+		manager.removeEntry(entity);
 		if (revertTask != null) revertTask.execute();
 	}
 
@@ -79,7 +81,7 @@ public class TempArmor implements Temporary {
 		for (ItemStack item : armorItems) {
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName("Bending Armor");
-			meta.setLore(Collections.singletonList(ChatColor.GRAY + "Temporary"));
+			meta.setLore(Collections.singletonList("Temporary"));
 			meta.setUnbreakable(true);
 			Bending.getLayer().addArmorKey(meta);
 			item.setItemMeta(meta);

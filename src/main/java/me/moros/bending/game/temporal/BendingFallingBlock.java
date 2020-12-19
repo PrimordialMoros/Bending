@@ -39,7 +39,7 @@ public class BendingFallingBlock implements Temporary {
 
 	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
 		fallingBlock = location.getWorld().spawnFallingBlock(location, data);
-		fallingBlock.setVelocity(velocity.clampVelocity().toVector());
+		fallingBlock.setVelocity(velocity.clampVelocity());
 		fallingBlock.setGravity(gravity);
 		fallingBlock.setDropItem(false);
 		fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());

@@ -106,7 +106,9 @@ public final class ActivationController {
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);
 		WaterRing.launchShard(user);
+		FerroControl.act(user);
 		EarthBlast.launch(user);
+		MetalCable.launch(user);
 		EarthLine.launch(user);
 		Shockwave.activateCone(user);
 		HeatControl.act(user);
@@ -124,6 +126,9 @@ public final class ActivationController {
 
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
 		if (sneaking) PhaseChange.melt(user);
+
+		MetalCable.attemptDestroy(user);
+
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
 		game.getSequenceManager().registerAction(user, action);
 		activateAbility(user, action);

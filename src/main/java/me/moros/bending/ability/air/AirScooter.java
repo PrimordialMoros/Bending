@@ -183,7 +183,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 			force = force > 0 ? 0.5 : -0.5; // Cap the force to maxForce so the player isn't instantly pulled to the ground.
 		}
 		Vector3 velocity = direction.scalarMultiply(userConfig.speed).setY(force);
-		user.getEntity().setVelocity(velocity.clampVelocity().toVector());
+		user.getEntity().setVelocity(velocity.clampVelocity());
 		user.getEntity().setFallDistance(0);
 		return true;
 	}

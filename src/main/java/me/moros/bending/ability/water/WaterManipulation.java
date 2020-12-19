@@ -255,7 +255,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			Vector3 origin = getCurrent().add(Vector3.HALF);
 			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
-			entity.setVelocity(push.clampVelocity().toVector());
+			entity.setVelocity(push.clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			return true;
 		}

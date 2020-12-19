@@ -153,6 +153,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+
 		abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
@@ -169,6 +172,9 @@ public final class AbilityInitializer {
 		AbilityDescription earthArmorWall = AbilityDescription.builder("EarthArmorWall", EarthArmorWall::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).setHidden(true).build();
 		abilities.add(earthArmorWall);
+
+		abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).build());
 
 		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());

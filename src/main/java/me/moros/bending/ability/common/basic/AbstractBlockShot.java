@@ -45,7 +45,7 @@ import org.bukkit.util.NumberConversions;
 import java.util.Collections;
 
 public abstract class AbstractBlockShot implements Updatable {
-	private static final AABB BOX = new AABB(new Vector3(-0.25, -0.25, -0.25), new Vector3(1.25, 1.25, 1.25));
+	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
 
 	private final User user;
 	private final Material material;

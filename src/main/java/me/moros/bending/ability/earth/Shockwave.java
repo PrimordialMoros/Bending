@@ -172,7 +172,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 				double deltaY = FastMath.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
 				Vector3 push = loc.subtract(origin).normalize().setY(deltaY).scalarMultiply(userConfig.knockback);
-				entity.setVelocity(push.clampVelocity().toVector());
+				entity.setVelocity(push.clampVelocity());
 				affectedEntities.add(entity);
 			}
 		}

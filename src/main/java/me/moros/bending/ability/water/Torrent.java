@@ -177,7 +177,7 @@ public class Torrent extends AbilityInstance implements Ability {
 			if (affectedEntities.contains(entity)) return false;
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
-			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity().toVector());
+			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
 			affectedEntities.add(entity);
 			return false;
 		}

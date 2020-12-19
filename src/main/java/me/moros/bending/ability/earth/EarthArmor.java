@@ -36,7 +36,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
@@ -50,7 +49,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -165,10 +163,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 				break;
 		}
 
-		if (user instanceof BendingPlayer) {
-			Player player = (Player) user.getEntity();
-			TempArmor.create(player, new ItemStack[]{ boots, leggings, chest, head }, userConfig.duration);
-		}
+		TempArmor.create(user, new ItemStack[]{ boots, leggings, chest, head }, userConfig.duration);
 		if (PotionUtil.canAddPotion(user, PotionEffectType.DAMAGE_RESISTANCE, 20, resistance)) {
 			user.getEntity().addPotionEffect(
 				new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, NumberConversions.round(userConfig.duration / 50F), resistance, true, false)
@@ -197,7 +192,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		}
 
 		Vector3 dir = user.getEyeLocation().subtract(center).normalize().scalarMultiply(speedFactor);
-		fallingBlock.getFallingBlock().setVelocity(dir.clampVelocity().toVector());
+		fallingBlock.getFallingBlock().setVelocity(dir.clampVelocity());
 		return true;
 	}
 

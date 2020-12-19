@@ -158,7 +158,8 @@ public class Pillar implements Updatable {
 			return Optional.empty();
 		int maxLength = validate(user, origin, direction, length);
 		if (maxLength < 1) return Optional.empty();
-		if (direction != BlockFace.DOWN && origin.getRelative(direction.getOppositeFace(), maxLength).isPassable()) return Optional.empty();
+		if (direction != BlockFace.DOWN && origin.getRelative(direction.getOppositeFace(), maxLength).isPassable())
+			return Optional.empty();
 		return Optional.of(new Pillar(user, origin, direction, maxLength, interval, duration, predicate));
 	}
 

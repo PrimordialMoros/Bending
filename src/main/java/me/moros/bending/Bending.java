@@ -27,6 +27,7 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
 import me.moros.bending.game.Game;
 import me.moros.bending.listener.BlockListener;
+import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.UserListener;
 import me.moros.bending.listener.WorldListener;
 import me.moros.bending.protection.WorldGuardFlag;
@@ -74,9 +75,10 @@ public class Bending extends JavaPlugin {
 		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
 		game = new Game(storage);
 
-		getServer().getPluginManager().registerEvents(new UserListener(game), this);
-		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
 		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
+		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
+		getServer().getPluginManager().registerEvents(new EntityListener(game), this);
+		getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
 		commandManager = new PaperCommandManager(this);
 		commandManager.enableUnstableAPI("help");

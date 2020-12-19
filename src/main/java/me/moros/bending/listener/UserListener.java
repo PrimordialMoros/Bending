@@ -29,15 +29,18 @@ import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Tasker;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -100,12 +103,16 @@ public class UserListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPlayerDeath(PlayerDeathEvent event) {
+	public void onEntityDeath(EntityDeathEvent event) {
 		event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
 		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
 			event.getDrops().addAll(tempArmor.getSnapshot());
 			tempArmor.revert();
 		});
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerDeath(PlayerDeathEvent event) {
 		String newMessage = DamageUtil.getBendingMessage(event.getEntity().getUniqueId());
 		if (newMessage != null) event.setDeathMessage(newMessage);
 	}
@@ -132,20 +139,17 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onFallDamage(EntityDamageEvent event) {
-		if (event.getCause() != DamageCause.FALL || !(event.getEntity() instanceof Player)) return;
-		Player player = (Player) event.getEntity();
-		if (!game.getActivationController().onFallDamage(game.getPlayerManager().getPlayer(player.getUniqueId()))) {
-			event.setCancelled(true);
-		}
-	}
-
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onFireTickDamage(EntityDamageEvent event) {
-		if (event.getCause() != DamageCause.FIRE && event.getCause() != DamageCause.FIRE_TICK) return;
-		if (!(event.getEntity() instanceof Player)) return;
-		Player player = (Player) event.getEntity();
-		if (!game.getActivationController().onFireTickDamage(game.getPlayerManager().getPlayer(player.getUniqueId()))) {
-			event.setCancelled(true);
+		if (!(event.getEntity() instanceof LivingEntity)) return;
+		if (event.getCause() == DamageCause.FALL) {
+			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+			if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {
+				event.setCancelled(true);
+			}
+		} else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
+			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+			if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
+				event.setCancelled(true);
+			}
 		}
 	}
 
@@ -197,7 +201,7 @@ public class UserListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerSlotChange(final PlayerItemHeldEvent event) {
+	public void onPlayerSlotChange(PlayerItemHeldEvent event) {
 		game.getBoardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
 	}
 

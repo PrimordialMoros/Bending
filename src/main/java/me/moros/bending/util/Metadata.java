@@ -31,6 +31,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 public final class Metadata {
 	public static final String NO_INTERACT = "bending-no-interact";
 	public static final String FALLING_BLOCK = "bending-falling-block";
+	public static final String METAL_CABLE = "bending-metal-cable";
 
 	public static FixedMetadataValue emptyMetadata() {
 		return new FixedMetadataValue(Bending.getPlugin(), "");

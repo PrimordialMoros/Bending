@@ -209,7 +209,7 @@ public class Vector3 extends Vector3D {
 		return world.getBlockAt(NumberConversions.floor(getX()), NumberConversions.floor(getY()), NumberConversions.floor(getZ()));
 	}
 
-	public Vector3 clampVelocity() {
-		return min(MAX_VELOCITY).max(MIN_VELOCITY);
+	public org.bukkit.util.Vector clampVelocity() {
+		return min(MAX_VELOCITY).max(MIN_VELOCITY).toVector();
 	}
 }

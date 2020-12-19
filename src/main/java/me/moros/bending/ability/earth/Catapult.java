@@ -102,7 +102,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 		Collider collider = new Sphere(new Vector3(user.getLocBlock()).add(Vector3.HALF), 1.5);
 		return CollisionUtil.handleEntityCollisions(user, collider, e -> {
-			e.setVelocity(user.getDirection().scalarMultiply(power).clampVelocity().toVector());
+			e.setVelocity(user.getDirection().scalarMultiply(power).clampVelocity());
 			return true;
 		}, true, true);
 	}

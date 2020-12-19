@@ -248,7 +248,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			} else {
 				velocity = velocity.add(direction.scalarMultiply(factor * 0.5));
 			}
-			entity.setVelocity(velocity.clampVelocity().toVector());
+			entity.setVelocity(velocity.clampVelocity());
 			entity.setFireTicks(0);
 			return false;
 		}

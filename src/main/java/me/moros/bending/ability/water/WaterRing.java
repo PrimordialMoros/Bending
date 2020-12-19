@@ -263,7 +263,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 				continue;
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.getEyeLocation()).setY(0).normalize();
-			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity().toVector());
+			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
 			affectedEntities.put(entity, false);
 		}
 		return false;
