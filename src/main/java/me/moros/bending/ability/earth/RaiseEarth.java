@@ -35,7 +35,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -69,7 +68,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
 		if (!source.isPresent()) return false;
 		origin = source.get();
@@ -90,7 +89,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 
 	public boolean activate(@NonNull User user, @NonNull Block source, int height, int width) {
 		this.user = user;
-		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		origin = source;
 		raiseWall(height, width);
 		if (!pillars.isEmpty()) {
@@ -110,7 +109,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		pillars.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+		pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
 		return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
@@ -118,8 +117,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		for (Block b : new Block[]{ block, block.getRelative(BlockFace.DOWN) }) {
 			if (!predicate.test(b) || !TempBlock.isBendable(b)) return;
 		}
-		Pillar.buildPillar(user, block, BlockFace.UP, height, BendingProperties.EARTHBENDING_REVERT_TIME, predicate)
-			.ifPresent(pillars::add);
+		Pillar.builder(user, block).setPredicate(predicate).build(height).ifPresent(pillars::add);
 	}
 
 	private void raiseWall(int height, int width) {

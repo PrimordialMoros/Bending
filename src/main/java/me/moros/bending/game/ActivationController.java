@@ -27,6 +27,7 @@ import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.earth.*;
 import me.moros.bending.ability.earth.passives.*;
+import me.moros.bending.ability.earth.sequences.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
@@ -62,8 +63,11 @@ public final class ActivationController {
 	}
 
 	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
-		AbilityDescription desc = user.getSelectedAbility().orElse(null);
-		if (desc == null || !desc.isActivatedBy(method) || !user.canBend(desc)) return false;
+		return user.getSelectedAbility().map(desc -> activateAbility(user, method, desc)).orElse(false);
+	}
+
+	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
+		if (!desc.isActivatedBy(method) || !user.canBend(desc)) return false;
 		Ability ability = desc.createAbility();
 		if (ability.activate(user, method)) {
 			game.getAbilityManager(user.getWorld()).addAbility(user, ability);
@@ -145,6 +149,7 @@ public final class ActivationController {
 	}
 
 	public boolean onFallDamage(@NonNull User user) {
+		EarthPillars.onFall(user);
 		activateAbility(user, ActivationMethod.FALL);
 		if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
 			return false;

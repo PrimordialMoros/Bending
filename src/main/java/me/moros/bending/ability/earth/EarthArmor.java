@@ -56,7 +56,6 @@ import org.bukkit.util.NumberConversions;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 public class EarthArmor extends AbilityInstance implements Ability {
 	private enum Mode {ROCK, IRON, GOLD}
@@ -84,8 +83,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
 
 		if (!source.isPresent()) return false;
 

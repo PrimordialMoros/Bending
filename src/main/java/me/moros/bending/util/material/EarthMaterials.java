@@ -73,6 +73,12 @@ public class EarthMaterials {
 		return ALL.isTagged(block);
 	}
 
+	public static boolean isEarthNotLava(@NonNull User user, @NonNull Block block) {
+		if (isLavaBendable(block)) return false;
+		if (isMetalBendable(block) && !user.hasPermission("bending.metal")) return false;
+		return ALL.isTagged(block);
+	}
+
 	public static boolean isSandBendable(@NonNull Block block) {
 		return SAND_BENDABLE.isTagged(block);
 	}

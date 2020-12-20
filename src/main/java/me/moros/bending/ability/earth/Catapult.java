@@ -35,7 +35,6 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
@@ -97,7 +96,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		double power = user.isSneaking() ? userConfig.power * 0.666 : userConfig.power;
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-		pillar = Pillar.buildPillar(user, base, BlockFace.UP, 1, BendingProperties.EARTHBENDING_REVERT_TIME, predicate).orElse(null);
+		pillar = Pillar.builder(user, base).setPredicate(predicate).build(1).orElse(null);
 		SoundUtil.EARTH_SOUND.play(base.getLocation());
 
 		Collider collider = new Sphere(new Vector3(user.getLocBlock()).add(Vector3.HALF), 1.5);

@@ -34,7 +34,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -69,7 +68,7 @@ public class Collapse extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
 		if (!source.isPresent()) return false;
 		Block origin = source.get();
@@ -107,7 +106,7 @@ public class Collapse extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
 		this.user = user;
 		recalculateConfig();
-		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		this.height = height;
 		for (Block block : sources) {
 			getBottomValid(block).flatMap(this::createPillar).ifPresent(pillars::add);
@@ -129,13 +128,16 @@ public class Collapse extends AbilityInstance implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		pillars.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+		pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
 		return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
 	private Optional<Pillar> createPillar(Block block) {
 		if (!predicate.test(block) || !TempBlock.isBendable(block)) return Optional.empty();
-		return Pillar.buildPillar(user, block, BlockFace.DOWN, height, 125, BendingProperties.EARTHBENDING_REVERT_TIME, predicate);
+		return Pillar.builder(user, block)
+			.setDirection(BlockFace.DOWN)
+			.setInterval(125)
+			.setPredicate(predicate).build(height);
 	}
 
 	private Optional<Block> getBottomValid(Block block) {

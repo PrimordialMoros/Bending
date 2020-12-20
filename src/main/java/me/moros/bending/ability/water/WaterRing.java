@@ -217,10 +217,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 				}
 				if (time > sneakStartTime + userConfig.chargeTime) {
 					if (!complete().isEmpty()) {
-						WaterWave wave = new WaterWave(waveDesc);
-						if (wave.activate(user, ActivationMethod.SNEAK)) {
-							Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, wave);
-						}
+						Bending.getGame().getActivationController().activateAbility(user, ActivationMethod.SNEAK, waveDesc);
 					}
 					return UpdateResult.REMOVE;
 				}

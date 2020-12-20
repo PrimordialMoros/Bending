@@ -72,7 +72,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isLavaBendable(b);
+		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
 		if (!block.isPresent()) return false;
 

@@ -26,6 +26,7 @@ import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.earth.*;
 import me.moros.bending.ability.earth.passives.*;
+import me.moros.bending.ability.earth.sequences.*;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
@@ -189,13 +190,24 @@ public final class AbilityInitializer {
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(catapult);
 
-		abilities.add(AbilityDescription.builder("Shockwave", Shockwave::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
+		AbilityDescription earthPillars = AbilityDescription.builder("EarthPillars", EarthPillars::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE, ActivationMethod.FALL).build();
+		abilities.add(earthPillars);
 
+		AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build();
+		abilities.add(shockwave);
 
 		sequences.put(earthArmorWall, new Sequence(
 			new AbilityAction(earthArmor, ActivationMethod.SNEAK),
 			new AbilityAction(earthArmor, ActivationMethod.SNEAK_RELEASE)
+		));
+
+		sequences.put(earthPillars, new Sequence(
+			new AbilityAction(shockwave, ActivationMethod.SNEAK),
+			new AbilityAction(shockwave, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(shockwave, ActivationMethod.SNEAK),
+			new AbilityAction(catapult, ActivationMethod.SNEAK_RELEASE)
 		));
 	}
 

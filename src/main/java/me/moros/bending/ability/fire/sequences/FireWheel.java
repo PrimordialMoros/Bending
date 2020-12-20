@@ -181,4 +181,3 @@ public class FireWheel extends AbilityInstance implements Ability {
 		}
 	}
 }
-

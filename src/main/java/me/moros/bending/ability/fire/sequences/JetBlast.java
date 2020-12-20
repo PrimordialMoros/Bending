@@ -107,4 +107,3 @@ public class JetBlast extends AbilityInstance implements Ability {
 		}
 	}
 }
-
