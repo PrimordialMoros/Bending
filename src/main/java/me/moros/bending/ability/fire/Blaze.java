@@ -22,6 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.basic.AbstractBlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -32,7 +33,10 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -40,18 +44,20 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Blaze extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
+	private RemovalPolicy removalPolicy;
 
 	private final Collection<FireStream> streams = new ArrayList<>();
 	private final Set<Block> affectedBlocks = new HashSet<>();
@@ -69,17 +75,7 @@ public class Blaze extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return false;
 		}
-
-		Vector3 origin = user.getLocation();
-		Vector3 dir = user.getDirection().setY(0).normalize();
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
-		if (method == ActivationMethod.PUNCH) {
-			int steps = userConfig.arc / 8;
-			VectorMethods.createArc(dir, rotation, steps).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
-		} else {
-			VectorMethods.rotate(dir, rotation, 40).forEach(v -> streams.add(new FireStream(new Ray(origin, v))));
-		}
-		return true;
+		return release(method == ActivationMethod.PUNCH);
 	}
 
 	@Override
@@ -87,8 +83,37 @@ public class Blaze extends AbilityInstance implements Ability {
 		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
+	private boolean release(boolean cone) {
+		double range = cone ? userConfig.coneRange : userConfig.ringRange;
+		double deltaAngle = FastMath.PI / (3 * range);
+		Vector3 origin = user.getLocation().floor().add(Vector3.HALF);
+		Vector3 dir = user.getDirection().setY(0).normalize();
+		Rotation rotation = new Rotation(Vector3.PLUS_J, deltaAngle, RotationConvention.VECTOR_OPERATOR);
+		if (cone) {
+			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 2)).forEach(v ->
+				streams.add(new FireStream(new Ray(origin, v), range))
+			);
+		} else {
+			VectorMethods.rotate(dir, rotation, NumberConversions.ceil(range * 6)).forEach(v ->
+				streams.add(new FireStream(new Ray(origin, v), range))
+			);
+		}
+
+		// First update in same tick to only activate if there are valid fire streams
+		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+		if (streams.isEmpty()) {
+			return false;
+		}
+		removalPolicy = Policies.builder().build();
+		user.setCooldown(getDescription(), userConfig.cooldown);
+		return true;
+	}
+
 	@Override
 	public @NonNull UpdateResult update() {
+		if (removalPolicy.test(user, getDescription())) {
+			return UpdateResult.REMOVE;
+		}
 		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
 		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
@@ -103,50 +128,25 @@ public class Blaze extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	private class FireStream {
-		private long nextUpdate;
-		private Vector3 location;
-		private final Vector3 origin;
-		private final Vector3 direction;
-
-		FireStream(Ray ray) {
-			origin = ray.origin;
-			direction = ray.direction.normalize();
-			location = origin.add(direction);
+	private class FireStream extends AbstractBlockLine {
+		public FireStream(Ray ray, double range) {
+			super(user, ray, 70, range);
 		}
 
-		private UpdateResult update() {
-			long time = System.currentTimeMillis();
-			if (time <= nextUpdate) return UpdateResult.CONTINUE;
-			nextUpdate = time + 70;
+		@Override
+		protected boolean isValidBlock(@NonNull Block block) {
+			return MaterialUtil.isFire(block) || MaterialUtil.isIgnitable(block);
+		}
 
-			if (location.distanceSq(origin) > userConfig.range * userConfig.range) {
-				return UpdateResult.REMOVE;
-			}
-
-			location = location.add(direction);
-			Block block = location.toBlock(user.getWorld());
-			if (!MaterialUtil.isIgnitable(block)) {
-				if (MaterialUtil.isIgnitable(block.getRelative(BlockFace.UP))) {
-					location.add(Vector3.PLUS_J);
-					block = block.getRelative(BlockFace.UP);
-				} else if (MaterialUtil.isIgnitable(block.getRelative(BlockFace.DOWN))) {
-					location.add(Vector3.MINUS_J);
-					block = block.getRelative(BlockFace.DOWN);
-				} else {
-					return UpdateResult.REMOVE;
-				}
-			}
-
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				return UpdateResult.REMOVE;
-			}
-
-			if (affectedBlocks.contains(block)) {
-				return UpdateResult.CONTINUE;
-			}
+		@Override
+		protected boolean render(@NonNull Block block) {
+			if (affectedBlocks.contains(block)) return true;
 			affectedBlocks.add(block);
-			return TempBlock.create(block, Material.FIRE, 500, true).map(b -> UpdateResult.CONTINUE).orElse(UpdateResult.REMOVE);
+			TempBlock.create(block, Material.FIRE, 500, true);
+			if (ThreadLocalRandom.current().nextInt(6) == 0) {
+				SoundUtil.FIRE_SOUND.play(block.getLocation());
+			}
+			return true;
 		}
 	}
 
@@ -154,18 +154,17 @@ public class Blaze extends AbilityInstance implements Ability {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
-		public double range;
-		public int arc;
+		public double coneRange;
+		@Attribute(Attribute.RANGE)
+		public double ringRange;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "blaze");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(500);
-			range = abilityNode.getNode("range").getDouble(7.0);
-			arc = abilityNode.getNode("arc").getInt(32);
-
-			abilityNode.getNode("arc").setComment("How large the entire arc is in degrees");
+			coneRange = abilityNode.getNode("cone-range").getDouble(10.0);
+			ringRange = abilityNode.getNode("ring-range").getDouble(7.0);
 		}
 	}
 }

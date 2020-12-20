@@ -24,11 +24,11 @@ import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.basic.AbstractBlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -94,6 +94,8 @@ public class Shockwave extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Shockwave.class)) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -196,21 +198,28 @@ public class Shockwave extends AbilityInstance implements Ability {
 		range = cone ? userConfig.coneRange : userConfig.ringRange;
 
 		double deltaAngle = FastMath.PI / (3 * range);
-		origin = user.getLocation().add(Vector3.MINUS_J);
+		origin = user.getLocation().floor().add(Vector3.HALF);
 		Vector3 dir = user.getDirection().setY(0).normalize();
 		Rotation rotation = new Rotation(Vector3.PLUS_J, deltaAngle, RotationConvention.VECTOR_OPERATOR);
 		double speed = cone ? userConfig.coneSpeed : userConfig.ringSpeed;
 		if (cone) {
-			VectorMethods.createArc(dir, rotation, NumberConversions.round(range / 2)).forEach(v ->
-				streams.add(new Ripple(new Ray(origin.add(v).floor(), v), speed))
+			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 2)).forEach(v ->
+				streams.add(new Ripple(new Ray(origin, v), speed, range))
 			);
 		} else {
-			VectorMethods.rotate(dir, rotation, NumberConversions.round(range * 6)).forEach(v ->
-				streams.add(new Ripple(new Ray(origin.add(v).floor(), v), speed))
+			VectorMethods.rotate(dir, rotation, NumberConversions.ceil(range * 6)).forEach(v ->
+				streams.add(new Ripple(new Ray(origin, v), speed, range))
 			);
 		}
-		removalPolicy = Policies.builder().build();
-		user.setCooldown(getDescription(), userConfig.cooldown);
+
+		// First update in same tick to only apply cooldown if there are valid ripples
+		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+		if (streams.isEmpty()) {
+			removalPolicy = (u, d) -> true;
+		} else {
+			removalPolicy = Policies.builder().build();
+			user.setCooldown(getDescription(), userConfig.cooldown);
+		}
 	}
 
 	@Override
@@ -218,64 +227,31 @@ public class Shockwave extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	private class Ripple implements Updatable {
-		private final Ray ray;
-
-		private Vector3 location;
-
-		private final double speed;
-
-		public Ripple(Ray ray, double speed) {
-			this.location = ray.origin.add(new Vector3(0.5, 1.25, 0.5));
-			this.ray = ray;
-			this.speed = FastMath.min(1, speed);
+	private class Ripple extends AbstractBlockLine {
+		public Ripple(Ray ray, double speed, double range) {
+			super(user, ray, speed, range);
 		}
 
 		@Override
-		public @NonNull UpdateResult update() {
-			location = location.add(ray.direction.scalarMultiply(speed));
-			Block baseBlock = location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN);
-
-			if (!isValidBlock(baseBlock)) {
-				if (isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
-					location = location.add(Vector3.PLUS_J);
-				} else if (isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
-					location = location.add(Vector3.MINUS_J);
-				} else {
-					return UpdateResult.REMOVE;
-				}
-			}
-
-			if (location.distanceSq(ray.origin) > range * range) {
-				return UpdateResult.REMOVE;
-			}
-
-			if (affectedBlocks.contains(baseBlock)) {
-				return UpdateResult.CONTINUE;
-			}
-
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
-				return UpdateResult.REMOVE;
-			}
-
-			Block block = location.toBlock(user.getWorld());
-			if (!affectedBlocks.contains(block)) {
-				affectedBlocks.add(block);
-				recentAffectedBlocks.put(block, false);
-				double deltaY = FastMath.min(0.35, 0.1 + location.distance(ray.origin) / (1.5 * range));
-				Vector3 velocity = new Vector3(0, deltaY, 0);
-				new BendingFallingBlock(block, block.getRelative(BlockFace.DOWN).getBlockData(), velocity, true, 3000);
-				if (ThreadLocalRandom.current().nextInt(6) == 0) {
-					SoundUtil.EARTH_SOUND.play(block.getLocation());
-				}
-			}
-
-			return UpdateResult.CONTINUE;
-		}
-
-		protected boolean isValidBlock(Block block) {
+		protected boolean isValidBlock(@NonNull Block block) {
 			if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
 			return EarthMaterials.isEarthbendable(user, block) && !block.isLiquid();
+		}
+
+		@Override
+		protected boolean render(@NonNull Block block) {
+			if (affectedBlocks.contains(block)) return true;
+			affectedBlocks.add(block);
+			recentAffectedBlocks.put(block, false);
+			double deltaY = FastMath.min(0.35, 0.1 + location.distance(ray.origin) / (1.5 * range));
+			Vector3 velocity = new Vector3(0, deltaY, 0);
+			// Falling blocks spawned inside a solid block are glitched client side so spawn it one block above
+			Block spawnBlock = block.getRelative(BlockFace.UP);
+			new BendingFallingBlock(spawnBlock, block.getBlockData(), velocity, true, 3000);
+			if (ThreadLocalRandom.current().nextInt(6) == 0) {
+				SoundUtil.EARTH_SOUND.play(block.getLocation());
+			}
+			return true;
 		}
 	}
 
