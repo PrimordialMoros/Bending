@@ -37,6 +37,7 @@ import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -56,6 +57,7 @@ public class Pillar implements Updatable {
 	private final Collection<Block> pillarBlocks;
 	private final Predicate<Block> predicate;
 
+	private final boolean solidify;
 	private final int length;
 	private final long interval;
 	private final long duration;
@@ -73,6 +75,7 @@ public class Pillar implements Updatable {
 		this.duration = builder.duration;
 		this.predicate = builder.predicate;
 		this.pillarBlocks = new ArrayList<>(length);
+		solidify = (direction != BlockFace.UP && direction != BlockFace.DOWN);
 		currentLength = 0;
 		nextUpdateTime = 0;
 	}
@@ -93,18 +96,20 @@ public class Pillar implements Updatable {
 	}
 
 	private boolean move(Block newBlock) {
-		if (!MaterialUtil.isTransparent(newBlock) || MaterialUtil.isLava(newBlock)) return false;
+		if (MaterialUtil.isLava(newBlock)) return false;
+		if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) return false;
 		if (!newBlock.isLiquid()) newBlock.breakNaturally(new ItemStack(Material.AIR));
 
 		for (int i = 0; i < length; i++) {
 			Block forwardBlock = newBlock.getRelative(opposite, i);
 			Block backwardBlock = forwardBlock.getRelative(opposite);
 			if (!predicate.test(backwardBlock)) {
-				playSound(forwardBlock);
 				TempBlock.create(forwardBlock, Material.AIR, duration, true);
+				playSound(forwardBlock);
 				return false;
 			}
-			TempBlock.create(forwardBlock, MaterialUtil.getSolidType(backwardBlock.getBlockData()), duration, true);
+			BlockData data = solidify ? MaterialUtil.getSolidType(backwardBlock.getBlockData()) : backwardBlock.getBlockData();
+			TempBlock.create(forwardBlock, data, duration, true);
 		}
 		pillarBlocks.add(newBlock);
 		TempBlock.create(newBlock.getRelative(opposite, length), Material.AIR, duration, true);

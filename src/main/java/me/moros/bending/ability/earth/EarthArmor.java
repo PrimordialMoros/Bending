@@ -83,7 +83,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b), true);
 
 		if (!source.isPresent()) return false;
 
@@ -176,10 +176,12 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		Vector3 center = new Vector3(fallingBlock.getFallingBlock().getLocation()).add(new Vector3(0, 0.5, 0));
 
 		Block currentBlock = center.toBlock(user.getWorld());
-		if (MaterialUtil.isTransparent(currentBlock) && !currentBlock.isLiquid()) {
-			currentBlock.breakNaturally(new ItemStack(Material.AIR));
-		} else if (!EarthMaterials.isEarthbendable(user, currentBlock) && !currentBlock.isLiquid() && !MaterialUtil.isAir(currentBlock)) {
-			return false;
+		if (!currentBlock.isLiquid()) {
+			if (MaterialUtil.isTransparent(currentBlock)) {
+				currentBlock.breakNaturally(new ItemStack(Material.AIR));
+			} else if (!EarthMaterials.isEarthbendable(user, currentBlock) && !MaterialUtil.isAir(currentBlock)) {
+				return false;
+			}
 		}
 
 		final double distanceSquared = user.getEyeLocation().distanceSq(center);

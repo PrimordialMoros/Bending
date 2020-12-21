@@ -56,10 +56,24 @@ public final class SourceUtil {
 	}
 
 	/**
-	 * @see #getSource(User, double, Predicate)
+	 * @see #getSource(User, double, Predicate, boolean)
 	 */
 	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull MaterialSetTag materials) {
-		return getSource(user, range, materials::isTagged);
+		return getSource(user, range, materials::isTagged, false);
+	}
+
+	/**
+	 * @see #getSource(User, double, Predicate, boolean)
+	 */
+	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull MaterialSetTag materials, boolean ignorePassable) {
+		return getSource(user, range, materials::isTagged, ignorePassable);
+	}
+
+	/**
+	 * @see #getSource(User, double, Predicate, boolean)
+	 */
+	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
+		return getSource(user, range, predicate, false);
 	}
 
 	/**
@@ -67,12 +81,14 @@ public final class SourceUtil {
 	 * @param user the user checking for a source
 	 * @param range the max range to check
 	 * @param predicate the predicate to check
+	 * @param ignorePassable whether to ignore passable blocks and fluids in the ray trace check
 	 * @return an Optional source block
 	 */
-	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
+	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate, boolean ignorePassable) {
 		Location start = user.getEntity().getEyeLocation();
 		Vector dir = user.getDirection().toVector();
-		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, FluidCollisionMode.ALWAYS, false);
+		FluidCollisionMode mode = ignorePassable ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
+		RayTraceResult result = user.getWorld().rayTraceBlocks(start, dir, range, mode, ignorePassable);
 		if (result == null || result.getHitBlock() == null) return Optional.empty();
 		Block block = result.getHitBlock();
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block) || !predicate.test(block) || !TempBlock.isBendable(block)) {

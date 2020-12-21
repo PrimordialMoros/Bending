@@ -82,7 +82,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate, true).orElse(null);
 		if (source == null) return false;
 		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 

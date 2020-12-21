@@ -66,7 +66,7 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
+		Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b), true);
 		if (!source.isPresent()) return false;
 
 		RaiseEarth raiseWall = new RaiseEarth(getDescription());

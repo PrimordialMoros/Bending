@@ -126,6 +126,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
 
+		abilities.add(AbilityDescription.builder("WaterBubble", WaterBubble::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
+
 		AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
 		abilities.add(waterRing);

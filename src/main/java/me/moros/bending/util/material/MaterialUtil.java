@@ -93,6 +93,10 @@ public final class MaterialUtil {
 		return TRANSPARENT.isTagged(block);
 	}
 
+	public static boolean isTransparentOrWater(@NonNull Block block) {
+		return block.getType() == Material.WATER || TRANSPARENT.isTagged(block);
+	}
+
 	public static boolean isContainer(@NonNull Block block) {
 		return CONTAINERS.isTagged(block.getType()) || (block.getState() instanceof InventoryHolder);
 	}

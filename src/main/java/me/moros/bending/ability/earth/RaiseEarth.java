@@ -69,7 +69,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate, true);
 		if (!source.isPresent()) return false;
 		origin = source.get();
 
@@ -126,13 +126,13 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		Vector3 center = new Vector3(origin).add(Vector3.HALF);
 		for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
 			Block check = center.add(side.scalarMultiply(i)).toBlock(user.getWorld());
-			if (MaterialUtil.isTransparent(check)) {
+			if (MaterialUtil.isTransparentOrWater(check)) {
 				for (int j = 1; j < height; j++) {
 					Block block = check.getRelative(BlockFace.DOWN, j);
 					if (predicate.test(block)) {
 						createPillar(block, height);
 						break;
-					} else if (!MaterialUtil.isTransparent(block)) {
+					} else if (!MaterialUtil.isTransparentOrWater(block)) {
 						break;
 					}
 				}

@@ -95,6 +95,21 @@ public class TempBlock implements Temporary {
 				data = waterData;
 			}
 		}
+
+		if (MaterialUtil.TRANSPARENT.isTagged(data)) {
+			if (BlockMethods.isInfiniteWater(block)) {
+				TempBlock tb = manager.get(block).orElse(null);
+				if (tb != null) {
+					if (Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
+						tb.revert();
+						return Optional.empty();
+					}
+				} else {
+					block.setType(Material.WATER);
+				}
+			}
+		}
+
 		return Optional.of(new TempBlock(block, data, duration, bendable));
 	}
 
