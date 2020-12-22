@@ -177,29 +177,38 @@ public final class AbilityInitializer {
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).setHidden(true).build();
 		abilities.add(earthArmorWall);
 
-		abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).build());
-
-		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+		AbilityDescription earthGlove = AbilityDescription.builder("EarthGlove", EarthGlove::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).build();
+		abilities.add(earthGlove);
 
 		abilities.add(AbilityDescription.builder("RaiseEarth", RaiseEarth::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
 
-		abilities.add(AbilityDescription.builder("Collapse", Collapse::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+		AbilityDescription collapse = AbilityDescription.builder("Collapse", Collapse::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
+		abilities.add(collapse);
 
 		AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).setHarmless(true).build();
 		abilities.add(catapult);
 
+		AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build();
+		abilities.add(shockwave);
+
 		AbilityDescription earthPillars = AbilityDescription.builder("EarthPillars", EarthPillars::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE, ActivationMethod.FALL).build();
 		abilities.add(earthPillars);
 
-		AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build();
-		abilities.add(shockwave);
+		AbilityDescription earthShards = AbilityDescription.builder("EarthShards", EarthShards::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).build();
+		abilities.add(earthShards);
+
+		abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PUNCH).build());
+
+		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
 		sequences.put(earthArmorWall, new Sequence(
 			new AbilityAction(earthArmor, ActivationMethod.SNEAK),
@@ -211,6 +220,13 @@ public final class AbilityInitializer {
 			new AbilityAction(shockwave, ActivationMethod.SNEAK_RELEASE),
 			new AbilityAction(shockwave, ActivationMethod.SNEAK),
 			new AbilityAction(catapult, ActivationMethod.SNEAK_RELEASE)
+		));
+
+		sequences.put(earthShards, new Sequence(
+			new AbilityAction(earthGlove, ActivationMethod.SNEAK),
+			new AbilityAction(collapse, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(collapse, ActivationMethod.SNEAK),
+			new AbilityAction(earthGlove, ActivationMethod.SNEAK_RELEASE)
 		));
 	}
 

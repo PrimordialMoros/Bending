@@ -111,7 +111,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 			CollisionUtil.handleEntityCollisions(user, collider, entity -> {
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 				return false;
-			}, true);
+			});
 			nextDamageTime = time + 500;
 		}
 		return scooter.update();

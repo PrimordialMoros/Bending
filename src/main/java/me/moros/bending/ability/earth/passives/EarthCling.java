@@ -22,6 +22,7 @@ package me.moros.bending.ability.earth.passives;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.earth.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
@@ -70,8 +71,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
 			return UpdateResult.CONTINUE;
 		}
-		int counter = 2;
-		// TODO add earthglove and count available
+		long counter = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count();
 		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());

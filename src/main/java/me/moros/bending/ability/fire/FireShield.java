@@ -115,7 +115,7 @@ public class FireShield extends AbilityInstance implements Ability {
 		CollisionUtil.handleEntityCollisions(user, shield.getCollider(), entity -> {
 			FireTick.LARGER.apply(entity, userConfig.fireTicks);
 			return false;
-		}, true);
+		});
 
 		shield.update();
 		return UpdateResult.CONTINUE;

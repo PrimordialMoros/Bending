@@ -136,7 +136,7 @@ public class FireWall extends AbilityInstance implements Ability {
 					DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 					FireTick.ACCUMULATE.apply(entity, 20);
 					return true;
-				}, true);
+				});
 			}
 			applyDamage = !applyDamage;
 		}

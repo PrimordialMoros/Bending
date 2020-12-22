@@ -170,7 +170,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		displayLavaDisk();
 		if (++ticks % 3 == 0) {
 			double damage = FastMath.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
-			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage), true);
+			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage));
 		}
 		return UpdateResult.CONTINUE;
 	}

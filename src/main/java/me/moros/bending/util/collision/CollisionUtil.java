@@ -22,7 +22,6 @@ package me.moros.bending.util.collision;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.CollisionCallback;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import org.bukkit.GameMode;
@@ -34,10 +33,24 @@ import org.bukkit.entity.Player;
 
 public final class CollisionUtil {
 	/**
-	 * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision disabled
+	 * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision. earlyEscape disabled
+	 */
+	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback) {
+		return handleEntityCollisions(user, collider, callback, true, false, false);
+	}
+
+	/**
+	 * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision and earlyEscape disabled
 	 */
 	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly) {
-		return handleEntityCollisions(user, collider, callback, livingOnly, false);
+		return handleEntityCollisions(user, collider, callback, livingOnly, false, false);
+	}
+
+	/**
+	 * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean, boolean)} with earlyEscape disabled
+	 */
+	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
+		return handleEntityCollisions(user, collider, callback, livingOnly, selfCollision, false);
 	}
 
 	/**
@@ -48,9 +61,10 @@ public final class CollisionUtil {
 	 * @param callback the method to  be called for every hit entity
 	 * @param livingOnly whether only LivingEntities should be checked
 	 * @param selfCollision whether the collider can collider with the user
+	 * @param earlyEscape if true it will return on the first valid collision callback without evaluating other entities
 	 * @return true if it hit at least one entity
 	 */
-	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
+	public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
 		final double buffer = 4.0; // Buffer needed to check for nearby entities that have locations outside the check range but still intersect
 		Vector3 extent = collider.getHalfExtents().add(new Vector3(buffer, buffer, buffer));
 		Vector3 pos = collider.getPosition();
@@ -60,7 +74,9 @@ public final class CollisionUtil {
 			if (!selfCollision && entity.equals(user.getEntity())) continue;
 			if (!isValidEntity(entity)) continue;
 			if (collider.intersects(AABBUtils.getEntityBounds(entity))) {
-				hit |= callback.onCollision(entity);
+				boolean result = callback.onCollision(entity);
+				if (earlyEscape && result) return true;
+				hit |= result;
 			}
 		}
 		return hit;
@@ -75,5 +91,10 @@ public final class CollisionUtil {
 			return ((ArmorStand) entity).isVisible();
 		}
 		return true;
+	}
+
+	@FunctionalInterface
+	public interface CollisionCallback {
+		boolean onCollision(@NonNull Entity e);
 	}
 }

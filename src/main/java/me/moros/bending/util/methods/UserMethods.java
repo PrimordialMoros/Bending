@@ -19,17 +19,23 @@
 
 package me.moros.bending.util.methods;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
+import org.bukkit.inventory.MainHand;
 
 /**
  * Utility class with useful {@link User} related methods.
  */
 public final class UserMethods {
-	private static final Vector3 playerOffset = new Vector3(0, 1.2, 0);
+	public static final Vector3 PLAYER_OFFSET = new Vector3(0, 1.2, 0);
+
+	private static boolean isMainHandRightSide(BendingPlayer user) {
+		return user.getEntity().getMainHand() == MainHand.RIGHT;
+	}
 
 	/**
 	 * Note: the returned value includes an offset and is ideal for showing charging particles
@@ -38,25 +44,24 @@ public final class UserMethods {
 	 * @see #getRightSide(User)
 	 * @see #getLeftSide(User)
 	 */
-	public static Vector3 getMainHandSide(User user) {
+	public static Vector3 getMainHandSide(@NonNull User user) {
 		Vector3 dir = user.getDirection().scalarMultiply(0.4);
 		if (user instanceof BendingPlayer) {
-			switch (((BendingPlayer) user).getEntity().getMainHand()) {
-				case LEFT:
-					return getLeftSide(user).add(playerOffset).add(dir);
-				case RIGHT:
-				default:
-					return getRightSide(user).add(playerOffset).add(dir);
-			}
+			boolean right = isMainHandRightSide((BendingPlayer) user);
+			return right ? getRightSide(user).add(PLAYER_OFFSET).add(dir) : getLeftSide(user).add(PLAYER_OFFSET).add(dir);
 		}
 		return user.getEyeLocation().add(dir);
 	}
 
+	public static Vector3 getHandSide(@NonNull User user, boolean right) {
+		Vector3 dir = user.getDirection().scalarMultiply(0.4);
+		return right ? getRightSide(user).add(PLAYER_OFFSET).add(dir) : getLeftSide(user).add(PLAYER_OFFSET).add(dir);
+	}
 
 	/**
 	 * Gets the user's right side
 	 */
-	public static Vector3 getRightSide(User user) {
+	public static Vector3 getRightSide(@NonNull User user) {
 		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
 		return user.getLocation().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
@@ -64,7 +69,7 @@ public final class UserMethods {
 	/**
 	 * Gets the user's left side
 	 */
-	public static Vector3 getLeftSide(User user) {
+	public static Vector3 getLeftSide(@NonNull User user) {
 		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
 		return user.getLocation().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
@@ -74,7 +79,7 @@ public final class UserMethods {
 	 * @param user the user to check
 	 * @return th fire particle type
 	 */
-	public static Particle getFireParticles(User user) {
+	public static Particle getFireParticles(@NonNull User user) {
 		return user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
 	}
 }

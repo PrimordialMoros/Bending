@@ -29,7 +29,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 
 public class EntityListener implements Listener {
 	private final Game game;
@@ -58,6 +61,28 @@ public class EntityListener implements Listener {
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
 			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onItemMerge(ItemMergeEvent event) {
+		if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY)) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onItemPickup(EntityPickupItemEvent event) {
+		if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onHopperItemPickup(InventoryPickupItemEvent event) {
+		if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+			event.setCancelled(true);
+			event.getItem().remove();
 		}
 	}
 }

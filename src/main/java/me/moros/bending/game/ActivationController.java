@@ -131,7 +131,12 @@ public final class ActivationController {
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
 		if (sneaking) PhaseChange.melt(user);
 
-		MetalCable.attemptDestroy(user);
+		String selectedAbilityName = user.getSelectedAbility().map(AbilityDescription::getName).orElse("");
+		if (selectedAbilityName.equals("MetalCable")) {
+			MetalCable.attemptDestroy(user);
+		} else if (selectedAbilityName.equals("EarthGlove")) {
+			EarthGlove.attemptDestroy(user);
+		}
 
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
 		game.getSequenceManager().registerAction(user, action);

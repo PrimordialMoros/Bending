@@ -39,8 +39,10 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 
 import java.util.function.Predicate;
 
@@ -85,7 +87,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (System.currentTimeMillis() > startTime + 250) {
+		if (System.currentTimeMillis() > startTime + 100) {
 			return pillar == null ? UpdateResult.REMOVE : pillar.update();
 		}
 		return UpdateResult.CONTINUE;
@@ -96,7 +98,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		double power = user.isSneaking() ? userConfig.power * 0.666 : userConfig.power;
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-		pillar = Pillar.builder(user, base).setPredicate(predicate).build(1).orElse(null);
+		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(1).orElse(null);
 		SoundUtil.EARTH_SOUND.play(base.getLocation());
 
 		double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
@@ -113,12 +115,27 @@ public class Catapult extends AbilityInstance implements Ability {
 		return user;
 	}
 
+	private static class EarthPillar extends Pillar {
+		protected EarthPillar(@NonNull PillarBuilder builder) {
+			super(builder);
+		}
+
+		@Override
+		public void playSound(@NonNull Block block) {
+		}
+
+		@Override
+		public boolean onEntityHit(@NonNull Entity entity) {
+			return true;
+		}
+	}
+
 	public static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.STRENGTH)
 		public double power;
-		public int angle;
+		public double angle;
 
 		@Override
 		public void onConfigReload() {
@@ -126,7 +143,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.getNode("cooldown").getLong(2000);
 			power = abilityNode.getNode("power").getDouble(2.4);
-			angle = abilityNode.getNode("angle").getInt(85);
+			angle = FastMath.toRadians(abilityNode.getNode("angle").getInt(85));
 		}
 	}
 }

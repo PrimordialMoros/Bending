@@ -145,7 +145,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 		}
 		location = new Vector3(projectile.getFallingBlock().getLocation());
 		if (ticks % 4 == 0) {
-			if (CollisionUtil.handleEntityCollisions(user, BOX.at(location), this::onProjectileHit, true)) {
+			if (CollisionUtil.handleEntityCollisions(user, BOX.at(location), this::onProjectileHit)) {
 				BlockData bd = projectile.getFallingBlock().getBlockData();
 				ParticleUtil.create(Particle.BLOCK_CRACK, location.toLocation(user.getWorld())).count(4)
 					.offset(0.25, 0.15, 0.25).data(bd).spawn();

@@ -285,7 +285,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			Location center = location.toLocation(user.getWorld());
 			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 0.5f);
 			ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
-			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit, true);
+			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit);
 			Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
 			List<Block> wall = new ArrayList<>(WorldMethods.getNearbyBlocks(center, 3, predicate));
 			Collections.shuffle(wall);

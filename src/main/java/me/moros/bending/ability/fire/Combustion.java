@@ -111,7 +111,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		}
 
 		collider = new Sphere(location, userConfig.collisionRadius);
-		if (CollisionUtil.handleEntityCollisions(user, collider, entity -> true, true)) {
+		if (CollisionUtil.handleEntityCollisions(user, collider, entity -> true, true, false, true)) {
 			explode();
 			return UpdateResult.REMOVE;
 		}
