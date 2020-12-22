@@ -99,9 +99,11 @@ public class Catapult extends AbilityInstance implements Ability {
 		pillar = Pillar.builder(user, base).setPredicate(predicate).build(1).orElse(null);
 		SoundUtil.EARTH_SOUND.play(base.getLocation());
 
+		double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
+		Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.getDirection();
 		Collider collider = new Sphere(new Vector3(user.getLocBlock()).add(Vector3.HALF), 1.5);
 		return CollisionUtil.handleEntityCollisions(user, collider, e -> {
-			e.setVelocity(user.getDirection().scalarMultiply(power).clampVelocity());
+			e.setVelocity(direction.scalarMultiply(power).clampVelocity());
 			return true;
 		}, true, true);
 	}
@@ -116,6 +118,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		public long cooldown;
 		@Attribute(Attribute.STRENGTH)
 		public double power;
+		public int angle;
 
 		@Override
 		public void onConfigReload() {
@@ -123,6 +126,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.getNode("cooldown").getLong(2000);
 			power = abilityNode.getNode("power").getDouble(2.4);
+			angle = abilityNode.getNode("angle").getInt(85);
 		}
 	}
 }

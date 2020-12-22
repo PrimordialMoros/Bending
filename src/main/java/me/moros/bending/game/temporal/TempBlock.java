@@ -102,11 +102,11 @@ public class TempBlock implements Temporary {
 				if (tb != null) {
 					if (Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
 						tb.revert();
-						return Optional.empty();
 					}
 				} else {
 					block.setType(Material.WATER);
 				}
+				return Optional.empty();
 			}
 		}
 
