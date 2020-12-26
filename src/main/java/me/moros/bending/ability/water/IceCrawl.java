@@ -187,7 +187,6 @@ public class IceCrawl extends AbilityInstance implements Ability {
 				new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
 				int potionDuration = NumberConversions.round(userConfig.freezeDuration / 50F);
 				((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, 5));
-				// TODO freeze entity movement
 			}
 			return true;
 		}

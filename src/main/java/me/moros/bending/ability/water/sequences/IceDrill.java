@@ -175,7 +175,6 @@ public class IceDrill extends AbilityInstance implements Ability {
 		return new BlockIterator(user.getWorld(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
 	}
 
-
 	@Override
 	public void onDestroy() {
 		if (!blocks.isEmpty()) {

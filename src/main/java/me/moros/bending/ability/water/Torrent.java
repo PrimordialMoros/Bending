@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockStream;
+import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -56,7 +57,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-// TODO apply cooldown
 public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 	private static AbilityDescription ringDesc;
@@ -79,6 +79,10 @@ public class Torrent extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
+			return false;
+		}
+
 		Optional<Torrent> torrent = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Torrent.class);
 		if (torrent.isPresent()) {
 			torrent.get().launch();
@@ -109,7 +113,10 @@ public class Torrent extends AbilityInstance implements Ability {
 
 	private void launch() {
 		if (states == null) {
-			if (ring.isReady()) states = new StateChain(ring.complete()).addState(new TorrentStream(user)).start();
+			if (ring.isReady()) {
+				states = new StateChain(ring.complete()).addState(new TorrentStream(user)).start();
+				user.setCooldown(getDescription(), userConfig.cooldown);
+			}
 		} else {
 			State current = states.getCurrent();
 			if (current instanceof TorrentStream) ((TorrentStream) current).freeze();
@@ -222,8 +229,6 @@ public class Torrent extends AbilityInstance implements Ability {
 			verticalPush = abilityNode.getNode("vertical-push").getDouble(0.2);
 			freezeRadius = abilityNode.getNode("freeze-radius").getDouble(3.0);
 			freezeDuration = abilityNode.getNode("freeze-duration").getInt(12500);
-
-			abilityNode.getNode("max-select-range").setComment("The range in blocks at which the source is invalidated");
 		}
 	}
 }

@@ -50,6 +50,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,7 +61,6 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
@@ -206,11 +206,11 @@ public class MetalCable extends AbilityInstance implements Ability {
 	private boolean launchCable() {
 		if (!hasRequiredInv()) return false;
 
-		Location targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(LivingEntity::getEyeLocation)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
+		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
+			.map(VectorMethods::getEntityCenter)
+			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
 
-		if (targetLocation.getBlock().isLiquid()) {
+		if (targetLocation.toBlock(user.getWorld()).isLiquid()) {
 			return false;
 		}
 
@@ -320,9 +320,9 @@ public class MetalCable extends AbilityInstance implements Ability {
 		if (launched || target == null || target.getType() == MetalCable.CableTarget.Type.BLOCK) return;
 
 		launched = true;
-		Vector3 targetLocation = new Vector3(WorldMethods.getTargetEntity(user, userConfig.projectileRange)
-			.map(LivingEntity::getEyeLocation)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange))));
+		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.projectileRange)
+			.map(VectorMethods::getEntityCenter)
+			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange))));
 
 		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.blockSpeed);
 		target.getEntity().setVelocity(velocity.clampVelocity());

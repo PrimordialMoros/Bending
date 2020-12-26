@@ -32,6 +32,7 @@ import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
+import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.Element;
@@ -110,6 +111,7 @@ public final class ActivationController {
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);
 		WaterRing.launchShard(user);
+		WaterGimbal.launch(user);
 		FerroControl.act(user);
 		EarthBlast.launch(user);
 		MetalCable.launch(user);

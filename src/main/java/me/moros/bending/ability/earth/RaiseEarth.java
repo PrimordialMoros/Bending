@@ -114,7 +114,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 	}
 
 	private void createPillar(Block block, int height) {
-		for (Block b : new Block[]{ block, block.getRelative(BlockFace.DOWN) }) {
+		for (Block b : new Block[]{block, block.getRelative(BlockFace.DOWN)}) {
 			if (!predicate.test(b) || !TempBlock.isBendable(b)) return;
 		}
 		Pillar.builder(user, block).setPredicate(predicate).build(height).ifPresent(pillars::add);

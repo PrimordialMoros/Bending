@@ -29,11 +29,11 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
@@ -71,8 +71,8 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 			target = entity.get();
 			locked = true;
 		}
-		targetLocation = new Vector3(entity.map(Entity::getLocation).orElseGet(() ->
-			WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER)))
+		targetLocation = entity.map(VectorMethods::getEntityCenter).orElseGet(() ->
+			new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER)))
 		);
 		direction = targetLocation.subtract(location).setY(0).normalize();
 	}

@@ -155,7 +155,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(new Sphere(user.getLocation(), userConfig.collisionRadius));
+		return Collections.singletonList(new Sphere(user.getLocation(), 2));
 	}
 
 	@Override
@@ -243,8 +243,6 @@ public class AirScooter extends AbilityInstance implements Ability {
 		public double speed;
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 
 		public Config() {
 			super();
@@ -256,7 +254,6 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 			speed = abilityNode.getNode("speed").getDouble(0.6);
 			cooldown = abilityNode.getNode("cooldown").getLong(4000);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(2.0);
 		}
 	}
 }

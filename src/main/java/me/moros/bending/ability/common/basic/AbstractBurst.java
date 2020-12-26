@@ -26,6 +26,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 public abstract class AbstractBurst extends AbilityInstance {
+	private static final double ANGLE_STEP = FastMath.toRadians(10);
+	private static final double ANGLE = FastMath.toRadians(30);
+
 	protected final Collection<Burstable> blasts = new ArrayList<>();
 
 	protected AbstractBurst(@NonNull AbilityDescription desc) {
@@ -48,17 +52,17 @@ public abstract class AbstractBurst extends AbilityInstance {
 	}
 
 	private <T extends Burstable> void createBurst(User user, Supplier<T> constructor, double range, boolean cone) {
-		for (double theta = 0; theta < FastMath.PI; theta += FastMath.toRadians(10)) {
-			for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.toRadians(10)) {
+		for (double theta = 0; theta < FastMath.PI; theta += ANGLE_STEP) {
+			for (double phi = 0; phi < FastMath.PI * 2; phi += ANGLE_STEP) {
 				double x = FastMath.cos(phi) * FastMath.sin(theta);
 				double y = FastMath.cos(phi) * FastMath.cos(theta);
 				double z = FastMath.sin(phi);
 				Vector3 direction = new Vector3(x, y, z);
-				if (cone && Vector3.angle(direction, user.getDirection()) > FastMath.toRadians(30)) {
+				if (cone && Vector3.angle(direction, user.getDirection()) > ANGLE) {
 					continue;
 				}
 				T blast = constructor.get();
-				blast.initialize(user, user.getLocation().add(Vector3.PLUS_J).add(direction), direction.scalarMultiply(range));
+				blast.initialize(user, VectorMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
 				blasts.add(blast);
 			}
 		}

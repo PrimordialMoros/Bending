@@ -32,13 +32,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -47,6 +47,8 @@ import java.util.Collections;
 import java.util.Deque;
 
 public abstract class BlockStream implements State {
+	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
+
 	private StateChain chain;
 	private final User user;
 	private final Collection<Collider> colliders = new ArrayList<>();
@@ -102,8 +104,8 @@ public abstract class BlockStream implements State {
 		Block head = stream.getFirst();
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
 		if (controllable || direction == null) {
-			Vector3 targetLoc = new Vector3(WorldMethods.getTargetEntity(user, range).map(LivingEntity::getEyeLocation)
-				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
+			Vector3 targetLoc = WorldMethods.getTargetEntity(user, range).map(VectorMethods::getEntityCenter)
+				.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
 			// Improve targeting when near
 			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
 				targetLoc = targetLoc.add(user.getDirection());
@@ -121,12 +123,7 @@ public abstract class BlockStream implements State {
 		clean(stream.removeLast());
 		if (current.distanceSq(user.getEyeLocation()) <= range * range) {
 			if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
-				if (material == Material.WATER && MaterialUtil.isWater(head)) {
-					ParticleUtil.create(Particle.WATER_BUBBLE, head.getLocation().add(0.5, 0.5, 0.5))
-						.count(5).offset(0.25, 0.25, 0.25).spawn();
-				} else {
-					TempBlock.create(head, material);
-				}
+				renderHead(head);
 				stream.addFirst(head);
 			}
 		}
@@ -134,7 +131,7 @@ public abstract class BlockStream implements State {
 		colliders.clear();
 		boolean hit = false;
 		for (Block block : stream) {
-			Collider collider = AABB.BLOCK_BOUNDS.at(new Vector3(block));
+			Collider collider = BOX.at(new Vector3(block));
 			colliders.add(collider);
 			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false);
 		}
@@ -146,6 +143,15 @@ public abstract class BlockStream implements State {
 
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return colliders;
+	}
+
+	protected void renderHead(@NonNull Block block) {
+		if (material == Material.WATER && MaterialUtil.isWater(block)) {
+			ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
+				.count(5).offset(0.25, 0.25, 0.25).spawn();
+		} else {
+			TempBlock.create(block, material);
+		}
 	}
 
 	public boolean isValid(@NonNull Block block) {

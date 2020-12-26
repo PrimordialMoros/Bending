@@ -119,7 +119,7 @@ public class FireKick extends AbilityInstance implements Ability {
 
 	private class FireStream extends ParticleStream {
 		public FireStream(User user, Ray ray) {
-			super(user, ray, userConfig.speed, userConfig.collisionRadius);
+			super(user, ray, userConfig.speed, 0.5);
 			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
@@ -162,8 +162,6 @@ public class FireKick extends AbilityInstance implements Ability {
 		public double range;
 		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 
 		@Override
 		public void onConfigReload() {
@@ -173,7 +171,6 @@ public class FireKick extends AbilityInstance implements Ability {
 			damage = abilityNode.getNode("damage").getDouble(3.0);
 			range = abilityNode.getNode("range").getDouble(7.0);
 			speed = abilityNode.getNode("speed").getDouble(1.0);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(0.5);
 
 			abilityNode.getNode("speed").setComment("How many blocks the streams advance with each tick.");
 		}

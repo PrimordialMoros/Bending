@@ -161,7 +161,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 				break;
 		}
 
-		TempArmor.create(user, new ItemStack[]{ boots, leggings, chest, head }, userConfig.duration);
+		TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
 		if (PotionUtil.canAddPotion(user, PotionEffectType.DAMAGE_RESISTANCE, 20, resistance)) {
 			user.getEntity().addPotionEffect(
 				new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, NumberConversions.round(userConfig.duration / 50F), resistance, true, false)

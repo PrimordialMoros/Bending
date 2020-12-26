@@ -31,6 +31,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
@@ -38,14 +39,13 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Collections;
 
 public abstract class AbstractBlockShot implements Updatable {
-	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
+	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
 	private final User user;
 	private final Material material;
@@ -80,7 +80,7 @@ public abstract class AbstractBlockShot implements Updatable {
 
 		redirect();
 		settingUp = true;
-		firstDestination = getCurrent();
+		firstDestination = getCurrent().add(Vector3.HALF);
 		if (target.getY() - current.getY() > 2) {
 			firstDestination = firstDestination.setY(target.getY() - 1);
 		} else if (current.getY() > user.getEyeLocation().getY() && current.getRelative(BlockFace.UP).isPassable()) {
@@ -89,7 +89,7 @@ public abstract class AbstractBlockShot implements Updatable {
 			firstDestination = firstDestination.add(new Vector3(0, 2, 0));
 		} else {
 			Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
-			firstDestination = firstDestination.add(dir);
+			firstDestination = firstDestination.add(dir).floor().add(Vector3.HALF);
 		}
 	}
 
@@ -111,10 +111,9 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (currentVector.distanceSq(user.getEyeLocation()) > range * range) {
 			return UpdateResult.REMOVE;
 		}
-		if (currentVector.distanceSq(target) < 1) {
+		if (currentVector.distanceSq(target) < 0.8) {
 			return UpdateResult.REMOVE;
 		}
-
 
 		current = currentVector.toBlock(user.getWorld());
 		previousBlock = current;
@@ -141,9 +140,10 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public void redirect() {
-		target = new Vector3(WorldMethods.getTargetEntity(user, range)
-			.map(LivingEntity::getEyeLocation)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
+		target = WorldMethods.getTargetEntity(user, range)
+			.map(VectorMethods::getEntityCenter)
+			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))))
+			.floor().add(Vector3.HALF);
 		settingUp = false;
 	}
 

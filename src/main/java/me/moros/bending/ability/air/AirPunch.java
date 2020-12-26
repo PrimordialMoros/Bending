@@ -86,7 +86,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 		Vector3 userVelocity = new Vector3(user.getEntity().getVelocity());
 		double length = userVelocity.subtract(user.getDirection()).getNorm();
 		double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
-		stream = new AirStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius, factor);
+		stream = new AirStream(user, new Ray(origin, lookingDir), 1.2, factor);
 		return true;
 	}
 
@@ -168,8 +168,6 @@ public class AirPunch extends AbilityInstance implements Ability {
 		public double range;
 		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 
 		@Override
 		public void onConfigReload() {
@@ -179,7 +177,6 @@ public class AirPunch extends AbilityInstance implements Ability {
 			damage = abilityNode.getNode("damage").getDouble(3.0);
 			range = abilityNode.getNode("range").getDouble(18.0);
 			speed = abilityNode.getNode("speed").getDouble(0.8);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(1.0);
 		}
 	}
 }

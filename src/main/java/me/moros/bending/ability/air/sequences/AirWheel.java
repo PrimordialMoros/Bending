@@ -82,7 +82,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
-		collider = new Sphere(user.getLocation(), userConfig.collisionRadius);
+		collider = new Sphere(user.getLocation(), 2);
 		nextRenderTime = 0;
 		nextDamageTime = 0;
 		return true;
@@ -97,7 +97,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 	public @NonNull UpdateResult update() {
 		long time = System.currentTimeMillis();
 		center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
-		collider = new Sphere(center, userConfig.collisionRadius);
+		collider = new Sphere(center, 2);
 
 		if (time > nextRenderTime) {
 			render();
@@ -157,8 +157,6 @@ public class AirWheel extends AbilityInstance implements Ability {
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 
 		public Config() {
 			super();
@@ -170,7 +168,6 @@ public class AirWheel extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.getNode("cooldown").getLong(4000);
 			damage = abilityNode.getNode("damage").getDouble(2.0);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(2.0);
 		}
 	}
 }

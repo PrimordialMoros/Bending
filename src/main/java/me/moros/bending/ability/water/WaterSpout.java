@@ -61,9 +61,9 @@ public class WaterSpout extends AbilityInstance implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private final Collection<TempBlock> column = new ArrayList<>();
+	private final Collection<Block> column = new ArrayList<>();
 	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || WaterMaterials.isIceBendable(b);
-	private AbstractSpout spout;
+	private Spout spout;
 
 	public WaterSpout(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -110,9 +110,9 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
 	@Override
 	public void onDestroy() {
+		column.forEach(spout::clean);
 		spout.getFlight().setFlying(false);
 		spout.getFlight().release();
-		column.forEach(TempBlock::revert);
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
@@ -151,14 +151,15 @@ public class WaterSpout extends AbilityInstance implements Ability {
 			BlockVector userBlockVector = new BlockVector(user.getLocation().toVector());
 			if (userBlockVector.equals(blockVector)) return;
 			blockVector = userBlockVector;
-			column.forEach(TempBlock::revert);
+			column.forEach(this::clean);
 			column.clear();
 			ignore.clear();
+
 			Block block = user.getLocBlock();
 			for (int i = 0; i < distance - 1; i++) {
-				TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER).ifPresent(column::add);
+				TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER).ifPresent(tb -> column.add(tb.getBlock()));
 			}
-			column.stream().map(TempBlock::getBlock).forEach(ignore::add);
+			ignore.addAll(column);
 		}
 
 		@Override
@@ -169,6 +170,10 @@ public class WaterSpout extends AbilityInstance implements Ability {
 			if (ThreadLocalRandom.current().nextInt(8) == 0) {
 				SoundUtil.WATER_SOUND.play(user.getEntity().getLocation());
 			}
+		}
+
+		protected void clean(Block block) {
+			TempBlock.manager.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
 		}
 	}
 

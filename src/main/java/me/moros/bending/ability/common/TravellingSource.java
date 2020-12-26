@@ -57,10 +57,8 @@ public class TravellingSource implements State {
 		if (started) return;
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
-		if (source != null && data.getMaterial() == Material.WATER) {
-			if (BlockMethods.CARDINAL_FACES.stream().map(source::getRelative).filter(MaterialUtil::isSourceBlock).count() < 2) {
-				TempBlock.create(source, Material.AIR, 30000);
-			}
+		if (source != null && data.getMaterial() == Material.WATER && !BlockMethods.isInfiniteWater(source)) {
+			TempBlock.create(source, Material.AIR, 30000);
 		}
 		started = source != null;
 	}

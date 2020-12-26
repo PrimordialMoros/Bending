@@ -22,4 +22,5 @@ package me.moros.bending.util;
 public final class BendingProperties {
 	public static final long EARTHBENDING_REVERT_TIME = 300_000; // 5 minutes
 	public static final long FIRE_REVERT_TIME = 10000; // 10 seconds
+	public static final long EXPLOSION_REVERT_TIME = 20000; // 10 seconds
 }

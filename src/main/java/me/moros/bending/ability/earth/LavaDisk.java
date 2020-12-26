@@ -51,6 +51,7 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -70,7 +71,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class LavaDisk extends AbilityInstance implements Ability {
-	private static final String[] colors = { "2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00" };
+	private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
 	private static final Config config = new Config();
 
 	private User user;
@@ -253,7 +254,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 				int rotAngle = rotationAngle + j + offset;
 				double length = 0.1 * i;
 				Vector3 temp = new Vector3(length * FastMath.cos(rotAngle), 0, length * FastMath.sin(rotAngle));
-				Location loc = location.add(rotateAroundAxisY(temp, cos, sin)).toLocation(user.getWorld());
+				Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.getWorld());
 				ParticleUtil.createRGB(loc, colors[index], size).spawn();
 				if (length > 0.5) damageBlock(loc.getBlock());
 			}
@@ -261,10 +262,6 @@ public class LavaDisk extends AbilityInstance implements Ability {
 			index = FastMath.min(colors.length - 1, ++index);
 			size -= 0.05;
 		}
-	}
-
-	private Vector3 rotateAroundAxisY(Vector3 v, double cos, double sin) {
-		return new Vector3(v.getX() * cos + v.getZ() * sin, v.getY(), v.getX() * -sin + v.getZ() * cos);
 	}
 
 	private boolean isLocationSafe() {

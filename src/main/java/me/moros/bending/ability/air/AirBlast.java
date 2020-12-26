@@ -142,7 +142,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		selectedOrigin = true;
 	}
 
-	private boolean launch() {
+	private void launch() {
 		launched = true;
 		Vector3 target = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (user.isSneaking()) {
@@ -152,8 +152,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		}
 		direction = target.subtract(origin).normalize();
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		stream = new AirStream(user, new Ray(origin, direction.scalarMultiply(userConfig.range)), userConfig.collisionRadius);
-		return true;
+		stream = new AirStream(user, new Ray(origin, direction.scalarMultiply(userConfig.range)));
 	}
 
 	@Override
@@ -184,7 +183,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		origin = location;
 		this.direction = direction;
 		removalPolicy = Policies.builder().build();
-		stream = new AirStream(user, new Ray(location, direction), userConfig.collisionRadius);
+		stream = new AirStream(user, new Ray(location, direction));
 	}
 
 	@Override
@@ -200,8 +199,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	private class AirStream extends ParticleStream {
 		private long nextRenderTime;
 
-		public AirStream(User user, Ray ray, double collisionRadius) {
-			super(user, ray, userConfig.speed, collisionRadius);
+		public AirStream(User user, Ray ray) {
+			super(user, ray, userConfig.speed, 1.25);
 			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
 		}
 
@@ -266,8 +265,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		public double range;
 		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 		@Attribute(Attribute.STRENGTH)
 		public double selfPush;
 		@Attribute(Attribute.STRENGTH)
@@ -285,7 +282,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			cooldown = abilityNode.getNode("cooldown").getLong(1500);
 			range = abilityNode.getNode("range").getDouble(25.0);
 			speed = abilityNode.getNode("speed").getDouble(1.25);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(1.0);
 
 			selfPush = abilityNode.getNode("push").getNode("self").getDouble(2.5);
 			otherPush = abilityNode.getNode("push").getNode("other").getDouble(3);

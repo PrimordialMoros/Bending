@@ -41,6 +41,7 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -93,7 +94,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		location = user.getEyeLocation();
 		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range, user.getEyeLocation(), () -> location)).build();
-		collider = new Sphere(location, userConfig.collisionRadius);
+		collider = new Sphere(location, 1);
 
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
@@ -110,7 +111,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			return UpdateResult.REMOVE;
 		}
 
-		collider = new Sphere(location, userConfig.collisionRadius);
+		collider = new Sphere(location, 1);
 		if (CollisionUtil.handleEntityCollisions(user, collider, entity -> true, true, false, true)) {
 			explode();
 			return UpdateResult.REMOVE;
@@ -211,7 +212,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
 				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) break;
 				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && MaterialUtil.isIgnitable(block)) ? Material.FIRE : Material.AIR;
-				TempBlock.create(block, mat, userConfig.regenTime + ThreadLocalRandom.current().nextInt(1000), true);
+				TempBlock.create(block, mat, BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000), true);
 			}
 		}
 	}
@@ -227,11 +228,9 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		public int fireTick;
 		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
+
 		public boolean damageBlocks;
-		public long regenTime;
-		private int particleRange;
+		public int particleRange;
 
 		@Override
 		public void onConfigReload() {
@@ -242,9 +241,8 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			power = abilityNode.getNode("power").getDouble(3.0);
 			fireTick = abilityNode.getNode("fire-tick").getInt(60);
 			range = abilityNode.getNode("range").getDouble(80.0);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(1.4);
+
 			damageBlocks = abilityNode.getNode("damage-blocks").getBoolean(true);
-			regenTime = abilityNode.getNode("regen-time").getLong(15000);
 			particleRange = NumberConversions.ceil(range);
 		}
 	}

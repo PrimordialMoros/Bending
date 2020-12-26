@@ -26,6 +26,7 @@ import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -111,6 +112,9 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
+			return false;
+		}
 		if (method == ActivationMethod.PUNCH && user.isSneaking()) {
 			if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterRing")) {
 				if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class)) {
@@ -358,7 +362,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		@Override
 		public void render() {
-			ParticleUtil.create(Particle.SNOW_SHOVEL, getBukkitLocation())
+			ParticleUtil.create(Particle.SNOW_SHOVEL, getBukkitLocation()).count(3)
 				.offset(0.25, 0.25, 0.25).spawn();
 		}
 

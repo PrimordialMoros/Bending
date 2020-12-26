@@ -134,15 +134,14 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		return (charging || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
-	private boolean launch() {
+	private void launch() {
 		double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
 		charging = false;
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
-		stream = new FireStream(user, new Ray(origin, lookingDir), userConfig.collisionRadius * factor);
-		return true;
+		stream = new FireStream(user, new Ray(origin, lookingDir), 1.2 * factor);
 	}
 
 	@Override
@@ -171,7 +170,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		factor = 1.0;
 		charging = false;
 		removalPolicy = Policies.builder().build();
-		stream = new FireStream(user, new Ray(location, direction), userConfig.collisionRadius);
+		stream = new FireStream(user, new Ray(location, direction), 1.2);
 	}
 
 	@Override
@@ -257,8 +256,6 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		public double range;
 		@Attribute(Attribute.SPEED)
 		public double speed;
-		@Attribute(Attribute.COLLISION_RADIUS)
-		public double collisionRadius;
 		@Attribute(Attribute.RADIUS)
 		public double igniteRadius;
 		@Attribute(Attribute.STRENGTH)
@@ -275,7 +272,6 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			range = abilityNode.getNode("range").getDouble(20.0);
 			speed = abilityNode.getNode("speed").getDouble(0.8);
 			igniteRadius = abilityNode.getNode("ignite-radius").getDouble(1.5);
-			collisionRadius = abilityNode.getNode("collision-radius").getDouble(1.4);
 
 			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(1.5);
 			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2000);

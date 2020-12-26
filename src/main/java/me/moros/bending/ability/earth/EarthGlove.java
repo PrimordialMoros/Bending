@@ -44,6 +44,7 @@ import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
@@ -225,9 +226,9 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
 		lastUsedSide.put(user.getEntity().getUniqueId(), side);
 
-		Vector3 target = new Vector3(WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(e -> e.getEyeLocation().subtract(0, e.getHeight() / 2, 0))
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
+		Vector3 target = WorldMethods.getTargetEntity(user, userConfig.range)
+			.map(VectorMethods::getEntityCenter)
+			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
 
 		glove = buildGlove(gloveSpawnLocation);
 		Vector3 velocity = target.subtract(gloveSpawnLocation).normalize().scalarMultiply(GLOVE_SPEED);

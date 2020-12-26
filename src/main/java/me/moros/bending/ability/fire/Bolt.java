@@ -41,8 +41,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -57,7 +57,7 @@ public class Bolt extends AbilityInstance implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private Location targetLocation;
+	private Vector3 targetLocation;
 
 	private long startTime;
 
@@ -106,9 +106,9 @@ public class Bolt extends AbilityInstance implements Ability {
 	private boolean onEntityHit(Entity entity) {
 		if (entity instanceof ArmorStand) return false;
 		if (entity instanceof Creeper) ((Creeper) entity).setPowered(true);
-		double distance = entity.getLocation().distance(targetLocation);
+		double distance = VectorMethods.getEntityCenter(entity).distance(targetLocation);
 		if (distance > 5) return false;
-		boolean hitWater = MaterialUtil.isWater(targetLocation.getBlock());
+		boolean hitWater = MaterialUtil.isWater(targetLocation.toBlock(user.getWorld()));
 		boolean vulnerable = hitWater;
 		if (entity instanceof Player) {
 			// TODO add check for conductors
@@ -126,22 +126,22 @@ public class Bolt extends AbilityInstance implements Ability {
 	public boolean isNearbyChannel() {
 		Optional<Bolt> instance = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(Bolt.class)
 			.filter(b -> !b.getUser().equals(user))
-			.filter(b -> b.getUser().getLocation().distanceSq(new Vector3(targetLocation)) < 4 * 4)
+			.filter(b -> b.getUser().getLocation().distanceSq(targetLocation) < 4 * 4)
 			.findAny();
 		instance.ifPresent(bolt -> bolt.startTime = 0);
 		return instance.isPresent();
 	}
 
 	public void dealDamage() {
-		Collider collider = new Sphere(new Vector3(targetLocation), 5);
+		Collider collider = new Sphere(targetLocation, 5);
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
 	}
 
 	private void strike() {
 		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(Entity::getLocation).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.getBlock())) return;
-		user.getWorld().strikeLightningEffect(targetLocation);
+			.map(VectorMethods::getEntityCenter).orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
+		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		if (!isNearbyChannel()) dealDamage();
 	}

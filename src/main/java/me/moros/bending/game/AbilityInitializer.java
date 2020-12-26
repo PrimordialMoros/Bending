@@ -31,6 +31,7 @@ import me.moros.bending.ability.fire.*;
 import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
+import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
@@ -117,8 +118,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
 
-		abilities.add(AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setSourcesPlants(true).build());
+		AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setSourcesPlants(true).build();
+		abilities.add(waterManipulation);
 
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).setHarmless(true).build());
@@ -134,7 +136,7 @@ public final class AbilityInitializer {
 		abilities.add(waterRing);
 
 		AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHidden(true).setSourcesPlants(true).build();
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHidden(true).setSourcesPlants(true).build();
 		abilities.add(waterWave);
 
 		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
@@ -148,6 +150,30 @@ public final class AbilityInitializer {
 		AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
 		abilities.add(iceCrawl);
+
+		AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+		abilities.add(waterGimbal);
+
+		AbilityDescription frostBreath = AbilityDescription.builder("FrostBreath", FrostBreath::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+		abilities.add(frostBreath);
+
+		sequences.put(waterGimbal, new Sequence(
+			new AbilityAction(waterRing, ActivationMethod.SNEAK),
+			new AbilityAction(waterRing, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(waterRing, ActivationMethod.SNEAK),
+			new AbilityAction(waterRing, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(torrent, ActivationMethod.SNEAK)
+		));
+
+		sequences.put(frostBreath, new Sequence(
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK)
+		));
 	}
 
 	private static void initEarth(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
