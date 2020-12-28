@@ -48,7 +48,6 @@ public abstract class AbstractBlockShot implements Updatable {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
 	private final User user;
-	private final Material material;
 
 	private Block current;
 	private Block previousBlock;
@@ -57,6 +56,7 @@ public abstract class AbstractBlockShot implements Updatable {
 
 	protected Vector3 target;
 	protected Vector3 direction;
+	protected Material material;
 
 	private boolean settingUp;
 	private int buffer;

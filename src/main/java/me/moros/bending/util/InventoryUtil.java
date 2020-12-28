@@ -21,7 +21,10 @@ package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -73,6 +76,15 @@ public final class InventoryUtil {
 		if (user.getInventory().isPresent()) {
 			Inventory inventory = user.getInventory().get();
 			return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
+		}
+		return false;
+	}
+
+	public static boolean hasMetalArmor(@NonNull LivingEntity entity) {
+		EntityEquipment equipment = entity.getEquipment();
+		if (equipment == null) return false;
+		for (ItemStack item : equipment.getArmorContents()) {
+			if (item != null && MaterialUtil.METAL_ARMOR.isTagged(item)) return true;
 		}
 		return false;
 	}

@@ -48,6 +48,9 @@ public class EarthMaterials {
 			Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS
 		));
 		EARTH_BENDABLE.add(MaterialSetTag.STONE_BRICKS.getValues());
+		EARTH_BENDABLE.add(MaterialTags.TERRACOTTA);
+		EARTH_BENDABLE.add(MaterialTags.CONCRETES);
+		EARTH_BENDABLE.add(MaterialTags.CONCRETE_POWDER);
 
 		SAND_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), MaterialSetTag.SAND.getValues());
 		SAND_BENDABLE.add(MaterialTags.SANDSTONES, MaterialTags.RED_SANDSTONES);

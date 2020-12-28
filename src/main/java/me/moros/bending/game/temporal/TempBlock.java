@@ -31,9 +31,13 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class TempBlock implements Temporary {
+	private static final Set<Block> GRAVITY_CACHE = new HashSet<>();
+
 	public static final TemporalManager<Block, TempBlock> manager = new TemporalManager<>();
 	private BlockState snapshot;
 	private final BlockData data;
@@ -51,6 +55,7 @@ public class TempBlock implements Temporary {
 			snapshot = temp.snapshot;
 			if (revertTask != null) revertTask.execute();
 		});
+		if (data.getMaterial().hasGravity()) GRAVITY_CACHE.add(block);
 		block.setBlockData(data);
 		manager.addEntry(block, this, duration);
 	}
@@ -117,6 +122,7 @@ public class TempBlock implements Temporary {
 	public void revert() {
 		snapshot.getWorld().getChunkAtAsync(getBlock()).thenAccept(r -> snapshot.update(true, false));
 		manager.removeEntry(getBlock());
+		GRAVITY_CACHE.remove(getBlock());
 		if (revertTask != null) revertTask.execute();
 	}
 
@@ -155,5 +161,9 @@ public class TempBlock implements Temporary {
 
 	public static boolean isBendable(@NonNull Block block) {
 		return manager.get(block).map(TempBlock::isBendable).orElse(true);
+	}
+
+	public static boolean isGravityCached(@NonNull Block block) {
+		return GRAVITY_CACHE.contains(block);
 	}
 }

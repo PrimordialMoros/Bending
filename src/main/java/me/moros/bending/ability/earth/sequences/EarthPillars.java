@@ -64,7 +64,6 @@ public class EarthPillars extends AbilityInstance implements Ability {
 	private final Collection<Entity> affectedEntities = new HashSet<>();
 	private Predicate<Block> predicate;
 
-
 	public EarthPillars(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
@@ -145,7 +144,6 @@ public class EarthPillars extends AbilityInstance implements Ability {
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) return false;
-
 			affectedEntities.add(entity);
 			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup).clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());

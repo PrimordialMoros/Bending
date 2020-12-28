@@ -44,6 +44,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -61,25 +62,17 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MetalCable extends AbilityInstance implements Ability {
-	private static final Set<Material> armorItems = EnumSet.of(
-		Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
-		Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
-		Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS
-	);
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
 
 	private static final Config config = new Config();
@@ -286,11 +279,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 	}
 
 	private boolean hasRequiredInv() {
-		if (user.getEntity().getEquipment() != null) {
-			for (ItemStack item : user.getEntity().getEquipment().getArmorContents()) {
-				if (armorItems.contains(item.getType())) return true;
-			}
-		}
+		if (InventoryUtil.hasMetalArmor(user.getEntity())) return true;
 		return user.getInventory().map(itemStacks -> itemStacks.contains(Material.IRON_INGOT)).orElse(false);
 	}
 

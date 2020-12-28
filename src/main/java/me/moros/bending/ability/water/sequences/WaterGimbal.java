@@ -213,7 +213,8 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 		@Override
 		public @NonNull UpdateResult update() {
 			if (!started) return UpdateResult.REMOVE;
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) return UpdateResult.REMOVE;
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock()))
+				return UpdateResult.REMOVE;
 
 			Set<Block> ring = new HashSet<>();
 			double yaw = FastMath.toRadians(-user.getEntity().getLocation().getYaw()) - FastMath.PI / 2;

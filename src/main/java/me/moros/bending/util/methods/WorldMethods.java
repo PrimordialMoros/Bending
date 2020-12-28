@@ -143,10 +143,24 @@ public final class WorldMethods {
 	}
 
 	/**
-	 * @return {@link #getTarget(World, Ray, Set)} with set defaulting to {@link MaterialUtil#TRANSPARENT}.
+	 * @return {@link #getTarget(World, Ray, Set)} with an empty material set and ignoreLiquids = true
 	 */
 	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray) {
-		return getTarget(world, ray, Collections.emptySet());
+		return getTarget(world, ray, Collections.emptySet(), true);
+	}
+
+	/**
+	 * @return {@link #getTarget(World, Ray, Set, boolean)} with an empty material set
+	 */
+	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, boolean ignoreLiquids) {
+		return getTarget(world, ray, Collections.emptySet(), ignoreLiquids);
+	}
+
+	/**
+	 * @return {@link #getTarget(World, Ray, Set, boolean)} with ignoreLiquids = true
+	 */
+	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
+		return getTarget(world, ray, ignored, true);
 	}
 
 	/**
@@ -155,16 +169,18 @@ public final class WorldMethods {
 	 * @param world the world to check in
 	 * @param ray the ray which holds the origin and direction
 	 * @param ignored an extra set of materials that will be ignored (transparent materials are already ignored)
+	 * @param ignoreLiquids whether liquids should be ignored for collisions
 	 * @return the target location
 	 */
-	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
+	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
 		Location location = ray.origin.toLocation(world);
 		Vector direction = ray.direction.normalize().toVector();
 		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
 			Block center = location.getBlock();
 			for (Block block : BlockMethods.combineFaces(center)) {
 				if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) continue;
-				if (AABBUtils.getBlockBounds(block).intersects(ray)) {
+				AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
+				if (blockBounds.intersects(ray)) {
 					return location;
 				}
 			}

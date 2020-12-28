@@ -26,6 +26,8 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.material.WaterMaterials;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
@@ -37,6 +39,7 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -106,6 +109,14 @@ public class BlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockFromTo(BlockFromToEvent event) {
 		if (TempBlock.manager.isTemp(event.getBlock()) || TempBlock.manager.isTemp(event.getToBlock())) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onBlockPhysics(BlockPhysicsEvent event) {
+		Block block = event.getBlock();
+		if (block.getType().hasGravity() && TempBlock.isGravityCached(block)) {
 			event.setCancelled(true);
 		}
 	}

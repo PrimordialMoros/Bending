@@ -31,6 +31,7 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -41,7 +42,7 @@ import org.bukkit.block.Block;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.function.Consumer;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public class PhaseChange extends AbilityInstance implements PassiveAbility {
@@ -50,8 +51,8 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	private User user;
 	private Config userConfig;
 
-	private final Queue<Block> freezeQueue = new ArrayDeque<>(32);
-	private final Queue<Block> meltQueue = new ArrayDeque<>(32);
+	private final PhaseTransformer freeze = new PhaseTransformer(MaterialUtil::isWater, Material.ICE);
+	private final PhaseTransformer melt = new PhaseTransformer(WaterMaterials::isIceBendable, Material.WATER);
 
 	public PhaseChange(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -71,62 +72,21 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		processQueue(freezeQueue, MaterialUtil::isWater, block -> {
-			Optional<TempBlock> tb = TempBlock.manager.get(block);
-			if (tb.isPresent()) {
-				tb.get().revert();
-			} else {
-				TempBlock.create(block, Material.ICE, true);
-			}
-		});
-
+		freeze.processQueue();
 		if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
-			processQueue(meltQueue, WaterMaterials::isIceBendable, block -> {
-				Optional<TempBlock> tb = TempBlock.manager.get(block);
-				if (tb.isPresent()) {
-					tb.get().revert();
-				} else {
-					TempBlock.create(block, Material.WATER, true);
-				}
-			});
+			melt.processQueue();
 		}
-
 		return UpdateResult.CONTINUE;
 	}
 
-	private boolean fillQueue(double range, double radius, Predicate<Block> predicate, Queue<Block> queue) {
-		if (!user.canBend(getDescription())) return false;
-		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(range));
-		boolean acted = false;
-		for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			queue.offer(block);
-			acted = true;
-		}
-		return acted;
-	}
-
-	private void processQueue(Queue<Block> queue, Predicate<Block> valid, Consumer<Block> alter) {
-		int counter = 0;
-		while (!queue.isEmpty() && counter <= userConfig.speed) {
-			Block block = queue.poll();
-			if (TempBlock.isBendable(block) && valid.test(block)) {
-				alter.accept(block);
-				counter++;
-			}
-		}
-	}
-
 	public void freeze() {
-		if (fillQueue(userConfig.freezeRange, userConfig.freezeRadius, MaterialUtil::isWater, freezeQueue)) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-		}
+		if (!user.canBend(getDescription())) return;
+		freeze.fillQueue(userConfig.freezeRange, userConfig.freezeRadius);
 	}
 
 	public void melt() {
-		if (fillQueue(userConfig.meltRange, userConfig.meltRadius, WaterMaterials::isIceBendable, meltQueue)) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-		}
+		if (!user.canBend(getDescription())) return;
+		melt.fillQueue(userConfig.meltRange, userConfig.meltRadius);
 	}
 
 	public static void freeze(User user) {
@@ -144,6 +104,51 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	@Override
 	public @NonNull User getUser() {
 		return user;
+	}
+
+	private class PhaseTransformer {
+		private final Queue<Block> queue;
+		private final Predicate<Block> predicate;
+		private final Material material;
+
+		private final boolean isFreeze;
+
+		private PhaseTransformer(@NonNull Predicate<Block> predicate, @NonNull Material material) {
+			queue = new ArrayDeque<>(32);
+			this.predicate = predicate;
+			this.material = material;
+			isFreeze = material == Material.ICE;
+		}
+
+		private void fillQueue(double range, double radius) {
+			Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(range), !isFreeze);
+			boolean acted = false;
+			for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
+				queue.offer(block);
+				acted = true;
+			}
+			if (acted) user.setCooldown(getDescription(), userConfig.cooldown);
+		}
+
+		private void processQueue() {
+			int counter = 0;
+			while (!queue.isEmpty() && counter <= userConfig.speed) {
+				Block block = queue.poll();
+				if (TempBlock.isBendable(block) && predicate.test(block)) {
+					Optional<TempBlock> tb = TempBlock.manager.get(block);
+					if (tb.isPresent()) {
+						tb.get().revert();
+					} else {
+						TempBlock.create(block, material, true);
+						if (isFreeze && ThreadLocalRandom.current().nextInt(12) == 0) {
+							SoundUtil.ICE_SOUND.play(block.getLocation());
+						}
+					}
+					counter++;
+				}
+			}
+		}
 	}
 
 	public static class Config extends Configurable {
@@ -169,10 +174,10 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 			cooldown = abilityNode.getNode("cooldown").getLong(3000);
 
 			freezeRange = abilityNode.getNode("freeze").getNode("range").getDouble(7.0);
-			freezeRadius = abilityNode.getNode("freeze").getNode("radius").getDouble(3.0);
+			freezeRadius = abilityNode.getNode("freeze").getNode("radius").getDouble(3.5);
 
 			meltRange = abilityNode.getNode("melt").getNode("range").getDouble(7.0);
-			meltRadius = abilityNode.getNode("melt").getNode("radius").getDouble(4.0);
+			meltRadius = abilityNode.getNode("melt").getNode("radius").getDouble(4.5);
 
 			abilityNode.getNode("speed").setComment("How many blocks can be affected per tick.");
 		}

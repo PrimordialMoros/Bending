@@ -202,4 +202,3 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		}
 	}
 }
-

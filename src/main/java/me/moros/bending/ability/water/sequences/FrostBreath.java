@@ -38,6 +38,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.UserMethods;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FrostBreath extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -100,7 +102,8 @@ public class FrostBreath extends AbilityInstance implements Ability {
 		}
 
 		if (charging) {
-			if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) return UpdateResult.REMOVE;
+			if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange"))
+				return UpdateResult.REMOVE;
 			if (System.currentTimeMillis() > startTime + userConfig.chargeTime) {
 				ParticleUtil.create(Particle.SNOW_SHOVEL, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
 				if (!user.isSneaking()) {
@@ -169,6 +172,8 @@ public class FrostBreath extends AbilityInstance implements Ability {
 				if (entity.isValid() && entity instanceof LivingEntity) {
 					int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
 					((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, userConfig.power));
+					ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
+						.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
 				}
 			}
 			return false;
@@ -180,6 +185,9 @@ public class FrostBreath extends AbilityInstance implements Ability {
 				BlockMethods.extinguish(user, block);
 			} else if (MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.ICE, true);
+				if (ThreadLocalRandom.current().nextInt(6) == 0) {
+					SoundUtil.ICE_SOUND.play(block.getLocation());
+				}
 			}
 			return true;
 		}
@@ -204,7 +212,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "frostbreath");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(10000);
-			range = abilityNode.getNode("range").getDouble(5.0);
+			range = abilityNode.getNode("range").getDouble(7.0);
 			chargeTime = abilityNode.getNode("charge-time").getLong(1000);
 			damage = abilityNode.getNode("damage").getDouble(2.0);
 			power = abilityNode.getNode("slow-power").getInt(2) - 1;

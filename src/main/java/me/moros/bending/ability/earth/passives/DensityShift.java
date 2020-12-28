@@ -30,10 +30,14 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
@@ -74,15 +78,25 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 		if (instance == null) {
 			return false;
 		}
-		long duration = instance.userConfig.duration;
-		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (EarthMaterials.isEarthbendable(user, block)) {
-			Predicate<Block> predicate = b -> EarthMaterials.EARTH_SAND_SOURCES.isTagged(b) && b.getRelative(BlockFace.UP).isPassable();
-			WorldMethods.getNearbyBlocks(block.getLocation().add(0.5, 0.5, 0.5), instance.userConfig.radius, predicate)
-				.forEach(b -> TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), duration, true));
-			return true;
+
+		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
+		for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), b -> EarthMaterials.isEarthbendable(user, b))) {
+			if (block.getY() > entityBounds.getPosition().getY()) continue;
+			if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
+				instance.softenArea();
+				return true;
+			}
 		}
 		return false;
+	}
+
+	private void softenArea() {
+		Location center = user.getLocBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
+		Predicate<Block> predicate = b -> EarthMaterials.EARTH_SAND_SOURCES.isTagged(b) && b.getRelative(BlockFace.UP).isPassable();
+		for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
+			if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) continue;
+			TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true);
+		}
 	}
 
 	@Override

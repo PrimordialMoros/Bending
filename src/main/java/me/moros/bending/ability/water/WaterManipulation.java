@@ -247,6 +247,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	private class Manip extends AbstractBlockShot {
 		public Manip(User user, Block block) {
 			super(user, block, userConfig.range, 100);
+			material = Material.WATER;
 			allowUnderWater = true;
 		}
 

@@ -58,7 +58,7 @@ public class TravellingSource implements State {
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
 		if (source != null && data.getMaterial() == Material.WATER && !BlockMethods.isInfiniteWater(source)) {
-			TempBlock.create(source, Material.AIR, 30000);
+			TempBlock.create(source, Material.AIR, 30000, true);
 		}
 		started = source != null;
 	}

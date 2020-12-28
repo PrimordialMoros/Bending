@@ -41,6 +41,7 @@ public final class MaterialUtil {
 	public static final MaterialSetTag TRANSPARENT;
 	public static final MaterialSetTag CONTAINERS;
 	public static final MaterialSetTag UNBREAKABLES;
+	public static final MaterialSetTag METAL_ARMOR;
 
 	static {
 		COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
@@ -82,6 +83,12 @@ public final class MaterialUtil {
 		UNBREAKABLES = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.BARRIER, Material.BEDROCK,
 			Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
 			Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
+		);
+
+		METAL_ARMOR = new MaterialSetTag(Bending.getLayer().getCoreKey(),
+			Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
+			Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
+			Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS
 		);
 	}
 
@@ -134,7 +141,11 @@ public final class MaterialUtil {
 	}
 
 	public static @NonNull BlockData getSolidType(@NonNull BlockData data, BlockData def) {
-		switch (data.getMaterial()) { // TODO implement concrete powder maybe (if it ever becomes bendable)?
+		if (MaterialTags.CONCRETE_POWDER.isTagged(data)) {
+			Material material = Material.getMaterial(data.getMaterial().name().replace("_POWDER", ""));
+			if (material != null) return material.createBlockData();
+		}
+		switch (data.getMaterial()) {
 			case SAND:
 				return Material.SANDSTONE.createBlockData();
 			case RED_SAND:
@@ -152,10 +163,16 @@ public final class MaterialUtil {
 
 	// Finds a suitable soft block type to replace a solid block
 	public static @NonNull BlockData getSoftType(@NonNull BlockData data) {
-		if (MaterialTags.SANDSTONES.isTagged(data.getMaterial())) {
+		if (data.getMaterial() == Material.SAND || MaterialTags.SANDSTONES.isTagged(data)) {
 			return Material.SAND.createBlockData();
-		} else if (MaterialTags.RED_SANDSTONES.isTagged(data.getMaterial())) {
+		} else if (data.getMaterial() == Material.RED_SAND || MaterialTags.RED_SANDSTONES.isTagged(data)) {
 			return Material.RED_SAND.createBlockData();
+		} else if (MaterialTags.STAINED_TERRACOTTA.isTagged(data)) {
+			return Material.CLAY.createBlockData();
+		} else if (MaterialTags.CONCRETES.isTagged(data)) {
+			Material material = Material.getMaterial(data.getMaterial().name() + "_POWDER");
+			if (material != null) return material.createBlockData();
+			return Material.GRAVEL.createBlockData();
 		}
 		switch (data.getMaterial()) {
 			case STONE:
@@ -171,10 +188,6 @@ public final class MaterialUtil {
 			case GRASS_BLOCK:
 			case GRASS_PATH:
 				return Material.COARSE_DIRT.createBlockData();
-			case SAND:
-				return Material.SAND.createBlockData();
-			case RED_SAND:
-				return Material.RED_SAND.createBlockData();
 		}
 		return Material.SAND.createBlockData();
 	}

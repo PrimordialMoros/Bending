@@ -32,21 +32,22 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 
 import java.util.Optional;
 
@@ -59,6 +60,7 @@ public class Bolt extends AbilityInstance implements Ability {
 
 	private Vector3 targetLocation;
 
+	private boolean struck = false;
 	private long startTime;
 
 	public Bolt(@NonNull AbilityDescription desc) {
@@ -74,7 +76,10 @@ public class Bolt extends AbilityInstance implements Ability {
 		if (Policies.IN_LIQUID.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
 		}
-		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+		removalPolicy = Policies.builder()
+			.add(new ExpireRemovalPolicy(userConfig.duration))
+			.add(new SwappedSlotsRemovalPolicy(getDescription()))
+			.build();
 
 		startTime = System.currentTimeMillis();
 		return true;
@@ -104,16 +109,12 @@ public class Bolt extends AbilityInstance implements Ability {
 	}
 
 	private boolean onEntityHit(Entity entity) {
-		if (entity instanceof ArmorStand) return false;
 		if (entity instanceof Creeper) ((Creeper) entity).setPowered(true);
 		double distance = VectorMethods.getEntityCenter(entity).distance(targetLocation);
 		if (distance > 5) return false;
 		boolean hitWater = MaterialUtil.isWater(targetLocation.toBlock(user.getWorld()));
-		boolean vulnerable = hitWater;
-		if (entity instanceof Player) {
-			// TODO add check for conductors
-			vulnerable = true;
-		}
+
+		boolean vulnerable = (entity instanceof LivingEntity && InventoryUtil.hasMetalArmor((LivingEntity) entity));
 
 		double damage = (vulnerable || hitWater) ? userConfig.damage * 2 : userConfig.damage;
 		if (distance >= 1.5) {
@@ -143,12 +144,20 @@ public class Bolt extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
 		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
 		user.setCooldown(getDescription(), userConfig.cooldown);
+		struck = true;
 		if (!isNearbyChannel()) dealDamage();
 	}
 
 	@Override
 	public @NonNull User getUser() {
 		return user;
+	}
+
+	@Override
+	public void onDestroy() {
+		if (!struck && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
+			DamageUtil.damageEntity(user.getEntity(), user, userConfig.damage, getDescription());
+		}
 	}
 
 	public static class Config extends Configurable {
@@ -160,6 +169,8 @@ public class Bolt extends AbilityInstance implements Ability {
 		public double range;
 		@Attribute(Attribute.CHARGE_TIME)
 		public long chargeTime;
+		@Attribute(Attribute.DURATION)
+		public long duration;
 
 		@Override
 		public void onConfigReload() {
@@ -168,6 +179,7 @@ public class Bolt extends AbilityInstance implements Ability {
 			damage = abilityNode.getNode("damage").getDouble(3.0);
 			range = abilityNode.getNode("range").getDouble(20.0);
 			chargeTime = abilityNode.getNode("charge-time").getLong(2000);
+			duration = abilityNode.getNode("duration").getLong(8000);
 		}
 	}
 }
