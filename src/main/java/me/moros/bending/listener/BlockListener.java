@@ -26,8 +26,8 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.material.WaterMaterials;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
@@ -67,7 +67,9 @@ public class BlockListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockFade(BlockFadeEvent event) {
-		if (TempBlock.manager.isTemp(event.getBlock())) {
+		Block block = event.getBlock();
+		if (block.getType() == Material.FIRE) return;
+		if (TempBlock.manager.isTemp(block)) {
 			event.setCancelled(true);
 		}
 	}

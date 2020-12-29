@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.config.Configurable;
@@ -289,6 +290,11 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 			if (!MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.WATER);
 			}
+		}
+
+		@Override
+		public void onBlockHit(@NonNull Block block) {
+			WallData.attemptDamageWall(Collections.singletonList(block), 3);
 		}
 	}
 

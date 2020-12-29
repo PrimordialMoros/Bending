@@ -22,6 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -49,6 +50,7 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class Bolt extends AbilityInstance implements Ability {
@@ -136,11 +138,12 @@ public class Bolt extends AbilityInstance implements Ability {
 	public void dealDamage() {
 		Collider collider = new Sphere(targetLocation, 5);
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
+		WallData.attemptDamageWall(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
 	}
 
 	private void strike() {
 		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(VectorMethods::getEntityCenter).orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
+			.map(VectorMethods::getEntityCenter).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
 		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
 		user.setCooldown(getDescription(), userConfig.cooldown);

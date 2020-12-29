@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -42,22 +43,26 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -77,6 +82,8 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	private StateChain states;
 	private Manip manip;
 	private final Deque<Block> trail = new ArrayDeque<>(2);
+
+	private boolean isIce;
 
 	public WaterManipulation(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -118,16 +125,25 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		if (manip != null) {
+			SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
 			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				SoundUtil.WATER_SOUND.play(manip.getCurrent().toLocation(user.getWorld()));
+				effect.play(manip.getCurrent().toLocation(user.getWorld()));
 			}
 
-			Block previous = manip.getPreviousBlock();
-			if (previous != null) {
-				if (!trail.isEmpty()) manip.clean(trail.peekFirst());
-				if (trail.size() == 2) manip.clean(trail.removeLast());
-				trail.addFirst(previous);
-				TempBlock.manager.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
+			if (isIce) {
+				Location center = manip.getCurrent().add(Vector3.HALF).toLocation(user.getWorld());
+				ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
+					.offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
+				ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
+					.offset(0.5, 0.5, 0.5).spawn();
+			} else {
+				Block previous = manip.getPreviousBlock();
+				if (previous != null) {
+					if (!trail.isEmpty()) manip.clean(trail.peekFirst());
+					if (trail.size() == 2) manip.clean(trail.removeLast());
+					trail.addFirst(previous);
+					TempBlock.manager.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
+				}
 			}
 
 			return manip.update();
@@ -174,6 +190,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null || !TempBlock.isBendable(source)) return;
 			if (WaterMaterials.ALL.isTagged(source)) {
+				isIce = WaterMaterials.isIceBendable(source);
 				manip = new Manip(user, source);
 				Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
@@ -204,13 +221,6 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	@Override
 	public void onDestroy() {
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			Block block = ((SelectedSource) state).getSelectedSource();
-			if (user instanceof BendingPlayer) {
-				((Player) user.getEntity()).sendBlockChange(block.getLocation(), block.getBlockData());
-			}
-		}
 		if (manip != null) {
 			trail.forEach(b -> {
 				TempBlock.manager.get(b).ifPresent(tb -> tb.setRevertTask(null));
@@ -228,6 +238,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	@Override
 	public boolean setUser(@NonNull User user) {
 		this.user = user;
+		if (manip != null) manip.setUser(user);
 		return true;
 	}
 
@@ -246,8 +257,8 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	private class Manip extends AbstractBlockShot {
 		public Manip(User user, Block block) {
-			super(user, block, userConfig.range, 100);
-			material = Material.WATER;
+			super(user, block, userConfig.range, isIce ? 80 : 100);
+			material = isIce ? block.getType() : Material.WATER;
 			allowUnderWater = true;
 		}
 
@@ -258,7 +269,16 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
 			entity.setVelocity(push.clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+			if (entity.isValid() && entity instanceof LivingEntity) {
+				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+				((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, userConfig.power));
+			}
 			return true;
+		}
+
+		@Override
+		public void onBlockHit(@NonNull Block block) {
+			WallData.attemptDamageWall(Collections.singletonList(block), 3);
 		}
 	}
 
@@ -271,6 +291,11 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		public double selectRange;
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
+
+		@Attribute(Attribute.STRENGTH)
+		public int power;
+		@Attribute(Attribute.DURATION)
+		public long slowDuration;
 
 		public double redirectGrabRadius;
 		public double rMin;
@@ -287,6 +312,11 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			redirectGrabRadius = abilityNode.getNode("redirect-grab-radius").getDouble(2.0);
 			rMin = abilityNode.getNode("min-redirect-range").getDouble(5.0);
 			rMax = abilityNode.getNode("max-redirect-range").getDouble(20.0);
+
+			CommentedConfigurationNode iceNode = abilityNode.getNode("iceblast");
+
+			power = iceNode.getNode("slow-power").getInt(2) - 1;
+			slowDuration = iceNode.getNode("slow-duration").getLong(1500);
 		}
 	}
 }

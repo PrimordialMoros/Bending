@@ -72,7 +72,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 			locked = true;
 		}
 		targetLocation = entity.map(VectorMethods::getEntityCenter).orElseGet(() ->
-			new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER)))
+			WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER))
 		);
 		direction = targetLocation.subtract(location).setY(0).normalize();
 	}
@@ -89,7 +89,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		}
 
 		if (controllable) {
-			targetLocation = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range)));
+			targetLocation = WorldMethods.getTarget(user.getWorld(), user.getRay(range));
 			direction = targetLocation.subtract(origin).setY(0).normalize();
 		}
 

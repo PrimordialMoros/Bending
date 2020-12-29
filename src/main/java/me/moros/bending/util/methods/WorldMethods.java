@@ -145,21 +145,21 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getTarget(World, Ray, Set)} with an empty material set and ignoreLiquids = true
 	 */
-	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray) {
+	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray) {
 		return getTarget(world, ray, Collections.emptySet(), true);
 	}
 
 	/**
 	 * @return {@link #getTarget(World, Ray, Set, boolean)} with an empty material set
 	 */
-	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, boolean ignoreLiquids) {
+	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, boolean ignoreLiquids) {
 		return getTarget(world, ray, Collections.emptySet(), ignoreLiquids);
 	}
 
 	/**
 	 * @return {@link #getTarget(World, Ray, Set, boolean)} with ignoreLiquids = true
 	 */
-	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
+	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
 		return getTarget(world, ray, ignored, true);
 	}
 
@@ -172,21 +172,19 @@ public final class WorldMethods {
 	 * @param ignoreLiquids whether liquids should be ignored for collisions
 	 * @return the target location
 	 */
-	public static @NonNull Location getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
-		Location location = ray.origin.toLocation(world);
-		Vector direction = ray.direction.normalize().toVector();
-		for (double i = 0; i < ray.direction.getNorm() + 1; i++) {
-			Block center = location.getBlock();
-			for (Block block : BlockMethods.combineFaces(center)) {
+	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
+		Vector3 dir = ray.direction.normalize();
+		for (int i = 0; i <= ray.direction.getNorm(); i++) {
+			Vector3 current = ray.origin.add(dir.scalarMultiply(i));
+			for (Block block : BlockMethods.combineFaces(current.toBlock(world))) {
 				if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) continue;
 				AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
 				if (blockBounds.intersects(ray)) {
-					return location;
+					return current;
 				}
 			}
-			location.add(direction);
 		}
-		return ray.origin.add(ray.direction).toLocation(world);
+		return ray.origin.add(ray.direction);
 	}
 
 	/**
@@ -219,8 +217,11 @@ public final class WorldMethods {
 	/**
 	 * @see World#rayTraceBlocks(Location, Vector, double)
 	 */
-	public static Optional<Block> rayTraceBlocks(@NonNull Location location, @NonNull Vector direction, double range) {
-		RayTraceResult result = location.getWorld().rayTraceBlocks(location, direction, range, FluidCollisionMode.ALWAYS, false);
+	public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray) {
+		Location origin = ray.origin.toLocation(world);
+		Vector direction = ray.direction.normalize().toVector();
+		double range = FastMath.max(1, ray.direction.getNorm());
+		RayTraceResult result = world.rayTraceBlocks(origin, direction, range, FluidCollisionMode.ALWAYS, false);
 		if (result != null && result.getHitBlock() != null) return Optional.of(result.getHitBlock());
 		return Optional.empty();
 	}

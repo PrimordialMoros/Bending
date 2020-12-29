@@ -26,10 +26,13 @@ import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
+import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 
 public class HydroSink extends AbilityInstance implements PassiveAbility {
 	private User user;
@@ -55,16 +58,22 @@ public class HydroSink extends AbilityInstance implements PassiveAbility {
 	}
 
 	public static boolean canHydroSink(User user) {
+		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false)) {
+			return false;
+		}
+
 		if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
 			return false;
 		}
-		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false))
-			return false;
 
-		Block block = user.getLocBlock();
-		if (WaterMaterials.ALL.isTagged(block)) return false;
-		Block baseBlock = block.getRelative(BlockFace.DOWN);
-		return block.isPassable() && WaterMaterials.ALL.isTagged(baseBlock);
+		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
+		for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), WaterMaterials::isWaterBendable)) {
+			if (block.getY() > entityBounds.getPosition().getY()) continue;
+			if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

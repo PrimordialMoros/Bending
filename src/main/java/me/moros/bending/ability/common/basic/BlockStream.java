@@ -105,7 +105,7 @@ public abstract class BlockStream implements State {
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
 		if (controllable || direction == null) {
 			Vector3 targetLoc = WorldMethods.getTargetEntity(user, range).map(VectorMethods::getEntityCenter)
-				.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))));
+				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)));
 			// Improve targeting when near
 			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
 				targetLoc = targetLoc.add(user.getDirection());
@@ -122,6 +122,9 @@ public abstract class BlockStream implements State {
 
 		clean(stream.removeLast());
 		if (current.distanceSq(user.getEyeLocation()) <= range * range) {
+			if (!MaterialUtil.isTransparent(head)) {
+				onBlockHit(head);
+			}
 			if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
 				renderHead(head);
 				stream.addFirst(head);
@@ -140,6 +143,9 @@ public abstract class BlockStream implements State {
 	}
 
 	public abstract boolean onEntityHit(@NonNull Entity entity);
+
+	public void onBlockHit(@NonNull Block block) {
+	}
 
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return colliders;

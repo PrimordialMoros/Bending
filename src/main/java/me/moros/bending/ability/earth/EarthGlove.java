@@ -228,7 +228,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
 		Vector3 target = WorldMethods.getTargetEntity(user, userConfig.range)
 			.map(VectorMethods::getEntityCenter)
-			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 
 		glove = buildGlove(gloveSpawnLocation);
 		Vector3 velocity = target.subtract(gloveSpawnLocation).normalize().scalarMultiply(GLOVE_SPEED);

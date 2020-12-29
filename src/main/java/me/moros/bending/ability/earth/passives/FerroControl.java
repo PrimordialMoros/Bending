@@ -58,7 +58,8 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 
 	public void act() {
 		if (!user.canBend(getDescription())) return;
-		Block target = WorldMethods.getTarget(user.getWorld(), user.getRay(6)).getBlock();
+		Block target = WorldMethods.rayTraceBlocks(user.getWorld(), user.getRay(6)).orElse(null);
+		if (target == null) return;
 		user.setCooldown(getDescription(), 1000);
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, target)) {
 			return;

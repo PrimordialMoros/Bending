@@ -47,7 +47,7 @@ import java.util.Collections;
 public abstract class AbstractBlockShot implements Updatable {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
-	private final User user;
+	private User user;
 
 	private Block current;
 	private Block previousBlock;
@@ -124,6 +124,9 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false)) {
 			return UpdateResult.REMOVE;
 		}
+		if (!MaterialUtil.isTransparent(current)) {
+			onBlockHit(current);
+		}
 		if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
 			if (!current.isLiquid()) current.breakNaturally(new ItemStack(Material.AIR));
 			if (material == Material.WATER && MaterialUtil.isWater(current)) {
@@ -142,7 +145,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	public void redirect() {
 		target = WorldMethods.getTargetEntity(user, range)
 			.map(VectorMethods::getEntityCenter)
-			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material))))
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)))
 			.floor().add(Vector3.HALF);
 		settingUp = false;
 	}
@@ -156,6 +159,9 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public abstract boolean onEntityHit(@NonNull Entity entity);
+
+	public void onBlockHit(@NonNull Block block) {
+	}
 
 	public @NonNull Collider getCollider() {
 		return collider;
@@ -172,5 +178,9 @@ public abstract class AbstractBlockShot implements Updatable {
 
 	public void clean(@NonNull Block block) {
 		TempBlock.manager.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
+	}
+
+	public void setUser(@NonNull User user) {
+		this.user = user;
 	}
 }

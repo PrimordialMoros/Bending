@@ -22,6 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -54,7 +55,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.Vector;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -231,18 +232,21 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			Vector reverse = ray.direction.scalarMultiply(-1).toVector();
 			double rayRange = userConfig.igniteRadius * factor + 2;
+			Vector3 reverse = ray.direction.scalarMultiply(-rayRange);
+			Location center = getBukkitLocation();
 			if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
 				List<Block> blocks = new ArrayList<>();
-				for (Block b : WorldMethods.getNearbyBlocks(getBukkitLocation(), userConfig.igniteRadius * factor)) {
+				for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.igniteRadius * factor)) {
 					if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
-					if (WorldMethods.rayTraceBlocks(b.getLocation(), reverse, rayRange).isPresent()) continue;
+					if (WorldMethods.rayTraceBlocks(user.getWorld(), new Ray(new Vector3(b), reverse)).isPresent())
+						continue;
 					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
 				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true));
 			}
+			WallData.attemptDamageWall(Collections.singletonList(block), NumberConversions.round(4 * factor));
 			return true;
 		}
 	}

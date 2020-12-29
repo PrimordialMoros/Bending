@@ -22,6 +22,7 @@ package me.moros.bending.ability.water;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.config.Configurable;
@@ -193,12 +194,19 @@ public class Torrent extends AbilityInstance implements Ability {
 			cleanAll();
 			Block head = stream.getFirst();
 			if (head == null) return;
+
+			WallData.attemptDamageWall(Collections.singletonList(head), 8);
 			for (Block block : WorldMethods.getNearbyBlocks(head.getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, predicate)) {
 				if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 				}
 			}
 			stream.clear();
+		}
+
+		@Override
+		public void onBlockHit(@NonNull Block block) {
+			WallData.attemptDamageWall(Collections.singletonList(block), 1);
 		}
 	}
 

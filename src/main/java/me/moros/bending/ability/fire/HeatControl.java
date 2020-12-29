@@ -110,7 +110,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	public void act() {
 		if (!user.canBend(getDescription())) return;
 		boolean acted = false;
-		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
+		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)).toLocation(user.getWorld());
 		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> WaterMaterials.isIceBendable(b) || MaterialUtil.isFire(b))) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;

@@ -151,6 +151,12 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
 		abilities.add(iceCrawl);
 
+		abilities.add(AbilityDescription.builder("IceSpike", IceSpike::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+
+		abilities.add(AbilityDescription.builder("IceWall", IceWall::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
+
 		AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(waterGimbal);

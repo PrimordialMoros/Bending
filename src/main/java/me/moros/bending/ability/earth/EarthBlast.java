@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -190,6 +191,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 	@Override
 	public boolean setUser(@NonNull User user) {
 		this.user = user;
+		if (blast != null) blast.setUser(user);
 		return true;
 	}
 
@@ -220,6 +222,11 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			entity.setVelocity(push.clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			return true;
+		}
+
+		@Override
+		public void onBlockHit(@NonNull Block block) {
+			WallData.attemptDamageWall(Collections.singletonList(block), 4);
 		}
 	}
 

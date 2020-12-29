@@ -22,6 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.WallData;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
@@ -47,6 +48,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -208,6 +210,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		}, true, true);
 
 		if (userConfig.damageBlocks && !loc.getBlock().isLiquid()) {
+			WallData.attemptDamageWall(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
 			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
 				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) break;

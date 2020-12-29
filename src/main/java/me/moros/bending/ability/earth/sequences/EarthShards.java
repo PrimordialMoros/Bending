@@ -92,7 +92,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 				nextFireTime = time + userConfig.interval;
 				Vector3 rightOrigin = UserMethods.getHandSide(user, true);
 				Vector3 leftOrigin = UserMethods.getHandSide(user, false);
-				Vector3 target = new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
+				Vector3 target = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
 				double distance = target.distance(user.getEyeLocation());
 				for (int i = 0; i < 2; i++) {
 					if (firedShots >= userConfig.maxShots) break;

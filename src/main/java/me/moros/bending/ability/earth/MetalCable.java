@@ -201,7 +201,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
 			.map(VectorMethods::getEntityCenter)
-			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range))));
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 
 		if (targetLocation.toBlock(user.getWorld()).isLiquid()) {
 			return false;
@@ -311,7 +311,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 		launched = true;
 		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.projectileRange)
 			.map(VectorMethods::getEntityCenter)
-			.orElseGet(() -> new Vector3(WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange))));
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange)));
 
 		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.blockSpeed);
 		target.getEntity().setVelocity(velocity.clampVelocity());
