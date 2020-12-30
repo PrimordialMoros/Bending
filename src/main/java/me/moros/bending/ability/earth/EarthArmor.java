@@ -173,7 +173,8 @@ public class EarthArmor extends AbilityInstance implements Ability {
 	}
 
 	private boolean moveBlock() {
-		Vector3 center = new Vector3(fallingBlock.getFallingBlock().getLocation()).add(new Vector3(0, 0.5, 0));
+		if (!fallingBlock.getFallingBlock().isValid()) return false;
+		Vector3 center = fallingBlock.getCenter();
 
 		Block currentBlock = center.toBlock(user.getWorld());
 		if (!currentBlock.isLiquid()) {
@@ -200,7 +201,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 	public void onDestroy() {
 		Location center;
 		if (!formed && fallingBlock != null) {
-			center = fallingBlock.getFallingBlock().getLocation().add(0, 0.5, 0);
+			center = fallingBlock.getCenter().toLocation(user.getWorld());
 			fallingBlock.revert();
 		} else {
 			center = user.getEntity().getEyeLocation();

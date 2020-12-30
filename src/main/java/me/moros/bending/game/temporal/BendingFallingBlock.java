@@ -73,4 +73,8 @@ public class BendingFallingBlock implements Temporary {
 	public void setRevertTask(RevertTask task) {
 		this.revertTask = task;
 	}
+
+	public @NonNull Vector3 getCenter() {
+		return new Vector3(fallingBlock.getLocation()).add(new Vector3(0, 0.5, 0));
+	}
 }

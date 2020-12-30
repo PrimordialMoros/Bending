@@ -114,6 +114,7 @@ public final class ActivationController {
 		WaterGimbal.launch(user);
 		FerroControl.act(user);
 		EarthBlast.launch(user);
+		EarthShot.launch(user);
 		MetalCable.launch(user);
 		EarthLine.launch(user);
 		Shockwave.activateCone(user);
