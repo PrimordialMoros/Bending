@@ -63,7 +63,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 		this.dir = ray.direction.normalize().scalarMultiply(speed);
 		box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius)).grow(Vector3.HALF);
 		AABB bounds = new AABB(new Vector3(-0.15, -radius, -radius), new Vector3(0.15, radius, radius));
-		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
+		double angle = FastMath.toRadians(user.getYaw());
 		OBB obb = new OBB(bounds, new Rotation(Vector3.PLUS_J, angle, RotationConvention.VECTOR_OPERATOR));
 		collider = new Disk(obb, new Sphere(location, radius));
 	}

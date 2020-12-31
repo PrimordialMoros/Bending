@@ -160,8 +160,8 @@ public class FireShield extends AbilityInstance implements Ability {
 			double r = userConfig.diskRadius;
 			AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
 			Vector3 right = UserMethods.getRightSide(user);
-			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getEntity().getLocation().getYaw()), RotationConvention.VECTOR_OPERATOR);
-			rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getEntity().getLocation().getPitch()), RotationConvention.VECTOR_OPERATOR));
+			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
+			rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getPitch()), RotationConvention.VECTOR_OPERATOR));
 			disk = new Disk(new OBB(aabb, rotation).addPosition(location), new Sphere(location, userConfig.diskRadius));
 		}
 

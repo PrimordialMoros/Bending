@@ -70,7 +70,7 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 		if (!source.isPresent()) return false;
 
 		RaiseEarth raiseWall = new RaiseEarth(getDescription());
-		if (raiseWall.activate(user, source.get(), 2, 3)) {
+		if (raiseWall.activate(user, source.get(), 2, 3, 0)) {
 			removalPolicy = Policies.builder()
 				.add(new ExpireRemovalPolicy(5000 + userConfig.wallDuration))
 				.build();

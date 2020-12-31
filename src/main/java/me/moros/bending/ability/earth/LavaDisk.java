@@ -244,7 +244,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
 	private void displayLavaDisk() {
 		damageBlock(location.toBlock(user.getWorld()));
-		int angle = (int) user.getEntity().getLocation().getYaw() + 90;
+		int angle = user.getYaw() + 90;
 		double cos = FastMath.cos(-angle);
 		double sin = FastMath.sin(-angle);
 		int offset = 0;

@@ -62,7 +62,7 @@ public final class UserMethods {
 	 * Gets the user's right side
 	 */
 	public static Vector3 getRightSide(@NonNull User user) {
-		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
+		double angle = FastMath.toRadians(user.getYaw());
 		return user.getLocation().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
 
@@ -70,7 +70,7 @@ public final class UserMethods {
 	 * Gets the user's left side
 	 */
 	public static Vector3 getLeftSide(@NonNull User user) {
-		double angle = FastMath.toRadians(user.getEntity().getLocation().getYaw());
+		double angle = FastMath.toRadians(user.getYaw());
 		return user.getLocation().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
 	}
 

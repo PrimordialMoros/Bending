@@ -78,8 +78,7 @@ public class FireWall extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		double yaw = user.getEntity().getLocation().getYaw();
-		double pitch = user.getEntity().getLocation().getPitch();
+		int pitch = user.getPitch();
 
 		if (FastMath.abs(pitch) > 50) {
 			return false;
@@ -95,7 +94,7 @@ public class FireWall extends AbilityInstance implements Ability {
 			return false;
 		}
 
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(yaw), RotationConvention.VECTOR_OPERATOR);
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
 		rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(pitch), RotationConvention.VECTOR_OPERATOR));
 		collider = new OBB(aabb, rotation).addPosition(location);
 		double radius = collider.getHalfExtents().maxComponent() + 1;

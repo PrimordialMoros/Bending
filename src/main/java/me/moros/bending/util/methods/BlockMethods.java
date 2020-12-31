@@ -22,11 +22,14 @@ package me.moros.bending.util.methods;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -37,6 +40,7 @@ import org.bukkit.block.Campfire;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
+import org.bukkit.util.NumberConversions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -127,6 +131,11 @@ public final class BlockMethods {
 		return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
 	}
 
+	/**
+	 * Check surrounding blocks to see if an infinite water source can be created.
+	 * @param block the center block to check
+	 * @return true if there 2 or more water sources around the block
+	 */
 	public static boolean isInfiniteWater(@NonNull Block block) {
 		int sources = 0;
 		for (BlockFace face : CARDINAL_FACES) {
@@ -134,10 +143,15 @@ public final class BlockMethods {
 			if (!TempBlock.isBendable(adjacent)) continue;
 			if (MaterialUtil.isWater(adjacent) && MaterialUtil.isSourceBlock(adjacent)) {
 				sources++;
-			} else if (WaterMaterials.isIceBendable(adjacent)) {
-				sources++;
 			}
 		}
 		return sources >= 2;
+	}
+
+	public static @NonNull Collection<Block> createBlockRing(@NonNull Block center, double radius) {
+		Vector3 centerVector = new Vector3(center).add(Vector3.HALF);
+		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / (5 * radius), RotationConvention.VECTOR_OPERATOR);
+		return VectorMethods.rotate(Vector3.PLUS_I.scalarMultiply(radius), rotation, NumberConversions.ceil(10 * radius))
+			.stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
 	}
 }

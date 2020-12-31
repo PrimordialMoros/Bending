@@ -110,6 +110,7 @@ public final class ActivationController {
 		PhaseChange.freeze(user);
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);
+		IceBerg.launch(user);
 		WaterRing.launchShard(user);
 		WaterGimbal.launch(user);
 		FerroControl.act(user);

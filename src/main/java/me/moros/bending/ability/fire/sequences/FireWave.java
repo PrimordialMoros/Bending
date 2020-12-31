@@ -73,7 +73,7 @@ public class FireWave extends AbilityInstance implements Ability {
 
 		Vector3 origin = user.getEyeLocation().add(user.getDirection().scalarMultiply(wall.getRange()));
 		Vector3 direction = user.getDirection();
-		double yaw = user.getEntity().getLocation().getYaw();
+		double yaw = user.getYaw();
 		double hw = wall.getWidth() / 2.0;
 		double hh = wall.getHeight() / 2.0;
 		for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {

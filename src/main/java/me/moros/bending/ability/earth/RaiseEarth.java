@@ -59,6 +59,8 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 	private Predicate<Block> predicate;
 	private final Collection<Pillar> pillars = new ArrayList<>();
 
+	private long interval = 100;
+
 	public RaiseEarth(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
@@ -87,10 +89,11 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		return false;
 	}
 
-	public boolean activate(@NonNull User user, @NonNull Block source, int height, int width) {
+	public boolean activate(@NonNull User user, @NonNull Block source, int height, int width, long interval) {
 		this.user = user;
 		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		origin = source;
+		this.interval = interval;
 		raiseWall(height, width);
 		if (!pillars.isEmpty()) {
 			removalPolicy = Policies.builder().build();
@@ -117,7 +120,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		for (Block b : new Block[]{block, block.getRelative(BlockFace.DOWN)}) {
 			if (!predicate.test(b) || !TempBlock.isBendable(b)) return;
 		}
-		Pillar.builder(user, block).setPredicate(predicate).build(height).ifPresent(pillars::add);
+		Pillar.builder(user, block).setInterval(interval).setPredicate(predicate).build(height).ifPresent(pillars::add);
 	}
 
 	private void raiseWall(int height, int width) {

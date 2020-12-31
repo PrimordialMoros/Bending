@@ -123,13 +123,16 @@ public final class AbilityInitializer {
 		abilities.add(waterManipulation);
 
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).setHarmless(true).build());
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("WaterBubble", WaterBubble::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
+
+		abilities.add(AbilityDescription.builder("OctopusForm", OctopusForm::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build());
 
 		AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH).setSourcesPlants(true).build();
@@ -151,8 +154,9 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
 		abilities.add(iceCrawl);
 
-		abilities.add(AbilityDescription.builder("IceSpike", IceSpike::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
+		AbilityDescription iceSpike = AbilityDescription.builder("IceSpike", IceSpike::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
+		abilities.add(iceSpike);
 
 		abilities.add(AbilityDescription.builder("IceWall", IceWall::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
@@ -164,6 +168,10 @@ public final class AbilityInitializer {
 		AbilityDescription frostBreath = AbilityDescription.builder("FrostBreath", FrostBreath::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(frostBreath);
+
+		AbilityDescription iceDrill = AbilityDescription.builder("IceBerg", IceBerg::new)
+			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+		abilities.add(iceDrill);
 
 		sequences.put(waterGimbal, new Sequence(
 			new AbilityAction(waterRing, ActivationMethod.SNEAK),
@@ -179,6 +187,14 @@ public final class AbilityInitializer {
 			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
 			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
 			new AbilityAction(phaseChange, ActivationMethod.SNEAK)
+		));
+
+		sequences.put(iceDrill, new Sequence(
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
+			new AbilityAction(iceSpike, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
+			new AbilityAction(iceSpike, ActivationMethod.SNEAK_RELEASE),
+			new AbilityAction(iceSpike, ActivationMethod.SNEAK)
 		));
 	}
 

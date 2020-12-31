@@ -53,9 +53,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -188,7 +185,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		if (!ready) {
 			if (states.update() == UpdateResult.REMOVE) {
 				if (states.isComplete() && !states.getChainStore().isEmpty()) {
-					ring.addAll(createRing());
+					ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
 					sources = ring.size();
 					ready = true;
 				} else {
@@ -204,12 +201,12 @@ public class WaterRing extends AbilityInstance implements Ability {
 		Block current = user.getLocBlock();
 		if (!current.equals(lastBlock)) {
 			ring.clear();
-			ring.addAll(createRing());
+			ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
 			Collections.rotate(ring, index);
 			lastBlock = current;
 		}
 
-		if (user.isSneaking()) {
+		if (user.isSneaking() && !user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("OctopusForm")) {
 			long time = System.currentTimeMillis();
 			if (sneakStartTime == 0) {
 				sneakStartTime = time;
@@ -279,18 +276,11 @@ public class WaterRing extends AbilityInstance implements Ability {
 		this.radius = radius;
 		cleanAll();
 		ring.clear();
-		ring.addAll(createRing());
+		ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
 	}
 
 	public double getRadius() {
 		return radius;
-	}
-
-	private Collection<Block> createRing() {
-		Vector3 center = new Vector3(user.getHeadBlock()).add(Vector3.HALF);
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / (5 * radius), RotationConvention.VECTOR_OPERATOR);
-		return VectorMethods.rotateInverse(Vector3.PLUS_I.scalarMultiply(radius), rotation, NumberConversions.ceil(10 * radius))
-			.stream().map(v -> center.add(v).toBlock(user.getWorld())).distinct().collect(Collectors.toList());
 	}
 
 	private void cleanAll() {

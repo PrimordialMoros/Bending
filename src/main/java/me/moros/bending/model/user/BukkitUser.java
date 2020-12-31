@@ -54,6 +54,14 @@ public interface BukkitUser extends CommandUser {
 		return new Vector3(getEntity().getLocation().getDirection());
 	}
 
+	default int getYaw() {
+		return (int) getEntity().getLocation().getYaw();
+	}
+
+	default int getPitch() {
+		return (int) getEntity().getLocation().getPitch();
+	}
+
 	default @NonNull World getWorld() {
 		return getEntity().getWorld();
 	}

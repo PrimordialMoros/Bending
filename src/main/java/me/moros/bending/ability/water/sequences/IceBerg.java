@@ -56,7 +56,7 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class IceDrill extends AbilityInstance implements Ability {
+public class IceBerg extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -71,7 +71,7 @@ public class IceDrill extends AbilityInstance implements Ability {
 
 	private boolean started = false;
 
-	public IceDrill(@NonNull AbilityDescription desc) {
+	public IceBerg(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
 
@@ -120,6 +120,9 @@ public class IceDrill extends AbilityInstance implements Ability {
 			}
 			return UpdateResult.CONTINUE;
 		} else {
+			if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceSpike")) {
+				return UpdateResult.REMOVE;
+			}
 			return states.update();
 		}
 	}
@@ -132,14 +135,14 @@ public class IceDrill extends AbilityInstance implements Ability {
 			return;
 		}
 		Material mat = block.getType();
-		TempBlock.create(block, Material.PACKED_ICE, userConfig.duration, true)
-			.filter(tb -> Material.WATER.equals(mat)).ifPresent(tb -> tb.setRevertTask(() -> TempBlock.create(block, Material.AIR, userConfig.regenDelay)));
+		TempBlock.create(block, ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE, userConfig.duration, true)
+			.filter(tb -> !Material.WATER.equals(mat)).ifPresent(tb -> tb.setRevertTask(() -> TempBlock.create(block, Material.AIR, userConfig.regenDelay)));
 		blocks.add(block);
 	}
 
 	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceCrawl")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceDrill.class).ifPresent(IceDrill::launch);
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceSpike")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceBerg.class).ifPresent(IceBerg::launch);
 		}
 	}
 
@@ -152,7 +155,7 @@ public class IceDrill extends AbilityInstance implements Ability {
 			if (src.isPresent()) {
 				Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
 				Vector3 target = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange + userConfig.length));
-				Vector3 direction = target.subtract(origin);
+				Vector3 direction = target.subtract(origin).normalize();
 				tip = origin.add(direction.scalarMultiply(userConfig.length));
 				Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
 				double radius = FastMath.ceil(0.2 * userConfig.length);
@@ -201,7 +204,7 @@ public class IceDrill extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "icedrill");
+			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "iceberg");
 
 			cooldown = abilityNode.getNode("cooldown").getLong(15000);
 			selectRange = abilityNode.getNode("select-range").getDouble(16.0);

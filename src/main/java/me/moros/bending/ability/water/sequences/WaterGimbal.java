@@ -218,7 +218,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 				return UpdateResult.REMOVE;
 
 			Set<Block> ring = new HashSet<>();
-			double yaw = FastMath.toRadians(-user.getEntity().getLocation().getYaw()) - FastMath.PI / 2;
+			double yaw = FastMath.toRadians(-user.getYaw()) - FastMath.PI / 2;
 			double cos = FastMath.cos(yaw);
 			double sin = FastMath.sin(yaw);
 			Vector3 center = user.getLocation().add(Vector3.PLUS_J);

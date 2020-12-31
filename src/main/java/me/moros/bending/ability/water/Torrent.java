@@ -60,8 +60,8 @@ import java.util.function.Predicate;
 
 public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
-	private static AbilityDescription ringDesc;
 	private static final Predicate<Block> predicate = b -> MaterialUtil.isTransparent(b) || b.getType() == Material.WATER;
+	private static AbilityDescription ringDesc;
 
 	private User user;
 	private Config userConfig;
