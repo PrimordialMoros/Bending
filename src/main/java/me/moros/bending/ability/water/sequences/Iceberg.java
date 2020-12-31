@@ -56,7 +56,7 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class IceBerg extends AbilityInstance implements Ability {
+public class Iceberg extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -71,7 +71,7 @@ public class IceBerg extends AbilityInstance implements Ability {
 
 	private boolean started = false;
 
-	public IceBerg(@NonNull AbilityDescription desc) {
+	public Iceberg(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
 
@@ -142,7 +142,7 @@ public class IceBerg extends AbilityInstance implements Ability {
 
 	public static void launch(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceSpike")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceBerg.class).ifPresent(IceBerg::launch);
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
 		}
 	}
 

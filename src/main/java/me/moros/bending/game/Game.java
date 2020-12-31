@@ -36,6 +36,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.Flight;
+import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
 
@@ -91,6 +92,7 @@ public final class Game {
 
 	private void update() {
 		MCTiming timing = Bending.getTimingManager().ofStart("Bending Update");
+		activationController.clearSpoutCache();
 		worldManager.update();
 		Flight.updateAll();
 		timing.stopTiming();
@@ -113,6 +115,7 @@ public final class Game {
 		worldManager.destroyAllInstances();
 		removeTemporary();
 		Flight.removeAll();
+		MovementHandler.resetAll();
 		playerManager.getOnlinePlayers().forEach(storage::savePlayerAsync);
 		storage.close();
 	}

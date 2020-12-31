@@ -169,7 +169,7 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(frostBreath);
 
-		AbilityDescription iceDrill = AbilityDescription.builder("IceBerg", IceBerg::new)
+		AbilityDescription iceDrill = AbilityDescription.builder("IceBerg", Iceberg::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(iceDrill);
 

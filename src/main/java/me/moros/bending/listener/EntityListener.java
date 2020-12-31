@@ -22,16 +22,25 @@ package me.moros.bending.listener;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.ability.earth.*;
 import me.moros.bending.game.Game;
+import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.util.Metadata;
+import me.moros.bending.util.MovementHandler;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 
 public class EntityListener implements Listener {
@@ -58,10 +67,46 @@ public class EntityListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityExplodeEvent(EntityExplodeEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityInteractEvent(EntityInteractEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT)) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityShootBowEvent(EntityShootBowEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onSlimeSplitEvent(SlimeSplitEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityTarget(EntityTargetEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
+		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
 			event.setCancelled(true);
 		}
+		if (MovementHandler.isRestricted(event.getDamager(), ActionType.DAMAGE)) event.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

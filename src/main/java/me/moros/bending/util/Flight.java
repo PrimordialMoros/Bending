@@ -20,10 +20,7 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,17 +34,16 @@ public class Flight {
 	private static final Map<User, Flight> instances = new HashMap<>();
 
 	private final User user;
-	private int references;
+
 	private final boolean couldFly;
 	private final boolean wasFlying;
-	private boolean isFlying;
-	private boolean changedFlying;
+
+	private boolean isFlying = false;
+	private boolean changedFlying = false;
+	private int references = 0;
 
 	private Flight(User user) {
 		this.user = user;
-		references = 0;
-		isFlying = false;
-		changedFlying = false;
 		couldFly = user.getAllowFlight();
 		wasFlying = user.isFlying();
 	}
@@ -87,24 +83,19 @@ public class Flight {
 	// Completely releases flight for the user.
 	// This will set the user back to the state before any Flight was originally added.
 	public static void remove(@NonNull User user) {
-		if (!instances.containsKey(user)) return;
-		Flight flight = instances.remove(user);
-		if (flight.changedFlying) {
-			user.setAllowFlight(flight.couldFly);
-			user.setFlying(flight.wasFlying);
-		}
+		revertFlight(instances.remove(user));
 	}
 
 	public static void removeAll() {
-		for (Map.Entry<User, Flight> entry : instances.entrySet()) {
-			User user = entry.getKey();
-			Flight flight = entry.getValue();
-			if (flight.changedFlying) {
-				user.setAllowFlight(flight.couldFly);
-				user.setFlying(flight.wasFlying);
-			}
-		}
+		instances.values().forEach(Flight::revertFlight);
 		instances.clear();
+	}
+
+	private static void revertFlight(Flight flight) {
+		if (flight != null && flight.changedFlying) {
+			flight.user.setAllowFlight(flight.couldFly);
+			flight.user.setFlying(flight.wasFlying);
+		}
 	}
 
 	public static void updateAll() {
@@ -113,43 +104,6 @@ public class Flight {
 			Flight flight = entry.getValue();
 			if (flight.changedFlying && user.isFlying() != flight.isFlying) {
 				user.setFlying(flight.isFlying);
-			}
-		}
-	}
-
-	// This class will apply flight when constructed and then remove it when the user touches the ground.
-	public static class GroundRemovalTask implements Runnable {
-		private final Flight flight;
-		private final BendingUser user;
-		private final long start;
-		private final long maxDuration;
-		private boolean cancelled;
-
-		private final BukkitTask task;
-
-		public GroundRemovalTask(BendingUser user, int initialDelay) {
-			this(user, initialDelay, 10000L);
-		}
-
-		public GroundRemovalTask(BendingUser user, int initialDelay, long maxDuration) {
-			this.user = user;
-			this.maxDuration = maxDuration;
-			flight = Flight.get(user);
-			start = System.currentTimeMillis();
-			cancelled = false;
-			task = Tasker.createTaskTimer(this, initialDelay, 1);
-		}
-
-		@Override
-		public void run() {
-			if (cancelled) {
-				flight.release();
-				task.cancel();
-				return;
-			}
-			long time = System.currentTimeMillis();
-			if (time >= start + maxDuration || WorldMethods.isOnGround(user.getEntity())) {
-				cancelled = true; // Remove flight next tick so Flight still exists during the fall event handler.
 			}
 		}
 	}

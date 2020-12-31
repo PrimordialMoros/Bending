@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.ability.air.*;
@@ -45,6 +46,7 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -57,10 +59,13 @@ public final class ActivationController {
 		.expiration(100, TimeUnit.MILLISECONDS)
 		.expirationPolicy(ExpirationPolicy.CREATED)
 		.build();
+
 	private final Game game;
+	private final MovementCache cache;
 
 	public ActivationController(@NonNull Game game) {
 		this.game = game;
+		this.cache = new MovementCache();
 	}
 
 	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
@@ -110,7 +115,7 @@ public final class ActivationController {
 		PhaseChange.freeze(user);
 		WaterWave.freeze(user);
 		IceCrawl.launch(user);
-		IceBerg.launch(user);
+		Iceberg.launch(user);
 		WaterRing.launchShard(user);
 		WaterGimbal.launch(user);
 		FerroControl.act(user);
@@ -149,12 +154,14 @@ public final class ActivationController {
 	}
 
 	public void onUserMove(@NonNull User user, @NonNull Vector velocity) {
-		game.getAbilityManager(user.getWorld()).getFirstInstance(user, AirSpout.class).ifPresent(spout ->
-			spout.handleMovement(velocity.setY(0))
-		);
-		game.getAbilityManager(user.getWorld()).getFirstInstance(user, WaterSpout.class).ifPresent(spout ->
-			spout.handleMovement(velocity.setY(0))
-		);
+		if (user.hasElement(Element.AIR)) {
+			AirSpout spout = cache.getAirSpout(user);
+			if (spout != null) spout.handleMovement(velocity.setY(0));
+		}
+		if (user.hasElement(Element.WATER)) {
+			WaterSpout spout = cache.getWaterSpout(user);
+			if (spout != null) spout.handleMovement(velocity.setY(0));
+		}
 	}
 
 	public boolean onFallDamage(@NonNull User user) {
@@ -188,5 +195,29 @@ public final class ActivationController {
 
 	public boolean onFireTickDamage(@NonNull User user) {
 		return HeatControl.canBurn(user);
+	}
+
+	// Optimize player move events by caching instances every tick
+	private class MovementCache {
+		private final Map<User, AirSpout> airSpoutCache;
+		private final Map<User, WaterSpout> waterSpoutCache;
+
+		private MovementCache() {
+			airSpoutCache = new HashMap<>();
+			waterSpoutCache = new HashMap<>();
+		}
+
+		private @Nullable AirSpout getAirSpout(@NonNull User user) {
+			return airSpoutCache.computeIfAbsent(user, u -> game.getAbilityManager(u.getWorld()).getFirstInstance(u, AirSpout.class).orElse(null));
+		}
+
+		private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
+			return waterSpoutCache.computeIfAbsent(user, u -> game.getAbilityManager(u.getWorld()).getFirstInstance(u, WaterSpout.class).orElse(null));
+		}
+	}
+
+	public void clearSpoutCache() {
+		cache.airSpoutCache.clear();
+		cache.waterSpoutCache.clear();
 	}
 }

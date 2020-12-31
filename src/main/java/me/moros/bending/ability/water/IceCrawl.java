@@ -33,6 +33,7 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
+import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
@@ -44,6 +45,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -55,9 +57,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -185,8 +184,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			if (entity.isValid() && entity instanceof LivingEntity) {
 				Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
 				new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
-				int potionDuration = NumberConversions.round(userConfig.freezeDuration / 50F);
-				((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, 5));
+				MovementHandler.restrictEntity((LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
 			}
 			return true;
 		}

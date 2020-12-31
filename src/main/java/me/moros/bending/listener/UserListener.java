@@ -27,12 +27,16 @@ import me.moros.bending.events.CooldownRemoveEvent;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
+import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Metadata;
+import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -73,7 +77,7 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
-		Tasker.newChain().delay(3 * 20).async(event::allow); // After 3 seconds allow the player to login anyway
+		Tasker.newChain().delay(3 * 20).async(event::allow).execute(); // After 3 seconds allow the player to login anyway
 		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on pre-login");
 		if (!game.getPlayerManager().getProfile(event.getUniqueId()).isPresent()) {
 			Bending.getLog().severe("Could not create bending profile for: " + event.getUniqueId() + " (" + event.getName() + ")");
@@ -155,8 +159,32 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
-		final Vector velocity = event.getTo().clone().subtract(event.getFrom()).toVector();
+		Location from = event.getFrom();
+		Location to = event.getTo();
+		if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+			return;
+		}
+		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.MOVE)) {
+			event.setCancelled(true);
+			return;
+		}
+
+		final Vector velocity = to.toVector().subtract(from.toVector());
 		game.getActivationController().onUserMove(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), velocity);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onPlayerInteractLow(PlayerInteractEvent event) {
+		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT)) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onPlayerInteractEntityLow(PlayerInteractEntityEvent event) {
+		if (event.getRightClicked().hasMetadata(Metadata.NO_INTERACT)) {
+			event.setCancelled(true);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

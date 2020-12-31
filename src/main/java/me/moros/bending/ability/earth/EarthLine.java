@@ -37,6 +37,7 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
+import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -51,6 +52,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -76,6 +78,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -219,7 +222,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 	}
 
-	// TODO add movement restriction in prison mode, metal/magma modifiers on damage
+	// TODO add metal/magma modifiers on damage
 	private class Line extends AbstractLine {
 		private boolean raisedSpikes = false;
 		private boolean imprisoned = false;
@@ -333,6 +336,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 				new TempArmorStand(loc.add(v.toVector()), mat, userConfig.prisonDuration);
 				new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
 			});
+			MovementHandler.restrictEntity(entity, userConfig.prisonDuration).disableActions(Arrays.asList(ActionType.values()));
 		}
 
 		public void setControllable(boolean value) {

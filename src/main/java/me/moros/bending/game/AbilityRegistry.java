@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  */
 public final class AbilityRegistry {
 	private final Map<String, AbilityDescription> abilities = new HashMap<>();
-	private final EnumMap<Element, Set<AbilityDescription>> passives = new EnumMap<>(Element.class);
+	private final Map<Element, Set<AbilityDescription>> passives = new EnumMap<>(Element.class);
 
 	protected int registerAbilities(@NonNull Collection<@NonNull AbilityDescription> abilities) {
 		int counter = 0;

@@ -23,8 +23,10 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.Metadata;
+import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -83,6 +85,10 @@ public class BlockListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event) {
+		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT_BLOCK)) {
+			event.setCancelled(true);
+			return;
+		}
 		TempBlock.manager.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
 	}
 
@@ -131,6 +137,8 @@ public class BlockListener implements Listener {
 				event.setCancelled(true);
 			}
 			BendingFallingBlock.manager.get(fb).ifPresent(BendingFallingBlock::revert);
+		} else {
+			if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) event.setCancelled(true);
 		}
 	}
 }
