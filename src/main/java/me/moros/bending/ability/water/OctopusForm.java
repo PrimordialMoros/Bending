@@ -184,7 +184,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 			if (forceUpdate || time > tentacle.nextUpdateTime) {
 				tentacle.updateBlocks(center);
 			}
-			tentacle.render();
+			tentacle.blocks.forEach(this::renderWaterBlock);
 		}
 	}
 
@@ -200,9 +200,10 @@ public class OctopusForm extends AbilityInstance implements Ability {
 
 	private void punch() {
 		if (!formed) return;
+		Vector3 center = user.getLocation().floor().add(new Vector3(0.5, 0, 0.5));
 		double r = RADIUS + 0.5;
 		for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.PI / 4) {
-			Vector3 tentacleBase = user.getLocation().add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
+			Vector3 tentacleBase = center.add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
 			CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
 		}
 	}
@@ -221,7 +222,9 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	}
 
 	private void cleanAll() {
-		tentacles.forEach(Tentacle::revert);
+		for (Tentacle t : tentacles) {
+			t.blocks.forEach(this::clean);
+		}
 		base.forEach(this::clean);
 	}
 
@@ -239,45 +242,34 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	}
 
 	private class Tentacle {
-		private final Block[] blocks;
+		private final Collection<Block> blocks;
 		private final double cos, sin;
 		private final long topFormTime;
 
 		private long nextUpdateTime;
 
 		private Tentacle(int index) {
-			double theta = index * FastMath.PI / 4;
-			cos = FastMath.cos(theta);
-			sin = FastMath.sin(theta);
-			blocks = new Block[2];
+			blocks = new ArrayList<>();
+			double phi = index * FastMath.PI / 4;
+			cos = FastMath.cos(phi);
+			sin = FastMath.sin(phi);
 			topFormTime = System.currentTimeMillis() + 150;
 			updateBlocks(user.getLocation().floor().add(Vector3.HALF));
 		}
 
 		private void updateBlocks(Vector3 center) {
+			blocks.clear();
 			long time = System.currentTimeMillis();
-			nextUpdateTime = time + ThreadLocalRandom.current().nextLong(150, 450);
-			double topOffset = ThreadLocalRandom.current().nextDouble(1);
+			nextUpdateTime = time + ThreadLocalRandom.current().nextLong(250, 550);
 			double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
 			double xBottom = cos * (RADIUS + bottomOffset);
 			double zBottom = sin * (RADIUS + bottomOffset);
-			blocks[0] = center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.getWorld());
+			blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.getWorld()));
 			if (time > topFormTime) {
+				double topOffset = ThreadLocalRandom.current().nextDouble(1);
 				double xTop = cos * (RADIUS + topOffset);
 				double zTop = sin * (RADIUS + topOffset);
-				blocks[1] = center.add(new Vector3(xTop, 2, zTop)).toBlock(user.getWorld());
-			}
-		}
-
-		private void revert() {
-			for (Block block : blocks) {
-				if (block != null) clean(block);
-			}
-		}
-
-		private void render() {
-			for (Block block : blocks) {
-				if (block != null) renderWaterBlock(block);
+				blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.getWorld()));
 			}
 		}
 	}

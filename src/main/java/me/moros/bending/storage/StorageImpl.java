@@ -134,7 +134,7 @@ public final class StorageImpl implements BendingStorage {
 	public boolean createElements(@NonNull Set<@NonNull Element> elements) {
 		try {
 			DB.useHandle(handle -> {
-				PreparedBatch batch = handle.prepareBatch(SqlQueries.ELEMENTS_INSERT_NEW.getQuery());
+				PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertElements(type));
 				for (Element element : elements) {
 					batch.bind(0, element.name()).add();
 				}
@@ -155,7 +155,7 @@ public final class StorageImpl implements BendingStorage {
 	public boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities) {
 		try {
 			DB.useHandle(handle -> {
-				PreparedBatch batch = handle.prepareBatch(SqlQueries.ABILITIES_INSERT_NEW.getQuery());
+				PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
 				for (AbilityDescription desc : abilities) {
 					batch.bind(0, desc.getName()).add();
 				}

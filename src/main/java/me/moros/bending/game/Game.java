@@ -33,6 +33,7 @@ import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.Flight;
@@ -129,7 +130,12 @@ public final class Game {
 
 	private void loadStorage() {
 		storage.createElements(Element.getAll());
-		storage.createAbilities(getAbilityRegistry().getAbilities().collect(Collectors.toSet()));
+		storage.createAbilities(abilityRegistry.getAbilities().collect(Collectors.toSet()));
+	}
+
+	public void initConfig() {
+		abilityRegistry.getAbilities().forEach(AbilityDescription::createAbility);
+		ConfigManager.save();
 	}
 
 	public @NonNull BendingStorage getStorage() {

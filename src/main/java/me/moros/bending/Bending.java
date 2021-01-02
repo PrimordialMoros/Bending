@@ -74,6 +74,7 @@ public class Bending extends JavaPlugin {
 
 		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
 		game = new Game(storage);
+		game.initConfig();
 
 		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
 		getServer().getPluginManager().registerEvents(new BlockListener(game), this);

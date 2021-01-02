@@ -19,14 +19,14 @@
 
 package me.moros.bending.storage.sql;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.storage.StorageType;
+
 public enum SqlQueries {
-	// TODO current queries are only tested with postgresql, ELEMENTS_INSERT_NEW and ABILITIES_INSERT_NEW probably need changing
 	PLAYER_INSERT("INSERT INTO bending_players (uuid) VALUES(?)"),
 	PLAYER_SELECT_BY_UUID("SELECT player_id, board FROM bending_players WHERE uuid=? LIMIT 1"),
 	PLAYER_UPDATE_BOARD_FOR_ID("UPDATE bending_players SET board=? WHERE player_id=?"),
 
-	ELEMENTS_INSERT_NEW("INSERT INTO bending_elements (element_name) VALUES (?) ON CONFLICT DO NOTHING"),
-	ABILITIES_INSERT_NEW("INSERT INTO bending_abilities (ability_name) VALUES (?) ON CONFLICT DO NOTHING"),
 	ABILITIES_SELECT_ID_BY_NAME("SELECT ability_id FROM bending_abilities WHERE ability_name=?"),
 
 	PLAYER_ELEMENTS_SELECT_FOR_ID("SELECT e.element_name FROM bending_players_elements pe JOIN bending_elements e ON e.element_id = pe.element_id WHERE pe.player_id=?"),
@@ -34,7 +34,7 @@ public enum SqlQueries {
 	PLAYER_ELEMENTS_REMOVE_FOR_ID("DELETE FROM bending_players_elements WHERE player_id=?"),
 
 	PLAYER_SLOTS_SELECT_FOR_ID("SELECT ps.slot, a.ability_name FROM bending_players_slots ps JOIN bending_abilities a ON a.ability_id = ps.ability_id WHERE ps.player_id=?"),
-	PLAYER_SLOTS_INSERT_NEW("INSERT INTO bending_players_slots (player_id, slot, ability_id) VALUES (?, ?, ?)"),
+	PLAYER_SLOTS_INSERT_NEW("INSERT INTO bending_players_slots (player_id, slot, ability_id) VALUES(?, ?, ?)"),
 	PLAYER_SLOTS_REMOVE_FOR_ID("DELETE FROM bending_players_slots WHERE player_id=?"),
 
 	PRESET_NAMES_SELECT_BY_PLAYER_ID("SELECT preset_name FROM bending_presets WHERE player_id=?"),
@@ -44,7 +44,7 @@ public enum SqlQueries {
 	PRESET_REMOVE_SPECIFIC("DELETE FROM bending_presets WHERE player_id=? AND preset_name=?"),
 
 	PRESET_SLOTS_SELECT_BY_ID("SELECT ps.slot, a.ability_name FROM bending_presets_slots ps JOIN bending_abilities a ON a.ability_id = ps.ability_id WHERE ps.preset_id=?"),
-	PRESET_SLOTS_INSERT_NEW("INSERT INTO bending_presets_slots (preset_id, slot, ability_id) VALUES (?, ?, ?)");
+	PRESET_SLOTS_INSERT_NEW("INSERT INTO bending_presets_slots (preset_id, slot, ability_id) VALUES(?, ?, ?)");
 
 	private final String query;
 
@@ -57,5 +57,28 @@ public enum SqlQueries {
 	 */
 	public String getQuery() {
 		return query;
+	}
+
+	public static @NonNull String groupInsertAbilities(@NonNull StorageType type) {
+		return groupInsert(type, "bending_abilities", "ability_name");
+	}
+
+	public static @NonNull String groupInsertElements(@NonNull StorageType type) {
+		return groupInsert(type, "bending_elements", "element_name");
+	}
+
+	private static String groupInsert(@NonNull StorageType type, @NonNull String table, @NonNull String column) {
+		switch (type) {
+			case SQLITE:
+				return "INSERT OR IGNORE INTO " + table + " (" + column + ") VALUES(?)";
+			case MYSQL:
+			case MARIADB:
+				return "INSERT INTO " + table + " (" + column + ") VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
+			case H2:
+				return "MERGE INTO " + table + " (" + column + ") VALUES(?)";
+			case POSTGRESQL:
+			default:
+				return "INSERT INTO " + table + " (" + column + ") VALUES(?) ON CONFLICT DO NOTHING";
+		}
 	}
 }

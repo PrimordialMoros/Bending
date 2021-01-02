@@ -34,10 +34,9 @@ import java.io.File;
  * @see StorageImpl
  */
 public final class StorageFactory {
-	// TODO implement database redundancy
 	public static @Nullable BendingStorage createInstance() {
 		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");
-		String configValue = storageNode.getNode("engine").getString("");
+		String configValue = storageNode.getNode("engine").getString("h2");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {
 			Bending.getLog().warn("Failed to parse: " + configValue + ". Defaulting to H2.");

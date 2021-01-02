@@ -19,20 +19,17 @@
 
 package me.moros.bending.config;
 
-
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
 import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 public final class ConfigManager {
 	private static HoconConfigurationLoader loader;
@@ -42,19 +39,10 @@ public final class ConfigManager {
 
 	public static void init(@NonNull String directory) {
 		Path path = Paths.get(directory, "bending.conf");
-		URL url = Objects.requireNonNull(Bending.class.getClassLoader().getResource("default.conf"));
 		loader = HoconConfigurationLoader.builder()
 			.setDefaultOptions(o -> o.withShouldCopyDefaults(true)).setPath(path).build();
 		try {
 			Files.createDirectories(path.getParent());
-			configRoot = loader.load().mergeValuesFrom(HoconConfigurationLoader.builder().setURL(url).build().load());
-		} catch (IOException e) {
-			Bending.getLog().warn(e.getMessage());
-		}
-	}
-
-	private static void load() {
-		try {
 			configRoot = loader.load();
 		} catch (IOException e) {
 			Bending.getLog().warn(e.getMessage());
@@ -62,12 +50,15 @@ public final class ConfigManager {
 	}
 
 	public static void reload() {
-		load();
-		save();
-		instances.forEach(Configurable::reload);
+		try {
+			configRoot = loader.load();
+			instances.forEach(Configurable::reload);
+		} catch (IOException e) {
+			Bending.getLog().warn(e.getMessage());
+		}
 	}
 
-	private static void save() {
+	public static void save() {
 		try {
 			Bending.getLog().info("Saving bending config");
 			loader.save(configRoot);
