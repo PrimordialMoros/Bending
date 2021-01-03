@@ -20,31 +20,31 @@
 package me.moros.bending.game.manager;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
-import me.moros.bending.config.Configurable;
+import me.moros.atlas.configurate.ConfigurationNode;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.DummyAbilityManager;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public final class WorldManager extends Configurable {
-	private static final Set<UUID> disabledWorlds = new HashSet<>();
-
-	private final Map<World, WorldInstance> worlds = new ConcurrentHashMap<>();
+public final class WorldManager {
+	private final Map<World, WorldInstance> worlds;
+	private final Set<UUID> disabledWorlds;
 
 	public WorldManager() {
-		for (World w : Bukkit.getWorlds()) {
-			if (isDisabledWorld(w.getUID())) continue;
-			worlds.put(w, new WorldInstance(w));
-		}
+		ConfigurationNode node = ConfigManager.getConfig().getNode("properties", "disabled-worlds");
+		disabledWorlds = node.getList(s -> (String) s, Collections.emptyList())
+			.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID).collect(Collectors.toSet());
+		worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
+			.collect(Collectors.toConcurrentMap(Function.identity(), WorldInstance::new));
 	}
 
 	public @NonNull AbilityManager getInstanceForWorld(@NonNull World world) {
@@ -95,17 +95,6 @@ public final class WorldManager extends Configurable {
 
 		private CollisionManager getCollisionManager() {
 			return collisions;
-		}
-	}
-
-	@Override
-	public void onConfigReload() {
-		CommentedConfigurationNode node = config.getNode("properties", "disabled-worlds");
-		disabledWorlds.clear();
-		List<String> temp = node.getList(s -> (String) s, Collections.emptyList());
-		for (String name : temp) {
-			World w = Bukkit.getWorld(name);
-			if (w != null) disabledWorlds.add(w.getUID());
 		}
 	}
 }

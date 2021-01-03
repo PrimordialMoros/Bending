@@ -84,7 +84,11 @@ public class Commands {
 
 	private static void registerCommandContexts() {
 		CommandContexts<BukkitCommandExecutionContext> commandContexts = Bending.getCommandManager().getCommandContexts();
-		commandContexts.registerIssuerOnlyContext(CommandUser.class, c -> new CommandUserWrapper(c.getSender()));
+		commandContexts.registerIssuerOnlyContext(CommandUser.class, c -> {
+			Player player = c.getPlayer();
+			if (player != null) return Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
+			return new CommandUserWrapper(c.getSender());
+		});
 
 		commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
 			Player player = c.getPlayer();

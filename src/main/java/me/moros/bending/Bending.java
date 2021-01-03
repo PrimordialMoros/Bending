@@ -30,6 +30,7 @@ import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.UserListener;
 import me.moros.bending.listener.WorldListener;
+import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
@@ -48,6 +49,7 @@ public class Bending extends JavaPlugin {
 	private TimingManager timingManager;
 	private PaperCommandManager commandManager;
 
+	private TranslationManager translationManager;
 	private BukkitAudiences audiences;
 	private PersistentDataLayer layer;
 	private String author;
@@ -81,6 +83,7 @@ public class Bending extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new EntityListener(game), this);
 		getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
+		translationManager = new TranslationManager();
 		commandManager = new PaperCommandManager(this);
 		commandManager.enableUnstableAPI("help");
 		Commands.initialize();
@@ -113,6 +116,10 @@ public class Bending extends JavaPlugin {
 
 	public static Bending getPlugin() {
 		return plugin;
+	}
+
+	public static TranslationManager getTranslationManager() {
+		return plugin.translationManager;
 	}
 
 	public static BukkitAudiences getAudiences() {

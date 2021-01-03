@@ -109,6 +109,7 @@ public final class Game {
 		worldManager.clearCollisions();
 		removeTemporary();
 		ConfigManager.reload();
+		Bending.getTranslationManager().reload();
 		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
 	}
 

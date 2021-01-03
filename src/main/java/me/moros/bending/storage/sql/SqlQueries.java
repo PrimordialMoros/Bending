@@ -68,17 +68,17 @@ public enum SqlQueries {
 	}
 
 	private static String groupInsert(@NonNull StorageType type, @NonNull String table, @NonNull String column) {
+		String tableWithColumn = table + " (" + column + ") ";
 		switch (type) {
 			case SQLITE:
-				return "INSERT OR IGNORE INTO " + table + " (" + column + ") VALUES(?)";
+				return "INSERT OR IGNORE INTO " + tableWithColumn + "VALUES(?)";
 			case MYSQL:
 			case MARIADB:
-				return "INSERT INTO " + table + " (" + column + ") VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
+				return "INSERT INTO " + tableWithColumn + "VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
 			case H2:
-				return "MERGE INTO " + table + " (" + column + ") VALUES(?)";
 			case POSTGRESQL:
 			default:
-				return "INSERT INTO " + table + " (" + column + ") VALUES(?) ON CONFLICT DO NOTHING";
+				return "INSERT INTO " + tableWithColumn + "VALUES(?) ON CONFLICT DO NOTHING";
 		}
 	}
 }

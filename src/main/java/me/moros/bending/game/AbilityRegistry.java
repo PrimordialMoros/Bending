@@ -51,10 +51,6 @@ public final class AbilityRegistry {
 	}
 
 	private boolean registerAbility(@NonNull AbilityDescription desc) {
-		if (!desc.getConfigNode().getNode("enabled").getBoolean(true)) {
-			Bending.getLog().info(desc.getName() + " is disabled.");
-			return false;
-		}
 		abilities.put(desc.getName().toLowerCase(), desc);
 		if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
 			passives.computeIfAbsent(desc.getElement(), e -> new HashSet<>()).add(desc);

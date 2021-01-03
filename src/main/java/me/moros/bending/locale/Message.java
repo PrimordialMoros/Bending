@@ -25,110 +25,105 @@ import me.moros.atlas.kyori.adventure.text.ComponentLike;
 import me.moros.bending.model.user.CommandUser;
 
 import static me.moros.atlas.kyori.adventure.text.Component.text;
+import static me.moros.atlas.kyori.adventure.text.Component.translatable;
 import static me.moros.atlas.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
- * WIP Locale support
- * TODO: move to json resource file, import as locale and register in adventure
+ * @see TranslationManager
  */
 public interface Message {
 	Component PREFIX = text("[", DARK_GRAY)
 		.append(text("Bending", DARK_AQUA))
 		.append(text("] ", DARK_GRAY));
 
-	Args0 HELP_HEADER = () -> brand(text("List of commands:", DARK_AQUA));
+	Args0 HELP_HEADER = () -> brand(translatable("bending.command.help.header", DARK_AQUA));
 
-	Args0 EMPTY_PRESET = () -> text("You can't create an empty preset!", YELLOW);
-	Args0 NO_PRESETS = () -> text("No presets found", YELLOW);
+	Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", YELLOW);
+	Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", YELLOW);
 
-	Args1<String> PRESET_SUCCESS = preset -> text("Successfully created preset {preset}", GREEN)
-		.replaceFirstText("{preset}", text(preset));
-	Args1<String> PRESET_EXISTS = preset -> text("Preset {preset} already exists!", YELLOW)
-		.replaceFirstText("{preset}", text(preset));
-	Args1<String> PRESET_FAIL = preset -> text("There was an error while saving preset {preset}", RED)
-		.replaceFirstText("{preset}", text(preset));
+	Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.create-success", GREEN)
+		.args(text(preset));
+	Args1<String> PRESET_EXISTS = preset -> translatable("bending.command.preset.create-exists", YELLOW)
+		.args(text(preset));
+	Args1<String> PRESET_FAIL = preset -> translatable("bending.command.preset.create-fail", RED)
+		.args(text(preset));
 
-	Args1<String> PRESET_REMOVE_SUCCESS = preset -> text("Preset {preset} has been removed", GREEN)
-		.replaceFirstText("{preset}", text(preset));
-	Args1<String> PRESET_REMOVE_FAIL = preset -> text("Failed to remove preset {preset}", RED)
-		.replaceFirstText("{preset}", text(preset));
+	Args1<String> PRESET_REMOVE_SUCCESS = preset -> translatable("bending.command.preset.remove-success", GREEN)
+		.args(text(preset));
+	Args1<String> PRESET_REMOVE_FAIL = preset -> translatable("bending.command.preset.remove-fail", RED)
+		.args(text(preset));
 
-	Args2<Integer, String> PRESET_BIND_SUCCESS = (amount, preset) -> text("Successfully bound {amount} abilities from preset {preset}", GREEN)
-		.replaceFirstText("{amount}", text(amount))
-		.replaceFirstText("{preset}", text(preset));
-	Args1<String> PRESET_BIND_FAIL = preset -> text("No abilities could be bound from preset {preset}", YELLOW);
+	Args2<Integer, String> PRESET_BIND_SUCCESS = (amount, preset) -> translatable("bending.command.preset.bind-success", GREEN)
+		.args(text(amount), text(preset));
+	Args1<String> PRESET_BIND_FAIL = preset -> translatable("bending.command.preset.bind-fail", YELLOW);
 
-	Args1<String> MODIFIER_ADD = name -> text("Successfully added modifier to {name}", GREEN)
-		.replaceFirstText("{name}", text(name));
-	Args1<String> MODIFIER_CLEAR = name -> text("Cleared attribute modifiers for {name}", GREEN)
-		.replaceFirstText("{name}", text(name));
+	Args1<String> MODIFIER_ADD = name -> translatable("bending.command.modifier.add", GREEN)
+		.args(text(name));
+	Args1<String> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", GREEN)
+		.args(text(name));
 
-	Args0 TOGGLE_ON = () -> text("Your bending has been toggled back on.", GREEN);
-	Args0 TOGGLE_OFF = () -> text("Your bending has been toggled back off.", RED);
+	Args0 TOGGLE_ON = () -> translatable("bending.command.toggle.on", GREEN);
+	Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", RED);
 
-	Args0 CONFIG_RELOAD = () -> text("Bending config reloaded", GREEN);
+	Args0 CONFIG_RELOAD = () -> translatable("bending.command.config-reload", GREEN);
 
-	Args1<Component> ELEMENT_CHOOSE_NO_PERMISSION = element -> text("You don't have permission to choose the element of {element}", RED)
-		.replaceFirstText("{element}", element);
-	Args1<Component> ELEMENT_CHOOSE_SUCCESS = element -> text("Your bending was set to the element of {element}", GREEN)
-		.replaceFirstText("{element}", element);
-	Args1<Component> ELEMENT_CHOOSE_FAIL = element -> text("Failed to choose element {element}", YELLOW)
-		.replaceFirstText("{element}", element);
+	Args1<Component> ELEMENT_CHOOSE_NO_PERMISSION = element -> translatable("bending.command.element.choose-no-permission", RED)
+		.args(element);
+	Args1<Component> ELEMENT_CHOOSE_SUCCESS = element -> translatable("bending.command.element.choose-success", GREEN)
+		.args(element);
+	Args1<Component> ELEMENT_CHOOSE_FAIL = element -> translatable("bending.command.element.choose-fail", YELLOW)
+		.args(element);
 
-	Args1<Component> ELEMENT_ADD_NO_PERMISSION = element -> text("You don't have permission to add the element of {element}", RED)
-		.replaceFirstText("{element}", element);
-	Args1<Component> ELEMENT_ADD_SUCCESS = element -> text("You now have the element of {element}", GREEN)
-		.replaceFirstText("{element}", element);
-	Args1<Component> ELEMENT_ADD_FAIL = element -> text("You already have the element of {element}", YELLOW)
-		.replaceFirstText("{element}", element);
+	Args1<Component> ELEMENT_ADD_NO_PERMISSION = element -> translatable("bending.command.element.add-no-permission", RED)
+		.args(element);
+	Args1<Component> ELEMENT_ADD_SUCCESS = element -> translatable("bending.command.element.add-success", GREEN)
+		.args(element);
+	Args1<Component> ELEMENT_ADD_FAIL = element -> translatable("bending.command.element.add-fail", YELLOW)
+		.args(element);
 
-	Args1<Component> ELEMENT_REMOVE_SUCCESS = element -> text("You no longer have the element of {element}", GRAY)
-		.replaceFirstText("{element}", element);
-	Args1<Component> ELEMENT_REMOVE_FAIL = element -> text("Failed to remove the element of {element}", YELLOW)
-		.replaceFirstText("{element}", element);
+	Args1<Component> ELEMENT_REMOVE_SUCCESS = element -> translatable("bending.command.element.remove-success", GRAY)
+		.args(element);
+	Args1<Component> ELEMENT_REMOVE_FAIL = element -> translatable("bending.command.element.remove-fail", YELLOW)
+		.args(element);
 
-	Args0 BOARD_DISABLED = () -> text("Bending Board is disabled!", RED);
-	Args0 BOARD_TOGGLED_ON = () -> text("Toggled Bending Board on", GREEN);
-	Args0 BOARD_TOGGLED_OFF = () -> text("Toggled Bending Board off", YELLOW);
+	Args0 BOARD_DISABLED = () -> translatable("bending.command.board.disabled", RED);
+	Args0 BOARD_TOGGLED_ON = () -> translatable("bending.command.board.on", GREEN);
+	Args0 BOARD_TOGGLED_OFF = () -> translatable("bending.command.board.off", YELLOW);
 
-	Args1<Component> ELEMENT_ABILITIES_HEADER = element -> text("List of {element} abilities:", DARK_AQUA)
-		.replaceFirstText("{element}", element);
+	Args1<Component> ELEMENT_ABILITIES_HEADER = element -> translatable("bending.command.display.abilities-header", DARK_AQUA)
+		.args(element);
 
-	Args1<Component> ELEMENT_ABILITIES_EMPTY = element -> text("No abilities found for {element}", YELLOW)
-		.replaceFirstText("{element}", element);
+	Args1<Component> ELEMENT_ABILITIES_EMPTY = element -> translatable("bending.command.display.abilities-not-found", YELLOW)
+		.args(element);
 
-	Args0 ABILITIES = () -> text("Abilities:", DARK_GRAY);
-	Args0 SEQUENCES = () -> text("Sequences:", DARK_GRAY);
-	Args0 PASSIVES = () -> text("Passives:", DARK_GRAY);
+	Args0 ABILITIES = () -> translatable("bending.command.display.abilities", DARK_GRAY);
+	Args0 SEQUENCES = () -> translatable("bending.command.display.sequences", DARK_GRAY);
+	Args0 PASSIVES = () -> translatable("bending.command.display.passives", DARK_GRAY);
 
-	Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> text("{ability} requires element {element}", YELLOW)
-		.replaceFirstText("{ability}", ability)
-		.replaceFirstText("{element}", element);
+	Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> translatable("bending.command.bind.require-element", YELLOW)
+		.args(ability, element);
 
-	Args1<Component> ABILITY_BIND_SEQUENCE = ability -> text("{ability} is a sequence and cannot be bound to a slot", YELLOW)
-		.replaceFirstText("{ability}", ability);
+	Args1<Component> ABILITY_BIND_SEQUENCE = ability -> translatable("bending.command.bind.sequence", YELLOW)
+		.args(ability);
 
-	Args2<Component, Integer> ABILITY_BIND_SUCCESS = (ability, slot) -> text("Successfully bound {ability} to slot {slot}", GREEN)
-		.replaceFirstText("{ability}", ability)
-		.replaceFirstText("{slot}", text(slot));
+	Args2<Component, Integer> ABILITY_BIND_SUCCESS = (ability, slot) -> translatable("bending.command.bind.success", GREEN)
+		.args(ability, text(slot));
 
-	Args1<String> BOUND_SLOTS = name -> text("{name}'s bound abilities: ", DARK_AQUA)
-		.replaceFirstText("{name}", text(name));
+	Args1<String> BOUND_SLOTS = name -> translatable("bending.command.display.header", DARK_AQUA)
+		.args(text(name));
 
-	Args0 CLEAR_ALL_SLOTS = () -> text("Cleared all slots:", GREEN);
-	Args1<Integer> CLEAR_SLOT = slot -> text("Cleared ability slot {slot}: ", GREEN)
-		.replaceFirstText("{slot}", text(slot));
+	Args0 CLEAR_ALL_SLOTS = () -> translatable("bending.command.clear.all", GREEN);
+	Args1<Integer> CLEAR_SLOT = slot -> translatable("bending.command.clear.specific", GREEN)
+		.args(text(slot));
 
-	Args1<Component> ABILITY_INFO_EMPTY = ability -> text("No description or instructions found for {ability}", YELLOW)
-		.replaceFirstText("{ability}", ability);
+	Args1<Component> ABILITY_INFO_EMPTY = ability -> translatable("bending.command.info.empty", YELLOW)
+		.args(ability);
 
-	Args2<Component, String> ABILITY_INFO_DESCRIPTION = (ability, details) -> text("{ability} description: {details}", GRAY)
-		.replaceFirstText("{ability}", ability)
-		.replaceFirstText("{details}", text(details));
+	Args2<Component, String> ABILITY_INFO_DESCRIPTION = (ability, details) -> translatable("bending.command.info.description", GRAY)
+		.args(ability, text(details));
 
-	Args2<Component, String> ABILITY_INFO_INSTRUCTIONS = (ability, details) -> text("{ability} instructions: {details}", GRAY)
-		.replaceFirstText("{ability}", ability)
-		.replaceFirstText("{details}", text(details));
+	Args2<Component, String> ABILITY_INFO_INSTRUCTIONS = (ability, details) -> translatable("bending.command.info.instructions", GRAY)
+		.args(ability, text(details));
 
 	static Component brand(ComponentLike message) {
 		return PREFIX.asComponent().append(message);

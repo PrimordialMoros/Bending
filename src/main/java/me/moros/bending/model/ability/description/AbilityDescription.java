@@ -116,16 +116,13 @@ public class AbilityDescription {
 	}
 
 	public @NonNull CommentedConfigurationNode getConfigNode() {
-		CommentedConfigurationNode elementNode = ConfigManager.getConfig().getNode("abilities", getElement().toString().toLowerCase());
-		CommentedConfigurationNode node;
+		CommentedConfigurationNode elementNode = ConfigManager.getConfig().getNode("abilities", element.toString().toLowerCase());
 		if (isActivatedBy(ActivationMethod.SEQUENCE)) {
-			node = elementNode.getNode("sequences", getName().toLowerCase());
+			return elementNode.getNode("sequences", name.toLowerCase());
 		} else if (isActivatedBy(ActivationMethod.PASSIVE)) {
-			node = elementNode.getNode("passives", getName().toLowerCase());
-		} else {
-			node = elementNode.getNode(getName().toLowerCase());
+			return elementNode.getNode("passives", name.toLowerCase());
 		}
-		return node;
+		return elementNode.getNode(name.toLowerCase());
 	}
 
 	public @NonNull String getPermission() {
