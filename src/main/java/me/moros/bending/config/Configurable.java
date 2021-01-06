@@ -19,7 +19,7 @@
 
 package me.moros.bending.config;
 
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 
 public abstract class Configurable {
 	protected CommentedConfigurationNode config;

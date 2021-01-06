@@ -20,7 +20,6 @@
 package me.moros.bending.game;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;

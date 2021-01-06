@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
@@ -58,14 +58,13 @@ public class FireWave extends AbilityInstance implements Ability {
 
 	public FireWave(@NonNull AbilityDescription desc) {
 		super(desc);
-		if (wallDesc == null) {
-			wallDesc = Bending.getGame().getAbilityRegistry()
-				.getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
-		}
 	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (wallDesc == null) {
+			wallDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
+		}
 		wall = new FireWall(wallDesc);
 		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.PUNCH)) return false;
 
@@ -155,14 +154,14 @@ public class FireWave extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "sequences", "firewave");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewave");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(11000);
-			maxHeight = abilityNode.getNode("max-height").getDouble(10.0);
-			duration = abilityNode.getNode("duration").getLong(10000);
-			steps = abilityNode.getNode("steps").getInt(8);
+			cooldown = abilityNode.node("cooldown").getLong(11000);
+			maxHeight = abilityNode.node("max-height").getDouble(10.0);
+			duration = abilityNode.node("duration").getLong(10000);
+			steps = abilityNode.node("steps").getInt(8);
 
-			abilityNode.getNode("steps").setComment("The amount of blocks the FireWave will advance.");
+			abilityNode.node("steps").comment("The amount of blocks the FireWave will advance.");
 		}
 	}
 }

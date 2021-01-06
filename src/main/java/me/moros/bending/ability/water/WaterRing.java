@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
@@ -101,10 +101,6 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 	public WaterRing(@NonNull AbilityDescription desc) {
 		super(desc);
-		if (waveDesc == null) {
-			waveDesc = Bending.getGame().getAbilityRegistry()
-				.getAbilityDescription("WaterWave").orElseThrow(RuntimeException::new);
-		}
 	}
 
 	@Override
@@ -124,7 +120,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		}
 		this.user = user;
 		recalculateConfig();
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.ALL);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable);
 		if (!source.isPresent()) return false;
 		List<Block> list = new ArrayList<>();
 		list.add(source.get());
@@ -133,6 +129,11 @@ public class WaterRing extends AbilityInstance implements Ability {
 			.start();
 
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
+
+		if (waveDesc == null) {
+			waveDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterWave").orElseThrow(RuntimeException::new);
+		}
+
 		return true;
 	}
 
@@ -371,11 +372,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block);
-				return true;
-			}
-			return false;
+			return BlockMethods.coolLava(user, block);
 		}
 	}
 
@@ -404,22 +401,22 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "waterring");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring");
 
-			duration = abilityNode.getNode("duration").getLong(30000);
-			selectRange = abilityNode.getNode("select-range").getDouble(16.0);
-			affectEntities = abilityNode.getNode("affect-entities").getBoolean(true);
-			damage = abilityNode.getNode("damage").getDouble(1.0);
-			knockback = abilityNode.getNode("knockback").getDouble(1.0);
+			duration = abilityNode.node("duration").getLong(30000);
+			selectRange = abilityNode.node("select-range").getDouble(16.0);
+			affectEntities = abilityNode.node("affect-entities").getBoolean(true);
+			damage = abilityNode.node("damage").getDouble(1.0);
+			knockback = abilityNode.node("knockback").getDouble(1.0);
 
-			CommentedConfigurationNode shardsNode = abilityNode.getNode("shards");
-			cooldown = shardsNode.getNode("cooldown").getLong(500);
-			shardRange = shardsNode.getNode("range").getDouble(16.0);
-			shardDamage = shardsNode.getNode("damage").getDouble(0.5);
-			shardAmount = shardsNode.getNode("amount").getInt(10);
+			CommentedConfigurationNode shardsNode = abilityNode.node("shards");
+			cooldown = shardsNode.node("cooldown").getLong(500);
+			shardRange = shardsNode.node("range").getDouble(16.0);
+			shardDamage = shardsNode.node("damage").getDouble(0.5);
+			shardAmount = shardsNode.node("amount").getInt(10);
 
-			CommentedConfigurationNode waveNode = abilityNode.getNode("waterwave");
-			chargeTime = waveNode.getNode("charge-time").getLong(1250);
+			CommentedConfigurationNode waveNode = abilityNode.node("waterwave");
+			chargeTime = waveNode.node("charge-time").getLong(1250);
 		}
 	}
 }

@@ -62,7 +62,7 @@ public abstract class BlockStream implements State {
 	private final int speed;
 
 	protected boolean controllable = false;
-	protected double range;
+	protected final double range;
 
 	/**
 	 * The maximum speed is 100 and represents movement of 1 block per tick.

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -80,7 +80,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 		double dist = WorldMethods.distanceAboveGround(user.getEntity());
 		// Only activate AirScooter if the player is in the air and near the ground.
-		if ((dist < 0.5 || dist > 5) && !user.getLocBlock().isLiquid()) {
+		if ((dist < 0.5 || dist > 3)) {
 			return false;
 		}
 
@@ -250,10 +250,10 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airscooter");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
 
-			speed = abilityNode.getNode("speed").getDouble(0.6);
-			cooldown = abilityNode.getNode("cooldown").getLong(4000);
+			speed = abilityNode.node("speed").getDouble(0.6);
+			cooldown = abilityNode.node("cooldown").getLong(4000);
 		}
 	}
 }

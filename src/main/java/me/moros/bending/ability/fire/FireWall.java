@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -198,14 +198,14 @@ public class FireWall extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "firewall");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firewall");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(11000);
-			height = abilityNode.getNode("height").getDouble(4.0);
-			width = abilityNode.getNode("width").getDouble(6.0);
-			range = abilityNode.getNode("range").getDouble(3.0);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			duration = abilityNode.getNode("duration").getLong(5000);
+			cooldown = abilityNode.node("cooldown").getLong(11000);
+			height = abilityNode.node("height").getDouble(4.0);
+			width = abilityNode.node("width").getDouble(6.0);
+			range = abilityNode.node("range").getDouble(3.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			duration = abilityNode.node("duration").getLong(5000);
 		}
 	}
 }

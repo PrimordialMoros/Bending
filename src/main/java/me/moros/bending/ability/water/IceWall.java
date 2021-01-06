@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.config.Configurable;
@@ -40,12 +40,12 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public class IceWall extends AbilityInstance implements Ability {
 			return false;
 		}
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
 		if (!source.isPresent()) return false;
 		origin = source.get();
 
@@ -203,7 +203,7 @@ public class IceWall extends AbilityInstance implements Ability {
 			if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block)) return false;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 			if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER) return false;
-			if (!block.isLiquid()) block.breakNaturally(new ItemStack(Material.AIR));
+			BlockMethods.breakPlant(block);
 			return true;
 		}
 	}
@@ -222,13 +222,13 @@ public class IceWall extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "icespike");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icespike");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
-			maxHeight = abilityNode.getNode("max-height").getInt(5);
-			width = abilityNode.getNode("width").getInt(4);
-			wallHealth = abilityNode.getNode("wall-durability").getInt(12);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			selectRange = abilityNode.node("select-range").getDouble(6.0);
+			maxHeight = abilityNode.node("max-height").getInt(5);
+			width = abilityNode.node("width").getInt(4);
+			wallHealth = abilityNode.node("wall-durability").getInt(12);
 		}
 	}
 }

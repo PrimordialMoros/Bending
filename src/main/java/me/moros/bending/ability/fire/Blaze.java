@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBlockLine;
 import me.moros.bending.config.Configurable;
@@ -160,11 +160,11 @@ public class Blaze extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "blaze");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "blaze");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(500);
-			coneRange = abilityNode.getNode("cone-range").getDouble(10.0);
-			ringRange = abilityNode.getNode("ring-range").getDouble(7.0);
+			cooldown = abilityNode.node("cooldown").getLong(500);
+			coneRange = abilityNode.node("cone-range").getDouble(10.0);
+			ringRange = abilityNode.node("ring-range").getDouble(7.0);
 		}
 	}
 }

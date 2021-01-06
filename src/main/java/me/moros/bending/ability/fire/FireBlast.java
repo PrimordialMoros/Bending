@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -269,19 +269,19 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireblast");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireblast");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			igniteRadius = abilityNode.getNode("ignite-radius").getDouble(1.5);
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			range = abilityNode.node("range").getDouble(20.0);
+			speed = abilityNode.node("speed").getDouble(0.8);
+			igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
 
-			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(1.5);
-			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2000);
+			chargeFactor = abilityNode.node("charge").node("factor").getDouble(1.5);
+			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
 
-			abilityNode.getNode("charge").getNode("factor").setComment("How much the damage, radius, range and speed are multiplied by at full charge");
-			abilityNode.getNode("charge").getNode("max-time").setComment("How many milliseconds it takes to fully charge");
+			abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");
+			abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
 		}
 	}
 }

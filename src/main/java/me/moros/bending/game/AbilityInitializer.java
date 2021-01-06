@@ -49,7 +49,7 @@ import java.util.Map;
 // TODO register collisions
 public final class AbilityInitializer {
 	public static void loadAbilities(@NonNull Game game) {
-		Collection<AbilityDescription> abilities = new ArrayList<>(40);
+		Collection<AbilityDescription> abilities = new ArrayList<>(64);
 		Map<AbilityDescription, Sequence> sequences = new HashMap<>();
 
 		initAir(abilities, sequences);
@@ -61,16 +61,18 @@ public final class AbilityInitializer {
 		int sequenceAmount = game.getSequenceManager().registerSequences(sequences);
 		Bending.getLog().info("Registered " + abilityAmount + " abilities!");
 		Bending.getLog().info("Registered " + sequenceAmount + " sequences!");
+
+		game.getAbilityRegistry().getAbilities().forEach(AbilityDescription::createAbility);
 	}
 
 	private static void initAir(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("AirAgility", AirAgility::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setHidden(true).setHarmless(true).build());
+			.setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("GracefulDescent", GracefulDescent::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setHidden(true).setHarmless(true).build());
+			.setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("AirSwipe", AirSwipe::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build());
@@ -113,10 +115,10 @@ public final class AbilityInitializer {
 
 	private static void initWater(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("FastSwim", FastSwim::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
 		AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setSourcesPlants(true).build();
@@ -139,7 +141,7 @@ public final class AbilityInitializer {
 		abilities.add(waterRing);
 
 		AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHidden(true).setSourcesPlants(true).build();
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setCanBind(false).setSourcesPlants(true).build();
 		abilities.add(waterWave);
 
 		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
@@ -200,13 +202,13 @@ public final class AbilityInitializer {
 
 	private static void initEarth(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
 		abilities.add(AbilityDescription.builder("DensityShift", DensityShift::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setHidden(true).setHarmless(true).build());
+			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -165,14 +165,14 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "sequences", "earthpillars");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthpillars");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			radius = abilityNode.getNode("radius").getDouble(10.0);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			knockup = abilityNode.getNode("knock-up").getDouble(1.2);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			radius = abilityNode.node("radius").getDouble(10.0);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			knockup = abilityNode.node("knock-up").getDouble(1.2);
 
-			fallThreshold = abilityNode.getNode("fall-threshold").getDouble(12.0);
+			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
 		}
 	}
 }

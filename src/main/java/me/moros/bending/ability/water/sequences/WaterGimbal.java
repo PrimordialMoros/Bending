@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.WallData;
@@ -96,7 +96,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 		}
 
 		if (sources.isEmpty()) {
-			Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
+			Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
 			if (!source.isPresent()) return false;
 			sources.add(source.get());
 			states = new StateChain(sources)
@@ -314,14 +314,14 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "watergimbal");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "watergimbal");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(10000);
-			selectRange = abilityNode.getNode("select-range").getDouble(8.0);
-			range = abilityNode.getNode("range").getDouble(28.0);
-			damage = abilityNode.getNode("damage").getDouble(4.0);
-			knockback = abilityNode.getNode("knockback").getDouble(1.0);
-			verticalPush = abilityNode.getNode("vertical-push").getDouble(0.2);
+			cooldown = abilityNode.node("cooldown").getLong(10000);
+			selectRange = abilityNode.node("select-range").getDouble(8.0);
+			range = abilityNode.node("range").getDouble(28.0);
+			damage = abilityNode.node("damage").getDouble(4.0);
+			knockback = abilityNode.node("knockback").getDouble(1.0);
+			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
 		}
 	}
 }

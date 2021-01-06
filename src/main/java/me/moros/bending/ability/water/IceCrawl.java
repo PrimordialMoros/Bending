@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
@@ -82,7 +82,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
 		if (!source.isPresent()) return false;
 
 		Optional<IceCrawl> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
@@ -191,13 +191,10 @@ public class IceCrawl extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block);
-				return true;
-			} else if (MaterialUtil.isWater(block)) {
+			if (MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.ICE, userConfig.iceDuration, true);
 			}
-			return false;
+			return BlockMethods.coolLava(user, block);
 		}
 
 		@Override
@@ -224,14 +221,14 @@ public class IceCrawl extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "icecrawl");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(5000);
-			iceDuration = abilityNode.getNode("ice-duration").getLong(8000);
-			freezeDuration = abilityNode.getNode("freeze-duration").getLong(2000);
-			range = abilityNode.getNode("range").getDouble(24.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(8.0);
-			damage = abilityNode.getNode("damage").getDouble(5.0);
+			cooldown = abilityNode.node("cooldown").getLong(5000);
+			iceDuration = abilityNode.node("ice-duration").getLong(8000);
+			freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
+			range = abilityNode.node("range").getDouble(24.0);
+			selectRange = abilityNode.node("select-range").getDouble(8.0);
+			damage = abilityNode.node("damage").getDouble(5.0);
 		}
 	}
 }

@@ -19,7 +19,6 @@
 
 package me.moros.bending.util;
 
-import com.destroystokyo.paper.MaterialSetTag;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
@@ -52,20 +51,6 @@ public final class SourceUtil {
 		PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
 		potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
 		waterBottle.setItemMeta(potionMeta);
-	}
-
-	/**
-	 * @see #getSource(User, double, Predicate, boolean)
-	 */
-	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull MaterialSetTag materials) {
-		return getSource(user, range, materials::isTagged, false);
-	}
-
-	/**
-	 * @see #getSource(User, double, Predicate, boolean)
-	 */
-	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull MaterialSetTag materials, boolean ignorePassable) {
-		return getSource(user, range, materials::isTagged, ignorePassable);
 	}
 
 	/**

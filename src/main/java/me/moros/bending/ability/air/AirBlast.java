@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -254,7 +254,9 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return MaterialUtil.isWater(block) || BlockMethods.extinguish(user, block);
+			if (BlockMethods.extinguishFire(user, block)) return false;
+			BlockMethods.coolLava(user, block);
+			return true;
 		}
 	}
 
@@ -277,19 +279,19 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airblast");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airblast");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			range = abilityNode.getNode("range").getDouble(25.0);
-			speed = abilityNode.getNode("speed").getDouble(1.25);
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			range = abilityNode.node("range").getDouble(25.0);
+			speed = abilityNode.node("speed").getDouble(1.25);
 
-			selfPush = abilityNode.getNode("push").getNode("self").getDouble(2.5);
-			otherPush = abilityNode.getNode("push").getNode("other").getDouble(3);
+			selfPush = abilityNode.node("push").node("self").getDouble(2.5);
+			otherPush = abilityNode.node("push").node("other").getDouble(3);
 
-			selectRange = abilityNode.getNode("select").getNode("range").getDouble(10.0);
-			selectOutOfRange = abilityNode.getNode("select").getNode("out-of-range").getDouble(35.0);
+			selectRange = abilityNode.node("select").node("range").getDouble(10.0);
+			selectOutOfRange = abilityNode.node("select").node("out-of-range").getDouble(35.0);
 
-			abilityNode.getNode("speed").setComment("The amount of blocks the blast advances every tick.");
+			abilityNode.node("speed").comment("The amount of blocks the blast advances every tick.");
 		}
 	}
 }

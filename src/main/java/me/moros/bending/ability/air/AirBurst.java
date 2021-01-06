@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
@@ -125,13 +125,13 @@ public class AirBurst extends AbstractBurst implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airburst");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(0);
-			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
-			coneRange = abilityNode.getNode("cone-range").getDouble(16.0);
-			sphereRange = abilityNode.getNode("sphere-range").getDouble(12.0);
-			fallThreshold = abilityNode.getNode("fall-threshold").getDouble(12.0);
+			cooldown = abilityNode.node("cooldown").getLong(0);
+			chargeTime = abilityNode.node("charge-time").getInt(3500);
+			coneRange = abilityNode.node("cone-range").getDouble(16.0);
+			sphereRange = abilityNode.node("sphere-range").getDouble(12.0);
+			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
 		}
 	}
 }

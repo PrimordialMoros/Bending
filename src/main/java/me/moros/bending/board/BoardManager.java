@@ -104,7 +104,7 @@ public final class BoardManager extends Configurable {
 		if (canUseScoreboard(player)) {
 			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
 				String value = "  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName();
-				scoreboardPlayers.get(player.getUniqueId()).updateMisc(value, cooldown, true);
+				scoreboardPlayers.get(player.getUniqueId()).updateMisc(value, cooldown);
 			} else {
 				scoreboardPlayers.get(player.getUniqueId()).updateAll();
 			}
@@ -123,6 +123,6 @@ public final class BoardManager extends Configurable {
 
 	@Override
 	public void onConfigReload() {
-		enabled = config.getNode("properties", "bending-board").getBoolean(true);
+		enabled = config.node("properties", "bending-board").getBoolean(true);
 	}
 }

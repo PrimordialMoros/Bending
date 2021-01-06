@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -168,14 +168,14 @@ public class FireKick extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "sequences", "firekick");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firekick");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			range = abilityNode.getNode("range").getDouble(7.0);
-			speed = abilityNode.getNode("speed").getDouble(1.0);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			range = abilityNode.node("range").getDouble(7.0);
+			speed = abilityNode.node("speed").getDouble(1.0);
 
-			abilityNode.getNode("speed").setComment("How many blocks the streams advance with each tick.");
+			abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");
 		}
 	}
 }

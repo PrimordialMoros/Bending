@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.config.Configurable;
@@ -177,12 +177,12 @@ public class Bolt extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "bolt");
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			chargeTime = abilityNode.getNode("charge-time").getLong(2000);
-			duration = abilityNode.getNode("duration").getLong(8000);
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "bolt");
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			range = abilityNode.node("range").getDouble(20.0);
+			chargeTime = abilityNode.node("charge-time").getLong(2000);
+			duration = abilityNode.node("duration").getLong(8000);
 		}
 	}
 }

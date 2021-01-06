@@ -34,7 +34,7 @@ import java.util.Collection;
  */
 public final class VectorMethods {
 	/**
-	 * Create an arc by combining {@link #rotate(Vector3, Rotation, int)} and {@link #rotateInverse(Vector3, Rotation, int)}
+	 * Create an arc by combining {@link #rotate(Vector3, Rotation, int)} and {@link #rotateInverse(Vector3, Rotation, int)}.
 	 * Amount of rays will be rounded up to the nearest odd number. Minimum value is 3.
 	 * @param start the starting point
 	 * @param rotation the rotation to use

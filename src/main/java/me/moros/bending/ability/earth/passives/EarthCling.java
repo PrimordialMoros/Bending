@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.earth.*;
 import me.moros.bending.config.Configurable;
@@ -100,9 +100,9 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "passives", "earthcling");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "earthcling");
 
-			speed = abilityNode.getNode("radius").getDouble(2.0);
+			speed = abilityNode.node("radius").getDouble(2.0);
 		}
 	}
 }

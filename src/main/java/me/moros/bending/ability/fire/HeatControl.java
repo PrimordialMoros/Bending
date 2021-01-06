@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -160,12 +160,12 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "heatcontrol");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "heatcontrol");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(500);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			radius = abilityNode.getNode("radius").getDouble(7.0);
-			cookInterval = abilityNode.getNode("cook-interval").getLong(2000);
+			cooldown = abilityNode.node("cooldown").getLong(500);
+			range = abilityNode.node("range").getDouble(20.0);
+			radius = abilityNode.node("radius").getDouble(7.0);
+			cookInterval = abilityNode.node("cook-interval").getLong(2000);
 		}
 	}
 }

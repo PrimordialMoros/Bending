@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -111,7 +111,8 @@ public class AirShield extends AbilityInstance implements Ability {
 		}
 
 		for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
-			BlockMethods.extinguish(user, b);
+			BlockMethods.coolLava(user, b);
+			BlockMethods.extinguishFire(user, b);
 		}
 
 		CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
@@ -166,12 +167,12 @@ public class AirShield extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airshield");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airshield");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(4000);
-			duration = abilityNode.getNode("duration").getLong(10000);
-			radius = abilityNode.getNode("radius").getDouble(4.0);
-			maxPush = abilityNode.getNode("max-push").getDouble(3.0);
+			cooldown = abilityNode.node("cooldown").getLong(4000);
+			duration = abilityNode.node("duration").getLong(10000);
+			radius = abilityNode.node("radius").getDouble(4.0);
+			maxPush = abilityNode.node("max-push").getDouble(3.0);
 		}
 	}
 }

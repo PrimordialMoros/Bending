@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
@@ -279,20 +279,20 @@ public class Shockwave extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "shockwave");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "shockwave");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(8000);
-			chargeTime = abilityNode.getNode("charge-time").getInt(2500);
-			damage = abilityNode.getNode("damage").getDouble(4.0);
-			knockback = abilityNode.getNode("knockback").getDouble(1.2);
+			cooldown = abilityNode.node("cooldown").getLong(8000);
+			chargeTime = abilityNode.node("charge-time").getInt(2500);
+			damage = abilityNode.node("damage").getDouble(4.0);
+			knockback = abilityNode.node("knockback").getDouble(1.2);
 
-			coneRange = abilityNode.getNode("cone", "range").getDouble(14.0);
-			coneSpeed = abilityNode.getNode("cone", "speed").getDouble(1.0);
+			coneRange = abilityNode.node("cone", "range").getDouble(14.0);
+			coneSpeed = abilityNode.node("cone", "speed").getDouble(1.0);
 
-			ringRange = abilityNode.getNode("ring", "range").getDouble(9.0);
-			ringSpeed = abilityNode.getNode("ring", "speed").getDouble(0.8);
+			ringRange = abilityNode.node("ring", "range").getDouble(9.0);
+			ringSpeed = abilityNode.node("ring", "speed").getDouble(0.8);
 
-			fallThreshold = abilityNode.getNode("fall-threshold").getDouble(12.0);
+			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
 		}
 	}
 }

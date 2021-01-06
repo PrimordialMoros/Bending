@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -124,10 +124,10 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "eartharmor", "wall");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor", "wall");
 
-			wallCooldown = abilityNode.getNode("cooldown").getLong(3000);
-			wallDuration = abilityNode.getNode("duration").getLong(2000);
+			wallCooldown = abilityNode.node("cooldown").getLong(3000);
+			wallDuration = abilityNode.node("duration").getLong(2000);
 		}
 	}
 }

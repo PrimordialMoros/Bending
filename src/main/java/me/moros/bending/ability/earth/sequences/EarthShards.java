@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -173,17 +173,17 @@ public class EarthShards extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "sequences", "earthshards");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthshards");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			damage = abilityNode.getNode("damage").getDouble(0.5);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			spread = abilityNode.getNode("spread").getDouble(0.2);
-			maxShots = abilityNode.getNode("max-shots").getInt(10);
-			interval = abilityNode.getNode("interval").getLong(100);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			damage = abilityNode.node("damage").getDouble(0.5);
+			range = abilityNode.node("range").getDouble(20.0);
+			speed = abilityNode.node("speed").getDouble(0.8);
+			spread = abilityNode.node("spread").getDouble(0.2);
+			maxShots = abilityNode.node("max-shots").getInt(10);
+			interval = abilityNode.node("interval").getLong(100);
 
-			abilityNode.getNode("speed").setComment("How many blocks the streams advance with each tick.");
+			abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");
 		}
 	}
 }

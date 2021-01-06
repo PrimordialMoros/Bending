@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
@@ -171,11 +171,11 @@ public class AirSpout extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airspout");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airspout");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(0);
-			height = abilityNode.getNode("height").getDouble(14.0);
-			maxSpeed = abilityNode.getNode("max-speed").getDouble(0.2);
+			cooldown = abilityNode.node("cooldown").getLong(0);
+			height = abilityNode.node("height").getDouble(14.0);
+			maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
 		}
 	}
 }

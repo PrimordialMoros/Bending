@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.BlockStream;
@@ -56,11 +56,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class Torrent extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
-	private static final Predicate<Block> predicate = b -> MaterialUtil.isTransparent(b) || b.getType() == Material.WATER;
 	private static AbilityDescription ringDesc;
 
 	private User user;
@@ -72,10 +70,6 @@ public class Torrent extends AbilityInstance implements Ability {
 
 	public Torrent(@NonNull AbilityDescription desc) {
 		super(desc);
-		if (ringDesc == null) {
-			ringDesc = Bending.getGame().getAbilityRegistry()
-				.getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
-		}
 	}
 
 	@Override
@@ -109,6 +103,11 @@ public class Torrent extends AbilityInstance implements Ability {
 		}
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+
+		if (ringDesc == null) {
+			ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+		}
+
 		return true;
 	}
 
@@ -196,7 +195,7 @@ public class Torrent extends AbilityInstance implements Ability {
 			if (head == null) return;
 
 			WallData.attemptDamageWall(Collections.singletonList(head), 8);
-			for (Block block : WorldMethods.getNearbyBlocks(head.getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, predicate)) {
+			for (Block block : WorldMethods.getNearbyBlocks(head.getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, MaterialUtil::isTransparentOrWater)) {
 				if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 				}
@@ -228,15 +227,15 @@ public class Torrent extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "torrent");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "torrent");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(0);
-			range = abilityNode.getNode("range").getDouble(32.0);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			knockback = abilityNode.getNode("knockback").getDouble(1.0);
-			verticalPush = abilityNode.getNode("vertical-push").getDouble(0.2);
-			freezeRadius = abilityNode.getNode("freeze-radius").getDouble(3.0);
-			freezeDuration = abilityNode.getNode("freeze-duration").getInt(12500);
+			cooldown = abilityNode.node("cooldown").getLong(0);
+			range = abilityNode.node("range").getDouble(32.0);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			knockback = abilityNode.node("knockback").getDouble(1.0);
+			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
+			freezeRadius = abilityNode.node("freeze-radius").getDouble(3.0);
+			freezeDuration = abilityNode.node("freeze-duration").getInt(12500);
 		}
 	}
 }

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -61,16 +61,13 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 		if (!user.isValid() || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
 		}
-		if (userConfig.jumpAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier - 1);
-		}
-		if (userConfig.speedAmplifier > 0) {
-			handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier - 1);
-		}
+		handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);
+		handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier);
 		return UpdateResult.CONTINUE;
 	}
 
 	private void handlePotionEffect(PotionEffectType type, int amplifier) {
+		if (amplifier < 0) return;
 		if (PotionUtil.canAddPotion(user, type, 20, amplifier)) {
 			user.getEntity().addPotionEffect(new PotionEffect(type, 100, amplifier, true, false));
 		}
@@ -95,10 +92,10 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "passives", "airagility");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
 
-			speedAmplifier = abilityNode.getNode("speed-amplifier").getInt(2);
-			jumpAmplifier = abilityNode.getNode("jump-amplifier").getInt(2);
+			speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
+			jumpAmplifier = abilityNode.node("jump-amplifier").getInt(2) - 1;
 		}
 	}
 }

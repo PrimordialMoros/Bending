@@ -189,8 +189,8 @@ public class BendingCommand extends BaseCommand {
 			Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.getDisplayName(), ability.getElement().getDisplayName());
 			return;
 		}
-		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-			Message.ABILITY_BIND_SEQUENCE.send(player, ability.getDisplayName());
+		if (!ability.canBind()) {
+			Message.ABILITY_BIND_FAIL.send(player, ability.getDisplayName());
 			return;
 		}
 		if (slot == 0) slot = player.getHeldItemSlot();
@@ -227,7 +227,7 @@ public class BendingCommand extends BaseCommand {
 
 	@Subcommand("info|i")
 	@CommandPermission("bending.command.help")
-	@CommandCompletion("@abilities")
+	@CommandCompletion("@allabilities")
 	@Description("View info about a specific ability")
 	public static void onInfo(CommandUser user, AbilityDescription ability) {
 		String description = ability.getDescription();
@@ -252,8 +252,8 @@ public class BendingCommand extends BaseCommand {
 		String link = "https://github.com/PrimordialMoros/Bending";
 		String content = "Developed by: {author}\n" + "Source code: {link}\n" + "Licensed under: AGPLv3\n\n" + "Click to open link.";
 		Component details = Component.text(content, NamedTextColor.DARK_AQUA)
-			.replaceFirstText("{author}", Component.text(Bending.getAuthor(), NamedTextColor.GREEN))
-			.replaceFirstText("{link}", Component.text(link, NamedTextColor.GREEN));
+			.replaceText(a -> a.match("{author}").once().replacement(match -> match.content(Bending.getAuthor()).color(NamedTextColor.GREEN)))
+			.replaceText(l -> l.match("{link}").once().replacement(match -> match.content(link).color(NamedTextColor.GREEN)));
 
 		return Component.text("Version: ", NamedTextColor.DARK_AQUA)
 			.append(Component.text(Bending.getVersion(), NamedTextColor.GREEN))

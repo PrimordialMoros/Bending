@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class MovementHandler {
-	public static Map<LivingEntity, MovementHandler> instances = new HashMap<>();
+	public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
 
 	private Set<ActionType> disabled;
 	private BarInfo info;
@@ -140,7 +140,7 @@ public class MovementHandler {
 				remove();
 			} else {
 				float factor = FastMath.max(0, FastMath.min(1, (endTime - time) / (float) duration));
-				audience.showBossBar(bar.percent(factor));
+				audience.showBossBar(bar.progress(factor));
 			}
 		}
 

@@ -2,7 +2,7 @@ plugins {
     java
     signing
     `maven-publish`
-    id("com.github.johnrengelman.shadow").version("6.0.0")
+    id("com.github.johnrengelman.shadow").version("6.1.0")
 }
 
 group = "me.moros"
@@ -40,12 +40,24 @@ tasks {
         archiveClassifier.set("")
         archiveBaseName.set(rootProject.name)
         dependencies {
-            relocate("org.bstats", "me.moros.bending.bstats")
+            relocate("co.aikar.commands", "me.moros.atlas.acf")
+            relocate("co.aikar.locales", "me.moros.atlas.locales")
+            relocate("co.aikar.taskchain", "me.moros.atlas.taskchain")
+            relocate("com.github.benmanes.caffeine", "me.moros.atlas.caffeine")
+            relocate("com.typesafe", "me.moros.atlas.typesafe")
+            relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
+            relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
+            relocate("net.jodah.expiringmap", "me.moros.atlas.expiringmap")
+            relocate("net.kyori", "me.moros.atlas.kyori")
+            relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
             relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
+            relocate("org.bstats", "me.moros.bending.bstats")
+            relocate("org.checkerframework", "me.moros.atlas.cf")
+            relocate("org.h2", "me.moros.atlas.h2")
+            relocate("org.jdbi", "me.moros.atlas.jdbi")
+            relocate("org.postgresql", "me.moros.atlas.postgresql")
+            relocate("org.spongepowered.configurate", "me.moros.atlas.configurate")
         }
-        //minimize {
-            //exclude(dependency("me.moros.atlas:.*:.*"))
-        //}
     }
     build {
         dependsOn(shadowJar)

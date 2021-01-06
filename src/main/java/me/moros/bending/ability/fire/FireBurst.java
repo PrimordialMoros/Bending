@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
@@ -120,12 +120,12 @@ public class FireBurst extends AbstractBurst implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireburst");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireburst");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(0);
-			chargeTime = abilityNode.getNode("charge-time").getInt(3500);
-			coneRange = abilityNode.getNode("cone-range").getDouble(16);
-			sphereRange = abilityNode.getNode("sphere-range").getDouble(12);
+			cooldown = abilityNode.node("cooldown").getLong(0);
+			chargeTime = abilityNode.node("charge-time").getInt(3500);
+			coneRange = abilityNode.node("cone-range").getDouble(16);
+			sphereRange = abilityNode.node("sphere-range").getDouble(12);
 		}
 	}
 }

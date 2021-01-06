@@ -20,7 +20,7 @@
 package me.moros.bending.config;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
 
@@ -39,8 +39,7 @@ public final class ConfigManager {
 
 	public static void init(@NonNull String directory) {
 		Path path = Paths.get(directory, "bending.conf");
-		loader = HoconConfigurationLoader.builder()
-			.setDefaultOptions(o -> o.withShouldCopyDefaults(true)).setPath(path).build();
+		loader = HoconConfigurationLoader.builder().path(path).build();
 		try {
 			Files.createDirectories(path.getParent());
 			configRoot = loader.load();

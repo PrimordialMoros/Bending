@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -149,13 +149,16 @@ public class AirPunch extends AbilityInstance implements Ability {
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-			entity.setVelocity(entity.getLocation().subtract(getBukkitLocation()).toVector().normalize().multiply(factor));
+			Vector3 velocity = VectorMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+			entity.setVelocity(velocity.clampVelocity());
 			return true;
 		}
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return MaterialUtil.isWater(block) || BlockMethods.extinguish(user, block);
+			if (BlockMethods.extinguishFire(user, block)) return false;
+			BlockMethods.coolLava(user, block);
+			return true;
 		}
 	}
 
@@ -171,12 +174,12 @@ public class AirPunch extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airpunch");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airpunch");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			range = abilityNode.getNode("range").getDouble(18.0);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			range = abilityNode.node("range").getDouble(18.0);
+			speed = abilityNode.node("speed").getDouble(0.8);
 		}
 	}
 }

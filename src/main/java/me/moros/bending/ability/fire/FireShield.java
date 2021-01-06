@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -230,17 +230,17 @@ public class FireShield extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "fireshield");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(2000);
-			fireTicks = abilityNode.getNode("fire-ticks").getInt(40);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			fireTicks = abilityNode.node("fire-ticks").getInt(40);
 
-			diskDuration = abilityNode.getNode("disk", "duration").getLong(1000);
-			diskRadius = abilityNode.getNode("disk", "radius").getDouble(2.0);
-			diskRange = abilityNode.getNode("disk", "range").getDouble(1.5);
+			diskDuration = abilityNode.node("disk", "duration").getLong(1000);
+			diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
+			diskRange = abilityNode.node("disk", "range").getDouble(1.5);
 
-			shieldDuration = abilityNode.getNode("shield", "duration").getLong(0);
-			shieldRadius = abilityNode.getNode("shield", "radius").getDouble(3.0);
+			shieldDuration = abilityNode.node("shield", "duration").getLong(0);
+			shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
 		}
 	}
 }

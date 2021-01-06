@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -134,12 +134,12 @@ public class WaterWave extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "waterring", "waterwave");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			duration = abilityNode.getNode("duration").getLong(2500);
-			speed = abilityNode.getNode("speed").getDouble(1.2);
-			radius = abilityNode.getNode("radius").getDouble(1.7);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			duration = abilityNode.node("duration").getLong(2500);
+			speed = abilityNode.node("speed").getDouble(1.2);
+			radius = abilityNode.node("radius").getDouble(1.7);
 		}
 	}
 }

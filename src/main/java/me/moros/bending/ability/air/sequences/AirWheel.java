@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.config.Configurable;
@@ -64,15 +64,13 @@ public class AirWheel extends AbilityInstance implements Ability {
 
 	public AirWheel(@NonNull AbilityDescription desc) {
 		super(desc);
-		if (scooterDesc == null) {
-			scooterDesc = Bending.getGame().getAbilityRegistry()
-				.getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
-		}
 	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-
+		if (scooterDesc == null) {
+			scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
+		}
 		scooter = new AirScooter(scooterDesc);
 		if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.PUNCH))
 			return false;
@@ -105,7 +103,8 @@ public class AirWheel extends AbilityInstance implements Ability {
 		}
 
 		Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
-		BlockMethods.extinguish(user, base);
+		BlockMethods.coolLava(user, base);
+		BlockMethods.extinguishFire(user, base);
 
 		if (time > nextDamageTime) {
 			CollisionUtil.handleEntityCollisions(user, collider, entity -> {
@@ -164,10 +163,10 @@ public class AirWheel extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "sequences", "airwheel");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(4000);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
+			cooldown = abilityNode.node("cooldown").getLong(4000);
+			damage = abilityNode.node("damage").getDouble(2.0);
 		}
 	}
 }

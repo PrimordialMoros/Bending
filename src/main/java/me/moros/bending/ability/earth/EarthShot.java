@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -46,6 +46,7 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -57,7 +58,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -126,7 +126,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 		for (int i = 1; i <= deltaY; i++) {
 			Block temp = block.getRelative(BlockFace.UP, i);
 			if (!MaterialUtil.isTransparent(temp)) return false;
-			if (!MaterialUtil.isAir(temp)) temp.breakNaturally(new ItemStack(Material.AIR));
+			BlockMethods.breakPlant(temp);
 		}
 
 		BlockData data;
@@ -347,16 +347,16 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthshot");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthshot");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1000);
-			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
-			range = abilityNode.getNode("range").getDouble(60.0);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			chargeTime = abilityNode.getNode("charge-time").getLong(1500);
-			maxAmount = abilityNode.getNode("max-sources").getInt(3);
-			allowConvertMagma = abilityNode.getNode("allow-convert-magma").getBoolean(true);
-			allowQuickLaunch = abilityNode.getNode("allow-quick-launch").getBoolean(true);
+			cooldown = abilityNode.node("cooldown").getLong(1000);
+			selectRange = abilityNode.node("select-range").getDouble(6.0);
+			range = abilityNode.node("range").getDouble(60.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			chargeTime = abilityNode.node("charge-time").getLong(1500);
+			maxAmount = abilityNode.node("max-sources").getInt(3);
+			allowConvertMagma = abilityNode.node("allow-convert-magma").getBoolean(true);
+			allowQuickLaunch = abilityNode.node("allow-quick-launch").getBoolean(true);
 		}
 	}
 }

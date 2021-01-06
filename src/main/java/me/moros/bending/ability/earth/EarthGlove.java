@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -311,11 +311,11 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthblast");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(750);
-			range = abilityNode.getNode("range").getDouble(32.0);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
+			cooldown = abilityNode.node("cooldown").getLong(750);
+			range = abilityNode.node("range").getDouble(32.0);
+			damage = abilityNode.node("damage").getDouble(2.0);
 		}
 	}
 }

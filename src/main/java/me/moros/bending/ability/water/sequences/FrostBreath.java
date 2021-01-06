@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -181,14 +181,13 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isLava(block)) {
-				BlockMethods.extinguish(user, block);
-			} else if (MaterialUtil.isWater(block)) {
+			if (MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.ICE, true);
 				if (ThreadLocalRandom.current().nextInt(6) == 0) {
 					SoundUtil.ICE_SOUND.play(block.getLocation());
 				}
 			}
+			BlockMethods.coolLava(user, block);
 			return true;
 		}
 	}
@@ -209,14 +208,14 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "frostbreath");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "frostbreath");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(10000);
-			range = abilityNode.getNode("range").getDouble(7.0);
-			chargeTime = abilityNode.getNode("charge-time").getLong(1000);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			power = abilityNode.getNode("slow-power").getInt(2) - 1;
-			slowDuration = abilityNode.getNode("slow-duration").getLong(5000);
+			cooldown = abilityNode.node("cooldown").getLong(10000);
+			range = abilityNode.node("range").getDouble(7.0);
+			chargeTime = abilityNode.node("charge-time").getLong(1000);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			power = abilityNode.node("slow-power").getInt(2) - 1;
+			slowDuration = abilityNode.node("slow-duration").getLong(5000);
 		}
 	}
 }

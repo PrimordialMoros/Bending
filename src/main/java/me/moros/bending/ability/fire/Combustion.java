@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.config.Configurable;
@@ -237,15 +237,15 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "combustion");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "combustion");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(10000);
-			damage = abilityNode.getNode("damage").getDouble(6.0);
-			power = abilityNode.getNode("power").getDouble(3.0);
-			fireTick = abilityNode.getNode("fire-tick").getInt(60);
-			range = abilityNode.getNode("range").getDouble(80.0);
+			cooldown = abilityNode.node("cooldown").getLong(10000);
+			damage = abilityNode.node("damage").getDouble(6.0);
+			power = abilityNode.node("power").getDouble(3.0);
+			fireTick = abilityNode.node("fire-tick").getInt(60);
+			range = abilityNode.node("range").getDouble(80.0);
 
-			damageBlocks = abilityNode.getNode("damage-blocks").getBoolean(true);
+			damageBlocks = abilityNode.node("damage-blocks").getBoolean(true);
 			particleRange = NumberConversions.ceil(range);
 		}
 	}

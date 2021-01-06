@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -81,7 +81,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-
+		startTime = System.currentTimeMillis();
 		charging = true;
 		if (user.getHeadBlock().isLiquid() || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
 			return false;
@@ -101,7 +101,6 @@ public class AirSwipe extends AbilityInstance implements Ability {
 			.add(Policies.IN_LIQUID)
 			.build();
 
-		startTime = System.currentTimeMillis();
 		return true;
 	}
 
@@ -136,8 +135,8 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 dir = user.getDirection();
 		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
-		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(userConfig.arcStep), RotationConvention.VECTOR_OPERATOR);
-		int steps = userConfig.arc / userConfig.arcStep;
+		Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
+		int steps = userConfig.arc / 5;
 		VectorMethods.createArc(dir, rotation, steps).forEach(
 			v -> streams.add(new AirStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
@@ -164,7 +163,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 	private class AirStream extends ParticleStream {
 		public AirStream(User user, Ray ray) {
 			super(user, ray, userConfig.speed, 0.5);
-			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
+			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b) || MaterialUtil.BREAKABLE_PLANTS.isTagged(b);
 		}
 
 		@Override
@@ -184,7 +183,8 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (!affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-				entity.setVelocity(entity.getLocation().subtract(getBukkitLocation()).toVector().normalize().multiply(factor));
+				Vector3 velocity = VectorMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+				entity.setVelocity(velocity.clampVelocity());
 				affectedEntities.add(entity);
 				return true;
 			}
@@ -193,7 +193,9 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return MaterialUtil.isWater(block) || BlockMethods.extinguish(user, block);
+			if (BlockMethods.breakPlant(block) || BlockMethods.extinguishFire(user, block)) return false;
+			BlockMethods.coolLava(user, block);
+			return true;
 		}
 	}
 
@@ -207,7 +209,6 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		@Attribute(Attribute.SPEED)
 		public double speed;
 		public int arc;
-		public int arcStep;
 		@Attribute(Attribute.CHARGE_TIME)
 		public long maxChargeTime;
 		@Attribute(Attribute.STRENGTH)
@@ -215,23 +216,21 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airswipe");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airswipe");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			range = abilityNode.getNode("range").getInt(14);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			arc = abilityNode.getNode("arc").getInt(35);
-			arcStep = abilityNode.getNode("arc-step").getInt(5);
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			range = abilityNode.node("range").getInt(14);
+			speed = abilityNode.node("speed").getDouble(0.8);
+			arc = abilityNode.node("arc").getInt(35);
 
-			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(3.0);
-			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2500);
+			chargeFactor = abilityNode.node("charge").node("factor").getDouble(3.0);
+			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2500);
 
-			abilityNode.getNode("arc").setComment("How large the entire arc is in degrees");
-			abilityNode.getNode("arc-step").setComment("How many degrees apart each stream is in the arc");
+			abilityNode.node("arc").comment("How large the entire arc is in degrees");
 
-			abilityNode.getNode("charge").getNode("factor").setComment("How much the damage and knockback are multiplied by at full charge");
-			abilityNode.getNode("charge").getNode("max-time").setComment("How many milliseconds it takes to fully charge");
+			abilityNode.node("charge").node("factor").comment("How much the damage and knockback are multiplied by at full charge");
+			abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
 		}
 	}
 }

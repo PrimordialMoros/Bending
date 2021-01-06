@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
@@ -360,14 +360,14 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthline");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthline");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(3000);
-			range = abilityNode.getNode("range").getDouble(24.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			prisonDuration = abilityNode.getNode("prison-duration").getLong(3000);
-			regen = abilityNode.getNode("revert-time").getLong(20000);
+			cooldown = abilityNode.node("cooldown").getLong(3000);
+			range = abilityNode.node("range").getDouble(24.0);
+			selectRange = abilityNode.node("select-range").getDouble(6.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			prisonDuration = abilityNode.node("prison-duration").getLong(3000);
+			regen = abilityNode.node("revert-time").getLong(20000);
 		}
 	}
 }

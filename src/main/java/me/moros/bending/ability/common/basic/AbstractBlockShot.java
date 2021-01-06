@@ -31,6 +31,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
@@ -39,7 +40,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Collections;
@@ -63,7 +63,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	private final int speed;
 
 	protected boolean allowUnderWater = false;
-	protected double range;
+	protected final double range;
 
 	/**
 	 * The maximum speed is 100 and represents movement of 1 block per tick.
@@ -128,7 +128,7 @@ public abstract class AbstractBlockShot implements Updatable {
 			onBlockHit(current);
 		}
 		if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
-			if (!current.isLiquid()) current.breakNaturally(new ItemStack(Material.AIR));
+			BlockMethods.breakPlant(current);
 			if (material == Material.WATER && MaterialUtil.isWater(current)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();

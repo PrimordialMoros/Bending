@@ -20,7 +20,7 @@
 package me.moros.bending.storage;
 
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.storage.ConnectionBuilder;
@@ -35,19 +35,19 @@ import java.io.File;
  */
 public final class StorageFactory {
 	public static @Nullable BendingStorage createInstance() {
-		CommentedConfigurationNode storageNode = ConfigManager.getConfig().getNode("storage");
-		String configValue = storageNode.getNode("engine").getString("h2");
+		CommentedConfigurationNode storageNode = ConfigManager.getConfig().node("storage");
+		String configValue = storageNode.node("engine").getString("h2");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {
 			Bending.getLog().warn("Failed to parse: " + configValue + ". Defaulting to H2.");
 		}
 
-		CommentedConfigurationNode connectionNode = storageNode.getNode("connection");
-		String host = connectionNode.getNode("host").getString("localhost");
-		int port = connectionNode.getNode("port").getInt(engine == StorageType.POSTGRESQL ? 5432 : 3306);
-		String username = connectionNode.getNode("username").getString("bending");
-		String password = connectionNode.getNode("password").getString("password");
-		String database = connectionNode.getNode("database").getString("bending");
+		CommentedConfigurationNode connectionNode = storageNode.node("connection");
+		String host = connectionNode.node("host").getString("localhost");
+		int port = connectionNode.node("port").getInt(engine == StorageType.POSTGRESQL ? 5432 : 3306);
+		String username = connectionNode.node("username").getString("bending");
+		String password = connectionNode.node("password").getString("password");
+		String database = connectionNode.node("database").getString("bending");
 
 		String path = "";
 		if (engine == StorageType.H2) {

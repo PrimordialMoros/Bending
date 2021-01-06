@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -92,7 +92,7 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 
 	private void softenArea() {
 		Location center = user.getLocBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
-		Predicate<Block> predicate = b -> EarthMaterials.EARTH_SAND_SOURCES.isTagged(b) && b.getRelative(BlockFace.UP).isPassable();
+		Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
 		for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
 			if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) continue;
 			TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true);
@@ -112,10 +112,10 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "passives", "densityshift");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "densityshift");
 
-			duration = abilityNode.getNode("duration").getLong(6000);
-			radius = abilityNode.getNode("radius").getDouble(2.0);
+			duration = abilityNode.node("duration").getLong(6000);
+			radius = abilityNode.node("radius").getDouble(2.0);
 		}
 	}
 }

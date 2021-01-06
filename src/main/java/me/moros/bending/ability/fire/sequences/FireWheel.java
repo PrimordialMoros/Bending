@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
@@ -169,15 +169,15 @@ public class FireWheel extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "sequences", "firewheel");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewheel");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			radius = abilityNode.getNode("radius").getDouble(1.0);
-			damage = abilityNode.getNode("damage").getDouble(4.0);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			speed = abilityNode.getNode("speed").getDouble(0.55);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			radius = abilityNode.node("radius").getDouble(1.0);
+			damage = abilityNode.node("damage").getDouble(4.0);
+			range = abilityNode.node("range").getDouble(20.0);
+			speed = abilityNode.node("speed").getDouble(0.55);
 
-			abilityNode.getNode("speed").setComment("How many blocks the wheel advances every tick.");
+			abilityNode.node("speed").comment("How many blocks the wheel advances every tick.");
 		}
 	}
 }

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -43,6 +43,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -177,12 +178,9 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		Vector3 center = fallingBlock.getCenter();
 
 		Block currentBlock = center.toBlock(user.getWorld());
-		if (!currentBlock.isLiquid()) {
-			if (MaterialUtil.isTransparent(currentBlock)) {
-				currentBlock.breakNaturally(new ItemStack(Material.AIR));
-			} else if (!EarthMaterials.isEarthbendable(user, currentBlock) && !MaterialUtil.isAir(currentBlock)) {
-				return false;
-			}
+		BlockMethods.breakPlant(currentBlock);
+		if (!(currentBlock.isLiquid() || MaterialUtil.isAir(currentBlock) || EarthMaterials.isEarthbendable(user, currentBlock))) {
+			return false;
 		}
 
 		final double distanceSquared = user.getEyeLocation().distanceSq(center);
@@ -231,13 +229,13 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "eartharmor");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(20000);
-			duration = abilityNode.getNode("duration").getLong(15000);
-			selectRange = abilityNode.getNode("select-range").getDouble(8.0);
-			power = abilityNode.getNode("power").getInt(2);
-			metalPower = abilityNode.getNode("metal-power").getInt(3);
+			cooldown = abilityNode.node("cooldown").getLong(20000);
+			duration = abilityNode.node("duration").getLong(15000);
+			selectRange = abilityNode.node("select-range").getDouble(8.0);
+			power = abilityNode.node("power").getInt(2);
+			metalPower = abilityNode.node("metal-power").getInt(3);
 		}
 	}
 }

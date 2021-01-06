@@ -25,49 +25,40 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.User;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 
-import java.util.EnumSet;
-
 public class EarthMaterials {
-	public static final MaterialSetTag EARTH_BENDABLE;
-	public static final MaterialSetTag SAND_BENDABLE;
-	public static final MaterialSetTag METAL_BENDABLE;
-	public static final MaterialSetTag LAVA_BENDABLE;
-	public static final MaterialSetTag ALL;
-	public static final MaterialSetTag EARTH_SAND_SOURCES;
+	public static MaterialSetTag EARTH_BENDABLE;
+	public static MaterialSetTag SAND_BENDABLE;
+	public static MaterialSetTag METAL_BENDABLE;
+	public static MaterialSetTag LAVA_BENDABLE;
+	public static MaterialSetTag ALL;
 
 	static {
-		EARTH_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
-			Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.GRASS_PATH,
-			Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
-			Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
-			Material.COAL_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE,
-			Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.NETHER_QUARTZ_ORE, Material.EMERALD_ORE,
-			Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
-			Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS
-		));
-		EARTH_BENDABLE.add(MaterialSetTag.STONE_BRICKS.getValues());
-		EARTH_BENDABLE.add(MaterialTags.TERRACOTTA);
-		EARTH_BENDABLE.add(MaterialTags.CONCRETES);
-		EARTH_BENDABLE.add(MaterialTags.CONCRETE_POWDER);
+		NamespacedKey key = Bending.getLayer().getMaterialKey();
+		EARTH_BENDABLE = new MaterialSetTag(key)
+			.add(Tag.STONE_BRICKS.getValues())
+			.add(MaterialTags.TERRACOTTA, MaterialTags.CONCRETES, MaterialTags.CONCRETE_POWDER)
+			.add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.GRASS_PATH,
+				Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
+				Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
+				Material.COAL_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE,
+				Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.NETHER_QUARTZ_ORE, Material.EMERALD_ORE,
+				Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
+				Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS
+			).ensureSize("Earth", 96);
 
-		SAND_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), MaterialSetTag.SAND.getValues());
-		SAND_BENDABLE.add(MaterialTags.SANDSTONES, MaterialTags.RED_SANDSTONES);
+		SAND_BENDABLE = new MaterialSetTag(key)
+			.add(Material.SAND, Material.RED_SAND, Material.SOUL_SAND, Material.SOUL_SOIL)
+			.add(MaterialTags.SANDSTONES, MaterialTags.RED_SANDSTONES).ensureSize("Sand", 12);
 
-		METAL_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
-			Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.QUARTZ_BLOCK
-		));
+		METAL_BENDABLE = new MaterialSetTag(key).add(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.QUARTZ_BLOCK).ensureSize("Metal", 3);
 
-		LAVA_BENDABLE = new MaterialSetTag(Bending.getLayer().getCoreKey(), EnumSet.of(
-			Material.LAVA, Material.MAGMA_BLOCK
-		));
+		LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).ensureSize("Lava", 2);
 
-		ALL = new MaterialSetTag(Bending.getLayer().getCoreKey(), EARTH_BENDABLE.getValues());
-		ALL.add(SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE);
-
-		EARTH_SAND_SOURCES = new MaterialSetTag(Bending.getLayer().getCoreKey(), EARTH_BENDABLE.getValues());
-		EARTH_SAND_SOURCES.add(SAND_BENDABLE);
+		ALL = new MaterialSetTag(key).add(EARTH_BENDABLE, SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE).ensureSize("All", 113);
 	}
 
 	public static boolean isEarthbendable(@NonNull User user, @NonNull Block block) {
@@ -80,6 +71,10 @@ public class EarthMaterials {
 		if (isLavaBendable(block)) return false;
 		if (isMetalBendable(block) && !user.hasPermission("bending.metal")) return false;
 		return ALL.isTagged(block);
+	}
+
+	public static boolean isEarthOrSand(@NonNull Block block) {
+		return EARTH_BENDABLE.isTagged(block) || SAND_BENDABLE.isTagged(block);
 	}
 
 	public static boolean isSandBendable(@NonNull Block block) {

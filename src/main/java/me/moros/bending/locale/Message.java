@@ -103,11 +103,11 @@ public interface Message {
 	Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> translatable("bending.command.bind.require-element", YELLOW)
 		.args(ability, element);
 
-	Args1<Component> ABILITY_BIND_SEQUENCE = ability -> translatable("bending.command.bind.sequence", YELLOW)
-		.args(ability);
-
 	Args2<Component, Integer> ABILITY_BIND_SUCCESS = (ability, slot) -> translatable("bending.command.bind.success", GREEN)
 		.args(ability, text(slot));
+
+	Args1<Component> ABILITY_BIND_FAIL = ability -> translatable("bending.command.bind.fail", YELLOW)
+		.args(ability);
 
 	Args1<String> BOUND_SLOTS = name -> translatable("bending.command.display.header", DARK_AQUA)
 		.args(text(name));

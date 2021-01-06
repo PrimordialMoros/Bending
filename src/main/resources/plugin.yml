@@ -3,7 +3,7 @@ description: Bending plugin for PaperMC.
 author: Moros
 version: ${pluginVersion}
 main: me.moros.bending.Bending
-softdepend: [WorldGuard, WorldEdit, GriefPrevention, Towny, RedProtect, PlaceholderAPI]
+softdepend: [WorldGuard, WorldEdit, GriefPrevention, Towny]
 api-version: 1.16
 commands:
   bending:
@@ -51,73 +51,70 @@ permissions:
     children:
       bending.command.choose.Air: true
       bending.ability.AirAgility: true
+      bending.ability.GracefulDescent: true
+      bending.ability.AirWheel: true
+      bending.ability.AirBlade: true
       bending.ability.AirBlast: true
       bending.ability.AirBurst: true
+      bending.ability.AirPunch: true
       bending.ability.AirScooter: true
       bending.ability.AirShield: true
       bending.ability.AirSpout: true
-      bending.ability.AirStream: true
-      bending.ability.AirSuction: true
-      bending.ability.AirSweep: true
       bending.ability.AirSwipe: true
-      bending.ability.GracefulDescent: true
-      bending.ability.Suffocate: true
-      bending.ability.Tornado: true
-      bending.ability.Twister: true
   bending.earth:
     children:
       bending.metal: true
       bending.lava: true
       bending.command.choose.Earth: true
+      bending.ability.DensityShift: true
+      bending.ability.EarthCling: true
+      bending.ability.FerroControl: true
       bending.ability.Catapult: true
       bending.ability.Collapse: true
       bending.ability.EarthArmor: true
+      bending.ability.EarthArmorWall: true
       bending.ability.EarthBlast: true
-      bending.ability.EarthGrab: true
-      bending.ability.EarthSmash: true
+      bending.ability.EarthGlove: true
+      bending.ability.EarthLine: true
+      bending.ability.EarthShot: true
       bending.ability.EarthTunnel: true
+      bending.ability.LavaDisk: true
+      bending.ability.MetalCable: true
       bending.ability.RaiseEarth: true
       bending.ability.Shockwave: true
-      bending.ability.DensityShift: true
   bending.fire:
     children:
       bending.command.choose.Fire: true
+      bending.ability.FireKick: true
+      bending.ability.FireSpin: true
+      bending.ability.FireWave: true
+      bending.ability.FireWheel: true
+      bending.ability.JetBlast: true
       bending.ability.Blaze: true
+      bending.ability.Bolt: true
       bending.ability.Combustion: true
       bending.ability.FireBlast: true
-      bending.ability.FireBlastCharged: true
       bending.ability.FireBurst: true
       bending.ability.FireJet: true
       bending.ability.FireShield: true
-      bending.ability.HeatControl: true
-      bending.ability.Lightning: true
       bending.ability.FireWall: true
-      bending.ability.FireKick: true
-      bending.ability.FireSpin: true
-      bending.ability.FireWheel: true
-      bending.ability.JetBlast: true
-      bending.ability.JetBlaze: true
+      bending.ability.HeatControl: true
   bending.water:
     children:
       bending.command.choose.Water: true
-      bending.ability.Bloodbending: true
       bending.ability.FastSwim: true
-      bending.ability.HealingWaters: true
       bending.ability.Hydrosink: true
-      bending.ability.IceBlast: true
-      bending.ability.IceBullet: true
-      bending.ability.IceSpike: true
+      bending.ability.FrostBreath: true
+      bending.ability.Iceberg: true
+      bending.ability.WaterGimbal: true
+      bending.ability.HealingWaters: true
+      bending.ability.IceCrawl: true
+      bending.ability.IceWall: true
       bending.ability.OctopusForm: true
       bending.ability.PhaseChange: true
-      bending.ability.Surge: true
       bending.ability.Torrent: true
-      bending.ability.WaterArms: true
-      bending.ability.WaterArmsFreeze: true
-      bending.ability.WaterArmsGrab: true
-      bending.ability.WaterArmsGrapple: true
-      bending.ability.WaterArmsPull: true
-      bending.ability.WaterArmsPunch: true
-      bending.ability.WaterArmsSpear: true
       bending.ability.WaterBubble: true
       bending.ability.WaterManipulation: true
+      bending.ability.WaterRing: true
       bending.ability.WaterSpout: true
+      bending.ability.WaterWave: true

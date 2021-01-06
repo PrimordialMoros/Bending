@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -147,12 +147,12 @@ public class HealingWaters extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "healingwaters");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "healingwaters");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(3000);
-			range = abilityNode.getNode("range").getDouble(5.0);
-			power = abilityNode.getNode("power").getInt(2);
-			chargeTime = abilityNode.getNode("charge-time").getLong(2000);
+			cooldown = abilityNode.node("cooldown").getLong(3000);
+			range = abilityNode.node("range").getDouble(5.0);
+			power = abilityNode.node("power").getInt(2);
+			chargeTime = abilityNode.node("charge-time").getLong(2000);
 		}
 	}
 }

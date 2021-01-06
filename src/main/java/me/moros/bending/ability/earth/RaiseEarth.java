@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -181,18 +181,18 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "raiseearth");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "raiseearth");
 
-			selectRange = abilityNode.getNode("select-range").getDouble(20.0);
+			selectRange = abilityNode.node("select-range").getDouble(20.0);
 
-			CommentedConfigurationNode columnNode = abilityNode.getNode("column");
-			columnCooldown = columnNode.getNode("cooldown").getLong(500);
-			columnMaxHeight = columnNode.getNode("max-height").getInt(6);
+			CommentedConfigurationNode columnNode = abilityNode.node("column");
+			columnCooldown = columnNode.node("cooldown").getLong(500);
+			columnMaxHeight = columnNode.node("max-height").getInt(6);
 
-			CommentedConfigurationNode wallNode = abilityNode.getNode("wall");
-			wallCooldown = wallNode.getNode("cooldown").getLong(500);
-			wallMaxHeight = wallNode.getNode("max-height").getInt(6);
-			wallWidth = wallNode.getNode("width").getInt(6);
+			CommentedConfigurationNode wallNode = abilityNode.node("wall");
+			wallCooldown = wallNode.node("cooldown").getLong(500);
+			wallMaxHeight = wallNode.node("max-height").getInt(6);
+			wallWidth = wallNode.node("width").getInt(6);
 		}
 	}
 }

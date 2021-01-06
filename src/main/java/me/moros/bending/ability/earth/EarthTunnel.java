@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -192,13 +192,13 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "earthtunnel");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthtunnel");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(2000);
-			range = abilityNode.getNode("range").getDouble(10.0);
-			radius = abilityNode.getNode("radius").getInt(1);
-			regen = abilityNode.getNode("revert-time").getLong(0);
-			extractOres = abilityNode.getNode("extract-ores").getBoolean(true);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			range = abilityNode.node("range").getDouble(10.0);
+			radius = abilityNode.node("radius").getInt(1);
+			regen = abilityNode.node("revert-time").getLong(0);
+			extractOres = abilityNode.node("extract-ores").getBoolean(true);
 		}
 	}
 }

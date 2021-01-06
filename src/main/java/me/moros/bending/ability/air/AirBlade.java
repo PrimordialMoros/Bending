@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.*;
 import me.moros.bending.ability.common.basic.AbstractWheel;
@@ -237,21 +237,21 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "air", "airblade");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airblade");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(4000);
-			radius = abilityNode.getNode("radius").getDouble(1.2);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			range = abilityNode.getNode("range").getDouble(12.0);
-			prepareRange = abilityNode.getNode("prepare-range").getDouble(8.0);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
+			cooldown = abilityNode.node("cooldown").getLong(4000);
+			radius = abilityNode.node("radius").getDouble(1.2);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			range = abilityNode.node("range").getDouble(12.0);
+			prepareRange = abilityNode.node("prepare-range").getDouble(8.0);
+			speed = abilityNode.node("speed").getDouble(0.8);
 
-			chargeFactor = abilityNode.getNode("charge").getNode("factor").getDouble(3.0);
-			maxChargeTime = abilityNode.getNode("charge").getNode("max-time").getLong(2000);
+			chargeFactor = abilityNode.node("charge").node("factor").getDouble(3.0);
+			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
 
-			abilityNode.getNode("speed").setComment("How many blocks the blade advances every tick.");
-			abilityNode.getNode("charge").getNode("factor").setComment("How much the damage and range are multiplied by at full charge. Radius and speed are only affected by half that amount.");
-			abilityNode.getNode("charge").getNode("max-time").setComment("How many milliseconds it takes to fully charge");
+			abilityNode.node("speed").comment("How many blocks the blade advances every tick.");
+			abilityNode.node("charge").node("factor").comment("How much the damage and range are multiplied by at full charge. Radius and speed are only affected by half that amount.");
+			abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
 
 		}
 	}

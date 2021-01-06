@@ -30,15 +30,15 @@ import org.bukkit.persistence.PersistentDataType;
 public class PersistentDataLayer {
 	private static final byte VALUE = (byte) 0x1;
 
-	public static final String STR_CORE = "bending-core";
 	public static final String STR_ARMOR = "bending-armor";
+	public static final String STR_MATERIAL = "bending-material";
 
-	private final NamespacedKey NSK_MATERIAL;
 	private final NamespacedKey NSK_ARMOR;
+	private final NamespacedKey NSK_MATERIAL;
 
-	public PersistentDataLayer(Bending plugin) {
-		NSK_MATERIAL = new NamespacedKey(plugin, STR_CORE);
+	public PersistentDataLayer(@NonNull Bending plugin) {
 		NSK_ARMOR = new NamespacedKey(plugin, STR_ARMOR);
+		NSK_MATERIAL = new NamespacedKey(plugin, STR_MATERIAL);
 	}
 
 	public boolean hasArmorKey(@Nullable ItemMeta meta) {
@@ -58,7 +58,7 @@ public class PersistentDataLayer {
 		return false;
 	}
 
-	public NamespacedKey getCoreKey() {
+	public @NonNull NamespacedKey getMaterialKey() {
 		return NSK_MATERIAL;
 	}
 }

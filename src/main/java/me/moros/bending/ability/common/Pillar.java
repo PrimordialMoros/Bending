@@ -39,7 +39,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -98,7 +97,7 @@ public class Pillar implements Updatable {
 	private boolean move(Block newBlock) {
 		if (MaterialUtil.isLava(newBlock)) return false;
 		if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) return false;
-		if (!newBlock.isLiquid()) newBlock.breakNaturally(new ItemStack(Material.AIR));
+		BlockMethods.breakPlant(newBlock);
 
 		for (int i = 0; i < length; i++) {
 			Block forwardBlock = newBlock.getRelative(opposite, i);

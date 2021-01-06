@@ -92,7 +92,7 @@ public class TempBlock implements Temporary {
 		if (block instanceof TileState) return Optional.empty();
 		if (block.getBlockData() instanceof Waterlogged) {
 			Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
-			if (waterData.isWaterlogged() && MaterialUtil.AIR.isTagged(data.getMaterial())) {
+			if (waterData.isWaterlogged() && data.getMaterial().isAir()) {
 				waterData.setWaterlogged(false);
 				data = waterData;
 			} else if (!waterData.isWaterlogged() && data.getMaterial() == Material.WATER) {

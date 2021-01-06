@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.water.*;
@@ -82,7 +82,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, IceCrawl.class)) return false;
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.WATER_ICE_SOURCES);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
 		if (!source.isPresent()) return false;
 
 		states = new StateChain()
@@ -159,7 +159,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 				tip = origin.add(direction.scalarMultiply(userConfig.length));
 				Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
 				double radius = FastMath.ceil(0.2 * userConfig.length);
-				for (Block block : WorldMethods.getNearbyBlocks(origin.toLocation(user.getWorld()), radius, WaterMaterials.WATER_ICE_SOURCES::isTagged)) {
+				for (Block block : WorldMethods.getNearbyBlocks(origin.toLocation(user.getWorld()), radius, WaterMaterials::isWaterOrIceBendable)) {
 					if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 					lines.add(getLine(new Vector3(block).add(Vector3.HALF), targetLocation));
 				}
@@ -204,13 +204,13 @@ public class Iceberg extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "sequences", "iceberg");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "iceberg");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(15000);
-			selectRange = abilityNode.getNode("select-range").getDouble(16.0);
-			duration = abilityNode.getNode("ice-duration").getLong(12500);
-			regenDelay = abilityNode.getNode("regen-delay").getLong(30000);
-			length = abilityNode.getNode("length").getDouble(16.0);
+			cooldown = abilityNode.node("cooldown").getLong(15000);
+			selectRange = abilityNode.node("select-range").getDouble(16.0);
+			duration = abilityNode.node("ice-duration").getLong(12500);
+			regenDelay = abilityNode.node("regen-delay").getLong(30000);
+			length = abilityNode.node("length").getDouble(16.0);
 		}
 	}
 }

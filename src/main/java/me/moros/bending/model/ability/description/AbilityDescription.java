@@ -21,7 +21,7 @@ package me.moros.bending.model.ability.description;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
 import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
@@ -50,6 +50,7 @@ public class AbilityDescription {
 	private final String description;
 	private final String instructions;
 	private final boolean hidden;
+	private final boolean canBind;
 	private final boolean harmless;
 	private final boolean sourcesPlants;
 	private final int hashcode;
@@ -59,16 +60,10 @@ public class AbilityDescription {
 		constructor = builder.constructor;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
-		if (builder.description.isEmpty()) {
-			description = getConfigNode().getNode("description").getString("");
-		} else {
-			description = builder.description;
-		}
-		if (builder.instructions.isEmpty()) {
-			instructions = getConfigNode().getNode("instructions").getString("");
-		} else {
-			instructions = builder.instructions;
-		}
+		//createAbility(); // Init classes to get config values for description and instructions
+		description = getConfigNode().node("description").getString("");
+		instructions = getConfigNode().node("instructions").getString("");
+		canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
 		hidden = builder.hidden;
 		harmless = builder.harmless;
 		sourcesPlants = builder.sourcesPlants;
@@ -95,6 +90,10 @@ public class AbilityDescription {
 		return instructions;
 	}
 
+	public boolean canBind() {
+		return canBind;
+	}
+
 	public boolean isHidden() {
 		return hidden;
 	}
@@ -116,13 +115,13 @@ public class AbilityDescription {
 	}
 
 	public @NonNull CommentedConfigurationNode getConfigNode() {
-		CommentedConfigurationNode elementNode = ConfigManager.getConfig().getNode("abilities", element.toString().toLowerCase());
+		CommentedConfigurationNode elementNode = ConfigManager.getConfig().node("abilities", element.toString().toLowerCase());
 		if (isActivatedBy(ActivationMethod.SEQUENCE)) {
-			return elementNode.getNode("sequences", name.toLowerCase());
+			return elementNode.node("sequences", name.toLowerCase());
 		} else if (isActivatedBy(ActivationMethod.PASSIVE)) {
-			return elementNode.getNode("passives", name.toLowerCase());
+			return elementNode.node("passives", name.toLowerCase());
 		}
-		return elementNode.getNode(name.toLowerCase());
+		return elementNode.node(name.toLowerCase());
 	}
 
 	public @NonNull String getPermission() {
@@ -170,7 +169,6 @@ public class AbilityDescription {
 	public @NonNull AbilityDescriptionBuilder builder() {
 		return new AbilityDescriptionBuilder(name, constructor)
 			.setElement(element).setActivation(activationMethods)
-			.setDescription(description).setInstructions(instructions)
 			.setHidden(hidden).setHarmless(harmless)
 			.setSourcesPlants(sourcesPlants);
 	}
@@ -184,8 +182,7 @@ public class AbilityDescription {
 		private final Function<AbilityDescription, ? extends Ability> constructor;
 		private Element element;
 		private EnumSet<ActivationMethod> activationMethods;
-		private String description = "";
-		private String instructions = "";
+		private boolean canBind = true;
 		private boolean hidden = false;
 		private boolean harmless = false;
 		private boolean sourcesPlants = false;
@@ -212,13 +209,8 @@ public class AbilityDescription {
 			return setActivation(c);
 		}
 
-		public @NonNull AbilityDescriptionBuilder setDescription(@NonNull String description) {
-			this.description = description;
-			return this;
-		}
-
-		public @NonNull AbilityDescriptionBuilder setInstructions(@NonNull String instructions) {
-			this.instructions = instructions;
+		public @NonNull AbilityDescriptionBuilder setCanBind(boolean canBind) {
+			this.canBind = canBind;
 			return this;
 		}
 

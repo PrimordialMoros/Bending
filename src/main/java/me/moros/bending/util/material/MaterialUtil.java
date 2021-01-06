@@ -24,6 +24,8 @@ import com.destroystokyo.paper.MaterialTags;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
@@ -37,11 +39,11 @@ import java.util.Map;
 
 public final class MaterialUtil {
 	public static final Map<Material, Material> COOKABLE = new HashMap<>();
-	public static final MaterialSetTag AIR;
-	public static final MaterialSetTag TRANSPARENT;
-	public static final MaterialSetTag CONTAINERS;
-	public static final MaterialSetTag UNBREAKABLES;
-	public static final MaterialSetTag METAL_ARMOR;
+	public static MaterialSetTag BREAKABLE_PLANTS;
+	public static MaterialSetTag TRANSPARENT;
+	public static MaterialSetTag CONTAINERS;
+	public static MaterialSetTag UNBREAKABLES;
+	public static MaterialSetTag METAL_ARMOR;
 
 	static {
 		COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
@@ -56,44 +58,51 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
 		COOKABLE.put(Material.STICK, Material.TORCH);
 
-		AIR = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
+		NamespacedKey key = Bending.getLayer().getMaterialKey();
 
-		TRANSPARENT = new MaterialSetTag(Bending.getLayer().getCoreKey(), AIR.getValues());
-		TRANSPARENT.add(MaterialSetTag.SIGNS.getValues());
-		TRANSPARENT.add(MaterialSetTag.FIRE.getValues());
-		TRANSPARENT.add(MaterialSetTag.SAPLINGS.getValues());
-		TRANSPARENT.add(MaterialSetTag.FLOWERS.getValues());
-		TRANSPARENT.add(MaterialSetTag.SMALL_FLOWERS.getValues());
-		TRANSPARENT.add(MaterialSetTag.TALL_FLOWERS.getValues());
-		TRANSPARENT.add(MaterialSetTag.CARPETS.getValues());
-		TRANSPARENT.add(MaterialSetTag.BUTTONS.getValues());
-		TRANSPARENT.add(MaterialSetTag.CROPS.getValues());
-		TRANSPARENT.add(MaterialTags.MUSHROOMS.getValues());
-		TRANSPARENT.add(Material.COBWEB, Material.GRASS, Material.TALL_GRASS, Material.SNOW, Material.LARGE_FERN,
-			Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH);
-		TRANSPARENT.endsWith("TORCH");
+		Bending.getLog().info("Key: "+key.getKey());
 
-		CONTAINERS = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST,
-			Material.BARREL, Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
-			Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND, Material.BEACON,
-			Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.GRINDSTONE,
-			Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE
-		);
+		BREAKABLE_PLANTS = new MaterialSetTag(key)
+			.add(Tag.SAPLINGS.getValues())
+			.add(Tag.FLOWERS.getValues())
+			.add(Tag.SMALL_FLOWERS.getValues())
+			.add(Tag.TALL_FLOWERS.getValues())
+			.add(Tag.CROPS.getValues())
+			.add(MaterialTags.MUSHROOMS)
+			.add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN,
+				Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakble plants", 38);
 
-		UNBREAKABLES = new MaterialSetTag(Bending.getLayer().getCoreKey(), Material.BARRIER, Material.BEDROCK,
-			Material.OBSIDIAN, Material.CRYING_OBSIDIAN, Material.NETHER_PORTAL,
-			Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
-		);
+		TRANSPARENT = new MaterialSetTag(key)
+			.add(BREAKABLE_PLANTS.getValues())
+			.add(Tag.SIGNS.getValues())
+			.add(Tag.FIRE.getValues())
+			.add(Tag.CARPETS.getValues())
+			.add(Tag.BUTTONS.getValues())
+			.add(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
+			.endsWith("TORCH").ensureSize("Transparent", 93);
 
-		METAL_ARMOR = new MaterialSetTag(Bending.getLayer().getCoreKey(),
+		CONTAINERS = new MaterialSetTag(key).add(
+			Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL,
+			Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
+			Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND,
+			Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.BEACON,
+			Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE, Material.JUKEBOX
+		).ensureSize("Containers", 21);
+
+		UNBREAKABLES = new MaterialSetTag(key).add(
+			Material.BARRIER, Material.BEDROCK, Material.OBSIDIAN, Material.CRYING_OBSIDIAN,
+			Material.NETHER_PORTAL, Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
+		).ensureSize("Unbreakables", 8);
+
+		METAL_ARMOR = new MaterialSetTag(key).add(
 			Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
 			Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
 			Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS
-		);
+		).ensureSize("Metal Armor", 12);
 	}
 
 	public static boolean isAir(@NonNull Block block) {
-		return AIR.isTagged(block);
+		return block.getType().isAir();
 	}
 
 	public static boolean isTransparent(@NonNull Block block) {

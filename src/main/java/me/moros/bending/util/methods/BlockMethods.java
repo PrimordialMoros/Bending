@@ -40,6 +40,7 @@ import org.bukkit.block.Campfire;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Collection;
@@ -91,23 +92,35 @@ public final class BlockMethods {
 	}
 
 	/**
-	 * Attempts to extinguish the given block if it's Fire or cool it down if it's Lava.
-	 * @param user the user trying to extinguish the block
-	 * @param block the block to extinguish
+	 * Attempts to cool down  the given block if it's Lava.
+	 * @param user the user trying to cool the lava
+	 * @param block the block to check
 	 * @return true if lava was cooled down, false otherwise
 	 */
-	public static boolean extinguish(@NonNull User user, @NonNull Block block) {
+	public static boolean coolLava(@NonNull User user, @NonNull Block block) {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 		if (MaterialUtil.isLava(block)) {
 			block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
 			if (ThreadLocalRandom.current().nextBoolean()) playLavaExtinguishEffect(block);
 			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Attempts to extinguish the given block if it's Fire.
+	 * @param user the user trying to extinguish the fire
+	 * @param block the block to check
+	 * @return true if fire was extinguished, false otherwise
+	 */
+	public static boolean extinguishFire(@NonNull User user, @NonNull Block block) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 		if (MaterialUtil.isFire(block)) {
 			block.setType(Material.AIR);
 			if (ThreadLocalRandom.current().nextInt(4) == 0) {
 				SoundUtil.FIRE_EXTINGUISH_SOUND.play(block.getLocation());
 			}
+			return true;
 		}
 		return false;
 	}
@@ -153,5 +166,14 @@ public final class BlockMethods {
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / (5 * radius), RotationConvention.VECTOR_OPERATOR);
 		return VectorMethods.rotate(Vector3.PLUS_I.scalarMultiply(radius), rotation, NumberConversions.ceil(10 * radius))
 			.stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
+	}
+
+	public static boolean breakPlant(@NonNull Block block) {
+		if (MaterialUtil.BREAKABLE_PLANTS.isTagged(block)) {
+			if (TempBlock.manager.isTemp(block)) return false;
+			block.breakNaturally(new ItemStack(Material.AIR));
+			return true;
+		}
+		return false;
 	}
 }

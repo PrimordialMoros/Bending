@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -139,11 +139,11 @@ public class Catapult extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "catapult");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(2000);
-			power = abilityNode.getNode("power").getDouble(2.4);
-			angle = FastMath.toRadians(abilityNode.getNode("angle").getInt(85));
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			power = abilityNode.node("power").getDouble(2.4);
+			angle = FastMath.toRadians(abilityNode.node("angle").getInt(85));
 		}
 	}
 }

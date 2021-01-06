@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -167,13 +167,13 @@ public class Collapse extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "collapse");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "collapse");
 
-			selectRange = abilityNode.getNode("select-range").getDouble(20.0);
-			radius = abilityNode.getNode("radius").getDouble(5.0);
-			maxHeight = abilityNode.getNode("max-height").getInt(6);
-			columnCooldown = abilityNode.getNode("column", "cooldown").getLong(500);
-			wallCooldown = abilityNode.getNode("wall", "cooldown").getLong(500);
+			selectRange = abilityNode.node("select-range").getDouble(20.0);
+			radius = abilityNode.node("radius").getDouble(5.0);
+			maxHeight = abilityNode.node("max-height").getInt(6);
+			columnCooldown = abilityNode.node("column", "cooldown").getLong(500);
+			wallCooldown = abilityNode.node("wall", "cooldown").getLong(500);
 		}
 	}
 }

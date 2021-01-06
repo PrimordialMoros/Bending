@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -405,13 +405,13 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "metalcable");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "metalcable");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(5000);
-			range = abilityNode.getNode("range").getDouble(28.0);
-			projectileRange = abilityNode.getNode("projectile-range").getDouble(48.0);
-			damage = abilityNode.getNode("damage").getDouble(4.0);
-			blockSpeed = abilityNode.getNode("speed").getDouble(1.4);
+			cooldown = abilityNode.node("cooldown").getLong(5000);
+			range = abilityNode.node("range").getDouble(28.0);
+			projectileRange = abilityNode.node("projectile-range").getDouble(48.0);
+			damage = abilityNode.node("damage").getDouble(4.0);
+			blockSpeed = abilityNode.node("speed").getDouble(1.4);
 		}
 	}
 }

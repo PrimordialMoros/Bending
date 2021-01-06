@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
@@ -50,7 +50,6 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
@@ -115,7 +114,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		Block block = source.get();
 		for (int i = 1; i < 3; i++) {
 			Block temp = block.getRelative(BlockFace.UP, i);
-			if (WaterMaterials.isPlantBendable(temp)) temp.breakNaturally();
+			BlockMethods.breakPlant(temp);
 			if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) return false;
 		}
 
@@ -227,7 +226,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 			return false;
 		}
 		// TODO add fire ignition to specific blocks, add extra material types to destroy
-		if (EarthMaterials.EARTH_SAND_SOURCES.isTagged(block)) {
+		if (EarthMaterials.isEarthOrSand(block)) {
 			currentPower -= block.getType().getHardness();
 			TempBlock.create(block, Material.AIR, 30000, true);
 			ParticleUtil.create(Particle.LAVA, block.getLocation())
@@ -295,16 +294,16 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "earth", "lavadisk");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(1500);
-			minDamage = abilityNode.getNode("min-damage").getDouble(1.0);
-			maxDamage = abilityNode.getNode("max-damage").getDouble(4.0);
-			range = abilityNode.getNode("range").getDouble(20.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(6.0);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			power = abilityNode.getNode("power").getDouble(20.0);
-			powerDiminishPerEntity = abilityNode.getNode("damage-entity-power-cost").getDouble(7.5);
+			cooldown = abilityNode.node("cooldown").getLong(1500);
+			minDamage = abilityNode.node("min-damage").getDouble(1.0);
+			maxDamage = abilityNode.node("max-damage").getDouble(4.0);
+			range = abilityNode.node("range").getDouble(20.0);
+			selectRange = abilityNode.node("select-range").getDouble(6.0);
+			speed = abilityNode.node("speed").getDouble(0.8);
+			power = abilityNode.node("power").getDouble(20.0);
+			powerDiminishPerEntity = abilityNode.node("damage-entity-power-cost").getDouble(7.5);
 		}
 	}
 }

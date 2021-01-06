@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -143,11 +143,11 @@ public class FireJet extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "firejet");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firejet");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(7000);
-			speed = abilityNode.getNode("speed").getDouble(0.8);
-			duration = abilityNode.getNode("duration").getLong(2000);
+			cooldown = abilityNode.node("cooldown").getLong(7000);
+			speed = abilityNode.node("speed").getDouble(0.8);
+			duration = abilityNode.node("duration").getLong(2000);
 		}
 	}
 }

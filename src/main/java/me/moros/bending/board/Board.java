@@ -52,7 +52,7 @@ public class Board {
 		bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
 		bendingSlots = bendingBoard.registerNewObjective("Board Slots", "dummy", ChatColor.BOLD + "Slots");
 		bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
-		player.getPlayer().setScoreboard(bendingBoard);
+		player.setScoreboard(bendingBoard);
 		Arrays.fill(cachedSlots, "");
 		updateAll();
 	}
@@ -60,7 +60,7 @@ public class Board {
 	protected void disableScoreboard() {
 		bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
 		bendingSlots.unregister();
-		player.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+		player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 	}
 
 	protected void updateSlot(int slot) {
@@ -98,13 +98,13 @@ public class Board {
 		updateSlot(newSlot);
 	}
 
-	protected void updateMisc(String text, boolean show, boolean isCombo) {
+	protected void updateMisc(String text, boolean show) {
 		if (show) {
 			if (misc.isEmpty()) {
 				bendingSlots.getScore("  ------------  ").setScore(-10);
 			}
 			misc.add(text);
-			bendingSlots.getScore(text).setScore(isCombo ? -10 : -11);
+			bendingSlots.getScore(text).setScore(-11);
 		} else {
 			misc.remove(text);
 			bendingBoard.resetScores(text);

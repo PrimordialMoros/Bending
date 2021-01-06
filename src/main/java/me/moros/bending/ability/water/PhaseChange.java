@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -168,18 +168,18 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "phasechange");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "phasechange");
 
-			speed = abilityNode.getNode("speed").getInt(8);
-			cooldown = abilityNode.getNode("cooldown").getLong(3000);
+			speed = abilityNode.node("speed").getInt(8);
+			cooldown = abilityNode.node("cooldown").getLong(3000);
 
-			freezeRange = abilityNode.getNode("freeze").getNode("range").getDouble(7.0);
-			freezeRadius = abilityNode.getNode("freeze").getNode("radius").getDouble(3.5);
+			freezeRange = abilityNode.node("freeze").node("range").getDouble(7.0);
+			freezeRadius = abilityNode.node("freeze").node("radius").getDouble(3.5);
 
-			meltRange = abilityNode.getNode("melt").getNode("range").getDouble(7.0);
-			meltRadius = abilityNode.getNode("melt").getNode("radius").getDouble(4.5);
+			meltRange = abilityNode.node("melt").node("range").getDouble(7.0);
+			meltRadius = abilityNode.node("melt").node("radius").getDouble(4.5);
 
-			abilityNode.getNode("speed").setComment("How many blocks can be affected per tick.");
+			abilityNode.node("speed").comment("How many blocks can be affected per tick.");
 		}
 	}
 }

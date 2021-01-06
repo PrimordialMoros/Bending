@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.WallData;
@@ -94,7 +94,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.ALL).orElse(null);
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
 		if (source == null) return false;
 
 		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
@@ -154,7 +154,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	private void renderTrail(Block block, int level) {
 		if (MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block)) {
-			if (!block.isLiquid()) block.breakNaturally(new ItemStack(Material.AIR));
+			BlockMethods.breakPlant(block);
 			if (MaterialUtil.isWater(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
@@ -189,7 +189,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			state.complete();
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null || !TempBlock.isBendable(source)) return;
-			if (WaterMaterials.ALL.isTagged(source)) {
+			if (WaterMaterials.isWaterBendable(source)) {
 				isIce = WaterMaterials.isIceBendable(source);
 				manip = new Manip(user, source);
 				Policies.builder().build();
@@ -303,20 +303,20 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "watermanipulation");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(750);
-			range = abilityNode.getNode("range").getDouble(32.0);
-			selectRange = abilityNode.getNode("select-range").getDouble(12.0);
-			damage = abilityNode.getNode("damage").getDouble(2.0);
-			redirectGrabRadius = abilityNode.getNode("redirect-grab-radius").getDouble(2.0);
-			rMin = abilityNode.getNode("min-redirect-range").getDouble(5.0);
-			rMax = abilityNode.getNode("max-redirect-range").getDouble(20.0);
+			cooldown = abilityNode.node("cooldown").getLong(750);
+			range = abilityNode.node("range").getDouble(32.0);
+			selectRange = abilityNode.node("select-range").getDouble(12.0);
+			damage = abilityNode.node("damage").getDouble(2.0);
+			redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
+			rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
+			rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
 
-			CommentedConfigurationNode iceNode = abilityNode.getNode("iceblast");
+			CommentedConfigurationNode iceNode = abilityNode.node("iceblast");
 
-			power = iceNode.getNode("slow-power").getInt(2) - 1;
-			slowDuration = iceNode.getNode("slow-duration").getLong(1500);
+			power = iceNode.node("slow-power").getInt(2) - 1;
+			slowDuration = iceNode.node("slow-duration").getLong(1500);
 		}
 	}
 }

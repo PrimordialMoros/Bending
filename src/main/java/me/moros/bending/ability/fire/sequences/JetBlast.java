@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.*;
 import me.moros.bending.config.Configurable;
@@ -45,14 +45,13 @@ public class JetBlast extends AbilityInstance implements Ability {
 
 	public JetBlast(@NonNull AbilityDescription desc) {
 		super(desc);
-		if (jetDesc == null) {
-			jetDesc = Bending.getGame().getAbilityRegistry()
-				.getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
-		}
 	}
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (jetDesc == null) {
+			jetDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
+		}
 		jet = new FireJet(jetDesc);
 		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.PUNCH)) return false;
 
@@ -99,11 +98,11 @@ public class JetBlast extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "fire", "sequences", "jetblast");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "jetblast");
 
-			cooldown = abilityNode.getNode("cooldown").getLong(6000);
-			speed = abilityNode.getNode("speed").getDouble(1.2);
-			duration = abilityNode.getNode("duration").getLong(5000);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
+			speed = abilityNode.node("speed").getDouble(1.2);
+			duration = abilityNode.node("duration").getLong(5000);
 		}
 	}
 }

@@ -19,7 +19,6 @@
 
 package me.moros.bending;
 
-import me.moros.atlas.acf.PaperCommandManager;
 import me.moros.atlas.acf.lib.timings.TimingManager;
 import me.moros.atlas.kyori.adventure.platform.bukkit.BukkitAudiences;
 import me.moros.bending.command.Commands;
@@ -47,7 +46,6 @@ import java.util.Objects;
 public class Bending extends JavaPlugin {
 	private static Bending plugin;
 	private TimingManager timingManager;
-	private PaperCommandManager commandManager;
 
 	private TranslationManager translationManager;
 	private BukkitAudiences audiences;
@@ -76,7 +74,7 @@ public class Bending extends JavaPlugin {
 
 		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
 		game = new Game(storage);
-		game.initConfig();
+		ConfigManager.save();
 
 		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
 		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
@@ -84,9 +82,7 @@ public class Bending extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
 		translationManager = new TranslationManager();
-		commandManager = new PaperCommandManager(this);
-		commandManager.enableUnstableAPI("help");
-		Commands.initialize();
+		new Commands(this, game);
 	}
 
 	@Override
@@ -108,10 +104,6 @@ public class Bending extends JavaPlugin {
 
 	public static TimingManager getTimingManager() {
 		return plugin.timingManager;
-	}
-
-	public static PaperCommandManager getCommandManager() {
-		return plugin.commandManager;
 	}
 
 	public static Bending getPlugin() {

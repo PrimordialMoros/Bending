@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.commented.CommentedConfigurationNode;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -45,6 +45,7 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -52,7 +53,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -94,7 +94,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 				}
 			}
 			if (source == null) {
-				Optional<Block> targetBlock = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials.ICE_BENDABLE);
+				Optional<Block> targetBlock = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isIceBendable);
 				if (!targetBlock.isPresent()) return false;
 				source = targetBlock.get();
 			}
@@ -228,7 +228,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 		private boolean canMove(Block newBlock) {
 			if (MaterialUtil.isLava(newBlock)) return false;
 			if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) return false;
-			if (!newBlock.isLiquid()) newBlock.breakNaturally(new ItemStack(Material.AIR));
+			BlockMethods.breakPlant(newBlock);
 			return true;
 		}
 
@@ -260,20 +260,20 @@ public class IceSpike extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.getNode("abilities", "water", "icespike");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icespike");
 
-			selectRange = abilityNode.getNode("select-range").getDouble(10.0);
-			damage = abilityNode.getNode("damage").getDouble(3.0);
-			knockup = abilityNode.getNode("knock-up").getDouble(0.8);
+			selectRange = abilityNode.node("select-range").getDouble(10.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			knockup = abilityNode.node("knock-up").getDouble(0.8);
 
-			CommentedConfigurationNode columnNode = abilityNode.getNode("column");
-			columnCooldown = columnNode.getNode("cooldown").getLong(1500);
-			columnMaxHeight = columnNode.getNode("max-height").getInt(5);
+			CommentedConfigurationNode columnNode = abilityNode.node("column");
+			columnCooldown = columnNode.node("cooldown").getLong(1500);
+			columnMaxHeight = columnNode.node("max-height").getInt(5);
 
-			CommentedConfigurationNode fieldNode = abilityNode.getNode("field");
+			CommentedConfigurationNode fieldNode = abilityNode.node("field");
 
-			fieldCooldown = fieldNode.getNode("cooldown").getLong(5000);
-			radius = fieldNode.getNode("radius").getDouble(10.0);
+			fieldCooldown = fieldNode.node("cooldown").getLong(5000);
+			radius = fieldNode.node("radius").getDouble(10.0);
 		}
 	}
 }
