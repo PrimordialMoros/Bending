@@ -46,7 +46,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-// TODO scale cooldown based on amount of pillars?
 public class Collapse extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
@@ -96,7 +95,7 @@ public class Collapse extends AbilityInstance implements Ability {
 			getBottomValid(origin).flatMap(this::createPillar).ifPresent(pillars::add);
 		}
 		if (!pillars.isEmpty()) {
-			user.setCooldown(getDescription(), sneak ? userConfig.wallCooldown : userConfig.columnCooldown);
+			user.setCooldown(getDescription(), userConfig.cooldown);
 			removalPolicy = Policies.builder().build();
 			return true;
 		}
@@ -159,11 +158,9 @@ public class Collapse extends AbilityInstance implements Ability {
 		@Attribute(Attribute.RADIUS)
 		public double radius;
 		@Attribute(Attribute.COOLDOWN)
-		public long columnCooldown;
+		public long cooldown;
 		@Attribute(Attribute.HEIGHT)
 		public int maxHeight;
-		@Attribute(Attribute.COOLDOWN)
-		public long wallCooldown;
 
 		@Override
 		public void onConfigReload() {
@@ -172,8 +169,7 @@ public class Collapse extends AbilityInstance implements Ability {
 			selectRange = abilityNode.node("select-range").getDouble(20.0);
 			radius = abilityNode.node("radius").getDouble(5.0);
 			maxHeight = abilityNode.node("max-height").getInt(6);
-			columnCooldown = abilityNode.node("column", "cooldown").getLong(500);
-			wallCooldown = abilityNode.node("wall", "cooldown").getLong(500);
+			cooldown = abilityNode.node("cooldown").getLong(500);
 		}
 	}
 }

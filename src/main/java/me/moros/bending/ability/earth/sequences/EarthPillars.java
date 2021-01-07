@@ -40,17 +40,18 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;
 
-// TODO scale based on fallen distance
 public class EarthPillars extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
@@ -64,6 +65,8 @@ public class EarthPillars extends AbilityInstance implements Ability {
 	private final Collection<Entity> affectedEntities = new HashSet<>();
 	private Predicate<Block> predicate;
 
+	private double factor;
+
 	public EarthPillars(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
@@ -73,15 +76,17 @@ public class EarthPillars extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
+		factor = 1;
 		if (method == ActivationMethod.FALL) {
-			if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
+			double dist = user.getEntity().getFallDistance();
+			if (dist < userConfig.fallThreshold || user.isSneaking()) {
 				return false;
 			}
+			factor += FastMath.min(userConfig.maxScaleFactor, (dist - userConfig.fallThreshold) / (8 * userConfig.fallThreshold));
 		}
 
 		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-
-		Collider collider = new Sphere(user.getLocation(), userConfig.radius);
+		Collider collider = new Sphere(user.getLocation(), userConfig.radius * factor);
 		CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
 
 		if (!pillars.isEmpty()) {
@@ -114,7 +119,8 @@ public class EarthPillars extends AbilityInstance implements Ability {
 			if (unique) {
 				ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
 					.count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
-				Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(3).ifPresent(pillars::add);
+				int length = NumberConversions.floor(3 * factor);
+				Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(length).ifPresent(pillars::add);
 			}
 			return true;
 		}
@@ -145,8 +151,8 @@ public class EarthPillars extends AbilityInstance implements Ability {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) return false;
 			affectedEntities.add(entity);
-			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup).clampVelocity());
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
+			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
 			return true;
 		}
 	}
@@ -161,6 +167,7 @@ public class EarthPillars extends AbilityInstance implements Ability {
 		@Attribute(Attribute.STRENGTH)
 		private double knockup;
 
+		public double maxScaleFactor;
 		public double fallThreshold;
 
 		@Override
@@ -172,6 +179,7 @@ public class EarthPillars extends AbilityInstance implements Ability {
 			damage = abilityNode.node("damage").getDouble(2.0);
 			knockup = abilityNode.node("knock-up").getDouble(1.2);
 
+			maxScaleFactor = abilityNode.node("max-scale-factor").getDouble(1.5);
 			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
 		}
 	}

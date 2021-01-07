@@ -76,7 +76,6 @@ public class IceWall extends AbilityInstance implements Ability {
 
 		Block targetBlock = WorldMethods.rayTraceBlocks(user.getWorld(), user.getRay(userConfig.selectRange)).orElse(null);
 		if (targetBlock != null && WallData.attemptDamageWall(Collections.singletonList(targetBlock), 0)) {
-			// TODO damage nearby targets?
 			return false;
 		}
 

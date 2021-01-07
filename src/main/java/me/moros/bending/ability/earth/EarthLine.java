@@ -51,6 +51,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
@@ -222,7 +223,6 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 	}
 
-	// TODO add metal/magma modifiers on damage
 	private class Line extends AbstractLine {
 		private boolean raisedSpikes = false;
 		private boolean imprisoned = false;
@@ -249,6 +249,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
+			double damage = userConfig.damage;
 			switch (mode) {
 				case NORMAL:
 					raiseSpikes();
@@ -257,10 +258,11 @@ public class EarthLine extends AbilityInstance implements Ability {
 					imprisonTarget((LivingEntity) entity);
 					return true;
 				case MAGMA:
+					damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
 					FireTick.LARGER.apply(entity, 40);
 					break;
 			}
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+			DamageUtil.damageEntity(entity, user, damage, getDescription());
 			return true;
 		}
 

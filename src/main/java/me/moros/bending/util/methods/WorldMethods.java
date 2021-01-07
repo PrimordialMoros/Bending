@@ -306,4 +306,15 @@ public final class WorldMethods {
 		}
 		return false;
 	}
+
+	public static boolean isDay(@NonNull World world) {
+		if (world.getEnvironment() != World.Environment.NORMAL) return false;
+		return world.isDayTime();
+	}
+
+	public static boolean isNight(@NonNull World world) {
+		if (world.getEnvironment() != World.Environment.NORMAL) return false;
+		return !world.isDayTime();
+	}
+
 }

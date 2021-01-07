@@ -290,10 +290,10 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 		switch (mode) {
 			case METAL:
-				damage = userConfig.damage * 1.25;
+				damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
 				break;
 			case MAGMA:
-				damage = userConfig.damage * 1.5;
+				damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
 				break;
 			default:
 				damage = userConfig.damage;

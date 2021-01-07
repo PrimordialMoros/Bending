@@ -209,9 +209,17 @@ public class EarthBlast extends AbilityInstance implements Ability {
 	}
 
 	private class Blast extends AbstractBlockShot {
+		private final double damage;
 		public Blast(User user, Block block) {
 			super(user, block, userConfig.range, 100);
 			allowUnderWater = false;
+			if (EarthMaterials.isMetalBendable(block)) {
+				damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
+			} else if (EarthMaterials.isLavaBendable(block)) {
+				damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
+			} else {
+				damage = userConfig.damage;
+			}
 		}
 
 		@Override
@@ -220,7 +228,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
 			entity.setVelocity(push.clampVelocity());
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+			DamageUtil.damageEntity(entity, user, damage, getDescription());
 			return true;
 		}
 

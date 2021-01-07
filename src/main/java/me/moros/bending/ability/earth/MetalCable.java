@@ -49,6 +49,7 @@ import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
@@ -152,7 +153,14 @@ public class MetalCable extends AbilityInstance implements Ability {
 	}
 
 	private boolean onProjectileHit(Entity entity) {
-		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+		Material mat = projectile.getFallingBlock().getBlockData().getMaterial();
+		double damage = userConfig.damage;
+		if (EarthMaterials.METAL_BENDABLE.isTagged(mat)) {
+			damage *= BendingProperties.METAL_MODIFIER;
+		} else if (EarthMaterials.LAVA_BENDABLE.isTagged(mat)) {
+			damage *= BendingProperties.MAGMA_MODIFIER;
+		}
+		DamageUtil.damageEntity(entity, user, damage, getDescription());
 		return true;
 	}
 
