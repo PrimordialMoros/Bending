@@ -85,7 +85,7 @@ publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
         pom {
-            name.set("Bending")
+            name.set(project.name.toLowerCase())
             description.set("Modern Bending plugin for Minecraft servers running PaperMC")
             url.set("https://github.com/PrimordialMoros/Bending")
             licenses {

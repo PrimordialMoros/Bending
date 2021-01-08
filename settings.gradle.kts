@@ -1,1 +1,1 @@
-rootProject.name = "bending"
+rootProject.name = "Bending"
