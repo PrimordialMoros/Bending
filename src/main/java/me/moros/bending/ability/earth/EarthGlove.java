@@ -208,17 +208,13 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	}
 
 	private boolean launchEarthGlove() {
-		Vector3 gloveSpawnLocation;
-		Vector3 offset = UserMethods.PLAYER_OFFSET.add(user.getDirection().scalarMultiply(0.4));
 		Side side;
-		if (lastUsedSide.getOrDefault(user.getEntity().getUniqueId(), Side.RIGHT) == Side.RIGHT) {
-			gloveSpawnLocation = UserMethods.getRightSide(user).add(offset);
+		if (lastUsedSide.getOrDefault(user.getEntity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
 			side = Side.LEFT;
 		} else {
-			gloveSpawnLocation = UserMethods.getLeftSide(user).add(offset);
 			side = Side.RIGHT;
 		}
-
+		Vector3 gloveSpawnLocation = UserMethods.getHandSide(user, side == Side.RIGHT);
 		// TODO check for cooldown
 		/*if (user.isOnCooldown(side)) {
 			return false;

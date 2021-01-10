@@ -161,6 +161,13 @@ public final class BlockMethods {
 		return sources >= 2;
 	}
 
+	/**
+	 * Calculate and collect a ring of blocks.
+	 * Note: ring blocks are in clockwise order and are unique.
+	 * @param center the center block
+	 * @param radius the radius of the circle
+	 * @return a collection of blocks representing the ring
+	 */
 	public static @NonNull Collection<Block> createBlockRing(@NonNull Block center, double radius) {
 		Vector3 centerVector = new Vector3(center).add(Vector3.HALF);
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / (5 * radius), RotationConvention.VECTOR_OPERATOR);
@@ -168,6 +175,11 @@ public final class BlockMethods {
 			.stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
 	}
 
+	/**
+	 * Attempts to break the specified block if it's a valid plant ({@link MaterialUtil#BREAKABLE_PLANTS}).
+	 * @param block the block to break
+	 * @return true if the plant was broken, false otherwise
+	 */
 	public static boolean breakPlant(@NonNull Block block) {
 		if (MaterialUtil.BREAKABLE_PLANTS.isTagged(block)) {
 			if (TempBlock.manager.isTemp(block)) return false;

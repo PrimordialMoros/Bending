@@ -166,11 +166,10 @@ public class Vector3 extends Vector3D {
 		return new Vector3(getX(), getY(), value);
 	}
 
-	public Vector3 crossProduct(final Vector<Euclidean3D> v) {
-		final Vector3 v3 = (Vector3) v;
-		return new Vector3(MathArrays.linearCombination(getY(), v3.getZ(), -getZ(), v3.getY()),
-			MathArrays.linearCombination(getZ(), v3.getX(), -getX(), v3.getZ()),
-			MathArrays.linearCombination(getX(), v3.getY(), -getY(), v3.getX()));
+	public Vector3 crossProduct(Vector3 v) {
+		return new Vector3(MathArrays.linearCombination(getY(), v.getZ(), -getZ(), v.getY()),
+			MathArrays.linearCombination(getZ(), v.getX(), -getX(), v.getZ()),
+			MathArrays.linearCombination(getX(), v.getY(), -getY(), v.getX()));
 	}
 
 	public double component(int axis) {

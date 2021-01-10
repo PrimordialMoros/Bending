@@ -81,8 +81,9 @@ public abstract class AbstractBlockShot implements Updatable {
 		redirect();
 		settingUp = true;
 		firstDestination = getCurrent().add(Vector3.HALF);
-		if (target.getY() - current.getY() > 2) {
-			firstDestination = firstDestination.setY(target.getY() - 1);
+		int targetY = NumberConversions.floor(target.getY());
+		if (targetY > current.getY() + 2) {
+			firstDestination = firstDestination.setY(targetY + 0.5);
 		} else if (current.getY() > user.getEyeLocation().getY() && current.getRelative(BlockFace.UP).isPassable()) {
 			firstDestination = firstDestination.subtract(new Vector3(0, 2, 0));
 		} else if (current.getRelative(BlockFace.UP).isPassable() && current.getRelative(BlockFace.UP, 2).isPassable()) {
@@ -111,9 +112,6 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (currentVector.distanceSq(user.getEyeLocation()) > range * range) {
 			return UpdateResult.REMOVE;
 		}
-		if (currentVector.distanceSq(target) < 0.8) {
-			return UpdateResult.REMOVE;
-		}
 
 		current = currentVector.toBlock(user.getWorld());
 		previousBlock = current;
@@ -138,8 +136,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		} else {
 			return UpdateResult.REMOVE;
 		}
-
-		return UpdateResult.CONTINUE;
+		return currentVector.distanceSq(target) < 0.8 ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
 	public void redirect() {

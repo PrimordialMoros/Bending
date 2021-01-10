@@ -221,7 +221,7 @@ public class BendingCommand extends BaseCommand {
 			Message.CLEAR_ALL_SLOTS.send(player);
 			return;
 		}
-		player.setSlotAbility(slot, null);
+		player.clearSlot(slot);
 		Message.CLEAR_SLOT.send(player, slot);
 	}
 

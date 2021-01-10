@@ -38,7 +38,7 @@ public final class UserMethods {
 	}
 
 	/**
-	 * Note: the returned value includes an offset and is ideal for showing charging particles
+	 * Note: The returned value includes an offset and is ideal for showing charging particles.
 	 * @param user the user to check
 	 * @return a vector which represents the user's main hand location
 	 * @see #getRightSide(User)
@@ -53,13 +53,21 @@ public final class UserMethods {
 		return user.getEyeLocation().add(dir);
 	}
 
+	/**
+	 * Gets the user's specified hand position.
+	 * @param user the user to check
+	 * @param right whether to get the right hand
+	 * @return a vector which represents the user's specified hand location
+	 */
 	public static Vector3 getHandSide(@NonNull User user, boolean right) {
 		Vector3 dir = user.getDirection().scalarMultiply(0.4);
 		return right ? getRightSide(user).add(PLAYER_OFFSET).add(dir) : getLeftSide(user).add(PLAYER_OFFSET).add(dir);
 	}
 
 	/**
-	 * Gets the user's right side
+	 * Gets the user's right side.
+	 * @param user the user to check
+	 * @return a vector which represents the user's right side
 	 */
 	public static Vector3 getRightSide(@NonNull User user) {
 		double angle = FastMath.toRadians(user.getYaw());
@@ -67,7 +75,9 @@ public final class UserMethods {
 	}
 
 	/**
-	 * Gets the user's left side
+	 * Gets the user's left side.
+	 * @param user the user to check
+	 * @return a vector which represents the user's left side
 	 */
 	public static Vector3 getLeftSide(@NonNull User user) {
 		double angle = FastMath.toRadians(user.getYaw());

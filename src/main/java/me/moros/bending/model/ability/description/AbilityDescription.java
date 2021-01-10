@@ -60,7 +60,7 @@ public class AbilityDescription {
 		constructor = builder.constructor;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
-		//createAbility(); // Init classes to get config values for description and instructions
+		createAbility(); // Init classes to get config values for description and instructions
 		description = getConfigNode().node("description").getString("");
 		instructions = getConfigNode().node("instructions").getString("");
 		canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
