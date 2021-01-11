@@ -39,10 +39,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbilityManager {
-	private final Map<User, Collection<Ability>> globalInstances = new HashMap<>();
-	private final Collection<UserInstance> addQueue = new ArrayList<>();
+	private final Map<User, Collection<Ability>> globalInstances;
+	private final Collection<UserInstance> addQueue;
 
 	protected AbilityManager() {
+		globalInstances = new HashMap<>(64);
+		addQueue = new ArrayList<>(64);
 	}
 
 	private static class UserInstance {
@@ -128,11 +130,6 @@ public class AbilityManager {
 			}
 		}
 		return destroyed;
-	}
-
-	// Get the number of active abilities.
-	public int getInstanceCount() {
-		return globalInstances.values().stream().mapToInt(Collection::size).sum();
 	}
 
 	private @NonNull Stream<Ability> getQueuedInstances() {

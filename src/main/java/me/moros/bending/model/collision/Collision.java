@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.collision;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Ability;
 
 /**
@@ -41,11 +42,11 @@ public final class Collision {
 		this.secondCollider = secondCollider;
 	}
 
-	public Ability getFirstAbility() {
+	public @NonNull Ability getFirstAbility() {
 		return firstAbility;
 	}
 
-	public Ability getSecondAbility() {
+	public @NonNull Ability getSecondAbility() {
 		return secondAbility;
 	}
 
@@ -57,11 +58,11 @@ public final class Collision {
 		return removeSecond;
 	}
 
-	public Collider getFirstCollider() {
+	public @NonNull Collider getFirstCollider() {
 		return firstCollider;
 	}
 
-	public Collider getSecondCollider() {
+	public @NonNull Collider getSecondCollider() {
 		return secondCollider;
 	}
 }

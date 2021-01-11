@@ -20,10 +20,7 @@
 package me.moros.bending.game.manager;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.Bending;
-import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
@@ -32,13 +29,14 @@ import me.moros.bending.util.Tasker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-// TODO implement BVH and cache static ability colliders
-// Also will need profiling
+// TODO implement BVH and profile
 public final class CollisionManager {
-	private final Collection<RegisteredCollision> collisions = new ArrayList<>();
+	private static final Collection<RegisteredCollision> collisions = new ArrayList<>();
 	private final AbilityManager manager;
 
 	public CollisionManager(@NonNull AbilityManager manager) {
@@ -46,15 +44,9 @@ public final class CollisionManager {
 		Tasker.createTaskTimer(this::run, 5, 1);
 	}
 
-	public void clear() {
-		collisions.clear();
-	}
-
 	private void run() {
-		if (manager.getInstanceCount() < 2) return;
 		Collection<Ability> instances = manager.getInstances().collect(Collectors.toList());
 		Map<Ability, Collection<Collider>> colliderCache = new HashMap<>();
-
 		for (RegisteredCollision registeredCollision : collisions) {
 			Collection<Ability> firstAbilities = instances.stream()
 				.filter(ability -> ability.getDescription().equals(registeredCollision.getFirst()))
@@ -83,16 +75,15 @@ public final class CollisionManager {
 	}
 
 	private void handleCollision(Ability first, Ability second, Collider collider1, Collider collider2, RegisteredCollision collision) {
-		Collision firstCollision = new Collision(first, second, collision.shouldRemoveFirst(), collision.shouldRemoveSecond(), collider1, collider2);
-		Collision secondCollision = new Collision(second, first, collision.shouldRemoveSecond(), collision.shouldRemoveFirst(), collider2, collider1);
-		first.onCollision(firstCollision);
-		second.onCollision(secondCollision);
+		first.onCollision(new Collision(first, second, collision.shouldRemoveFirst(), collision.shouldRemoveSecond(), collider1, collider2));
+		second.onCollision(new Collision(second, first, collision.shouldRemoveSecond(), collision.shouldRemoveFirst(), collider2, collider1));
 	}
 
-	protected void registerCollision(@NonNull AbilityDescription first, @NonNull AbilityDescription second, boolean removeFirst, boolean removeSecond) {
-		AbilityRegistry registry = Bending.getGame().getAbilityRegistry();
-		if (registry.isRegistered(first) && registry.isRegistered(second)) {
-			collisions.add(new RegisteredCollision(first, second, removeFirst, removeSecond));
-		}
+	public static int registerCollisions(@NonNull Collection<RegisteredCollision> newCollisions) {
+		Set<RegisteredCollision> collisionSet = new HashSet<>(newCollisions);
+		collisions.clear();
+		collisions.addAll(collisionSet);
+		//collisions.stream().map(RegisteredCollision::toString).forEach(Bending.getLog()::info);
+		return collisions.size();
 	}
 }

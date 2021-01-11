@@ -21,6 +21,7 @@ package me.moros.bending.model.collision;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Represents a possible collision between 2 abilities.
@@ -52,5 +53,25 @@ public final class RegisteredCollision {
 
 	public boolean shouldRemoveSecond() {
 		return removeSecond;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		RegisteredCollision that = (RegisteredCollision) obj;
+		return (first.equals(that.first) && second.equals(that.second)) || (first.equals(that.second) && second.equals(that.first));
+	}
+
+	@Override
+	public int hashCode() {
+		int maxHash = FastMath.max(first.hashCode(), second.hashCode());
+		int minHash = FastMath.min(first.hashCode(), second.hashCode());
+		return minHash * 31 + maxHash;
+	}
+
+	@Override
+	public String toString() {
+		return first.getName() + " (Remove: " + removeFirst + ") - " + second.getName() + "(Remove: " + removeSecond + ")";
 	}
 }

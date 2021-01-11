@@ -74,7 +74,7 @@ public final class Game {
 		activationController = new ActivationController(this);
 		boardManager = new BoardManager();
 
-		AbilityInitializer.loadAbilities(this);
+		new AbilityInitializer(this);
 		loadStorage();
 
 		TempArmor.init();
@@ -105,7 +105,6 @@ public final class Game {
 	public void reload() {
 		worldManager.destroyAllInstances();
 		sequenceManager.clear();
-		worldManager.clearCollisions();
 		removeTemporary();
 		ConfigManager.reload();
 		Bending.getTranslationManager().reload();

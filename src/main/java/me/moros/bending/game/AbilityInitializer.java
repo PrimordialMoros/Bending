@@ -32,11 +32,14 @@ import me.moros.bending.ability.fire.sequences.*;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
 import me.moros.bending.ability.water.sequences.*;
+import me.moros.bending.game.manager.CollisionManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.collision.CollisionBuilder;
+import me.moros.bending.model.collision.RegisteredCollision;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,26 +49,39 @@ import java.util.Map;
 /**
  * Used to initialize all ability descriptions, sequences and collisions
  */
-// TODO register collisions
 public final class AbilityInitializer {
-	public static void loadAbilities(@NonNull Game game) {
-		Collection<AbilityDescription> abilities = new ArrayList<>(64);
-		Map<AbilityDescription, Sequence> sequences = new HashMap<>();
+	private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
+	private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
+	private final AbilityRegistry registry;
 
-		initAir(abilities, sequences);
-		initWater(abilities, sequences);
-		initEarth(abilities, sequences);
-		initFire(abilities, sequences);
+	protected AbilityInitializer(@NonNull Game game) {
+		registry = game.getAbilityRegistry();
+		initAir();
+		initWater();
+		initEarth();
+		initFire();
 
-		int abilityAmount = game.getAbilityRegistry().registerAbilities(abilities);
+		int abilityAmount = registry.registerAbilities(abilities);
 		int sequenceAmount = game.getSequenceManager().registerSequences(sequences);
+		int collisionAmount = CollisionManager.registerCollisions(buildCollisions());
+
 		Bending.getLog().info("Registered " + abilityAmount + " abilities!");
 		Bending.getLog().info("Registered " + sequenceAmount + " sequences!");
-
-		game.getAbilityRegistry().getAbilities().forEach(AbilityDescription::createAbility);
+		Bending.getLog().info("Registered " + collisionAmount + " collisions!");
 	}
 
-	private static void initAir(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private Collection<RegisteredCollision> buildCollisions() {
+		return new CollisionBuilder(registry)
+			.addLayer("EarthGlove", "MetalCable")
+			.addSpecialLayer("AirSpout", "WaterSpout")
+			.addLayer("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation")
+			.addLayer("AirPunch", "AirBlade")
+			.addSpecialLayer("AirShield", "FireShield", "WallOfFire")
+			.addLayer("LavaDisk", "Combustion")
+			.build();
+	}
+
+	private void initAir() {
 		abilities.add(AbilityDescription.builder("AirAgility", AirAgility::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
 			.setCanBind(false).setHarmless(true).build());
@@ -113,7 +129,7 @@ public final class AbilityInitializer {
 		));
 	}
 
-	private static void initWater(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private void initWater() {
 		abilities.add(AbilityDescription.builder("FastSwim", FastSwim::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
@@ -200,7 +216,7 @@ public final class AbilityInitializer {
 		));
 	}
 
-	private static void initEarth(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private void initEarth() {
 		abilities.add(AbilityDescription.builder("DensityShift", DensityShift::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
 
@@ -283,7 +299,7 @@ public final class AbilityInitializer {
 		));
 	}
 
-	private static void initFire(Collection<AbilityDescription> abilities, Map<AbilityDescription, Sequence> sequences) {
+	private void initFire() {
 		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast::new)
 			.setElement(Element.FIRE).setActivation(ActivationMethod.PUNCH, ActivationMethod.SNEAK).build();
 		abilities.add(fireBlast);

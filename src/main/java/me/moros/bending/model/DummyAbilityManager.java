@@ -76,11 +76,6 @@ public final class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
-	public int getInstanceCount() {
-		return 0;
-	}
-
-	@Override
 	public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
 		return Stream.empty();
 	}

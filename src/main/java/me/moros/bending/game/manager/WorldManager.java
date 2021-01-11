@@ -60,10 +60,6 @@ public final class WorldManager {
 		return worlds.computeIfAbsent(world, WorldInstance::new).getAbilityManager();
 	}
 
-	public void clearCollisions() {
-		worlds.values().forEach(w -> w.getCollisionManager().clear());
-	}
-
 	public void update() {
 		worlds.values().forEach(w -> w.getAbilityManager().update());
 	}
