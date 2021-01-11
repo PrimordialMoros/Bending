@@ -22,7 +22,9 @@ package me.moros.bending.ability.air;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -38,6 +40,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -45,6 +48,7 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import java.util.Collection;
@@ -150,8 +154,16 @@ public class AirShield extends AbilityInstance implements Ability {
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
+		Ability collidedAbility = collision.getCollidedAbility();
+		if (collidedAbility instanceof FrostBreath) {
+			for (Block block : WorldMethods.getNearbyBlocks(getCenter().toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
+				BlockMethods.breakPlant(block);
+				if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
+					long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
+					TempBlock.create(block, Material.ICE, iceDuration, true);
+				}
+			}
 		}
 	}
 

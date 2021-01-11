@@ -32,7 +32,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -347,13 +346,6 @@ public class MetalCable extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(new Sphere(location, 0.8));
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	public static class CableTarget {

@@ -30,7 +30,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -264,13 +263,6 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (glove == null || returning) return Collections.emptyList();
 		return Collections.singletonList(new Sphere(location, 0.8));
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	public void shatterGlove() {

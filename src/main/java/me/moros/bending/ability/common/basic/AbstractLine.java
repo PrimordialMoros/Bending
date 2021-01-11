@@ -56,7 +56,6 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 	protected final double speed;
 
 	protected boolean locked = false;
-	protected boolean livingOnly = true;
 	protected boolean controllable = false;
 	protected boolean skipVertical = false;
 
@@ -98,7 +97,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		}
 
 		collider = new Sphere(location, 1);
-		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly)) {
+		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true)) {
 			return UpdateResult.REMOVE;
 		}
 

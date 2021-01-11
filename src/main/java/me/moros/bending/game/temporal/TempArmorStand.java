@@ -31,6 +31,8 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Objects;
+
 public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();
 	private final ArmorStand armorStand;
@@ -45,7 +47,7 @@ public class TempArmorStand implements Temporary {
 			entity.setInvulnerable(true);
 			entity.setVisible(false);
 			entity.setGravity(false);
-			entity.getEquipment().setHelmet(new ItemStack(material));
+			Objects.requireNonNull(entity.getEquipment()).setHelmet(new ItemStack(material));
 			entity.setMetadata(Metadata.NO_INTERACT, Metadata.emptyMetadata());
 		});
 

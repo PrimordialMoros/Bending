@@ -32,7 +32,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -93,7 +92,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 				if (method == ActivationMethod.SNEAK_RELEASE) {
 					blast.selectOrigin();
 					if (!Bending.getGame().getProtectionSystem().canBuild(user, blast.origin.toBlock(user.getWorld()))) {
-						Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, blast);
+						Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(blast);
 					}
 				} else {
 					blast.launch();
@@ -162,13 +161,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	}
 
 	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
-	}
-
-	@Override
 	public @NonNull User getUser() {
 		return user;
 	}
@@ -200,7 +192,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		private long nextRenderTime;
 
 		public AirStream(User user, Ray ray) {
-			super(user, ray, userConfig.speed, 1.25);
+			super(user, ray, userConfig.speed, 1.3);
 			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
 		}
 

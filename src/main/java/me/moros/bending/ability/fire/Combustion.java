@@ -170,13 +170,12 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
-		if (collision.getSecondAbility() instanceof Combustion) {
+		Ability collidedAbility = collision.getCollidedAbility();
+		if (collidedAbility instanceof Combustion) {
 			createExplosion(location, userConfig.power * 2, userConfig.damage * 2);
-		} else if (collision.getSecondAbility() instanceof Explosive || collision.getSecondAbility().getDescription().getElement() == Element.EARTH) {
+			((Combustion) collidedAbility).hasExploded = true;
+		} else if (collidedAbility instanceof Explosive || collidedAbility.getDescription().getElement() == Element.EARTH) {
 			createExplosion(location, userConfig.power, userConfig.damage);
-		}
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
 		}
 	}
 
@@ -184,6 +183,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
 	}
 
+	@Override
 	public void explode() {
 		createExplosion(location, userConfig.power, userConfig.damage);
 	}

@@ -25,6 +25,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -153,8 +154,18 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
+		Ability collidedAbility = collision.getCollidedAbility();
+		if (factor == userConfig.chargeFactor && collision.shouldRemoveSelf()) {
+			String name = collidedAbility.getDescription().getName();
+			if (AbilityInitializer.layer2.contains(name)) {
+				collision.setRemoveCollided(true);
+			} else {
+				collision.setRemoveSelf(false);
+			}
+		}
+		if (collidedAbility instanceof FireBlast) {
+			double collidedFactor = ((FireBlast) collidedAbility).factor;
+			if (factor > collidedFactor + 0.1) collision.setRemoveSelf(false);
 		}
 	}
 

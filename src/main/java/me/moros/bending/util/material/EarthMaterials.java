@@ -30,11 +30,11 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 
 public class EarthMaterials {
-	public static MaterialSetTag EARTH_BENDABLE;
-	public static MaterialSetTag SAND_BENDABLE;
-	public static MaterialSetTag METAL_BENDABLE;
-	public static MaterialSetTag LAVA_BENDABLE;
-	public static MaterialSetTag ALL;
+	public static final MaterialSetTag EARTH_BENDABLE;
+	public static final MaterialSetTag SAND_BENDABLE;
+	public static final MaterialSetTag METAL_BENDABLE;
+	public static final MaterialSetTag LAVA_BENDABLE;
+	public static final MaterialSetTag ALL;
 
 	static {
 		NamespacedKey key = Bending.getLayer().getMaterialKey();

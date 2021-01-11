@@ -61,7 +61,7 @@ public class Bending extends JavaPlugin {
 	public void onEnable() {
 		new MetricsLite(this, 8717);
 		plugin = this;
-		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass()));
+		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
 		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
 		layer = new PersistentDataLayer(this);

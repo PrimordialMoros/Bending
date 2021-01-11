@@ -110,7 +110,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
-		Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
+		Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(this);
 	}
 
 	@Override

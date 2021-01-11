@@ -52,6 +52,11 @@ public final class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
+	public int getInstancesCount() {
+		return 0;
+	}
+
+	@Override
 	public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
 		return false;
 	}
@@ -62,7 +67,7 @@ public final class DummyAbilityManager extends AbilityManager {
 	}
 
 	@Override
-	public void destroyInstance(@NonNull User user, @NonNull Ability ability) {
+	public void destroyInstance(@NonNull Ability ability) {
 	}
 
 	@Override

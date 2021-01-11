@@ -19,6 +19,8 @@
 
 package me.moros.bending.game.manager;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
@@ -30,21 +32,19 @@ import me.moros.bending.model.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AbilityManager {
-	private final Map<User, Collection<Ability>> globalInstances;
+	private final Multimap<User, Ability> globalInstances;
 	private final Collection<UserInstance> addQueue;
 
+	@SuppressWarnings("UnstableApiUsage")
 	protected AbilityManager() {
-		globalInstances = new HashMap<>(64);
-		addQueue = new ArrayList<>(64);
+		globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
+		addQueue = new ArrayList<>(32);
 	}
 
 	private static class UserInstance {
@@ -65,17 +65,16 @@ public class AbilityManager {
 		}
 	}
 
-	// Add a new ability instance that should be updated every tick
-	// This is deferred until next update to prevent concurrent modifications.
 	public void addAbility(@NonNull User user, @NonNull Ability instance) {
 		addQueue.add(new UserInstance(user, instance));
 	}
 
 	public void changeOwner(@NonNull Ability ability, @NonNull User user) {
 		if (ability.getUser().equals(user)) return;
-		globalInstances.getOrDefault(ability.getUser(), Collections.emptyList()).remove(ability);
-		globalInstances.computeIfAbsent(user, k -> new ArrayList<>()).add(ability);
-		ability.setUser(user);
+		if (globalInstances.remove(ability.getUser(), ability)) {
+			globalInstances.put(user, ability);
+			ability.setUser(user);
+		}
 	}
 
 	public void createPassives(@NonNull User user) {
@@ -93,9 +92,11 @@ public class AbilityManager {
 	}
 
 	public void clearPassives(@NonNull User user) {
-		getUserInstances(user)
-			.filter(a -> a.getDescription().isActivatedBy(ActivationMethod.PASSIVE))
-			.forEach(this::destroyAbility);
+		getUserInstances(user).filter(a -> a.getDescription().isActivatedBy(ActivationMethod.PASSIVE)).forEach(this::destroyAbility);
+	}
+
+	public int getInstancesCount() {
+		return globalInstances.size();
 	}
 
 	public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
@@ -106,11 +107,10 @@ public class AbilityManager {
 		return hasAbility(user, desc.createAbility().getClass());
 	}
 
-	public void destroyInstance(@NonNull User user, @NonNull Ability ability) {
-		if (!globalInstances.containsKey(user)) return;
-		Collection<Ability> abilities = globalInstances.get(user);
-		abilities.remove(ability);
-		destroyAbility(ability);
+	public void destroyInstance(@NonNull Ability ability) {
+		if (globalInstances.remove(ability.getUser(), ability)) {
+			destroyAbility(ability);
+		}
 	}
 
 	public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
@@ -118,10 +118,9 @@ public class AbilityManager {
 	}
 
 	public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
-		if (!globalInstances.containsKey(user)) return false;
-		Collection<Ability> abilities = globalInstances.get(user);
 		boolean destroyed = false;
-		for (Iterator<Ability> iterator = abilities.iterator(); iterator.hasNext(); ) {
+		Iterator<Ability> iterator = globalInstances.get(user).iterator();
+		while (iterator.hasNext()) {
 			Ability ability = iterator.next();
 			if (ability.getClass() == type) {
 				iterator.remove();
@@ -132,16 +131,8 @@ public class AbilityManager {
 		return destroyed;
 	}
 
-	private @NonNull Stream<Ability> getQueuedInstances() {
-		return addQueue.stream().map(UserInstance::getAbility);
-	}
-
-	private @NonNull Stream<Ability> getQueuedUserInstances(@NonNull User user) {
-		return addQueue.stream().filter(i -> i.getUser().equals(user)).map(UserInstance::getAbility);
-	}
-
 	public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
-		return Stream.concat(getQueuedUserInstances(user), globalInstances.getOrDefault(user, Collections.emptyList()).stream());
+		return globalInstances.get(user).stream();
 	}
 
 	public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
@@ -153,59 +144,42 @@ public class AbilityManager {
 	}
 
 	public @NonNull Stream<Ability> getInstances() {
-		return Stream.concat(getQueuedInstances(), globalInstances.values().stream().flatMap(Collection::stream));
+		return globalInstances.values().stream();
 	}
 
 	public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
 		return getInstances().filter(a -> a.getClass() == type).map(type::cast);
 	}
 
-	// Destroy every instance created by a user.
-	// Calls destroy on the ability before removing it.
 	public void destroyUserInstances(@NonNull User user) {
-		if (!globalInstances.containsKey(user)) return;
-		globalInstances.get(user).forEach(this::destroyAbility);
-		globalInstances.remove(user);
+		globalInstances.removeAll(user).forEach(this::destroyAbility);
 	}
 
-	// Destroy all instances created by every user.
-	// Calls destroy on the ability before removing it.
 	public void destroyAllInstances() {
-		globalInstances.values().forEach(abilities -> abilities.forEach(this::destroyAbility));
+		globalInstances.values().forEach(this::destroyAbility);
 		globalInstances.clear();
 	}
 
 	// Updates each ability every tick. Destroys the ability if ability.update() returns UpdateResult.Remove.
 	public void update() {
 		for (UserInstance i : addQueue) {
-			globalInstances.computeIfAbsent(i.getUser(), key -> new ArrayList<>()).add(i.getAbility());
+			globalInstances.put(i.getUser(), i.getAbility());
 		}
 		addQueue.clear();
-		Iterator<Map.Entry<User, Collection<Ability>>> globalIterator = globalInstances.entrySet().iterator();
-		// Store the removed abilities here so any abilities added during Ability#destroy won't be concurrent.
-		Collection<Ability> removed = new ArrayList<>();
+		Iterator<Ability> globalIterator = globalInstances.values().iterator();
 		while (globalIterator.hasNext()) {
-			Map.Entry<User, Collection<Ability>> entry = globalIterator.next();
-			Collection<Ability> instances = entry.getValue();
-			Iterator<Ability> iterator = instances.iterator();
-			while (iterator.hasNext()) {
-				Ability ability = iterator.next();
-				UpdateResult result = UpdateResult.REMOVE;
-				try (MCTiming timing = Bending.getTimingManager().of(ability.getDescription().getName()).startTiming()) {
-					result = ability.update();
-				} catch (Exception e) {
-					Bending.getLog().warn(e.getMessage());
-				}
-				if (result == UpdateResult.REMOVE) {
-					removed.add(ability);
-					iterator.remove();
-				}
+			Ability ability = globalIterator.next();
+			UpdateResult result = UpdateResult.REMOVE;
+			try (MCTiming timing = Bending.getTimingManager().of(ability.getDescription().getName()).startTiming()) {
+				result = ability.update();
+			} catch (Exception e) {
+				Bending.getLog().warn(e.getMessage());
 			}
-			if (entry.getValue().isEmpty()) {
+			if (result == UpdateResult.REMOVE) {
 				globalIterator.remove();
+				destroyAbility(ability);
 			}
 		}
-		removed.forEach(this::destroyAbility);
 	}
 
 	private void destroyAbility(@NonNull Ability ability) {

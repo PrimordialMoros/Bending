@@ -43,7 +43,6 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -214,13 +213,6 @@ public class EarthLine extends AbilityInstance implements Ability {
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (earthLine == null) return Collections.emptyList();
 		return Collections.singletonList(earthLine.getCollider());
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	private class Line extends AbstractLine {

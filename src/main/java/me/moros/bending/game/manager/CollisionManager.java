@@ -24,7 +24,6 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
-import me.moros.bending.util.Tasker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,12 +38,12 @@ public final class CollisionManager {
 	private static final Collection<RegisteredCollision> collisions = new ArrayList<>();
 	private final AbilityManager manager;
 
-	public CollisionManager(@NonNull AbilityManager manager) {
+	protected CollisionManager(@NonNull AbilityManager manager) {
 		this.manager = manager;
-		Tasker.createTaskTimer(this::run, 5, 1);
 	}
 
-	private void run() {
+	public void update() {
+		if (manager.getInstancesCount() < 2) return;
 		Collection<Ability> instances = manager.getInstances().collect(Collectors.toList());
 		Map<Ability, Collection<Collider>> colliderCache = new HashMap<>();
 		for (RegisteredCollision registeredCollision : collisions) {
@@ -74,9 +73,12 @@ public final class CollisionManager {
 		}
 	}
 
-	private void handleCollision(Ability first, Ability second, Collider collider1, Collider collider2, RegisteredCollision collision) {
-		first.onCollision(new Collision(first, second, collision.shouldRemoveFirst(), collision.shouldRemoveSecond(), collider1, collider2));
-		second.onCollision(new Collision(second, first, collision.shouldRemoveSecond(), collision.shouldRemoveFirst(), collider2, collider1));
+	private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, RegisteredCollision rc) {
+		Collision.CollisionData data = new Collision.CollisionData(first, second, c1, c2, rc.shouldRemoveFirst(), rc.shouldRemoveSecond());
+		first.onCollision(data.asCollision());
+		second.onCollision(data.asInverseCollision());
+		if (data.shouldRemoveFirst()) manager.destroyInstance(first);
+		if (data.shouldRemoveSecond()) manager.destroyInstance(second);
 	}
 
 	public static int registerCollisions(@NonNull Collection<RegisteredCollision> newCollisions) {

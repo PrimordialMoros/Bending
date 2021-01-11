@@ -36,7 +36,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -246,13 +245,6 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (manip == null) return Collections.emptyList();
 		return Collections.singletonList(manip.getCollider());
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	private class Manip extends AbstractBlockShot {

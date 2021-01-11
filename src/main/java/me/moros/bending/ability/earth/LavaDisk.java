@@ -35,7 +35,6 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -196,13 +195,6 @@ public class LavaDisk extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return launched ? Collections.singletonList(new Sphere(location, 1.4)) : Collections.emptyList();
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	private boolean damageEntity(Entity entity, double damage) {

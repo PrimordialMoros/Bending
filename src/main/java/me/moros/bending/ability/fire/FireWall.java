@@ -31,7 +31,6 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.math.Vector3;
@@ -161,13 +160,6 @@ public class FireWall extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(collider);
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	public double getWidth() {

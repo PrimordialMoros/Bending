@@ -39,11 +39,11 @@ import java.util.Map;
 
 public final class MaterialUtil {
 	public static final Map<Material, Material> COOKABLE = new HashMap<>();
-	public static MaterialSetTag BREAKABLE_PLANTS;
-	public static MaterialSetTag TRANSPARENT;
-	public static MaterialSetTag CONTAINERS;
-	public static MaterialSetTag UNBREAKABLES;
-	public static MaterialSetTag METAL_ARMOR;
+	public static final MaterialSetTag BREAKABLE_PLANTS;
+	public static final MaterialSetTag TRANSPARENT;
+	public static final MaterialSetTag CONTAINERS;
+	public static final MaterialSetTag UNBREAKABLES;
+	public static final MaterialSetTag METAL_ARMOR;
 
 	static {
 		COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
@@ -59,9 +59,6 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.STICK, Material.TORCH);
 
 		NamespacedKey key = Bending.getLayer().getMaterialKey();
-
-		Bending.getLog().info("Key: "+key.getKey());
-
 		BREAKABLE_PLANTS = new MaterialSetTag(key)
 			.add(Tag.SAPLINGS.getValues())
 			.add(Tag.FLOWERS.getValues())

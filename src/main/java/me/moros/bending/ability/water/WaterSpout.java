@@ -32,7 +32,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -124,13 +123,6 @@ public class WaterSpout extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.singletonList(spout.getCollider());
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	public void handleMovement(Vector velocity) {

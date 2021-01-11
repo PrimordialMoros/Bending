@@ -42,14 +42,23 @@ import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Used to initialize all ability descriptions, sequences and collisions
  */
 public final class AbilityInitializer {
+	public static final List<String> spoutLayer = Arrays.asList("AirSpout", "WaterSpout");
+	public static final List<String> shieldLayer = Arrays.asList("AirShield", "FireShield", "WallOfFire");
+	public static final List<String> layer0 = Arrays.asList("EarthGlove", "MetalCable");
+	public static final List<String> layer1 = Arrays.asList("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
+	public static final List<String> layer2 = Arrays.asList("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
+	public static final List<String> layer3 = Arrays.asList("LavaDisk", "Combustion");
+
 	private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
 	private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
 	private final AbilityRegistry registry;
@@ -72,12 +81,14 @@ public final class AbilityInitializer {
 
 	private Collection<RegisteredCollision> buildCollisions() {
 		return new CollisionBuilder(registry)
-			.addLayer("EarthGlove", "MetalCable")
-			.addSpecialLayer("AirSpout", "WaterSpout")
-			.addLayer("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation")
-			.addLayer("AirPunch", "AirBlade")
-			.addSpecialLayer("AirShield", "FireShield", "WallOfFire")
-			.addLayer("LavaDisk", "Combustion")
+			.addLayer(layer0)
+			.addSpecialLayer(spoutLayer)
+			.addLayer(layer1)
+			.addLayer(layer2)
+			.addSpecialLayer(shieldLayer)
+			.addLayer(layer3)
+			.addSimpleCollision("FrostBreath", "AirShield", true, true)
+			.addSimpleCollision("IceCrawl", "EarthLine", true, false)
 			.build();
 	}
 

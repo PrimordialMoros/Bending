@@ -27,14 +27,10 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 
 public class AbilitySlotContainer {
-	protected AbilityDescription[] abilities;
-
-	protected AbilitySlotContainer(@IntRange(from = 1, to = 9) int size) {
-		this.abilities = new AbilityDescription[size];
-	}
+	protected final AbilityDescription[] abilities;
 
 	public AbilitySlotContainer() {
-		this(9);
+		this.abilities = new AbilityDescription[9];
 	}
 
 	public AbilityDescription getAbility(@IntRange(from = 1, to = 9) int slot) {

@@ -42,10 +42,6 @@ public interface Ability extends Updatable {
 		return false;
 	}
 
-	default boolean isStatic() {
-		return false;
-	}
-
 	default @NonNull Collection<@NonNull Collider> getColliders() {
 		return Collections.emptyList();
 	}

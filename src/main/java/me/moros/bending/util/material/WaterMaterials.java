@@ -29,9 +29,9 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 
 public class WaterMaterials {
-	public static MaterialSetTag PLANT_BENDABLE;
-	public static MaterialSetTag ICE_BENDABLE;
-	public static MaterialSetTag ALL;
+	public static final MaterialSetTag PLANT_BENDABLE;
+	public static final MaterialSetTag ICE_BENDABLE;
+	public static final MaterialSetTag ALL;
 
 	static {
 		NamespacedKey key = Bending.getLayer().getMaterialKey();

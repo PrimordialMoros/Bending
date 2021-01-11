@@ -31,7 +31,9 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Disk;
+import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -49,6 +51,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class AirWheel extends AbilityInstance implements Ability {
+	private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
 	private static final Config config = new Config();
 	private static AbilityDescription scooterDesc;
 
@@ -80,7 +83,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
-		collider = new Sphere(user.getLocation(), 2);
+
 		nextRenderTime = 0;
 		nextDamageTime = 0;
 		return true;
@@ -95,7 +98,9 @@ public class AirWheel extends AbilityInstance implements Ability {
 	public @NonNull UpdateResult update() {
 		long time = System.currentTimeMillis();
 		center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
-		collider = new Sphere(center, 2);
+
+		OBB obb = new OBB(BOUNDS, new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR));
+		collider = new Disk(obb, new Sphere(center, 2));
 
 		if (time > nextRenderTime) {
 			render();
@@ -132,13 +137,6 @@ public class AirWheel extends AbilityInstance implements Ability {
 
 	public Vector3 getCenter() {
 		return center;
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	@Override

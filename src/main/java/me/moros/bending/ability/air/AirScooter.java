@@ -30,7 +30,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -129,15 +128,8 @@ public class AirScooter extends AbilityInstance implements Ability {
 	}
 
 	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
-	}
-
-	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(new Sphere(user.getLocation(), 2));
+		return Collections.singletonList(new Sphere(user.getLocation(), 1.5));
 	}
 
 	@Override

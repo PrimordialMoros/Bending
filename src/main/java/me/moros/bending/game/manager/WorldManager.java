@@ -61,7 +61,7 @@ public final class WorldManager {
 	}
 
 	public void update() {
-		worlds.values().forEach(w -> w.getAbilityManager().update());
+		worlds.values().forEach(WorldInstance::update);
 	}
 
 	public void remove(@NonNull World world) {
@@ -91,6 +91,11 @@ public final class WorldManager {
 		private WorldInstance(World world) {
 			abilities = new AbilityManager();
 			collisions = new CollisionManager(abilities);
+		}
+
+		private void update() {
+			abilities.update();
+			collisions.update();
 		}
 
 		private AbilityManager getAbilityManager() {

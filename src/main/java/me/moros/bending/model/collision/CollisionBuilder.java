@@ -20,12 +20,10 @@
 package me.moros.bending.model.collision;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -43,19 +41,16 @@ import java.util.stream.Collectors;
 public class CollisionBuilder {
 	private final AbilityRegistry registry;
 	private final List<CollisionLayer> layers;
+	private final Collection<RegisteredCollision> simpleCollisions;
 
 	public CollisionBuilder(@NonNull AbilityRegistry registry) {
 		this.registry = registry;
 		layers = new ArrayList<>();
+		simpleCollisions = new ArrayList<>();
 	}
 
 	public @NonNull CollisionBuilder addSpecialLayer(@NonNull Collection<@NonNull String> abilities) {
 		layers.add(new CollisionLayer(mapAbilities(abilities), false));
-		return this;
-	}
-
-	public @NonNull CollisionBuilder addSpecialLayer(@NonNull String ability0, @Nullable String @NonNull ... abilities) {
-		layers.add(new CollisionLayer(mapAbilities(ability0, abilities), false));
 		return this;
 	}
 
@@ -64,13 +59,17 @@ public class CollisionBuilder {
 		return this;
 	}
 
-	public @NonNull CollisionBuilder addLayer(@NonNull String ability0, @Nullable String @NonNull ... abilities) {
-		layers.add(new CollisionLayer(mapAbilities(ability0, abilities)));
+	public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull String second, boolean removeFirst, boolean removeSecond) {
+		AbilityDescription desc1 = registry.getAbilityDescription(first).orElse(null);
+		AbilityDescription desc2 = registry.getAbilityDescription(second).orElse(null);
+		if (desc1 != null && desc2 != null) {
+			simpleCollisions.add(new RegisteredCollision(desc1, desc2, removeFirst, removeSecond));
+		}
 		return this;
 	}
 
 	public @NonNull Collection<RegisteredCollision> build() {
-		Set<RegisteredCollision> collisionSet = new HashSet<>();
+		Set<RegisteredCollision> collisionSet = new HashSet<>(simpleCollisions);
 		int size = layers.size();
 		for (int i = 0; i < size; i++) {
 			CollisionLayer currentLayer = layers.get(i);
@@ -89,13 +88,6 @@ public class CollisionBuilder {
 
 	private List<AbilityDescription> mapAbilities(Collection<String> abilities) {
 		return abilities.stream().map(registry::getAbilityDescription).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-	}
-
-	private List<AbilityDescription> mapAbilities(String ability0, String... abilities) {
-		Collection<String> c = new ArrayList<>();
-		c.add(ability0);
-		if (abilities != null) c.addAll(Arrays.asList(abilities));
-		return mapAbilities(c);
 	}
 
 	private static Collection<RegisteredCollision> registerSelfCancellingCollisions(List<AbilityDescription> layer) {

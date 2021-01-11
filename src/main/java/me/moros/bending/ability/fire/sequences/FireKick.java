@@ -33,7 +33,6 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -100,13 +99,6 @@ public class FireKick extends AbilityInstance implements Ability {
 	public @NonNull UpdateResult update() {
 		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
 		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
-
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
 	}
 
 	@Override

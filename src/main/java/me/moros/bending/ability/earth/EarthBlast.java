@@ -36,7 +36,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -201,15 +200,9 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		return Collections.singletonList(blast.getCollider());
 	}
 
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
-		}
-	}
-
 	private class Blast extends AbstractBlockShot {
 		private final double damage;
+
 		public Blast(User user, Block block) {
 			super(user, block, userConfig.range, 100);
 			allowUnderWater = false;

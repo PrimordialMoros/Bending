@@ -106,7 +106,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, wheel);
+			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(wheel);
 			return true;
 		}
 
@@ -171,8 +171,10 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
-		if (collision.shouldRemoveFirst()) {
-			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(user, this);
+		Ability collidedAbility = collision.getCollidedAbility();
+		if (collidedAbility instanceof AirBlade) {
+			double collidedFactor = ((AirBlade) collidedAbility).factor;
+			if (collidedFactor - factor > 0.1) collision.setRemoveCollided(false);
 		}
 	}
 
