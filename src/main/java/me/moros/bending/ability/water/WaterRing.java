@@ -108,7 +108,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
 			return false;
 		}
-		if (method == ActivationMethod.PUNCH && user.isSneaking()) {
+		if (method == ActivationMethod.ATTACK && user.isSneaking()) {
 			if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterRing")) {
 				if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class)) {
 					return false;

@@ -107,7 +107,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				return false;
 			}
 		}
-		if (method == ActivationMethod.PUNCH) {
+		if (method == ActivationMethod.ATTACK) {
 			launch();
 		}
 		return true;

@@ -94,7 +94,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 				return false;
 			}
 		}
-		if (method == ActivationMethod.PUNCH) {
+		if (method == ActivationMethod.ATTACK) {
 			launch();
 		}
 		removalPolicy = Policies.builder()

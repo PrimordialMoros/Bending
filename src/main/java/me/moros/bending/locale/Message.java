@@ -22,6 +22,7 @@ package me.moros.bending.locale;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.ComponentLike;
+import me.moros.atlas.kyori.adventure.text.format.TextColor;
 import me.moros.bending.model.user.CommandUser;
 
 import static me.moros.atlas.kyori.adventure.text.Component.text;
@@ -119,11 +120,11 @@ public interface Message {
 	Args1<Component> ABILITY_INFO_EMPTY = ability -> translatable("bending.command.info.empty", YELLOW)
 		.args(ability);
 
-	Args2<Component, String> ABILITY_INFO_DESCRIPTION = (ability, details) -> translatable("bending.command.info.description", GRAY)
-		.args(ability, text(details));
+	Args2<Component, Component> ABILITY_INFO_DESCRIPTION = (ability, description) -> translatable("bending.command.info.description", TextColor.color(221, 221, 221))
+		.args(ability, description);
 
-	Args2<Component, String> ABILITY_INFO_INSTRUCTIONS = (ability, details) -> translatable("bending.command.info.instructions", GRAY)
-		.args(ability, text(details));
+	Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TextColor.color(221, 221, 221))
+		.args(ability, instructions);
 
 	static Component brand(ComponentLike message) {
 		return PREFIX.asComponent().append(message);

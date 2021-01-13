@@ -20,6 +20,8 @@
 package me.moros.bending.model.ability.sequence;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.TextComponent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 
@@ -33,7 +35,7 @@ import java.util.List;
  */
 public final class Sequence {
 	private final List<AbilityAction> sequence = new ArrayList<>();
-	private String instructions = "";
+	private Component instructions;
 
 	public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction @NonNull ... actions) {
 		this.sequence.add(action);
@@ -47,32 +49,33 @@ public final class Sequence {
 		return Collections.unmodifiableList(sequence);
 	}
 
-	public @NonNull String getInstructions() {
-		if (instructions.isEmpty()) {
-			instructions = generateInstructions(this.sequence);
+	public @NonNull Component getInstructions() {
+		if (instructions == null) {
+			instructions = generateInstructions(sequence);
 		}
 		return instructions;
 	}
 
-	private static String generateInstructions(List<AbilityAction> actions) {
-		StringBuilder sb = new StringBuilder();
+	private static Component generateInstructions(List<AbilityAction> actions) {
+		TextComponent.Builder builder = Component.text();
 		for (int i = 0; i < actions.size(); i++) {
 			AbilityAction abilityAction = actions.get(i);
-			if (i != 0) sb.append(" > ");
+			if (i != 0) builder.append(Component.text(" > "));
 			AbilityDescription desc = abilityAction.getAbilityDescription();
 			ActivationMethod action = abilityAction.getAction();
-			String actionString = action.toString();
+			String actionKey = action.getKey();
 			if (action == ActivationMethod.SNEAK && i + 1 < actions.size()) {
-				// Check if the next instruction is to release this sneak.
+				// Check if the next instruction is to release sneak.
 				AbilityAction next = actions.get(i + 1);
 				if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
-					actionString = "Tap Sneak";
+					actionKey = "bending.activation.sneak-tap";
 					i++;
 				}
 			}
-			sb.append(desc.getName()).append(" (").append(actionString).append(")");
+			builder.append(Component.text(desc.getName())).append(Component.text(" ("))
+				.append(Component.translatable(actionKey)).append(Component.text(")"));
 		}
-		return sb.toString();
+		return builder.build();
 	}
 
 	public boolean matches(@NonNull AbilityAction @NonNull [] actions) {

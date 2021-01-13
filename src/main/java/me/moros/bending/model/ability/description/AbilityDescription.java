@@ -21,12 +21,11 @@ package me.moros.bending.model.ability.description;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
 import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
 import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
-import me.moros.bending.config.ConfigManager;
+import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -47,8 +46,8 @@ public class AbilityDescription {
 	private final Function<AbilityDescription, ? extends Ability> constructor;
 	private final Element element;
 	private final EnumSet<ActivationMethod> activationMethods;
-	private final String description;
-	private final String instructions;
+	private final Component description;
+	private final Component instructions;
 	private final boolean hidden;
 	private final boolean canBind;
 	private final boolean harmless;
@@ -61,8 +60,10 @@ public class AbilityDescription {
 		element = builder.element;
 		activationMethods = builder.activationMethods;
 		createAbility(); // Init classes to get config values for description and instructions
-		description = getConfigNode().node("description").getString("");
-		instructions = getConfigNode().node("instructions").getString("");
+		String descKey = "bending.ability." + name.toLowerCase() + ".description";
+		String instKey = "bending.ability." + name.toLowerCase() + ".instructions";
+		description = TranslationManager.hasDefaultTranslation(descKey) ? Component.translatable(descKey) : null;
+		instructions = TranslationManager.hasDefaultTranslation(instKey) ? Component.translatable(instKey) : null;
 		canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
 		hidden = builder.hidden;
 		harmless = builder.harmless;
@@ -82,11 +83,11 @@ public class AbilityDescription {
 		return element;
 	}
 
-	public @NonNull String getDescription() {
+	public @Nullable Component getDescription() {
 		return description;
 	}
 
-	public @NonNull String getInstructions() {
+	public @Nullable Component getInstructions() {
 		return instructions;
 	}
 
@@ -112,16 +113,6 @@ public class AbilityDescription {
 
 	public @NonNull Ability createAbility() {
 		return constructor.apply(this);
-	}
-
-	public @NonNull CommentedConfigurationNode getConfigNode() {
-		CommentedConfigurationNode elementNode = ConfigManager.getConfig().node("abilities", element.toString().toLowerCase());
-		if (isActivatedBy(ActivationMethod.SEQUENCE)) {
-			return elementNode.node("sequences", name.toLowerCase());
-		} else if (isActivatedBy(ActivationMethod.PASSIVE)) {
-			return elementNode.node("passives", name.toLowerCase());
-		}
-		return elementNode.node(name.toLowerCase());
 	}
 
 	public @NonNull String getPermission() {

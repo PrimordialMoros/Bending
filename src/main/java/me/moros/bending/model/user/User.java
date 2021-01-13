@@ -105,7 +105,7 @@ public interface User extends BukkitUser {
 	 */
 	default void validateSlots() {
 		IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
-			if (!hasElement(desc.getElement()) || !hasPermission(desc)) setSlotAbilityInternal(i, null);
+			if (!hasElement(desc.getElement()) || !hasPermission(desc) || !desc.canBind()) setSlotAbilityInternal(i, null);
 		}));
 	}
 }

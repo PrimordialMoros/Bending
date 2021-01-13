@@ -21,6 +21,8 @@ package me.moros.bending.ability.air.sequences;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.config.Configurable;
@@ -46,9 +48,12 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class AirWheel extends AbilityInstance implements Ability {
 	private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
@@ -58,12 +63,15 @@ public class AirWheel extends AbilityInstance implements Ability {
 	private User user;
 	private Config userConfig;
 
+	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+		.expirationPolicy(ExpirationPolicy.CREATED)
+		.expiration(250, TimeUnit.MILLISECONDS).build();
+
 	private AirScooter scooter;
 	private Collider collider;
 	private Vector3 center;
 
 	private long nextRenderTime;
-	private long nextDamageTime;
 
 	public AirWheel(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -75,7 +83,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 			scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
 		}
 		scooter = new AirScooter(scooterDesc);
-		if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.PUNCH))
+		if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.ATTACK))
 			return false;
 		scooter.canRender = false;
 
@@ -85,7 +93,6 @@ public class AirWheel extends AbilityInstance implements Ability {
 		user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
 
 		nextRenderTime = 0;
-		nextDamageTime = 0;
 		return true;
 	}
 
@@ -111,14 +118,15 @@ public class AirWheel extends AbilityInstance implements Ability {
 		BlockMethods.coolLava(user, base);
 		BlockMethods.extinguishFire(user, base);
 
-		if (time > nextDamageTime) {
-			CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-				return false;
-			});
-			nextDamageTime = time + 500;
-		}
+		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
 		return scooter.update();
+	}
+
+	private boolean onEntityHit(Entity entity) {
+		if (affectedEntities.containsKey(entity)) return false;
+		affectedEntities.put(entity, false);
+		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+		return true;
 	}
 
 	@Override

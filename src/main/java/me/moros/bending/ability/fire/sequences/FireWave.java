@@ -66,7 +66,7 @@ public class FireWave extends AbilityInstance implements Ability {
 			wallDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
 		}
 		wall = new FireWall(wallDesc);
-		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.PUNCH)) return false;
+		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.ATTACK)) return false;
 
 		recalculateConfig();
 

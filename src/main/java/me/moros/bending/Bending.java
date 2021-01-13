@@ -45,17 +45,19 @@ import java.util.Objects;
 
 public class Bending extends JavaPlugin {
 	private static Bending plugin;
-	private TimingManager timingManager;
+
+	private Logger logger;
 
 	private TranslationManager translationManager;
 	private BukkitAudiences audiences;
-	private PersistentDataLayer layer;
-	private String author;
-	private String version;
-	private Logger logger;
+	private TimingManager timingManager;
 
+	private PersistentDataLayer layer;
 	private BendingEventBus eventBus;
 	private Game game;
+
+	private String author;
+	private String version;
 
 	@Override
 	public void onEnable() {
@@ -64,12 +66,15 @@ public class Bending extends JavaPlugin {
 		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
 		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
-		layer = new PersistentDataLayer(this);
-		eventBus = new BendingEventBus();
-		audiences = BukkitAudiences.create(this);
 
-		timingManager = TimingManager.of(this);
 		Tasker.init(this);
+
+		translationManager = new TranslationManager();
+		audiences = BukkitAudiences.create(this);
+		timingManager = TimingManager.of(this);
+		eventBus = new BendingEventBus();
+		layer = new PersistentDataLayer(this);
+
 		ConfigManager.init(getConfigFolder());
 
 		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
@@ -81,7 +86,6 @@ public class Bending extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new EntityListener(game), this);
 		getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
-		translationManager = new TranslationManager();
 		new Commands(this, game);
 	}
 

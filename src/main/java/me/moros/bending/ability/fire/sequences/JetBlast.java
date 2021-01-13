@@ -53,7 +53,7 @@ public class JetBlast extends AbilityInstance implements Ability {
 			jetDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
 		}
 		jet = new FireJet(jetDesc);
-		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.PUNCH)) return false;
+		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.ATTACK)) return false;
 
 		recalculateConfig();
 

@@ -230,19 +230,19 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@allabilities")
 	@Description("View info about a specific ability")
 	public static void onInfo(CommandUser user, AbilityDescription ability) {
-		String description = ability.getDescription();
-		String instructions = ability.getInstructions();
-		if (ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
+		Component description = ability.getDescription();
+		Component instructions = ability.getInstructions();
+		if (instructions == null && ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
 			Sequence sequence = Bending.getGame().getSequenceManager().getSequence(ability);
 			if (sequence != null) instructions = sequence.getInstructions();
 		}
-		if (description.isEmpty() && instructions.isEmpty()) {
+		if (description == null && instructions == null) {
 			Message.ABILITY_INFO_EMPTY.send(user, ability.getDisplayName());
 		} else {
-			if (!description.isEmpty()) {
+			if (description != null) {
 				Message.ABILITY_INFO_DESCRIPTION.send(user, ability.getDisplayName(), description);
 			}
-			if (!instructions.isEmpty()) {
+			if (instructions != null) {
 				Message.ABILITY_INFO_INSTRUCTIONS.send(user, ability.getDisplayName(), instructions);
 			}
 		}

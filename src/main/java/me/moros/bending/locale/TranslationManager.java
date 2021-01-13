@@ -19,24 +19,40 @@
 
 package me.moros.bending.locale;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.kyori.adventure.key.Key;
 import me.moros.atlas.kyori.adventure.translation.GlobalTranslator;
 import me.moros.atlas.kyori.adventure.translation.TranslationRegistry;
+import me.moros.atlas.kyori.adventure.translation.Translator;
 import me.moros.atlas.kyori.adventure.util.UTF8ResourceBundleControl;
+import me.moros.bending.Bending;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-// TODO register extra bundles from path
 public class TranslationManager {
 	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
 	private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
+	private final Path translationsDirectory;
 	private TranslationRegistry registry;
 
 	public TranslationManager() {
+		translationsDirectory = Paths.get(Bending.getConfigFolder(), "translations");
 		reload();
 	}
 
@@ -48,8 +64,60 @@ public class TranslationManager {
 		registry = TranslationRegistry.create(Key.key("bending", "translations"));
 		registry.defaultLocale(DEFAULT_LOCALE);
 
+		loadCustom();
+
 		ResourceBundle bundle = ResourceBundle.getBundle("bending", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
 		registry.registerAll(DEFAULT_LOCALE, bundle, false);
 		GlobalTranslator.get().addSource(registry);
+	}
+
+	private void loadCustom() {
+		Collection<Path> files;
+		try (Stream<Path> stream = Files.list(translationsDirectory)) {
+			files = stream.filter(this::isValidPropertyFile).collect(Collectors.toList());
+		} catch (IOException e) {
+			files = Collections.emptyList();
+		}
+		files.forEach(this::loadTranslationFile);
+		int amount = installed.size();
+		if (amount > 0) {
+			String translations = installed.stream().map(Locale::getLanguage).collect(Collectors.joining(", ", "[", "]"));
+			Bending.getLog().info("Loaded " + amount + " translations: " + translations);
+		}
+	}
+
+	private void loadTranslationFile(Path path) {
+		String localeString = removeFileExtension(path);
+		Locale locale = Translator.parseLocale(localeString);
+		if (locale == null) {
+			Bending.getLog().warn("Unknown locale: " + localeString);
+			return;
+		}
+		PropertyResourceBundle bundle;
+		try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+			bundle = new PropertyResourceBundle(reader);
+		} catch (IOException e) {
+			Bending.getLog().warn("Error loading locale file: " + localeString);
+			return;
+		}
+		registry.registerAll(locale, bundle, false);
+		installed.add(locale);
+	}
+
+	private boolean isValidPropertyFile(Path path) {
+		if (!Files.isRegularFile(path)) return false;
+		String name = path.getFileName().toString();
+		return name.length() > "properties".length() && name.endsWith(".properties");
+	}
+
+	private String removeFileExtension(Path path) {
+		String fileName = path.getFileName().toString();
+		return fileName.substring(0, fileName.length() - ".properties".length());
+	}
+
+	public static boolean hasDefaultTranslation(@NonNull String key) {
+		MessageFormat translation = GlobalTranslator.get().translate(key, DEFAULT_LOCALE);
+		if (translation == null) return false;
+		return !translation.format(null, new StringBuffer(), null).toString().isEmpty();
 	}
 }

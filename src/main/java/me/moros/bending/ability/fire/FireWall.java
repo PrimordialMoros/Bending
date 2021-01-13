@@ -21,6 +21,8 @@ package me.moros.bending.ability.fire;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -50,10 +52,13 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 public class FireWall extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -62,10 +67,13 @@ public class FireWall extends AbilityInstance implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
+	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+		.expirationPolicy(ExpirationPolicy.CREATED)
+		.expiration(200, TimeUnit.MILLISECONDS).build();
+
 	private Collection<Block> blocks;
 	private OBB collider;
 
-	private boolean applyDamage;
 	private long nextRenderTime;
 
 	public FireWall(@NonNull AbilityDescription desc) {
@@ -119,6 +127,7 @@ public class FireWall extends AbilityInstance implements Ability {
 		}
 		long time = System.currentTimeMillis();
 		if (time > nextRenderTime) {
+			nextRenderTime = time + 250;
 			for (Block block : blocks) {
 				Location location = block.getLocation().add(0.5, 0.5, 0.5);
 				ParticleUtil.createFire(user, location).count(3).offset(0.6, 0.6, 0.6).extra(0.01).spawn();
@@ -127,19 +136,19 @@ public class FireWall extends AbilityInstance implements Ability {
 					SoundUtil.FIRE_SOUND.play(location);
 				}
 			}
-			nextRenderTime = time + 250;
-			if (applyDamage) {
-				CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-					entity.setVelocity(Vector3.ZERO.toVector());
-					DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-					FireTick.ACCUMULATE.apply(entity, 20);
-					return true;
-				});
-			}
-			applyDamage = !applyDamage;
 		}
-
+		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
 		return UpdateResult.CONTINUE;
+	}
+
+
+	private boolean onEntityHit(Entity entity) {
+		if (affectedEntities.containsKey(entity)) return false;
+		affectedEntities.put(entity, false);
+		entity.setVelocity(Vector3.ZERO.toVector());
+		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+		FireTick.ACCUMULATE.apply(entity, 20);
+		return true;
 	}
 
 	public void setWall(Collection<Block> blocks, OBB collider) {

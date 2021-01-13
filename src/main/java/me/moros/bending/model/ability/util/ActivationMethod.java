@@ -19,27 +19,29 @@
 
 package me.moros.bending.model.ability.util;
 
-public enum ActivationMethod {
-	PASSIVE("Passive"),
-	PUNCH("Click"),
-	PUNCH_ENTITY("Click Entity"),
-	INTERACT("Right Click Air", true),
-	INTERACT_ENTITY("Right Click Entity", true),
-	INTERACT_BLOCK("Right Click Block", true),
-	SNEAK("Hold Sneak"),
-	SNEAK_RELEASE("Release Sneak"),
-	FALL("Fall"),
-	SEQUENCE("Sequence");
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
-	private final String name;
+public enum ActivationMethod {
+	PASSIVE("bending.activation.passive"),
+	ATTACK("bending.activation.attack"),
+	ATTACK_ENTITY("bending.activation.attack-entity"),
+	INTERACT("bending.activation.interact", true),
+	INTERACT_ENTITY("bending.activation.interact-entity", true),
+	INTERACT_BLOCK("bending.activation.interact-block", true),
+	SNEAK("bending.activation.sneak"),
+	SNEAK_RELEASE("bending.activation.sneak-release"),
+	FALL("bending.activation.fall"),
+	SEQUENCE("bending.activation.sequence");
+
+	private final String key;
 	private final boolean interact;
 
-	ActivationMethod(String name) {
-		this(name, false);
+	ActivationMethod(String key) {
+		this(key, false);
 	}
 
-	ActivationMethod(String name, boolean interact) {
-		this.name = name;
+	ActivationMethod(String key, boolean interact) {
+		this.key = key;
 		this.interact = interact;
 	}
 
@@ -47,8 +49,7 @@ public enum ActivationMethod {
 		return interact;
 	}
 
-	@Override
-	public String toString() {
-		return name;
+	public @NonNull String getKey() {
+		return key;
 	}
 }

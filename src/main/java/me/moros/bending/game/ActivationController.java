@@ -129,12 +129,12 @@ public final class ActivationController {
 		FireBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
-			game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH_ENTITY);
+			game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
 		} else {
-			game.getSequenceManager().registerAction(user, ActivationMethod.PUNCH);
+			game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK);
 		}
 
-		activateAbility(user, ActivationMethod.PUNCH);
+		activateAbility(user, ActivationMethod.ATTACK);
 	}
 
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
