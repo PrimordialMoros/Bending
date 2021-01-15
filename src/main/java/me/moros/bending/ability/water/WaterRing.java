@@ -366,7 +366,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.shardDamage, "IceShard");
+			DamageUtil.damageEntity(entity, user, userConfig.shardDamage, getDescription());
 			return true;
 		}
 

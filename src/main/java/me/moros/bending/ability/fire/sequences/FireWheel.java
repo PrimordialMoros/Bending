@@ -134,7 +134,7 @@ public class FireWheel extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage);
+			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			return true;
 		}
 

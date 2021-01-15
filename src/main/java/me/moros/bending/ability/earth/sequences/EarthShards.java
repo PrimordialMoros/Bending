@@ -39,8 +39,10 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -136,7 +138,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 			super(user, ray, userConfig.speed, 0.5);
 			livingOnly = true;
 			canCollide = Block::isLiquid;
-			// TODO add sounds
+			SoundUtil.playSound(ray.origin.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 2);
 		}
 
 		@Override

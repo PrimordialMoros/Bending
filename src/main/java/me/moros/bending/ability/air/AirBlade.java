@@ -206,7 +206,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage * factor);
+			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
 			return true;
 		}
 

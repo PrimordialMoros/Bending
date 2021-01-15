@@ -84,7 +84,7 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 				}
 			}
 
-			SoundUtil.playSound(target.getLocation(), sound, 0.5f, 0);
+			SoundUtil.playSound(target.getLocation(), sound, 0.5F, 0);
 		}
 	}
 

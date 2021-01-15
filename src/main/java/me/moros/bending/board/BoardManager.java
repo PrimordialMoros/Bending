@@ -25,8 +25,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.util.ChatUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -103,8 +101,7 @@ public final class BoardManager extends Configurable {
 	public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
 		if (canUseScoreboard(player)) {
 			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
-				String value = "  " + ChatUtil.getLegacyColor(desc.getElement().getColor()) + ChatColor.STRIKETHROUGH + desc.getName();
-				scoreboardPlayers.get(player.getUniqueId()).updateMisc(value, cooldown);
+				scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
 			} else {
 				scoreboardPlayers.get(player.getUniqueId()).updateAll();
 			}

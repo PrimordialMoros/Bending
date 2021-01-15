@@ -282,7 +282,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			WallData.attemptDamageWall(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
 			if (mode != Mode.MAGMA) return;
 			Location center = location.toLocation(user.getWorld());
-			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 0.5f);
+			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1, 0.5F);
 			ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
 			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit);
 			Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);

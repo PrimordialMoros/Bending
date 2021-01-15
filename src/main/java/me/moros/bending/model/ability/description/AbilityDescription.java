@@ -22,10 +22,11 @@ package me.moros.bending.model.ability.description;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.TranslatableComponent;
 import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
 import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
 import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
-import me.moros.bending.locale.TranslationManager;
+import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -46,29 +47,32 @@ public class AbilityDescription {
 	private final Function<AbilityDescription, ? extends Ability> constructor;
 	private final Element element;
 	private final EnumSet<ActivationMethod> activationMethods;
-	private final Component description;
-	private final Component instructions;
+	private final TranslatableComponent description;
+	private final TranslatableComponent instructions;
+	private final TranslatableComponent deathMessage;
 	private final boolean hidden;
 	private final boolean canBind;
 	private final boolean harmless;
 	private final boolean sourcesPlants;
 	private final int hashcode;
 
-	protected AbilityDescription(AbilityDescriptionBuilder builder) {
+	private AbilityDescription(AbilityDescriptionBuilder builder) {
 		name = builder.name;
 		constructor = builder.constructor;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
-		createAbility(); // Init classes to get config values for description and instructions
 		String descKey = "bending.ability." + name.toLowerCase() + ".description";
 		String instKey = "bending.ability." + name.toLowerCase() + ".instructions";
-		description = TranslationManager.hasDefaultTranslation(descKey) ? Component.translatable(descKey) : null;
-		instructions = TranslationManager.hasDefaultTranslation(instKey) ? Component.translatable(instKey) : null;
+		String deathKey = "bending.ability." + name.toLowerCase() + ".death";
+		description = Bending.getTranslationManager().containsKey(descKey) ? Component.translatable(descKey) : null;
+		instructions = Bending.getTranslationManager().containsKey(instKey) ? Component.translatable(instKey) : null;
+		deathMessage = Bending.getTranslationManager().containsKey(deathKey) ? Component.translatable(deathKey) : null;
 		canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
 		hidden = builder.hidden;
 		harmless = builder.harmless;
 		sourcesPlants = builder.sourcesPlants;
-		hashcode = Objects.hash(name, constructor, element, activationMethods, description, instructions, hidden, harmless);
+		hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcesPlants);
+		createAbility(); // Init config values
 	}
 
 	public @NonNull String getName() {
@@ -83,12 +87,16 @@ public class AbilityDescription {
 		return element;
 	}
 
-	public @Nullable Component getDescription() {
+	public @Nullable TranslatableComponent getDescription() {
 		return description;
 	}
 
-	public @Nullable Component getInstructions() {
+	public @Nullable TranslatableComponent getInstructions() {
 		return instructions;
+	}
+
+	public @Nullable TranslatableComponent getDeathMessage() {
+		return deathMessage;
 	}
 
 	public boolean canBind() {

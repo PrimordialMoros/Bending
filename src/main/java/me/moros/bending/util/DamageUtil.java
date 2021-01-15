@@ -19,10 +19,12 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.TranslatableComponent;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
@@ -31,45 +33,54 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Utility class to handle bending damage and player death messages.
+ * Utility class to handle bending damage and death messages.
  */
 public final class DamageUtil {
-	private static final Cache<UUID, String> cache = Caffeine.newBuilder()
-		.maximumSize(100)
-		.expireAfterWrite(Duration.ofSeconds(60))
-		.build();
+	private static final TranslatableComponent DEATH_MESSAGE = Component.translatable("bending.ability.generic.death");
 
-	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage) {
-		return damageEntity(entity, source, damage, "");
-	}
+	private static final Map<UUID, BendingDamage> cache = ExpiringMap.builder()
+		.expirationPolicy(ExpirationPolicy.CREATED)
+		.expiration(250, TimeUnit.MILLISECONDS).build();
 
-	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage, @Nullable AbilityDescription desc) {
-		return damageEntity(entity, source, damage, desc == null ? "" : desc.getName());
-	}
-
-	public static boolean damageEntity(@NonNull Entity entity, @NonNull User source, double damage, @NonNull String abilityName) {
-		if (entity instanceof LivingEntity && damage > 0) {
-			LivingEntity targetEntity = (LivingEntity) entity;
+	public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
+		if (target instanceof LivingEntity && damage > 0) {
+			LivingEntity targetEntity = (LivingEntity) target;
 			LivingEntity sourceEntity = source.getEntity();
-			EntityDamageByEntityEvent finalEvent = new EntityDamageByEntityEvent(sourceEntity, entity, EntityDamageEvent.DamageCause.CUSTOM, damage);
+			targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(sourceEntity, target, EntityDamageEvent.DamageCause.CUSTOM, damage));
+			if (target instanceof Player) {
+				cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
+			}
 			targetEntity.damage(damage, sourceEntity);
-			targetEntity.setLastDamageCause(finalEvent);
-			if (!abilityName.isEmpty() && targetEntity instanceof Player)
-				cache.put(targetEntity.getUniqueId(), abilityName);
 			return true;
 		}
 		return false;
 	}
 
-	public static String getBendingMessage(@NonNull UUID uuid) {
-		return cache.getIfPresent(uuid);
+	public static boolean handleBendingDeath(@NonNull Player player) {
+		BendingDamage cause = cache.remove(player.getUniqueId());
+		if (cause == null) return false;
+
+		AbilityDescription ability = cause.desc;
+		TranslatableComponent msg = ability.getDeathMessage();
+		if (msg == null) msg = DEATH_MESSAGE;
+		Component target = Component.text(player.getName());
+		Component source = Component.text(cause.source.getName());
+		Bending.getAudiences().players().sendMessage(msg.args(target, source, ability.getDisplayName()));
+		return true;
 	}
 
-	private static class BendingDeath {
-		// TODO death messages
+	private static class BendingDamage {
+		private final Entity source;
+		private final AbilityDescription desc;
+
+		private BendingDamage(@NonNull Entity source, @NonNull AbilityDescription desc) {
+			this.source = source;
+			this.desc = desc;
+		}
 	}
 }

@@ -109,16 +109,18 @@ public class UserListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onEntityDeath(EntityDeathEvent event) {
 		event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
+		boolean keepInventory = (event instanceof PlayerDeathEvent) && ((PlayerDeathEvent) event).getKeepInventory();
 		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
-			event.getDrops().addAll(tempArmor.getSnapshot());
+			if (!keepInventory) event.getDrops().addAll(tempArmor.getSnapshot());
 			tempArmor.revert();
 		});
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerDeath(PlayerDeathEvent event) {
-		String newMessage = DamageUtil.getBendingMessage(event.getEntity().getUniqueId());
-		if (newMessage != null) event.setDeathMessage(newMessage);
+		if (DamageUtil.handleBendingDeath(event.getEntity())) {
+			event.setDeathMessage(null);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

@@ -36,7 +36,7 @@ public final class SoundUtil {
 
 	public static final SoundEffect EARTH_SOUND = new SoundEffect(Sound.ENTITY_GHAST_SHOOT);
 	public static final SoundEffect SAND_SOUND = new SoundEffect(Sound.BLOCK_SAND_BREAK);
-	public static final SoundEffect METAL_SOUND = new SoundEffect(Sound.ENTITY_IRON_GOLEM_HURT, 1, 1.25f);
+	public static final SoundEffect METAL_SOUND = new SoundEffect(Sound.ENTITY_IRON_GOLEM_HURT, 1, 1.25F);
 	public static final SoundEffect LAVA_SOUND = new SoundEffect(Sound.BLOCK_LAVA_AMBIENT);
 
 	public static final SoundEffect FIRE_SOUND = new SoundEffect(Sound.BLOCK_FIRE_AMBIENT);

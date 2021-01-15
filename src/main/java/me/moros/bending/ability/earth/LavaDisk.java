@@ -183,7 +183,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 			.data(Material.MAGMA_BLOCK.createBlockData()).spawn();
 		ParticleUtil.create(Particle.LAVA, center)
 			.count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
-		SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5f);
+		SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
@@ -225,8 +225,8 @@ public class LavaDisk extends AbilityInstance implements Ability {
 				.offset(0.5, 0.5, 0.5).extra(0.05).spawn();
 			if (ThreadLocalRandom.current().nextInt(5) == 0) {
 				Location center = block.getLocation().add(0.5, 0.5, 0.5);
-				SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3f, 0.3f);
-				SoundUtil.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 0.3f, 0.3f);
+				SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
+				SoundUtil.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 0.3F, 0.3F);
 			}
 			return true;
 		}

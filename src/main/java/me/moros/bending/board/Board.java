@@ -19,10 +19,13 @@
 
 package me.moros.bending.board;
 
+import me.moros.atlas.kyori.adventure.text.Component;
+import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
+import me.moros.atlas.kyori.adventure.text.format.TextDecoration;
+import me.moros.atlas.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -32,7 +35,6 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -66,23 +68,23 @@ public class Board {
 	protected void updateSlot(int slot) {
 		if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) return;
 		BendingPlayer bendingPlayer = Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
-		StringBuilder sb = new StringBuilder(slot == selectedSlot ? ">" : "  ");
+		String prefix = slot == selectedSlot ? ">" : "  ";
 
-		Optional<AbilityDescription> desc = bendingPlayer.getSlotAbility(slot);
-		if (desc.isPresent()) {
-			sb.append(ChatUtil.getLegacyColor(desc.get().getElement().getColor()));
-			if (bendingPlayer.isOnCooldown(desc.get())) sb.append(ChatColor.STRIKETHROUGH);
-			sb.append(desc.get().getName());
+		AbilityDescription desc = bendingPlayer.getSlotAbility(slot).orElse(null);
+		Component component;
+		if (desc == null) {
+			component = Component.text(prefix).append(Component.text("-- Slot " + slot + " --", NamedTextColor.DARK_GRAY));
 		} else {
-			sb.append(ChatColor.GRAY).append("-- Slot ").append(slot).append(" --");
+			Component name = Component.text(desc.getName(), desc.getElement().getColor());
+			if (bendingPlayer.isOnCooldown(desc)) name = name.decorate(TextDecoration.STRIKETHROUGH);
+			component = Component.text(prefix).append(name);
 		}
-		sb.append(ChatColor.values()[slot].toString()); // Unique suffix
-		String scoreKey = sb.toString();
-		if (!cachedSlots[slot].equals(scoreKey)) {
+		String legacy = LegacyComponentSerializer.legacySection().serialize(component) + ChatColor.values()[slot].toString();
+		if (!cachedSlots[slot].equals(legacy)) {
 			bendingBoard.resetScores(cachedSlots[slot]);
 		}
-		cachedSlots[slot] = scoreKey;
-		bendingSlots.getScore(scoreKey).setScore(-slot);
+		cachedSlots[slot] = legacy;
+		bendingSlots.getScore(legacy).setScore(-slot);
 	}
 
 	protected void updateAll() {
@@ -98,16 +100,18 @@ public class Board {
 		updateSlot(newSlot);
 	}
 
-	protected void updateMisc(String text, boolean show) {
+	protected void updateMisc(AbilityDescription desc, boolean show) {
+		Component component = Component.text("  ").append(desc.getDisplayName().decorate(TextDecoration.STRIKETHROUGH));
+		String legacy = LegacyComponentSerializer.legacySection().serialize(component);
 		if (show) {
 			if (misc.isEmpty()) {
 				bendingSlots.getScore("  ------------  ").setScore(-10);
 			}
-			misc.add(text);
-			bendingSlots.getScore(text).setScore(-11);
+			misc.add(legacy);
+			bendingSlots.getScore(legacy).setScore(-11);
 		} else {
-			misc.remove(text);
-			bendingBoard.resetScores(text);
+			misc.remove(legacy);
+			bendingBoard.resetScores(legacy);
 			if (misc.isEmpty()) {
 				bendingBoard.resetScores("  ------------  ");
 			}

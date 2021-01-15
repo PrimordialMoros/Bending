@@ -19,6 +19,7 @@
 
 package me.moros.bending.locale;
 
+import com.google.common.collect.ImmutableSet;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.kyori.adventure.key.Key;
 import me.moros.atlas.kyori.adventure.translation.GlobalTranslator;
@@ -33,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
@@ -48,6 +48,7 @@ public class TranslationManager {
 	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
 	private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
+	private Set<String> defaultTranslations;
 	private final Path translationsDirectory;
 	private TranslationRegistry registry;
 
@@ -67,6 +68,7 @@ public class TranslationManager {
 		loadCustom();
 
 		ResourceBundle bundle = ResourceBundle.getBundle("bending", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
+		defaultTranslations = ImmutableSet.copyOf(bundle.keySet());
 		registry.registerAll(DEFAULT_LOCALE, bundle, false);
 		GlobalTranslator.get().addSource(registry);
 	}
@@ -115,9 +117,7 @@ public class TranslationManager {
 		return fileName.substring(0, fileName.length() - ".properties".length());
 	}
 
-	public static boolean hasDefaultTranslation(@NonNull String key) {
-		MessageFormat translation = GlobalTranslator.get().translate(key, DEFAULT_LOCALE);
-		if (translation == null) return false;
-		return !translation.format(null, new StringBuffer(), null).toString().isEmpty();
+	public boolean containsKey(@NonNull String key) {
+		return defaultTranslations.contains(key);
 	}
 }

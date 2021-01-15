@@ -42,6 +42,8 @@ import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -140,5 +142,15 @@ public class BlockListener implements Listener {
 		} else {
 			if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) event.setCancelled(true);
 		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
+		if (event.getBlocks().stream().anyMatch(TempBlock.manager::isTemp)) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onBlockPistonRetractEvent(BlockPistonRetractEvent event) {
+		if (event.getBlocks().stream().anyMatch(TempBlock.manager::isTemp)) event.setCancelled(true);
 	}
 }

@@ -79,7 +79,6 @@ public final class PlayerManager {
 			Bending.getGame().getAbilityManager(p.getWorld()).createPassives(p);
 			Bending.getEventBus().postBendingPlayerLoadEvent(p);
 		});
-		Bending.getLog().info(profile.toString()); // TODO remove debug message
 	}
 
 	public Optional<BendingProfile> getProfile(@NonNull UUID uuid) {
