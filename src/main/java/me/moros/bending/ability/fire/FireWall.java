@@ -137,7 +137,7 @@ public class FireWall extends AbilityInstance implements Ability {
 				}
 			}
 		}
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
+		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false);
 		return UpdateResult.CONTINUE;
 	}
 

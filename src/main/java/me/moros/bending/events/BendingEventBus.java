@@ -20,30 +20,44 @@
 package me.moros.bending.events;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.plugin.PluginManager;
 
 public class BendingEventBus {
+	private final PluginManager manager;
+
+	public BendingEventBus(Bending plugin) {
+		manager = plugin.getServer().getPluginManager();
+	}
+
 	public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {
-		Bukkit.getPluginManager().callEvent(new BendingPlayerLoadEvent(player));
+		manager.callEvent(new BendingPlayerLoadEvent(player));
 	}
 
 	public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
-		Bukkit.getPluginManager().callEvent(new CooldownAddEvent(user, desc, duration));
+		manager.callEvent(new CooldownAddEvent(user, desc, duration));
 	}
 
 	public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
 		if (!user.isValid()) return; // We post the event 1 tick later so this is needed for safety
-		Bukkit.getPluginManager().callEvent(new CooldownRemoveEvent(user, desc));
+		manager.callEvent(new CooldownRemoveEvent(user, desc));
 	}
 
 	public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
-		Bukkit.getPluginManager().callEvent(new ElementChangeEvent(user, result));
+		manager.callEvent(new ElementChangeEvent(user, result));
 	}
 
 	public void postBindChangeEvent(@NonNull User user, BindChangeEvent.Result result) {
-		Bukkit.getPluginManager().callEvent(new BindChangeEvent(user, result));
+		manager.callEvent(new BindChangeEvent(user, result));
+	}
+
+	public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
+		BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
+		manager.callEvent(event);
+		return event;
 	}
 }

@@ -20,19 +20,20 @@
 package me.moros.bending.config;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
+import me.moros.bending.Bending;
 
 public abstract class Configurable {
 	protected CommentedConfigurationNode config;
 
 	public Configurable() {
-		ConfigManager.add(this);
+		Bending.getConfigManager().add(this);
 		reload();
 	}
 
 	public abstract void onConfigReload();
 
 	public void reload() {
-		config = ConfigManager.getConfig();
+		config = Bending.getConfigManager().getConfig();
 		onConfigReload();
 	}
 }

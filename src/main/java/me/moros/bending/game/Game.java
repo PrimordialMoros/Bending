@@ -23,7 +23,6 @@ import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
-import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.game.manager.PlayerManager;
 import me.moros.bending.game.manager.SequenceManager;
@@ -106,7 +105,7 @@ public final class Game {
 		worldManager.destroyAllInstances();
 		sequenceManager.clear();
 		removeTemporary();
-		ConfigManager.reload();
+		Bending.getConfigManager().reload();
 		Bending.getTranslationManager().reload();
 		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
 	}

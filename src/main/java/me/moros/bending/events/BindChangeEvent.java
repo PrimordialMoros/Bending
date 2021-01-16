@@ -25,7 +25,7 @@ import me.moros.bending.model.user.User;
 public class BindChangeEvent extends BendingUserEvent {
 	private final Result result;
 
-	public BindChangeEvent(@NonNull User user, @NonNull Result result) {
+	BindChangeEvent(User user, Result result) {
 		super(user);
 		this.result = result;
 	}

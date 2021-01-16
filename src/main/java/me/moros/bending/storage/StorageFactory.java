@@ -22,7 +22,6 @@ package me.moros.bending.storage;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.config.ConfigManager;
 import me.moros.storage.ConnectionBuilder;
 import me.moros.storage.StorageType;
 
@@ -35,7 +34,7 @@ import java.io.File;
  */
 public final class StorageFactory {
 	public static @Nullable BendingStorage createInstance() {
-		CommentedConfigurationNode storageNode = ConfigManager.getConfig().node("storage");
+		CommentedConfigurationNode storageNode = Bending.getConfigManager().getConfig().node("storage");
 		String configValue = storageNode.node("engine").getString("h2");
 		StorageType engine = StorageType.parse(configValue, StorageType.H2);
 		if (!configValue.equalsIgnoreCase(engine.toString())) {

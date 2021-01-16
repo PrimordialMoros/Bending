@@ -204,8 +204,11 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-			DamageUtil.damageEntity(entity, user, damage, getDescription());
-			FireTick.LARGER.apply(entity, userConfig.fireTick);
+			double distance = center.distance(VectorMethods.getEntityCenter(entity));
+			double halfSize = size / 2;
+			double factor = (distance <= halfSize) ? 1 : (distance - halfSize) / size;
+			DamageUtil.damageEntity(entity, user, damage * factor, getDescription());
+			FireTick.LARGER.apply(entity, NumberConversions.floor(userConfig.fireTick));
 			return true;
 		}, true, true);
 

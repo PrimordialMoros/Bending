@@ -22,7 +22,7 @@ package me.moros.bending.game.manager;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
-import me.moros.bending.config.ConfigManager;
+import me.moros.bending.Bending;
 import me.moros.bending.model.DummyAbilityManager;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.Bukkit;
@@ -42,7 +42,7 @@ public final class WorldManager {
 	private final Set<UUID> disabledWorlds;
 
 	public WorldManager() {
-		ConfigurationNode node = ConfigManager.getConfig().node("properties", "disabled-worlds");
+		ConfigurationNode node = Bending.getConfigManager().getConfig().node("properties", "disabled-worlds");
 		List<String> worldNames = Collections.emptyList();
 		try {
 			worldNames = node.getList(String.class, Collections.emptyList());

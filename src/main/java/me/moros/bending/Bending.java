@@ -48,6 +48,7 @@ public class Bending extends JavaPlugin {
 
 	private Logger logger;
 
+	private ConfigManager configManager;
 	private TranslationManager translationManager;
 	private BukkitAudiences audiences;
 	private TimingManager timingManager;
@@ -69,17 +70,18 @@ public class Bending extends JavaPlugin {
 
 		Tasker.init(this);
 
-		translationManager = new TranslationManager();
+		String dir = getConfigFolder();
+
+		configManager = new ConfigManager(dir);
+		translationManager = new TranslationManager(dir);
 		audiences = BukkitAudiences.create(this);
 		timingManager = TimingManager.of(this);
-		eventBus = new BendingEventBus();
+		eventBus = new BendingEventBus(this);
 		layer = new PersistentDataLayer(this);
-
-		ConfigManager.init(getConfigFolder());
 
 		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
 		game = new Game(storage);
-		ConfigManager.save();
+		configManager.save();
 
 		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
 		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
@@ -112,6 +114,10 @@ public class Bending extends JavaPlugin {
 
 	public static Bending getPlugin() {
 		return plugin;
+	}
+
+	public static ConfigManager getConfigManager() {
+		return plugin.configManager;
 	}
 
 	public static TranslationManager getTranslationManager() {

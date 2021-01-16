@@ -31,13 +31,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class ConfigManager {
-	private static HoconConfigurationLoader loader;
-	private static CommentedConfigurationNode configRoot;
+public class ConfigManager {
+	private final Collection<Configurable> instances = new ArrayList<>();
+	private final HoconConfigurationLoader loader;
 
-	private static final Collection<Configurable> instances = new ArrayList<>();
+	private CommentedConfigurationNode configRoot;
 
-	public static void init(@NonNull String directory) {
+	public ConfigManager(@NonNull String directory) {
 		Path path = Paths.get(directory, "bending.conf");
 		loader = HoconConfigurationLoader.builder().path(path).build();
 		try {
@@ -48,7 +48,7 @@ public final class ConfigManager {
 		}
 	}
 
-	public static void reload() {
+	public void reload() {
 		try {
 			configRoot = loader.load();
 			instances.forEach(Configurable::reload);
@@ -57,7 +57,7 @@ public final class ConfigManager {
 		}
 	}
 
-	public static void save() {
+	public void save() {
 		try {
 			Bending.getLog().info("Saving bending config");
 			loader.save(configRoot);
@@ -66,11 +66,11 @@ public final class ConfigManager {
 		}
 	}
 
-	public static @NonNull CommentedConfigurationNode getConfig() {
+	public @NonNull CommentedConfigurationNode getConfig() {
 		return configRoot;
 	}
 
-	public static void add(@NonNull Configurable c) {
+	public void add(@NonNull Configurable c) {
 		instances.add(c);
 	}
 }

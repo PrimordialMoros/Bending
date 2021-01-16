@@ -25,7 +25,6 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
@@ -64,7 +63,7 @@ public class ProtectionSystem extends Configurable {
 
 	@Override
 	public void onConfigReload() {
-		CommentedConfigurationNode node = ConfigManager.getConfig().node("protection");
+		CommentedConfigurationNode node = config.node("protection");
 		allowHarmless = node.node("allow-harmless").getBoolean(true);
 	}
 
@@ -123,7 +122,7 @@ public class ProtectionSystem extends Configurable {
 	 * @param creator the factory function that creates the protection instance
 	 */
 	public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
-		CommentedConfigurationNode node = ConfigManager.getConfig().node("protection", name);
+		CommentedConfigurationNode node = config.node("protection", name);
 		if (!node.getBoolean(true)) return;
 		try {
 			Protection method = creator.create();

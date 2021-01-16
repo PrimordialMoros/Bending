@@ -19,18 +19,43 @@
 
 package me.moros.bending.events;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.bukkit.entity.Entity;
+import org.bukkit.event.Cancellable;
 
-public class CooldownAddEvent extends BendingAbilityEvent {
-	private final long duration;
+public class BendingDamageEvent extends BendingAbilityEvent implements Cancellable {
+	private final Entity target;
 
-	CooldownAddEvent(User user, AbilityDescription desc, long duration) {
+	private boolean cancelled = false;
+	private double damage;
+
+	BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
 		super(user, desc);
-		this.duration = duration;
+		this.target = target;
+		this.damage = damage;
 	}
 
-	public long getDuration() {
-		return duration;
+	public @NonNull Entity getTarget() {
+		return target;
+	}
+
+	public double getDamage() {
+		return damage;
+	}
+
+	public void setDamage(double damage) {
+		this.damage = damage;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
+	@Override
+	public void setCancelled(boolean cancel) {
+		this.cancelled = cancel;
 	}
 }

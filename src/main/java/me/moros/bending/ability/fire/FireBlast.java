@@ -55,7 +55,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
@@ -233,10 +232,10 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
-				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-				FireTick.LARGER.apply(entity, 30);
+			if (!affectedEntities.contains(entity)) {
 				affectedEntities.add(entity);
+				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+				FireTick.LARGER.apply(entity, userConfig.fireTick);
 			}
 			return true;
 		}
@@ -271,6 +270,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		public double range;
 		@Attribute(Attribute.SPEED)
 		public double speed;
+		@Attribute(Attribute.DURATION)
+		public int fireTick;
 		@Attribute(Attribute.RADIUS)
 		public double igniteRadius;
 		@Attribute(Attribute.STRENGTH)
@@ -286,6 +287,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			damage = abilityNode.node("damage").getDouble(3.0);
 			range = abilityNode.node("range").getDouble(20.0);
 			speed = abilityNode.node("speed").getDouble(0.8);
+			fireTick = abilityNode.node("fire-tick").getInt(20);
 			igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
 
 			chargeFactor = abilityNode.node("charge").node("factor").getDouble(1.5);

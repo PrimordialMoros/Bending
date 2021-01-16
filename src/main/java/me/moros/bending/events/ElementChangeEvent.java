@@ -25,12 +25,12 @@ import me.moros.bending.model.user.User;
 public class ElementChangeEvent extends BendingUserEvent {
 	private final Result result;
 
-	public ElementChangeEvent(@NonNull User user, @NonNull Result result) {
+	ElementChangeEvent(User user, Result result) {
 		super(user);
 		this.result = result;
 	}
 
-	public Result getResult() {
+	public @NonNull Result getResult() {
 		return result;
 	}
 

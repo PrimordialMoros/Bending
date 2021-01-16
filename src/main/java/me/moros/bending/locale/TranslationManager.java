@@ -52,8 +52,8 @@ public class TranslationManager {
 	private final Path translationsDirectory;
 	private TranslationRegistry registry;
 
-	public TranslationManager() {
-		translationsDirectory = Paths.get(Bending.getConfigFolder(), "translations");
+	public TranslationManager(@NonNull String directory) {
+		translationsDirectory = Paths.get(directory, "translations");
 		reload();
 	}
 

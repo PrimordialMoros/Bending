@@ -19,12 +19,11 @@
 
 package me.moros.bending.events;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public class CooldownRemoveEvent extends BendingAbilityEvent {
-	public CooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
+	CooldownRemoveEvent(User user, AbilityDescription desc) {
 		super(user, desc);
 	}
 }

@@ -144,8 +144,7 @@ public class UserListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onFallDamage(EntityDamageEvent event) {
-		if (!(event.getEntity() instanceof LivingEntity)) return;
+	public void onEntityDamage(EntityDamageEvent event) {
 		if (event.getCause() == DamageCause.FALL) {
 			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
 			if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {

@@ -25,6 +25,7 @@ import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.TranslatableComponent;
 import me.moros.bending.Bending;
+import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
@@ -51,11 +52,12 @@ public final class DamageUtil {
 		if (target instanceof LivingEntity && damage > 0) {
 			LivingEntity targetEntity = (LivingEntity) target;
 			LivingEntity sourceEntity = source.getEntity();
-			targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(sourceEntity, target, EntityDamageEvent.DamageCause.CUSTOM, damage));
-			if (target instanceof Player) {
-				cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
-			}
-			targetEntity.damage(damage, sourceEntity);
+			BendingDamageEvent event = Bending.getEventBus().postAbilityDamageEvent(source, target, desc, damage);
+			if (event.isCancelled()) return false;
+			if (target instanceof Player) cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
+			double finalDamage = event.getDamage();
+			targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(target, sourceEntity, EntityDamageEvent.DamageCause.CUSTOM, finalDamage));
+			targetEntity.damage(finalDamage, sourceEntity);
 			return true;
 		}
 		return false;
