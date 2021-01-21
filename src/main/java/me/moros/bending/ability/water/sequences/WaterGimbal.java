@@ -23,7 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.config.Configurable;
@@ -286,7 +286,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			WallData.attemptDamageWall(Collections.singletonList(block), 3);
+			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
 		}
 	}
 

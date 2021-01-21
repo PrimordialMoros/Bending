@@ -69,7 +69,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		base = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, base) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, base)) {
 			return false;
 		}
 		if (base.isLiquid() || !EarthMaterials.isEarthbendable(user, base) || !TempBlock.isBendable(base)) {

@@ -136,7 +136,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 			while (!queue.isEmpty() && counter <= userConfig.speed) {
 				Block block = queue.poll();
 				if (TempBlock.isBendable(block) && predicate.test(block)) {
-					Optional<TempBlock> tb = TempBlock.manager.get(block);
+					Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
 					if (tb.isPresent()) {
 						tb.get().revert();
 					} else {

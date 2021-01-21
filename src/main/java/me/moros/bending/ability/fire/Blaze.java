@@ -72,9 +72,6 @@ public class Blaze extends AbilityInstance implements Ability {
 
 		this.user = user;
 		recalculateConfig();
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
-			return false;
-		}
 		return release(method == ActivationMethod.ATTACK);
 	}
 

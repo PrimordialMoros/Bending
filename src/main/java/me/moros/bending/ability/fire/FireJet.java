@@ -73,10 +73,6 @@ public class FireJet extends AbilityInstance implements Ability {
 			return false;
 		}
 
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-			return false;
-		}
-
 		speed = userConfig.speed;
 		duration = userConfig.duration;
 

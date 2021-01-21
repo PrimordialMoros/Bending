@@ -24,7 +24,7 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -210,7 +210,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
 	private boolean damageBlock(Block block) {
 		if (currentPower <= 0) return false;
-		WallData.attemptDamageWall(Collections.singletonList(block), 0);
+		FragileStructure.attemptDamageStructure(Collections.singletonList(block), 0);
 		if (block.isLiquid() || !TempBlock.isBendable(block)) {
 			return false;
 		}

@@ -74,6 +74,7 @@ public final class ActivationController {
 
 	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
 		if (!desc.isActivatedBy(method) || !user.canBend(desc)) return false;
+		if (!game.getProtectionSystem().canBuild(user, user.getLocBlock())) return false;
 		Ability ability = desc.createAbility();
 		if (ability.activate(user, method)) {
 			game.getAbilityManager(user.getWorld()).addAbility(user, ability);
@@ -83,7 +84,7 @@ public final class ActivationController {
 	}
 
 	public void onPlayerLogout(@NonNull BendingPlayer player) {
-		TempArmor.manager.get(player.getEntity()).ifPresent(TempArmor::revert);
+		TempArmor.MANAGER.get(player.getEntity()).ifPresent(TempArmor::revert);
 		game.getAttributeSystem().clearModifiers(player);
 		game.getStorage().savePlayerAsync(player);
 		Flight.remove(player);
@@ -121,6 +122,7 @@ public final class ActivationController {
 		FerroControl.act(user);
 		EarthBlast.launch(user);
 		EarthShot.launch(user);
+		EarthSmash.launch(user);
 		MetalCable.launch(user);
 		EarthLine.launch(user);
 		Shockwave.activateCone(user);
@@ -138,12 +140,10 @@ public final class ActivationController {
 	}
 
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
-		if (sneaking) PhaseChange.melt(user);
-
-		String selectedAbilityName = user.getSelectedAbility().map(AbilityDescription::getName).orElse("");
-		if (selectedAbilityName.equals("MetalCable")) {
+		if (sneaking) {
+			PhaseChange.melt(user);
 			MetalCable.attemptDestroy(user);
-		} else if (selectedAbilityName.equals("EarthGlove")) {
+			EarthSmash.attemptGrab(user);
 			EarthGlove.attemptDestroy(user);
 		}
 

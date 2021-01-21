@@ -23,7 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -189,8 +189,9 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean setUser(@NonNull User user) {
+		if (blast == null) return false;
 		this.user = user;
-		if (blast != null) blast.setUser(user);
+		blast.setUser(user);
 		return true;
 	}
 
@@ -227,7 +228,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			WallData.attemptDamageWall(Collections.singletonList(block), 4);
+			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 4);
 		}
 	}
 

@@ -35,7 +35,7 @@ import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
-	public static final TemporalManager<LivingEntity, TempArmor> manager = new TemporalManager<>();
+	public static final TemporalManager<LivingEntity, TempArmor> MANAGER = new TemporalManager<>();
 	private final LivingEntity entity;
 	private final ItemStack[] snapshot;
 
@@ -48,11 +48,11 @@ public class TempArmor implements Temporary {
 		this.entity = entity;
 		this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
 		entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
-		manager.addEntry(entity, this, duration);
+		MANAGER.addEntry(entity, this, duration);
 	}
 
 	public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-		if (manager.isTemp(user.getEntity())) return Optional.empty();
+		if (MANAGER.isTemp(user.getEntity())) return Optional.empty();
 		if (user.getEntity().getEquipment() == null) return Optional.empty();
 		return Optional.of(new TempArmor(user.getEntity(), armor, duration));
 	}
@@ -68,7 +68,7 @@ public class TempArmor implements Temporary {
 	@Override
 	public void revert() {
 		entity.getEquipment().setArmorContents(snapshot);
-		manager.removeEntry(entity);
+		MANAGER.removeEntry(entity);
 		if (revertTask != null) revertTask.execute();
 	}
 

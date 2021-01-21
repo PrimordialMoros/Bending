@@ -165,7 +165,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 		}
 
 		protected void clean(Block block) {
-			TempBlock.manager.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
 		}
 	}
 

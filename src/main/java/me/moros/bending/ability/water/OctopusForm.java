@@ -218,7 +218,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	}
 
 	private void clean(Block block) {
-		TempBlock.manager.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
+		TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 
 	private void cleanAll() {

@@ -31,7 +31,6 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class AirAgility extends AbilityInstance implements PassiveAbility {
@@ -68,9 +67,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
 	private void handlePotionEffect(PotionEffectType type, int amplifier) {
 		if (amplifier < 0) return;
-		if (PotionUtil.canAddPotion(user, type, 20, amplifier)) {
-			user.getEntity().addPotionEffect(new PotionEffect(type, 100, amplifier, true, false));
-		}
+		PotionUtil.addPotion(user.getEntity(), type, 100, amplifier);
 	}
 
 	@Override

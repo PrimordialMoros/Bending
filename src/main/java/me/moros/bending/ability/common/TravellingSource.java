@@ -131,6 +131,6 @@ public class TravellingSource implements State {
 	}
 
 	private void clean() {
-		TempBlock.manager.get(source).filter(tb -> data.getMaterial() == tb.getBlock().getType()).ifPresent(TempBlock::revert);
+		TempBlock.MANAGER.get(source).filter(tb -> data.getMaterial() == tb.getBlock().getType()).ifPresent(TempBlock::revert);
 	}
 }

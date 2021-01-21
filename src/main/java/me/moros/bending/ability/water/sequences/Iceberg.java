@@ -128,7 +128,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 	}
 
 	private void formIce(Block block) {
-		if (blocks.contains(block) || TempBlock.manager.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
+		if (blocks.contains(block) || TempBlock.MANAGER.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
 			return;
 		}
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {

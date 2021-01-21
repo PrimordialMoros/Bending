@@ -240,6 +240,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
+		abilities.add(AbilityDescription.builder("EarthSmash", EarthSmash::new)
+			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+
 		abilities.add(AbilityDescription.builder("EarthShot", EarthShot::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 

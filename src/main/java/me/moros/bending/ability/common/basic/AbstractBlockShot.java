@@ -174,7 +174,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public void clean(@NonNull Block block) {
-		TempBlock.manager.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
+		TempBlock.MANAGER.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 
 	public void setUser(@NonNull User user) {

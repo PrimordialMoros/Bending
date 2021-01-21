@@ -74,7 +74,7 @@ public class FireShield extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		if (user.getHeadBlock().isLiquid() || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (user.getHeadBlock().isLiquid()) {
 			return false;
 		}
 

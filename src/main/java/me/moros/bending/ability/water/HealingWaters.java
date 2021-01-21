@@ -104,10 +104,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
 	private boolean healEntity(LivingEntity livingEntity) {
 		AttributeInstance attributeInstance = livingEntity.getAttribute(healthAttribute);
 		if (attributeInstance != null && livingEntity.getHealth() < attributeInstance.getValue()) {
-			PotionEffectType type = PotionEffectType.REGENERATION;
-			if (PotionUtil.canAddPotion(user, type, 20, userConfig.power - 1)) {
-				user.getEntity().addPotionEffect(new PotionEffect(type, 60, userConfig.power - 1));
-			}
+			PotionUtil.addPotion(livingEntity, PotionEffectType.REGENERATION, 60, userConfig.power);
 			return true;
 		}
 		return false;
@@ -151,7 +148,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(3000);
 			range = abilityNode.node("range").getDouble(5.0);
-			power = abilityNode.node("power").getInt(2);
+			power = abilityNode.node("power").getInt(2) - 1;
 			chargeTime = abilityNode.node("charge-time").getLong(2000);
 		}
 	}

@@ -20,6 +20,8 @@
 package me.moros.bending.game.temporal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.expiringmap.ExpirationPolicy;
+import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.material.MaterialUtil;
@@ -34,11 +36,14 @@ import org.bukkit.block.data.Waterlogged;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class TempBlock implements Temporary {
 	private static final Set<Block> GRAVITY_CACHE = new HashSet<>();
 
-	public static final TemporalManager<Block, TempBlock> manager = new TemporalManager<>();
+	public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>();
+	private static final ExpiringMap<Block, Boolean> TEMP_AIR = ExpiringMap.builder().variableExpiration().build();
+
 	private BlockState snapshot;
 	private final BlockData data;
 	private RevertTask revertTask;
@@ -51,13 +56,18 @@ public class TempBlock implements Temporary {
 		snapshot = block.getState();
 		this.data = data;
 		this.bendable = bendable;
-		manager.get(block).ifPresent(temp -> {
+		TempBlock temp = MANAGER.get(block).orElse(null);
+		if (temp != null) {
 			snapshot = temp.snapshot;
-			if (revertTask != null) revertTask.execute();
-		});
+			if (temp.revertTask != null) temp.revertTask.execute();
+		} else {
+			if (data.getMaterial().isAir() && !TEMP_AIR.containsKey(block)) {
+				TEMP_AIR.put(block, false, ExpirationPolicy.CREATED, duration <= 0 ? DEFAULT_REVERT : duration, TimeUnit.MILLISECONDS);
+			}
+		}
 		if (data.getMaterial().hasGravity()) GRAVITY_CACHE.add(block);
 		block.setBlockData(data);
-		manager.addEntry(block, this, duration);
+		MANAGER.addEntry(block, this, duration);
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type) {
@@ -90,6 +100,12 @@ public class TempBlock implements Temporary {
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable) {
 		if (block instanceof TileState) return Optional.empty();
+
+		TempBlock tb = MANAGER.get(block).orElse(null);
+		if (tb != null && data.matches(tb.snapshot.getBlockData())) {
+			return Optional.empty();
+		}
+
 		if (block.getBlockData() instanceof Waterlogged) {
 			Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
 			if (waterData.isWaterlogged() && data.getMaterial().isAir()) {
@@ -103,7 +119,6 @@ public class TempBlock implements Temporary {
 
 		if (MaterialUtil.TRANSPARENT.isTagged(data)) {
 			if (BlockMethods.isInfiniteWater(block)) {
-				TempBlock tb = manager.get(block).orElse(null);
 				if (tb != null) {
 					if (Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
 						tb.revert();
@@ -120,9 +135,15 @@ public class TempBlock implements Temporary {
 
 	@Override
 	public void revert() {
-		snapshot.getWorld().getChunkAtAsync(getBlock()).thenAccept(r -> snapshot.update(true, false));
-		manager.removeEntry(getBlock());
-		GRAVITY_CACHE.remove(getBlock());
+		Block block = getBlock();
+		if (TEMP_AIR.containsKey(block)) {
+			long remainingTime = TEMP_AIR.getExpectedExpiration(block);
+			create(block, Material.AIR, remainingTime, true);
+			return;
+		}
+		snapshot.getWorld().getChunkAtAsync(block).thenAccept(r -> snapshot.update(true, false));
+		MANAGER.removeEntry(block);
+		GRAVITY_CACHE.remove(block);
 		if (revertTask != null) revertTask.execute();
 	}
 
@@ -143,7 +164,7 @@ public class TempBlock implements Temporary {
 	}
 
 	public void removeWithoutReverting() {
-		manager.removeEntry(getBlock());
+		MANAGER.removeEntry(getBlock());
 	}
 
 	public boolean isBendable() {
@@ -156,11 +177,11 @@ public class TempBlock implements Temporary {
 	}
 
 	public static boolean isTouchingTempBlock(@NonNull Block block) {
-		return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(manager::isTemp);
+		return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(MANAGER::isTemp);
 	}
 
 	public static boolean isBendable(@NonNull Block block) {
-		return manager.get(block).map(TempBlock::isBendable).orElse(true);
+		return MANAGER.get(block).map(TempBlock::isBendable).orElse(true);
 	}
 
 	public static boolean isGravityCached(@NonNull Block block) {

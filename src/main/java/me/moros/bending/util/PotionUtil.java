@@ -20,7 +20,8 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.user.User;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -58,8 +59,20 @@ public final class PotionUtil {
 		return NEGATIVE.contains(type);
 	}
 
-	public static boolean canAddPotion(@NonNull User user, @NonNull PotionEffectType type, int minDuration, int minAmplifier) {
-		PotionEffect effect = user.getEntity().getPotionEffect(type);
-		return effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < minAmplifier;
+	public static boolean canAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int minDuration, int minAmplifier) {
+		if (entity instanceof LivingEntity) {
+			PotionEffect effect = ((LivingEntity) entity).getPotionEffect(type);
+			return effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < minAmplifier;
+		}
+		return false;
+	}
+
+	public static boolean addPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
+		int minDuration = isPositive(type) ? 20 : duration;
+		if (entity.isValid() && canAddPotion(entity, type, minDuration, amplifier)) {
+			((LivingEntity) entity).addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
+			return true;
+		}
+		return false;
 	}
 }

@@ -284,15 +284,17 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	}
 
 	public static void attemptDestroy(@NonNull User user) {
-		CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
-			if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
-				EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
-				if (ability != null && !user.equals(ability.getUser())) {
-					ability.shatterGlove();
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
+			CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
+				if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
+					EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
+					if (ability != null && !user.equals(ability.getUser())) {
+						ability.shatterGlove();
+					}
 				}
-			}
-			return true;
-		}, false, false);
+				return true;
+			}, false, false);
+		}
 	}
 
 	public static class Config extends Configurable {

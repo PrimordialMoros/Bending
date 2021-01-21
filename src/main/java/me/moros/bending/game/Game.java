@@ -120,10 +120,10 @@ public final class Game {
 	}
 
 	private void removeTemporary() {
-		TempArmor.manager.removeAll();
-		TempBlock.manager.removeAll();
-		TempArmorStand.manager.removeAll();
-		BendingFallingBlock.manager.removeAll();
+		TempArmor.MANAGER.removeAll();
+		TempBlock.MANAGER.removeAll();
+		TempArmorStand.MANAGER.removeAll();
+		BendingFallingBlock.MANAGER.removeAll();
 	}
 
 	private void loadStorage() {

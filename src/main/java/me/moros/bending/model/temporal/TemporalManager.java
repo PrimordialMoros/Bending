@@ -45,7 +45,7 @@ public final class TemporalManager<K, V extends Temporary> {
 	}
 
 	public void addEntry(@NonNull K key, @NonNull V value, long duration) {
-		if (duration <= 0) duration = 600_000; // 10 minutes
+		if (duration <= 0) duration = Temporary.DEFAULT_REVERT;
 		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
 	}
 

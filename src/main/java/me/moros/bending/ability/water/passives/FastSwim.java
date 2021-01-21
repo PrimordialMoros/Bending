@@ -28,7 +28,6 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class FastSwim extends AbilityInstance implements PassiveAbility {
@@ -56,11 +55,7 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 		}
 
 		if (MaterialUtil.isWater(user.getLocBlock())) {
-			if (PotionUtil.canAddPotion(user, PotionEffectType.DOLPHINS_GRACE, 20, 1)) {
-				user.getEntity().addPotionEffect(
-					new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 100, 1, true, false)
-				);
-			}
+			PotionUtil.addPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, 1);
 		}
 		return UpdateResult.CONTINUE;
 	}

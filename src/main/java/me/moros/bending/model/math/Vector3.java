@@ -28,6 +28,7 @@ import org.apache.commons.math3.util.MathArrays;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.NumberConversions;
 
 /**
@@ -107,6 +108,10 @@ public class Vector3 extends Vector3D {
 
 	public Vector3(Block block) {
 		super(block.getX(), block.getY(), block.getZ());
+	}
+
+	public Vector3(BlockVector vector) {
+		super(vector.getX(), vector.getY(), vector.getZ());
 	}
 
 	@Override

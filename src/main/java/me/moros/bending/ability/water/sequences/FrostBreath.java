@@ -38,6 +38,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -49,7 +50,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
@@ -169,12 +169,11 @@ public class FrostBreath extends AbilityInstance implements Ability {
 			if (!affectedEntities.contains(entity)) {
 				affectedEntities.add(entity);
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-				if (entity.isValid() && entity instanceof LivingEntity) {
-					int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-					((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, userConfig.power));
-					ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
-						.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
-				}
+				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+				PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+				ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
+					.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
+
 			}
 			return false;
 		}

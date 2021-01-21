@@ -115,7 +115,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
 			if (WaterMaterials.isIceBendable(block)) {
-				Optional<TempBlock> tb = TempBlock.manager.get(block);
+				Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
 				if (tb.isPresent()) {
 					tb.get().revert();
 				} else {

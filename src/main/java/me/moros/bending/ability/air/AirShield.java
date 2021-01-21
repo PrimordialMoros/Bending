@@ -73,10 +73,6 @@ public class AirShield extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
-			return false;
-		}
 		removalPolicy = Policies.builder()
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
 			.add(Policies.NOT_SNEAKING)

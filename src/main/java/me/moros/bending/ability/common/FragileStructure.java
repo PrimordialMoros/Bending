@@ -38,16 +38,16 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-public class WallData {
-	private final Collection<Block> wallBlocks;
+public class FragileStructure {
+	private final Collection<Block> fragileBlocks;
 	private final Predicate<Block> predicate;
 	private int health;
 
-	private WallData(Collection<Block> wallBlocks, int health, Predicate<Block> predicate) {
-		this.wallBlocks = wallBlocks;
+	private FragileStructure(Collection<Block> fragileBlocks, int health, Predicate<Block> predicate) {
+		this.fragileBlocks = fragileBlocks;
 		this.health = health;
 		this.predicate = predicate;
-		this.wallBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.customMetadata(this)));
+		this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.customMetadata(this)));
 	}
 
 	public int getHealth() {
@@ -55,39 +55,39 @@ public class WallData {
 	}
 
 	/**
-	 * @return unmodifiable collection of blocks belonging to the same wall
+	 * @return unmodifiable collection of blocks belonging to the same fragile structure
 	 */
-	public Collection<Block> getWallBlocks() {
-		return Collections.unmodifiableCollection(wallBlocks);
+	public Collection<Block> getFragileBlocks() {
+		return Collections.unmodifiableCollection(fragileBlocks);
 	}
 
 	/**
-	 * Attempt to subtract the specified amount of damage from this wall's health.
-	 * If health drops at zero or below then the wall will break.
-	 * Note: Provide a non positive damage value to instantly destroy the wall.
+	 * Attempt to subtract the specified amount of damage from this structure's health.
+	 * If health drops at zero or below then the structure will shatter.
+	 * Note: Provide a non positive damage value to instantly destroy the structure.
 	 * @param damage the amount of damage to inflict
-	 * @return the remaining wall health
+	 * @return the remaining structure health
 	 */
-	private int damageWall(int damage) {
+	private int damageStructure(int damage) {
 		if (damage > 0 && health > damage) {
 			health -= damage;
 			return health;
 		}
-		destroyWall(this);
+		destroyStructure(this);
 		return 0;
 	}
 
-	public static Optional<WallData> createWallData(@NonNull Collection<Block> blocks, int health, @NonNull Predicate<Block> predicate) {
+	public static Optional<FragileStructure> create(@NonNull Collection<Block> blocks, int health, @NonNull Predicate<Block> predicate) {
 		if (health < 0 || blocks.isEmpty()) return Optional.empty();
-		return Optional.of(new WallData(blocks, health, predicate));
+		return Optional.of(new FragileStructure(blocks, health, predicate));
 	}
 
-	public static boolean attemptDamageWall(@NonNull Collection<Block> blocks, int damage) {
+	public static boolean attemptDamageStructure(@NonNull Collection<Block> blocks, int damage) {
 		for (Block block : blocks) {
 			if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
-				WallData wallData = (WallData) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
-				if (wallData != null) {
-					wallData.damageWall(damage);
+				FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
+				if (structure != null) {
+					structure.damageStructure(damage);
 					return true;
 				}
 			}
@@ -95,11 +95,12 @@ public class WallData {
 		return false;
 	}
 
-	public static void destroyWall(@NonNull WallData data) {
-		for (Block block : data.wallBlocks) {
+	// TODO match sounds to actual materials
+	public static void destroyStructure(@NonNull FragileStructure data) {
+		for (Block block : data.fragileBlocks) {
 			if (!data.predicate.test(block)) continue;
 			Material mat = block.getType();
-			TempBlock.manager.get(block).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
 			block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.getPlugin());
 			Location center = block.getLocation().add(0.5, 0.5, 0.5);
 			ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)

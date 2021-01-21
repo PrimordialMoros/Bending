@@ -160,7 +160,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 	}
 
 	private void clean(Block block) {
-		TempBlock.manager.get(block).filter(tb -> WaterMaterials.isIceBendable(tb.getBlock())).ifPresent(TempBlock::revert);
+		TempBlock.MANAGER.get(block).filter(tb -> WaterMaterials.isIceBendable(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 
 			if (canMove(currentIndex)) {
 				pillarBlocks.offerFirst(currentIndex);
-				TempBlock.create(currentIndex, material, false);
+				TempBlock.create(currentIndex, material);
 				SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
 			} else {
 				reverting = true;

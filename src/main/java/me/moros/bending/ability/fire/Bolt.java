@@ -22,7 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -74,10 +74,6 @@ public class Bolt extends AbilityInstance implements Ability {
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) return false;
 		this.user = user;
 		recalculateConfig();
-
-		if (Policies.IN_LIQUID.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
-			return false;
-		}
 		removalPolicy = Policies.builder()
 			.add(new ExpireRemovalPolicy(userConfig.duration))
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
@@ -138,7 +134,7 @@ public class Bolt extends AbilityInstance implements Ability {
 	public void dealDamage() {
 		Collider collider = new Sphere(targetLocation, 5);
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
-		WallData.attemptDamageWall(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
+		FragileStructure.attemptDamageStructure(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
 	}
 
 	private void strike() {

@@ -26,7 +26,7 @@ import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -279,7 +279,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 		@Override
 		protected void onCollision() {
-			WallData.attemptDamageWall(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
+			FragileStructure.attemptDamageStructure(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
 			if (mode != Mode.MAGMA) return;
 			Location center = location.toLocation(user.getWorld());
 			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1, 0.5F);

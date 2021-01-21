@@ -30,17 +30,26 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.NumberConversions;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class WaterWave extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -48,6 +57,8 @@ public class WaterWave extends AbilityInstance implements Ability {
 	private User user;
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
+
+	private final Set<Entity> affectedEntities = new HashSet<>();
 
 	private boolean ice = false;
 	private long startTime;
@@ -91,15 +102,27 @@ public class WaterWave extends AbilityInstance implements Ability {
 		user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());
 		user.getEntity().setFallDistance(0);
 
-		Location center = user.getEntity().getLocation().subtract(0, 1, 0);
-		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, MaterialUtil::isTransparent)) {
+		Vector3 center = user.getLocation().add(Vector3.MINUS_J);
+		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			Optional<TempBlock> tb = TempBlock.create(block, Material.WATER, 1000);
 			if (ice) {
 				tb.ifPresent(t -> t.setRevertTask(() -> TempBlock.create(block, Material.ICE, 1000)));
 			}
 		}
+		if (ice) {
+			CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
+		}
 		return UpdateResult.CONTINUE;
+	}
+
+	private boolean onEntityHit(Entity entity) {
+		if (affectedEntities.contains(entity)) return false;
+		affectedEntities.add(entity);
+		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+		int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+		PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+		return true;
 	}
 
 	public void freeze() {
@@ -132,6 +155,13 @@ public class WaterWave extends AbilityInstance implements Ability {
 		@Attribute(Attribute.RADIUS)
 		public double radius;
 
+		@Attribute(Attribute.DAMAGE)
+		public double damage;
+		@Attribute(Attribute.STRENGTH)
+		public int power;
+		@Attribute(Attribute.DURATION)
+		public long slowDuration;
+
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
@@ -140,6 +170,10 @@ public class WaterWave extends AbilityInstance implements Ability {
 			duration = abilityNode.node("duration").getLong(2500);
 			speed = abilityNode.node("speed").getDouble(1.2);
 			radius = abilityNode.node("radius").getDouble(1.7);
+
+			damage = abilityNode.node("ice-damage").getDouble(2.0);
+			power = abilityNode.node("ice-slow-power").getInt(2) - 1;
+			slowDuration = abilityNode.node("ice-slow-duration").getLong(3500);
 		}
 	}
 }

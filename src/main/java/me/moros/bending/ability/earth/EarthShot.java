@@ -22,6 +22,7 @@ package me.moros.bending.ability.earth;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
@@ -202,7 +203,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 	private void handleSource() {
 		Block block = projectile.getFallingBlock().getLocation().getBlock();
 		if (block.getY() >= targetY) {
-			TempBlock.create(block, projectile.getFallingBlock().getBlockData(), false);
+			TempBlock.create(block, projectile.getFallingBlock().getBlockData());
 			projectile.revert();
 			location = new Vector3(block);
 			readySource = block;
@@ -229,7 +230,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 			if (userConfig.chargeTime <= 0 || System.currentTimeMillis() > magmaStartTime + userConfig.chargeTime) {
 				mode = Mode.MAGMA;
-				TempBlock.create(readySource, Material.MAGMA_BLOCK, false);
+				TempBlock.create(readySource, Material.MAGMA_BLOCK);
 				canConvert = false;
 			}
 		} else {
@@ -277,7 +278,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 			origin = new Vector3(readySource).add(Vector3.HALF);
 			Vector3 dir = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), Collections.singleton(readySource.getType())).subtract(origin);
 			projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.normalize().scalarMultiply(1.8), true, 30000);
-			TempBlock.manager.get(readySource).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
 		}
 		location = projectile.getCenter();
 		lastVelocity = new Vector3(projectile.getFallingBlock().getVelocity());
@@ -315,11 +316,13 @@ public class EarthShot extends AbilityInstance implements Ability {
 					ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
 					SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
 				}
+				Block projected = spawnLoc.add(projectile.getFallingBlock().getVelocity().normalize().multiply(0.75)).getBlock();
+				FragileStructure.attemptDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
 			}
 			projectile.revert();
 		}
 		if (readySource != null) {
-			TempBlock.manager.get(readySource).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
 		}
 	}
 

@@ -22,8 +22,8 @@ package me.moros.bending.ability.water;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.WallData;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -45,6 +45,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -57,9 +58,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
@@ -141,7 +140,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 					if (!trail.isEmpty()) manip.clean(trail.peekFirst());
 					if (trail.size() == 2) manip.clean(trail.removeLast());
 					trail.addFirst(previous);
-					TempBlock.manager.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
+					TempBlock.MANAGER.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
 				}
 			}
 
@@ -222,7 +221,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	public void onDestroy() {
 		if (manip != null) {
 			trail.forEach(b -> {
-				TempBlock.manager.get(b).ifPresent(tb -> tb.setRevertTask(null));
+				TempBlock.MANAGER.get(b).ifPresent(tb -> tb.setRevertTask(null));
 				manip.clean(b);
 			});
 			manip.clean();
@@ -236,8 +235,9 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean setUser(@NonNull User user) {
+		if (manip == null) return false;
 		this.user = user;
-		if (manip != null) manip.setUser(user);
+		manip.setUser(user);
 		return true;
 	}
 
@@ -261,16 +261,14 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
 			entity.setVelocity(push.clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			if (entity.isValid() && entity instanceof LivingEntity) {
-				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-				((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.SLOW, potionDuration, userConfig.power));
-			}
+			int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+			PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
 			return true;
 		}
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			WallData.attemptDamageWall(Collections.singletonList(block), 3);
+			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
 		}
 	}
 

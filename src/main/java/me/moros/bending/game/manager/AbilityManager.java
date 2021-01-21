@@ -70,10 +70,10 @@ public class AbilityManager {
 	}
 
 	public void changeOwner(@NonNull Ability ability, @NonNull User user) {
-		if (ability.getUser().equals(user)) return;
-		if (globalInstances.remove(ability.getUser(), ability)) {
+		if (ability.getUser().equals(user) || !ability.getUser().getWorld().equals(user.getWorld())) return;
+		if (ability.setUser(user) && globalInstances.remove(ability.getUser(), ability)) {
+			ability.recalculateConfig();
 			globalInstances.put(user, ability);
-			ability.setUser(user);
 		}
 	}
 

@@ -99,9 +99,6 @@ public class Shockwave extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
-			return false;
-		}
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		released = false;
 		if (method == ActivationMethod.FALL) {

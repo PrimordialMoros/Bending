@@ -182,7 +182,7 @@ public final class BlockMethods {
 	 */
 	public static boolean breakPlant(@NonNull Block block) {
 		if (MaterialUtil.BREAKABLE_PLANTS.isTagged(block)) {
-			if (TempBlock.manager.isTemp(block)) return false;
+			if (TempBlock.MANAGER.isTemp(block)) return false;
 			block.breakNaturally(new ItemStack(Material.AIR));
 			return true;
 		}

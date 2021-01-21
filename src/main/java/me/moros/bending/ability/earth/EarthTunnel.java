@@ -132,7 +132,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 	private void extract(Block block) {
 		if (!userConfig.extractOres || !TempBlock.isBendable(block)) return;
 		Material mat = block.getType().name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
-		TempBlock.manager.get(block).ifPresent(tb -> tb.overwriteSnapshot(mat.createBlockData()));
+		TempBlock.MANAGER.get(block).ifPresent(tb -> tb.overwriteSnapshot(mat.createBlockData()));
 
 		Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
 		int rand = ThreadLocalRandom.current().nextInt(100);

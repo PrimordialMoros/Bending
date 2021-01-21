@@ -84,7 +84,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
 		charging = true;
-		if (user.getHeadBlock().isLiquid() || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (user.getHeadBlock().isLiquid()) {
 			return false;
 		}
 

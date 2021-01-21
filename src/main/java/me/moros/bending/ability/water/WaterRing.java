@@ -286,7 +286,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 	private void cleanAll() {
 		for (Block block : ring) {
-			TempBlock.manager.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
 		}
 	}
 

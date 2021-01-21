@@ -292,13 +292,15 @@ public class MetalCable extends AbilityInstance implements Ability {
 	}
 
 	public static void attemptDestroy(User user) {
-		Location center = user.getEntity().getEyeLocation();
-		Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
-		for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
-			MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
-			if (ability != null && !entity.equals(ability.getUser().getEntity())) {
-				ability.remove();
-				return;
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("MetalCable")) {
+			Location center = user.getEntity().getEyeLocation();
+			Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
+			for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
+				MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
+				if (ability != null && !entity.equals(ability.getUser().getEntity())) {
+					ability.remove();
+					return;
+				}
 			}
 		}
 	}

@@ -22,7 +22,7 @@ package me.moros.bending.ability.water;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -75,7 +75,7 @@ public class IceWall extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		Block targetBlock = WorldMethods.rayTraceBlocks(user.getWorld(), user.getRay(userConfig.selectRange)).orElse(null);
-		if (targetBlock != null && WallData.attemptDamageWall(Collections.singletonList(targetBlock), 0)) {
+		if (targetBlock != null && FragileStructure.attemptDamageStructure(Collections.singletonList(targetBlock), 0)) {
 			return false;
 		}
 
@@ -160,7 +160,7 @@ public class IceWall extends AbilityInstance implements Ability {
 
 	@Override
 	public void onDestroy() {
-		WallData.createWallData(wallBlocks, userConfig.wallHealth, WaterMaterials::isIceBendable);
+		FragileStructure.create(wallBlocks, userConfig.wallHealth, WaterMaterials::isIceBendable);
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class IceWall extends AbilityInstance implements Ability {
 			if (canMove(currentIndex)) {
 				wallBlocks.add(currentIndex);
 				SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
-				TempBlock.create(currentIndex, Material.ICE, false);
+				TempBlock.create(currentIndex, Material.ICE);
 			}
 			return UpdateResult.CONTINUE;
 		}

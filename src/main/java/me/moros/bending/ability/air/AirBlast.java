@@ -78,20 +78,19 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		recalculateConfig();
 		particleCount = 6;
 
-		if (Policies.IN_LIQUID.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (Policies.IN_LIQUID.test(user, getDescription())) {
 			return false;
 		}
 
 		removalPolicy = Policies.builder()
-			.add(new OutOfRangeRemovalPolicy(userConfig.selectOutOfRange, () -> origin))
+			.add(new OutOfRangeRemovalPolicy(userConfig.selectRange * 2, () -> origin))
 			.add(Policies.IN_LIQUID)
 			.build();
 
 		for (AirBlast blast : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
 			if (!blast.launched) {
 				if (method == ActivationMethod.SNEAK_RELEASE) {
-					blast.selectOrigin();
-					if (!Bending.getGame().getProtectionSystem().canBuild(user, blast.origin.toBlock(user.getWorld()))) {
+					if (!blast.selectOrigin()) {
 						Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(blast);
 					}
 				} else {
@@ -102,12 +101,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		}
 
 		if (method == ActivationMethod.SNEAK_RELEASE) {
-			selectOrigin();
-			return Bending.getGame().getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
+			return selectOrigin();
 		} else {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
-				return false;
-			}
 			origin = user.getEyeLocation();
 			launch();
 		}
@@ -135,10 +130,11 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
-	private void selectOrigin() {
+	private boolean selectOrigin() {
 		origin = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange))
 			.subtract(user.getDirection().scalarMultiply(0.5));
 		selectedOrigin = true;
+		return Bending.getGame().getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
 	}
 
 	private void launch() {
@@ -226,8 +222,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			double factor = entity.equals(user.getEntity()) ? userConfig.selfPush : userConfig.otherPush;
 			factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
 			// Reduce the push if the player is on the ground.
-			if (entity.equals(user.getEntity()) && WorldMethods.isOnGround(entity)) {
-				factor *= 0.5;
+			if (!WorldMethods.isOnGround(entity)) {
+				factor *= userConfig.airborneFactor;
 			}
 			Vector3 velocity = new Vector3(entity.getVelocity());
 			// The strength of the entity's velocity in the direction of the blast.
@@ -263,11 +259,10 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		public double selfPush;
 		@Attribute(Attribute.STRENGTH)
 		public double otherPush;
-
+		@Attribute(Attribute.STRENGTH)
+		public double airborneFactor;
 		@Attribute(Attribute.SELECTION)
 		public double selectRange;
-		@Attribute(Attribute.SELECTION)
-		public double selectOutOfRange;
 
 		@Override
 		public void onConfigReload() {
@@ -277,13 +272,11 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			range = abilityNode.node("range").getDouble(25.0);
 			speed = abilityNode.node("speed").getDouble(1.25);
 
-			selfPush = abilityNode.node("push").node("self").getDouble(2.5);
-			otherPush = abilityNode.node("push").node("other").getDouble(3);
+			selfPush = abilityNode.node("push").node("self").getDouble(2.2);
+			otherPush = abilityNode.node("push").node("other").getDouble(2.2);
+			airborneFactor = abilityNode.node("push").node("airborne").getDouble(0.5);
 
-			selectRange = abilityNode.node("select").node("range").getDouble(10.0);
-			selectOutOfRange = abilityNode.node("select").node("out-of-range").getDouble(35.0);
-
-			abilityNode.node("speed").comment("The amount of blocks the blast advances every tick.");
+			selectRange = abilityNode.node("select-range").getDouble(10.0);
 		}
 	}
 }

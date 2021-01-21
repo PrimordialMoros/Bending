@@ -22,7 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.AbilityInitializer;
@@ -94,7 +94,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		charging = true;
 		particleCount = 6;
 
-		if (user.getHeadBlock().isLiquid() || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+		if (user.getHeadBlock().isLiquid()) {
 			return false;
 		}
 
@@ -256,7 +256,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				}
 				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true));
 			}
-			WallData.attemptDamageWall(Collections.singletonList(block), NumberConversions.round(4 * factor));
+			FragileStructure.attemptDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
 			return true;
 		}
 	}

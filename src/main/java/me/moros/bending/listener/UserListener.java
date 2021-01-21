@@ -110,7 +110,7 @@ public class UserListener implements Listener {
 	public void onEntityDeath(EntityDeathEvent event) {
 		event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
 		boolean keepInventory = (event instanceof PlayerDeathEvent) && ((PlayerDeathEvent) event).getKeepInventory();
-		TempArmor.manager.get(event.getEntity()).ifPresent(tempArmor -> {
+		TempArmor.MANAGER.get(event.getEntity()).ifPresent(tempArmor -> {
 			if (!keepInventory) event.getDrops().addAll(tempArmor.getSnapshot());
 			tempArmor.revert();
 		});
@@ -135,7 +135,7 @@ public class UserListener implements Listener {
 			PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
 			if (inventory.getHolder() instanceof Player) {
 				Player player = ((Player) inventory.getHolder()).getPlayer();
-				if (!TempArmor.manager.isTemp(player) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
+				if (!TempArmor.MANAGER.isTemp(player) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
 					inventory.remove(item);
 				}
 			}

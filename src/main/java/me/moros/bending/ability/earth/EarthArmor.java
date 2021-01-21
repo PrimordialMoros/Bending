@@ -51,7 +51,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
@@ -163,11 +162,8 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		}
 
 		TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
-		if (PotionUtil.canAddPotion(user, PotionEffectType.DAMAGE_RESISTANCE, 20, resistance)) {
-			user.getEntity().addPotionEffect(
-				new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, NumberConversions.round(userConfig.duration / 50F), resistance, true, false)
-			);
-		}
+		int duration = NumberConversions.round(userConfig.duration / 50F);
+		PotionUtil.addPotion(user.getEntity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		formed = true;

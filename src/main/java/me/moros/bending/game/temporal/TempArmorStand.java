@@ -34,7 +34,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Objects;
 
 public class TempArmorStand implements Temporary {
-	public static final TemporalManager<ArmorStand, TempArmorStand> manager = new TemporalManager<>();
+	public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
 	private final ArmorStand armorStand;
 
 	private RevertTask revertTask;
@@ -60,7 +60,7 @@ public class TempArmorStand implements Temporary {
 				.data(data).spawn();
 		}
 
-		manager.addEntry(armorStand, this, duration);
+		MANAGER.addEntry(armorStand, this, duration);
 	}
 
 	public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
@@ -74,7 +74,7 @@ public class TempArmorStand implements Temporary {
 	@Override
 	public void revert() {
 		armorStand.remove();
-		manager.removeEntry(armorStand);
+		MANAGER.removeEntry(armorStand);
 		if (revertTask != null) revertTask.execute();
 	}
 

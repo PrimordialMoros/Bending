@@ -20,6 +20,7 @@
 package me.moros.bending.util.collision;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
@@ -74,6 +75,7 @@ public final class CollisionUtil {
 			if (!selfCollision && entity.equals(user.getEntity())) continue;
 			if (!isValidEntity(entity)) continue;
 			if (collider.intersects(AABBUtils.getEntityBounds(entity))) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, entity.getLocation().getBlock())) continue;
 				boolean result = callback.onCollision(entity);
 				if (earlyEscape && result) return true;
 				hit |= result;
@@ -86,7 +88,7 @@ public final class CollisionUtil {
 		if (entity instanceof Player) {
 			return ((Player) entity).getGameMode() != GameMode.SPECTATOR;
 		} else if (entity instanceof FallingBlock) {
-			return !BendingFallingBlock.manager.isTemp((FallingBlock) entity);
+			return !BendingFallingBlock.MANAGER.isTemp((FallingBlock) entity);
 		} else if (entity instanceof ArmorStand) {
 			return ((ArmorStand) entity).isVisible();
 		}

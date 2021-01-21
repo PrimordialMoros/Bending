@@ -30,7 +30,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 
 public class BendingFallingBlock implements Temporary {
-	public static final TemporalManager<FallingBlock, BendingFallingBlock> manager = new TemporalManager<>();
+	public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();
 	private final FallingBlock fallingBlock;
 	private RevertTask revertTask;
 
@@ -43,7 +43,7 @@ public class BendingFallingBlock implements Temporary {
 		fallingBlock.setGravity(gravity);
 		fallingBlock.setDropItem(false);
 		fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
-		manager.addEntry(fallingBlock, this, duration);
+		MANAGER.addEntry(fallingBlock, this, duration);
 	}
 
 	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
@@ -61,7 +61,7 @@ public class BendingFallingBlock implements Temporary {
 	@Override
 	public void revert() {
 		fallingBlock.remove();
-		manager.removeEntry(fallingBlock);
+		MANAGER.removeEntry(fallingBlock);
 		if (revertTask != null) revertTask.execute();
 	}
 

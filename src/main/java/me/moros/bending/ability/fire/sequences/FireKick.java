@@ -22,7 +22,7 @@ package me.moros.bending.ability.fire.sequences;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.WallData;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -72,9 +72,6 @@ public class FireKick extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
-			return false;
-		}
 
 		double height = user.getEntity().getEyeHeight();
 		Vector3 direction = user.getDirection().scalarMultiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
@@ -143,7 +140,7 @@ public class FireKick extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			WallData.attemptDamageWall(Collections.singletonList(block), 3);
+			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
 			return true;
 		}
 	}
