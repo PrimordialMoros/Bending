@@ -48,6 +48,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -62,6 +63,7 @@ import org.bukkit.entity.LivingEntity;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EarthShot extends AbilityInstance implements Ability {
@@ -271,13 +273,13 @@ public class EarthShot extends AbilityInstance implements Ability {
 		Vector3 origin;
 		if (prematureLaunch) {
 			origin = projectile.getCenter();
-			Vector3 dir = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)).subtract(origin);
+			Vector3 dir = getTarget(null).subtract(origin).normalize().scalarMultiply(userConfig.speed);
 			projectile.getFallingBlock().setGravity(true);
-			projectile.getFallingBlock().setVelocity(dir.normalize().scalarMultiply(1.8).clampVelocity());
+			projectile.getFallingBlock().setVelocity(dir.add(new Vector3(0, 0.2, 0)).clampVelocity());
 		} else {
 			origin = new Vector3(readySource).add(Vector3.HALF);
-			Vector3 dir = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), Collections.singleton(readySource.getType())).subtract(origin);
-			projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.normalize().scalarMultiply(1.8), true, 30000);
+			Vector3 dir = getTarget(readySource).subtract(origin).normalize().scalarMultiply(userConfig.speed);
+			projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
 			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
 		}
 		location = projectile.getCenter();
@@ -301,6 +303,13 @@ public class EarthShot extends AbilityInstance implements Ability {
 				break;
 		}
 		launched = true;
+	}
+
+	private Vector3 getTarget(Block source) {
+		Set<Material> ignored = source == null ? Collections.emptySet() : Collections.singleton(source.getType());
+		return WorldMethods.getTargetEntity(user, userConfig.range)
+			.map(VectorMethods::getEntityCenter)
+			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), ignored));
 	}
 
 	@Override
@@ -342,6 +351,8 @@ public class EarthShot extends AbilityInstance implements Ability {
 		public double damage;
 		@Attribute(Attribute.CHARGE_TIME)
 		public long chargeTime;
+		@Attribute(Attribute.SPEED)
+		public double speed;
 		@Attribute(Attribute.AMOUNT)
 		public int maxAmount;
 
@@ -355,8 +366,9 @@ public class EarthShot extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(1000);
 			selectRange = abilityNode.node("select-range").getDouble(6.0);
 			range = abilityNode.node("range").getDouble(60.0);
-			damage = abilityNode.node("damage").getDouble(3.0);
+			damage = abilityNode.node("damage").getDouble(1.0);
 			chargeTime = abilityNode.node("charge-time").getLong(1500);
+			speed = abilityNode.node("speed").getDouble(1.8);
 			maxAmount = abilityNode.node("max-sources").getInt(3);
 			allowConvertMagma = abilityNode.node("allow-convert-magma").getBoolean(true);
 			allowQuickLaunch = abilityNode.node("allow-quick-launch").getBoolean(true);

@@ -177,7 +177,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 		}
 		Vector3 direction = targetLocation.subtract(new Vector3(entityToMove.getLocation())).normalize();
 		if (distance > 3) {
-			entityToMove.setVelocity(direction.scalarMultiply(0.8).clampVelocity());
+			entityToMove.setVelocity(direction.scalarMultiply(userConfig.pullSpeed).clampVelocity());
 		} else {
 			if (target.getType() == MetalCable.CableTarget.Type.ENTITY) {
 				entityToMove.setVelocity(new Vector());
@@ -193,14 +193,13 @@ public class MetalCable extends AbilityInstance implements Ability {
 				return false;
 			} else {
 				if (distance <= 3 && distance > 1.5) {
-					entityToMove.setVelocity(direction.scalarMultiply(0.35).clampVelocity());
+					entityToMove.setVelocity(direction.scalarMultiply(0.4 * userConfig.pullSpeed).clampVelocity());
 				} else {
 					user.getEntity().setVelocity(new Vector(0, 0.5, 0));
 					return false;
 				}
 			}
 		}
-
 		return true;
 	}
 
@@ -217,7 +216,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector dir = targetLocation.toVector().subtract(origin.toVector()).normalize();
-		Arrow arrow = user.getWorld().spawnArrow(origin.toLocation(user.getWorld()), dir, 1.8f, 0);
+		Arrow arrow = user.getWorld().spawnArrow(origin.toLocation(user.getWorld()), dir, 1.8F, 0);
 		arrow.setShooter(user.getEntity());
 		arrow.setGravity(false);
 		arrow.setInvulnerable(true);
@@ -323,8 +322,8 @@ public class MetalCable extends AbilityInstance implements Ability {
 			.map(VectorMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange)));
 
-		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.blockSpeed);
-		target.getEntity().setVelocity(velocity.clampVelocity());
+		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.launchSpeed);
+		target.getEntity().setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
 		if (target.getEntity() instanceof FallingBlock) {
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.projectileRange, location, () -> location))
@@ -403,7 +402,9 @@ public class MetalCable extends AbilityInstance implements Ability {
 		@Attribute(Attribute.DAMAGE)
 		private double damage;
 		@Attribute(Attribute.SPEED)
-		private double blockSpeed;
+		private double pullSpeed;
+		@Attribute(Attribute.SPEED)
+		private double launchSpeed;
 
 		@Override
 		public void onConfigReload() {
@@ -413,7 +414,8 @@ public class MetalCable extends AbilityInstance implements Ability {
 			range = abilityNode.node("range").getDouble(28.0);
 			projectileRange = abilityNode.node("projectile-range").getDouble(48.0);
 			damage = abilityNode.node("damage").getDouble(4.0);
-			blockSpeed = abilityNode.node("speed").getDouble(1.4);
+			pullSpeed = abilityNode.node("pull-speed").getDouble(0.9);
+			launchSpeed = abilityNode.node("launch-speed").getDouble(1.6);
 		}
 	}
 }

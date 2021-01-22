@@ -52,6 +52,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 
 import java.util.Collection;
@@ -143,6 +144,10 @@ public class FireWall extends AbilityInstance implements Ability {
 
 
 	private boolean onEntityHit(Entity entity) {
+		if (entity instanceof Arrow) {
+			entity.remove();
+			return true;
+		}
 		if (affectedEntities.containsKey(entity)) return false;
 		affectedEntities.put(entity, false);
 		entity.setVelocity(Vector3.ZERO.toVector());
