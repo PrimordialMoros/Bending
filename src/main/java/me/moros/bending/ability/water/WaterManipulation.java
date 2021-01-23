@@ -192,9 +192,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 				manip = new Manip(user, source);
 				Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
-				if (!BlockMethods.isInfiniteWater(source)) {
-					source.setType(Material.AIR);
-				}
+				TempBlock.create(source, Material.AIR, true);
 			}
 		}
 	}

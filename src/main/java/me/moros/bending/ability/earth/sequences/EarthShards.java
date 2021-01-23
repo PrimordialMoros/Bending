@@ -51,6 +51,7 @@ import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+// TODO restrictions based on earthglove cooldown, add bleed effect
 public class EarthShards extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 

@@ -44,6 +44,8 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -180,9 +182,16 @@ public final class ActivationController {
 	}
 
 	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method) {
+		onUserInteract(user, method, null);
+	}
+
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method, @Nullable Entity interactedEntity) {
 		if (!method.isInteract()) return;
 		ignoreNextSwing(user);
 
+		if (interactedEntity instanceof LivingEntity) {
+			HealingWaters.setTarget(user, (LivingEntity) interactedEntity);
+		}
 		EarthLine.setPrisonMode(user);
 
 		game.getSequenceManager().registerAction(user, method);

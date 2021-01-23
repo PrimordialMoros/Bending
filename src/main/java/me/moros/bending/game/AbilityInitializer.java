@@ -168,7 +168,7 @@ public final class AbilityInitializer {
 		abilities.add(waterRing);
 
 		AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setCanBind(false).setSourcesPlants(true).build();
+			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setCanBind(false).build();
 		abilities.add(waterWave);
 
 		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
@@ -198,7 +198,7 @@ public final class AbilityInitializer {
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(frostBreath);
 
-		AbilityDescription iceDrill = AbilityDescription.builder("IceBerg", Iceberg::new)
+		AbilityDescription iceDrill = AbilityDescription.builder("Iceberg", Iceberg::new)
 			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
 		abilities.add(iceDrill);
 
@@ -211,11 +211,11 @@ public final class AbilityInitializer {
 		));
 
 		sequences.put(frostBreath, new Sequence(
+			new AbilityAction(iceCrawl, ActivationMethod.SNEAK),
+			new AbilityAction(iceCrawl, ActivationMethod.SNEAK_RELEASE),
 			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
 			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK)
+			new AbilityAction(iceCrawl, ActivationMethod.SNEAK)
 		));
 
 		sequences.put(iceDrill, new Sequence(
@@ -299,8 +299,6 @@ public final class AbilityInitializer {
 		));
 
 		sequences.put(earthPillars, new Sequence(
-			new AbilityAction(shockwave, ActivationMethod.SNEAK),
-			new AbilityAction(shockwave, ActivationMethod.SNEAK_RELEASE),
 			new AbilityAction(shockwave, ActivationMethod.SNEAK),
 			new AbilityAction(catapult, ActivationMethod.SNEAK_RELEASE)
 		));

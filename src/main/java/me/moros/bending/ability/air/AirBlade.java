@@ -43,12 +43,11 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -207,14 +206,14 @@ public class AirBlade extends AbilityInstance implements Ability {
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+			Vector3 velocity = direction.setY(userConfig.knockup).normalize().scalarMultiply(userConfig.knockback);
+			entity.setVelocity(velocity.clampVelocity());
 			return true;
 		}
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isFire(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				block.setType(Material.AIR);
-			}
+			BlockMethods.extinguishFire(user, block);
 			return true;
 		}
 	}
@@ -226,6 +225,10 @@ public class AirBlade extends AbilityInstance implements Ability {
 		public double radius;
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
+		@Attribute(Attribute.STRENGTH)
+		public double knockback;
+		@Attribute(Attribute.STRENGTH)
+		public double knockup;
 		@Attribute(Attribute.RANGE)
 		public double range;
 		@Attribute(Attribute.RANGE)
@@ -244,6 +247,8 @@ public class AirBlade extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(4000);
 			radius = abilityNode.node("radius").getDouble(1.2);
 			damage = abilityNode.node("damage").getDouble(2.0);
+			knockback = abilityNode.node("knockback").getDouble(0.8);
+			knockup = abilityNode.node("knockup").getDouble(0.15);
 			range = abilityNode.node("range").getDouble(12.0);
 			prepareRange = abilityNode.node("prepare-range").getDouble(8.0);
 			speed = abilityNode.node("speed").getDouble(0.8);

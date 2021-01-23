@@ -32,11 +32,12 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
@@ -50,6 +51,8 @@ public class HealingWaters extends AbilityInstance implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
+	private LivingEntity target;
+
 	private long startTime;
 	private long nextTime;
 
@@ -59,10 +62,12 @@ public class HealingWaters extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HealingWaters.class)) return false;
 		this.user = user;
 		recalculateConfig();
 		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 		startTime = System.currentTimeMillis();
+		target = user.getEntity();
 		nextTime = 0;
 		return true;
 	}
@@ -77,18 +82,11 @@ public class HealingWaters extends AbilityInstance implements Ability {
 		if (removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-		if (!MaterialUtil.isWater(user.getLocBlock())) {
-			return UpdateResult.REMOVE;
-		}
 		long time = System.currentTimeMillis();
 		if (time > startTime + userConfig.chargeTime) {
 			if (time > nextTime) {
 				nextTime = time + 250;
-				LivingEntity target = getTarget();
-				ParticleUtil.createRGB(target.getLocation().add(0, target.getEyeHeight() / 2, 0), "00ffff")
-					.count(6).offset(0.35, 0.35, 0.35).spawn();
-				removeNegativeEffects(target);
-				if (!healEntity(target)) return UpdateResult.REMOVE;
+				if (!attemptHeal()) return UpdateResult.REMOVE;
 			}
 		} else {
 			ParticleUtil.createRGB(UserMethods.getMainHandSide(user).toLocation(user.getWorld()), "00ffff").spawn();
@@ -96,30 +94,40 @@ public class HealingWaters extends AbilityInstance implements Ability {
 		return UpdateResult.CONTINUE;
 	}
 
-	private void removeNegativeEffects(LivingEntity livingEntity) {
-		livingEntity.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
-			.forEach(livingEntity::removePotionEffect);
+	private boolean isValidEntity(LivingEntity entity) {
+		if (entity == null || !entity.isValid()) return false;
+		if (!entity.getWorld().equals(user.getWorld())) return false;
+		if (VectorMethods.getEntityCenter(entity).distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) return false;
+		return user.getEntity().hasLineOfSight(entity);
 	}
 
-	private boolean healEntity(LivingEntity livingEntity) {
-		AttributeInstance attributeInstance = livingEntity.getAttribute(healthAttribute);
-		if (attributeInstance != null && livingEntity.getHealth() < attributeInstance.getValue()) {
-			PotionUtil.addPotion(livingEntity, PotionEffectType.REGENERATION, 60, userConfig.power);
+	private boolean attemptHeal() {
+		if (!user.getEntity().equals(target) && !isValidEntity(target)) {
+			target = user.getEntity();
+		}
+		if (!MaterialUtil.isWater(target.getLocation().getBlock()) && !InventoryUtil.hasFullBottle(user)) return false;
+
+		ParticleUtil.createRGB(VectorMethods.getEntityCenter(target).toLocation(user.getWorld()), "00ffff")
+			.count(6).offset(0.35, 0.35, 0.35).spawn();
+		target.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
+			.forEach(target::removePotionEffect);
+		AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
+		if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
+			PotionUtil.addPotion(target, PotionEffectType.REGENERATION, 60, userConfig.power);
 			return true;
 		}
 		return false;
 	}
 
-	private boolean isValidTarget(LivingEntity entity) {
-		return entity != null && entity.isValid()
-			&& !MaterialUtil.isWater(entity.getLocation().getBlock())
-			&& entity.getLocation().distanceSquared(user.getEntity().getLocation()) > userConfig.range * userConfig.range
-			&& user.getEntity().hasLineOfSight(entity);
+	public static void setTarget(User user, LivingEntity entity) {
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("HealingWaters")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HealingWaters.class)
+				.ifPresent(hw -> hw.setTarget(entity));
+		}
 	}
 
-	private LivingEntity getTarget() {
-		LivingEntity target = WorldMethods.getTargetEntity(user, userConfig.range).orElse(null);
-		return isValidTarget(target) ? target : user.getEntity();
+	private void setTarget(LivingEntity entity) {
+		if (!target.equals(entity) && !user.getEntity().equals(entity) && isValidEntity(entity)) target = entity;
 	}
 
 	@Override

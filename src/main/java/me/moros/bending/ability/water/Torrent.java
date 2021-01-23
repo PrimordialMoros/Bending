@@ -118,7 +118,7 @@ public class Torrent extends AbilityInstance implements Ability {
 			}
 		} else {
 			State current = states.getCurrent();
-			if (current instanceof TorrentStream) ((TorrentStream) current).freeze();
+			if (current instanceof TorrentStream) ((TorrentStream) current).shouldFreeze = true;
 		}
 	}
 
@@ -135,8 +135,9 @@ public class Torrent extends AbilityInstance implements Ability {
 		if (states != null) {
 			return states.update();
 		} else {
-			if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class))
+			if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
 				return UpdateResult.REMOVE;
+			}
 		}
 		return UpdateResult.CONTINUE;
 	}
@@ -165,6 +166,8 @@ public class Torrent extends AbilityInstance implements Ability {
 
 	private class TorrentStream extends BlockStream {
 		private final Set<Entity> affectedEntities = new HashSet<>();
+		private boolean frozen = false;
+		private boolean shouldFreeze = false;
 
 		public TorrentStream(@NonNull User user) {
 			super(user, Material.WATER, userConfig.range, 90);
@@ -173,15 +176,23 @@ public class Torrent extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (affectedEntities.contains(entity)) return false;
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
-			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
-			affectedEntities.add(entity);
+			if (shouldFreeze) {
+				freeze();
+				return false;
+			} else {
+				Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
+				entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
+			}
+			if (!affectedEntities.contains(entity)) {
+				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+				affectedEntities.add(entity);
+			}
 			return false;
 		}
 
 		public void freeze() {
+			if (frozen) return;
+			frozen = true;
 			cleanAll();
 			Block head = stream.getFirst();
 			if (head == null) return;
@@ -197,6 +208,10 @@ public class Torrent extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
+			if (shouldFreeze) {
+				freeze();
+				return;
+			}
 			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 1);
 		}
 	}

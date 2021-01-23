@@ -95,6 +95,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 	private double radius = RING_RADIUS;
 	private int index = 0;
 	private int sources = 0;
+	private int launchedShards = 0;
 	private long nextShardTime = 0;
 	private long ringNextShrinkTime = 0;
 	private long sneakStartTime = 0;
@@ -305,6 +306,11 @@ public class WaterRing extends AbilityInstance implements Ability {
 		long time = System.currentTimeMillis();
 		if (time > nextShardTime) {
 			nextShardTime = time + 100;
+			if (++launchedShards > userConfig.shardAmount) {
+				launchedShards = 0;
+				user.setCooldown(getDescription(), userConfig.cooldown);
+				return;
+			}
 			Vector3 origin = new Vector3(getClosestRingBlock());
 			Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.shardRange + radius);
 			shards.add(new IceShard(user, new Ray(origin, lookingDir)));

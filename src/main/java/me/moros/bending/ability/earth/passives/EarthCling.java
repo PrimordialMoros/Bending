@@ -35,6 +35,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
@@ -75,9 +76,12 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());
+				user.getEntity().setFallDistance(0);
 			} else {
 				Vector3 velocity = new Vector3(user.getEntity().getVelocity());
 				if (velocity.getY() < 0) {
+					double fallDistance = FastMath.max(0, user.getEntity().getFallDistance() - userConfig.speed);
+					user.getEntity().setFallDistance((float) fallDistance);
 					user.getEntity().setVelocity(velocity.scalarMultiply(userConfig.speed).clampVelocity());
 					ParticleUtil.create(Particle.CRIT, user.getEntity().getEyeLocation()).count(2)
 						.offset(0.05, 0.4, 0.05);
@@ -102,7 +106,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "earthcling");
 
-			speed = abilityNode.node("radius").getDouble(2.0);
+			speed = abilityNode.node("speed").getDouble(0.5);
 		}
 	}
 }
