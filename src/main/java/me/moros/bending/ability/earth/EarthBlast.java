@@ -22,8 +22,8 @@ package me.moros.bending.ability.earth;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -232,7 +232,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -253,7 +253,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(750);
 			range = abilityNode.node("range").getDouble(32.0);
 			selectRange = abilityNode.node("select-range").getDouble(12.0);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(2.25);
 			redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
 			rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
 			rMax = abilityNode.node("max-redirect-range").getDouble(20.0);

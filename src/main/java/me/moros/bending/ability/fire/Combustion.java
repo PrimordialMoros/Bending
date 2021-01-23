@@ -223,7 +223,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -243,10 +243,10 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "combustion");
 
 			cooldown = abilityNode.node("cooldown").getLong(10000);
-			damage = abilityNode.node("damage").getDouble(6.0);
+			damage = abilityNode.node("damage").getDouble(5.0);
 			power = abilityNode.node("power").getDouble(3.0);
 			fireTick = abilityNode.node("fire-tick").getInt(60);
-			range = abilityNode.node("range").getDouble(80.0);
+			range = abilityNode.node("range").getDouble(64.0);
 
 			damageBlocks = abilityNode.node("damage-blocks").getBoolean(true);
 			particleRange = NumberConversions.ceil(range);

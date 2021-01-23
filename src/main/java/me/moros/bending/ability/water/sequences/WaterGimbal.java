@@ -22,8 +22,8 @@ package me.moros.bending.ability.water.sequences;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.*;
 import me.moros.bending.config.Configurable;
@@ -290,7 +290,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.SELECTION)
@@ -310,10 +310,10 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(10000);
 			selectRange = abilityNode.node("select-range").getDouble(8.0);
-			range = abilityNode.node("range").getDouble(28.0);
-			damage = abilityNode.node("damage").getDouble(4.0);
-			knockback = abilityNode.node("knockback").getDouble(1.0);
-			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
+			range = abilityNode.node("range").getDouble(24.0);
+			damage = abilityNode.node("damage").getDouble(6.0);
+			knockback = abilityNode.node("knockback").getDouble(1.2);
+			verticalPush = abilityNode.node("vertical-push").getDouble(0.25);
 		}
 	}
 }

@@ -154,7 +154,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -168,7 +168,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airpunch");
 
-			cooldown = abilityNode.node("cooldown").getLong(1500);
+			cooldown = abilityNode.node("cooldown").getLong(2500);
 			damage = abilityNode.node("damage").getDouble(3.0);
 			range = abilityNode.node("range").getDouble(18.0);
 			speed = abilityNode.node("speed").getDouble(0.8);

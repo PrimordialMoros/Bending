@@ -42,6 +42,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -117,7 +118,9 @@ public class LavaDisk extends AbilityInstance implements Ability {
 			if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) return false;
 		}
 
-		if (!MaterialUtil.isLava(block)) TempBlock.create(block, Material.AIR, userConfig.cooldown, true);
+		if (!MaterialUtil.isLava(block)) {
+			TempBlock.create(block, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+		}
 		location = new Vector3(block).add(Vector3.HALF);
 		distance = location.distance(user.getEyeLocation());
 
@@ -267,7 +270,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		return MaterialUtil.isTransparent(block) || damageBlock(block);
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -288,7 +291,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
 
-			cooldown = abilityNode.node("cooldown").getLong(1500);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
 			minDamage = abilityNode.node("min-damage").getDouble(1.0);
 			maxDamage = abilityNode.node("max-damage").getDouble(4.0);
 			range = abilityNode.node("range").getDouble(20.0);

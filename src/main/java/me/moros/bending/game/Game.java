@@ -121,6 +121,7 @@ public final class Game {
 
 	private void removeTemporary() {
 		TempArmor.MANAGER.removeAll();
+		TempBlock.clearAir();
 		TempBlock.MANAGER.removeAll();
 		TempArmorStand.MANAGER.removeAll();
 		BendingFallingBlock.MANAGER.removeAll();

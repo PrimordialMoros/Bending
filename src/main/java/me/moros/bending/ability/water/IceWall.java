@@ -207,7 +207,7 @@ public class IceWall extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.SELECTION)
@@ -221,7 +221,7 @@ public class IceWall extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icespike");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icewall");
 
 			cooldown = abilityNode.node("cooldown").getLong(6000);
 			selectRange = abilityNode.node("select-range").getDouble(6.0);

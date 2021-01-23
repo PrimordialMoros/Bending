@@ -155,7 +155,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
@@ -167,7 +167,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterspout");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterbubble");
 
 			cooldown = abilityNode.node("cooldown").getLong(3000);
 			duration = abilityNode.node("duration").getLong(0);

@@ -56,7 +56,7 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AirBlade extends AbilityInstance implements Ability {
-	public static final Config config = new Config();
+	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
@@ -218,7 +218,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RADIUS)
@@ -246,7 +246,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(4000);
 			radius = abilityNode.node("radius").getDouble(1.2);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(2.6);
 			knockback = abilityNode.node("knockback").getDouble(0.8);
 			knockup = abilityNode.node("knockup").getDouble(0.15);
 			range = abilityNode.node("range").getDouble(12.0);

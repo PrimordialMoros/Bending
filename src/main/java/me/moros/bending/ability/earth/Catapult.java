@@ -130,7 +130,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.STRENGTH)
@@ -141,7 +141,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
 
-			cooldown = abilityNode.node("cooldown").getLong(2000);
+			cooldown = abilityNode.node("cooldown").getLong(3000);
 			power = abilityNode.node("power").getDouble(2.4);
 			angle = FastMath.toRadians(abilityNode.node("angle").getInt(85));
 		}

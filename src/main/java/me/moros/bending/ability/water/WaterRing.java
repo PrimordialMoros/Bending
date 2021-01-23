@@ -258,13 +258,14 @@ public class WaterRing extends AbilityInstance implements Ability {
 	private boolean checkCollisions(Entity entity) {
 		for (Block block : ring) {
 			if (affectedEntities.containsKey(entity)) return false;
-			if (!MaterialUtil.isWater(block)) continue;
-			if (!AABB.BLOCK_BOUNDS.at(new Vector3(block.getLocation())).intersects(AABBUtils.getEntityBounds(entity)))
-				continue;
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.getEyeLocation()).setY(0).normalize();
-			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
-			affectedEntities.put(entity, false);
+			AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block.getLocation()));
+			AABB entityBounds = AABBUtils.getEntityBounds(entity);
+			if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
+				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+				Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.getEyeLocation()).setY(0).normalize();
+				entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
+				affectedEntities.put(entity, false);
+			}
 		}
 		return false;
 	}
@@ -302,15 +303,11 @@ public class WaterRing extends AbilityInstance implements Ability {
 	}
 
 	public void launchShard() {
-		if (!user.canBend(getDescription()) || ring.isEmpty()) return;
+		if (!user.canBend(getDescription()) || ring.isEmpty()  || launchedShards >= userConfig.shardAmount) return;
 		long time = System.currentTimeMillis();
 		if (time > nextShardTime) {
-			nextShardTime = time + 100;
-			if (++launchedShards > userConfig.shardAmount) {
-				launchedShards = 0;
-				user.setCooldown(getDescription(), userConfig.cooldown);
-				return;
-			}
+			launchedShards++;
+			nextShardTime = time + userConfig.cooldown;
 			Vector3 origin = new Vector3(getClosestRingBlock());
 			Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.shardRange + radius);
 			shards.add(new IceShard(user, new Ray(origin, lookingDir)));
@@ -382,7 +379,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.DURATION)
 		public long duration;
 		@Attribute(Attribute.SELECTION)
@@ -418,8 +415,8 @@ public class WaterRing extends AbilityInstance implements Ability {
 			CommentedConfigurationNode shardsNode = abilityNode.node("shards");
 			cooldown = shardsNode.node("cooldown").getLong(500);
 			shardRange = shardsNode.node("range").getDouble(16.0);
-			shardDamage = shardsNode.node("damage").getDouble(0.5);
-			shardAmount = shardsNode.node("amount").getInt(10);
+			shardDamage = shardsNode.node("damage").getDouble(0.25);
+			shardAmount = shardsNode.node("amount").getInt(20);
 
 			CommentedConfigurationNode waveNode = abilityNode.node("waterwave");
 			chargeTime = waveNode.node("charge-time").getLong(1250);

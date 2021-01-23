@@ -20,18 +20,25 @@
 package me.moros.bending.ability.water.passives;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
+import me.moros.bending.Bending;
+import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
+import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffectType;
 
 public class FastSwim extends AbilityInstance implements PassiveAbility {
+	private static final Config config = new Config();
+
 	private User user;
+	private Config userConfig;
 
 	public FastSwim(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -46,6 +53,7 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public void recalculateConfig() {
+		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
 	@Override
@@ -55,7 +63,7 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 		}
 
 		if (MaterialUtil.isWater(user.getLocBlock())) {
-			PotionUtil.addPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, 1);
+			PotionUtil.addPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
 		}
 		return UpdateResult.CONTINUE;
 	}
@@ -63,5 +71,17 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 	@Override
 	public @NonNull User getUser() {
 		return user;
+	}
+
+	private static class Config extends Configurable {
+		@Attribute(Attribute.STRENGTH)
+		public int speedAmplifier;
+
+		@Override
+		public void onConfigReload() {
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "passives", "fastswim");
+
+			speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
+		}
 	}
 }

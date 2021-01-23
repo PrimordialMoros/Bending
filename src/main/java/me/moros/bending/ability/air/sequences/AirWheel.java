@@ -157,7 +157,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -171,7 +171,7 @@ public class AirWheel extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
 
-			cooldown = abilityNode.node("cooldown").getLong(4000);
+			cooldown = abilityNode.node("cooldown").getLong(8000);
 			damage = abilityNode.node("damage").getDouble(2.0);
 		}
 	}

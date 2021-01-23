@@ -90,18 +90,16 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		Block block = source.get();
 		mode = getType(block);
 		if (EarthMaterials.METAL_BENDABLE.isTagged(block)) {
-			resistance = userConfig.metalPower - 1;
+			resistance = userConfig.metalPower;
 			SoundUtil.METAL_SOUND.play(block.getLocation());
 		} else {
-			resistance = userConfig.power - 1;
+			resistance = userConfig.power;
 			SoundUtil.EARTH_SOUND.play(block.getLocation());
 		}
-
 		BlockState state = block.getState();
 		long delay = ThreadLocalRandom.current().nextInt(5000, 10000) + userConfig.cooldown;
 		TempBlock.create(block, Material.AIR, delay, true);
 		fallingBlock = new BendingFallingBlock(block, state.getBlockData(), new Vector3(0, 0.2, 0), false, 10000);
-
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(5000)).build();
 		return true;
 	}
@@ -182,6 +180,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		final double distanceSquared = user.getEyeLocation().distanceSq(center);
 		final double speedFactor = (distanceSquared > userConfig.selectRange * userConfig.selectRange) ? 1.5 : 0.8;
 		if (distanceSquared < 0.5) {
+			fallingBlock.revert();
 			formArmor();
 			return true;
 		}
@@ -211,7 +210,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
@@ -228,10 +227,10 @@ public class EarthArmor extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor");
 
 			cooldown = abilityNode.node("cooldown").getLong(20000);
-			duration = abilityNode.node("duration").getLong(15000);
+			duration = abilityNode.node("duration").getLong(12000);
 			selectRange = abilityNode.node("select-range").getDouble(8.0);
-			power = abilityNode.node("power").getInt(2);
-			metalPower = abilityNode.node("metal-power").getInt(3);
+			power = abilityNode.node("power").getInt(2) - 1;
+			metalPower = abilityNode.node("metal-power").getInt(3) - 1;
 		}
 	}
 }

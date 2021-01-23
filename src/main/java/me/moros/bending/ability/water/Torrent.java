@@ -216,7 +216,7 @@ public class Torrent extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -238,7 +238,7 @@ public class Torrent extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(0);
 			range = abilityNode.node("range").getDouble(32.0);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(4.0);
 			knockback = abilityNode.node("knockback").getDouble(1.0);
 			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
 			freezeRadius = abilityNode.node("freeze-radius").getDouble(3.0);

@@ -129,7 +129,7 @@ public class FireJet extends AbilityInstance implements Ability {
 		removalPolicy = Policies.builder().add(Policies.IN_LIQUID).add(new ExpireRemovalPolicy(duration)).build();
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.SPEED)

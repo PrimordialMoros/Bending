@@ -112,7 +112,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.CHARGE_TIME)
@@ -131,7 +131,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 			chargeTime = abilityNode.node("charge-time").getInt(3500);
 			coneRange = abilityNode.node("cone-range").getDouble(16.0);
 			sphereRange = abilityNode.node("sphere-range").getDouble(12.0);
-			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
+			fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);
 		}
 	}
 }

@@ -33,6 +33,7 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -81,7 +82,10 @@ public class AirScooter extends AbilityInstance implements Ability {
 			return false;
 		}
 
-		removalPolicy = Policies.builder().add(Policies.SNEAKING).build();
+		removalPolicy = Policies.builder()
+			.add(Policies.SNEAKING)
+			.add(new ExpireRemovalPolicy(userConfig.duration))
+			.build();
 		return true;
 	}
 
@@ -197,22 +201,21 @@ public class AirScooter extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.SPEED)
 		public double speed;
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-
-		public Config() {
-			super();
-		}
+		@Attribute(Attribute.DURATION)
+		public long duration;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
 
-			speed = abilityNode.node("speed").getDouble(0.6);
-			cooldown = abilityNode.node("cooldown").getLong(4000);
+			speed = abilityNode.node("speed").getDouble(0.7);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			duration = abilityNode.node("duration").getLong(0);
 		}
 	}
 }

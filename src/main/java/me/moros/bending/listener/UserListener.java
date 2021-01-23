@@ -144,7 +144,7 @@ public class UserListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityDamage(EntityDamageEvent event) {
+	public void onEntityDamageLow(EntityDamageEvent event) {
 		if (!(event.getEntity() instanceof LivingEntity)) return;
 		if (event.getCause() == DamageCause.FALL) {
 			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
@@ -157,6 +157,13 @@ public class UserListener implements Listener {
 				event.setCancelled(true);
 			}
 		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityDamage(EntityDamageEvent event) {
+		if (!(event.getEntity() instanceof LivingEntity)) return;
+		game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity())
+			.ifPresent(game.getActivationController()::onUserDamage);
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -189,7 +196,7 @@ public class UserListener implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getHand() != EquipmentSlot.HAND) return;
 		BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
@@ -199,6 +206,10 @@ public class UserListener implements Listener {
 				break;
 			case RIGHT_CLICK_BLOCK:
 				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK);
+				break;
+			case LEFT_CLICK_AIR:
+			case LEFT_CLICK_BLOCK:
+				game.getActivationController().onUserSwing(player);
 				break;
 		}
 	}
@@ -217,11 +228,6 @@ public class UserListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
 		game.getActivationController().onUserSneak(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), event.isSneaking());
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerSwing(PlayerAnimationEvent event) {
-		game.getActivationController().onUserSwing(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

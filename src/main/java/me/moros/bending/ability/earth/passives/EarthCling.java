@@ -98,7 +98,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.SPEED)
 		public double speed;
 

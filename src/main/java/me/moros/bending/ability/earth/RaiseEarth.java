@@ -165,7 +165,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.SELECTION)
 		public double selectRange;
 		@Attribute(Attribute.COOLDOWN)
@@ -183,14 +183,14 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "raiseearth");
 
-			selectRange = abilityNode.node("select-range").getDouble(20.0);
+			selectRange = abilityNode.node("select-range").getDouble(18.0);
 
 			CommentedConfigurationNode columnNode = abilityNode.node("column");
 			columnCooldown = columnNode.node("cooldown").getLong(500);
 			columnMaxHeight = columnNode.node("max-height").getInt(6);
 
 			CommentedConfigurationNode wallNode = abilityNode.node("wall");
-			wallCooldown = wallNode.node("cooldown").getLong(500);
+			wallCooldown = wallNode.node("cooldown").getLong(1500);
 			wallMaxHeight = wallNode.node("max-height").getInt(6);
 			wallWidth = wallNode.node("width").getInt(6);
 		}

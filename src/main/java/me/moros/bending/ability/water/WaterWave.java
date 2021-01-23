@@ -145,7 +145,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
@@ -167,7 +167,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
 
 			cooldown = abilityNode.node("cooldown").getLong(6000);
-			duration = abilityNode.node("duration").getLong(2500);
+			duration = abilityNode.node("duration").getLong(3500);
 			speed = abilityNode.node("speed").getDouble(1.2);
 			radius = abilityNode.node("radius").getDouble(1.7);
 

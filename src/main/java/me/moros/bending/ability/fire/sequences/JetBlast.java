@@ -88,7 +88,7 @@ public class JetBlast extends AbilityInstance implements Ability {
 		return jet.getUser();
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.SPEED)
@@ -100,7 +100,7 @@ public class JetBlast extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "jetblast");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
+			cooldown = abilityNode.node("cooldown").getLong(10000);
 			speed = abilityNode.node("speed").getDouble(1.2);
 			duration = abilityNode.node("duration").getLong(5000);
 		}

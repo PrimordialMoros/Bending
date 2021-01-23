@@ -56,7 +56,7 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FireWheel extends AbilityInstance implements Ability {
-	public static final Config config = new Config();
+	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
@@ -147,7 +147,7 @@ public class FireWheel extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RADIUS)
@@ -163,11 +163,11 @@ public class FireWheel extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewheel");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
+			cooldown = abilityNode.node("cooldown").getLong(8000);
 			radius = abilityNode.node("radius").getDouble(1.0);
-			damage = abilityNode.node("damage").getDouble(4.0);
+			damage = abilityNode.node("damage").getDouble(3.5);
 			range = abilityNode.node("range").getDouble(20.0);
-			speed = abilityNode.node("speed").getDouble(0.55);
+			speed = abilityNode.node("speed").getDouble(0.75);
 
 			abilityNode.node("speed").comment("How many blocks the wheel advances every tick.");
 		}

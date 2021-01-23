@@ -159,7 +159,7 @@ public class Bolt extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -174,9 +174,9 @@ public class Bolt extends AbilityInstance implements Ability {
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "bolt");
-			cooldown = abilityNode.node("cooldown").getLong(1500);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
 			damage = abilityNode.node("damage").getDouble(3.0);
-			range = abilityNode.node("range").getDouble(20.0);
+			range = abilityNode.node("range").getDouble(30.0);
 			chargeTime = abilityNode.node("charge-time").getLong(2000);
 			duration = abilityNode.node("duration").getLong(8000);
 		}

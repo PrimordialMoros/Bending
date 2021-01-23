@@ -70,7 +70,7 @@ public class FireWall extends AbilityInstance implements Ability {
 
 	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(200, TimeUnit.MILLISECONDS).build();
+		.expiration(250, TimeUnit.MILLISECONDS).build();
 
 	private Collection<Block> blocks;
 	private OBB collider;
@@ -188,7 +188,7 @@ public class FireWall extends AbilityInstance implements Ability {
 		return userConfig.range;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.HEIGHT)
@@ -210,7 +210,7 @@ public class FireWall extends AbilityInstance implements Ability {
 			height = abilityNode.node("height").getDouble(4.0);
 			width = abilityNode.node("width").getDouble(6.0);
 			range = abilityNode.node("range").getDouble(3.0);
-			damage = abilityNode.node("damage").getDouble(3.0);
+			damage = abilityNode.node("damage").getDouble(2.0);
 			duration = abilityNode.node("duration").getLong(5000);
 		}
 	}

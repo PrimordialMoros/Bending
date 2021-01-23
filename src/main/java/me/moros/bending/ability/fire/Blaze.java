@@ -147,7 +147,7 @@ public class Blaze extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -159,7 +159,7 @@ public class Blaze extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "blaze");
 
-			cooldown = abilityNode.node("cooldown").getLong(500);
+			cooldown = abilityNode.node("cooldown").getLong(1000);
 			coneRange = abilityNode.node("cone-range").getDouble(10.0);
 			ringRange = abilityNode.node("ring-range").getDouble(7.0);
 		}

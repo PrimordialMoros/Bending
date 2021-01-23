@@ -197,7 +197,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
@@ -220,7 +220,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
 			range = abilityNode.node("range").getDouble(24.0);
 			selectRange = abilityNode.node("select-range").getDouble(8.0);
-			damage = abilityNode.node("damage").getDouble(5.0);
+			damage = abilityNode.node("damage").getDouble(4.0);
 		}
 	}
 }

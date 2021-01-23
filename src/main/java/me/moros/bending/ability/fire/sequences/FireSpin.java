@@ -141,7 +141,7 @@ public class FireSpin extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -156,9 +156,9 @@ public class FireSpin extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firekick");
 
 			cooldown = abilityNode.node("cooldown").getLong(6000);
-			damage = abilityNode.node("damage").getDouble(3.0);
-			range = abilityNode.node("range").getDouble(7.0);
-			speed = abilityNode.node("speed").getDouble(0.3);
+			damage = abilityNode.node("damage").getDouble(2.5);
+			range = abilityNode.node("range").getDouble(6.0);
+			speed = abilityNode.node("speed").getDouble(0.35);
 
 			abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");
 		}

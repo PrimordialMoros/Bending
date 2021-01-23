@@ -53,7 +53,6 @@ public class HealingWaters extends AbilityInstance implements Ability {
 
 	private LivingEntity target;
 
-	private long startTime;
 	private long nextTime;
 
 	public HealingWaters(@NonNull AbilityDescription desc) {
@@ -66,9 +65,8 @@ public class HealingWaters extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
-		startTime = System.currentTimeMillis();
+		nextTime = System.currentTimeMillis();
 		target = user.getEntity();
-		nextTime = 0;
 		return true;
 	}
 
@@ -83,11 +81,9 @@ public class HealingWaters extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		long time = System.currentTimeMillis();
-		if (time > startTime + userConfig.chargeTime) {
-			if (time > nextTime) {
-				nextTime = time + 250;
-				if (!attemptHeal()) return UpdateResult.REMOVE;
-			}
+		if (time > nextTime) {
+			nextTime = time + 250;
+			if (!attemptHeal()) return UpdateResult.REMOVE;
 		} else {
 			ParticleUtil.createRGB(UserMethods.getMainHandSide(user).toLocation(user.getWorld()), "00ffff").spawn();
 		}
@@ -140,15 +136,13 @@ public class HealingWaters extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
 		public double range;
 		@Attribute(Attribute.STRENGTH)
 		public int power;
-		@Attribute(Attribute.CHARGE_TIME)
-		public long chargeTime;
 
 		@Override
 		public void onConfigReload() {
@@ -157,7 +151,6 @@ public class HealingWaters extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(3000);
 			range = abilityNode.node("range").getDouble(5.0);
 			power = abilityNode.node("power").getInt(2) - 1;
-			chargeTime = abilityNode.node("charge-time").getLong(2000);
 		}
 	}
 }

@@ -107,7 +107,7 @@ public class FireBurst extends AbstractBurst implements Ability {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.CHARGE_TIME)

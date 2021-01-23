@@ -62,7 +62,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -78,6 +77,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private Mode mode;
+	private Block source;
 	private Block readySource;
 	private Vector3 location;
 	private Vector3 lastVelocity;
@@ -114,20 +114,19 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 
 	private boolean prepare() {
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b));
-		if (!source.isPresent()) return false;
-		Block block = source.get();
-		mode = getType(block);
+		source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
+		if (source == null) return false;
+		mode = getType(source);
 		int deltaY = 3;
-		if (block.getY() >= user.getHeadBlock().getY()) {
-			targetY = block.getY() + 2;
+		if (source.getY() >= user.getHeadBlock().getY()) {
+			targetY = source.getY() + 2;
 		} else {
 			targetY = user.getLocBlock().getY() + 2;
-			deltaY = 1 + targetY - block.getY();
+			deltaY = 1 + targetY - source.getY();
 		}
 
 		for (int i = 1; i <= deltaY; i++) {
-			Block temp = block.getRelative(BlockFace.UP, i);
+			Block temp = source.getRelative(BlockFace.UP, i);
 			if (!MaterialUtil.isTransparent(temp)) return false;
 			BlockMethods.breakPlant(temp);
 		}
@@ -137,23 +136,23 @@ public class EarthShot extends AbilityInstance implements Ability {
 			data = Material.MAGMA_BLOCK.createBlockData();
 			canConvert = false;
 		} else {
-			data = MaterialUtil.getSolidType(block.getBlockData());
+			data = MaterialUtil.getSolidType(source.getBlockData());
 		}
 		if (mode == Mode.METAL) {
-			SoundUtil.METAL_SOUND.play(block.getLocation());
+			SoundUtil.METAL_SOUND.play(source.getLocation());
 			canConvert = false;
 		} else {
-			SoundUtil.EARTH_SOUND.play(block.getLocation());
+			SoundUtil.EARTH_SOUND.play(source.getLocation());
 		}
 
-		projectile = new BendingFallingBlock(block, data, new Vector3(0, 0.65, 0), false, 6000);
-		if (!MaterialUtil.isLava(block))
-			TempBlock.create(block, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
-
+		projectile = new BendingFallingBlock(source, data, new Vector3(0, 0.65, 0), false, 6000);
+		if (!MaterialUtil.isLava(source)) {
+			TempBlock.create(source, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+		}
 		location = projectile.getCenter();
 		removalPolicy = Policies.builder()
 			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.add(new OutOfRangeRemovalPolicy(userConfig.selectRange + 5, () -> location))
+			.add(new OutOfRangeRemovalPolicy(userConfig.selectRange + 10, () -> location))
 			.build();
 
 		return true;
@@ -332,6 +331,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 		}
 		if (readySource != null) {
 			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
+			TempBlock.MANAGER.get(source).ifPresent(TempBlock::revert);
 		}
 	}
 
@@ -340,7 +340,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.SELECTION)
@@ -363,13 +363,13 @@ public class EarthShot extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthshot");
 
-			cooldown = abilityNode.node("cooldown").getLong(1000);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
 			selectRange = abilityNode.node("select-range").getDouble(6.0);
-			range = abilityNode.node("range").getDouble(60.0);
-			damage = abilityNode.node("damage").getDouble(1.0);
-			chargeTime = abilityNode.node("charge-time").getLong(1500);
+			range = abilityNode.node("range").getDouble(48.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			chargeTime = abilityNode.node("charge-time").getLong(1000);
 			speed = abilityNode.node("speed").getDouble(1.8);
-			maxAmount = abilityNode.node("max-sources").getInt(3);
+			maxAmount = abilityNode.node("max-sources").getInt(1);
 			allowConvertMagma = abilityNode.node("allow-convert-magma").getBoolean(true);
 			allowQuickLaunch = abilityNode.node("allow-quick-launch").getBoolean(true);
 		}

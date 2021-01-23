@@ -261,7 +261,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -285,13 +285,13 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 			cooldown = abilityNode.node("cooldown").getLong(1500);
 			damage = abilityNode.node("damage").getDouble(3.0);
-			range = abilityNode.node("range").getDouble(20.0);
+			range = abilityNode.node("range").getDouble(22.0);
 			speed = abilityNode.node("speed").getDouble(0.8);
 			fireTick = abilityNode.node("fire-tick").getInt(20);
 			igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
 
 			chargeFactor = abilityNode.node("charge").node("factor").getDouble(1.5);
-			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
+			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);
 
 			abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");
 			abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");

@@ -241,7 +241,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.SELECTION)
 		public double selectRange;
 		@Attribute(Attribute.DAMAGE)

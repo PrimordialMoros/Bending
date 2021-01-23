@@ -153,7 +153,7 @@ public class AirSpout extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.HEIGHT)
@@ -165,8 +165,8 @@ public class AirSpout extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airspout");
 
-			cooldown = abilityNode.node("cooldown").getLong(0);
-			height = abilityNode.node("height").getDouble(14.0);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			height = abilityNode.node("height").getDouble(11.0);
 			maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
 		}
 	}

@@ -151,7 +151,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.SPEED)
 		public long speed;
 		@Attribute(Attribute.COOLDOWN)

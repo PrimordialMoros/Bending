@@ -163,7 +163,7 @@ public class AirShield extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
@@ -180,7 +180,7 @@ public class AirShield extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(4000);
 			duration = abilityNode.node("duration").getLong(10000);
 			radius = abilityNode.node("radius").getDouble(4.0);
-			maxPush = abilityNode.node("max-push").getDouble(3.0);
+			maxPush = abilityNode.node("max-push").getDouble(2.6);
 		}
 	}
 }

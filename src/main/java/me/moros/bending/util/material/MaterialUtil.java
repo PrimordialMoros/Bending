@@ -39,6 +39,7 @@ import java.util.Map;
 
 public final class MaterialUtil {
 	public static final Map<Material, Material> COOKABLE = new HashMap<>();
+	public static final Map<Material, Material> ORES = new HashMap<>();
 	public static final MaterialSetTag BREAKABLE_PLANTS;
 	public static final MaterialSetTag TRANSPARENT;
 	public static final MaterialSetTag CONTAINERS;
@@ -57,6 +58,16 @@ public final class MaterialUtil {
 		COOKABLE.put(Material.WET_SPONGE, Material.SPONGE);
 		COOKABLE.put(Material.KELP, Material.DRIED_KELP);
 		COOKABLE.put(Material.STICK, Material.TORCH);
+
+		ORES.put(Material.COAL_ORE, Material.COAL);
+		ORES.put(Material.LAPIS_ORE, Material.LAPIS_LAZULI);
+		ORES.put(Material.REDSTONE_ORE, Material.REDSTONE);
+		ORES.put(Material.DIAMOND_ORE, Material.DIAMOND);
+		ORES.put(Material.EMERALD_ORE, Material.EMERALD);
+		ORES.put(Material.NETHER_QUARTZ_ORE, Material.QUARTZ);
+		ORES.put(Material.IRON_ORE, Material.IRON_INGOT);
+		ORES.put(Material.GOLD_ORE, Material.GOLD_INGOT);
+		ORES.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
 
 		NamespacedKey key = Bending.getLayer().getMaterialKey();
 		BREAKABLE_PLANTS = new MaterialSetTag(key)

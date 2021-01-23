@@ -210,7 +210,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -230,7 +230,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airswipe");
 
 			cooldown = abilityNode.node("cooldown").getLong(1500);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(1.5);
 			range = abilityNode.node("range").getInt(14);
 			speed = abilityNode.node("speed").getDouble(0.8);
 			arc = abilityNode.node("arc").getInt(35);

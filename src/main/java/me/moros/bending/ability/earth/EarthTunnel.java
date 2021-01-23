@@ -36,9 +36,9 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -102,7 +102,9 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 				return UpdateResult.REMOVE;
 			}
 			if (predicate.test(current)) {
-				extract(current);
+				if (userConfig.extractOres) {
+					extract(current);
+				}
 				TempBlock.create(current, Material.AIR, userConfig.regen, true);
 			}
 			if (angle >= 360) {
@@ -130,43 +132,43 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
 	// TODO tweak drop rates
 	private void extract(Block block) {
-		if (!userConfig.extractOres || !TempBlock.isBendable(block)) return;
-		Material mat = block.getType().name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
-		TempBlock.MANAGER.get(block).ifPresent(tb -> tb.overwriteSnapshot(mat.createBlockData()));
+		if (!TempBlock.isBendable(block)) return;
+		Material type = block.getType();
+		if (!MaterialUtil.ORES.containsKey(type)) return;
+		Material drop = MaterialUtil.ORES.get(type);
+		int amount = getAmount(drop);
+		if (amount == 0) return;
 
-		Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
+		Material newType = type.name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
+		Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
+		if (tb.isPresent()) {
+			tb.get().overwriteSnapshot(newType.createBlockData());
+		} else {
+			block.setType(newType);
+		}
+
 		int rand = ThreadLocalRandom.current().nextInt(100);
 		int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;
+		block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(drop, factor * amount));
+	}
 
-		switch (block.getType()) {
-			case COAL_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.COAL, factor));
-				break;
-			case LAPIS_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.LAPIS_LAZULI, 9 * factor));
-				break;
-			case REDSTONE_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.REDSTONE, 5 * factor));
-				break;
-			case DIAMOND_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.DIAMOND, factor));
-				break;
-			case EMERALD_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.EMERALD, factor));
-				break;
-			case NETHER_QUARTZ_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.QUARTZ, factor));
-				break;
-			case IRON_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.IRON_INGOT, factor));
-				break;
-			case GOLD_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.GOLD_INGOT, factor));
-				break;
-			case NETHER_GOLD_ORE:
-				block.getWorld().dropItem(dropLocation, new ItemStack(Material.GOLD_NUGGET, 6 * factor));
-				break;
+	private int getAmount(Material type) {
+		switch (type) {
+			case COAL:
+			case DIAMOND:
+			case EMERALD:
+			case QUARTZ:
+			case IRON_INGOT:
+			case GOLD_INGOT:
+				return 1;
+			case REDSTONE:
+				return 5;
+			case GOLD_NUGGET:
+				return 6;
+			case LAPIS_LAZULI:
+				return 9;
 		}
+		return 0;
 	}
 
 	@Override
@@ -179,13 +181,13 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
 		public double range;
 		@Attribute(Attribute.RADIUS)
-		public int radius;
+		public double radius;
 		@Attribute(Attribute.DURATION)
 		public long regen;
 		public boolean extractOres;
@@ -196,7 +198,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(2000);
 			range = abilityNode.node("range").getDouble(10.0);
-			radius = abilityNode.node("radius").getInt(1);
+			radius = abilityNode.node("radius").getDouble(1.0);
 			regen = abilityNode.node("revert-time").getLong(0);
 			extractOres = abilityNode.node("extract-ores").getBoolean(true);
 		}

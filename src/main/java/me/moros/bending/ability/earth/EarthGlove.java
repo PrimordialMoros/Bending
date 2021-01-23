@@ -297,7 +297,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -309,12 +309,12 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthglove");
 
 			cooldown = abilityNode.node("cooldown").getLong(750);
-			range = abilityNode.node("range").getDouble(32.0);
+			range = abilityNode.node("range").getDouble(16.0);
 			grabDuration = abilityNode.node("duration").getLong(4000);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(1.5);
 
 			abilityNode.node("duration").comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips.");
 		}

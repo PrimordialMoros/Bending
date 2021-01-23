@@ -81,7 +81,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.STRENGTH)
 		public int speedAmplifier;
 		@Attribute(Attribute.STRENGTH)
@@ -92,7 +92,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
 
 			speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
-			jumpAmplifier = abilityNode.node("jump-amplifier").getInt(2) - 1;
+			jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3) - 1;
 		}
 	}
 }

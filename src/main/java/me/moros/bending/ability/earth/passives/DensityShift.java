@@ -104,7 +104,7 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.DURATION)
 		public long duration;
 		@Attribute(Attribute.RADIUS)

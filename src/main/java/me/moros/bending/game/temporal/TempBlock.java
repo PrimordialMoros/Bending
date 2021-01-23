@@ -187,4 +187,8 @@ public class TempBlock implements Temporary {
 	public static boolean isGravityCached(@NonNull Block block) {
 		return GRAVITY_CACHE.contains(block);
 	}
+
+	public static void clearAir() {
+		TEMP_AIR.clear();
+	}
 }

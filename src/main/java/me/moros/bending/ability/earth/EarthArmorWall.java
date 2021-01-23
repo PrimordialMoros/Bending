@@ -116,7 +116,7 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long wallCooldown;
 		@Attribute(Attribute.DURATION)

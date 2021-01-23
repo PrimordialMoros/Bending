@@ -160,7 +160,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DAMAGE)
@@ -178,9 +178,9 @@ public class EarthShards extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthshards");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
+			cooldown = abilityNode.node("cooldown").getLong(10000);
 			damage = abilityNode.node("damage").getDouble(0.5);
-			range = abilityNode.node("range").getDouble(20.0);
+			range = abilityNode.node("range").getDouble(16.0);
 			speed = abilityNode.node("speed").getDouble(0.8);
 			spread = abilityNode.node("spread").getDouble(0.2);
 			maxShots = abilityNode.node("max-shots").getInt(10);

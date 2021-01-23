@@ -148,7 +148,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -162,9 +162,9 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "heatcontrol");
 
-			cooldown = abilityNode.node("cooldown").getLong(500);
-			range = abilityNode.node("range").getDouble(20.0);
-			radius = abilityNode.node("radius").getDouble(7.0);
+			cooldown = abilityNode.node("cooldown").getLong(2000);
+			range = abilityNode.node("range").getDouble(12.0);
+			radius = abilityNode.node("radius").getDouble(5.0);
 			cookInterval = abilityNode.node("cook-interval").getLong(2000);
 		}
 	}

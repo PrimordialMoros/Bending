@@ -270,7 +270,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -294,7 +294,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
 
 			cooldown = abilityNode.node("cooldown").getLong(750);
-			range = abilityNode.node("range").getDouble(32.0);
+			range = abilityNode.node("range").getDouble(28.0);
 			selectRange = abilityNode.node("select-range").getDouble(12.0);
 			damage = abilityNode.node("damage").getDouble(2.0);
 			redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);

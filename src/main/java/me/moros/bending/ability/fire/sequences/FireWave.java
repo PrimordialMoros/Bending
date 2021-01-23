@@ -142,7 +142,7 @@ public class FireWave extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.HEIGHT)
@@ -156,9 +156,9 @@ public class FireWave extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewave");
 
-			cooldown = abilityNode.node("cooldown").getLong(11000);
+			cooldown = abilityNode.node("cooldown").getLong(16000);
 			maxHeight = abilityNode.node("max-height").getDouble(10.0);
-			duration = abilityNode.node("duration").getLong(10000);
+			duration = abilityNode.node("duration").getLong(8000);
 			steps = abilityNode.node("steps").getInt(8);
 
 			abilityNode.node("steps").comment("The amount of blocks the FireWave will advance.");

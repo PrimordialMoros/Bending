@@ -482,7 +482,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RADIUS)
@@ -522,7 +522,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
 			shootRange = abilityNode.node("range").getDouble(32.0);
 			damage = abilityNode.node("damage").getDouble(5.0);
-			knockback = abilityNode.node("knockback").getDouble(3.5);
+			knockback = abilityNode.node("knockback").getDouble(3.2);
 			knockup = abilityNode.node("knockup").getDouble(0.15);
 
 			if (radius % 2 == 0) radius++;

@@ -219,23 +219,26 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			double factor = entity.equals(user.getEntity()) ? userConfig.selfPush : userConfig.otherPush;
+			boolean isUser = entity.equals(user.getEntity());
+			double factor = isUser ? userConfig.selfPush : userConfig.otherPush;
 			factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
 			// Reduce the push if the player is on the ground.
-			if (!WorldMethods.isOnGround(entity)) {
-				factor *= userConfig.airborneFactor;
+			if (isUser && WorldMethods.isOnGround(entity)) {
+				factor *= 0.5;
 			}
 			Vector3 velocity = new Vector3(entity.getVelocity());
 			// The strength of the entity's velocity in the direction of the blast.
 			double strength = velocity.dotProduct(direction);
 			if (strength > factor) {
-				velocity = velocity.scalarMultiply(0.5).add(direction.scalarMultiply(strength / 2));
-			} else if (strength > factor * 0.5) {
+				double f = velocity.normalize().dotProduct(direction);
+				velocity = velocity.scalarMultiply(0.5).add(direction.scalarMultiply(f));
+			} else if (strength + factor * 0.5 > factor) {
 				velocity = velocity.add(direction.scalarMultiply(factor - strength));
 			} else {
 				velocity = velocity.add(direction.scalarMultiply(factor * 0.5));
 			}
 			entity.setVelocity(velocity.clampVelocity());
+			entity.setFallDistance(0);
 			entity.setFireTicks(0);
 			return false;
 		}
@@ -248,7 +251,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -259,8 +262,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		public double selfPush;
 		@Attribute(Attribute.STRENGTH)
 		public double otherPush;
-		@Attribute(Attribute.STRENGTH)
-		public double airborneFactor;
 		@Attribute(Attribute.SELECTION)
 		public double selectRange;
 
@@ -274,7 +275,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 			selfPush = abilityNode.node("push").node("self").getDouble(2.2);
 			otherPush = abilityNode.node("push").node("other").getDouble(2.2);
-			airborneFactor = abilityNode.node("push").node("airborne").getDouble(0.5);
 
 			selectRange = abilityNode.node("select-range").getDouble(10.0);
 		}

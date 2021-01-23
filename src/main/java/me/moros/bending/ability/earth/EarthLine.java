@@ -24,9 +24,9 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -291,7 +291,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			ThreadLocalRandom rnd = ThreadLocalRandom.current();
 			for (Block block : wall) {
 				Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
-				TempBlock.create(block, Material.AIR, userConfig.regen, true);
+				TempBlock.create(block, Material.AIR, BendingProperties.EXPLOSION_REVERT_TIME, true);
 				new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
 			}
 		}
@@ -338,7 +338,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static class Config extends Configurable {
+	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
@@ -349,19 +349,16 @@ public class EarthLine extends AbilityInstance implements Ability {
 		public double damage;
 		@Attribute(Attribute.DURATION)
 		public long prisonDuration;
-		@Attribute(Attribute.DURATION)
-		public long regen;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthline");
 
-			cooldown = abilityNode.node("cooldown").getLong(3000);
+			cooldown = abilityNode.node("cooldown").getLong(4000);
 			range = abilityNode.node("range").getDouble(24.0);
-			selectRange = abilityNode.node("select-range").getDouble(6.0);
+			selectRange = abilityNode.node("select-range").getDouble(8.0);
 			damage = abilityNode.node("damage").getDouble(3.0);
-			prisonDuration = abilityNode.node("prison-duration").getLong(3000);
-			regen = abilityNode.node("revert-time").getLong(20000);
+			prisonDuration = abilityNode.node("prison-duration").getLong(2500);
 		}
 	}
 }

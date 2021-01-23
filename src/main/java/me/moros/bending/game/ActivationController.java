@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
+import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;
@@ -99,6 +100,7 @@ public final class ActivationController {
 	}
 
 	public void onUserSwing(@NonNull User user) {
+		Bending.getLog().info("swing activation");
 		if (ignoreSwing.containsKey(user)) return;
 		AbilityManager manager = game.getAbilityManager(user.getWorld());
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);
@@ -164,6 +166,10 @@ public final class ActivationController {
 			WaterSpout spout = cache.getWaterSpout(user);
 			if (spout != null) spout.handleMovement(velocity.setY(0));
 		}
+	}
+
+	public void onUserDamage(@NonNull User user) {
+		game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
 	}
 
 	public boolean onFallDamage(@NonNull User user) {
