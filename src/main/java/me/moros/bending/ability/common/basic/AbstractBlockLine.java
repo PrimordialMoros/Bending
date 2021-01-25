@@ -26,41 +26,34 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import org.apache.commons.math3.util.FastMath;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.util.NumberConversions;
+
+import java.util.function.Predicate;
 
 public abstract class AbstractBlockLine implements Updatable {
 	private final User user;
-
 	protected final Ray ray;
-	protected Vector3 location;
 
-	private final double speed;
-	private final double range;
-	private final long interval;
+	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparent(b);
+	protected Vector3 location;
+	protected Vector3 dir;
+
+	private final double maxRange;
+
+	protected long interval = 0;
 
 	private long nextUpdate;
 
-	public AbstractBlockLine(@NonNull User user, @NonNull Ray ray, double range) {
-		this(user, ray, 0, 1, range);
-	}
-
-	public AbstractBlockLine(@NonNull User user, @NonNull Ray ray, double speed, double range) {
-		this(user, ray, 0, speed, range);
-	}
-
-	public AbstractBlockLine(@NonNull User user, @NonNull Ray ray, long interval, double range) {
-		this(user, ray, interval, 1, range);
-	}
-
-	public AbstractBlockLine(@NonNull User user, @NonNull Ray ray, long interval, double speed, double range) {
+	public AbstractBlockLine(@NonNull User user, @NonNull Ray ray) {
 		this.user = user;
-		this.location = ray.origin.add(ray.direction);
 		this.ray = ray;
-		this.interval = interval;
-		this.speed = FastMath.min(1, speed);
-		this.range = range;
+		this.maxRange = ray.direction.getNormSq();
+		dir = ray.direction.normalize().setY(0);
+		this.location = ray.origin.add(dir);
 	}
 
 	@Override
@@ -71,7 +64,8 @@ public abstract class AbstractBlockLine implements Updatable {
 			nextUpdate = time + interval;
 		}
 
-		location = location.add(ray.direction.scalarMultiply(speed));
+		Vector3 originalVector = new Vector3(location.toArray());
+		location = location.add(dir);
 		Block block = location.toBlock(user.getWorld());
 
 		if (!isValidBlock(block)) {
@@ -86,18 +80,30 @@ public abstract class AbstractBlockLine implements Updatable {
 			}
 		}
 
-		if (location.distanceSq(ray.origin) > range * range) {
+		if (location.distanceSq(ray.origin) > maxRange) {
 			return UpdateResult.REMOVE;
+		}
+
+		Block originBlock = originalVector.toBlock(user.getWorld());
+		for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, dir)) {
+			int x = NumberConversions.floor(v.getX());
+			int y = NumberConversions.floor(v.getY());
+			int z = NumberConversions.floor(v.getZ());
+			if (diagonalsPredicate.test(originBlock.getRelative(x, y, z))) {
+				return UpdateResult.REMOVE;
+			}
 		}
 
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return UpdateResult.REMOVE;
 		}
 
-		return render(block) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+		render(block);
+
+		return UpdateResult.CONTINUE;
 	}
 
-	protected abstract boolean isValidBlock(@NonNull Block block);
+	public abstract boolean isValidBlock(@NonNull Block block);
 
-	protected abstract boolean render(@NonNull Block block);
+	public abstract void render(@NonNull Block block);
 }

@@ -32,13 +32,15 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.util.NumberConversions;
 
 import java.util.function.Predicate;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
-	protected final User user;
+	private final User user;
 	protected final Ray ray;
 
 	protected Predicate<Block> canCollide = b -> false;
@@ -46,8 +48,11 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 	protected Vector3 location;
 	protected final Vector3 dir;
 
-	protected boolean livingOnly;
-	protected boolean hitSelf;
+	protected boolean livingOnly = true;
+	protected boolean hitSelf = false;
+	protected boolean singleCollision = false;
+	protected boolean controllable = false;
+	protected int steps = 1;
 
 	protected final double speed;
 	protected final double maxRange;
@@ -67,21 +72,34 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		location = location.add(dir);
-		Block block = location.toBlock(user.getWorld());
-		if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-			return UpdateResult.REMOVE;
-		}
-		render();
-		postRender();
-		// Use previous collider for entity checks for visual reasons
-		boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
-		if (hitEntity) return UpdateResult.REMOVE;
-		collider = collider.at(location);
-		if (canCollide.test(block) && onBlockHit(block)) return UpdateResult.REMOVE;
-		if (!MaterialUtil.isTransparent(block)) {
-			if (AABBUtils.getBlockBounds(block).intersects(collider)) {
-				if (onBlockHit(block)) return UpdateResult.REMOVE;
+		Vector3 vector = controllable ? user.getDirection().scalarMultiply(speed) : dir;
+		for (int i = 0; i < steps; i++) {
+			Vector3 originalVector = new Vector3(location.toArray());
+			location = location.add(vector);
+			if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+				return UpdateResult.REMOVE;
+			}
+			render();
+			postRender();
+
+			if (i % NumberConversions.ceil(speed * steps) != 0) continue; // Avoid unnecessary collision checks
+			// Use previous collider for entity checks for visual reasons
+			boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf, singleCollision);
+			if (hitEntity) return UpdateResult.REMOVE;
+			collider = collider.at(location);
+
+			Block originBlock = originalVector.toBlock(user.getWorld());
+			for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
+				int x = NumberConversions.floor(v.getX());
+				int y = NumberConversions.floor(v.getY());
+				int z = NumberConversions.floor(v.getZ());
+				Block block = originBlock.getRelative(x, y, z);
+				if (canCollide.test(block) && onBlockHit(block)) return UpdateResult.REMOVE;
+				if (!MaterialUtil.isTransparent(block)) {
+					if (AABBUtils.getBlockBounds(block).intersects(collider)) {
+						if (onBlockHit(block)) return UpdateResult.REMOVE;
+					}
+				}
 			}
 		}
 		return UpdateResult.CONTINUE;

@@ -255,7 +255,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		private int tick = 0;
 
 		private LiftState() {
-			this.origin = new Vector3(boulder.center.getX(), boulder.center.getY(), boulder.center.getZ());
+			this.origin = new Vector3(boulder.center.toArray());
 		}
 
 		@Override
@@ -336,7 +336,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
 		private ShotState() {
 			affectedEntities = new HashSet<>();
-			origin = new Vector3(boulder.center.getX(), boulder.center.getY(), boulder.center.getZ());
+			origin = new Vector3(boulder.center.toArray());
 			direction = user.getDirection();
 			SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
 		}

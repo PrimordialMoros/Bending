@@ -39,12 +39,14 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.function.Predicate;
 
 public abstract class BlockStream implements State {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
@@ -54,6 +56,7 @@ public abstract class BlockStream implements State {
 	private final Collection<Collider> colliders = new ArrayList<>();
 	private final Material material;
 
+	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
 	protected Deque<Block> stream;
 	protected Vector3 direction;
 
@@ -114,6 +117,10 @@ public abstract class BlockStream implements State {
 		}
 
 		buffer -= 100; // Reduce buffer by one since we moved
+
+		Vector3 originalVector = new Vector3(current.toArray());
+		Block originBlock = originalVector.toBlock(user.getWorld());
+
 		current = current.add(direction);
 		head = current.toBlock(user.getWorld());
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, head)) {
@@ -122,24 +129,38 @@ public abstract class BlockStream implements State {
 
 		clean(stream.removeLast());
 		if (current.distanceSq(user.getEyeLocation()) <= range * range) {
-			if (!MaterialUtil.isTransparent(head)) {
-				onBlockHit(head);
+			boolean canRender = true;
+			for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
+				int x = NumberConversions.floor(v.getX());
+				int y = NumberConversions.floor(v.getY());
+				int z = NumberConversions.floor(v.getZ());
+				Block b = originBlock.getRelative(x, y, z);
+				if (diagonalsPredicate.test(b)) {
+					canRender = false;
+					onBlockHit(b);
+					break;
+				}
 			}
-			if (MaterialUtil.isTransparent(head) || MaterialUtil.isWater(head)) {
+			if (canRender) {
 				renderHead(head);
 				stream.addFirst(head);
 			}
 		}
+
+		postRender();
 
 		colliders.clear();
 		boolean hit = false;
 		for (Block block : stream) {
 			Collider collider = BOX.at(new Vector3(block));
 			colliders.add(collider);
-			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false);
+			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
 		}
 
 		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+	}
+
+	public void postRender() {
 	}
 
 	public abstract boolean onEntityHit(@NonNull Entity entity);

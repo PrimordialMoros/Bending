@@ -42,8 +42,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -86,6 +84,10 @@ public class Torrent extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
+		if (ringDesc == null) {
+			ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+		}
+
 		ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
 		if (ring == null) {
 			ring = new WaterRing(ringDesc);
@@ -98,27 +100,22 @@ public class Torrent extends AbilityInstance implements Ability {
 		if (ring.isReady()) {
 			List<Block> sources = ring.complete();
 			if (sources.isEmpty()) return false;
-			states = new StateChain(sources).addState(new TorrentStream(user)).start();
+			states = new StateChain(sources).addState(new TorrentStream()).start();
 		}
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
-
-		if (ringDesc == null) {
-			ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
-		}
-
 		return true;
 	}
 
 	private void launch() {
 		if (states == null) {
 			if (ring.isReady()) {
-				states = new StateChain(ring.complete()).addState(new TorrentStream(user)).start();
+				states = new StateChain(ring.complete()).addState(new TorrentStream()).start();
 				user.setCooldown(getDescription(), userConfig.cooldown);
 			}
 		} else {
 			State current = states.getCurrent();
-			if (current instanceof TorrentStream) ((TorrentStream) current).shouldFreeze = true;
+			if (current instanceof TorrentStream) ((TorrentStream) current).hasClicked = true;
 		}
 	}
 
@@ -166,23 +163,22 @@ public class Torrent extends AbilityInstance implements Ability {
 
 	private class TorrentStream extends BlockStream {
 		private final Set<Entity> affectedEntities = new HashSet<>();
-		private boolean frozen = false;
 		private boolean shouldFreeze = false;
+		private boolean hasClicked = false;
 
-		public TorrentStream(@NonNull User user) {
+		public TorrentStream() {
 			super(user, Material.WATER, userConfig.range, 90);
 			controllable = true;
 		}
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (shouldFreeze) {
-				freeze();
-				return false;
-			} else {
-				Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
-				entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
+			if (hasClicked && !shouldFreeze) {
+				shouldFreeze = true;
+				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription()); // apply bonus damage on freeze
 			}
+			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
+			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
 			if (!affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 				affectedEntities.add(entity);
@@ -190,25 +186,26 @@ public class Torrent extends AbilityInstance implements Ability {
 			return false;
 		}
 
+		@Override
+		public void postRender() {
+			if (shouldFreeze) freeze();
+		}
+
 		public void freeze() {
-			if (frozen) return;
-			frozen = true;
-			cleanAll();
+			if (!hasClicked ||stream.isEmpty()) return;
 			Block head = stream.getFirst();
 			if (head == null) return;
-
-			FragileStructure.attemptDamageStructure(Collections.singletonList(head), 8);
-			for (Block block : WorldMethods.getNearbyBlocks(head.getLocation().add(0.5, 0.5, 0.5), userConfig.freezeRadius, MaterialUtil::isTransparentOrWater)) {
-				if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-					TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
-				}
+			cleanAll();
+			for (Block block : stream) {
+				TempBlock.create(block, Material.ICE, userConfig.freezeDuration, true);
 			}
+			FragileStructure.attemptDamageStructure(Collections.singletonList(head), 8);
 			stream.clear();
 		}
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			if (shouldFreeze) {
+			if (hasClicked) {
 				freeze();
 				return;
 			}
@@ -227,10 +224,8 @@ public class Torrent extends AbilityInstance implements Ability {
 		public double knockback;
 		@Attribute(Attribute.STRENGTH)
 		public double verticalPush;
-		@Attribute(Attribute.RADIUS)
-		public double freezeRadius;
 		@Attribute(Attribute.DURATION)
-		public int freezeDuration;
+		public long freezeDuration;
 
 		@Override
 		public void onConfigReload() {
@@ -241,8 +236,7 @@ public class Torrent extends AbilityInstance implements Ability {
 			damage = abilityNode.node("damage").getDouble(4.0);
 			knockback = abilityNode.node("knockback").getDouble(1.0);
 			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
-			freezeRadius = abilityNode.node("freeze-radius").getDouble(3.0);
-			freezeDuration = abilityNode.node("freeze-duration").getInt(12500);
+			freezeDuration = abilityNode.node("freeze-duration").getLong(12500);
 		}
 	}
 }

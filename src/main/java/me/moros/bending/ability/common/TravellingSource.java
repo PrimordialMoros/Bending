@@ -125,8 +125,7 @@ public class TravellingSource implements State {
 
 	private boolean isValid(Block block) {
 		if (!TempBlock.isBendable(block)) return false;
-		if (data.getMaterial() == Material.WATER)
-			return MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block);
+		if (data.getMaterial() == Material.WATER) return MaterialUtil.isTransparentOrWater(block);
 		return MaterialUtil.isTransparent(block);
 	}
 

@@ -131,7 +131,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			state.complete();
 			Optional<Block> src = states.getChainStore().stream().findAny();
 			if (src.isPresent()) {
-				iceLine = new Line(user, src.get());
+				iceLine = new Line(src.get());
 				Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
 			}
@@ -150,7 +150,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 	}
 
 	private class Line extends AbstractLine {
-		public Line(User user, Block source) {
+		public Line(Block source) {
 			super(user, source, userConfig.range, 0.5, true);
 			skipVertical = true;
 		}
@@ -192,7 +192,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		@Override
 		protected boolean isValidBlock(@NonNull Block block) {
 			Block above = block.getRelative(BlockFace.UP);
-			if (!MaterialUtil.isTransparent(above) && !MaterialUtil.isWater(above)) return false;
+			if (!MaterialUtil.isTransparentOrWater(above)) return false;
 			return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();
 		}
 	}

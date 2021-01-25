@@ -25,9 +25,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Utility class with useful {@link Vector3} related methods.
@@ -141,5 +143,30 @@ public final class VectorMethods {
 	 */
 	public static Vector3 rotateAroundAxisZ(Vector3 v, double cos, double sin) {
 		return new Vector3(v.getX() * cos - v.getY() * sin, v.getX() * sin + v.getY() * cos, v.getZ());
+	}
+
+	/**
+	 * Decompose diagonal vectors into their cardinal components so they can be checked individually.
+	 * This is helpful for resolving collisions when moving blocks diagonally and need to consider all block faces.
+	 * @param origin the point of origin
+	 * @param direction the direction to check
+	 * @return a collection of normalized vectors corresponding to cardinal block faces
+	 */
+	public static @NonNull Collection<Vector3> decomposeDiagonals(@NonNull Vector3 origin, @NonNull Vector3 direction) {
+		double[] o = origin.toArray();
+		double[] d = direction.toArray();
+		Collection<Vector3> possibleCollisions = new ArrayList<>(3);
+		for (int i = 0; i < 3; i++) {
+			int a = NumberConversions.floor(o[i] + d[i]);
+			int b = NumberConversions.floor(o[i]);
+			int delta = FastMath.min(1, FastMath.max(-1, a - b));
+			if (delta != 0) {
+				double[] v = new double[]{0, 0, 0};
+				v[i] = delta;
+				possibleCollisions.add(new Vector3(v));
+			}
+		}
+		if (possibleCollisions.isEmpty()) return Collections.singletonList(Vector3.ZERO);
+		return possibleCollisions;
 	}
 }

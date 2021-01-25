@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
-	protected final User user;
+	private final User user;
 	protected final Set<Block> ignore = new HashSet<>();
 	protected final Flight flight;
 

@@ -83,7 +83,7 @@ public class AirSpout extends AbilityInstance implements Ability {
 
 		removalPolicy = Policies.builder().build();
 
-		spout = new Spout(user);
+		spout = new Spout();
 		return true;
 	}
 
@@ -129,7 +129,7 @@ public class AirSpout extends AbilityInstance implements Ability {
 	private class Spout extends AbstractSpout {
 		private long nextRenderTime;
 
-		public Spout(User user) {
+		public Spout() {
 			super(user, userConfig.height, userConfig.maxSpeed);
 			nextRenderTime = 0;
 		}

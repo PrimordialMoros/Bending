@@ -80,7 +80,7 @@ public class FireKick extends AbilityInstance implements Ability {
 		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
 		Rotation rotation = new Rotation(rotateAxis, FastMath.toRadians(6), RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.createArc(direction, rotation, 11).forEach(
-			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
+			v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 
 		user.setCooldown(getDescription(), userConfig.cooldown);
@@ -109,9 +109,8 @@ public class FireKick extends AbilityInstance implements Ability {
 	}
 
 	private class FireStream extends ParticleStream {
-		public FireStream(User user, Ray ray) {
+		public FireStream(Ray ray) {
 			super(user, ray, userConfig.speed, 0.5);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
 

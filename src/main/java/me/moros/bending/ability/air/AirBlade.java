@@ -101,7 +101,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 			origin = wheel.getCenter();
 			factor = userConfig.chargeFactor;
 			charging = false;
-			blade = new Blade(user, new Ray(origin, direction), userConfig.speed * factor * 0.5);
+			blade = new Blade(new Ray(origin, direction), userConfig.speed * factor * 0.5);
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
@@ -152,7 +152,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 		double timeFactor = FastMath.min(1, (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime);
 		factor = FastMath.max(1, timeFactor * userConfig.chargeFactor);
 		charging = false;
-		blade = new Blade(user, new Ray(origin, direction));
+		blade = new Blade(new Ray(origin, direction));
 		removalPolicy = Policies.builder()
 			.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 		user.setCooldown(getDescription(), userConfig.cooldown);
@@ -178,12 +178,12 @@ public class AirBlade extends AbilityInstance implements Ability {
 	}
 
 	private class Blade extends AbstractWheel {
-		public Blade(User user, Ray ray) {
+		public Blade(Ray ray) {
 			super(user, ray, userConfig.radius * factor * 0.5, userConfig.speed * factor * 0.5);
 		}
 
 		// When started from wheel
-		public Blade(User user, Ray ray, double speed) {
+		public Blade(Ray ray, double speed) {
 			super(user, ray, 1.6, speed);
 		}
 

@@ -85,7 +85,7 @@ public class AirPunch extends AbilityInstance implements Ability {
 		Vector3 userVelocity = new Vector3(user.getEntity().getVelocity());
 		double length = userVelocity.subtract(user.getDirection()).getNorm();
 		double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
-		stream = new AirStream(user, new Ray(origin, lookingDir), 1.2, factor);
+		stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
 		return true;
 	}
 
@@ -115,10 +115,9 @@ public class AirPunch extends AbilityInstance implements Ability {
 	private class AirStream extends ParticleStream {
 		private final double factor;
 
-		public AirStream(User user, Ray ray, double collisionRadius, double factor) {
+		public AirStream(Ray ray, double collisionRadius, double factor) {
 			super(user, ray, userConfig.speed * factor, collisionRadius);
 			this.factor = factor;
-			livingOnly = true;
 			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
 		}
 

@@ -142,7 +142,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = UserMethods.getMainHandSide(user);
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
-		stream = new FireStream(user, new Ray(origin, lookingDir), 1.2 * factor);
+		stream = new FireStream(new Ray(origin, lookingDir), 1.2 * factor);
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		factor = 1.0;
 		charging = false;
 		removalPolicy = Policies.builder().build();
-		stream = new FireStream(user, new Ray(location, direction), 1.2);
+		stream = new FireStream(new Ray(location, direction), 1.2);
 	}
 
 	@Override
@@ -198,9 +198,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		private final double displayRadius;
 		private long nextRenderTime;
 
-		public FireStream(User user, Ray ray, double collisionRadius) {
+		public FireStream(Ray ray, double collisionRadius) {
 			super(user, ray, userConfig.speed * factor, collisionRadius);
-			livingOnly = true;
 			displayRadius = FastMath.max(collisionRadius - 1, 1);
 			canCollide = Block::isLiquid;
 		}

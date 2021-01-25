@@ -43,6 +43,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Collections;
+import java.util.function.Predicate;
 
 public abstract class AbstractBlockShot implements Updatable {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
@@ -54,6 +55,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	private Collider collider;
 	private Vector3 firstDestination;
 
+	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
 	protected Vector3 target;
 	protected Vector3 direction;
 	protected Material material;
@@ -107,7 +109,18 @@ public abstract class AbstractBlockShot implements Updatable {
 		Vector3 dest = settingUp ? firstDestination : target;
 		Vector3 currentVector = getCurrent().add(Vector3.HALF);
 		direction = dest.subtract(currentVector).normalize();
+		Vector3 originalVector = new Vector3(currentVector.toArray());
 		currentVector = currentVector.add(direction).floor().add(Vector3.HALF);
+
+		Block originBlock = originalVector.toBlock(user.getWorld());
+		for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
+			int x = NumberConversions.floor(v.getX());
+			int y = NumberConversions.floor(v.getY());
+			int z = NumberConversions.floor(v.getZ());
+			if (diagonalsPredicate.test(originBlock.getRelative(x, y, z))) {
+				return UpdateResult.REMOVE;
+			}
+		}
 
 		if (currentVector.distanceSq(user.getEyeLocation()) > range * range) {
 			return UpdateResult.REMOVE;
@@ -119,7 +132,7 @@ public abstract class AbstractBlockShot implements Updatable {
 			return UpdateResult.REMOVE;
 		}
 		collider = BOX.at(getCurrent());
-		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, false)) {
+		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
 			return UpdateResult.REMOVE;
 		}
 		if (!MaterialUtil.isTransparent(current)) {

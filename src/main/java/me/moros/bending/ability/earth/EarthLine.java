@@ -174,7 +174,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null) return;
 			if (EarthMaterials.LAVA_BENDABLE.isTagged(source)) mode = Mode.MAGMA;
-			earthLine = new Line(user, source);
+			earthLine = new Line(source);
 			Policies.builder().build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
 		}
@@ -219,7 +219,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		private boolean raisedSpikes = false;
 		private boolean imprisoned = false;
 
-		public Line(User user, Block source) {
+		public Line(Block source) {
 			super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.4 : 0.7, false);
 		}
 

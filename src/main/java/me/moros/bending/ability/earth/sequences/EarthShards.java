@@ -102,7 +102,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 					firedShots++;
 					Vector3 origin = (i == 0) ? rightOrigin : leftOrigin;
 					Vector3 dir = getRandomOffset(target, distance * userConfig.spread).subtract(origin);
-					streams.add(new ShardStream(user, new Ray(origin, dir)));
+					streams.add(new ShardStream(new Ray(origin, dir)));
 				}
 			}
 		}
@@ -135,9 +135,8 @@ public class EarthShards extends AbilityInstance implements Ability {
 	}
 
 	private class ShardStream extends ParticleStream {
-		public ShardStream(User user, Ray ray) {
+		public ShardStream(Ray ray) {
 			super(user, ray, userConfig.speed, 0.5);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
 			SoundUtil.playSound(ray.origin.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 2);
 		}

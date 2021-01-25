@@ -310,7 +310,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 			nextShardTime = time + userConfig.cooldown;
 			Vector3 origin = new Vector3(getClosestRingBlock());
 			Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.shardRange + radius);
-			shards.add(new IceShard(user, new Ray(origin, lookingDir)));
+			shards.add(new IceShard(new Ray(origin, lookingDir)));
 		}
 	}
 
@@ -321,37 +321,10 @@ public class WaterRing extends AbilityInstance implements Ability {
 	}
 
 	private class IceShard extends ParticleStream {
-		public IceShard(User user, Ray ray) {
+		public IceShard(Ray ray) {
 			super(user, ray, 0.3, 0.5);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
-		}
-
-		@Override
-		public @NonNull UpdateResult update() {
-			for (int i = 0; i < 5; i++) {
-				location = location.add(dir);
-				Block block = location.toBlock(user.getWorld());
-				if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-					return UpdateResult.REMOVE;
-				}
-				render();
-				postRender();
-
-				if (i % 2 == 0) {
-					// Use previous collider for entity checks for visual reasons
-					boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf);
-					if (hitEntity) return UpdateResult.REMOVE;
-					collider = collider.at(location);
-					if (!MaterialUtil.isTransparent(block)) {
-						AABB blockBounds = AABBUtils.getBlockBounds(block);
-						if (canCollide.test(block) || blockBounds.intersects(collider)) {
-							if (onBlockHit(block)) return UpdateResult.REMOVE;
-						}
-					}
-				}
-			}
-			return UpdateResult.CONTINUE;
+			steps = 5;
 		}
 
 		@Override

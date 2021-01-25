@@ -100,7 +100,6 @@ public final class ActivationController {
 	}
 
 	public void onUserSwing(@NonNull User user) {
-		Bending.getLog().info("swing activation");
 		if (ignoreSwing.containsKey(user)) return;
 		AbilityManager manager = game.getAbilityManager(user.getWorld());
 		AbilityDescription desc = user.getSelectedAbility().orElse(null);

@@ -76,7 +76,7 @@ public class FireSpin extends AbilityInstance implements Ability {
 		Vector3 origin = user.getLocation().add(Vector3.PLUS_J);
 		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
 		VectorMethods.rotate(Vector3.PLUS_I, rotation, 40).forEach(
-			v -> streams.add(new FireStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
+			v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 
 		user.setCooldown(getDescription(), userConfig.cooldown);
@@ -105,9 +105,8 @@ public class FireSpin extends AbilityInstance implements Ability {
 	}
 
 	private class FireStream extends ParticleStream {
-		public FireStream(User user, Ray ray) {
+		public FireStream(Ray ray) {
 			super(user, ray, userConfig.speed, 0.5);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
 

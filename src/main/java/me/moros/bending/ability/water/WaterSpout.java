@@ -89,7 +89,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
 		removalPolicy = Policies.builder().build();
 
-		spout = new Spout(user);
+		spout = new Spout();
 		return true;
 	}
 
@@ -133,7 +133,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 		private BlockVector blockVector;
 		private final Vector g = new Vector(0, -0.1, 0); // Applied as extra gravity
 
-		public Spout(User user) {
+		public Spout() {
 			super(user, userConfig.height, userConfig.maxSpeed);
 			validBlock = predicate;
 		}

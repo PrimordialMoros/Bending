@@ -139,7 +139,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
 		int steps = userConfig.arc / 5;
 		VectorMethods.createArc(dir, rotation, steps).forEach(
-			v -> streams.add(new AirStream(user, new Ray(origin, v.scalarMultiply(userConfig.range))))
+			v -> streams.add(new AirStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
 		);
 		removalPolicy = Policies.builder().build();
 	}
@@ -172,9 +172,10 @@ public class AirSwipe extends AbilityInstance implements Ability {
 	}
 
 	private class AirStream extends ParticleStream {
-		public AirStream(User user, Ray ray) {
+		public AirStream(Ray ray) {
 			super(user, ray, userConfig.speed, 0.5);
 			canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b) || MaterialUtil.BREAKABLE_PLANTS.isTagged(b);
+			livingOnly = false;
 		}
 
 		@Override

@@ -57,6 +57,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
@@ -198,14 +199,13 @@ public class Shockwave extends AbilityInstance implements Ability {
 		origin = user.getLocation().floor().add(Vector3.HALF);
 		Vector3 dir = user.getDirection().setY(0).normalize();
 		Rotation rotation = new Rotation(Vector3.PLUS_J, deltaAngle, RotationConvention.VECTOR_OPERATOR);
-		double speed = cone ? userConfig.coneSpeed : userConfig.ringSpeed;
 		if (cone) {
 			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 2)).forEach(v ->
-				streams.add(new Ripple(new Ray(origin, v), speed, range))
+				streams.add(new Ripple(new Ray(origin, v.scalarMultiply(range)), 0))
 			);
 		} else {
 			VectorMethods.rotate(dir, rotation, NumberConversions.ceil(range * 6)).forEach(v ->
-				streams.add(new Ripple(new Ray(origin, v), speed, range))
+				streams.add(new Ripple(new Ray(origin, v.scalarMultiply(range)), 75))
 			);
 		}
 
@@ -225,30 +225,29 @@ public class Shockwave extends AbilityInstance implements Ability {
 	}
 
 	private class Ripple extends AbstractBlockLine {
-		public Ripple(Ray ray, double speed, double range) {
-			super(user, ray, speed, range);
+		public Ripple(Ray ray, long interval) {
+			super(user, ray);
+			this.interval = interval;
 		}
 
 		@Override
-		protected boolean isValidBlock(@NonNull Block block) {
-			if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) return false;
-			return EarthMaterials.isEarthbendable(user, block) && !block.isLiquid();
+		public boolean isValidBlock(@NonNull Block block) {
+			if (block.isLiquid() || !MaterialUtil.isTransparent(block)) return false;
+			return EarthMaterials.isEarthbendable(user, block.getRelative(BlockFace.DOWN));
 		}
 
 		@Override
-		protected boolean render(@NonNull Block block) {
-			if (affectedBlocks.contains(block)) return true;
+		public void render(@NonNull Block block) {
+			if (affectedBlocks.contains(block)) return;
 			affectedBlocks.add(block);
 			recentAffectedBlocks.put(block, false);
 			double deltaY = FastMath.min(0.35, 0.1 + location.distance(ray.origin) / (1.5 * range));
 			Vector3 velocity = new Vector3(0, deltaY, 0);
-			// Falling blocks spawned inside a solid block are glitched client side so spawn it one block above
-			Block spawnBlock = block.getRelative(BlockFace.UP);
-			new BendingFallingBlock(spawnBlock, block.getBlockData(), velocity, true, 3000);
+			BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
+			new BendingFallingBlock(block, data, velocity, true, 3000);
 			if (ThreadLocalRandom.current().nextInt(6) == 0) {
 				SoundUtil.EARTH_SOUND.play(block.getLocation());
 			}
-			return true;
 		}
 	}
 
@@ -261,17 +260,10 @@ public class Shockwave extends AbilityInstance implements Ability {
 		public double damage;
 		@Attribute(Attribute.STRENGTH)
 		public double knockback;
-
 		@Attribute(Attribute.RANGE)
 		public double coneRange;
-		@Attribute(Attribute.SPEED)
-		public double coneSpeed;
-
 		@Attribute(Attribute.RANGE)
 		public double ringRange;
-		@Attribute(Attribute.SPEED)
-		public double ringSpeed;
-
 		public double fallThreshold;
 
 		@Override
@@ -282,13 +274,8 @@ public class Shockwave extends AbilityInstance implements Ability {
 			chargeTime = abilityNode.node("charge-time").getInt(2500);
 			damage = abilityNode.node("damage").getDouble(4.0);
 			knockback = abilityNode.node("knockback").getDouble(1.2);
-
-			coneRange = abilityNode.node("cone", "range").getDouble(14.0);
-			coneSpeed = abilityNode.node("cone", "speed").getDouble(1.0);
-
-			ringRange = abilityNode.node("ring", "range").getDouble(9.0);
-			ringSpeed = abilityNode.node("ring", "speed").getDouble(0.8);
-
+			coneRange = abilityNode.node("cone-range").getDouble(14.0);
+			ringRange = abilityNode.node("ring-range").getDouble(9.0);
 			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
 		}
 	}

@@ -173,7 +173,7 @@ public class AbilityManager {
 			try (MCTiming timing = Bending.getTimingManager().of(ability.getDescription().getName()).startTiming()) {
 				result = ability.update();
 			} catch (Exception e) {
-				Bending.getLog().warn(e.getMessage());
+				e.printStackTrace();
 			}
 			if (result == UpdateResult.REMOVE) {
 				globalIterator.remove();

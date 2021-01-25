@@ -201,6 +201,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 		grabbed = true;
 		grabbedTarget = entity;
 		glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
+		grabbedTarget.setFallDistance(0);
 		if (isMetal) {
 			removalPolicy = Policies.builder()
 				.add(Policies.IN_LIQUID)

@@ -23,6 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
@@ -38,7 +39,6 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -59,8 +59,8 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -74,12 +74,9 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private Vector3 location;
-	private Sphere collider;
+	private CombustBeam beam;
 
 	private boolean hasExploded;
-	private double distanceTravelled;
-	private double randomBeamDistance;
 
 	public Combustion(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -93,11 +90,8 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		if (Policies.IN_LIQUID.test(user, getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
 			return false;
 		}
-		location = user.getEyeLocation();
-		removalPolicy = Policies.builder()
-			.add(new OutOfRangeRemovalPolicy(userConfig.range, user.getEyeLocation(), () -> location)).build();
-		collider = new Sphere(location, 1);
-
+		beam = new CombustBeam();
+		removalPolicy = Policies.builder().build();
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
@@ -112,50 +106,10 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		if (hasExploded || removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
-
-		collider = new Sphere(location, 1);
-		if (CollisionUtil.handleEntityCollisions(user, collider, entity -> true, true, false, true)) {
-			explode();
+		if (beam.distanceTravelled > userConfig.range) {
 			return UpdateResult.REMOVE;
 		}
-		return advanceLocation() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
-	}
-
-	private boolean advanceLocation() {
-		Vector direction = user.getDirection().scalarMultiply(0.4).toVector();
-		Location bukkitLocation = location.toLocation(user.getWorld());
-		if (distanceTravelled >= randomBeamDistance) {
-			SoundUtil.playSound(bukkitLocation, SoundUtil.COMBUSTION_SOUND.getSound(), 1.5F, 0);
-			randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
-			double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
-			Rotation rotation = new Rotation(user.getDirection(), FastMath.PI / 10, RotationConvention.VECTOR_OPERATOR);
-			VectorMethods.rotate(Vector3.ONE, rotation, 20).forEach(v -> {
-				Vector3 velocity = v.scalarMultiply(radius);
-				ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation.clone().add(v.scalarMultiply(0.2).toVector()), userConfig.particleRange)
-					.count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
-			});
-		}
-		for (int i = 0; i < 5; i++) {
-			distanceTravelled += 0.4;
-			bukkitLocation.add(direction);
-			ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
-			ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
-			if (i % 2 != 0) {
-				Block block = bukkitLocation.getBlock();
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-					return false;
-				}
-				if (ThreadLocalRandom.current().nextInt(3) == 0) {
-					SoundUtil.COMBUSTION_SOUND.play(bukkitLocation);
-				}
-				if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
-					createExplosion(new Vector3(bukkitLocation), userConfig.power, userConfig.damage);
-					return false;
-				}
-			}
-		}
-		location = new Vector3(bukkitLocation);
-		return true;
+		return beam.update();
 	}
 
 	@Override
@@ -165,17 +119,17 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(collider);
+		return Collections.singletonList(beam.getCollider());
 	}
 
 	@Override
 	public void onCollision(@NonNull Collision collision) {
 		Ability collidedAbility = collision.getCollidedAbility();
 		if (collidedAbility instanceof Combustion) {
-			createExplosion(location, userConfig.power * 2, userConfig.damage * 2);
+			createExplosion(beam.getLocation(), userConfig.power * 2, userConfig.damage * 2);
 			((Combustion) collidedAbility).hasExploded = true;
 		} else if (collidedAbility instanceof Explosive || collidedAbility.getDescription().getElement() == Element.EARTH) {
-			createExplosion(location, userConfig.power, userConfig.damage);
+			explode();
 		}
 	}
 
@@ -185,7 +139,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 	@Override
 	public void explode() {
-		createExplosion(location, userConfig.power, userConfig.damage);
+		createExplosion(beam.getLocation(), userConfig.power, userConfig.damage);
 	}
 
 	private void createExplosion(Vector3 center, double size, double damage) {
@@ -220,6 +174,65 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && MaterialUtil.isIgnitable(block)) ? Material.FIRE : Material.AIR;
 				TempBlock.create(block, mat, BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000), true);
 			}
+		}
+	}
+
+	private class CombustBeam extends ParticleStream {
+		private double randomBeamDistance = 0;
+		private double distanceTravelled = 0;
+
+		public CombustBeam() {
+			super(user, user.getRay(userConfig.range), 0.4, 1);
+			canCollide = Block::isLiquid;
+			singleCollision = true;
+			controllable = true;
+			steps = 5;
+		}
+
+		@Override
+		public void render() {
+			distanceTravelled += speed;
+			renderRing();
+			Location bukkitLocation = getBukkitLocation();
+			ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
+			ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
+		}
+
+		private void renderRing() {
+			if (distanceTravelled >= randomBeamDistance) {
+				SoundUtil.playSound(getBukkitLocation(), SoundUtil.COMBUSTION_SOUND.getSound(), 1.5F, 0);
+				randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
+				double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
+				Rotation rotation = new Rotation(user.getDirection(), FastMath.PI / 10, RotationConvention.VECTOR_OPERATOR);
+				VectorMethods.rotate(Vector3.ONE, rotation, 20).forEach(v -> {
+					Vector3 velocity = v.scalarMultiply(radius);
+					ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.scalarMultiply(0.2)).toLocation(user.getWorld()), userConfig.particleRange)
+						.count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
+				});
+			}
+		}
+
+		@Override
+		public void postRender() {
+			if (ThreadLocalRandom.current().nextInt(3) == 0) {
+				SoundUtil.COMBUSTION_SOUND.play(getBukkitLocation());
+			}
+		}
+
+		@Override
+		public boolean onEntityHit(@NonNull Entity entity) {
+			explode();
+			return true;
+		}
+
+		@Override
+		public boolean onBlockHit(@NonNull Block block) {
+			explode();
+			return true;
+		}
+
+		public @NonNull Vector3 getLocation() {
+			return location;
 		}
 	}
 

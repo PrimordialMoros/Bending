@@ -134,7 +134,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 				double z = FastMath.sin(phi);
 				Vector3 direction = new Vector3(x, y, z);
 				if (Vector3.angle(direction, userDir) <= maxAngle) {
-					streams.add(new FrostStream(user, new Ray(origin, direction.normalize().scalarMultiply(userConfig.range))));
+					streams.add(new FrostStream(new Ray(origin, direction.normalize().scalarMultiply(userConfig.range))));
 				}
 			}
 		}
@@ -149,9 +149,8 @@ public class FrostBreath extends AbilityInstance implements Ability {
 	}
 
 	private class FrostStream extends ParticleStream {
-		public FrostStream(User user, Ray ray) {
+		public FrostStream(Ray ray) {
 			super(user, ray, 0.3, 0.5);
-			livingOnly = true;
 			canCollide = Block::isLiquid;
 		}
 

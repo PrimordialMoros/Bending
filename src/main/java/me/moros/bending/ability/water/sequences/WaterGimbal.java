@@ -105,7 +105,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 		}
 
 		states.addState(new Gimbal(user))
-			.addState(new GimbalStream(user))
+			.addState(new GimbalStream())
 			.start();
 
 		AbilityDescription torrentDesc = user.getSelectedAbility().orElse(null);
@@ -248,7 +248,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 		private void addValidBlock(Block start, Collection<Block> ring) {
 			for (int i = 0; i < 4; i++) {
 				Block block = start.getRelative(BlockFace.UP, i);
-				if (MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block)) {
+				if (MaterialUtil.isTransparentOrWater(block)) {
 					center = block;
 					ring.add(block);
 					return;
@@ -260,7 +260,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 	private class GimbalStream extends BlockStream {
 		private final Set<Entity> affectedEntities = new HashSet<>();
 
-		public GimbalStream(@NonNull User user) {
+		public GimbalStream() {
 			super(user, Material.WATER, userConfig.range, 70);
 			controllable = true;
 		}

@@ -44,7 +44,7 @@ import org.bukkit.block.BlockFace;
 import java.util.Collection;
 
 public abstract class AbstractWheel implements Updatable, SimpleAbility {
-	protected final User user;
+	private final User user;
 
 	private final Vector3 dir;
 	private final AABB box;

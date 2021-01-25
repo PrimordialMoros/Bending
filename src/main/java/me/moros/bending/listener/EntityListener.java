@@ -22,6 +22,7 @@ package me.moros.bending.listener;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.ability.earth.*;
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
@@ -31,6 +32,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -99,6 +101,15 @@ public class EntityListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
 		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onEntityDamage(EntityDamageEvent event) {
+		if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION && event.getEntity() instanceof LivingEntity) {
+			if (TempBlock.MANAGER.isTemp(((LivingEntity) event.getEntity()).getEyeLocation().getBlock())) {
+				event.setCancelled(true);
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

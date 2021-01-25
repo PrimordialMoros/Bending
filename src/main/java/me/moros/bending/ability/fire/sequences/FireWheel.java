@@ -78,7 +78,7 @@ public class FireWheel extends AbilityInstance implements Ability {
 		location = location.add(new Vector3(0, userConfig.radius, 0));
 		if (location.toBlock(user.getWorld()).isLiquid()) return false;
 
-		wheel = new Wheel(user, new Ray(location, direction));
+		wheel = new Wheel(new Ray(location, direction));
 		if (!wheel.resolveMovement(userConfig.radius)) return false;
 
 		removalPolicy = Policies.builder()
@@ -112,7 +112,7 @@ public class FireWheel extends AbilityInstance implements Ability {
 	}
 
 	private class Wheel extends AbstractWheel {
-		public Wheel(User user, Ray ray) {
+		public Wheel(Ray ray) {
 			super(user, ray, userConfig.radius, userConfig.speed);
 		}
 

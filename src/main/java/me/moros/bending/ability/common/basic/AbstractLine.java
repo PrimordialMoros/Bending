@@ -29,6 +29,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
@@ -40,12 +41,14 @@ import org.bukkit.util.NumberConversions;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public abstract class AbstractLine implements Updatable, SimpleAbility {
-	protected final User user;
+	private final User user;
 
 	protected final Vector3 origin;
 
+	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparent(b);
 	protected Vector3 location;
 	protected Vector3 targetLocation;
 	protected Vector3 direction;
@@ -104,6 +107,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		render();
 		postRender();
 
+		Vector3 originalVector = new Vector3(location.toArray());
 		location = location.add(direction.scalarMultiply(speed));
 		Block baseBlock = location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN);
 
@@ -123,6 +127,16 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 				location = location.add(Vector3.PLUS_J);
 			} else if (y1 < y2 && isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
 				location = location.add(Vector3.MINUS_J);
+			}
+		}
+
+		Block originBlock = originalVector.toBlock(user.getWorld());
+		for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction.scalarMultiply(speed))) {
+			int x = NumberConversions.floor(v.getX());
+			int y = NumberConversions.floor(v.getY());
+			int z = NumberConversions.floor(v.getZ());
+			if (diagonalsPredicate.test(originBlock.getRelative(x, y, z))) {
+				return UpdateResult.REMOVE;
 			}
 		}
 

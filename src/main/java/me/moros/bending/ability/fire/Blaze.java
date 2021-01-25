@@ -88,11 +88,11 @@ public class Blaze extends AbilityInstance implements Ability {
 		Rotation rotation = new Rotation(Vector3.PLUS_J, deltaAngle, RotationConvention.VECTOR_OPERATOR);
 		if (cone) {
 			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 2)).forEach(v ->
-				streams.add(new FireStream(new Ray(origin, v), range))
+				streams.add(new FireStream(new Ray(origin, v.scalarMultiply(range))))
 			);
 		} else {
 			VectorMethods.rotate(dir, rotation, NumberConversions.ceil(range * 6)).forEach(v ->
-				streams.add(new FireStream(new Ray(origin, v), range))
+				streams.add(new FireStream(new Ray(origin, v.scalarMultiply(range))))
 			);
 		}
 
@@ -126,24 +126,24 @@ public class Blaze extends AbilityInstance implements Ability {
 	}
 
 	private class FireStream extends AbstractBlockLine {
-		public FireStream(Ray ray, double range) {
-			super(user, ray, 70, range);
+		public FireStream(Ray ray) {
+			super(user, ray);
+			this.interval = 70;
 		}
 
 		@Override
-		protected boolean isValidBlock(@NonNull Block block) {
+		public boolean isValidBlock(@NonNull Block block) {
 			return MaterialUtil.isFire(block) || MaterialUtil.isIgnitable(block);
 		}
 
 		@Override
-		protected boolean render(@NonNull Block block) {
-			if (affectedBlocks.contains(block)) return true;
+		public void render(@NonNull Block block) {
+			if (affectedBlocks.contains(block)) return;
 			affectedBlocks.add(block);
 			TempBlock.create(block, Material.FIRE, 500, true);
 			if (ThreadLocalRandom.current().nextInt(6) == 0) {
 				SoundUtil.FIRE_SOUND.play(block.getLocation());
 			}
-			return true;
 		}
 	}
 

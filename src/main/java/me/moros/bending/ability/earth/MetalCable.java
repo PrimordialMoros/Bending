@@ -282,6 +282,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 			return;
 		}
 		target = new CableTarget(entity);
+		entity.setFallDistance(0);
 		hasHit = true;
 	}
 
@@ -324,6 +325,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.launchSpeed);
 		target.getEntity().setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
+		target.getEntity().setFallDistance(0);
 		if (target.getEntity() instanceof FallingBlock) {
 			removalPolicy = Policies.builder()
 				.add(new OutOfRangeRemovalPolicy(userConfig.projectileRange, location, () -> location))

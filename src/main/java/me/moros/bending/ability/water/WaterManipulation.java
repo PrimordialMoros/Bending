@@ -151,7 +151,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	}
 
 	private void renderTrail(Block block, int level) {
-		if (MaterialUtil.isTransparent(block) || MaterialUtil.isWater(block)) {
+		if (MaterialUtil.isTransparentOrWater(block)) {
 			BlockMethods.breakPlant(block);
 			if (MaterialUtil.isWater(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
