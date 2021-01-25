@@ -39,6 +39,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
+import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -134,13 +135,17 @@ public class Iceberg extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return;
 		}
-		boolean canPlaceAir = !MaterialUtil.isWater(block);
-		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-		Optional<TempBlock> tb = TempBlock.create(block, ice, userConfig.duration, true);
-		if (canPlaceAir && tb.isPresent()) {
-			tb.get().setRevertTask(() -> TempBlock.create(block, Material.AIR, userConfig.regenDelay));
-		}
 		blocks.add(block);
+		boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
+		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
+		TempBlock tb = TempBlock.create(block, ice, userConfig.duration, true).orElse(null);
+		if (canPlaceAir && tb != null) {
+			tb.setRevertTask(() ->
+				Tasker.newChain().delay(1)
+					.sync(() -> TempBlock.create(block, Material.AIR.createBlockData(), userConfig.regenDelay, true))
+					.execute()
+			);
+		}
 	}
 
 	public static void launch(User user) {
