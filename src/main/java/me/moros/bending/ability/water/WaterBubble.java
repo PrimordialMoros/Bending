@@ -124,29 +124,29 @@ public class WaterBubble extends AbilityInstance implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(user.getEntity().getLocation(), radius, MaterialUtil::isWater)) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			if (TempBlock.MANAGER.isTemp(block)) continue;
-			TempBlock.create(block, Material.AIR, true).ifPresent(tb -> bubble.add(block));
-		}
-	}
-
-	private void clean(Block block) {
-		TempBlock tempBlock = TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.getBlock())).orElse(null);
-		if (tempBlock != null) {
-			final Vector3 centerLoc = new Vector3(center);
-			double distance = new Vector3(block).distanceSq(centerLoc);
-			double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
-			long delay = (long) (1500 * factor);
-			tempBlock.setRevertTask(() -> TempBlock.create(block, Material.AIR, delay, true));
-			tempBlock.revert();
+			TempBlock.create(block, Material.AIR.createBlockData(), 0, true, false).ifPresent(tb -> bubble.add(block));
 		}
 	}
 
 	private void fastClean(Block block) {
+		TempBlock.removeTempAir(block);
 		TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.getBlock())).ifPresent(TempBlock::revert);
 	}
 
 	@Override
 	public void onDestroy() {
-		bubble.forEach(this::clean);
+		Vector3 centerLoc = new Vector3(center);
+		for (Block block : bubble) {
+			if (!MaterialUtil.isAir(block)) continue;
+			TempBlock tb = TempBlock.MANAGER.get(block).orElse(null);
+			if (tb == null) continue;
+			double distance = new Vector3(block).distanceSq(centerLoc);
+			double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
+			long delay = (long) (1500 * factor);
+			tb.setRevertTask(() -> TempBlock.create(block, Material.AIR.createBlockData(), delay, true, false));
+			TempBlock.removeTempAir(block);
+			tb.revert();
+		}
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 

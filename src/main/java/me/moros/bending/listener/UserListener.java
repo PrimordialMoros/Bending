@@ -232,7 +232,9 @@ public class UserListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
 		game.getBoardManager().forceToggleScoreboard(event.getPlayer());
-		game.getAbilityManager(event.getFrom()).destroyUserInstances(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+		BendingPlayer bendingPlayer = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+		game.getAbilityManager(event.getFrom()).destroyUserInstances(bendingPlayer);
+		game.getAbilityManager(event.getPlayer().getWorld()).createPassives(bendingPlayer);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

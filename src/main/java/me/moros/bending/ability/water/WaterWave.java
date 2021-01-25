@@ -38,6 +38,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.Tasker;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
@@ -104,10 +105,11 @@ public class WaterWave extends AbilityInstance implements Ability {
 
 		Vector3 center = user.getLocation().add(Vector3.MINUS_J);
 		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
+			if (TempBlock.MANAGER.isTemp(block)) continue;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			Optional<TempBlock> tb = TempBlock.create(block, Material.WATER, 1000);
-			if (ice) {
-				tb.ifPresent(t -> t.setRevertTask(() -> TempBlock.create(block, Material.ICE, 1000)));
+			if (ice && tb.isPresent()) {
+				Tasker.newChain().delay(20).sync(() -> TempBlock.create(block, Material.ICE, 1000)).execute();
 			}
 		}
 		if (ice) {

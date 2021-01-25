@@ -26,7 +26,7 @@ Please fork this repository and contribute back using [pull requests](https://gi
 
 ## Project Layout
 
-The project currently has a single module but it may be split into sub-modules (API and Implementation) in the future.
+The project currently has a single module, but it may be split into sub-modules (API and Implementation) in the future.
 
 `me.moros.bending` is the top level package.
 

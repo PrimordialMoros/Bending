@@ -348,6 +348,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
+		if (launched && projectile != null) return Collections.singletonList(BOX.at(projectile.getCenter()));
 		return Collections.singletonList(new Sphere(location, 0.8));
 	}
 

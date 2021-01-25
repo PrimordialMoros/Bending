@@ -88,6 +88,7 @@ public final class AbilityInitializer {
 			.addSpecialLayer(shieldLayer)
 			.addLayer(layer3)
 			.addSimpleCollision("FrostBreath", "AirShield", true, true)
+			.addSimpleCollision("EarthShot", "AirShield", true, false)
 			.addSimpleCollision("IceCrawl", "EarthLine", true, false)
 			.build();
 	}

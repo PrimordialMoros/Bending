@@ -260,10 +260,8 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
 		@Override
 		public @NonNull UpdateResult update() {
-			Block newCenter = boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world);
-			if (!boulder.isValidCenter(newCenter)) return UpdateResult.REMOVE;
 			cleanAll();
-			boulder.setCenter(newCenter);
+			boulder.setCenter(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
 			SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
 			CollisionUtil.handleEntityCollisions(user, boulder.getCollider(), entity -> {
 				entity.setVelocity(new Vector3(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());

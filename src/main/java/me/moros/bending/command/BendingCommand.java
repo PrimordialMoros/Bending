@@ -159,7 +159,12 @@ public class BendingCommand extends BaseCommand {
 	@CommandPermission("bending.command.help")
 	@Description("View version info about the bending plugin")
 	public static void onVersion(CommandUser user) {
-		user.sendMessage(getVersionInfo());
+		String link = "https://github.com/PrimordialMoros/Bending";
+		Component version = Component.text("Version: ", NamedTextColor.DARK_AQUA)
+			.append(Component.text(Bending.getVersion(), NamedTextColor.GREEN))
+			.hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.getAuthor(), link)))
+			.clickEvent(ClickEvent.openUrl(link));
+		user.sendMessage(version);
 	}
 
 
@@ -246,19 +251,6 @@ public class BendingCommand extends BaseCommand {
 				Message.ABILITY_INFO_INSTRUCTIONS.send(user, ability.getDisplayName(), instructions);
 			}
 		}
-	}
-
-	private static Component getVersionInfo() {
-		String link = "https://github.com/PrimordialMoros/Bending";
-		String content = "Developed by: {author}\n" + "Source code: {link}\n" + "Licensed under: AGPLv3\n\n" + "Click to open link.";
-		Component details = Component.text(content, NamedTextColor.DARK_AQUA)
-			.replaceText(a -> a.match("{author}").once().replacement(match -> match.content(Bending.getAuthor()).color(NamedTextColor.GREEN)))
-			.replaceText(l -> l.match("{link}").once().replacement(match -> match.content(link).color(NamedTextColor.GREEN)));
-
-		return Component.text("Version: ", NamedTextColor.DARK_AQUA)
-			.append(Component.text(Bending.getVersion(), NamedTextColor.GREEN))
-			.hoverEvent(HoverEvent.showText(details))
-			.clickEvent(ClickEvent.openUrl(link));
 	}
 
 	private static Collection<Component> collectAbilities(CommandUser user, Element element) {

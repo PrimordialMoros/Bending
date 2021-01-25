@@ -99,6 +99,10 @@ public class TempBlock implements Temporary {
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable) {
+		return create(block, data, duration, bendable, true);
+	}
+
+	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable, boolean fixWater) {
 		if (block instanceof TileState) return Optional.empty();
 
 		TempBlock tb = MANAGER.get(block).orElse(null);
@@ -117,17 +121,13 @@ public class TempBlock implements Temporary {
 			}
 		}
 
-		if (MaterialUtil.TRANSPARENT.isTagged(data)) {
-			if (BlockMethods.isInfiniteWater(block)) {
-				if (tb != null) {
-					if (Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
-						tb.revert();
-					}
-				} else {
-					block.setType(Material.WATER);
-				}
-				return Optional.empty();
+		if (fixWater && MaterialUtil.TRANSPARENT.isTagged(data) && BlockMethods.isInfiniteWater(block)) {
+			if (tb != null && Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
+				tb.revert();
+			} else {
+				block.setType(Material.WATER);
 			}
+			return Optional.empty();
 		}
 
 		return Optional.of(new TempBlock(block, data, duration, bendable));
@@ -136,14 +136,15 @@ public class TempBlock implements Temporary {
 	@Override
 	public void revert() {
 		Block block = getBlock();
-		if (TEMP_AIR.containsKey(block)) {
-			long remainingTime = TEMP_AIR.getExpectedExpiration(block);
-			create(block, Material.AIR, remainingTime, true);
-			return;
-		}
-		snapshot.getWorld().getChunkAtAsync(block).thenAccept(r -> snapshot.update(true, false));
+		snapshot.getWorld().getChunkAtAsync(block).thenRun(() -> snapshot.update(true, false));
 		MANAGER.removeEntry(block);
 		GRAVITY_CACHE.remove(block);
+
+		if (TEMP_AIR.containsKey(block)) {
+			long remainingTime = TEMP_AIR.getExpectedExpiration(block);
+			if (remainingTime > 200) new TempBlock(block, Material.AIR.createBlockData(), remainingTime, true);
+		}
+
 		if (revertTask != null) revertTask.execute();
 	}
 
@@ -186,6 +187,10 @@ public class TempBlock implements Temporary {
 
 	public static boolean isGravityCached(@NonNull Block block) {
 		return GRAVITY_CACHE.contains(block);
+	}
+
+	public static void removeTempAir(@NonNull Block block) {
+		TEMP_AIR.remove(block);
 	}
 
 	public static void clearAir() {

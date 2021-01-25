@@ -6,12 +6,12 @@
 
 Bending is a free and open source Minecraft plugin that brings the universe of _Avatar: The Last Airbender_ to your server.
 
-This project is a modern implementation of bending that is best described by:
-- Simple to learn and use.
-- Provide deeper mechanics for those inclined
-- Provide balanced pvp and pve experience, extremely configurable
-- Robust, flexible API
+This project is a modern implementation of bending with the following key aspects:
 - Transparent development process
+- Robust, flexible API
+- Supports custom translations
+- Accurate collision detection system
+- Balanced pvp and pve experience, extremely configurable
 
 For a full list of features check out the [features list](https://github.com/PrimordialMoros/Bending/wiki/Features).
 
@@ -19,15 +19,11 @@ Support and project discussion is available on [Discord](https://discord.gg/sjwn
 
 ## Download
 
-This project is still under development. A build server will be created soon to host development builds.
-
-You can temporarily download builds from [actions](https://github.com/PrimordialMoros/Bending/actions).
-
-Main releases will be downloadable from [Github Releases](https://github.com/PrimordialMoros/Bending/releases) as well as other sources.
+Currently, downloads are available in [Github Releases](https://github.com/PrimordialMoros/Bending/releases).
 
 ## Building
 
-This project requires Java 8 or newer and uses Gradle (which comes with a wrapper so you don't need to install it).
+This project requires Java 8 or newer and uses Gradle (which comes with a wrapper, so you don't need to install it).
 
 Open a terminal and run `./gradlew build`.
 

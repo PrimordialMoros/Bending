@@ -32,6 +32,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -61,6 +62,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -111,7 +113,6 @@ public class EarthShot extends AbilityInstance implements Ability {
 	public void recalculateConfig() {
 		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
-
 
 	private boolean prepare() {
 		source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
@@ -338,6 +339,12 @@ public class EarthShot extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
+	}
+
+	@Override
+	public @NonNull Collection<@NonNull Collider> getColliders() {
+		if (!launched || projectile == null) return Collections.emptyList();
+		return Collections.singletonList(BOX.at(projectile.getCenter()));
 	}
 
 	private static class Config extends Configurable {

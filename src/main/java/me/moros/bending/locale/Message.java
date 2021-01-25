@@ -126,6 +126,9 @@ public interface Message {
 	Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TextColor.color(221, 221, 221))
 		.args(ability, instructions);
 
+	Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", DARK_AQUA)
+		.args(text(author, GREEN), text(link, GREEN));
+
 	static Component brand(ComponentLike message) {
 		return PREFIX.asComponent().append(message);
 	}

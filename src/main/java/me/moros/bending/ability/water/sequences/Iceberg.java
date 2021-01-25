@@ -134,9 +134,12 @@ public class Iceberg extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return;
 		}
-		Material mat = block.getType();
-		TempBlock.create(block, ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE, userConfig.duration, true)
-			.filter(tb -> !Material.WATER.equals(mat)).ifPresent(tb -> tb.setRevertTask(() -> TempBlock.create(block, Material.AIR, userConfig.regenDelay)));
+		boolean canPlaceAir = !MaterialUtil.isWater(block);
+		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
+		Optional<TempBlock> tb = TempBlock.create(block, ice, userConfig.duration, true);
+		if (canPlaceAir && tb.isPresent()) {
+			tb.get().setRevertTask(() -> TempBlock.create(block, Material.AIR, userConfig.regenDelay));
+		}
 		blocks.add(block);
 	}
 

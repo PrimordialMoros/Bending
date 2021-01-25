@@ -106,10 +106,6 @@ public class AirBlade extends AbilityInstance implements Ability {
 				.add(new OutOfRangeRemovalPolicy(userConfig.range * factor, origin, () -> blade.getLocation())).build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
 			Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(wheel);
-			return true;
-		}
-
-		if (method == ActivationMethod.SNEAK_RELEASE) {
 			launch();
 		}
 		return true;
@@ -165,6 +161,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull Collection<@NonNull Collider> getColliders() {
+		if (blade == null) return Collections.emptyList();
 		return Collections.singletonList(blade.getCollider());
 	}
 

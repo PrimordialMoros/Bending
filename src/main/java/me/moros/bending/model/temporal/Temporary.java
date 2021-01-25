@@ -26,9 +26,6 @@ public interface Temporary {
 
 	void setRevertTask(RevertTask task);
 
-	/**
-	 * Currently only TempBlock respects revert tasks
-	 */
 	@FunctionalInterface
 	interface RevertTask {
 		void execute();

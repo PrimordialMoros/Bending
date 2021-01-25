@@ -77,7 +77,7 @@ public class AirSpout extends AbilityInstance implements Ability {
 		}
 
 		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
-		if (block == null || block.isPassable()) {
+		if (block == null) {
 			return false;
 		}
 
