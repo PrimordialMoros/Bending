@@ -57,7 +57,7 @@ public final class AbilityInitializer {
 	public static final List<String> layer0 = Arrays.asList("EarthGlove", "MetalCable");
 	public static final List<String> layer1 = Arrays.asList("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
 	public static final List<String> layer2 = Arrays.asList("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
-	public static final List<String> layer3 = Arrays.asList("LavaDisk", "Combustion");
+	public static final List<String> layer3 = Arrays.asList("LavaDisk", "Combustion", "EarthSmash");
 
 	private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
 	private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();

@@ -192,7 +192,7 @@ public class Torrent extends AbilityInstance implements Ability {
 		}
 
 		public void freeze() {
-			if (!hasClicked ||stream.isEmpty()) return;
+			if (!hasClicked || stream.isEmpty()) return;
 			Block head = stream.getFirst();
 			if (head == null) return;
 			cleanAll();

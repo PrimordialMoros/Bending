@@ -23,7 +23,6 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
-import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
 import me.moros.bending.ability.air.passives.*;
 import me.moros.bending.ability.air.sequences.*;

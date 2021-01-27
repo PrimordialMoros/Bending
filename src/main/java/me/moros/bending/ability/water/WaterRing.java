@@ -303,7 +303,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 	}
 
 	public void launchShard() {
-		if (!user.canBend(getDescription()) || ring.isEmpty()  || launchedShards >= userConfig.shardAmount) return;
+		if (!user.canBend(getDescription()) || ring.isEmpty() || launchedShards >= userConfig.shardAmount) return;
 		long time = System.currentTimeMillis();
 		if (time > nextShardTime) {
 			launchedShards++;
