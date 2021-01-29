@@ -231,10 +231,7 @@ public final class WorldMethods {
 	 * @see World#rayTraceEntities(Location, Vector, double, Predicate)
 	 */
 	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range) {
-		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
-		if (result != null && result.getHitEntity() instanceof LivingEntity)
-			return Optional.of((LivingEntity) result.getHitEntity());
-		return Optional.empty();
+		return getTargetEntity(user, range, LivingEntity.class);
 	}
 
 	/**
@@ -242,10 +239,29 @@ public final class WorldMethods {
 	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
 	 */
 	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range, int raySize) {
+		return getTargetEntity(user, range, raySize, LivingEntity.class);
+	}
+
+	/**
+	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
+	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
+	 */
+	public static <T extends Entity> Optional<T> getTargetEntity(@NonNull User user, double range, @NonNull Class<T> type) {
+		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
+		if (result == null) return Optional.empty();
+		Entity entity = result.getHitEntity();
+		return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
+	}
+
+	/**
+	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
+	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
+	 */
+	public static <T extends Entity> Optional<T> getTargetEntity(@NonNull User user, double range, int raySize, @NonNull Class<T> type) {
 		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(user.getEntity()));
-		if (result != null && result.getHitEntity() instanceof LivingEntity)
-			return Optional.of((LivingEntity) result.getHitEntity());
-		return Optional.empty();
+		if (result == null) return Optional.empty();
+		Entity entity = result.getHitEntity();
+		return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
 	}
 
 	/**

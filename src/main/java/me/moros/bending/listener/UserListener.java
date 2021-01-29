@@ -31,6 +31,7 @@ import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Metadata;
@@ -204,7 +205,7 @@ public class UserListener implements Listener {
 				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT);
 				break;
 			case RIGHT_CLICK_BLOCK:
-				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK);
+				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK, event.getClickedBlock());
 				break;
 			case LEFT_CLICK_AIR:
 			case LEFT_CLICK_BLOCK:
@@ -221,7 +222,8 @@ public class UserListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
 		if (event.getHand() != EquipmentSlot.HAND) return;
-		game.getActivationController().onUserInteract(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), ActivationMethod.INTERACT_ENTITY);
+		User user = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+		game.getActivationController().onUserInteract(user, ActivationMethod.INTERACT_ENTITY, event.getRightClicked());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

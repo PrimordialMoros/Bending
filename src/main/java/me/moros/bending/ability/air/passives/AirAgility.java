@@ -29,6 +29,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
 import org.bukkit.potion.PotionEffectType;
@@ -38,6 +40,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
 	private User user;
 	private Config userConfig;
+	private RemovalPolicy removalPolicy;
 
 	public AirAgility(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -47,6 +50,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
+		removalPolicy = Policies.builder().build();
 		return true;
 	}
 
@@ -57,7 +61,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (!user.isValid() || !user.canBend(getDescription())) {
+		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
 			return UpdateResult.CONTINUE;
 		}
 		handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);

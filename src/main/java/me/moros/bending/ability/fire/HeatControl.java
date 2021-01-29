@@ -107,7 +107,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		return false;
 	}
 
-	public void act() {
+	private void act() {
 		if (!user.canBend(getDescription())) return;
 		boolean acted = false;
 		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)).toLocation(user.getWorld());

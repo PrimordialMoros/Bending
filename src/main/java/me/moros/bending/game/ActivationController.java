@@ -44,6 +44,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
@@ -121,7 +122,6 @@ public final class ActivationController {
 		Iceberg.launch(user);
 		WaterRing.launchShard(user);
 		WaterGimbal.launch(user);
-		FerroControl.act(user);
 		EarthBlast.launch(user);
 		EarthShot.launch(user);
 		EarthSmash.launch(user);
@@ -186,15 +186,26 @@ public final class ActivationController {
 	}
 
 	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method) {
-		onUserInteract(user, method, null);
+		onUserInteract(user, method, null, null);
 	}
 
-	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method, @Nullable Entity interactedEntity) {
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method,  @Nullable Entity entity) {
+		onUserInteract(user, method, entity, null);
+	}
+
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method, @Nullable Block block) {
+		onUserInteract(user, method, null, block);
+	}
+
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method, @Nullable Entity entity, @Nullable Block block) {
 		if (!method.isInteract()) return;
 		ignoreNextSwing(user);
 
-		if (interactedEntity instanceof LivingEntity) {
-			HealingWaters.setTarget(user, (LivingEntity) interactedEntity);
+		if (entity instanceof LivingEntity) {
+			HealingWaters.setTarget(user, (LivingEntity) entity);
+		}
+		if (block != null) {
+			FerroControl.act(user, block);
 		}
 		EarthLine.setPrisonMode(user);
 

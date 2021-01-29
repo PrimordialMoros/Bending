@@ -122,7 +122,7 @@ public class AbilityManager {
 		Iterator<Ability> iterator = globalInstances.get(user).iterator();
 		while (iterator.hasNext()) {
 			Ability ability = iterator.next();
-			if (ability.getClass() == type) {
+			if (type.isInstance(ability)) {
 				iterator.remove();
 				destroyAbility(ability);
 				destroyed = true;
@@ -136,7 +136,7 @@ public class AbilityManager {
 	}
 
 	public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
-		return getUserInstances(user).filter(a -> a.getClass() == type).map(type::cast);
+		return getUserInstances(user).filter(type::isInstance).map(type::cast);
 	}
 
 	public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
@@ -148,7 +148,7 @@ public class AbilityManager {
 	}
 
 	public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
-		return getInstances().filter(a -> a.getClass() == type).map(type::cast);
+		return getInstances().filter(type::isInstance).map(type::cast);
 	}
 
 	public void destroyUserInstances(@NonNull User user) {

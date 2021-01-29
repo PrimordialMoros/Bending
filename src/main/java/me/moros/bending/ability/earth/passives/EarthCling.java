@@ -31,6 +31,8 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.EarthMaterials;
@@ -47,6 +49,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 
 	private User user;
 	private Config userConfig;
+	private RemovalPolicy removalPolicy;
 
 	public EarthCling(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -56,6 +59,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
+		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 		return true;
 	}
 
@@ -66,7 +70,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (!user.isValid() || !user.isSneaking() || WorldMethods.isOnGround(user.getEntity())) {
+		if (removalPolicy.test(user, getDescription()) || WorldMethods.isOnGround(user.getEntity())) {
 			return UpdateResult.CONTINUE;
 		}
 		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
