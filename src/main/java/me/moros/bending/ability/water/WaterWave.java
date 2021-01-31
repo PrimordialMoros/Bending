@@ -49,7 +49,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 public class WaterWave extends AbilityInstance implements Ability {
@@ -107,15 +106,23 @@ public class WaterWave extends AbilityInstance implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
 			if (TempBlock.MANAGER.isTemp(block)) continue;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			Optional<TempBlock> tb = TempBlock.create(block, Material.WATER, 1000);
-			if (ice && tb.isPresent()) {
-				Tasker.newChain().delay(20).sync(() -> TempBlock.create(block, Material.ICE, 1000)).execute();
-			}
+			TempBlock.create(block, Material.WATER).ifPresent(this::scheduleRevert);
 		}
 		if (ice) {
 			CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
 		}
 		return UpdateResult.CONTINUE;
+	}
+
+	private void scheduleRevert(TempBlock tb) {
+		final Block block = tb.getBlock();
+		Tasker.newChain().delay(20).sync(() -> {
+			if (ice) {
+				TempBlock.create(block, Material.ICE, 1000);
+			} else {
+				tb.revert();
+			}
+		}).execute();
 	}
 
 	private boolean onEntityHit(Entity entity) {

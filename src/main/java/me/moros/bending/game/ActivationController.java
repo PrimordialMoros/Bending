@@ -189,7 +189,7 @@ public final class ActivationController {
 		onUserInteract(user, method, null, null);
 	}
 
-	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method,  @Nullable Entity entity) {
+	public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method, @Nullable Entity entity) {
 		onUserInteract(user, method, entity, null);
 	}
 
