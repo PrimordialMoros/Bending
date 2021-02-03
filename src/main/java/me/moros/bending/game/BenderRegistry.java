@@ -24,6 +24,7 @@ import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.game.manager.PlayerManager;
 import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -49,14 +50,14 @@ public final class BenderRegistry {
 		return isBendingUser.test(entity.getUniqueId());
 	}
 
-	public Optional<BendingUser> getBendingUser(@NonNull LivingEntity entity) {
+	public Optional<User> getBendingUser(@NonNull LivingEntity entity) {
 		if (entity instanceof Player) {
 			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(entity.getUniqueId()));
 		}
 		return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
 	}
 
-	public Optional<BendingUser> getBendingUserByName(@NonNull String name) {
+	public Optional<User> getBendingUserByName(@NonNull String name) {
 		Player player = Bukkit.getPlayer(name);
 		if (player != null) {
 			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()));

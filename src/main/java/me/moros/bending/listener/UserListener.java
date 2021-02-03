@@ -30,7 +30,6 @@ import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;
@@ -147,12 +146,12 @@ public class UserListener implements Listener {
 	public void onEntityDamageLow(EntityDamageEvent event) {
 		if (!(event.getEntity() instanceof LivingEntity)) return;
 		if (event.getCause() == DamageCause.FALL) {
-			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
 			if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {
 				event.setCancelled(true);
 			}
 		} else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
-			Optional<BendingUser> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
 			if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
 				event.setCancelled(true);
 			}

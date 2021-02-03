@@ -330,7 +330,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 				new TempArmorStand(loc.add(v.toVector()), mat, userConfig.prisonDuration);
 				new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
 			});
-			MovementHandler.restrictEntity(entity, userConfig.prisonDuration).disableActions(Arrays.asList(ActionType.values()));
+			MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(Arrays.asList(ActionType.values()));
 		}
 
 		public void setControllable(boolean value) {

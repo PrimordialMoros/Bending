@@ -25,7 +25,9 @@ import me.moros.atlas.kyori.adventure.audience.Audience;
 import me.moros.atlas.kyori.adventure.bossbar.BossBar;
 import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.bending.Bending;
+import me.moros.bending.events.BendingRestrictEvent;
 import me.moros.bending.model.ability.util.ActionType;
+import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -43,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MovementHandler {
 	public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
+	private static DummyMovementHandler DUMMY;
 
 	private Set<ActionType> disabled;
 	private BarInfo info;
@@ -50,7 +53,12 @@ public class MovementHandler {
 	private final LivingEntity entity;
 	private final boolean hadAI;
 
-	private MovementHandler(@NonNull LivingEntity entity, long duration) {
+	private MovementHandler() {
+		entity = null;
+		hadAI = true;
+	}
+
+	private MovementHandler(LivingEntity entity, long duration) {
 		this.entity = entity;
 		hadAI = entity.hasAI();
 		if (entity instanceof Player) {
@@ -87,13 +95,14 @@ public class MovementHandler {
 		return disableActions(c);
 	}
 
-	/**
-	 * This stops the movement of the entity once they land on the ground,
-	 * acting as a "paralyze" with a duration for how long they should be
-	 * stopped
-	 */
-	public static @NonNull MovementHandler restrictEntity(@NonNull LivingEntity entity, long duration) {
-		return instances.computeIfAbsent(entity, e -> new MovementHandler(e, duration));
+	public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
+		BendingRestrictEvent event = Bending.getEventBus().postRestrictEvent(user, entity, duration);
+		if (event.isCancelled()) {
+			if (DUMMY == null) DUMMY = new DummyMovementHandler();
+			return DUMMY;
+		}
+		long finalDuration = FastMath.abs(event.getDuration());
+		return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
 	}
 
 	public static boolean isRestricted(@NonNull Entity entity) {
@@ -147,6 +156,22 @@ public class MovementHandler {
 		private void remove() {
 			audience.hideBossBar(bar);
 			barTask.cancel();
+		}
+	}
+
+	private static class DummyMovementHandler extends MovementHandler {
+		private DummyMovementHandler() {
+			super();
+		}
+
+		@Override
+		public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
+			return this;
+		}
+
+		@Override
+		public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
+			return this;
 		}
 	}
 }

@@ -222,6 +222,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			boolean isUser = entity.equals(user.getEntity());
 			double factor = isUser ? userConfig.selfPush : userConfig.otherPush;
+			entity.setFireTicks(0);
+			if (factor == 0) return false;
 			factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
 			// Reduce the push if the player is on the ground.
 			if (isUser && WorldMethods.isOnGround(entity)) {
@@ -240,7 +242,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			}
 			entity.setVelocity(velocity.clampVelocity());
 			entity.setFallDistance(0);
-			entity.setFireTicks(0);
 			return false;
 		}
 

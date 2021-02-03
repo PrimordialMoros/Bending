@@ -134,7 +134,7 @@ public class BendingUser extends CommandUserWrapper implements User {
 		return entity.hashCode();
 	}
 
-	public static Optional<BendingUser> createUser(@NonNull LivingEntity entity) {
+	public static Optional<User> createUser(@NonNull LivingEntity entity) {
 		if (entity instanceof Player) return Optional.empty();
 		if (Bending.getGame().getBenderRegistry().isBender(entity)) {
 			return Bending.getGame().getBenderRegistry().getBendingUser(entity);

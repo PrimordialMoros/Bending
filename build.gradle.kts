@@ -27,7 +27,7 @@ dependencies {
     implementation("me.moros", "atlas-core", "1.0.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit-lite", "1.7")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
-    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.4-R0.1-SNAPSHOT")
+    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1")
     compileOnly("com.github.TownyAdvanced", "Towny", "0.96.2.0")
     compileOnly("com.sk89q.worldedit", "worldedit-core", "7.0.0-SNAPSHOT")

@@ -120,6 +120,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("AirPunch", AirPunch::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK).build());
 
+		abilities.add(AbilityDescription.builder("Tornado", Tornado::new)
+			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
+
 		AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade::new)
 			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.SNEAK_RELEASE).build();
 		abilities.add(airBlade);

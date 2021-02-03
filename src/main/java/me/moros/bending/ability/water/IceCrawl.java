@@ -176,7 +176,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			if (entity.isValid() && entity instanceof LivingEntity) {
 				Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
 				new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
-				MovementHandler.restrictEntity((LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
+				MovementHandler.restrictEntity(user, (LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
 			}
 			return true;
 		}

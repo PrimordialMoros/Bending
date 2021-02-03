@@ -25,6 +25,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.PluginManager;
 
 public class BendingEventBus {
@@ -57,6 +58,12 @@ public class BendingEventBus {
 
 	public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
 		BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
+		manager.callEvent(event);
+		return event;
+	}
+
+	public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
+		BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
 		manager.callEvent(event);
 		return event;
 	}
