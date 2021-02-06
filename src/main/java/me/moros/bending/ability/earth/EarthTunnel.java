@@ -34,6 +34,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -105,7 +106,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 				if (userConfig.extractOres) {
 					extract(current);
 				}
-				TempBlock.create(current, Material.AIR, userConfig.regen, true);
+				TempBlock.create(current, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
 			}
 			if (angle >= 360) {
 				angle = 0;
@@ -188,8 +189,6 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		public double range;
 		@Attribute(Attribute.RADIUS)
 		public double radius;
-		@Attribute(Attribute.DURATION)
-		public long regen;
 		public boolean extractOres;
 
 		@Override
@@ -199,7 +198,6 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(2000);
 			range = abilityNode.node("range").getDouble(10.0);
 			radius = abilityNode.node("radius").getDouble(1.0);
-			regen = abilityNode.node("revert-time").getLong(0);
 			extractOres = abilityNode.node("extract-ores").getBoolean(true);
 		}
 	}

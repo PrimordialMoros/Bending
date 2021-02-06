@@ -38,6 +38,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -171,7 +172,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 		for (Block block : base) {
 			Block below = block.getRelative(BlockFace.DOWN);
 			if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
-				TempBlock.create(below, Material.ICE, userConfig.iceDuration, true);
+				TempBlock.create(below, Material.ICE, BendingProperties.ICE_DURATION, true);
 			}
 			renderWaterBlock(block);
 		}
@@ -277,8 +278,6 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long iceDuration;
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
 		@Attribute(Attribute.STRENGTH)
@@ -288,8 +287,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "octopusform");
 
-			cooldown = abilityNode.node("cooldown").getLong(0);
-			iceDuration = abilityNode.node("ice-duration").getLong(30000);
+			cooldown = abilityNode.node("cooldown").getLong(1000);
 			damage = abilityNode.node("damage").getDouble(2.0);
 			knockback = abilityNode.node("knockback").getDouble(1.75);
 		}

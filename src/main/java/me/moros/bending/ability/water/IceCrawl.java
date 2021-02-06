@@ -43,6 +43,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundUtil;
@@ -184,7 +185,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isWater(block)) {
-				TempBlock.create(block, Material.ICE, userConfig.iceDuration, true);
+				TempBlock.create(block, Material.ICE, BendingProperties.ICE_DURATION, true);
 			}
 			return BlockMethods.coolLava(user, block);
 		}
@@ -201,8 +202,6 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.DURATION)
-		public long iceDuration;
-		@Attribute(Attribute.DURATION)
 		public long freezeDuration;
 		@Attribute(Attribute.RANGE)
 		public double range;
@@ -216,7 +215,6 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
 
 			cooldown = abilityNode.node("cooldown").getLong(5000);
-			iceDuration = abilityNode.node("ice-duration").getLong(8000);
 			freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
 			range = abilityNode.node("range").getDouble(24.0);
 			selectRange = abilityNode.node("select-range").getDouble(8.0);

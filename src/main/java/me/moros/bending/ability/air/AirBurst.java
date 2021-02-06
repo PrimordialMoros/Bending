@@ -127,7 +127,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
 
-			cooldown = abilityNode.node("cooldown").getLong(0);
+			cooldown = abilityNode.node("cooldown").getLong(6000);
 			chargeTime = abilityNode.node("charge-time").getInt(3500);
 			coneRange = abilityNode.node("cone-range").getDouble(16.0);
 			sphereRange = abilityNode.node("sphere-range").getDouble(12.0);

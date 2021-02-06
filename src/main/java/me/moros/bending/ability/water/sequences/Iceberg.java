@@ -38,6 +38,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
@@ -138,7 +139,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 		blocks.add(block);
 		boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
 		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-		TempBlock tb = TempBlock.create(block, ice, userConfig.duration, true).orElse(null);
+		TempBlock tb = TempBlock.create(block, ice, BendingProperties.ICE_DURATION, true).orElse(null);
 		if (canPlaceAir && tb != null) {
 			tb.setRevertTask(() ->
 				Tasker.newChain().delay(1)
@@ -203,8 +204,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 		public long cooldown;
 		@Attribute(Attribute.SELECTION)
 		public double selectRange;
-		@Attribute(Attribute.DURATION)
-		public long duration;
+
 		@Attribute(Attribute.DURATION)
 		public long regenDelay;
 		@Attribute(Attribute.HEIGHT)
@@ -216,7 +216,6 @@ public class Iceberg extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(15000);
 			selectRange = abilityNode.node("select-range").getDouble(16.0);
-			duration = abilityNode.node("ice-duration").getLong(12500);
 			regenDelay = abilityNode.node("regen-delay").getLong(30000);
 			length = abilityNode.node("length").getDouble(16.0);
 		}

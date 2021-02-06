@@ -65,8 +65,8 @@ public class Bending extends JavaPlugin {
 		new MetricsLite(this, 8717);
 		plugin = this;
 		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
-		version = getDescription().getVersion();
 		author = getDescription().getAuthors().get(0);
+		version = getDescription().getVersion();
 
 		Tasker.init(this);
 

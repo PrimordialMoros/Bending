@@ -215,7 +215,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 			speed = abilityNode.node("speed").getDouble(0.7);
 			cooldown = abilityNode.node("cooldown").getLong(2000);
-			duration = abilityNode.node("duration").getLong(0);
+			duration = abilityNode.node("duration").getLong(15000);
 		}
 	}
 }

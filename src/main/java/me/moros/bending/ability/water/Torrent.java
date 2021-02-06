@@ -231,7 +231,7 @@ public class Torrent extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "torrent");
 
-			cooldown = abilityNode.node("cooldown").getLong(0);
+			cooldown = abilityNode.node("cooldown").getLong(5000);
 			range = abilityNode.node("range").getDouble(32.0);
 			damage = abilityNode.node("damage").getDouble(4.0);
 			knockback = abilityNode.node("knockback").getDouble(1.0);

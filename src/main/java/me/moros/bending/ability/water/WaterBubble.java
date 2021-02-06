@@ -170,7 +170,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterbubble");
 
 			cooldown = abilityNode.node("cooldown").getLong(3000);
-			duration = abilityNode.node("duration").getLong(0);
+			duration = abilityNode.node("duration").getLong(15000);
 			radius = abilityNode.node("radius").getInt(5);
 			speed = abilityNode.node("speed").getDouble(0.5);
 		}

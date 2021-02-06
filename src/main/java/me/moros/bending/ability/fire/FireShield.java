@@ -231,7 +231,7 @@ public class FireShield extends AbilityInstance implements Ability {
 			diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
 			diskRange = abilityNode.node("disk", "range").getDouble(1.5);
 
-			shieldDuration = abilityNode.node("shield", "duration").getLong(0);
+			shieldDuration = abilityNode.node("shield", "duration").getLong(10000);
 			shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
 		}
 	}
