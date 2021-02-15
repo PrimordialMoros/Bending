@@ -106,7 +106,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 5))
+			.addState(new SelectedSource(user, source, userConfig.selectRange + 2))
 			.start();
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;

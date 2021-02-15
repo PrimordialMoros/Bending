@@ -95,7 +95,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 5))
+			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 2))
 			.start();
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();

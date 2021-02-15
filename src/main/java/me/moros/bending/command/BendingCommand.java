@@ -167,7 +167,6 @@ public class BendingCommand extends BaseCommand {
 		user.sendMessage(version);
 	}
 
-
 	@Subcommand("display|d|elements|element|elem|e")
 	@CommandPermission("bending.command.display")
 	@CommandCompletion("@elements")

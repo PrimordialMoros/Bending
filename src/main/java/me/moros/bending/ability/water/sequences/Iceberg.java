@@ -88,7 +88,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 		if (!source.isPresent()) return false;
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 5))
+			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 2))
 			.start();
 
 		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();

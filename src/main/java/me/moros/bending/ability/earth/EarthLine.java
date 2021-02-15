@@ -48,7 +48,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
@@ -74,7 +73,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
@@ -123,7 +121,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 		mode = Mode.NORMAL;
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 5, fakeData))
+			.addState(new SelectedSource(user, source, userConfig.selectRange + 2, fakeData))
 			.start();
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -197,10 +195,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 	public void onDestroy() {
 		State state = states.getCurrent();
 		if (state instanceof SelectedSource) {
-			Block block = ((SelectedSource) state).getSelectedSource();
-			if (user instanceof BendingPlayer) {
-				((Player) user.getEntity()).sendBlockChange(block.getLocation(), block.getBlockData());
-			}
+			((SelectedSource) state).onDestroy();
 		}
 	}
 
