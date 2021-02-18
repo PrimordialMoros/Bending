@@ -37,7 +37,6 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -122,7 +121,6 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthBlast")) {
 			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
 				.collect(Collectors.toList());
-			redirectAny(user);
 			for (EarthBlast eblast : eblasts) {
 				if (eblast.blast == null) {
 					eblast.launch();
@@ -150,19 +148,20 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	private static void redirectAny(@NonNull User user) {
-		Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
-			.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
-		for (EarthBlast eb : blasts) {
-			Vector3 center = eb.blast.getCurrent().add(Vector3.HALF);
-			double dist = center.distanceSq(user.getEyeLocation());
-			if (dist < config.rMin * config.rMin || dist > config.rMax * config.rMax) continue;
-			Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
-			if (selectSphere.intersects(user.getRay(dist))) {
-				Vector3 dir = center.subtract(user.getEyeLocation());
-				if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.rMax + 2).isPresent()) {
-					Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(eb, user);
-					eb.blast.redirect();
+	public static void attemptDestroy(User user) {
+		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthBlast")) {
+			Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
+				.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
+			for (EarthBlast eb : blasts) {
+				Vector3 center = eb.blast.getCurrent().add(Vector3.HALF);
+				double dist = center.distanceSq(user.getEyeLocation());
+				if (dist > config.shatterRange * config.shatterRange) continue;
+				if (eb.blast.getCollider().intersects(user.getRay(dist))) {
+					Vector3 dir = center.subtract(user.getEyeLocation());
+					if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
+						Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(eb, user);
+						eb.blast.redirect();
+					}
 				}
 			}
 		}
@@ -237,9 +236,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
 
-		public double redirectGrabRadius;
-		public double rMin;
-		public double rMax;
+		public double shatterRange;
 
 		@Override
 		public void onConfigReload() {
@@ -249,9 +246,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			range = abilityNode.node("range").getDouble(32.0);
 			selectRange = abilityNode.node("select-range").getDouble(12.0);
 			damage = abilityNode.node("damage").getDouble(2.25);
-			redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
-			rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
-			rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
+			shatterRange = abilityNode.node("max-shatter-range").getDouble(16.0);
 		}
 	}
 }

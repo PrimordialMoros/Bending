@@ -24,7 +24,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -52,7 +51,7 @@ public abstract class AbstractBlockShot implements Updatable {
 
 	private Block current;
 	private Block previousBlock;
-	private Collider collider;
+	private AABB collider;
 	private Vector3 firstDestination;
 
 	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
@@ -173,7 +172,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	public void onBlockHit(@NonNull Block block) {
 	}
 
-	public @NonNull Collider getCollider() {
+	public @NonNull AABB getCollider() {
 		return collider;
 	}
 

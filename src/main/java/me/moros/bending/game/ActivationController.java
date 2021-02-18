@@ -147,6 +147,7 @@ public final class ActivationController {
 			MetalCable.attemptDestroy(user);
 			EarthSmash.attemptGrab(user);
 			EarthGlove.attemptDestroy(user);
+			EarthBlast.attemptDestroy(user);
 		}
 
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;

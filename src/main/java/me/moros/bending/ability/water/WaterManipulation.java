@@ -197,13 +197,14 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		}
 	}
 
-	private static void redirectAny(@NonNull User user) {
+	private static void redirectAny(User user) {
 		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
 			.filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
 		for (WaterManipulation manip : manips) {
 			Vector3 center = manip.manip.getCurrent().add(Vector3.HALF);
-			double dist = center.distanceSq(user.getEyeLocation());
-			if (dist < config.rMin * config.rMin || dist > config.rMax * config.rMax) continue;
+			double dist = center.distanceSq(manip.getUser().getEyeLocation());
+			double dist2 = center.distanceSq(user.getEyeLocation());
+			if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) continue;
 			Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
 			if (selectSphere.intersects(user.getRay(dist))) {
 				Vector3 dir = center.subtract(user.getEyeLocation());
