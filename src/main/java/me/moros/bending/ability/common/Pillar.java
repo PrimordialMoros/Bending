@@ -96,7 +96,7 @@ public class Pillar implements Updatable {
 
 	private boolean move(Block newBlock) {
 		if (MaterialUtil.isLava(newBlock)) return false;
-		if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) return false;
+		if (!MaterialUtil.isTransparentOrWater(newBlock)) return false;
 		BlockMethods.breakPlant(newBlock);
 
 		for (int i = 0; i < length; i++) {
@@ -120,14 +120,14 @@ public class Pillar implements Updatable {
 		switch (direction) {
 			case NORTH:
 			case SOUTH:
-				return velocity.setX(direction.getDirection().getX());
+				return velocity.setX(direction.getDirection().getX() * 0.75);
 			case EAST:
 			case WEST:
-				return velocity.setZ(direction.getDirection().getZ());
+				return velocity.setZ(direction.getDirection().getZ() * 0.75);
 			case UP:
 			case DOWN:
 			default:
-				return velocity.setY(direction.getDirection().getY());
+				return velocity.setY(direction.getDirection().getY() * 0.75);
 		}
 	}
 

@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RaiseEarth extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -57,6 +58,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 
 	private Block origin;
 	private Predicate<Block> predicate;
+	private Collection<Block> raisedCache;
 	private final Collection<Pillar> pillars = new ArrayList<>();
 
 	private long interval = 100;
@@ -74,6 +76,8 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate, true);
 		if (!source.isPresent()) return false;
 		origin = source.get();
+
+		loadRaised();
 
 		boolean wall = method == ActivationMethod.SNEAK;
 		if (wall) {
@@ -93,6 +97,9 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		this.user = user;
 		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		origin = source;
+
+		loadRaised();
+
 		this.interval = interval;
 		raiseWall(height, width);
 		if (!pillars.isEmpty()) {
@@ -117,10 +124,22 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 	}
 
 	private void createPillar(Block block, int height) {
-		for (Block b : new Block[]{block, block.getRelative(BlockFace.DOWN)}) {
-			if (!predicate.test(b) || !TempBlock.isBendable(b)) return;
+		for (Block b : new Block[]{block, block.getRelative(BlockFace.DOWN)}) { // require at least 2 blocks
+			if (!predicate.test(b) || !TempBlock.isBendable(b) || isRaised(b)) return;
 		}
+		if (MaterialUtil.isTransparentOrWater(block.getRelative(BlockFace.DOWN, height))) return;
 		Pillar.builder(user, block).setInterval(interval).setPredicate(predicate).build(height).ifPresent(pillars::add);
+	}
+
+	private void loadRaised() {
+		raisedCache = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(RaiseEarth.class)
+			.map(RaiseEarth::getPillars).flatMap(Collection::stream)
+			.map(Pillar::getPillarBlocks).flatMap(Collection::stream)
+			.collect(Collectors.toSet());
+	}
+
+	private boolean isRaised(Block block) {
+		return raisedCache.contains(block);
 	}
 
 	private void raiseWall(int height, int width) {
@@ -132,7 +151,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 			if (MaterialUtil.isTransparentOrWater(check)) {
 				for (int j = 1; j < height; j++) {
 					Block block = check.getRelative(BlockFace.DOWN, j);
-					if (predicate.test(block)) {
+					if (predicate.test(block) && !isRaised(block)) {
 						createPillar(block, height);
 						break;
 					} else if (!MaterialUtil.isTransparentOrWater(block)) {

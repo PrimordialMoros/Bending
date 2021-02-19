@@ -107,6 +107,8 @@ public class TempBlock implements Temporary {
 
 		TempBlock tb = MANAGER.get(block).orElse(null);
 		if (tb != null && data.matches(tb.snapshot.getBlockData())) {
+			TEMP_AIR.remove(block);
+			tb.revert();
 			return Optional.empty();
 		}
 

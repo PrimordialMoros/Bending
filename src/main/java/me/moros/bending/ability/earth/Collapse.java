@@ -135,7 +135,7 @@ public class Collapse extends AbilityInstance implements Ability {
 		if (!predicate.test(block) || !TempBlock.isBendable(block)) return Optional.empty();
 		return Pillar.builder(user, block)
 			.setDirection(BlockFace.DOWN)
-			.setInterval(125)
+			.setInterval(75)
 			.setPredicate(predicate).build(height);
 	}
 
