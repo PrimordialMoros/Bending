@@ -70,28 +70,12 @@ public class TempBlock implements Temporary {
 		MANAGER.addEntry(block, this, duration);
 	}
 
-	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type) {
-		return create(block, type.createBlockData(), 0, false);
-	}
-
-	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, boolean bendable) {
-		return create(block, type.createBlockData(), 0, bendable);
-	}
-
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
 		return create(block, data, 0, false);
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, boolean bendable) {
 		return create(block, data, 0, bendable);
-	}
-
-	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, long duration) {
-		return create(block, type.createBlockData(), duration, false);
-	}
-
-	public static Optional<TempBlock> create(@NonNull Block block, @NonNull Material type, long duration, boolean bendable) {
-		return create(block, type.createBlockData(), duration, bendable);
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration) {
@@ -107,7 +91,10 @@ public class TempBlock implements Temporary {
 
 		TempBlock tb = MANAGER.get(block).orElse(null);
 		if (tb != null && data.matches(tb.snapshot.getBlockData())) {
-			TEMP_AIR.remove(block);
+			if (TEMP_AIR.containsKey(block)) {
+				long remainingTime = TEMP_AIR.getExpectedExpiration(block);
+				if (remainingTime <= duration) TEMP_AIR.remove(block);
+			}
 			tb.revert();
 			return Optional.empty();
 		}
@@ -133,6 +120,18 @@ public class TempBlock implements Temporary {
 		}
 
 		return Optional.of(new TempBlock(block, data, duration, bendable));
+	}
+
+	public static Optional<TempBlock> createAir(@NonNull Block block) {
+		return create(block, Material.AIR.createBlockData(), 0, true);
+	}
+
+	public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {
+		return create(block, Material.AIR.createBlockData(), duration, true);
+	}
+
+	public static Optional<TempBlock> forceCreateAir(@NonNull Block block, long duration) {
+		return create(block, Material.AIR.createBlockData(), duration, true, false);
 	}
 
 	@Override

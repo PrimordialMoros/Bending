@@ -196,7 +196,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 			if (!started) return;
 			if (center == null) {
 				center = user.getLocation().add(Vector3.PLUS_J).add(user.getDirection().setY(0).scalarMultiply(2)).toBlock(user.getWorld());
-				TempBlock.create(center, Material.WATER, 50);
+				TempBlock.create(center, Material.WATER.createBlockData(), 50);
 			}
 			chain.getChainStore().clear();
 			chain.getChainStore().addAll(Collections.nCopies(10, center));
@@ -238,7 +238,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else if (MaterialUtil.isTransparent(block)) {
-				TempBlock.create(block, Material.WATER, 150);
+				TempBlock.create(block, Material.WATER.createBlockData(), 150);
 			}
 			if (ThreadLocalRandom.current().nextInt(10) == 0) {
 				SoundUtil.WATER_SOUND.play(block.getLocation());
@@ -280,7 +280,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 			ParticleUtil.create(Particle.SNOW_SHOVEL, block.getLocation().add(0.5, 0.5, 0.5))
 				.count(6).offset(0.25, 0.25, 0.25).extra(0.05).spawn();
 			if (!MaterialUtil.isWater(block)) {
-				TempBlock.create(block, Material.WATER);
+				TempBlock.create(block, Material.WATER.createBlockData());
 			}
 		}
 

@@ -157,7 +157,7 @@ public class AirShield extends AbilityInstance implements Ability {
 				BlockMethods.breakPlant(block);
 				if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
 					long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
-					TempBlock.create(block, Material.ICE, iceDuration, true);
+					TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);
 				}
 			}
 		}

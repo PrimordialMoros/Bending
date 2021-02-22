@@ -139,11 +139,11 @@ public class Iceberg extends AbilityInstance implements Ability {
 		blocks.add(block);
 		boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
 		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-		TempBlock tb = TempBlock.create(block, ice, BendingProperties.ICE_DURATION, true).orElse(null);
+		TempBlock tb = TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true).orElse(null);
 		if (canPlaceAir && tb != null) {
 			tb.setRevertTask(() ->
 				Tasker.newChain().delay(1)
-					.sync(() -> TempBlock.create(block, Material.AIR.createBlockData(), userConfig.regenDelay, true))
+					.sync(() -> TempBlock.createAir(block, userConfig.regenDelay))
 					.execute()
 			);
 		}

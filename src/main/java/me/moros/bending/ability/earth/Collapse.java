@@ -68,7 +68,7 @@ public class Collapse extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate, true);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
 		if (!source.isPresent()) return false;
 		Block origin = source.get();
 

@@ -100,7 +100,7 @@ public class FragileStructure {
 		for (Block block : data.fragileBlocks) {
 			if (!data.predicate.test(block)) continue;
 			Material mat = block.getType();
-			TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
+			TempBlock.createAir(block);
 			block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.getPlugin());
 			Location center = block.getLocation().add(0.5, 0.5, 0.5);
 			ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)

@@ -34,7 +34,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -84,13 +83,14 @@ public class Pillar implements Updatable {
 		if (currentLength >= length) return UpdateResult.REMOVE;
 
 		long time = System.currentTimeMillis();
-		if (time < nextUpdateTime) return UpdateResult.CONTINUE;
-		nextUpdateTime = time + interval;
-
-		Block currentIndex = origin.getRelative(direction, ++currentLength);
-		AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3(currentIndex));
+		int offset = currentLength + (time >= nextUpdateTime ? 2 : 1);
+		AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3(0, 0.65, 0)).at(new Vector3(origin.getRelative(direction, offset)));
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true); // Push entities
 
+		if (time < nextUpdateTime) return UpdateResult.CONTINUE;
+
+		nextUpdateTime = time + interval;
+		Block currentIndex = origin.getRelative(direction, ++currentLength);
 		return move(currentIndex) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
 	}
 
@@ -103,7 +103,7 @@ public class Pillar implements Updatable {
 			Block forwardBlock = newBlock.getRelative(opposite, i);
 			Block backwardBlock = forwardBlock.getRelative(opposite);
 			if (!predicate.test(backwardBlock)) {
-				TempBlock.create(forwardBlock, Material.AIR, duration, true);
+				TempBlock.createAir(forwardBlock, duration);
 				playSound(forwardBlock);
 				return false;
 			}
@@ -111,23 +111,24 @@ public class Pillar implements Updatable {
 			TempBlock.create(forwardBlock, data, duration, true);
 		}
 		pillarBlocks.add(newBlock);
-		TempBlock.create(newBlock.getRelative(opposite, length), Material.AIR, duration, true);
+		TempBlock.createAir(newBlock.getRelative(opposite, length), duration);
 		playSound(newBlock);
 		return true;
 	}
 
 	private Vector normalizeVelocity(Vector velocity) {
+		double factor = 0.75 * (length - 0.4 * currentLength) / length;
 		switch (direction) {
 			case NORTH:
 			case SOUTH:
-				return velocity.setX(direction.getDirection().getX() * 0.75);
+				return velocity.setX(direction.getDirection().getX() * factor);
 			case EAST:
 			case WEST:
-				return velocity.setZ(direction.getDirection().getZ() * 0.75);
+				return velocity.setZ(direction.getDirection().getZ() * factor);
 			case UP:
 			case DOWN:
 			default:
-				return velocity.setY(direction.getDirection().getY() * 0.75);
+				return velocity.setY(direction.getDirection().getY() * factor);
 		}
 	}
 
@@ -162,7 +163,7 @@ public class Pillar implements Updatable {
 		private final Function<PillarBuilder, ? extends Pillar> constructor;
 		private BlockFace direction = BlockFace.UP;
 		private int length;
-		private long interval = 100;
+		private long interval = 125;
 		private long duration = BendingProperties.EARTHBENDING_REVERT_TIME;
 		private Predicate<Block> predicate = b -> true;
 

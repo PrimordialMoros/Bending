@@ -20,10 +20,12 @@
 package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -47,6 +49,7 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
@@ -67,8 +70,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class EarthSmash extends AbilityInstance implements Ability {
@@ -148,17 +151,28 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
 	public static void attemptGrab(User user) {
 		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthSmash")) {
-			Optional<Block> target = WorldMethods.rayTraceBlocks(user.getWorld(), user.getRay(config.grabRange));
-			if (!target.isPresent()) return;
-			AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(target.get()));
-			EarthSmash earthSmash = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthSmash.class)
-				.filter(s -> s.state.canGrab())
-				.filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
-				.findAny().orElse(null);
+			Block target = WorldMethods.blockCast(user.getWorld(), user.getRay(), config.grabRange).orElse(null);
+			EarthSmash earthSmash = getInstance(user, target);
 			if (earthSmash == null) return;
 			Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(earthSmash, user);
 			earthSmash.grabBoulder();
 		}
+	}
+
+	public static void attemptDestroy(User user, Block block) {
+		if (user.isSneaking() && user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthSmash")) {
+			EarthSmash earthSmash = getInstance(user, block);
+			if (earthSmash != null && earthSmash.boulder != null) earthSmash.boulder.shatter();
+		}
+	}
+
+	private static @Nullable EarthSmash getInstance(User user, Block block) {
+		if (block == null) return null;
+		AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
+		return Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthSmash.class)
+			.filter(s -> s.state.canGrab())
+			.filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
+			.findAny().orElse(null);
 	}
 
 	public static void launch(User user) {
@@ -172,7 +186,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		for (Map.Entry<Block, BlockData> entry : boulder.getData().entrySet()) {
 			Block block = entry.getKey();
 			if (block.getType() != entry.getValue().getMaterial()) continue;
-			TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
+			TempBlock.createAir(block);
 		}
 	}
 
@@ -180,6 +194,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		for (Map.Entry<Block, BlockData> entry : boulder.getData().entrySet()) {
 			Block block = entry.getKey();
 			if (!MaterialUtil.isTransparent(block)) continue;
+			BlockMethods.breakPlant(block);
 			TempBlock.create(block, entry.getValue());
 		}
 	}
@@ -284,13 +299,13 @@ public class EarthSmash extends AbilityInstance implements Ability {
 						if ((FastMath.abs(x) + FastMath.abs(z)) % 2 != 0) {
 							Block block = origin.add(new Vector3(x, -1, z)).toBlock(boulder.world);
 							if (EarthMaterials.isEarthNotLava(user, block)) {
-								TempBlock.create(block, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+								TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 							}
 						}
 						// Remove top layer
 						Block block = origin.add(new Vector3(x, 0, z)).toBlock(boulder.world);
 						if (EarthMaterials.isEarthNotLava(user, block)) {
-							TempBlock.create(block, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+							TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 						}
 					}
 				}
@@ -477,6 +492,21 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		private Map<Block, BlockData> getData() {
 			return data.entrySet().stream()
 				.collect(Collectors.toMap(e -> center.add(new Vector3(e.getKey())).toBlock(world), Map.Entry::getValue));
+		}
+
+		private void shatter() {
+			ThreadLocalRandom rnd = ThreadLocalRandom.current();
+			for (Map.Entry<Block, BlockData> entry : getData().entrySet()) {
+				Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
+				Block block = entry.getKey();
+				BlockData blockData = entry.getValue();
+				if (block.getType() != blockData.getMaterial()) continue;
+				TempBlock.createAir(block);
+				new BendingFallingBlock(block, blockData, velocity, true, 5000);
+				ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 0.5, 0.5)).count(4)
+					.offset(0.5, 0.5, 0.5).data(blockData).spawn();
+			}
+			data.clear();
 		}
 	}
 

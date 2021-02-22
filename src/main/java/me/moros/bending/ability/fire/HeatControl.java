@@ -119,7 +119,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 				if (tb.isPresent()) {
 					tb.get().revert();
 				} else {
-					TempBlock.create(block, Material.WATER, true);
+					TempBlock.create(block, Material.WATER.createBlockData(), true);
 				}
 			} else {
 				block.setType(Material.AIR);

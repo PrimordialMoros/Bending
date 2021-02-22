@@ -140,7 +140,7 @@ public class Blaze extends AbilityInstance implements Ability {
 		public void render(@NonNull Block block) {
 			if (affectedBlocks.contains(block)) return;
 			affectedBlocks.add(block);
-			TempBlock.create(block, Material.FIRE, 500, true);
+			TempBlock.create(block, Material.FIRE.createBlockData(), 500, true);
 			if (ThreadLocalRandom.current().nextInt(6) == 0) {
 				SoundUtil.FIRE_SOUND.play(block.getLocation());
 			}

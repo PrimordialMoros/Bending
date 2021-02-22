@@ -215,18 +215,6 @@ public final class WorldMethods {
 	}
 
 	/**
-	 * @see World#rayTraceBlocks(Location, Vector, double)
-	 */
-	public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray) {
-		Location origin = ray.origin.toLocation(world);
-		Vector direction = ray.direction.normalize().toVector();
-		double range = FastMath.max(1, ray.direction.getNorm());
-		RayTraceResult result = world.rayTraceBlocks(origin, direction, range, FluidCollisionMode.ALWAYS, false);
-		if (result != null && result.getHitBlock() != null) return Optional.of(result.getHitBlock());
-		return Optional.empty();
-	}
-
-	/**
 	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
 	 * @see World#rayTraceEntities(Location, Vector, double, Predicate)
 	 */

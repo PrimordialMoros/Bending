@@ -86,7 +86,7 @@ public abstract class BlockStream implements State {
 		this.chain = chain;
 		stream = new ArrayDeque<>();
 		chain.getChainStore().stream().filter(this::isValid).forEach(block -> {
-			if (TempBlock.create(block, material).isPresent()) stream.addLast(block);
+			if (TempBlock.create(block, material.createBlockData()).isPresent()) stream.addLast(block);
 		});
 		started = !stream.isEmpty();
 	}
@@ -177,7 +177,7 @@ public abstract class BlockStream implements State {
 			ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 				.count(5).offset(0.25, 0.25, 0.25).spawn();
 		} else {
-			TempBlock.create(block, material);
+			TempBlock.create(block, material.createBlockData());
 		}
 	}
 
@@ -191,6 +191,6 @@ public abstract class BlockStream implements State {
 	}
 
 	private void clean(@NonNull Block block) {
-		TempBlock.MANAGER.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
+		if (isValid(block)) TempBlock.createAir(block);
 	}
 }

@@ -140,7 +140,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 					if (tb.isPresent()) {
 						tb.get().revert();
 					} else {
-						TempBlock.create(block, material, true);
+						TempBlock.create(block, material.createBlockData(), true);
 						if (isFreeze && ThreadLocalRandom.current().nextInt(12) == 0) {
 							SoundUtil.ICE_SOUND.play(block.getLocation());
 						}

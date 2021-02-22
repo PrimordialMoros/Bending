@@ -141,7 +141,7 @@ public class FireWheel extends AbilityInstance implements Ability {
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
 			if (MaterialUtil.isIgnitable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				TempBlock.create(block, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true);
+				TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
 			}
 			return true;
 		}

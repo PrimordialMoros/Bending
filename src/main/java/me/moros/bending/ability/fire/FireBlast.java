@@ -241,19 +241,18 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			double rayRange = userConfig.igniteRadius * factor + 2;
-			Vector3 reverse = ray.direction.scalarMultiply(-rayRange);
+			Vector3 reverse = ray.direction.scalarMultiply(-1);
 			Location center = getBukkitLocation();
 			if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
 				List<Block> blocks = new ArrayList<>();
 				for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.igniteRadius * factor)) {
 					if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
-					if (WorldMethods.rayTraceBlocks(user.getWorld(), new Ray(new Vector3(b), reverse)).isPresent())
+					if (WorldMethods.blockCast(user.getWorld(), new Ray(new Vector3(b), reverse), userConfig.igniteRadius * factor + 2).isPresent())
 						continue;
 					BlockMethods.lightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
-				blocks.forEach(b -> TempBlock.create(b, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true));
+				blocks.forEach(b -> TempBlock.create(b, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true));
 			}
 			FragileStructure.attemptDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
 			return true;

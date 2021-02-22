@@ -106,7 +106,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
 			if (TempBlock.MANAGER.isTemp(block)) continue;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			TempBlock.create(block, Material.WATER).ifPresent(this::scheduleRevert);
+			TempBlock.create(block, Material.WATER.createBlockData()).ifPresent(this::scheduleRevert);
 		}
 		if (ice) {
 			CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
@@ -118,7 +118,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		final Block block = tb.getBlock();
 		Tasker.newChain().delay(20).sync(() -> {
 			if (ice) {
-				TempBlock.create(block, Material.ICE, 1000);
+				TempBlock.create(block, Material.ICE.createBlockData(), 1000);
 			} else {
 				tb.revert();
 			}

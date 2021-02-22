@@ -38,7 +38,6 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import java.util.Collection;
@@ -124,7 +123,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(user.getEntity().getLocation(), radius, MaterialUtil::isWater)) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			if (TempBlock.MANAGER.isTemp(block)) continue;
-			TempBlock.create(block, Material.AIR.createBlockData(), 0, true, false).ifPresent(tb -> bubble.add(block));
+			TempBlock.forceCreateAir(block, 0).ifPresent(tb -> bubble.add(block));
 		}
 	}
 
@@ -143,7 +142,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
 			double distance = new Vector3(block).distanceSq(centerLoc);
 			double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
 			long delay = (long) (1500 * factor);
-			tb.setRevertTask(() -> TempBlock.create(block, Material.AIR.createBlockData(), delay, true, false));
+			tb.setRevertTask(() -> TempBlock.forceCreateAir(block, delay));
 			TempBlock.removeTempAir(block);
 			tb.revert();
 		}

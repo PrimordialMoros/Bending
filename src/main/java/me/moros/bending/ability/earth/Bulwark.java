@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
-public class EarthArmorWall extends AbilityInstance implements Ability {
+public class Bulwark extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
 
 	private User user;
@@ -57,7 +57,7 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 	private boolean collapsing = false;
 	private long startTime;
 
-	public EarthArmorWall(@NonNull AbilityDescription desc) {
+	public Bulwark(@NonNull AbilityDescription desc) {
 		super(desc);
 	}
 
@@ -66,11 +66,11 @@ public class EarthArmorWall extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b), true);
+		Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
 		if (!source.isPresent()) return false;
 
 		RaiseEarth raiseWall = new RaiseEarth(getDescription());
-		if (raiseWall.activate(user, source.get(), 2, 3, 0)) {
+		if (raiseWall.activate(user, source.get(), 2, 3, 75)) {
 			removalPolicy = Policies.builder()
 				.add(new ExpireRemovalPolicy(5000 + userConfig.wallDuration))
 				.build();

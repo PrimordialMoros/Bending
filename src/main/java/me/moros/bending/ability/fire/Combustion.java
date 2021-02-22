@@ -169,10 +169,16 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		if (userConfig.damageBlocks && !loc.getBlock().isLiquid()) {
 			FragileStructure.attemptDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-			for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) break;
-				Material mat = (ThreadLocalRandom.current().nextInt(3) == 0 && MaterialUtil.isIgnitable(block)) ? Material.FIRE : Material.AIR;
-				TempBlock.create(block, mat, BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000), true);
+			Collection<Block> blocks = WorldMethods.getNearbyBlocks(loc, size, predicate);
+			for (Block block : blocks) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return;
+				long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+				TempBlock.createAir(block, delay);
+			}
+			for (Block block : blocks) {
+				if (MaterialUtil.isIgnitable(block) && ThreadLocalRandom.current().nextInt(3) == 0) {
+					TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+				}
 			}
 		}
 	}
@@ -186,7 +192,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			canCollide = Block::isLiquid;
 			singleCollision = true;
 			controllable = true;
-			steps = 5;
+			steps = 4;
 		}
 
 		@Override

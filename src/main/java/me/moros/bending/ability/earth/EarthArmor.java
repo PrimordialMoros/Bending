@@ -37,6 +37,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
@@ -55,7 +56,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class EarthArmor extends AbilityInstance implements Ability {
 	private enum Mode {ROCK, IRON, GOLD}
@@ -83,7 +83,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b), true);
+		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
 
 		if (!source.isPresent()) return false;
 
@@ -97,8 +97,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 			SoundUtil.EARTH_SOUND.play(block.getLocation());
 		}
 		BlockState state = block.getState();
-		long delay = ThreadLocalRandom.current().nextInt(5000, 10000) + userConfig.cooldown;
-		TempBlock.create(block, Material.AIR, delay, true);
+		TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 		fallingBlock = new BendingFallingBlock(block, state.getBlockData(), new Vector3(0, 0.2, 0), false, 10000);
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(5000)).build();
 		return true;

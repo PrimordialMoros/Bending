@@ -74,7 +74,7 @@ public class IceWall extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		Block targetBlock = WorldMethods.rayTraceBlocks(user.getWorld(), user.getRay(userConfig.selectRange)).orElse(null);
+		Block targetBlock = WorldMethods.blockCast(user.getWorld(), user.getRay(), userConfig.selectRange).orElse(null);
 		if (targetBlock != null && FragileStructure.attemptDamageStructure(Collections.singletonList(targetBlock), 0)) {
 			return false;
 		}
@@ -193,7 +193,7 @@ public class IceWall extends AbilityInstance implements Ability {
 			if (canMove(currentIndex)) {
 				wallBlocks.add(currentIndex);
 				SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
-				TempBlock.create(currentIndex, Material.ICE);
+				TempBlock.create(currentIndex, Material.ICE.createBlockData());
 			}
 			return UpdateResult.CONTINUE;
 		}

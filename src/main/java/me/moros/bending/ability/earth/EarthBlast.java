@@ -49,7 +49,6 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -79,7 +78,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate, true).orElse(null);
+		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
 		if (source == null) return false;
 		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 
@@ -143,7 +142,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 				SoundUtil.EARTH_SOUND.play(source.getLocation());
 				Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
-				TempBlock.create(source, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+				TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
 			}
 		}
 	}

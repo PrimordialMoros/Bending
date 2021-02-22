@@ -81,6 +81,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 	private Mode mode;
 	private Block source;
 	private Block readySource;
+	private BlockData data;
 	private Vector3 location;
 	private Vector3 lastVelocity;
 	private BendingFallingBlock projectile;
@@ -132,7 +133,6 @@ public class EarthShot extends AbilityInstance implements Ability {
 			BlockMethods.breakPlant(temp);
 		}
 
-		BlockData data;
 		if (mode == Mode.MAGMA) {
 			data = Material.MAGMA_BLOCK.createBlockData();
 			canConvert = false;
@@ -148,7 +148,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 		projectile = new BendingFallingBlock(source, data, new Vector3(0, 0.65, 0), false, 6000);
 		if (!MaterialUtil.isLava(source)) {
-			TempBlock.create(source, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+			TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
 		}
 		location = projectile.getCenter();
 		removalPolicy = Policies.builder()
@@ -232,7 +232,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 			if (userConfig.chargeTime <= 0 || System.currentTimeMillis() > magmaStartTime + userConfig.chargeTime) {
 				mode = Mode.MAGMA;
-				TempBlock.create(readySource, Material.MAGMA_BLOCK);
+				TempBlock.create(readySource, Material.MAGMA_BLOCK.createBlockData());
 				canConvert = false;
 			}
 		} else {
@@ -280,7 +280,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 			origin = new Vector3(readySource).add(Vector3.HALF);
 			Vector3 dir = getTarget(readySource).subtract(origin).normalize().scalarMultiply(userConfig.speed);
 			projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
-			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
+			TempBlock.createAir(readySource);
 		}
 		location = projectile.getCenter();
 		lastVelocity = new Vector3(projectile.getFallingBlock().getVelocity());
@@ -330,9 +330,9 @@ public class EarthShot extends AbilityInstance implements Ability {
 			}
 			projectile.revert();
 		}
-		if (readySource != null) {
-			TempBlock.MANAGER.get(readySource).ifPresent(TempBlock::revert);
-			TempBlock.MANAGER.get(source).ifPresent(TempBlock::revert);
+		if (!launched) {
+			TempBlock.create(source, data, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+			if (readySource != null) TempBlock.createAir(readySource);
 		}
 	}
 

@@ -243,7 +243,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else if (MaterialUtil.isTransparent(block)) {
-				TempBlock.create(block, Material.WATER, 250);
+				TempBlock.create(block, Material.WATER.createBlockData(), 250);
 			}
 		}
 
@@ -287,9 +287,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 	}
 
 	private void cleanAll() {
-		for (Block block : ring) {
-			TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
-		}
+		ring.stream().filter(MaterialUtil::isWater).forEach(TempBlock::createAir);
 	}
 
 	@Override

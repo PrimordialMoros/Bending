@@ -286,7 +286,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			ThreadLocalRandom rnd = ThreadLocalRandom.current();
 			for (Block block : wall) {
 				Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
-				TempBlock.create(block, Material.AIR, BendingProperties.EXPLOSION_REVERT_TIME, true);
+				TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
 				new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
 			}
 		}

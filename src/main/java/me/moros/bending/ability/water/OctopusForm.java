@@ -172,7 +172,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 		for (Block block : base) {
 			Block below = block.getRelative(BlockFace.DOWN);
 			if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
-				TempBlock.create(below, Material.ICE, BendingProperties.ICE_DURATION, true);
+				TempBlock.create(below, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
 			}
 			renderWaterBlock(block);
 		}
@@ -195,7 +195,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 			ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 				.count(5).offset(0.25, 0.25, 0.25).spawn();
 		} else if (MaterialUtil.isTransparent(block)) {
-			TempBlock.create(block, Material.WATER, 250);
+			TempBlock.create(block, Material.WATER.createBlockData(), 250);
 		}
 	}
 
@@ -219,7 +219,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	}
 
 	private void clean(Block block) {
-		TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
+		if (MaterialUtil.isWater(block)) TempBlock.createAir(block);
 	}
 
 	private void cleanAll() {

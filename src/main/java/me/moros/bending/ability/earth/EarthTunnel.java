@@ -106,7 +106,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 				if (userConfig.extractOres) {
 					extract(current);
 				}
-				TempBlock.create(current, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+				TempBlock.createAir(current, BendingProperties.EARTHBENDING_REVERT_TIME);
 			}
 			if (angle >= 360) {
 				angle = 0;

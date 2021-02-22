@@ -58,7 +58,7 @@ public class TravellingSource implements State {
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
 		if (source != null && data.getMaterial() == Material.WATER && !BlockMethods.isInfiniteWater(source)) {
-			TempBlock.create(source, Material.AIR, 30000, true);
+			TempBlock.createAir(source, 60000);
 		}
 		started = source != null;
 	}
@@ -130,6 +130,6 @@ public class TravellingSource implements State {
 	}
 
 	private void clean() {
-		TempBlock.MANAGER.get(source).filter(tb -> data.getMaterial() == tb.getBlock().getType()).ifPresent(TempBlock::revert);
+		if (source.getType() == data.getMaterial()) TempBlock.createAir(source);
 	}
 }

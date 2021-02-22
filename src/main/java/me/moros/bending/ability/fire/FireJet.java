@@ -77,7 +77,7 @@ public class FireJet extends AbilityInstance implements Ability {
 		duration = userConfig.duration;
 
 		flight = Flight.get(user);
-		if (ignitable) TempBlock.create(block, Material.FIRE, BendingProperties.FIRE_REVERT_TIME, true);
+		if (ignitable) TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
 
 		removalPolicy = Policies.builder()
 			.add(Policies.IN_LIQUID)

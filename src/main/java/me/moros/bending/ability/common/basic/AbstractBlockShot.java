@@ -44,6 +44,8 @@ import org.bukkit.util.NumberConversions;
 import java.util.Collections;
 import java.util.function.Predicate;
 
+
+// TODO check cleanup methods and redo system for temp air blocks. Right now it glitches like crazy, examples: eblast - raise earth, eblast fills blocks where it shouldn't
 public abstract class AbstractBlockShot implements Updatable {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
@@ -83,15 +85,20 @@ public abstract class AbstractBlockShot implements Updatable {
 		settingUp = true;
 		firstDestination = getCurrent().add(Vector3.HALF);
 		int targetY = NumberConversions.floor(target.getY());
-		if (targetY > current.getY() + 2) {
-			firstDestination = firstDestination.setY(targetY + 0.5);
-		} else if (current.getY() > user.getEyeLocation().getY() && current.getRelative(BlockFace.UP).isPassable()) {
-			firstDestination = firstDestination.subtract(new Vector3(0, 2, 0));
-		} else if (current.getRelative(BlockFace.UP).isPassable() && current.getRelative(BlockFace.UP, 2).isPassable()) {
-			firstDestination = firstDestination.add(new Vector3(0, 2, 0));
-		} else {
-			Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
+		int currentY = current.getY();
+		Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
+		if ((targetY < currentY && !current.getRelative(BlockFace.DOWN).isPassable()) || (targetY > currentY && !current.getRelative(BlockFace.UP).isPassable())) {
 			firstDestination = firstDestination.add(dir).floor().add(Vector3.HALF);
+		} else {
+			if (targetY > current.getY() + 2 && current.getRelative(BlockFace.UP).isPassable()) {
+				firstDestination = firstDestination.setY(targetY + 0.5);
+			} else if (current.getY() > user.getEyeLocation().getY() && current.getRelative(BlockFace.UP).isPassable()) {
+				firstDestination = firstDestination.subtract(new Vector3(0, 2, 0));
+			} else if (current.getRelative(BlockFace.UP).isPassable() && current.getRelative(BlockFace.UP, 2).isPassable()) {
+				firstDestination = firstDestination.add(new Vector3(0, 2, 0));
+			} else {
+				firstDestination = firstDestination.add(dir).floor().add(Vector3.HALF);
+			}
 		}
 	}
 
@@ -143,7 +150,7 @@ public abstract class AbstractBlockShot implements Updatable {
 				ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else {
-				TempBlock.create(current, material, true);
+				TempBlock.create(current, material.createBlockData(), true);
 			}
 		} else {
 			return UpdateResult.REMOVE;
@@ -186,7 +193,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public void clean(@NonNull Block block) {
-		TempBlock.MANAGER.get(block).filter(tb -> isValid(tb.getBlock())).ifPresent(TempBlock::revert);
+		if (isValid(block)) TempBlock.createAir(block);
 	}
 
 	public void setUser(@NonNull User user) {

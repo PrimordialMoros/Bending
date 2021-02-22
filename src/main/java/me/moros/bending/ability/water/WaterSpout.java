@@ -149,7 +149,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
 			Block block = user.getLocBlock();
 			for (int i = 0; i < distance - 1; i++) {
-				TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER).ifPresent(tb -> column.add(tb.getBlock()));
+				TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.getBlock()));
 			}
 			ignore.addAll(column);
 		}
@@ -165,7 +165,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 		}
 
 		protected void clean(Block block) {
-			TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isWater(tb.getBlock())).ifPresent(TempBlock::revert);
+			if (MaterialUtil.isWater(block)) TempBlock.createAir(block);
 		}
 	}
 

@@ -32,6 +32,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 
 public class SelectedSource implements State {
@@ -40,11 +41,13 @@ public class SelectedSource implements State {
 	private Vector3 origin;
 	private Block block;
 	private Material material;
+	private BlockState state;
 
 	private final boolean particles;
 	private final double distanceSq;
 
 	private boolean started = false;
+	private boolean forceRemove = false;
 
 	public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance, @Nullable BlockData data) {
 		this.user = user;
@@ -69,7 +72,10 @@ public class SelectedSource implements State {
 		this.block = block;
 		this.origin = newOrigin;
 		this.material = data == null ? block.getType() : data.getMaterial();
-		if (data != null) TempBlock.create(block, data, false);
+		if (data != null) {
+			if (TempBlock.MANAGER.isTemp(block)) state = block.getState();
+			TempBlock.create(block, data, false);
+		}
 		return true;
 	}
 
@@ -83,16 +89,18 @@ public class SelectedSource implements State {
 	@Override
 	public void complete() {
 		if (!started) return;
+		if (block.getType() != material) forceRemove = true;
 		onDestroy();
 		chain.getChainStore().clear();
+		if (forceRemove) return;
 		chain.getChainStore().add(block);
 		chain.nextState();
 	}
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (!started) return UpdateResult.REMOVE;
-		if (block.getType() != material || user.getEyeLocation().distanceSq(origin) > distanceSq) {
+		if (!started || forceRemove) return UpdateResult.REMOVE;
+		if (user.getEyeLocation().distanceSq(origin) > distanceSq) {
 			return UpdateResult.REMOVE;
 		}
 		Location loc = origin.toLocation(user.getWorld());
@@ -107,8 +115,12 @@ public class SelectedSource implements State {
 	}
 
 	public void onDestroy() {
-		if (!particles) {
-			TempBlock.MANAGER.get(block).filter(tb -> tb.getBlock().getType() == material).ifPresent(TempBlock::revert);
+		if (!particles && block != null && block.getType() == material) {
+			if (state != null) {
+				state.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+			} else {
+				TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
+			}
 		}
 	}
 }

@@ -207,6 +207,7 @@ public final class ActivationController {
 		}
 		if (block != null) {
 			FerroControl.act(user, block);
+			EarthSmash.attemptDestroy(user, block);
 		}
 		EarthLine.setPrisonMode(user);
 

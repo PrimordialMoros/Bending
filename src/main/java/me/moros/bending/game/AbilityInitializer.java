@@ -260,9 +260,9 @@ public final class AbilityInitializer {
 			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).build();
 		abilities.add(earthArmor);
 
-		AbilityDescription earthArmorWall = AbilityDescription.builder("EarthArmorWall", EarthArmorWall::new)
+		AbilityDescription bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).setHidden(true).build();
-		abilities.add(earthArmorWall);
+		abilities.add(bulwark);
 
 		AbilityDescription earthGlove = AbilityDescription.builder("EarthGlove", EarthGlove::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).build();
@@ -297,7 +297,7 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
 			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
 
-		sequences.put(earthArmorWall, new Sequence(
+		sequences.put(bulwark, new Sequence(
 			new AbilityAction(earthArmor, ActivationMethod.SNEAK),
 			new AbilityAction(earthArmor, ActivationMethod.SNEAK_RELEASE)
 		));

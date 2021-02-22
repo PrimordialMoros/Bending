@@ -119,7 +119,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		}
 
 		if (!MaterialUtil.isLava(block)) {
-			TempBlock.create(block, Material.AIR, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+			TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 		}
 		location = new Vector3(block).add(Vector3.HALF);
 		distance = location.distance(user.getEyeLocation());
@@ -223,7 +223,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		// TODO add fire ignition to specific blocks, add extra material types to destroy
 		if (EarthMaterials.isEarthOrSand(block)) {
 			currentPower -= block.getType().getHardness();
-			TempBlock.create(block, Material.AIR, 30000, true);
+			TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 			ParticleUtil.create(Particle.LAVA, block.getLocation())
 				.offset(0.5, 0.5, 0.5).extra(0.05).spawn();
 			if (ThreadLocalRandom.current().nextInt(5) == 0) {
