@@ -121,7 +121,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 		mode = Mode.NORMAL;
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 2, fakeData))
+			.addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
 			.start();
 
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
@@ -173,7 +173,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			if (source == null) return;
 			if (EarthMaterials.LAVA_BENDABLE.isTagged(source)) mode = Mode.MAGMA;
 			earthLine = new Line(source);
-			Policies.builder().build();
+			removalPolicy = Policies.builder().build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
 		}
 	}

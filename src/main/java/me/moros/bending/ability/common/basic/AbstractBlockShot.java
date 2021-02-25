@@ -90,15 +90,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		if ((targetY < currentY && !current.getRelative(BlockFace.DOWN).isPassable()) || (targetY > currentY && !current.getRelative(BlockFace.UP).isPassable())) {
 			firstDestination = firstDestination.add(dir).floor().add(Vector3.HALF);
 		} else {
-			if (targetY > current.getY() + 2 && current.getRelative(BlockFace.UP).isPassable()) {
-				firstDestination = firstDestination.setY(targetY + 0.5);
-			} else if (current.getY() > user.getEyeLocation().getY() && current.getRelative(BlockFace.UP).isPassable()) {
-				firstDestination = firstDestination.subtract(new Vector3(0, 2, 0));
-			} else if (current.getRelative(BlockFace.UP).isPassable() && current.getRelative(BlockFace.UP, 2).isPassable()) {
-				firstDestination = firstDestination.add(new Vector3(0, 2, 0));
-			} else {
-				firstDestination = firstDestination.add(dir).floor().add(Vector3.HALF);
-			}
+			firstDestination = firstDestination.setY(targetY + 0.5);
 		}
 	}
 

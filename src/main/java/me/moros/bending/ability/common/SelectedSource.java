@@ -51,7 +51,7 @@ public class SelectedSource implements State {
 
 	public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance, @Nullable BlockData data) {
 		this.user = user;
-		this.distanceSq = maxDistance * maxDistance;
+		this.distanceSq = 0.25 + maxDistance * maxDistance;
 		particles = data == null;
 		reselect(block, data);
 	}
@@ -74,7 +74,7 @@ public class SelectedSource implements State {
 		this.material = data == null ? block.getType() : data.getMaterial();
 		if (data != null) {
 			if (TempBlock.MANAGER.isTemp(block)) state = block.getState();
-			TempBlock.create(block, data, false);
+			TempBlock.create(block, data);
 		}
 		return true;
 	}
@@ -117,7 +117,7 @@ public class SelectedSource implements State {
 	public void onDestroy() {
 		if (!particles && block != null && block.getType() == material) {
 			if (state != null) {
-				state.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+				state.update(true, false);
 			} else {
 				TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
 			}

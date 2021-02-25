@@ -133,11 +133,13 @@ public class EarthShot extends AbilityInstance implements Ability {
 			BlockMethods.breakPlant(temp);
 		}
 
+		data = source.getBlockData().clone();
+		BlockData solidData;
 		if (mode == Mode.MAGMA) {
-			data = Material.MAGMA_BLOCK.createBlockData();
+			solidData = Material.MAGMA_BLOCK.createBlockData();
 			canConvert = false;
 		} else {
-			data = MaterialUtil.getSolidType(source.getBlockData());
+			solidData = MaterialUtil.getSolidType(source.getBlockData());
 		}
 		if (mode == Mode.METAL) {
 			SoundUtil.METAL_SOUND.play(source.getLocation());
@@ -146,7 +148,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 			SoundUtil.EARTH_SOUND.play(source.getLocation());
 		}
 
-		projectile = new BendingFallingBlock(source, data, new Vector3(0, 0.65, 0), false, 6000);
+		projectile = new BendingFallingBlock(source, solidData, new Vector3(0, 0.65, 0), false, 6000);
 		if (!MaterialUtil.isLava(source)) {
 			TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
 		}

@@ -106,7 +106,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 2))
+			.addState(new SelectedSource(user, source, userConfig.selectRange))
 			.start();
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;
@@ -190,7 +190,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			if (WaterMaterials.isWaterBendable(source)) {
 				isIce = WaterMaterials.isIceBendable(source);
 				manip = new Manip(user, source);
-				Policies.builder().build();
+				removalPolicy = Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
 				TempBlock.createAir(source);
 			}

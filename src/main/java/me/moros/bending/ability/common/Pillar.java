@@ -211,7 +211,7 @@ public class Pillar implements Updatable {
 			for (int i = 0; i < max; i++) {
 				Block forwardBlock = origin.getRelative(direction, i + 1);
 				Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
+				if (!TempBlock.isBendable(backwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
 					return i;
 				}
 			}

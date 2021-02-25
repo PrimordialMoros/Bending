@@ -93,7 +93,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 
 		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange + 2, fakeData))
+			.addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
 			.start();
 		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
 		return true;
@@ -140,7 +140,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
 				blast = new Blast(user, source);
 				SoundUtil.EARTH_SOUND.play(source.getLocation());
-				Policies.builder().build();
+				removalPolicy = Policies.builder().build();
 				user.setCooldown(getDescription(), userConfig.cooldown);
 				TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
 			}
