@@ -20,7 +20,6 @@
 package me.moros.bending;
 
 import me.moros.atlas.acf.lib.timings.TimingManager;
-import me.moros.atlas.kyori.adventure.platform.bukkit.BukkitAudiences;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
@@ -50,7 +49,6 @@ public class Bending extends JavaPlugin {
 
 	private ConfigManager configManager;
 	private TranslationManager translationManager;
-	private BukkitAudiences audiences;
 	private TimingManager timingManager;
 
 	private PersistentDataLayer layer;
@@ -74,7 +72,6 @@ public class Bending extends JavaPlugin {
 
 		configManager = new ConfigManager(dir);
 		translationManager = new TranslationManager(dir);
-		audiences = BukkitAudiences.create(this);
 		timingManager = TimingManager.of(this);
 		eventBus = new BendingEventBus(this);
 		layer = new PersistentDataLayer(this);
@@ -122,10 +119,6 @@ public class Bending extends JavaPlugin {
 
 	public static TranslationManager getTranslationManager() {
 		return plugin.translationManager;
-	}
-
-	public static BukkitAudiences getAudiences() {
-		return plugin.audiences;
 	}
 
 	public static String getAuthor() {

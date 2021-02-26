@@ -38,7 +38,7 @@ import org.bukkit.entity.Player;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class BendingUser extends CommandUserWrapper implements User {
+public class BendingUser implements User {
 	private final ElementHolder elementHolder = new ElementHolder();
 	private final AbilitySlotContainer slotContainer;
 	private final ExpiringMap<AbilityDescription, Boolean> cooldowns = ExpiringMap.builder().variableExpiration().build();
@@ -46,7 +46,6 @@ public class BendingUser extends CommandUserWrapper implements User {
 	private final LivingEntity entity;
 
 	protected BendingUser(@NonNull LivingEntity entity) {
-		super(entity);
 		this.entity = entity;
 		cooldowns.addExpirationListener((key, value) ->
 			Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));

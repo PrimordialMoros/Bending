@@ -21,15 +21,15 @@ package me.moros.bending.model.ability.description;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.TranslatableComponent;
-import me.moros.atlas.kyori.adventure.text.event.ClickEvent;
-import me.moros.atlas.kyori.adventure.text.event.HoverEvent;
-import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.Arrays;

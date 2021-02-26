@@ -21,13 +21,12 @@ package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.kyori.adventure.audience.Audience;
-import me.moros.atlas.kyori.adventure.bossbar.BossBar;
-import me.moros.atlas.kyori.adventure.text.Component;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingRestrictEvent;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.user.User;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -127,7 +126,7 @@ public class MovementHandler {
 	}
 
 	private static class BarInfo {
-		private final Audience audience;
+		private final Player player;
 		private final BossBar bar;
 		private final BukkitTask barTask;
 
@@ -135,8 +134,8 @@ public class MovementHandler {
 		private final long duration;
 
 		private BarInfo(Player player, long duration) {
+			this.player = player;
 			this.duration = duration;
-			audience = Bending.getAudiences().player(player);
 			endTime = System.currentTimeMillis() + duration;
 			Component name = Component.text("Restricted");
 			bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
@@ -149,12 +148,12 @@ public class MovementHandler {
 				remove();
 			} else {
 				float factor = FastMath.max(0, FastMath.min(1, (endTime - time) / (float) duration));
-				audience.showBossBar(bar.progress(factor));
+				player.showBossBar(bar.progress(factor));
 			}
 		}
 
 		private void remove() {
-			audience.hideBossBar(bar);
+			player.hideBossBar(bar);
 			barTask.cancel();
 		}
 	}

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.0.0-SNAPSHOT"
+version = "1.1.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.moros", "atlas-core", "1.0.0-SNAPSHOT")
+    implementation("me.moros", "atlas-core", "1.1.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit-lite", "1.7")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
@@ -48,7 +48,6 @@ tasks {
             relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
             relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
             relocate("net.jodah.expiringmap", "me.moros.atlas.expiringmap")
-            relocate("net.kyori", "me.moros.atlas.kyori")
             relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
             relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
             relocate("org.bstats", "me.moros.bending.bstats")

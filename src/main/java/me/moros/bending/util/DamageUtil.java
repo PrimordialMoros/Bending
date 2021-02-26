@@ -22,12 +22,13 @@ package me.moros.bending.util;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.TranslatableComponent;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -72,7 +73,8 @@ public final class DamageUtil {
 		if (msg == null) msg = DEATH_MESSAGE;
 		Component target = Component.text(player.getName());
 		Component source = Component.text(cause.source.getName());
-		Bending.getAudiences().players().sendMessage(msg.args(target, source, ability.getDisplayName()));
+		Component comp = msg.args(target, source, ability.getDisplayName());
+		Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(comp));
 		return true;
 	}
 

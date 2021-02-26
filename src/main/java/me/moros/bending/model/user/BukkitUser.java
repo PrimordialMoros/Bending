@@ -31,7 +31,7 @@ import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Optional;
 
-public interface BukkitUser extends CommandUser {
+public interface BukkitUser {
 	@NonNull LivingEntity getEntity();
 
 	default @NonNull Block getHeadBlock() {

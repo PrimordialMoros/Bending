@@ -28,13 +28,13 @@ import me.moros.atlas.acf.annotation.Default;
 import me.moros.atlas.acf.annotation.Description;
 import me.moros.atlas.acf.annotation.HelpCommand;
 import me.moros.atlas.acf.annotation.Subcommand;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.CommandUser;
 import me.moros.bending.util.ChatUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
 
@@ -49,14 +49,14 @@ public class PresetCommand extends BaseCommand {
 		if (presets.isEmpty()) {
 			Message.NO_PRESETS.send(player);
 		} else {
-			player.sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+			player.getEntity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
 		}
 	}
 
 	@HelpCommand
 	@CommandPermission("bending.command.help")
-	public static void doHelp(CommandUser user, CommandHelp help) {
-		Message.HELP_HEADER.send(user);
+	public static void doHelp(CommandSender user, CommandHelp help) {
+		user.sendMessage(Message.HELP_HEADER.build());
 		help.showHelp();
 	}
 
@@ -69,7 +69,7 @@ public class PresetCommand extends BaseCommand {
 			Message.EMPTY_PRESET.send(player);
 			return;
 		}
-		player.addPreset(preset, result -> player.sendMessage(result.getMessage(input)));
+		player.addPreset(preset, result -> player.getEntity().sendMessage(result.getMessage(input)));
 	}
 
 	@Subcommand("remove|rm|r|delete|del|d")

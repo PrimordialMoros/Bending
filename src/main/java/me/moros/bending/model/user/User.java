@@ -108,4 +108,12 @@ public interface User extends BukkitUser {
 			if (!hasElement(desc.getElement()) || !hasPermission(desc) || !desc.canBind()) setSlotAbilityInternal(i, null);
 		}));
 	}
+
+	default boolean hasPermission(@NonNull String permission) {
+		return true;
+	}
+
+	default boolean hasPermission(@NonNull AbilityDescription desc) {
+		return hasPermission(desc.getPermission());
+	}
 }

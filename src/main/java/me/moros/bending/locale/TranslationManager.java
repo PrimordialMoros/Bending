@@ -21,12 +21,12 @@ package me.moros.bending.locale;
 
 import com.google.common.collect.ImmutableSet;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.kyori.adventure.key.Key;
-import me.moros.atlas.kyori.adventure.translation.GlobalTranslator;
-import me.moros.atlas.kyori.adventure.translation.TranslationRegistry;
-import me.moros.atlas.kyori.adventure.translation.Translator;
-import me.moros.atlas.kyori.adventure.util.UTF8ResourceBundleControl;
 import me.moros.bending.Bending;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.translation.Translator;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -20,8 +20,8 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
-import me.moros.atlas.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 
 import java.util.regex.Pattern;

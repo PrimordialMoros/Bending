@@ -21,8 +21,6 @@ package me.moros.bending.ability.earth;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.Pillar;
@@ -61,6 +59,8 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -187,7 +187,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 	private void setPrisonMode() {
 		if (mode == Mode.NORMAL) {
 			mode = Mode.PRISON;
-			user.sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
+			user.getEntity().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
 		}
 	}
 

@@ -20,10 +20,10 @@
 package me.moros.bending.model.ability.sequence;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.TextComponent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;

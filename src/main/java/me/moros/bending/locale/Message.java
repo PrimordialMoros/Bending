@@ -20,14 +20,14 @@
 package me.moros.bending.locale;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.ComponentLike;
-import me.moros.atlas.kyori.adventure.text.format.TextColor;
-import me.moros.bending.model.user.CommandUser;
+import me.moros.bending.model.user.User;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.TextColor;
 
-import static me.moros.atlas.kyori.adventure.text.Component.text;
-import static me.moros.atlas.kyori.adventure.text.Component.translatable;
-import static me.moros.atlas.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * @see TranslationManager
@@ -136,24 +136,24 @@ public interface Message {
 	interface Args0 {
 		@NonNull Component build();
 
-		default void send(@NonNull CommandUser user) {
-			user.sendMessage(build());
+		default void send(@NonNull User user) {
+			user.getEntity().sendMessage(build());
 		}
 	}
 
 	interface Args1<A0> {
 		@NonNull Component build(@NonNull A0 arg0);
 
-		default void send(@NonNull CommandUser user, @NonNull A0 arg0) {
-			user.sendMessage(build(arg0));
+		default void send(@NonNull User user, @NonNull A0 arg0) {
+			user.getEntity().sendMessage(build(arg0));
 		}
 	}
 
 	interface Args2<A0, A1> {
 		@NonNull Component build(@NonNull A0 arg0, @NonNull A1 arg1);
 
-		default void send(@NonNull CommandUser user, @NonNull A0 arg0, @NonNull A1 arg1) {
-			user.sendMessage(build(arg0, arg1));
+		default void send(@NonNull User user, @NonNull A0 arg0, @NonNull A1 arg1) {
+			user.getEntity().sendMessage(build(arg0, arg1));
 		}
 	}
 }

@@ -188,11 +188,11 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		private double distanceTravelled = 0;
 
 		public CombustBeam() {
-			super(user, user.getRay(userConfig.range), 0.4, 1);
+			super(user, user.getRay(userConfig.range), 0.35, 1);
 			canCollide = Block::isLiquid;
 			singleCollision = true;
 			controllable = true;
-			steps = 4;
+			steps = 3;
 		}
 
 		@Override

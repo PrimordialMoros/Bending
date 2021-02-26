@@ -19,13 +19,13 @@
 
 package me.moros.bending.board;
 
-import me.moros.atlas.kyori.adventure.text.Component;
-import me.moros.atlas.kyori.adventure.text.format.NamedTextColor;
-import me.moros.atlas.kyori.adventure.text.format.TextDecoration;
-import me.moros.atlas.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
