@@ -315,7 +315,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(750);
 			range = abilityNode.node("range").getDouble(16.0);
 			grabDuration = abilityNode.node("duration").getLong(4000);
-			damage = abilityNode.node("damage").getDouble(1.5);
+			damage = abilityNode.node("damage").getDouble(1.0);
 
 			abilityNode.node("duration").comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips.");
 		}

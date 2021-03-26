@@ -166,8 +166,8 @@ public class Collapse extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "collapse");
 
-			selectRange = abilityNode.node("select-range").getDouble(18.0);
-			radius = abilityNode.node("radius").getDouble(5.0);
+			selectRange = abilityNode.node("select-range").getDouble(16.0);
+			radius = abilityNode.node("radius").getDouble(6.0);
 			maxHeight = abilityNode.node("max-height").getInt(6);
 			cooldown = abilityNode.node("cooldown").getLong(500);
 		}

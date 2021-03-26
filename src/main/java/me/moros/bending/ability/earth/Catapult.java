@@ -143,7 +143,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(3000);
 			power = abilityNode.node("power").getDouble(2.4);
-			angle = FastMath.toRadians(abilityNode.node("angle").getInt(85));
+			angle = FastMath.toRadians(abilityNode.node("angle").getInt(70));
 		}
 	}
 }

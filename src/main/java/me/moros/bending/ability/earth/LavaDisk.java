@@ -291,7 +291,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
+			cooldown = abilityNode.node("cooldown").getLong(8000);
 			minDamage = abilityNode.node("min-damage").getDouble(1.0);
 			maxDamage = abilityNode.node("max-damage").getDouble(4.0);
 			range = abilityNode.node("range").getDouble(20.0);

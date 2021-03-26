@@ -202,7 +202,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "raiseearth");
 
-			selectRange = abilityNode.node("select-range").getDouble(18.0);
+			selectRange = abilityNode.node("select-range").getDouble(16.0);
 
 			CommentedConfigurationNode columnNode = abilityNode.node("column");
 			columnCooldown = columnNode.node("cooldown").getLong(500);

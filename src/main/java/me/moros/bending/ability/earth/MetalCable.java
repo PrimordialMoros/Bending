@@ -413,10 +413,10 @@ public class MetalCable extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "metalcable");
 
-			cooldown = abilityNode.node("cooldown").getLong(5000);
+			cooldown = abilityNode.node("cooldown").getLong(4500);
 			range = abilityNode.node("range").getDouble(28.0);
 			projectileRange = abilityNode.node("projectile-range").getDouble(48.0);
-			damage = abilityNode.node("damage").getDouble(4.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
 			pullSpeed = abilityNode.node("pull-speed").getDouble(0.9);
 			launchSpeed = abilityNode.node("launch-speed").getDouble(1.6);
 		}

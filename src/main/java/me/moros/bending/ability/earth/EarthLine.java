@@ -351,9 +351,9 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(4000);
 			range = abilityNode.node("range").getDouble(24.0);
-			selectRange = abilityNode.node("select-range").getDouble(8.0);
+			selectRange = abilityNode.node("select-range").getDouble(6.0);
 			damage = abilityNode.node("damage").getDouble(3.0);
-			prisonDuration = abilityNode.node("prison-duration").getLong(2500);
+			prisonDuration = abilityNode.node("prison-duration").getLong(1500);
 		}
 	}
 }

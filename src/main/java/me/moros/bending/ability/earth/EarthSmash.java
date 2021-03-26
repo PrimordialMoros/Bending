@@ -521,11 +521,10 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		public double selectRange;
 		@Attribute(Attribute.DURATION)
 		public long maxDuration;
+		@Attribute(Attribute.STRENGTH)
 		public double raiseEntityPush;
-
 		@Attribute(Attribute.SELECTION)
 		public double grabRange;
-
 		@Attribute(Attribute.RANGE)
 		public double shootRange;
 		@Attribute(Attribute.DAMAGE)
@@ -539,18 +538,16 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsmash");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
+			cooldown = abilityNode.node("cooldown").getLong(7000);
 			radius = FastMath.max(3, abilityNode.node("radius").getInt(3));
-			chargeTime = abilityNode.node("charge-time").getLong(1500);
-			selectRange = abilityNode.node("select-range").getDouble(14.0);
+			chargeTime = abilityNode.node("charge-time").getLong(1250);
+			selectRange = abilityNode.node("select-range").getDouble(12.0);
 			maxDuration = abilityNode.node("max-duration").getLong(45000);
 			raiseEntityPush = abilityNode.node("raise-entity-push").getDouble(0.85);
-
-			grabRange = abilityNode.node("grab-range").getDouble(16.0);
-
-			shootRange = abilityNode.node("range").getDouble(32.0);
-			damage = abilityNode.node("damage").getDouble(5.0);
-			knockback = abilityNode.node("knockback").getDouble(3.2);
+			grabRange = abilityNode.node("grab-range").getDouble(12.0);
+			shootRange = abilityNode.node("range").getDouble(26.0);
+			damage = abilityNode.node("damage").getDouble(3.5);
+			knockback = abilityNode.node("knockback").getDouble(2.8);
 			knockup = abilityNode.node("knockup").getDouble(0.15);
 
 			if (radius % 2 == 0) radius++;

@@ -272,7 +272,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(8000);
 			chargeTime = abilityNode.node("charge-time").getInt(2500);
-			damage = abilityNode.node("damage").getDouble(4.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
 			knockback = abilityNode.node("knockback").getDouble(1.2);
 			coneRange = abilityNode.node("cone-range").getDouble(14.0);
 			ringRange = abilityNode.node("ring-range").getDouble(9.0);
