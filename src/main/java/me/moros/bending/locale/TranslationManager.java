@@ -21,8 +21,11 @@ package me.moros.bending.locale;
 
 import com.google.common.collect.ImmutableSet;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
@@ -48,7 +51,6 @@ public class TranslationManager {
 	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
 	private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
-	private Set<String> defaultTranslations;
 	private final Path translationsDirectory;
 	private TranslationRegistry registry;
 
@@ -68,7 +70,6 @@ public class TranslationManager {
 		loadCustom();
 
 		ResourceBundle bundle = ResourceBundle.getBundle("bending", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
-		defaultTranslations = ImmutableSet.copyOf(bundle.keySet());
 		registry.registerAll(DEFAULT_LOCALE, bundle, false);
 		GlobalTranslator.get().addSource(registry);
 	}
@@ -117,7 +118,7 @@ public class TranslationManager {
 		return fileName.substring(0, fileName.length() - ".properties".length());
 	}
 
-	public boolean containsKey(@NonNull String key) {
-		return defaultTranslations.contains(key);
+	public @Nullable TranslatableComponent getTranslation(@NonNull String key) {
+		return registry.contains(key) ? Component.translatable(key) : null;
 	}
 }

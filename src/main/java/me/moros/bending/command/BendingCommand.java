@@ -239,8 +239,10 @@ public class BendingCommand extends BaseCommand {
 	@CommandCompletion("@allabilities")
 	@Description("View info about a specific ability")
 	public static void onInfo(CommandSender user, AbilityDescription ability) {
-		Component description = ability.getDescription();
-		Component instructions = ability.getInstructions();
+		String descKey = "bending.ability." + ability.getName().toLowerCase() + ".description";
+		String instKey = "bending.ability." + ability.getName().toLowerCase() + ".instructions";
+		Component description = Bending.getTranslationManager().getTranslation(descKey);
+		Component instructions = Bending.getTranslationManager().getTranslation(instKey);
 		if (instructions == null && ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
 			Sequence sequence = Bending.getGame().getSequenceManager().getSequence(ability);
 			if (sequence != null) instructions = sequence.getInstructions();

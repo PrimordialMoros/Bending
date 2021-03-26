@@ -19,9 +19,12 @@
 
 package me.moros.bending.game;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.ability.util.ActivationMethod;
 
 import java.util.Collection;
@@ -32,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -89,5 +93,26 @@ public final class AbilityRegistry {
 	public Optional<AbilityDescription> getAbilityDescription(String name) {
 		if (name == null || name.isEmpty()) return Optional.empty();
 		return Optional.ofNullable(abilities.get(name.toLowerCase()));
+	}
+
+	public static class AddonRegistry {
+		private static final Set<AbilityDescription> addonAbilities = new HashSet<>();
+		private static final Map<AbilityDescription, Sequence> addonSequences = new ConcurrentHashMap<>();
+
+		public static boolean registerAddonAbility(@NonNull AbilityDescription desc) {
+			return addonAbilities.add(desc);
+		}
+
+		public static void registerAddonSequence(@NonNull AbilityDescription desc, @NonNull Sequence sequence) {
+			addonSequences.put(desc, sequence);
+		}
+
+		public static @NonNull Collection<AbilityDescription> getAddonAbilities() {
+			return ImmutableSet.copyOf(addonAbilities);
+		}
+
+		public static @NonNull Map<AbilityDescription, Sequence> getAddonSequences() {
+			return ImmutableMap.copyOf(addonSequences);
+		}
 	}
 }

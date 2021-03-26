@@ -21,12 +21,10 @@ package me.moros.bending.model.ability.description;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -47,9 +45,6 @@ public class AbilityDescription {
 	private final Function<AbilityDescription, ? extends Ability> constructor;
 	private final Element element;
 	private final EnumSet<ActivationMethod> activationMethods;
-	private final TranslatableComponent description;
-	private final TranslatableComponent instructions;
-	private final TranslatableComponent deathMessage;
 	private final boolean hidden;
 	private final boolean canBind;
 	private final boolean harmless;
@@ -61,12 +56,6 @@ public class AbilityDescription {
 		constructor = builder.constructor;
 		element = builder.element;
 		activationMethods = builder.activationMethods;
-		String descKey = "bending.ability." + name.toLowerCase() + ".description";
-		String instKey = "bending.ability." + name.toLowerCase() + ".instructions";
-		String deathKey = "bending.ability." + name.toLowerCase() + ".death";
-		description = Bending.getTranslationManager().containsKey(descKey) ? Component.translatable(descKey) : null;
-		instructions = Bending.getTranslationManager().containsKey(instKey) ? Component.translatable(instKey) : null;
-		deathMessage = Bending.getTranslationManager().containsKey(deathKey) ? Component.translatable(deathKey) : null;
 		canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
 		hidden = builder.hidden;
 		harmless = builder.harmless;
@@ -85,18 +74,6 @@ public class AbilityDescription {
 
 	public @NonNull Element getElement() {
 		return element;
-	}
-
-	public @Nullable TranslatableComponent getDescription() {
-		return description;
-	}
-
-	public @Nullable TranslatableComponent getInstructions() {
-		return instructions;
-	}
-
-	public @Nullable TranslatableComponent getDeathMessage() {
-		return deathMessage;
 	}
 
 	public boolean canBind() {

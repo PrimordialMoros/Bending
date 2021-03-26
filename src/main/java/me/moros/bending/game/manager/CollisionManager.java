@@ -85,7 +85,6 @@ public final class CollisionManager {
 		Set<RegisteredCollision> collisionSet = new HashSet<>(newCollisions);
 		collisions.clear();
 		collisions.addAll(collisionSet);
-		//collisions.stream().map(RegisteredCollision::toString).forEach(Bending.getLog()::info);
 		return collisions.size();
 	}
 }

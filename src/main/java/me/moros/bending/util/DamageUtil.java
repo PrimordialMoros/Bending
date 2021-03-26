@@ -69,7 +69,8 @@ public final class DamageUtil {
 		if (cause == null) return false;
 
 		AbilityDescription ability = cause.desc;
-		TranslatableComponent msg = ability.getDeathMessage();
+		String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
+		TranslatableComponent msg = Bending.getTranslationManager().getTranslation(deathKey);
 		if (msg == null) msg = DEATH_MESSAGE;
 		Component target = Component.text(player.getName());
 		Component source = Component.text(cause.source.getName());

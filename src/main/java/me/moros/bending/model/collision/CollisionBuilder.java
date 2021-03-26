@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  * <p>
  * Note: there is a special layer type (reserved for spout and shield abilities) in which inter-layer collisions are disabled.
  */
+// TODO improve collision registering to allow addon collisions
 public class CollisionBuilder {
 	private final AbilityRegistry registry;
 	private final List<CollisionLayer> layers;

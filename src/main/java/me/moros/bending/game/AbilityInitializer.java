@@ -71,11 +71,13 @@ public final class AbilityInitializer {
 		initFire();
 
 		int abilityAmount = registry.registerAbilities(abilities);
+		int addonAmount = registry.registerAbilities(AbilityRegistry.AddonRegistry.getAddonAbilities());
 		int sequenceAmount = game.getSequenceManager().registerSequences(sequences);
+		int addonSequences = game.getSequenceManager().registerSequences(AbilityRegistry.AddonRegistry.getAddonSequences());
 		int collisionAmount = CollisionManager.registerCollisions(buildCollisions());
 
-		Bending.getLog().info("Registered " + abilityAmount + " abilities!");
-		Bending.getLog().info("Registered " + sequenceAmount + " sequences!");
+		Bending.getLog().info("Registered " + abilityAmount + " core abilities and " + addonAmount + " addon abilities!");
+		Bending.getLog().info("Registered " + sequenceAmount  + " core sequences and " + addonSequences + " addon sequences!");
 		Bending.getLog().info("Registered " + collisionAmount + " collisions!");
 	}
 
