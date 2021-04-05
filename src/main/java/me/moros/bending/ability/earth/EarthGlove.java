@@ -66,7 +66,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// TODO possible changes: add per glove cooldown, use up inventory ingots for clips?
+// TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance implements Ability {
 	public enum Side {RIGHT, LEFT}
 
@@ -76,8 +76,8 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	private static final double GLOVE_SPEED = 1.2;
 	private static final double GLOVE_GRABBED_SPEED = 0.6;
 
-	private static final ItemStack stone = new ItemStack(Material.STONE, 1);
-	private static final ItemStack ingot = new ItemStack(Material.IRON_INGOT, 1);
+	private static final ItemStack STONE = new ItemStack(Material.STONE, 1);
+	private static final ItemStack INGOT = new ItemStack(Material.IRON_INGOT, 1);
 
 	private User user;
 	private Config userConfig;
@@ -242,12 +242,15 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	}
 
 	private Item buildGlove(Vector3 spawnLocation) {
-		isMetal = user.hasPermission("bending.metal") && InventoryUtil.hasItem(user, ingot);
-		Item item = user.getWorld().dropItem(spawnLocation.toLocation(user.getWorld()), isMetal ? ingot : stone);
-		item.setGravity(false);
+		isMetal = user.hasPermission("bending.metal") && InventoryUtil.hasItem(user, INGOT);
+		Item item = user.getWorld().dropItem(spawnLocation.toLocation(user.getWorld()), isMetal ? INGOT : STONE);
 		item.setInvulnerable(true);
-		item.setMetadata(Metadata.NO_PICKUP, Metadata.emptyMetadata());
+		item.setGravity(false);
 		item.setMetadata(Metadata.GLOVE_KEY, Metadata.customMetadata(this));
+		if (isMetal && InventoryUtil.removeItem(user, INGOT)) return item;
+		item.setCanMobPickup(false);
+		item.setCanPlayerPickup(false);
+		item.setMetadata(Metadata.NO_PICKUP, Metadata.emptyMetadata());
 		return item;
 	}
 

@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.function.Predicate;
 
 
-// TODO check cleanup methods and redo system for temp air blocks. Right now it glitches like crazy, examples: eblast - raise earth, eblast fills blocks where it shouldn't
 public abstract class AbstractBlockShot implements Updatable {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
