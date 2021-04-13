@@ -36,6 +36,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -117,8 +118,9 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerDeath(PlayerDeathEvent event) {
-		if (DamageUtil.handleBendingDeath(event.getEntity())) {
-			event.setDeathMessage(null);
+		Component msg = DamageUtil.getBendingDeathMessage(event.getEntity());
+		if (msg != null) {
+			event.deathMessage(msg);
 		}
 	}
 

@@ -68,6 +68,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -99,9 +100,25 @@ public class MetalCable extends AbilityInstance implements Ability {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		if (!user.hasPermission("bending.metal")) return false;
 
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, MetalCable.class)) {
+		if (method == ActivationMethod.SNEAK) {
+			Location center = user.getEntity().getEyeLocation();
+			Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
+			for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
+				MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
+				if (ability != null && !entity.equals(ability.getUser().getEntity())) {
+					ability.remove();
+				}
+			}
 			return false;
+		} else if (method == ActivationMethod.ATTACK) {
+			Optional<MetalCable> cable = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, MetalCable.class);
+			if (cable.isPresent()) {
+				cable.get().attemptLaunchTarget();
+				return false;
+			}
 		}
+
+		if (user.isOnCooldown(getDescription())) return false;
 
 		this.user = user;
 		recalculateConfig();
@@ -291,31 +308,11 @@ public class MetalCable extends AbilityInstance implements Ability {
 		return user.getInventory().map(itemStacks -> itemStacks.contains(Material.IRON_INGOT)).orElse(false);
 	}
 
-	public static void attemptDestroy(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("MetalCable")) {
-			Location center = user.getEntity().getEyeLocation();
-			Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
-			for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
-				MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
-				if (ability != null && !entity.equals(ability.getUser().getEntity())) {
-					ability.remove();
-					return;
-				}
-			}
-		}
-	}
-
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("MetalCable")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, MetalCable.class).ifPresent(MetalCable::attemptLaunchTarget);
-		}
-	}
-
 	private void remove() {
 		removalPolicy = (u, d) -> true; // Remove in next tick
 	}
 
-	public void attemptLaunchTarget() {
+	private void attemptLaunchTarget() {
 		if (launched || target == null || target.getType() == MetalCable.CableTarget.Type.BLOCK) return;
 
 		launched = true;

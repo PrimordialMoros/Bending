@@ -73,7 +73,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 		if (removalPolicy.test(user, getDescription()) || WorldMethods.isOnGround(user.getEntity())) {
 			return UpdateResult.CONTINUE;
 		}
-		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
+		if (!user.getSelectedAbilityName().equals("EarthGlove")) {
 			return UpdateResult.CONTINUE;
 		}
 		long counter = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count();

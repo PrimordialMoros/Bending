@@ -139,7 +139,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 	}
 
 	public static void freeze(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+		if (user.getSelectedAbilityName().equals("PhaseChange")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
 		}
 	}

@@ -84,6 +84,13 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
+			return false;
+		}
+
+		if (user.isOnCooldown(getDescription())) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -133,10 +140,6 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		}
 	}
 
-	public static void explode(User user) {
-		Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
-	}
-
 	@Override
 	public void explode() {
 		createExplosion(beam.getLocation(), userConfig.power, userConfig.damage);
@@ -166,19 +169,19 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			return true;
 		}, true, true);
 
-		if (userConfig.damageBlocks && !loc.getBlock().isLiquid()) {
-			FragileStructure.attemptDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
-			Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-			Collection<Block> blocks = WorldMethods.getNearbyBlocks(loc, size, predicate);
-			for (Block block : blocks) {
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return;
-				long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-				TempBlock.createAir(block, delay);
-			}
-			for (Block block : blocks) {
-				if (MaterialUtil.isIgnitable(block) && ThreadLocalRandom.current().nextInt(3) == 0) {
-					TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
-				}
+		FragileStructure.attemptDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+
+		if (loc.getBlock().isLiquid()) return;
+		Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
+		Collection<Block> blocks = WorldMethods.getNearbyBlocks(loc, size, predicate);
+		for (Block block : blocks) {
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return;
+			long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+			TempBlock.createAir(block, delay);
+		}
+		for (Block block : blocks) {
+			if (MaterialUtil.isIgnitable(block) && ThreadLocalRandom.current().nextInt(3) == 0) {
+				TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
 			}
 		}
 	}
@@ -254,20 +257,18 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 		@Attribute(Attribute.RANGE)
 		public double range;
 
-		public boolean damageBlocks;
 		public int particleRange;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "combustion");
 
-			cooldown = abilityNode.node("cooldown").getLong(10000);
+			cooldown = abilityNode.node("cooldown").getLong(12000);
 			damage = abilityNode.node("damage").getDouble(5.0);
 			power = abilityNode.node("power").getDouble(3.0);
 			fireTick = abilityNode.node("fire-tick").getInt(60);
-			range = abilityNode.node("range").getDouble(64.0);
+			range = abilityNode.node("range").getDouble(56.0);
 
-			damageBlocks = abilityNode.node("damage-blocks").getBoolean(true);
 			particleRange = NumberConversions.ceil(range);
 		}
 	}

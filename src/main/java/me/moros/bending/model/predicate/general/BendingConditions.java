@@ -80,7 +80,7 @@ public enum BendingConditions implements BendingConditional {
 		}
 
 		@NonNull Set<@NonNull BendingConditional> getConditionals() {
-			return conditionals;
+			return new HashSet<>(conditionals);
 		}
 	}
 }

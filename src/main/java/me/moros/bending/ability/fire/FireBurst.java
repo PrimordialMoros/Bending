@@ -48,6 +48,12 @@ public class FireBurst extends AbstractBurst implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
+				.ifPresent(b -> b.release(true));
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -83,15 +89,8 @@ public class FireBurst extends AbstractBurst implements Ability {
 		return user;
 	}
 
-	public boolean isCharged() {
+	private boolean isCharged() {
 		return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
-	}
-
-	public static void activateCone(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("FireBurst")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
-				.ifPresent(b -> b.release(true));
-		}
 	}
 
 	private void release(boolean cone) {

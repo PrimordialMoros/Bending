@@ -89,6 +89,14 @@ public interface User extends BukkitUser {
 
 	Optional<AbilityDescription> getSelectedAbility();
 
+
+	/**
+	 * @return the ability's name or an empty string if no ability is bound to the currently selected slot
+	 */
+	default @NonNull String getSelectedAbilityName() {
+		return getSelectedAbility().map(AbilityDescription::getName).orElse("");
+	}
+
 	default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
 		setSlotAbility(slot, null);
 	}

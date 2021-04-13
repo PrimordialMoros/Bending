@@ -40,6 +40,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
@@ -76,7 +77,15 @@ public final class ActivationController {
 	}
 
 	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
-		if (!desc.isActivatedBy(method) || !user.canBend(desc)) return false;
+		if (!desc.isActivatedBy(method)) return false;
+
+		boolean removed = false;
+		if (desc.canBypassCooldown()) {
+			removed = user.getBendingConditional().remove(BendingConditions.COOLDOWN);
+		}
+		if (!user.canBend(desc)) return false;
+		if (removed) user.getBendingConditional().add(BendingConditions.COOLDOWN);
+
 		if (!game.getProtectionSystem().canBuild(user, user.getLocBlock())) return false;
 		Ability ability = desc.createAbility();
 		if (ability.activate(user, method)) {
@@ -114,23 +123,11 @@ public final class ActivationController {
 		removed |= manager.destroyInstanceType(user, AirWheel.class);
 		if (removed) return;
 
-		AirBurst.activateCone(user);
-		WaterManipulation.launch(user);
 		PhaseChange.freeze(user);
 		WaterWave.freeze(user);
-		IceCrawl.launch(user);
 		Iceberg.launch(user);
-		WaterRing.launchShard(user);
 		WaterGimbal.launch(user);
-		EarthBlast.launch(user);
-		EarthShot.launch(user);
-		EarthSmash.launch(user);
-		MetalCable.launch(user);
-		EarthLine.launch(user);
-		Shockwave.activateCone(user);
 		HeatControl.act(user);
-		Combustion.explode(user);
-		FireBurst.activateCone(user);
 
 		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
 			game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
@@ -144,10 +141,6 @@ public final class ActivationController {
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
 		if (sneaking) {
 			PhaseChange.melt(user);
-			MetalCable.attemptDestroy(user);
-			EarthSmash.attemptGrab(user);
-			EarthGlove.attemptDestroy(user);
-			EarthBlast.attemptDestroy(user);
 		}
 
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;

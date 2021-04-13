@@ -129,7 +129,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	}
 
 	public static void act(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("HeatControl")) {
+		if (user.getSelectedAbilityName().equals("HeatControl")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
 		}
 	}

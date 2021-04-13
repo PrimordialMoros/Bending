@@ -19,7 +19,6 @@
 
 package me.moros.bending.locale;
 
-import com.google.common.collect.ImmutableSet;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;

@@ -116,7 +116,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
 	}
 
 	public static void setTarget(User user, LivingEntity entity) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("HealingWaters")) {
+		if (user.getSelectedAbilityName().equals("HealingWaters")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HealingWaters.class)
 				.ifPresent(hw -> hw.setTarget(entity));
 		}

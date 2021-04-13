@@ -82,7 +82,7 @@ public abstract class AbstractBlockShot implements Updatable {
 
 		redirect();
 		settingUp = true;
-		firstDestination = getCurrent().add(Vector3.HALF);
+		firstDestination = getCenter();
 		int targetY = NumberConversions.floor(target.getY());
 		int currentY = current.getY();
 		Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
@@ -104,7 +104,7 @@ public abstract class AbstractBlockShot implements Updatable {
 			settingUp = false;
 		}
 		Vector3 dest = settingUp ? firstDestination : target;
-		Vector3 currentVector = getCurrent().add(Vector3.HALF);
+		Vector3 currentVector = getCenter();
 		direction = dest.subtract(currentVector).normalize();
 		Vector3 originalVector = new Vector3(currentVector.toArray());
 		currentVector = currentVector.add(direction).floor().add(Vector3.HALF);
@@ -128,7 +128,7 @@ public abstract class AbstractBlockShot implements Updatable {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
 			return UpdateResult.REMOVE;
 		}
-		collider = BOX.at(getCurrent());
+		collider = BOX.at(getCenter().floor());
 		if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
 			return UpdateResult.REMOVE;
 		}
@@ -141,7 +141,7 @@ public abstract class AbstractBlockShot implements Updatable {
 				ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else {
-				TempBlock.create(current, material.createBlockData(), true);
+				TempBlock.create(current, material.createBlockData(), false);
 			}
 		} else {
 			return UpdateResult.REMOVE;
@@ -161,8 +161,8 @@ public abstract class AbstractBlockShot implements Updatable {
 		return previousBlock;
 	}
 
-	public Vector3 getCurrent() {
-		return new Vector3(current);
+	public Vector3 getCenter() {
+		return new Vector3(current).add(Vector3.HALF);
 	}
 
 	public abstract boolean onEntityHit(@NonNull Entity entity);

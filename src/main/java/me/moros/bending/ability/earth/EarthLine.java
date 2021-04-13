@@ -105,6 +105,11 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -155,12 +160,6 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
-		}
-	}
-
 	private void launch() {
 		if (earthLine != null) {
 			earthLine.raiseSpikes();
@@ -179,7 +178,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 	}
 
 	public static void setPrisonMode(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthLine")) {
+		if (user.getSelectedAbilityName().equals("EarthLine")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::setPrisonMode);
 		}
 	}

@@ -89,6 +89,20 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+				.collect(Collectors.toList());
+			redirectAny(user);
+			for (WaterManipulation manip : manips) {
+				if (manip.manip == null) {
+					manip.launch();
+				} else {
+					manip.manip.redirect();
+				}
+			}
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -125,11 +139,11 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		if (manip != null) {
 			SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
 			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				effect.play(manip.getCurrent().toLocation(user.getWorld()));
+				effect.play(manip.getCenter().toLocation(user.getWorld()));
 			}
 
 			if (isIce) {
-				Location center = manip.getCurrent().add(Vector3.HALF).toLocation(user.getWorld());
+				Location center = manip.getCenter().toLocation(user.getWorld());
 				ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
 					.offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
 				ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
@@ -165,23 +179,8 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterManipulation")) {
-			Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
-				.collect(Collectors.toList());
-			redirectAny(user);
-			for (WaterManipulation manip : manips) {
-				if (manip.manip == null) {
-					manip.launch();
-					return;
-				} else {
-					manip.manip.redirect();
-				}
-			}
-		}
-	}
-
 	private void launch() {
+		if (user.isOnCooldown(getDescription())) return;
 		State state = states.getCurrent();
 		if (state instanceof SelectedSource) {
 			state.complete();
@@ -201,7 +200,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
 			.filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
 		for (WaterManipulation manip : manips) {
-			Vector3 center = manip.manip.getCurrent().add(Vector3.HALF);
+			Vector3 center = manip.manip.getCenter();
 			double dist = center.distanceSq(manip.getUser().getEyeLocation());
 			double dist2 = center.distanceSq(user.getEyeLocation());
 			if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) continue;
@@ -255,7 +254,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			Vector3 origin = getCurrent().add(Vector3.HALF);
+			Vector3 origin = getCenter();
 			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
 			entity.setVelocity(push.clampVelocity());

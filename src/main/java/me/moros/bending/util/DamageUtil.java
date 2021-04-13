@@ -20,6 +20,7 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
@@ -28,7 +29,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -64,9 +64,9 @@ public final class DamageUtil {
 		return false;
 	}
 
-	public static boolean handleBendingDeath(@NonNull Player player) {
+	public static @Nullable Component getBendingDeathMessage(@NonNull Player player) {
 		BendingDamage cause = cache.remove(player.getUniqueId());
-		if (cause == null) return false;
+		if (cause == null) return null;
 
 		AbilityDescription ability = cause.desc;
 		String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
@@ -74,9 +74,7 @@ public final class DamageUtil {
 		if (msg == null) msg = DEATH_MESSAGE;
 		Component target = Component.text(player.getName());
 		Component source = Component.text(cause.source.getName());
-		Component comp = msg.args(target, source, ability.getDisplayName());
-		Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(comp));
-		return true;
+		return msg.args(target, source, ability.getDisplayName());
 	}
 
 	private static class BendingDamage {

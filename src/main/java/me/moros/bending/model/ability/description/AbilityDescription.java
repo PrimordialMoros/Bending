@@ -49,6 +49,7 @@ public class AbilityDescription {
 	private final boolean canBind;
 	private final boolean harmless;
 	private final boolean sourcesPlants;
+	private final boolean bypassCooldown;
 	private final int hashcode;
 
 	private AbilityDescription(AbilityDescriptionBuilder builder) {
@@ -60,7 +61,8 @@ public class AbilityDescription {
 		hidden = builder.hidden;
 		harmless = builder.harmless;
 		sourcesPlants = builder.sourcesPlants;
-		hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcesPlants);
+		bypassCooldown = builder.bypassCooldown;
+		hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcesPlants, bypassCooldown);
 		createAbility(); // Init config values
 	}
 
@@ -90,6 +92,10 @@ public class AbilityDescription {
 
 	public boolean canSourcePlant() {
 		return sourcesPlants;
+	}
+
+	public boolean canBypassCooldown() {
+		return bypassCooldown;
 	}
 
 	public boolean isActivatedBy(@NonNull ActivationMethod method) {
@@ -144,9 +150,9 @@ public class AbilityDescription {
 	 */
 	public @NonNull AbilityDescriptionBuilder builder() {
 		return new AbilityDescriptionBuilder(name, constructor)
-			.setElement(element).setActivation(activationMethods)
-			.setHidden(hidden).setHarmless(harmless)
-			.setSourcesPlants(sourcesPlants);
+			.element(element).activation(activationMethods)
+			.hidden(hidden).harmless(harmless)
+			.sourcesPlants(sourcesPlants);
 	}
 
 	public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
@@ -162,46 +168,52 @@ public class AbilityDescription {
 		private boolean hidden = false;
 		private boolean harmless = false;
 		private boolean sourcesPlants = false;
+		private boolean bypassCooldown = false;
 
 		public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
 			this.name = name;
 			this.constructor = constructor;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setElement(@NonNull Element element) {
+		public @NonNull AbilityDescriptionBuilder element(@NonNull Element element) {
 			this.element = element;
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull Collection<@NonNull ActivationMethod> methods) {
+		public @NonNull AbilityDescriptionBuilder activation(@NonNull Collection<@NonNull ActivationMethod> methods) {
 			activationMethods = EnumSet.copyOf(methods);
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setActivation(@NonNull ActivationMethod method, @Nullable ActivationMethod @NonNull ... methods) {
+		public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod @NonNull ... methods) {
 			Collection<ActivationMethod> c = new ArrayList<>();
 			if (methods != null) c.addAll(Arrays.asList(methods));
 			c.add(method);
-			return setActivation(c);
+			return activation(c);
 		}
 
-		public @NonNull AbilityDescriptionBuilder setCanBind(boolean canBind) {
+		public @NonNull AbilityDescriptionBuilder canBind(boolean canBind) {
 			this.canBind = canBind;
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setHidden(boolean hidden) {
+		public @NonNull AbilityDescriptionBuilder hidden(boolean hidden) {
 			this.hidden = hidden;
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setHarmless(boolean harmless) {
+		public @NonNull AbilityDescriptionBuilder harmless(boolean harmless) {
 			this.harmless = harmless;
 			return this;
 		}
 
-		public @NonNull AbilityDescriptionBuilder setSourcesPlants(boolean sourcesPlants) {
+		public @NonNull AbilityDescriptionBuilder sourcesPlants(boolean sourcesPlants) {
 			this.sourcesPlants = sourcesPlants;
+			return this;
+		}
+
+		public @NonNull AbilityDescriptionBuilder bypassCooldown(boolean bypassCooldown) {
+			this.bypassCooldown = bypassCooldown;
 			return this;
 		}
 

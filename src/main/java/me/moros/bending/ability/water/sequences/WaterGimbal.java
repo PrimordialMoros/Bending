@@ -137,7 +137,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 	}
 
 	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("Torrent")) {
+		if (user.getSelectedAbilityName().equals("Torrent")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
 		}
 	}

@@ -103,7 +103,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 		}
 
 		if (charging) {
-			if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceCrawl"))
+			if (!user.getSelectedAbilityName().equals("IceCrawl"))
 				return UpdateResult.REMOVE;
 			if (System.currentTimeMillis() > startTime + userConfig.chargeTime) {
 				ParticleUtil.create(Particle.SNOW_SHOVEL, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();

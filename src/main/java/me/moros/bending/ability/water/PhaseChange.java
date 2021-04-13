@@ -90,13 +90,13 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	}
 
 	public static void freeze(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+		if (user.getSelectedAbilityName().equals("PhaseChange")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
 		}
 	}
 
 	public static void melt(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("PhaseChange")) {
+		if (user.getSelectedAbilityName().equals("PhaseChange")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
 		}
 	}

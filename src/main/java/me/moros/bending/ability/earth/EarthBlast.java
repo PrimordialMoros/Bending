@@ -74,6 +74,21 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.SNEAK && attemptDestroy(user)) {
+			return false;
+		} else if (method == ActivationMethod.ATTACK) {
+			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+				.collect(Collectors.toList());
+			for (EarthBlast eblast : eblasts) {
+				if (eblast.blast == null) {
+					eblast.launch();
+				} else {
+					eblast.blast.redirect();
+				}
+			}
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -116,22 +131,8 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthBlast")) {
-			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
-				.collect(Collectors.toList());
-			for (EarthBlast eblast : eblasts) {
-				if (eblast.blast == null) {
-					eblast.launch();
-					return;
-				} else {
-					eblast.blast.redirect();
-				}
-			}
-		}
-	}
-
 	private void launch() {
+		if (user.isOnCooldown(getDescription())) return;
 		State state = states.getCurrent();
 		if (state instanceof SelectedSource) {
 			state.complete();
@@ -147,23 +148,22 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	public static void attemptDestroy(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthBlast")) {
-			Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
-				.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
-			for (EarthBlast eb : blasts) {
-				Vector3 center = eb.blast.getCurrent().add(Vector3.HALF);
-				double dist = center.distanceSq(user.getEyeLocation());
-				if (dist > config.shatterRange * config.shatterRange) continue;
-				if (eb.blast.getCollider().intersects(user.getRay(dist))) {
-					Vector3 dir = center.subtract(user.getEyeLocation());
-					if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
-						Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(eb, user);
-						eb.blast.redirect();
-					}
+	private static boolean attemptDestroy(User user) {
+		Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
+			.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
+		for (EarthBlast eb : blasts) {
+			Vector3 center = eb.blast.getCenter();
+			double dist = center.distanceSq(user.getEyeLocation());
+			if (dist > config.shatterRange * config.shatterRange) continue;
+			if (eb.blast.getCollider().intersects(user.getRay(dist))) {
+				Vector3 dir = center.subtract(user.getEyeLocation());
+				if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
+					Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(eb);
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	@Override
@@ -211,7 +211,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			Vector3 origin = getCurrent().add(Vector3.HALF);
+			Vector3 origin = getCenter();
 			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
 			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
 			entity.setVelocity(push.clampVelocity());
@@ -241,7 +241,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
 
-			cooldown = abilityNode.node("cooldown").getLong(750);
+			cooldown = abilityNode.node("cooldown").getLong(1000);
 			range = abilityNode.node("range").getDouble(28.0);
 			selectRange = abilityNode.node("select-range").getDouble(12.0);
 			damage = abilityNode.node("damage").getDouble(2.25);

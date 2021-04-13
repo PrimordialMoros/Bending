@@ -55,6 +55,7 @@ public class Catapult extends AbilityInstance implements Ability {
 	private Block base;
 	private Pillar pillar;
 
+	private boolean sneak;
 	private long startTime;
 
 	public Catapult(@NonNull AbilityDescription desc) {
@@ -75,6 +76,9 @@ public class Catapult extends AbilityInstance implements Ability {
 		if (base.isLiquid() || !EarthMaterials.isEarthbendable(user, base) || !TempBlock.isBendable(base)) {
 			return false;
 		}
+
+		sneak = method == ActivationMethod.SNEAK;
+
 		launch();
 		startTime = System.currentTimeMillis();
 		return true;
@@ -95,7 +99,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
 	public boolean launch() {
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		double power = user.isSneaking() ? userConfig.power * 0.666 : userConfig.power;
+		double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
 		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(1).orElse(null);
@@ -134,7 +138,9 @@ public class Catapult extends AbilityInstance implements Ability {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
 		@Attribute(Attribute.STRENGTH)
-		public double power;
+		public double sneakPower;
+		@Attribute(Attribute.STRENGTH)
+		public double clickPower;
 		public double angle;
 
 		@Override
@@ -142,8 +148,9 @@ public class Catapult extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
 
 			cooldown = abilityNode.node("cooldown").getLong(3000);
-			power = abilityNode.node("power").getDouble(2.4);
-			angle = FastMath.toRadians(abilityNode.node("angle").getInt(70));
+			sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
+			clickPower = abilityNode.node("click-power").getDouble(1.8);
+			angle = FastMath.toRadians(abilityNode.node("angle").getInt(60));
 		}
 	}
 }

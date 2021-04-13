@@ -79,6 +79,11 @@ public class IceCrawl extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -116,12 +121,6 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			return iceLine.update();
 		} else {
 			return states.update();
-		}
-	}
-
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceCrawl")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
 		}
 	}
 

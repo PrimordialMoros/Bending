@@ -98,8 +98,14 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count() >= 2)
+		if (method == ActivationMethod.SNEAK) {
+			attemptDestroy(user);
 			return false;
+		}
+
+		if (user.isOnCooldown(getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count() >= 2) {
+			return false;
+		}
 
 		this.user = user;
 		recalculateConfig();
@@ -287,18 +293,16 @@ public class EarthGlove extends AbilityInstance implements Ability {
 		onDestroy();
 	}
 
-	public static void attemptDestroy(@NonNull User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthGlove")) {
-			CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
-				if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
-					EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
-					if (ability != null && !user.equals(ability.getUser())) {
-						ability.shatterGlove();
-					}
+	private static void attemptDestroy(@NonNull User user) {
+		CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
+			if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
+				EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
+				if (ability != null && !user.equals(ability.getUser())) {
+					ability.shatterGlove();
 				}
-				return true;
-			}, false, false);
-		}
+			}
+			return true;
+		}, false, false);
 	}
 
 	private static class Config extends Configurable {

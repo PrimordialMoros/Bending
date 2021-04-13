@@ -158,7 +158,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	}
 
 	private void form() {
-		if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("OctopusForm")) return;
+		if (!user.getSelectedAbilityName().equals("OctopusForm")) return;
 		ring.complete().forEach(this::clean);
 		formed = true;
 		nextTentacleFormTime = System.currentTimeMillis() + 150;

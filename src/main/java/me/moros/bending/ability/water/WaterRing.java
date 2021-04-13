@@ -109,16 +109,18 @@ public class WaterRing extends AbilityInstance implements Ability {
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
 			return false;
 		}
-		if (method == ActivationMethod.ATTACK && user.isSneaking()) {
-			if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterRing")) {
-				if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class)) {
-					return false;
+		Optional<WaterRing> ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class);
+		if (ring.isPresent()) {
+			if (method == ActivationMethod.ATTACK && user.getSelectedAbilityName().equals("WaterRing")) {
+				if (user.isSneaking()) {
+					Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(ring.get());
+				} else {
+					ring.get().launchShard();
 				}
 			}
-		}
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
 			return false;
 		}
+
 		this.user = user;
 		recalculateConfig();
 		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable);
@@ -208,7 +210,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 			lastBlock = current;
 		}
 
-		if (user.isSneaking() && !user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("OctopusForm")) {
+		if (user.isSneaking() && !user.getSelectedAbilityName().equals("OctopusForm")) {
 			long time = System.currentTimeMillis();
 			if (sneakStartTime == 0) {
 				sneakStartTime = time;
@@ -300,7 +302,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	public void launchShard() {
+	private void launchShard() {
 		if (!user.canBend(getDescription()) || ring.isEmpty() || launchedShards >= userConfig.shardAmount) return;
 		long time = System.currentTimeMillis();
 		if (time > nextShardTime) {
@@ -309,12 +311,6 @@ public class WaterRing extends AbilityInstance implements Ability {
 			Vector3 origin = new Vector3(getClosestRingBlock());
 			Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.shardRange + radius);
 			shards.add(new IceShard(new Ray(origin, lookingDir)));
-		}
-	}
-
-	public static void launchShard(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("WaterRing")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).ifPresent(WaterRing::launchShard);
 		}
 	}
 

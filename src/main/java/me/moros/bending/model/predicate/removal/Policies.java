@@ -75,7 +75,7 @@ public enum Policies implements RemovalPolicy {
 		}
 
 		@NonNull Set<@NonNull RemovalPolicy> getPolicies() {
-			return policies;
+			return new HashSet<>(policies);
 		}
 	}
 }

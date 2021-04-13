@@ -48,8 +48,15 @@ public class AirBurst extends AbstractBurst implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+				.ifPresent(b -> b.release(true));
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
+
 		released = false;
 		if (method == ActivationMethod.FALL) {
 			if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
@@ -88,15 +95,8 @@ public class AirBurst extends AbstractBurst implements Ability {
 		return user;
 	}
 
-	public boolean isCharged() {
+	private boolean isCharged() {
 		return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
-	}
-
-	public static void activateCone(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("AirBurst")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
-				.ifPresent(b -> b.release(true));
-		}
 	}
 
 	private void release(boolean cone) {

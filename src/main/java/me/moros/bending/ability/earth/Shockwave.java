@@ -95,6 +95,12 @@ public class Shockwave extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(User user, ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Shockwave.class)
+				.ifPresent(s -> s.release(true));
+			return false;
+		}
+
 		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Shockwave.class)) return false;
 
 		this.user = user;
@@ -179,15 +185,8 @@ public class Shockwave extends AbilityInstance implements Ability {
 		return false;
 	}
 
-	public boolean isCharged() {
+	private boolean isCharged() {
 		return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
-	}
-
-	public static void activateCone(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("Shockwave")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Shockwave.class)
-				.ifPresent(s -> s.release(true));
-		}
 	}
 
 	private void release(boolean cone) {
@@ -200,7 +199,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 		Vector3 dir = user.getDirection().setY(0).normalize();
 		Rotation rotation = new Rotation(Vector3.PLUS_J, deltaAngle, RotationConvention.VECTOR_OPERATOR);
 		if (cone) {
-			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 2)).forEach(v ->
+			VectorMethods.createArc(dir, rotation, NumberConversions.ceil(range / 1.5)).forEach(v ->
 				streams.add(new Ripple(new Ray(origin, v.scalarMultiply(range)), 0))
 			);
 		} else {

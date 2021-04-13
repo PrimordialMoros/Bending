@@ -122,7 +122,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 			}
 			return UpdateResult.CONTINUE;
 		} else {
-			if (!user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceSpike")) {
+			if (!user.getSelectedAbilityName().equals("IceSpike")) {
 				return UpdateResult.REMOVE;
 			}
 			return states.update();
@@ -150,7 +150,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 	}
 
 	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("IceSpike")) {
+		if (user.getSelectedAbilityName().equals("IceSpike")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
 		}
 	}

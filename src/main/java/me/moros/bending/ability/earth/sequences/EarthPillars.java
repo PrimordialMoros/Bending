@@ -128,7 +128,7 @@ public class EarthPillars extends AbilityInstance implements Ability {
 	}
 
 	public static void onFall(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("Catapult")) {
+		if (user.getSelectedAbilityName().equals("Catapult")) {
 			if (pillarsDesc == null) {
 				pillarsDesc = Bending.getGame().getAbilityRegistry()
 					.getAbilityDescription("EarthPillars").orElseThrow(RuntimeException::new);
@@ -151,8 +151,8 @@ public class EarthPillars extends AbilityInstance implements Ability {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) return false;
 			affectedEntities.add(entity);
-			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
 			return true;
 		}
 	}

@@ -70,8 +70,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class EarthSmash extends AbilityInstance implements Ability {
@@ -91,11 +93,18 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		Optional<EarthSmash> grabbed = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthSmash.class)
+			.filter(s -> s.state instanceof GrabState).findAny();
+
 		if (method == ActivationMethod.SNEAK) {
-			boolean hasGrabbed = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthSmash.class)
-				.anyMatch(s -> s.state instanceof GrabState);
-			if (hasGrabbed) return false;
+			if (grabbed.isPresent() || attemptGrab(user)) return false;
+		} else if (method == ActivationMethod.ATTACK) {
+			grabbed.ifPresent(EarthSmash::launchBoulder);
+			return false;
 		}
+
+		if (user.isOnCooldown(getDescription())) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -149,37 +158,31 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		state = new GrabState();
 	}
 
-	public static void attemptGrab(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthSmash")) {
-			Block target = WorldMethods.blockCast(user.getWorld(), user.getRay(), config.grabRange).orElse(null);
-			EarthSmash earthSmash = getInstance(user, target);
-			if (earthSmash == null) return;
-			Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(earthSmash, user);
-			earthSmash.grabBoulder();
+	private static boolean attemptGrab(@NonNull User user) {
+		Block target = WorldMethods.blockCast(user.getWorld(), user.getRay(), config.grabRange).orElse(null);
+		EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
+		if (earthSmash == null) return false;
+		Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(earthSmash, user);
+		earthSmash.grabBoulder();
+		return true;
+	}
+
+	public static void attemptDestroy(@NonNull User user, @NonNull Block block) {
+		if (user.isSneaking() && user.getSelectedAbilityName().equals("EarthSmash")) {
+			EarthSmash earthSmash = getInstance(user, block, x -> true);
+			if (earthSmash != null && earthSmash.boulder != null) {
+				earthSmash.boulder.shatter();
+			}
 		}
 	}
 
-	public static void attemptDestroy(User user, Block block) {
-		if (user.isSneaking() && user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthSmash")) {
-			EarthSmash earthSmash = getInstance(user, block);
-			if (earthSmash != null && earthSmash.boulder != null) earthSmash.boulder.shatter();
-		}
-	}
-
-	private static @Nullable EarthSmash getInstance(User user, Block block) {
+	private static @Nullable EarthSmash getInstance(User user, Block block, Predicate<EarthSmash> filter) {
 		if (block == null) return null;
 		AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
 		return Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthSmash.class)
-			.filter(s -> s.state.canGrab())
+			.filter(filter)
 			.filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
 			.findAny().orElse(null);
-	}
-
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthSmash")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthSmash.class)
-				.filter(s -> s.state instanceof GrabState).findAny().ifPresent(EarthSmash::launchBoulder);
-		}
 	}
 
 	private void cleanAll() {
@@ -541,11 +544,11 @@ public class EarthSmash extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(7000);
 			radius = FastMath.max(3, abilityNode.node("radius").getInt(3));
 			chargeTime = abilityNode.node("charge-time").getLong(1250);
-			selectRange = abilityNode.node("select-range").getDouble(12.0);
+			selectRange = abilityNode.node("select-range").getDouble(10.0);
 			maxDuration = abilityNode.node("max-duration").getLong(45000);
 			raiseEntityPush = abilityNode.node("raise-entity-push").getDouble(0.85);
-			grabRange = abilityNode.node("grab-range").getDouble(12.0);
-			shootRange = abilityNode.node("range").getDouble(26.0);
+			grabRange = abilityNode.node("grab-range").getDouble(10.0);
+			shootRange = abilityNode.node("range").getDouble(16.0);
 			damage = abilityNode.node("damage").getDouble(3.5);
 			knockback = abilityNode.node("knockback").getDouble(2.8);
 			knockup = abilityNode.node("knockup").getDouble(0.15);

@@ -99,6 +99,12 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (method == ActivationMethod.ATTACK) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthShot.class)
+				.filter(e -> !e.launched).forEach(EarthShot::launch);
+			return false;
+		}
+
 		this.user = user;
 		recalculateConfig();
 
@@ -253,13 +259,6 @@ public class EarthShot extends AbilityInstance implements Ability {
 			return Mode.METAL;
 		} else {
 			return Mode.ROCK;
-		}
-	}
-
-	public static void launch(User user) {
-		if (user.getSelectedAbility().map(AbilityDescription::getName).orElse("").equals("EarthShot")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthShot.class)
-				.filter(e -> !e.launched).forEach(EarthShot::launch);
 		}
 	}
 

@@ -33,11 +33,9 @@ import me.moros.bending.ability.water.*;
 import me.moros.bending.ability.water.passives.*;
 import me.moros.bending.ability.water.sequences.*;
 import me.moros.bending.game.manager.CollisionManager;
-import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
 
@@ -47,6 +45,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static me.moros.bending.model.Element.*;
+import static me.moros.bending.model.ability.util.ActivationMethod.*;
 
 /**
  * Used to initialize all ability descriptions, sequences and collisions
@@ -77,7 +78,7 @@ public final class AbilityInitializer {
 		int collisionAmount = CollisionManager.registerCollisions(buildCollisions());
 
 		Bending.getLog().info("Registered " + abilityAmount + " core abilities and " + addonAmount + " addon abilities!");
-		Bending.getLog().info("Registered " + sequenceAmount  + " core sequences and " + addonSequences + " addon sequences!");
+		Bending.getLog().info("Registered " + sequenceAmount + " core sequences and " + addonSequences + " addon sequences!");
 		Bending.getLog().info("Registered " + collisionAmount + " collisions!");
 	}
 
@@ -97,317 +98,317 @@ public final class AbilityInitializer {
 
 	private void initAir() {
 		abilities.add(AbilityDescription.builder("AirAgility", AirAgility::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setCanBind(false).setHarmless(true).build());
+			.element(AIR).activation(PASSIVE)
+			.canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("GracefulDescent", GracefulDescent::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.PASSIVE)
-			.setCanBind(false).setHarmless(true).build());
+			.element(AIR).activation(PASSIVE)
+			.canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("AirSwipe", AirSwipe::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build());
+			.element(AIR).activation(ATTACK, SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("AirBlast", AirBlast::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK_RELEASE).build());
+			.element(AIR).activation(ATTACK, SNEAK_RELEASE).build());
 
 		abilities.add(AbilityDescription.builder("AirBurst", AirBurst::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build());
+			.element(AIR).activation(ATTACK, SNEAK, FALL).build());
 
 		abilities.add(AbilityDescription.builder("AirShield", AirShield::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
+			.element(AIR).activation(SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("AirSpout", AirSpout::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK).setHarmless(true).build());
+			.element(AIR).activation(ATTACK).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("AirPunch", AirPunch::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK).build());
+			.element(AIR).activation(ATTACK).build());
 
 		abilities.add(AbilityDescription.builder("Tornado", Tornado::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK).build());
+			.element(AIR).activation(SNEAK).build());
 
 		AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SNEAK, ActivationMethod.SNEAK_RELEASE).build();
+			.element(AIR).activation(SNEAK, SNEAK_RELEASE).build();
 		abilities.add(airBlade);
 
 		AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.ATTACK).setHarmless(true).build();
+			.element(AIR).activation(ATTACK).harmless(true).build();
 		abilities.add(airScooter);
 
 		AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel::new)
-			.setElement(Element.AIR).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(AIR).activation(SEQUENCE).build();
 		abilities.add(airWheel);
 
 		sequences.put(airWheel, new Sequence(
-			new AbilityAction(airScooter, ActivationMethod.SNEAK),
-			new AbilityAction(airScooter, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(airScooter, ActivationMethod.SNEAK),
-			new AbilityAction(airScooter, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(airBlade, ActivationMethod.ATTACK)
+			new AbilityAction(airScooter, SNEAK),
+			new AbilityAction(airScooter, SNEAK_RELEASE),
+			new AbilityAction(airScooter, SNEAK),
+			new AbilityAction(airScooter, SNEAK_RELEASE),
+			new AbilityAction(airBlade, ATTACK)
 		));
 	}
 
 	private void initWater() {
 		abilities.add(AbilityDescription.builder("FastSwim", FastSwim::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
+			.element(WATER).activation(PASSIVE).canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
+			.element(WATER).activation(PASSIVE).canBind(false).harmless(true).build());
 
 		AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setSourcesPlants(true).build();
+			.element(WATER).activation(SNEAK, ATTACK).sourcesPlants(true).bypassCooldown(true).build();
 		abilities.add(waterManipulation);
 
 		abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.ATTACK).setHarmless(true).build());
+			.element(WATER).activation(ATTACK).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setHarmless(true).build());
+			.element(WATER).activation(SNEAK).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("WaterBubble", WaterBubble::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
+			.element(WATER).activation(SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("OctopusForm", OctopusForm::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.ATTACK).setSourcesPlants(true).build());
+			.element(WATER).activation(ATTACK).sourcesPlants(true).build());
 
 		AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.ATTACK).setSourcesPlants(true).build();
+			.element(WATER).activation(ATTACK).sourcesPlants(true).build();
 		abilities.add(waterRing);
 
 		AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).setCanBind(false).build();
+			.element(WATER).activation(SNEAK).canBind(false).build();
 		abilities.add(waterWave);
 
 		AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.ATTACK).setSourcesPlants(true).build();
+			.element(WATER).activation(ATTACK).sourcesPlants(true).bypassCooldown(true).build();
 		abilities.add(torrent);
 
 		AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.PASSIVE).build();
+			.element(WATER).activation(PASSIVE).build();
 		abilities.add(phaseChange);
 
 		AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build();
+			.element(WATER).activation(ATTACK, SNEAK).build();
 		abilities.add(iceCrawl);
 
 		AbilityDescription iceSpike = AbilityDescription.builder("IceSpike", IceSpike::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build();
+			.element(WATER).activation(ATTACK, SNEAK).build();
 		abilities.add(iceSpike);
 
 		abilities.add(AbilityDescription.builder("IceWall", IceWall::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SNEAK).build());
+			.element(WATER).activation(SNEAK).build());
 
 		AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(WATER).activation(SEQUENCE).build();
 		abilities.add(waterGimbal);
 
 		AbilityDescription frostBreath = AbilityDescription.builder("FrostBreath", FrostBreath::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(WATER).activation(SEQUENCE).build();
 		abilities.add(frostBreath);
 
 		AbilityDescription iceberg = AbilityDescription.builder("Iceberg", Iceberg::new)
-			.setElement(Element.WATER).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(WATER).activation(SEQUENCE).build();
 		abilities.add(iceberg);
 
 		sequences.put(waterGimbal, new Sequence(
-			new AbilityAction(waterRing, ActivationMethod.SNEAK),
-			new AbilityAction(waterRing, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(waterRing, ActivationMethod.SNEAK),
-			new AbilityAction(waterRing, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(torrent, ActivationMethod.SNEAK)
+			new AbilityAction(waterRing, SNEAK),
+			new AbilityAction(waterRing, SNEAK_RELEASE),
+			new AbilityAction(waterRing, SNEAK),
+			new AbilityAction(waterRing, SNEAK_RELEASE),
+			new AbilityAction(torrent, SNEAK)
 		));
 
 		sequences.put(frostBreath, new Sequence(
-			new AbilityAction(iceCrawl, ActivationMethod.SNEAK),
-			new AbilityAction(iceCrawl, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(iceCrawl, ActivationMethod.SNEAK)
+			new AbilityAction(iceCrawl, SNEAK),
+			new AbilityAction(iceCrawl, SNEAK_RELEASE),
+			new AbilityAction(phaseChange, SNEAK),
+			new AbilityAction(phaseChange, SNEAK_RELEASE),
+			new AbilityAction(iceCrawl, SNEAK)
 		));
 
 		sequences.put(iceberg, new Sequence(
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
-			new AbilityAction(iceSpike, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(phaseChange, ActivationMethod.SNEAK),
-			new AbilityAction(iceSpike, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(iceSpike, ActivationMethod.SNEAK)
+			new AbilityAction(phaseChange, SNEAK),
+			new AbilityAction(iceSpike, SNEAK_RELEASE),
+			new AbilityAction(phaseChange, SNEAK),
+			new AbilityAction(iceSpike, SNEAK_RELEASE),
+			new AbilityAction(iceSpike, SNEAK)
 		));
 	}
 
 	private void initEarth() {
 		abilities.add(AbilityDescription.builder("DensityShift", DensityShift::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
+			.element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
+			.element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.PASSIVE).setCanBind(false).setHarmless(true).build());
+			.element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(SNEAK, ATTACK).bypassCooldown(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthSmash", EarthSmash::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("EarthShot", EarthShot::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("EarthLine", EarthLine::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(SNEAK).build());
 
 		AbilityDescription earthArmor = AbilityDescription.builder("EarthArmor", EarthArmor::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).build();
+			.element(EARTH).activation(ATTACK).build();
 		abilities.add(earthArmor);
 
 		AbilityDescription bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).setHidden(true).build();
+			.element(EARTH).activation(SEQUENCE).hidden(true).build();
 		abilities.add(bulwark);
 
 		AbilityDescription earthGlove = AbilityDescription.builder("EarthGlove", EarthGlove::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).build();
+			.element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build();
 		abilities.add(earthGlove);
 
 		abilities.add(AbilityDescription.builder("RaiseEarth", RaiseEarth::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).build());
 
 		AbilityDescription collapse = AbilityDescription.builder("Collapse", Collapse::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build();
+			.element(EARTH).activation(ATTACK, SNEAK).build();
 		abilities.add(collapse);
 
 		AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).setHarmless(true).build();
+			.element(EARTH).activation(ATTACK, SNEAK).harmless(true).build();
 		abilities.add(catapult);
 
 		AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK, ActivationMethod.FALL).build();
+			.element(EARTH).activation(ATTACK, SNEAK, FALL).build();
 		abilities.add(shockwave);
 
 		AbilityDescription earthPillars = AbilityDescription.builder("EarthPillars", EarthPillars::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE, ActivationMethod.FALL).build();
+			.element(EARTH).activation(SEQUENCE, FALL).build();
 		abilities.add(earthPillars);
 
 		AbilityDescription earthShards = AbilityDescription.builder("EarthShards", EarthShards::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(EARTH).activation(SEQUENCE).build();
 		abilities.add(earthShards);
 
 		abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.ATTACK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
 		abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
-			.setElement(Element.EARTH).setActivation(ActivationMethod.SNEAK).build());
+			.element(EARTH).activation(SNEAK).build());
 
 		sequences.put(bulwark, new Sequence(
-			new AbilityAction(earthArmor, ActivationMethod.SNEAK),
-			new AbilityAction(earthArmor, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(earthArmor, SNEAK),
+			new AbilityAction(earthArmor, SNEAK_RELEASE)
 		));
 
 		sequences.put(earthPillars, new Sequence(
-			new AbilityAction(shockwave, ActivationMethod.SNEAK),
-			new AbilityAction(catapult, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(shockwave, SNEAK),
+			new AbilityAction(catapult, SNEAK_RELEASE)
 		));
 
 		sequences.put(earthShards, new Sequence(
-			new AbilityAction(earthGlove, ActivationMethod.SNEAK),
-			new AbilityAction(collapse, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(collapse, ActivationMethod.SNEAK),
-			new AbilityAction(earthGlove, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(earthGlove, SNEAK),
+			new AbilityAction(collapse, SNEAK_RELEASE),
+			new AbilityAction(collapse, SNEAK),
+			new AbilityAction(earthGlove, SNEAK_RELEASE)
 		));
 	}
 
 	private void initFire() {
 		AbilityDescription fireBlast = AbilityDescription.builder("FireBlast", FireBlast::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build();
+			.element(FIRE).activation(ATTACK, SNEAK).build();
 		abilities.add(fireBlast);
 
 		abilities.add(AbilityDescription.builder("FireBurst", FireBurst::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+			.element(FIRE).activation(ATTACK, SNEAK).build());
 
 		AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.PASSIVE).build();
+			.element(FIRE).activation(PASSIVE).build();
 		abilities.add(heatControl);
 
 		abilities.add(AbilityDescription.builder("Blaze", Blaze::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build());
+			.element(FIRE).activation(ATTACK, SNEAK).build());
 
 		AbilityDescription fireShield = AbilityDescription.builder("FireShield", FireShield::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.ATTACK, ActivationMethod.SNEAK).build();
+			.element(FIRE).activation(ATTACK, SNEAK).build();
 		abilities.add(fireShield);
 
 		AbilityDescription fireJet = AbilityDescription.builder("FireJet", FireJet::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.ATTACK).setHarmless(true).build();
+			.element(FIRE).activation(ATTACK).harmless(true).build();
 		abilities.add(fireJet);
 
 		AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.ATTACK).build();
+			.element(FIRE).activation(ATTACK).build();
 		abilities.add(fireWall);
 
 		AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(FIRE).activation(SEQUENCE).build();
 		abilities.add(fireWave);
 
 		AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).setHarmless(true).build();
+			.element(FIRE).activation(SEQUENCE).harmless(true).build();
 		abilities.add(jetBlast);
 
 		AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(FIRE).activation(SEQUENCE).build();
 		abilities.add(fireKick);
 
 		AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(FIRE).activation(SEQUENCE).build();
 		abilities.add(fireSpin);
 
 		AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SEQUENCE).build();
+			.element(FIRE).activation(SEQUENCE).build();
 		abilities.add(fireWheel);
 
 		abilities.add(AbilityDescription.builder("Bolt", Bolt::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+			.element(FIRE).activation(SNEAK).build());
 
 		abilities.add(AbilityDescription.builder("Combustion", Combustion::new)
-			.setElement(Element.FIRE).setActivation(ActivationMethod.SNEAK).build());
+			.element(FIRE).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
 		sequences.put(fireWave, new Sequence(
-			new AbilityAction(heatControl, ActivationMethod.SNEAK),
-			new AbilityAction(heatControl, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(heatControl, ActivationMethod.SNEAK),
-			new AbilityAction(heatControl, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(fireWall, ActivationMethod.ATTACK)
+			new AbilityAction(heatControl, SNEAK),
+			new AbilityAction(heatControl, SNEAK_RELEASE),
+			new AbilityAction(heatControl, SNEAK),
+			new AbilityAction(heatControl, SNEAK_RELEASE),
+			new AbilityAction(fireWall, ATTACK)
 		));
 
 		sequences.put(jetBlast, new Sequence(
-			new AbilityAction(fireJet, ActivationMethod.SNEAK),
-			new AbilityAction(fireJet, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(fireJet, ActivationMethod.SNEAK),
-			new AbilityAction(fireJet, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(fireShield, ActivationMethod.SNEAK),
-			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE),
-			new AbilityAction(fireJet, ActivationMethod.ATTACK)
+			new AbilityAction(fireJet, SNEAK),
+			new AbilityAction(fireJet, SNEAK_RELEASE),
+			new AbilityAction(fireJet, SNEAK),
+			new AbilityAction(fireJet, SNEAK_RELEASE),
+			new AbilityAction(fireShield, SNEAK),
+			new AbilityAction(fireShield, SNEAK_RELEASE),
+			new AbilityAction(fireJet, ATTACK)
 		));
 
 		sequences.put(fireKick, new Sequence(
-			new AbilityAction(fireBlast, ActivationMethod.ATTACK),
-			new AbilityAction(fireBlast, ActivationMethod.ATTACK),
-			new AbilityAction(fireBlast, ActivationMethod.SNEAK),
-			new AbilityAction(fireBlast, ActivationMethod.ATTACK)
+			new AbilityAction(fireBlast, ATTACK),
+			new AbilityAction(fireBlast, ATTACK),
+			new AbilityAction(fireBlast, SNEAK),
+			new AbilityAction(fireBlast, ATTACK)
 		));
 
 		sequences.put(fireSpin, new Sequence(
-			new AbilityAction(fireBlast, ActivationMethod.ATTACK),
-			new AbilityAction(fireBlast, ActivationMethod.ATTACK),
-			new AbilityAction(fireShield, ActivationMethod.ATTACK),
-			new AbilityAction(fireShield, ActivationMethod.SNEAK),
-			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(fireBlast, ATTACK),
+			new AbilityAction(fireBlast, ATTACK),
+			new AbilityAction(fireShield, ATTACK),
+			new AbilityAction(fireShield, SNEAK),
+			new AbilityAction(fireShield, SNEAK_RELEASE)
 		));
 
 		sequences.put(fireWheel, new Sequence(
-			new AbilityAction(fireShield, ActivationMethod.SNEAK),
-			new AbilityAction(fireShield, ActivationMethod.INTERACT_BLOCK),
-			new AbilityAction(fireShield, ActivationMethod.INTERACT_BLOCK),
-			new AbilityAction(fireShield, ActivationMethod.SNEAK_RELEASE)
+			new AbilityAction(fireShield, SNEAK),
+			new AbilityAction(fireShield, INTERACT_BLOCK),
+			new AbilityAction(fireShield, INTERACT_BLOCK),
+			new AbilityAction(fireShield, SNEAK_RELEASE)
 		));
 	}
 }
