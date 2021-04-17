@@ -49,6 +49,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -161,7 +162,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-			double distance = center.distance(VectorMethods.getEntityCenter(entity));
+			double distance = center.distance(EntityMethods.getEntityCenter(entity));
 			double halfSize = size / 2;
 			double factor = (distance <= halfSize) ? 1 : (distance - halfSize) / size;
 			DamageUtil.damageEntity(entity, user, damage * factor, getDescription());
@@ -169,7 +170,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			return true;
 		}, true, true);
 
-		FragileStructure.attemptDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+		FragileStructure.tryDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 
 		if (loc.getBlock().isLiquid()) return;
 		Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();

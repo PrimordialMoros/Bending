@@ -23,7 +23,9 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -128,6 +130,11 @@ public interface Message {
 
 	Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", DARK_AQUA)
 		.args(text(author, GREEN), text(link, GREEN));
+
+	Args0 BENDING_BOARD_TITLE = () -> translatable("bending.board.title", Style.style(TextDecoration.BOLD));
+
+	// Scoreboard items not translatable yet?
+	Args2<String, String> BENDING_BOARD_EMPTY_SLOT = (prefix, slot) -> text(prefix).append(text("-- Slot " + slot + " --", DARK_GRAY));
 
 	static Component brand(ComponentLike message) {
 		return PREFIX.asComponent().append(message);

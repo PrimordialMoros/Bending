@@ -43,7 +43,6 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
@@ -151,7 +150,7 @@ public class FireShield extends AbilityInstance implements Ability {
 			location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.diskRange));
 			double r = userConfig.diskRadius;
 			AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
-			Vector3 right = UserMethods.getRightSide(user);
+			Vector3 right = user.getRightSide();
 			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
 			rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getPitch()), RotationConvention.VECTOR_OPERATOR));
 			disk = new Disk(new OBB(aabb, rotation).addPosition(location), new Sphere(location, userConfig.diskRadius));

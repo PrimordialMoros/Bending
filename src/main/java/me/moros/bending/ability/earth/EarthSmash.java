@@ -50,8 +50,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
@@ -97,7 +96,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 			.filter(s -> s.state instanceof GrabState).findAny();
 
 		if (method == ActivationMethod.SNEAK) {
-			if (grabbed.isPresent() || attemptGrab(user)) return false;
+			if (grabbed.isPresent() || tryGrab(user)) return false;
 		} else if (method == ActivationMethod.ATTACK) {
 			grabbed.ifPresent(EarthSmash::launchBoulder);
 			return false;
@@ -158,7 +157,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		state = new GrabState();
 	}
 
-	private static boolean attemptGrab(@NonNull User user) {
+	private static boolean tryGrab(@NonNull User user) {
 		Block target = WorldMethods.blockCast(user.getWorld(), user.getRay(), config.grabRange).orElse(null);
 		EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
 		if (earthSmash == null) return false;
@@ -167,7 +166,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		return true;
 	}
 
-	public static void attemptDestroy(@NonNull User user, @NonNull Block block) {
+	public static void tryDestroy(@NonNull User user, @NonNull Block block) {
 		if (user.isSneaking() && user.getSelectedAbilityName().equals("EarthSmash")) {
 			EarthSmash earthSmash = getInstance(user, block, x -> true);
 			if (earthSmash != null && earthSmash.boulder != null) {
@@ -197,7 +196,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		for (Map.Entry<Block, BlockData> entry : boulder.getData().entrySet()) {
 			Block block = entry.getKey();
 			if (!MaterialUtil.isTransparent(block)) continue;
-			BlockMethods.breakPlant(block);
+			BlockMethods.tryBreakPlant(block);
 			TempBlock.create(block, entry.getValue());
 		}
 	}
@@ -251,7 +250,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		public @NonNull UpdateResult update() {
 			if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
 				if (user.isSneaking()) {
-					ParticleUtil.create(Particle.SMOKE_NORMAL, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+					ParticleUtil.create(Particle.SMOKE_NORMAL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 					return UpdateResult.CONTINUE;
 				} else {
 					return createBoulder() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -380,7 +379,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 			if (affectedEntities.contains(entity)) return false;
 			affectedEntities.add(entity);
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			Vector3 velocity = VectorMethods.getEntityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
+			Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
 			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
 			return false;
 		}
@@ -475,7 +474,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 					iterator.remove();
 				}
 			}
-			FragileStructure.attemptDamageStructure(removed, 4 * removed.size());
+			FragileStructure.tryDamageStructure(removed, 4 * removed.size());
 			return !data.isEmpty() && originalSize - data.size() <= size;
 		}
 

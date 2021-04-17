@@ -40,6 +40,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -78,7 +79,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		double h = userConfig.height + 2;
-		if (WorldMethods.distanceAboveGround(user.getEntity()) > h) {
+		if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
 			return false;
 		}
 

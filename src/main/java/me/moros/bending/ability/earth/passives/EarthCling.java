@@ -30,13 +30,12 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -70,23 +69,22 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || WorldMethods.isOnGround(user.getEntity())) {
+		if (removalPolicy.test(user, getDescription()) || user.isOnGround()) {
 			return UpdateResult.CONTINUE;
 		}
 		if (!user.getSelectedAbilityName().equals("EarthGlove")) {
 			return UpdateResult.CONTINUE;
 		}
 		long counter = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count();
-		if (counter > 0 && WorldMethods.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
+		if (counter > 0 && EntityMethods.isAgainstWall(user.getEntity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
 			if (counter == 2) {
 				user.getEntity().setVelocity(new Vector());
 				user.getEntity().setFallDistance(0);
 			} else {
-				Vector3 velocity = new Vector3(user.getEntity().getVelocity());
-				if (velocity.getY() < 0) {
+				if (user.getVelocity().getY() < 0) {
 					double fallDistance = FastMath.max(0, user.getEntity().getFallDistance() - userConfig.speed);
 					user.getEntity().setFallDistance((float) fallDistance);
-					user.getEntity().setVelocity(velocity.scalarMultiply(userConfig.speed).clampVelocity());
+					user.getEntity().setVelocity(user.getVelocity().scalarMultiply(userConfig.speed).clampVelocity());
 					ParticleUtil.create(Particle.CRIT, user.getEntity().getEyeLocation()).count(2)
 						.offset(0.05, 0.4, 0.05);
 					ParticleUtil.create(Particle.BLOCK_CRACK, user.getEntity().getEyeLocation()).count(3)

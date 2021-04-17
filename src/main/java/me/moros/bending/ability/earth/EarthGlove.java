@@ -45,8 +45,7 @@ import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
@@ -99,7 +98,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		if (method == ActivationMethod.SNEAK) {
-			attemptDestroy(user);
+			tryDestroy(user);
 			return false;
 		}
 
@@ -226,10 +225,10 @@ public class EarthGlove extends AbilityInstance implements Ability {
 		} else {
 			side = Side.RIGHT;
 		}
-		Vector3 gloveSpawnLocation = UserMethods.getHandSide(user, side == Side.RIGHT);
+		Vector3 gloveSpawnLocation = user.getHandSide(side == Side.RIGHT);
 		lastUsedSide.put(user.getEntity().getUniqueId(), side);
-		Vector3 target = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(VectorMethods::getEntityCenter)
+		Vector3 target = user.getTargetEntity(userConfig.range)
+			.map(EntityMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 
 		glove = buildGlove(gloveSpawnLocation);
@@ -293,7 +292,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
 		onDestroy();
 	}
 
-	private static void attemptDestroy(@NonNull User user) {
+	private static void tryDestroy(@NonNull User user) {
 		CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
 			if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
 				EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();

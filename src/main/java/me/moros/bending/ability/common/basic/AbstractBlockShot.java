@@ -31,6 +31,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
@@ -136,7 +137,7 @@ public abstract class AbstractBlockShot implements Updatable {
 			onBlockHit(current);
 		}
 		if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
-			BlockMethods.breakPlant(current);
+			BlockMethods.tryBreakPlant(current);
 			if (material == Material.WATER && MaterialUtil.isWater(current)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
@@ -150,8 +151,8 @@ public abstract class AbstractBlockShot implements Updatable {
 	}
 
 	public void redirect() {
-		target = WorldMethods.getTargetEntity(user, range)
-			.map(VectorMethods::getEntityCenter)
+		target = user.getTargetEntity(range)
+			.map(EntityMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)))
 			.floor().add(Vector3.HALF);
 		settingUp = false;

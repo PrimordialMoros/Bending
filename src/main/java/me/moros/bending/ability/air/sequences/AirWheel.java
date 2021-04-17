@@ -115,8 +115,8 @@ public class AirWheel extends AbilityInstance implements Ability {
 		}
 
 		Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
-		BlockMethods.coolLava(user, base);
-		BlockMethods.extinguishFire(user, base);
+		BlockMethods.tryCoolLava(user, base);
+		BlockMethods.tryExtinguishFire(user, base);
 
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
 		return scooter.update();

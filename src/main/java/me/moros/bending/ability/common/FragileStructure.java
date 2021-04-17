@@ -62,7 +62,7 @@ public class FragileStructure {
 	}
 
 	/**
-	 * Attempt to subtract the specified amount of damage from this structure's health.
+	 * Try to subtract the specified amount of damage from this structure's health.
 	 * If health drops at zero or below then the structure will shatter.
 	 * Note: Provide a non positive damage value to instantly destroy the structure.
 	 * @param damage the amount of damage to inflict
@@ -82,7 +82,7 @@ public class FragileStructure {
 		return Optional.of(new FragileStructure(blocks, health, predicate));
 	}
 
-	public static boolean attemptDamageStructure(@NonNull Collection<Block> blocks, int damage) {
+	public static boolean tryDamageStructure(@NonNull Collection<Block> blocks, int damage) {
 		for (Block block : blocks) {
 			if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
 				FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();

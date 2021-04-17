@@ -40,7 +40,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -108,7 +108,7 @@ public class Tornado extends AbilityInstance implements Ability {
 		CollisionUtil.handleEntityCollisions(user, box, entity -> {
 			double dy = entity.getLocation().getY() - base.getY();
 			double r = 2 + (radius - 2) * dy;
-			Vector3 delta = VectorMethods.getEntityCenter(entity).subtract(base);
+			Vector3 delta = EntityMethods.getEntityCenter(entity).subtract(base);
 			double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
 			if (distSq > r * r) return false;
 

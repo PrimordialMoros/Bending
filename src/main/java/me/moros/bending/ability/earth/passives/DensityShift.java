@@ -30,10 +30,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
@@ -43,6 +40,8 @@ import org.bukkit.block.BlockFace;
 
 import java.util.function.Predicate;
 
+// TODO make it more consistent, maybe revert to simple block check?
+// Handle tempblocks better so it doesn't create ones
 public class DensityShift extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 
@@ -70,24 +69,19 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 		return UpdateResult.CONTINUE;
 	}
 
-	public static boolean isSoftened(User user) {
-		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("DensityShift").map(user::canBend).orElse(false)) {
-			return false;
-		}
-		DensityShift instance = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class).orElse(null);
-		if (instance == null) {
-			return false;
-		}
-
-		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
-		for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), b -> EarthMaterials.isEarthbendable(user, b))) {
-			if (block.getY() > entityBounds.getPosition().getY()) continue;
-			if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
-				instance.softenArea();
-				return true;
-			}
+	private boolean isSoftened() {
+		if (!user.canBend(getDescription())) return false;
+		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
+		if (EarthMaterials.isEarthbendable(user, block)) {
+			softenArea();
+			return true;
 		}
 		return false;
+	}
+
+	public static boolean isSoftened(User user) {
+		return Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class)
+			.map(DensityShift::isSoftened).orElse(false);
 	}
 
 	private void softenArea() {

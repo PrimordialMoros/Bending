@@ -30,6 +30,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
@@ -68,12 +69,12 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		this.origin = location;
 		this.range = range;
 		this.speed = speed;
-		Optional<LivingEntity> entity = WorldMethods.getTargetEntity(user, range);
+		Optional<LivingEntity> entity = user.getTargetEntity(range);
 		if (followTarget && entity.isPresent()) {
 			target = entity.get();
 			locked = true;
 		}
-		targetLocation = entity.map(VectorMethods::getEntityCenter).orElseGet(() ->
+		targetLocation = entity.map(EntityMethods::getEntityCenter).orElseGet(() ->
 			WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER))
 		);
 		direction = targetLocation.subtract(location).setY(0).normalize();

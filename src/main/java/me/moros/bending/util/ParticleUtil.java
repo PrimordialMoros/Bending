@@ -22,7 +22,6 @@ package me.moros.bending.util;
 import com.destroystokyo.paper.ParticleBuilder;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.methods.UserMethods;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -37,7 +36,8 @@ public final class ParticleUtil {
 	public static final Color AIR = fromHex("EEEEEE");
 
 	public static ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
-		return UserMethods.getFireParticles(user).builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
+		Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
+		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
 	}
 
 	public static ParticleBuilder createAir(@NonNull Location center) {

@@ -210,7 +210,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			BlockMethods.extinguishFire(user, block);
+			BlockMethods.tryExtinguishFire(user, block);
 			return true;
 		}
 	}

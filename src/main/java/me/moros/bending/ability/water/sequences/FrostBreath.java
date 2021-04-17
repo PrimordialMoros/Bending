@@ -43,7 +43,6 @@ import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.UserMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -106,7 +105,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 			if (!user.getSelectedAbilityName().equals("IceCrawl"))
 				return UpdateResult.REMOVE;
 			if (System.currentTimeMillis() > startTime + userConfig.chargeTime) {
-				ParticleUtil.create(Particle.SNOW_SHOVEL, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+				ParticleUtil.create(Particle.SNOW_SHOVEL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 				if (!user.isSneaking()) {
 					release();
 				}
@@ -187,7 +186,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 					SoundUtil.ICE_SOUND.play(block.getLocation());
 				}
 			}
-			BlockMethods.coolLava(user, block);
+			BlockMethods.tryCoolLava(user, block);
 			return true;
 		}
 	}

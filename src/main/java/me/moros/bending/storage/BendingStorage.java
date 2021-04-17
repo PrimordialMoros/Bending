@@ -20,6 +20,7 @@
 package me.moros.bending.storage;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
  * Handles all Storage tasks and their concurrency
  */
 public interface BendingStorage extends Storage {
-	BendingProfile createProfile(@NonNull UUID uuid);
+	@NonNull BendingProfile createProfile(@NonNull UUID uuid);
 
 	void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer);
 
@@ -45,7 +46,7 @@ public interface BendingStorage extends Storage {
 
 	boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities);
 
-	Preset loadPreset(int playerId, @NonNull String name);
+	@Nullable Preset loadPreset(int playerId, @NonNull String name);
 
 	void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer);
 

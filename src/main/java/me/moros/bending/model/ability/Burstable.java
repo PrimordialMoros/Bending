@@ -25,8 +25,4 @@ import me.moros.bending.model.user.User;
 
 public interface Burstable extends Ability {
 	void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction);
-
-	void setRenderInterval(long interval);
-
-	void setRenderParticleCount(int count);
 }

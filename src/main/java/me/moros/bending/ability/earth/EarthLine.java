@@ -57,6 +57,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import net.kyori.adventure.text.Component;
@@ -170,7 +171,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 			state.complete();
 			Block source = states.getChainStore().stream().findAny().orElse(null);
 			if (source == null) return;
-			if (EarthMaterials.LAVA_BENDABLE.isTagged(source)) mode = Mode.MAGMA;
+			if (EarthMaterials.isLavaBendable(source)) mode = Mode.MAGMA;
 			earthLine = new Line(source);
 			removalPolicy = Policies.builder().build();
 			user.setCooldown(getDescription(), userConfig.cooldown);
@@ -273,7 +274,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 
 		@Override
 		protected void onCollision() {
-			FragileStructure.attemptDamageStructure(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
+			FragileStructure.tryDamageStructure(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
 			if (mode != Mode.MAGMA) return;
 			Location center = location.toLocation(user.getWorld());
 			SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1, 0.5F);
@@ -301,7 +302,7 @@ public class EarthLine extends AbilityInstance implements Ability {
 		}
 
 		private void imprisonTarget(LivingEntity entity) {
-			if (imprisoned || !entity.isValid() || WorldMethods.distanceAboveGround(entity) > 1.2) return;
+			if (imprisoned || !entity.isValid() || EntityMethods.distanceAboveGround(entity) > 1.2) return;
 			Material material = null;
 			Block blockToCheck = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
 			if (EarthMaterials.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first

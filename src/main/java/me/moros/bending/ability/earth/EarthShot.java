@@ -49,7 +49,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -136,7 +136,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 		for (int i = 1; i <= deltaY; i++) {
 			Block temp = source.getRelative(BlockFace.UP, i);
 			if (!MaterialUtil.isTransparent(temp)) return false;
-			BlockMethods.breakPlant(temp);
+			BlockMethods.tryBreakPlant(temp);
 		}
 
 		data = source.getBlockData().clone();
@@ -308,8 +308,8 @@ public class EarthShot extends AbilityInstance implements Ability {
 
 	private Vector3 getTarget(Block source) {
 		Set<Material> ignored = source == null ? Collections.emptySet() : Collections.singleton(source.getType());
-		return WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(VectorMethods::getEntityCenter)
+		return user.getTargetEntity(userConfig.range)
+			.map(EntityMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), ignored));
 	}
 
@@ -327,7 +327,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 					SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
 				}
 				Block projected = spawnLoc.add(projectile.getFallingBlock().getVelocity().normalize().multiply(0.75)).getBlock();
-				FragileStructure.attemptDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
+				FragileStructure.tryDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
 			}
 			projectile.revert();
 		}

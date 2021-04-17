@@ -44,7 +44,6 @@ import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -129,7 +128,7 @@ public final class ActivationController {
 		WaterGimbal.launch(user);
 		HeatControl.act(user);
 
-		if (WorldMethods.getTargetEntity(user, 4).isPresent()) {
+		if (user.getTargetEntity(4).isPresent()) {
 			game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
 		} else {
 			game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK);
@@ -200,7 +199,7 @@ public final class ActivationController {
 		}
 		if (block != null) {
 			FerroControl.act(user, block);
-			EarthSmash.attemptDestroy(user, block);
+			EarthSmash.tryDestroy(user, block);
 		}
 		EarthLine.setPrisonMode(user);
 

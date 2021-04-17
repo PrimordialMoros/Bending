@@ -139,7 +139,7 @@ public class FireKick extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
 			return true;
 		}
 	}

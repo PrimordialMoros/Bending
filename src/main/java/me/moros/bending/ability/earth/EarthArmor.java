@@ -89,7 +89,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
 		Block block = source.get();
 		mode = getType(block);
-		if (EarthMaterials.METAL_BENDABLE.isTagged(block)) {
+		if (EarthMaterials.isMetalBendable(block)) {
 			resistance = userConfig.metalPower;
 			SoundUtil.METAL_SOUND.play(block.getLocation());
 		} else {
@@ -171,7 +171,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		Vector3 center = fallingBlock.getCenter();
 
 		Block currentBlock = center.toBlock(user.getWorld());
-		BlockMethods.breakPlant(currentBlock);
+		BlockMethods.tryBreakPlant(currentBlock);
 		if (!(currentBlock.isLiquid() || MaterialUtil.isAir(currentBlock) || EarthMaterials.isEarthbendable(user, currentBlock))) {
 			return false;
 		}

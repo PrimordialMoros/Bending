@@ -75,7 +75,7 @@ public class IceWall extends AbilityInstance implements Ability {
 		recalculateConfig();
 
 		Block targetBlock = WorldMethods.blockCast(user.getWorld(), user.getRay(), userConfig.selectRange).orElse(null);
-		if (targetBlock != null && FragileStructure.attemptDamageStructure(Collections.singletonList(targetBlock), 0)) {
+		if (targetBlock != null && FragileStructure.tryDamageStructure(Collections.singletonList(targetBlock), 0)) {
 			return false;
 		}
 
@@ -202,7 +202,7 @@ public class IceWall extends AbilityInstance implements Ability {
 			if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block)) return false;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 			if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER) return false;
-			BlockMethods.breakPlant(block);
+			BlockMethods.tryBreakPlant(block);
 			return true;
 		}
 	}

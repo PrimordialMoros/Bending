@@ -31,7 +31,6 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.methods.UserMethods;
 
 public class FireBurst extends AbstractBurst implements Ability {
 	private static final Config config = new Config();
@@ -72,7 +71,7 @@ public class FireBurst extends AbstractBurst implements Ability {
 		if (!released) {
 			boolean charged = isCharged();
 			if (charged) {
-				ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+				ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 				if (!user.isSneaking()) {
 					release(false);
 				}
@@ -101,8 +100,6 @@ public class FireBurst extends AbstractBurst implements Ability {
 		} else {
 			createSphere(user, () -> new FireBlast(getDescription()), userConfig.sphereRange);
 		}
-		setRenderInterval(100);
-		setRenderParticleCount(1);
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 

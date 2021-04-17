@@ -74,7 +74,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.SNEAK && attemptDestroy(user)) {
+		if (method == ActivationMethod.SNEAK && tryDestroy(user)) {
 			return false;
 		} else if (method == ActivationMethod.ATTACK) {
 			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
@@ -148,7 +148,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 		}
 	}
 
-	private static boolean attemptDestroy(User user) {
+	private static boolean tryDestroy(User user) {
 		Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
 			.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
 		for (EarthBlast eb : blasts) {
@@ -221,7 +221,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 4);
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
 		}
 	}
 

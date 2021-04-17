@@ -111,8 +111,8 @@ public class AirShield extends AbilityInstance implements Ability {
 		}
 
 		for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
-			BlockMethods.coolLava(user, b);
-			BlockMethods.extinguishFire(user, b);
+			BlockMethods.tryCoolLava(user, b);
+			BlockMethods.tryExtinguishFire(user, b);
 		}
 
 		CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
@@ -154,7 +154,7 @@ public class AirShield extends AbilityInstance implements Ability {
 		if (collidedAbility instanceof FrostBreath) {
 			for (Block block : WorldMethods.getNearbyBlocks(getCenter().toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
 				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-				BlockMethods.breakPlant(block);
+				BlockMethods.tryBreakPlant(block);
 				if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
 					long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
 					TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);

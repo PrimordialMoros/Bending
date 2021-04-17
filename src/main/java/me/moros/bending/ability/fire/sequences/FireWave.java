@@ -103,13 +103,13 @@ public class FireWave extends AbilityInstance implements Ability {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (walls.isEmpty()) return UpdateResult.REMOVE;
 		long time = System.currentTimeMillis();
 		if (time >= nextTime) {
 			nextTime = time + 250;
 			WallInfo info = walls.poll();
-			if (info == null) return UpdateResult.REMOVE;
-			wall.setWall(info.getBlocks(), info.getCollider());
+			if (info != null) {
+				wall.setWall(info.getBlocks(), info.getCollider());
+			}
 		}
 		return wall.update();
 	}

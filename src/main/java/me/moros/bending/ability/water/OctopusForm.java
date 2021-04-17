@@ -44,7 +44,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -212,7 +212,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 	private boolean onEntityHit(Entity entity) {
 		if (affectedEntities.containsKey(entity)) return false;
 		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		Vector3 dir = VectorMethods.getEntityCenter(entity).subtract(user.getLocation());
+		Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(user.getLocation());
 		entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
 		affectedEntities.put(entity, false);
 		return true;

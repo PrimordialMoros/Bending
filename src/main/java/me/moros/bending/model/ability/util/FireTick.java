@@ -20,6 +20,7 @@
 package me.moros.bending.model.ability.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 
 public enum FireTick implements FireTickMethod {
@@ -27,7 +28,7 @@ public enum FireTick implements FireTickMethod {
 	LARGER((e, a) -> {
 		if (e.getFireTicks() < a) e.setFireTicks(a);
 	}),
-	ACCUMULATE((e, a) -> e.setFireTicks(e.getFireTicks() + a));
+	ACCUMULATE((e, a) -> e.setFireTicks(FastMath.max(0, e.getFireTicks()) + a));
 
 	private final FireTickMethod method;
 

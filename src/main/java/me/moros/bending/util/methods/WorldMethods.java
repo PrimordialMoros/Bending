@@ -23,22 +23,14 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
-import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -213,103 +205,6 @@ public final class WorldMethods {
 		return Optional.empty();
 	}
 
-	/**
-	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
-	 * @see World#rayTraceEntities(Location, Vector, double, Predicate)
-	 */
-	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range) {
-		return getTargetEntity(user, range, LivingEntity.class);
-	}
-
-	/**
-	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity).
-	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-	 */
-	public static Optional<LivingEntity> getTargetEntity(@NonNull User user, double range, int raySize) {
-		return getTargetEntity(user, range, raySize, LivingEntity.class);
-	}
-
-	/**
-	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-	 */
-	public static <T extends Entity> Optional<T> getTargetEntity(@NonNull User user, double range, @NonNull Class<T> type) {
-		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, e -> !e.equals(user.getEntity()));
-		if (result == null) return Optional.empty();
-		Entity entity = result.getHitEntity();
-		return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
-	}
-
-	/**
-	 * Gets the provided user's targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-	 * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-	 */
-	public static <T extends Entity> Optional<T> getTargetEntity(@NonNull User user, double range, int raySize, @NonNull Class<T> type) {
-		RayTraceResult result = user.getWorld().rayTraceEntities(user.getEntity().getEyeLocation(), user.getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(user.getEntity()));
-		if (result == null) return Optional.empty();
-		Entity entity = result.getHitEntity();
-		return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
-	}
-
-	/**
-	 * Accurately checks if an entity is standing on ground using {@link AABB}.
-	 * Note: For mobs you should prefer {@link Entity#isOnGround()}. This method is to be used for Players.
-	 * @param entity the entity to check
-	 * @return true if entity standing on ground, false otherwise
-	 */
-	public static boolean isOnGround(@NonNull Entity entity) {
-		if (!(entity instanceof Player)) return entity.isOnGround();
-		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 0.05, 0));
-		AABB floorBounds = new AABB(new Vector3(-1, -0.1, -1), new Vector3(1, 0.1, 1)).at(new Vector3(entity.getLocation()));
-		for (Block block : getNearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
-			if (entityBounds.intersects(AABBUtils.getBlockBounds(block))) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Calculates the distance between an entity and the ground using {@link AABB}.
-	 * Uses a {@link BlockIterator} with the max world height as the range.
-	 * By default it ignores all passable materials except liquids.
-	 * @param entity the entity to check
-	 * @return the distance in blocks between the entity and ground or the max world height.
-	 */
-	public static double distanceAboveGround(@NonNull Entity entity) {
-		int maxHeight = entity.getWorld().getMaxHeight();
-		BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
-		AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, maxHeight, 0));
-		while (it.hasNext()) {
-			Block block = it.next();
-			if (block.getY() <= 0) break;
-			AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
-			if (checkBounds.intersects(entityBounds)) {
-				return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
-			}
-		}
-		return maxHeight;
-	}
-
-	/**
-	 * Check if a user is against a wall made of blocks matching the given predicate.
-	 * <p> Note: Passable blocks and barriers are ignored.
-	 * @param user the user to check
-	 * @param predicate the type of blocks to accept
-	 * @return whether the user is against a wall
-	 */
-	public static boolean isAgainstWall(@NonNull User user, @NonNull Predicate<Block> predicate) {
-		Block origin = user.getLocBlock();
-		for (BlockFace face : BlockMethods.CARDINAL_FACES) {
-			Block relative = origin.getRelative(face);
-			if (relative.isPassable() || relative.getType() == Material.BARRIER) continue;
-			if (predicate.test(relative)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public static boolean isDay(@NonNull World world) {
 		if (world.getEnvironment() != World.Environment.NORMAL) return false;
 		return world.isDayTime();
@@ -319,5 +214,4 @@ public final class WorldMethods {
 		if (world.getEnvironment() != World.Environment.NORMAL) return false;
 		return !world.isDayTime();
 	}
-
 }

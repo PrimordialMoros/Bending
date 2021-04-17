@@ -20,10 +20,10 @@
 package me.moros.bending.board;
 
 import me.moros.bending.Bending;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -31,6 +31,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class Board {
 		this.player = player;
 		selectedSlot = player.getInventory().getHeldItemSlot() + 1;
 		bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
-		bendingSlots = bendingBoard.registerNewObjective("Board Slots", "dummy", ChatColor.BOLD + "Slots");
+		bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
 		bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
 		player.setScoreboard(bendingBoard);
 		Arrays.fill(cachedSlots, "");
@@ -73,7 +74,7 @@ public class Board {
 		AbilityDescription desc = bendingPlayer.getSlotAbility(slot).orElse(null);
 		Component component;
 		if (desc == null) {
-			component = Component.text(prefix).append(Component.text("-- Slot " + slot + " --", NamedTextColor.DARK_GRAY));
+			component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
 		} else {
 			Component name = Component.text(desc.getName(), desc.getElement().getColor());
 			if (bendingPlayer.isOnCooldown(desc)) name = name.decorate(TextDecoration.STRIKETHROUGH);

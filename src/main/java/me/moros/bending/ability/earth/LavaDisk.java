@@ -114,7 +114,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 		Block block = source.get();
 		for (int i = 1; i < 3; i++) {
 			Block temp = block.getRelative(BlockFace.UP, i);
-			BlockMethods.breakPlant(temp);
+			BlockMethods.tryBreakPlant(temp);
 			if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) return false;
 		}
 
@@ -213,7 +213,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
 	private boolean damageBlock(Block block) {
 		if (currentPower <= 0) return false;
-		FragileStructure.attemptDamageStructure(Collections.singletonList(block), 0);
+		FragileStructure.tryDamageStructure(Collections.singletonList(block), 0);
 		if (block.isLiquid() || !TempBlock.isBendable(block)) {
 			return false;
 		}

@@ -286,7 +286,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
 		}
 	}
 

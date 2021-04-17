@@ -36,8 +36,7 @@ import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
@@ -83,9 +82,9 @@ public class HealingWaters extends AbilityInstance implements Ability {
 		long time = System.currentTimeMillis();
 		if (time > nextTime) {
 			nextTime = time + 250;
-			if (!attemptHeal()) return UpdateResult.REMOVE;
+			if (!tryHeal()) return UpdateResult.REMOVE;
 		} else {
-			ParticleUtil.createRGB(UserMethods.getMainHandSide(user).toLocation(user.getWorld()), "00ffff").spawn();
+			ParticleUtil.createRGB(user.getMainHandSide().toLocation(user.getWorld()), "00ffff").spawn();
 		}
 		return UpdateResult.CONTINUE;
 	}
@@ -93,17 +92,17 @@ public class HealingWaters extends AbilityInstance implements Ability {
 	private boolean isValidEntity(LivingEntity entity) {
 		if (entity == null || !entity.isValid()) return false;
 		if (!entity.getWorld().equals(user.getWorld())) return false;
-		if (VectorMethods.getEntityCenter(entity).distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) return false;
+		if (EntityMethods.getEntityCenter(entity).distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) return false;
 		return user.getEntity().hasLineOfSight(entity);
 	}
 
-	private boolean attemptHeal() {
+	private boolean tryHeal() {
 		if (!user.getEntity().equals(target) && !isValidEntity(target)) {
 			target = user.getEntity();
 		}
 		if (!MaterialUtil.isWater(target.getLocation().getBlock()) && !InventoryUtil.hasFullBottle(user)) return false;
 
-		ParticleUtil.createRGB(VectorMethods.getEntityCenter(target).toLocation(user.getWorld()), "00ffff")
+		ParticleUtil.createRGB(EntityMethods.getEntityCenter(target).toLocation(user.getWorld()), "00ffff")
 			.count(6).offset(0.35, 0.35, 0.35).spawn();
 		target.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
 			.forEach(target::removePotionEffect);

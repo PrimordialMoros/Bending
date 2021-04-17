@@ -24,6 +24,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.user.User;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -80,8 +81,8 @@ public class TempArmor implements Temporary {
 	private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
 		for (ItemStack item : armorItems) {
 			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName("Bending Armor");
-			meta.setLore(Collections.singletonList("Temporary"));
+			meta.displayName(Component.text("Bending Armor"));
+			meta.lore(Collections.singletonList(Component.text("Temporary")));
 			meta.setUnbreakable(true);
 			Bending.getLayer().addArmorKey(meta);
 			item.setItemMeta(meta);

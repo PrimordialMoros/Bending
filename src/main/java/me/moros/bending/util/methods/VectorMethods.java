@@ -24,7 +24,6 @@ import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
-import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
@@ -98,15 +97,6 @@ public final class VectorMethods {
 	}
 
 	/**
-	 * Calculates a vector at the center of the given entity using its height.
-	 * @param entity the entity to get the vector for
-	 * @return the resulting vector
-	 */
-	public static Vector3 getEntityCenter(@NonNull Entity entity) {
-		return new Vector3(entity.getLocation()).add(new Vector3(0, entity.getHeight() / 2, 0));
-	}
-
-	/**
 	 * Rotate a vector around the X axis.
 	 * @param v the vector to rotate
 	 * @param cos the rotation's cosine
@@ -115,7 +105,7 @@ public final class VectorMethods {
 	 * @see #rotateAroundAxisY(Vector3, double, double)
 	 * @see #rotateAroundAxisZ(Vector3, double, double)
 	 */
-	public static Vector3 rotateAroundAxisX(Vector3 v, double cos, double sin) {
+	public static @NonNull Vector3 rotateAroundAxisX(@NonNull Vector3 v, double cos, double sin) {
 		return new Vector3(v.getX(), v.getY() * cos - v.getZ() * sin, v.getY() * sin + v.getZ() * cos);
 	}
 
@@ -128,7 +118,7 @@ public final class VectorMethods {
 	 * @see #rotateAroundAxisX(Vector3, double, double)
 	 * @see #rotateAroundAxisZ(Vector3, double, double)
 	 */
-	public static Vector3 rotateAroundAxisY(Vector3 v, double cos, double sin) {
+	public static @NonNull Vector3 rotateAroundAxisY(@NonNull Vector3 v, double cos, double sin) {
 		return new Vector3(v.getX() * cos + v.getZ() * sin, v.getY(), v.getX() * -sin + v.getZ() * cos);
 	}
 
@@ -141,7 +131,7 @@ public final class VectorMethods {
 	 * @see #rotateAroundAxisX(Vector3, double, double)
 	 * @see #rotateAroundAxisY(Vector3, double, double)
 	 */
-	public static Vector3 rotateAroundAxisZ(Vector3 v, double cos, double sin) {
+	public static @NonNull Vector3 rotateAroundAxisZ(@NonNull Vector3 v, double cos, double sin) {
 		return new Vector3(v.getX() * cos - v.getY() * sin, v.getX() * sin + v.getY() * cos, v.getZ());
 	}
 

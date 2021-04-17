@@ -69,6 +69,7 @@ public class AABB implements Collider {
 	}
 
 	public boolean intersects(@NonNull AABB other) {
+		if (other instanceof DummyCollider) return false;
 		return (max.getX() > other.min.getX() &&
 			min.getX() < other.max.getX() &&
 			max.getY() > other.min.getY() &&

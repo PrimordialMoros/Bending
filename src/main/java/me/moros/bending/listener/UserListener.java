@@ -35,7 +35,6 @@ import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
-import me.moros.bending.util.Tasker;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
@@ -77,21 +76,23 @@ public class UserListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
-		Tasker.newChain().delay(3 * 20).async(event::allow).execute(); // After 3 seconds allow the player to login anyway
 		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on pre-login");
-		if (!game.getPlayerManager().getProfile(event.getUniqueId()).isPresent()) {
-			Bending.getLog().severe("Could not create bending profile for: " + event.getUniqueId() + " (" + event.getName() + ")");
+		UUID uuid = event.getUniqueId();
+		long startTime = System.currentTimeMillis();
+		game.getPlayerManager().getProfile(uuid);
+		long time = System.currentTimeMillis() - startTime;
+		if (time >= 1000) {
+			Bending.getLog().warn("Processing login for " + uuid + " took " + time + "ms.");
 		}
-		event.allow();
 		timing.stopTiming();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
+		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on join");
 		Player player = event.getPlayer();
 		UUID uuid = player.getUniqueId();
 		String name = player.getName();
-		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on join");
 		Optional<BendingProfile> profile = game.getPlayerManager().getProfile(uuid);
 		if (profile.isPresent()) {
 			game.getPlayerManager().createPlayer(player, profile.get());
@@ -155,6 +156,7 @@ public class UserListener implements Listener {
 		} else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
 			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
 			if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
+				event.getEntity().setFireTicks(0);
 				event.setCancelled(true);
 			}
 		}

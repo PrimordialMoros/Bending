@@ -48,9 +48,7 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -132,7 +130,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 		if (!released) {
 			boolean charged = isCharged();
 			if (charged) {
-				ParticleUtil.create(Particle.SMOKE_NORMAL, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+				ParticleUtil.create(Particle.SMOKE_NORMAL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 				if (!user.isSneaking()) {
 					release(false);
 				}
@@ -190,7 +188,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 	}
 
 	private void release(boolean cone) {
-		if (released || !isCharged() || !WorldMethods.isOnGround(user.getEntity())) return;
+		if (released || !isCharged() || !user.isOnGround()) return;
 		released = true;
 		range = cone ? userConfig.coneRange : userConfig.ringRange;
 

@@ -41,7 +41,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
@@ -79,11 +79,10 @@ public class AirPunch extends AbilityInstance implements Ability {
 		removalPolicy = Policies.builder().build();
 
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		Vector3 origin = UserMethods.getMainHandSide(user);
+		Vector3 origin = user.getMainHandSide();
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range);
 
-		Vector3 userVelocity = new Vector3(user.getEntity().getVelocity());
-		double length = userVelocity.subtract(user.getDirection()).getNorm();
+		double length = user.getVelocity().subtract(user.getDirection()).getNorm();
 		double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
 		stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
 		return true;
@@ -140,15 +139,15 @@ public class AirPunch extends AbilityInstance implements Ability {
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-			Vector3 velocity = VectorMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+			Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
 			entity.setVelocity(velocity.clampVelocity());
 			return true;
 		}
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (BlockMethods.extinguishFire(user, block)) return false;
-			BlockMethods.coolLava(user, block);
+			if (BlockMethods.tryExtinguishFire(user, block)) return false;
+			BlockMethods.tryCoolLava(user, block);
 			return true;
 		}
 	}

@@ -44,7 +44,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.UserMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
@@ -117,7 +117,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		}
 		if (charging) {
 			if (user.isSneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-				ParticleUtil.createAir(UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+				ParticleUtil.createAir(user.getMainHandSide().toLocation(user.getWorld())).spawn();
 			} else if (!user.isSneaking()) {
 				launch();
 			}
@@ -133,7 +133,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
 		charging = false;
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		Vector3 origin = UserMethods.getMainHandSide(user);
+		Vector3 origin = user.getMainHandSide();
 		Vector3 dir = user.getDirection();
 		Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
 		Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 36, RotationConvention.VECTOR_OPERATOR);
@@ -195,7 +195,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (!affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-				Vector3 velocity = VectorMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+				Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
 				entity.setVelocity(velocity.clampVelocity());
 				affectedEntities.add(entity);
 				return true;
@@ -205,8 +205,8 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (BlockMethods.breakPlant(block) || BlockMethods.extinguishFire(user, block)) return false;
-			BlockMethods.coolLava(user, block);
+			if (BlockMethods.tryBreakPlant(block) || BlockMethods.tryExtinguishFire(user, block)) return false;
+			BlockMethods.tryCoolLava(user, block);
 			return true;
 		}
 	}

@@ -342,7 +342,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			return BlockMethods.coolLava(user, block);
+			return BlockMethods.tryCoolLava(user, block);
 		}
 	}
 

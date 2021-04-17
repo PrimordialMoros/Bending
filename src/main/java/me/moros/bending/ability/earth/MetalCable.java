@@ -50,8 +50,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -113,7 +112,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 		} else if (method == ActivationMethod.ATTACK) {
 			Optional<MetalCable> cable = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, MetalCable.class);
 			if (cable.isPresent()) {
-				cable.get().attemptLaunchTarget();
+				cable.get().tryLaunchTarget();
 				return false;
 			}
 		}
@@ -223,15 +222,15 @@ public class MetalCable extends AbilityInstance implements Ability {
 	private boolean launchCable() {
 		if (!hasRequiredInv()) return false;
 
-		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(VectorMethods::getEntityCenter)
+		Vector3 targetLocation = user.getTargetEntity(userConfig.range)
+			.map(EntityMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 
 		if (targetLocation.toBlock(user.getWorld()).isLiquid()) {
 			return false;
 		}
 
-		Vector3 origin = UserMethods.getMainHandSide(user);
+		Vector3 origin = user.getMainHandSide();
 		Vector dir = targetLocation.toVector().subtract(origin.toVector()).normalize();
 		Arrow arrow = user.getWorld().spawnArrow(origin.toLocation(user.getWorld()), dir, 1.8F, 0);
 		arrow.setShooter(user.getEntity());
@@ -254,7 +253,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 	private boolean visualizeLine(double distance) {
 		if (ticks % 2 == 0) return true;
 		pointLocations.clear();
-		pointLocations.addAll(getLinePoints(UserMethods.getMainHandSide(user), location, NumberConversions.ceil(distance * 2)));
+		pointLocations.addAll(getLinePoints(user.getMainHandSide(), location, NumberConversions.ceil(distance * 2)));
 		int counter = 0;
 		for (Vector3 temp : pointLocations) {
 			Block block = temp.toBlock(user.getWorld());
@@ -312,12 +311,12 @@ public class MetalCable extends AbilityInstance implements Ability {
 		removalPolicy = (u, d) -> true; // Remove in next tick
 	}
 
-	private void attemptLaunchTarget() {
+	private void tryLaunchTarget() {
 		if (launched || target == null || target.getType() == MetalCable.CableTarget.Type.BLOCK) return;
 
 		launched = true;
-		Vector3 targetLocation = WorldMethods.getTargetEntity(user, userConfig.projectileRange)
-			.map(VectorMethods::getEntityCenter)
+		Vector3 targetLocation = user.getTargetEntity(userConfig.projectileRange)
+			.map(EntityMethods::getEntityCenter)
 			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange)));
 
 		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.launchSpeed);

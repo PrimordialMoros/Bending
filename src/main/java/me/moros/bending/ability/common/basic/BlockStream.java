@@ -32,6 +32,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
@@ -107,7 +108,7 @@ public abstract class BlockStream implements State {
 		Block head = stream.getFirst();
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
 		if (controllable || direction == null) {
-			Vector3 targetLoc = WorldMethods.getTargetEntity(user, range).map(VectorMethods::getEntityCenter)
+			Vector3 targetLoc = user.getTargetEntity(range).map(EntityMethods::getEntityCenter)
 				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)));
 			// Improve targeting when near
 			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {

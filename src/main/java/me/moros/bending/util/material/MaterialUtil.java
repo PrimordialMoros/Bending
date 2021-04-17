@@ -199,11 +199,14 @@ public final class MaterialUtil {
 			case POLISHED_DIORITE:
 			case ANDESITE:
 			case POLISHED_ANDESITE:
+			case GRAVEL:
 				return Material.GRAVEL.createBlockData();
 			case DIRT:
 			case MYCELIUM:
 			case GRASS_BLOCK:
 			case GRASS_PATH:
+			case PODZOL:
+			case COARSE_DIRT:
 				return Material.COARSE_DIRT.createBlockData();
 		}
 		return Material.SAND.createBlockData();

@@ -30,10 +30,10 @@ import java.util.Set;
 public enum BendingConditions implements BendingConditional {
 	COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
 	ELEMENT((u, d) -> u.hasElement(d.getElement())),
+	GAMEMODE((u, d) -> !u.isSpectator()),
 	PERMISSION((u, d) -> u.hasPermission(d)),
-	WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID())),
 	TOGGLED((u, d) -> false),
-	GAMEMODE((u, d) -> !u.isSpectator());
+	WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID()));
 
 	private final BendingConditional predicate;
 
@@ -51,11 +51,12 @@ public enum BendingConditions implements BendingConditional {
 	 * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
 	 */
 	public static @NonNull ConditionBuilder builder() {
-		return new ConditionBuilder().add(BendingConditions.COOLDOWN)
+		return new ConditionBuilder()
+			.add(BendingConditions.COOLDOWN)
 			.add(BendingConditions.ELEMENT)
+			.add(BendingConditions.GAMEMODE)
 			.add(BendingConditions.WORLD)
-			.add(BendingConditions.PERMISSION)
-			.add(BendingConditions.GAMEMODE);
+			.add(BendingConditions.PERMISSION);
 	}
 
 	public static class ConditionBuilder {

@@ -35,7 +35,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -80,7 +79,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		if (!user.isSneaking()) {
 			startTime = time;
 		} else {
-			ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+			ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 			if (time > startTime + userConfig.cookInterval && cook()) {
 				startTime = System.currentTimeMillis();
 			}
@@ -135,12 +134,9 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	}
 
 	public static boolean canBurn(User user) {
-		AbilityDescription current = user.getSelectedAbility().orElse(null);
-		if (current == null || !current.getName().equals("HeatControl") || !user.canBend(current)) {
-			return true;
-		}
-		user.getEntity().setFireTicks(0);
-		return false;
+		return !user.getSelectedAbility()
+			.filter(desc -> desc.getName().equals("HeatControl") && user.canBend(desc))
+			.isPresent();
 	}
 
 	@Override

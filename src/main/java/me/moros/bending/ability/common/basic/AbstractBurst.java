@@ -26,7 +26,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public abstract class AbstractBurst extends AbilityInstance {
 					continue;
 				}
 				T blast = constructor.get();
-				blast.initialize(user, VectorMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
+				blast.initialize(user, EntityMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
 				blasts.add(blast);
 			}
 		}
@@ -71,13 +71,5 @@ public abstract class AbstractBurst extends AbilityInstance {
 	protected @NonNull UpdateResult updateBurst() {
 		blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
 		return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
-
-	protected void setRenderInterval(long interval) {
-		blasts.forEach(b -> b.setRenderInterval(interval));
-	}
-
-	protected void setRenderParticleCount(int count) {
-		blasts.forEach(b -> b.setRenderParticleCount(count));
 	}
 }

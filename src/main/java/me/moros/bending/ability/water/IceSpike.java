@@ -46,7 +46,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -86,7 +85,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 			CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
 		} else {
 			Block source = null;
-			Optional<LivingEntity> entity = WorldMethods.getTargetEntity(user, userConfig.selectRange);
+			Optional<LivingEntity> entity = user.getTargetEntity(userConfig.selectRange);
 			if (entity.isPresent()) {
 				Block base = entity.get().getLocation().getBlock().getRelative(BlockFace.DOWN);
 				if (Bending.getGame().getProtectionSystem().canBuild(user, base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
@@ -228,7 +227,7 @@ public class IceSpike extends AbilityInstance implements Ability {
 		private boolean canMove(Block newBlock) {
 			if (MaterialUtil.isLava(newBlock)) return false;
 			if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) return false;
-			BlockMethods.breakPlant(newBlock);
+			BlockMethods.tryBreakPlant(newBlock);
 			return true;
 		}
 

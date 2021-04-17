@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -83,9 +82,5 @@ public final class PlayerManager {
 
 	public Optional<BendingProfile> getProfile(@NonNull UUID uuid) {
 		return Optional.ofNullable(cache.synchronous().get(uuid));
-	}
-
-	public CompletableFuture<BendingProfile> getProfileAsync(@NonNull UUID uuid) {
-		return cache.getIfPresent(uuid);
 	}
 }

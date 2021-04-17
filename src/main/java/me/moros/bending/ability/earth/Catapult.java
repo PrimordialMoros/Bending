@@ -32,10 +32,12 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -44,6 +46,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 
+import java.util.Comparator;
 import java.util.function.Predicate;
 
 public class Catapult extends AbilityInstance implements Ability {
@@ -64,16 +67,13 @@ public class Catapult extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (!WorldMethods.isOnGround(user.getEntity())) return false;
+		if (!user.isOnGround()) return false;
 
 		this.user = user;
 		recalculateConfig();
 
-		base = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, base)) {
-			return false;
-		}
-		if (base.isLiquid() || !EarthMaterials.isEarthbendable(user, base) || !TempBlock.isBendable(base)) {
+		base = getBase();
+		if (!TempBlock.isBendable(base) || !Bending.getGame().getProtectionSystem().canBuild(user, base)) {
 			return false;
 		}
 
@@ -97,11 +97,20 @@ public class Catapult extends AbilityInstance implements Ability {
 		return UpdateResult.CONTINUE;
 	}
 
-	public boolean launch() {
+	private Block getBase() {
+		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).grow(new Vector3(0, 0.1, 0));
+		AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.getLocation());
+		Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.getBlockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
+		return WorldMethods.getNearbyBlocks(user.getWorld(), floorBounds, predicate).stream()
+			.min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.getLocation())))
+			.orElse(user.getLocBlock().getRelative(BlockFace.DOWN));
+	}
+
+	private boolean launch() {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
+		Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(1).orElse(null);
 		SoundUtil.EARTH_SOUND.play(base.getLocation());
 

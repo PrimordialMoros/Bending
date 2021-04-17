@@ -70,6 +70,8 @@ tasks {
     }
     withType<JavaCompile> {
         options.compilerArgs.add("-parameters")
+        options.compilerArgs.add("-Xlint:unchecked")
+        options.compilerArgs.add("-Xlint:deprecation")
         options.isFork = true
         options.forkOptions.executable = "javac"
     }

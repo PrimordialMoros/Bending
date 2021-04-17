@@ -186,7 +186,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
 			if (MaterialUtil.isWater(block)) {
 				TempBlock.create(block, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
 			}
-			return BlockMethods.coolLava(user, block);
+			return BlockMethods.tryCoolLava(user, block);
 		}
 
 		@Override

@@ -59,10 +59,10 @@ public final class BlockMethods {
 	public static final Set<BlockFace> CARDINAL_FACES = Collections.unmodifiableSet(EnumSet.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH));
 
 	/**
-	 * Attempts to light a block if it's a furnace, smoker, blast furance or campfire.
+	 * Try to light a block if it's a furnace, smoker, blast furnace or campfire.
 	 * @param block the block to light
 	 */
-	public static void lightBlock(@NonNull Block block) {
+	public static void tryLightBlock(@NonNull Block block) {
 		if (block.getType() == Material.FURNACE) {
 			Furnace furnace = (Furnace) block.getState();
 			furnace.setBurnTime((short) 800);
@@ -92,12 +92,12 @@ public final class BlockMethods {
 	}
 
 	/**
-	 * Attempts to cool down  the given block if it's Lava.
+	 * Try to cool down the given block if it's Lava.
 	 * @param user the user trying to cool the lava
 	 * @param block the block to check
 	 * @return true if lava was cooled down, false otherwise
 	 */
-	public static boolean coolLava(@NonNull User user, @NonNull Block block) {
+	public static boolean tryCoolLava(@NonNull User user, @NonNull Block block) {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 		if (MaterialUtil.isLava(block)) {
 			block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
@@ -108,12 +108,12 @@ public final class BlockMethods {
 	}
 
 	/**
-	 * Attempts to extinguish the given block if it's Fire.
+	 * Try to extinguish the given block if it's Fire.
 	 * @param user the user trying to extinguish the fire
 	 * @param block the block to check
 	 * @return true if fire was extinguished, false otherwise
 	 */
-	public static boolean extinguishFire(@NonNull User user, @NonNull Block block) {
+	public static boolean tryExtinguishFire(@NonNull User user, @NonNull Block block) {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
 		if (MaterialUtil.isFire(block)) {
 			block.setType(Material.AIR);
@@ -176,11 +176,11 @@ public final class BlockMethods {
 	}
 
 	/**
-	 * Attempts to break the specified block if it's a valid plant ({@link MaterialUtil#BREAKABLE_PLANTS}).
+	 * Try to break the specified block if it's a valid plant ({@link MaterialUtil#BREAKABLE_PLANTS}).
 	 * @param block the block to break
 	 * @return true if the plant was broken, false otherwise
 	 */
-	public static boolean breakPlant(@NonNull Block block) {
+	public static boolean tryBreakPlant(@NonNull Block block) {
 		if (MaterialUtil.BREAKABLE_PLANTS.isTagged(block)) {
 			if (TempBlock.MANAGER.isTemp(block)) return false;
 			block.breakNaturally(new ItemStack(Material.AIR));

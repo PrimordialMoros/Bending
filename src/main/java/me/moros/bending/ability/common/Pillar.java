@@ -57,6 +57,7 @@ public class Pillar implements Updatable {
 
 	private final boolean solidify;
 	private final int length;
+	private final int distance;
 	private final long interval;
 	private final long duration;
 
@@ -69,6 +70,7 @@ public class Pillar implements Updatable {
 		this.direction = builder.direction;
 		this.opposite = direction.getOppositeFace();
 		this.length = builder.length;
+		this.distance = builder.distance;
 		this.interval = builder.interval;
 		this.duration = builder.duration;
 		this.predicate = builder.predicate;
@@ -80,7 +82,7 @@ public class Pillar implements Updatable {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (currentLength >= length) return UpdateResult.REMOVE;
+		if (currentLength >= distance) return UpdateResult.REMOVE;
 
 		long time = System.currentTimeMillis();
 		int offset = currentLength + (time >= nextUpdateTime ? 2 : 1);
@@ -97,7 +99,7 @@ public class Pillar implements Updatable {
 	private boolean move(Block newBlock) {
 		if (MaterialUtil.isLava(newBlock)) return false;
 		if (!MaterialUtil.isTransparentOrWater(newBlock)) return false;
-		BlockMethods.breakPlant(newBlock);
+		BlockMethods.tryBreakPlant(newBlock);
 
 		for (int i = 0; i < length; i++) {
 			Block forwardBlock = newBlock.getRelative(opposite, i);
@@ -163,6 +165,7 @@ public class Pillar implements Updatable {
 		private final Function<PillarBuilder, ? extends Pillar> constructor;
 		private BlockFace direction = BlockFace.UP;
 		private int length;
+		private int distance;
 		private long interval = 125;
 		private long duration = BendingProperties.EARTHBENDING_REVERT_TIME;
 		private Predicate<Block> predicate = b -> true;
@@ -197,21 +200,36 @@ public class Pillar implements Updatable {
 		}
 
 		public Optional<Pillar> build(@Positive int length) {
-			int maxLength = validate(length);
+			return build(length, length);
+		}
+
+		public Optional<Pillar> build(@Positive int length, @Positive int distance) {
+			int maxLength = validateLength(length);
 			if (maxLength < 1) return Optional.empty();
+			int maxDistance = validateDistance(distance);
+			if (maxDistance < 1) return Optional.empty();
 			this.length = maxLength;
+			this.distance = maxDistance;
 			return Optional.of(constructor.apply(this));
 		}
 
 		/**
 		 * Check region protections and return maximum valid length in blocks
 		 */
-		private int validate(int max) {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, origin)) return 0;
+		private int validateLength(int max) {
+			for (int i = 0; i < max; i++) {
+				Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
+				if (!TempBlock.isBendable(backwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
+					return i;
+				}
+			}
+			return max;
+		}
+
+		private int validateDistance(int max) {
 			for (int i = 0; i < max; i++) {
 				Block forwardBlock = origin.getRelative(direction, i + 1);
-				Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
-				if (!TempBlock.isBendable(backwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock)) {
 					return i;
 				}
 			}

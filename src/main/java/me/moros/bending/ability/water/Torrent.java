@@ -199,7 +199,7 @@ public class Torrent extends AbilityInstance implements Ability {
 			for (Block block : stream) {
 				TempBlock.create(block, Material.ICE.createBlockData(), userConfig.freezeDuration, true);
 			}
-			FragileStructure.attemptDamageStructure(Collections.singletonList(head), 8);
+			FragileStructure.tryDamageStructure(Collections.singletonList(head), 8);
 			stream.clear();
 		}
 
@@ -209,7 +209,7 @@ public class Torrent extends AbilityInstance implements Ability {
 				freeze();
 				return;
 			}
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 1);
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), 1);
 		}
 	}
 

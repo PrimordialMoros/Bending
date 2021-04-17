@@ -65,8 +65,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 	private boolean launched;
 	private boolean selectedOrigin;
-	private int particleCount;
-	private long renderInterval;
+	private int particleCount = 6;
+	private long renderInterval = 0;
 
 	public AirBlast(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -76,7 +76,6 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
-		particleCount = 6;
 
 		if (Policies.IN_LIQUID.test(user, getDescription())) {
 			return false;
@@ -161,7 +160,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		return user;
 	}
 
-	// Used to initialize the blast for bursts.
+	// Used to initialize the blast for bursts
 	@Override
 	public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
 		this.user = user;
@@ -171,17 +170,9 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 		origin = location;
 		this.direction = direction;
 		removalPolicy = Policies.builder().build();
+		particleCount = 1;
+		renderInterval = 100;
 		stream = new AirStream(new Ray(location, direction));
-	}
-
-	@Override
-	public void setRenderInterval(long interval) {
-		this.renderInterval = interval;
-	}
-
-	@Override
-	public void setRenderParticleCount(int count) {
-		this.particleCount = count;
 	}
 
 	private class AirStream extends ParticleStream {
@@ -226,7 +217,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 			if (factor == 0) return false;
 			factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
 			// Reduce the push if the player is on the ground.
-			if (isUser && WorldMethods.isOnGround(entity)) {
+			if (isUser && user.isOnGround()) {
 				factor *= 0.5;
 			}
 			Vector3 velocity = new Vector3(entity.getVelocity());
@@ -247,8 +238,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			if (BlockMethods.extinguishFire(user, block)) return false;
-			BlockMethods.coolLava(user, block);
+			if (BlockMethods.tryExtinguishFire(user, block)) return false;
+			BlockMethods.tryCoolLava(user, block);
 			return true;
 		}
 	}

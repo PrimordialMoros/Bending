@@ -34,7 +34,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -78,7 +77,7 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 		}
 
 		if (controlledEntity == null || !controlledEntity.isValid()) {
-			controlledEntity = WorldMethods.getTargetEntity(user, userConfig.entitySelectRange, Minecart.class).orElse(null);
+			controlledEntity = user.getTargetEntity(userConfig.entitySelectRange, Minecart.class).orElse(null);
 		}
 
 		if (controlledEntity != null) {

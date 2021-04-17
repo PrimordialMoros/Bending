@@ -42,7 +42,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
@@ -77,7 +77,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 		heightSmoother = new HeightSmoother();
 
-		double dist = WorldMethods.distanceAboveGround(user.getEntity());
+		double dist = EntityMethods.distanceAboveGround(user.getEntity());
 		if ((dist < 0.5 || dist > 3)) {
 			return false;
 		}
@@ -103,7 +103,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		stuckCount = user.getEntity().getVelocity().lengthSquared() < 0.1 ? stuckCount + 1 : 0;
+		stuckCount = user.getVelocity().getNormSq() < 0.1 ? stuckCount + 1 : 0;
 		if (stuckCount > 10 || !move()) {
 			return UpdateResult.REMOVE;
 		}
@@ -144,7 +144,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 	private boolean move() {
 		if (isColliding()) return false;
 		Vector3 direction = user.getDirection().setY(0).normalize();
-		double height = WorldMethods.distanceAboveGround(user.getEntity());
+		double height = EntityMethods.distanceAboveGround(user.getEntity());
 		double smoothedHeight = heightSmoother.add(height);
 		if (user.getLocBlock().isLiquid()) {
 			height = 0.5;
@@ -159,7 +159,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 	}
 
 	private boolean isColliding() {
-		double speed = user.getEntity().getVelocity().setY(0).length();
+		double speed = user.getVelocity().setY(0).getNorm();
 		Vector3 direction = user.getDirection().setY(0).normalize(Vector3.ZERO);
 		Vector3 front = user.getEyeLocation().subtract(new Vector3(0, 0.5, 0))
 			.add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
@@ -169,7 +169,7 @@ public class AirScooter extends AbilityInstance implements Ability {
 
 	private double getPrediction() {
 		Vector3 currentDirection = user.getDirection().setY(0).normalize();
-		double playerSpeed = user.getEntity().getVelocity().setY(0).length();
+		double playerSpeed = user.getVelocity().setY(0).getNorm();
 		double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
 		Vector3 location = user.getLocation().add(currentDirection.scalarMultiply(speed));
 		AABB userBounds = AABBUtils.getEntityBounds(user.getEntity());

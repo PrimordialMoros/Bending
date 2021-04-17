@@ -43,8 +43,7 @@ import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.UserMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -95,7 +94,7 @@ public class Bolt extends AbilityInstance implements Ability {
 		}
 		if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
 			if (user.isSneaking()) {
-				ParticleUtil.createRGB(UserMethods.getMainHandSide(user).toLocation(user.getWorld()), "01E1FF").spawn();
+				ParticleUtil.createRGB(user.getMainHandSide().toLocation(user.getWorld()), "01E1FF").spawn();
 				return UpdateResult.CONTINUE;
 			} else {
 				strike();
@@ -108,7 +107,7 @@ public class Bolt extends AbilityInstance implements Ability {
 
 	private boolean onEntityHit(Entity entity) {
 		if (entity instanceof Creeper) ((Creeper) entity).setPowered(true);
-		double distance = VectorMethods.getEntityCenter(entity).distance(targetLocation);
+		double distance = EntityMethods.getEntityCenter(entity).distance(targetLocation);
 		if (distance > 5) return false;
 		boolean hitWater = MaterialUtil.isWater(targetLocation.toBlock(user.getWorld()));
 
@@ -134,12 +133,12 @@ public class Bolt extends AbilityInstance implements Ability {
 	public void dealDamage() {
 		Collider collider = new Sphere(targetLocation, 5);
 		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
-		FragileStructure.attemptDamageStructure(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
+		FragileStructure.tryDamageStructure(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
 	}
 
 	private void strike() {
-		targetLocation = WorldMethods.getTargetEntity(user, userConfig.range)
-			.map(VectorMethods::getEntityCenter).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
+		targetLocation = user.getTargetEntity(userConfig.range)
+			.map(EntityMethods::getEntityCenter).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
 		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
 		user.setCooldown(getDescription(), userConfig.cooldown);

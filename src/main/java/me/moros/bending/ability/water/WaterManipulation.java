@@ -166,7 +166,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 	private void renderTrail(Block block, int level) {
 		if (MaterialUtil.isTransparentOrWater(block)) {
-			BlockMethods.breakPlant(block);
+			BlockMethods.tryBreakPlant(block);
 			if (MaterialUtil.isWater(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
@@ -266,7 +266,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
 		@Override
 		public void onBlockHit(@NonNull Block block) {
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), 3);
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
 		}
 	}
 

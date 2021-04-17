@@ -48,7 +48,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.UserMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -78,8 +77,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 	private boolean charging;
 	private double factor = 1.0;
-	private int particleCount;
-	private long renderInterval;
+	private int particleCount = 6;
+	private long renderInterval = 0;
 	private long startTime;
 
 	public FireBlast(@NonNull AbilityDescription desc) {
@@ -92,7 +91,6 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		recalculateConfig();
 		startTime = System.currentTimeMillis();
 		charging = true;
-		particleCount = 6;
 
 		if (user.getHeadBlock().isLiquid()) {
 			return false;
@@ -127,7 +125,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				return UpdateResult.REMOVE;
 			}
 			if (user.isSneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-				ParticleUtil.createFire(user, UserMethods.getMainHandSide(user).toLocation(user.getWorld())).spawn();
+				ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
 			} else if (!user.isSneaking()) {
 				launch();
 			}
@@ -140,7 +138,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
 		charging = false;
 		user.setCooldown(getDescription(), userConfig.cooldown);
-		Vector3 origin = UserMethods.getMainHandSide(user);
+		Vector3 origin = user.getMainHandSide();
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
 		stream = new FireStream(new Ray(origin, lookingDir), 1.2 * factor);
 	}
@@ -173,7 +171,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		return user;
 	}
 
-	// Used to initialize the blast for bursts.
+	// Used to initialize the blast for bursts
 	@Override
 	public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
 		this.user = user;
@@ -181,17 +179,9 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		factor = 1.0;
 		charging = false;
 		removalPolicy = Policies.builder().build();
+		particleCount = 1;
+		renderInterval = 100;
 		stream = new FireStream(new Ray(location, direction), 1.2);
-	}
-
-	@Override
-	public void setRenderInterval(long interval) {
-		this.renderInterval = interval;
-	}
-
-	@Override
-	public void setRenderParticleCount(int count) {
-		this.particleCount = count;
 	}
 
 	private class FireStream extends ParticleStream {
@@ -207,7 +197,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		@Override
 		public void render() {
 			long time = System.currentTimeMillis();
-			if (time > nextRenderTime) {
+			if (renderInterval == 0 || time > nextRenderTime) {
 				Location loc = getBukkitLocation();
 				if (factor < 1.2) {
 					ParticleUtil.createFire(user, loc)
@@ -249,12 +239,12 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 					if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) continue;
 					if (WorldMethods.blockCast(user.getWorld(), new Ray(new Vector3(b), reverse), userConfig.igniteRadius * factor + 2).isPresent())
 						continue;
-					BlockMethods.lightBlock(b);
+					BlockMethods.tryLightBlock(b);
 					if (MaterialUtil.isIgnitable(b)) blocks.add(b);
 				}
 				blocks.forEach(b -> TempBlock.create(b, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true));
 			}
-			FragileStructure.attemptDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
+			FragileStructure.tryDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
 			return true;
 		}
 	}

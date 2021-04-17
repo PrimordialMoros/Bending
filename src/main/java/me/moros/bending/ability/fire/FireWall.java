@@ -45,15 +45,16 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public class FireWall extends AbilityInstance implements Ability {
 
 	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(250, TimeUnit.MILLISECONDS).build();
+		.expiration(125, TimeUnit.MILLISECONDS).build();
 
 	private Collection<Block> blocks;
 	private OBB collider;
@@ -128,17 +129,16 @@ public class FireWall extends AbilityInstance implements Ability {
 		}
 		long time = System.currentTimeMillis();
 		if (time > nextRenderTime) {
-			nextRenderTime = time + 250;
+			nextRenderTime = time + 200;
 			for (Block block : blocks) {
 				Location location = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleUtil.createFire(user, location).count(3).offset(0.6, 0.6, 0.6).extra(0.01).spawn();
-				ParticleUtil.create(Particle.SMOKE_NORMAL, location).offset(0.6, 0.6, 0.6).spawn();
-				if (ThreadLocalRandom.current().nextInt(12) == 0) {
+				ParticleUtil.createFire(user, location).count(3).offset(0.5, 0.5, 0.5).extra(0.01).spawn();
+				if (ThreadLocalRandom.current().nextInt(15) == 0) {
 					SoundUtil.FIRE_SOUND.play(location);
 				}
 			}
 		}
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false);
+		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true);
 		return UpdateResult.CONTINUE;
 	}
 
@@ -148,11 +148,25 @@ public class FireWall extends AbilityInstance implements Ability {
 			entity.remove();
 			return true;
 		}
+
 		if (affectedEntities.containsKey(entity)) return false;
 		affectedEntities.put(entity, false);
-		entity.setVelocity(Vector3.ZERO.toVector());
+
+		if (!(entity instanceof LivingEntity)) {
+			entity.setVelocity(Vector3.ZERO.toVector());
+			return true;
+		}
+
+		boolean canBurn = Bending.getGame().getBenderRegistry().getBendingUser((LivingEntity) entity).map(HeatControl::canBurn).orElse(true);
+		if (!canBurn) return false;
+
+		((LivingEntity) entity).setNoDamageTicks(0);
 		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		FireTick.ACCUMULATE.apply(entity, 20);
+		FireTick.ACCUMULATE.apply(entity, 10);
+
+		Vector3 pos = EntityMethods.getEntityCenter(entity);
+		Vector3 velocity = pos.subtract(collider.getClosestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
+		entity.setVelocity(velocity.clampVelocity());
 		return true;
 	}
 
@@ -199,6 +213,8 @@ public class FireWall extends AbilityInstance implements Ability {
 		public double damage;
 		@Attribute(Attribute.RANGE)
 		public double range;
+		@Attribute(Attribute.STRENGTH)
+		public double knockback;
 		@Attribute(Attribute.DURATION)
 		public long duration;
 
@@ -207,10 +223,11 @@ public class FireWall extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firewall");
 
 			cooldown = abilityNode.node("cooldown").getLong(11000);
-			height = abilityNode.node("height").getDouble(4.0);
+			height = abilityNode.node("height").getDouble(5.0);
 			width = abilityNode.node("width").getDouble(6.0);
 			range = abilityNode.node("range").getDouble(3.0);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			damage = abilityNode.node("damage").getDouble(0.5);
+			knockback = abilityNode.node("knockback").getDouble(0.33);
 			duration = abilityNode.node("duration").getLong(5000);
 		}
 	}

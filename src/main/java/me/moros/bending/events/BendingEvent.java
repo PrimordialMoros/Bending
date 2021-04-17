@@ -19,15 +19,15 @@
 
 package me.moros.bending.events;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class BendingEvent extends Event {
 	private static final HandlerList handlers = new HandlerList();
 
 	@Override
-	public @NonNull HandlerList getHandlers() {
+	public @NotNull HandlerList getHandlers() {
 		return handlers;
 	}
 
