@@ -24,10 +24,11 @@ import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public final class TemporalManager<K, V extends Temporary> {
+public class TemporalManager<K, V extends Temporary> {
 	private final ExpiringMap<K, V> instances;
 
 	public TemporalManager() {
@@ -46,6 +47,10 @@ public final class TemporalManager<K, V extends Temporary> {
 
 	public void addEntry(@NonNull K key, @NonNull V value, long duration) {
 		if (duration <= 0) duration = Temporary.DEFAULT_REVERT;
+		if (instances.containsKey(key)) {
+			instances.setExpiration(key, duration, TimeUnit.MILLISECONDS);
+			return;
+		}
 		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
 	}
 
@@ -60,5 +65,9 @@ public final class TemporalManager<K, V extends Temporary> {
 	public void removeAll() {
 		instances.values().forEach(Temporary::revert);
 		instances.clear();
+	}
+
+	protected Collection<V> getInstances() {
+		return instances.values();
 	}
 }

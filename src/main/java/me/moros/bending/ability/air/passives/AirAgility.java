@@ -71,7 +71,7 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
 	private void handlePotionEffect(PotionEffectType type, int amplifier) {
 		if (amplifier < 0) return;
-		PotionUtil.addPotion(user.getEntity(), type, 100, amplifier);
+		PotionUtil.tryAddPotion(user.getEntity(), type, 100, amplifier);
 	}
 
 	@Override

@@ -40,7 +40,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SourceUtil;
-import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -138,15 +137,11 @@ public class Iceberg extends AbilityInstance implements Ability {
 		}
 		blocks.add(block);
 		boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
-		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-		TempBlock tb = TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true).orElse(null);
-		if (canPlaceAir && tb != null) {
-			tb.setRevertTask(() ->
-				Tasker.newChain().delay(1)
-					.sync(() -> TempBlock.createAir(block, userConfig.regenDelay))
-					.execute()
-			);
+		if (canPlaceAir) {
+			TempBlock.createAir(block, BendingProperties.ICE_DURATION + userConfig.regenDelay);
 		}
+		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
+		TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true);
 	}
 
 	public static void launch(User user) {

@@ -62,6 +62,7 @@ public final class SequenceManager {
 	 * @return the amount of sequences that were registered.
 	 */
 	public int registerSequences(@NonNull Map<@NonNull AbilityDescription, @NonNull Sequence> sequences) {
+		int i = 0;
 		for (Map.Entry<AbilityDescription, Sequence> entry : sequences.entrySet()) {
 			AbilityDescription desc = entry.getKey();
 			if (!game.getAbilityRegistry().isRegistered(desc)) continue;
@@ -71,11 +72,12 @@ public final class SequenceManager {
 				.allMatch(game.getAbilityRegistry()::isRegistered);
 			if (valid) {
 				registeredSequences.put(entry.getKey(), sequence);
+				i++;
 			} else {
 				Bending.getLog().warn(desc.getName() + " sequence will be disabled as it requires an invalid ability to activate.");
 			}
 		}
-		return registeredSequences.size();
+		return i;
 	}
 
 	public @Nullable Sequence getSequence(@NonNull AbilityDescription desc) {

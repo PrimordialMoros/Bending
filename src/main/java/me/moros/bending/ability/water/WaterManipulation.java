@@ -66,7 +66,6 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -137,44 +136,45 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 		if (manip != null) {
-			SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
-			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				effect.play(manip.getCenter().toLocation(user.getWorld()));
-			}
+			UpdateResult result = manip.update();
+			if (result == UpdateResult.CONTINUE) {
+				SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
+				if (ThreadLocalRandom.current().nextInt(5) == 0) {
+					effect.play(manip.getCenter().toLocation(user.getWorld()));
+				}
 
-			if (isIce) {
-				Location center = manip.getCenter().toLocation(user.getWorld());
-				ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
-					.offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
-				ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
-					.offset(0.5, 0.5, 0.5).spawn();
-			} else {
-				Block previous = manip.getPreviousBlock();
-				if (previous != null) {
-					if (!trail.isEmpty()) manip.clean(trail.peekFirst());
-					if (trail.size() == 2) manip.clean(trail.removeLast());
-					trail.addFirst(previous);
-					TempBlock.MANAGER.get(previous).ifPresent(tb -> tb.setRevertTask(() -> renderTrail(previous, 7)));
+				if (isIce) {
+					Location center = manip.getCenter().toLocation(user.getWorld());
+					ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
+						.offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
+					ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
+						.offset(0.5, 0.5, 0.5).spawn();
+				} else {
+					Block trail1 = manip.getPreviousBlock();
+					if (trail1 != null) {
+						if (!trail.isEmpty()) manip.clean(trail.peekFirst());
+						if (trail.size() == 2) manip.clean(trail.removeLast());
+						trail.addFirst(trail1);
+						renderTrail(trail1, 7);
+						renderTrail(trail.peekLast(), 6);
+					}
 				}
 			}
-
-			return manip.update();
+			return result;
 		} else {
 			return states.update();
 		}
 	}
 
 	private void renderTrail(Block block, int level) {
+		if (block == null) return;
 		if (MaterialUtil.isTransparentOrWater(block)) {
 			BlockMethods.tryBreakPlant(block);
 			if (MaterialUtil.isWater(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else {
-				Optional<TempBlock> tempBlock = TempBlock.create(block, MaterialUtil.getWaterData(level), true);
-				if (level == 7 && tempBlock.isPresent()) {
-					tempBlock.get().setRevertTask(() -> renderTrail(block, level - 1));
-				}
+				TempBlock.create(block, MaterialUtil.getWaterData(level));
 			}
 		}
 	}
@@ -218,10 +218,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 	@Override
 	public void onDestroy() {
 		if (manip != null) {
-			trail.forEach(b -> {
-				TempBlock.MANAGER.get(b).ifPresent(tb -> tb.setRevertTask(null));
-				manip.clean(b);
-			});
+			trail.forEach(manip::clean);
 			manip.clean();
 		}
 	}
@@ -260,7 +257,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 			entity.setVelocity(push.clampVelocity());
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-			PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+			PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
 			return true;
 		}
 

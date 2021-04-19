@@ -169,7 +169,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 				affectedEntities.add(entity);
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-				PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+				PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
 				ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
 					.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
 

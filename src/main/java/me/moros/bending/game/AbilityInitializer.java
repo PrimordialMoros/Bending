@@ -248,7 +248,7 @@ public final class AbilityInitializer {
 			.element(EARTH).activation(SNEAK, ATTACK).bypassCooldown(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthSmash", EarthSmash::new)
-			.element(EARTH).activation(ATTACK, SNEAK).build());
+			.element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
 		abilities.add(AbilityDescription.builder("EarthShot", EarthShot::new)
 			.element(EARTH).activation(ATTACK, SNEAK).build());

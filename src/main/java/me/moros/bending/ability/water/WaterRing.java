@@ -145,11 +145,13 @@ public class WaterRing extends AbilityInstance implements Ability {
 		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
 	}
 
-	public List<Block> complete() {
+	public @NonNull List<Block> complete() {
 		if (!ready) return Collections.emptyList();
 		completed = true;
 		sources = 0;
-		return getOrdered(getDirectionIndex());
+		int i = getDirectionIndex();
+		if (i == 0) return ring;
+		return Stream.concat(ring.subList(i, ring.size()).stream(), ring.subList(0, i).stream()).collect(Collectors.toList());
 	}
 
 	private Block getClosestRingBlock() {
@@ -169,16 +171,10 @@ public class WaterRing extends AbilityInstance implements Ability {
 		return result;
 	}
 
-	public int getDirectionIndex() {
+	private int getDirectionIndex() {
 		Vector3 dir = user.getDirection().setY(0).normalize().scalarMultiply(radius);
 		Block target = new Vector3(user.getHeadBlock()).add(Vector3.HALF).add(dir).toBlock(user.getWorld());
 		return FastMath.max(0, ring.indexOf(target));
-	}
-
-	public List<Block> getOrdered(int index) {
-		if (index == 0) return ring;
-		return Stream.concat(ring.subList(index, ring.size()).stream(), ring.subList(0, index).stream())
-			.collect(Collectors.toList());
 	}
 
 	@Override

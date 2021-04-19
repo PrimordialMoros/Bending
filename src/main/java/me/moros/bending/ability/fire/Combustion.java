@@ -188,7 +188,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 	}
 
 	private class CombustBeam extends ParticleStream {
-		private double randomBeamDistance = 0;
+		private double randomBeamDistance = 7;
 		private double distanceTravelled = 0;
 
 		public CombustBeam() {
@@ -266,7 +266,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
 			cooldown = abilityNode.node("cooldown").getLong(12000);
 			damage = abilityNode.node("damage").getDouble(5.0);
-			power = abilityNode.node("power").getDouble(3.0);
+			power = abilityNode.node("power").getDouble(2.4);
 			fireTick = abilityNode.node("fire-tick").getInt(60);
 			range = abilityNode.node("range").getDouble(56.0);
 

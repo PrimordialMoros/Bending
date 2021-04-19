@@ -57,9 +57,6 @@ public class TravellingSource implements State {
 		if (started) return;
 		this.chain = chain;
 		source = chain.getChainStore().stream().findFirst().orElse(null);
-		if (source != null && data.getMaterial() == Material.WATER && !BlockMethods.isInfiniteWater(source)) {
-			TempBlock.createAir(source, 60000);
-		}
 		started = source != null;
 	}
 
@@ -73,8 +70,8 @@ public class TravellingSource implements State {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		clean();
 		if (!started) return UpdateResult.REMOVE;
+		clean();
 		Vector3 target = user.getEyeLocation().floor();
 		Vector3 location = new Vector3(source);
 

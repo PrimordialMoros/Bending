@@ -133,7 +133,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
 	// TODO tweak drop rates
 	private void extract(Block block) {
-		if (!TempBlock.isBendable(block)) return;
+		if (TempBlock.MANAGER.isTemp(block)) return;
 		Material type = block.getType();
 		if (!MaterialUtil.ORES.containsKey(type)) return;
 		Material drop = MaterialUtil.ORES.get(type);
@@ -141,12 +141,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 		if (amount == 0) return;
 
 		Material newType = type.name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
-		Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
-		if (tb.isPresent()) {
-			tb.get().overwriteSnapshot(newType.createBlockData());
-		} else {
-			block.setType(newType);
-		}
+		block.setType(newType);
 
 		int rand = ThreadLocalRandom.current().nextInt(100);
 		int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;

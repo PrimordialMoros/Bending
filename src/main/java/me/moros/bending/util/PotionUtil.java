@@ -30,6 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Utility class to handle potion effects on entities.
+ */
 public final class PotionUtil {
 	private static final Set<PotionEffectType> POSITIVE = new HashSet<>(Arrays.asList(
 		PotionEffectType.ABSORPTION, PotionEffectType.DAMAGE_RESISTANCE, PotionEffectType.FAST_DIGGING,
@@ -59,19 +62,14 @@ public final class PotionUtil {
 		return NEGATIVE.contains(type);
 	}
 
-	public static boolean canAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int minDuration, int minAmplifier) {
-		if (entity instanceof LivingEntity) {
+	public static boolean tryAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
+		if (entity.isValid() && entity instanceof LivingEntity) {
+			int minDuration = isPositive(type) ? 20 : duration;
 			PotionEffect effect = ((LivingEntity) entity).getPotionEffect(type);
-			return effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < minAmplifier;
-		}
-		return false;
-	}
-
-	public static boolean addPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
-		int minDuration = isPositive(type) ? 20 : duration;
-		if (entity.isValid() && canAddPotion(entity, type, minDuration, amplifier)) {
-			((LivingEntity) entity).addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
-			return true;
+			if (effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < amplifier) {
+				((LivingEntity) entity).addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
+				return true;
+			}
 		}
 		return false;
 	}

@@ -280,7 +280,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 			return;
 		}
 		if (user.isSneaking() && !MaterialUtil.isUnbreakable(block)) {
-			BlockData data = block.getState().getBlockData();
+			BlockData data = block.getBlockData();
 			TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
 			Vector3 velocity = user.getEyeLocation().subtract(location).normalize().scalarMultiply(0.2);
 			projectile = new BendingFallingBlock(block, data, velocity, true, 30000);

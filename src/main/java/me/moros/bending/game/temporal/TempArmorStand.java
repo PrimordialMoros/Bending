@@ -37,8 +37,6 @@ public class TempArmorStand implements Temporary {
 	public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
 	private final ArmorStand armorStand;
 
-	private RevertTask revertTask;
-
 	public static void init() {
 	}
 
@@ -75,11 +73,5 @@ public class TempArmorStand implements Temporary {
 	public void revert() {
 		armorStand.remove();
 		MANAGER.removeEntry(armorStand);
-		if (revertTask != null) revertTask.execute();
-	}
-
-	@Override
-	public void setRevertTask(RevertTask task) {
-		this.revertTask = task;
 	}
 }

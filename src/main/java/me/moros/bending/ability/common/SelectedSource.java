@@ -35,7 +35,12 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SelectedSource implements State {
+	private static final Map<Block, SelectedSource> INSTANCES = new HashMap<>();
+
 	private StateChain chain;
 	private final User user;
 	private Vector3 origin;
@@ -75,6 +80,7 @@ public class SelectedSource implements State {
 		if (data != null) {
 			if (TempBlock.MANAGER.isTemp(block)) state = block.getState();
 			TempBlock.create(block, data);
+			INSTANCES.put(block, this);
 		}
 		return true;
 	}
@@ -83,7 +89,7 @@ public class SelectedSource implements State {
 	public void start(@NonNull StateChain chain) {
 		if (started) return;
 		this.chain = chain;
-		started = true;
+		started = origin != null;
 	}
 
 	@Override
@@ -121,6 +127,14 @@ public class SelectedSource implements State {
 			} else {
 				TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
 			}
+		}
+		INSTANCES.remove(block);
+	}
+
+	public static void tryRevertSource(@NonNull Block block) {
+		SelectedSource selectedSource = INSTANCES.get(block);
+		if (selectedSource != null) {
+			selectedSource.onDestroy();
 		}
 	}
 }

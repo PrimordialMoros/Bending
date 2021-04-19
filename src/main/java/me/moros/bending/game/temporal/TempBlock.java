@@ -20,11 +20,9 @@
 package me.moros.bending.game.temporal;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,41 +31,66 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 
-import java.util.HashSet;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TempBlock implements Temporary {
-	private static final Set<Block> GRAVITY_CACHE = new HashSet<>();
+	private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
-	public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>();
-	private static final ExpiringMap<Block, Boolean> TEMP_AIR = ExpiringMap.builder().variableExpiration().build();
+	public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalBlockManager();
 
-	private BlockState snapshot;
-	private final BlockData data;
-	private RevertTask revertTask;
+	private final Deque<TempBlockState> snapshots = new ArrayDeque<>();
+	private final Block block;
 	private final boolean bendable;
 
 	public static void init() {
 	}
 
 	private TempBlock(Block block, BlockData data, long duration, boolean bendable) {
-		snapshot = block.getState();
-		this.data = data;
+		TemporalBlockManager.CACHE.add(block);
+		this.block = block;
 		this.bendable = bendable;
-		TempBlock temp = MANAGER.get(block).orElse(null);
-		if (temp != null) {
-			snapshot = temp.snapshot;
-			if (temp.revertTask != null) temp.revertTask.execute();
+		addState(data, duration);
+	}
+
+	private void addState(BlockData data, long duration) {
+		cleanStates();
+		TempBlockState tbs = snapshots.peekLast();
+		if (tbs == null || !tbs.overwrite) {
+			snapshots.offerLast(new TempBlockState(block.getState(false), duration));
 		} else {
-			if (data.getMaterial().isAir() && !TEMP_AIR.containsKey(block)) {
-				TEMP_AIR.put(block, false, ExpirationPolicy.CREATED, duration <= 0 ? DEFAULT_REVERT : duration, TimeUnit.MILLISECONDS);
+			tbs.overwrite = false;
+		}
+		block.setBlockData(data);
+		refreshGravityCache(block);
+		MANAGER.addEntry(block, this, duration);
+	}
+
+	// Cleans up previous states that have already expired
+	private void cleanStates() {
+		if (snapshots.size() < 2) return;
+		long time = System.currentTimeMillis();
+		Iterator<TempBlockState> it = snapshots.iterator();
+		it.next(); // ignore original snapshot
+		while (it.hasNext()) {
+			TempBlockState tbs = it.next();
+			if (time > tbs.expirationTime + 5000) {
+				it.remove();
 			}
 		}
-		if (data.getMaterial().hasGravity()) GRAVITY_CACHE.add(block);
-		block.setBlockData(data);
-		MANAGER.addEntry(block, this, duration);
+	}
+
+	public static @NonNull BlockData getLastValidData(@NonNull Block block) {
+		TempBlock tb = MANAGER.get(block).orElse(null);
+		if (tb != null) {
+			TempBlockState tbs = tb.snapshots.peekLast();
+			if (tbs != null && tbs.overwrite) return tbs.state.getBlockData();
+		}
+		return block.getBlockData();
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
@@ -83,21 +106,10 @@ public class TempBlock implements Temporary {
 	}
 
 	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable) {
-		return create(block, data, duration, bendable, true);
-	}
-
-	public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable, boolean fixWater) {
 		if (block instanceof TileState) return Optional.empty();
 
-		TempBlock tb = MANAGER.get(block).orElse(null);
-		if (tb != null && data.matches(tb.snapshot.getBlockData())) {
-			if (TEMP_AIR.containsKey(block)) {
-				long remainingTime = TEMP_AIR.getExpectedExpiration(block);
-				if (remainingTime <= duration) TEMP_AIR.remove(block);
-			}
-			tb.revert();
-			return Optional.empty();
-		}
+		if (duration <= 0) duration = DEFAULT_REVERT;
+		if (duration < 50) return Optional.empty();
 
 		if (block.getBlockData() instanceof Waterlogged) {
 			Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
@@ -110,72 +122,95 @@ public class TempBlock implements Temporary {
 			}
 		}
 
-		if (fixWater && MaterialUtil.TRANSPARENT.isTagged(data) && BlockMethods.isInfiniteWater(block)) {
-			if (tb != null && Material.WATER.createBlockData().matches(tb.snapshot.getBlockData())) {
-				tb.revert();
-			} else {
-				block.setType(Material.WATER);
+		if (block.getBlockData().matches(data)) return Optional.empty();
+
+		TempBlock tb = MANAGER.get(block).orElse(null);
+		if (tb != null && !tb.snapshots.isEmpty()) {
+			BlockState state = tb.snapshots.peekFirst().state;
+			if (data.matches(state.getBlockData())) {
+				tb.revertFully();
+				MANAGER.removeEntry(block);
+				return Optional.empty();
 			}
-			return Optional.empty();
+			tb.addState(data, duration);
+			return Optional.of(tb);
 		}
 
 		return Optional.of(new TempBlock(block, data, duration, bendable));
 	}
 
 	public static Optional<TempBlock> createAir(@NonNull Block block) {
-		return create(block, Material.AIR.createBlockData(), 0, true);
+		return createAir(block,0);
 	}
 
 	public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {
-		return create(block, Material.AIR.createBlockData(), duration, true);
+		Material mat = BlockMethods.isInfiniteWater(block) ? Material.WATER : Material.AIR;
+		return create(block, mat.createBlockData(), duration, true);
 	}
 
-	public static Optional<TempBlock> forceCreateAir(@NonNull Block block, long duration) {
-		return create(block, Material.AIR.createBlockData(), duration, true, false);
+	public static Optional<TempBlock> forceCreateAir(@NonNull Block block) {
+		return create(block, Material.AIR.createBlockData(), 0, true);
+	}
+
+	private static void refreshGravityCache(Block block) {
+		if (block.getType().hasGravity()) {
+			GRAVITY_CACHE.add(block);
+		} else {
+			GRAVITY_CACHE.remove(block);
+		}
+	}
+
+	private static void invalidateCache(Block block) {
+		GRAVITY_CACHE.remove(block);
+		TemporalBlockManager.CACHE.remove(block);
+	}
+
+	public void setOverwrite() {
+		TempBlockState tbs = snapshots.peekLast();
+		if (tbs != null) tbs.overwrite = true;
 	}
 
 	@Override
 	public void revert() {
-		Block block = getBlock();
-		snapshot.getWorld().getChunkAtAsync(block).thenRun(() -> snapshot.update(true, false));
-		MANAGER.removeEntry(block);
-		GRAVITY_CACHE.remove(block);
-
-		if (TEMP_AIR.containsKey(block)) {
-			long remainingTime = TEMP_AIR.getExpectedExpiration(block);
-			if (remainingTime > 200) new TempBlock(block, Material.AIR.createBlockData(), remainingTime, true);
+		TempBlockState tbs = null;
+		long time = System.currentTimeMillis();
+		while (!snapshots.isEmpty()) {
+			tbs = snapshots.pollLast();
+			if (time >= tbs.expirationTime) break;
 		}
+		if (tbs == null) return;
+		BlockState state = tbs.state;
+		state.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+		TempBlockState nextState = snapshots.peekLast();
+		if (nextState == null) {
+			MANAGER.removeEntry(block);
+			invalidateCache(block);
+		} else {
+			refreshGravityCache(block);
+			long deltaTime = nextState.expirationTime - time;
+			if (deltaTime >= 50) {
+				MANAGER.addEntry(block, this, deltaTime);
+			}
+		}
+	}
 
-		if (revertTask != null) revertTask.execute();
+	private void revertFully() {
+		TempBlockState tbs = snapshots.pollFirst();
+		if (tbs == null) return;
+		block.getWorld().getChunkAtAsync(block).thenRun(() -> tbs.state.update(true, false));
+		invalidateCache(block);
 	}
 
 	public @NonNull Block getBlock() {
-		return snapshot.getBlock();
-	}
-
-	public @NonNull BlockData getBlockData() {
-		return data;
-	}
-
-	public @NonNull BlockState getSnapshot() {
-		return snapshot;
-	}
-
-	public void overwriteSnapshot(@NonNull BlockData newData) {
-		this.snapshot.setBlockData(newData);
+		return block;
 	}
 
 	public void removeWithoutReverting() {
-		MANAGER.removeEntry(getBlock());
+		MANAGER.removeEntry(block);
 	}
 
 	public boolean isBendable() {
 		return bendable;
-	}
-
-	@Override
-	public void setRevertTask(RevertTask task) {
-		this.revertTask = task;
 	}
 
 	public static boolean isTouchingTempBlock(@NonNull Block block) {
@@ -190,11 +225,29 @@ public class TempBlock implements Temporary {
 		return GRAVITY_CACHE.contains(block);
 	}
 
-	public static void removeTempAir(@NonNull Block block) {
-		TEMP_AIR.remove(block);
+	private static class TempBlockState {
+		private final BlockState state;
+		private final long expirationTime;
+		private boolean overwrite = false;
+
+		private TempBlockState(BlockState state, long expirationTime) {
+			this.state = state;
+			this.expirationTime = System.currentTimeMillis() + expirationTime;
+		}
 	}
 
-	public static void clearAir() {
-		TEMP_AIR.clear();
+	private static class TemporalBlockManager extends TemporalManager<Block, TempBlock> {
+		private static final Set<Block> CACHE = ConcurrentHashMap.newKeySet();
+
+		@Override
+		public boolean isTemp(@Nullable Block key) {
+			return CACHE.contains(key);
+		}
+
+		@Override
+		public void removeAll() {
+			getInstances().forEach(TempBlock::revertFully);
+			getInstances().clear();
+		}
 	}
 }

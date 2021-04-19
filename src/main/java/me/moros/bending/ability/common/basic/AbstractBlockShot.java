@@ -124,8 +124,9 @@ public abstract class AbstractBlockShot implements Updatable {
 			return UpdateResult.REMOVE;
 		}
 
-		current = currentVector.toBlock(user.getWorld());
 		previousBlock = current;
+		current = currentVector.toBlock(user.getWorld());
+
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
 			return UpdateResult.REMOVE;
 		}

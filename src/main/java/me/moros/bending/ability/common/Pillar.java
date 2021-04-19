@@ -34,6 +34,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -101,6 +102,8 @@ public class Pillar implements Updatable {
 		if (!MaterialUtil.isTransparentOrWater(newBlock)) return false;
 		BlockMethods.tryBreakPlant(newBlock);
 
+		SelectedSource.tryRevertSource(newBlock.getRelative(opposite));
+
 		for (int i = 0; i < length; i++) {
 			Block forwardBlock = newBlock.getRelative(opposite, i);
 			Block backwardBlock = forwardBlock.getRelative(opposite);
@@ -109,8 +112,8 @@ public class Pillar implements Updatable {
 				playSound(forwardBlock);
 				return false;
 			}
-			BlockData data = solidify ? MaterialUtil.getSolidType(backwardBlock.getBlockData()) : backwardBlock.getBlockData();
-			TempBlock.create(forwardBlock, data, duration, true);
+			BlockData data = TempBlock.getLastValidData(backwardBlock);
+			TempBlock.create(forwardBlock, solidify ? MaterialUtil.getSolidType(data) : data, duration, true);
 		}
 		pillarBlocks.add(newBlock);
 		TempBlock.createAir(newBlock.getRelative(opposite, length), duration);
@@ -209,7 +212,7 @@ public class Pillar implements Updatable {
 			int maxDistance = validateDistance(distance);
 			if (maxDistance < 1) return Optional.empty();
 			this.length = maxLength;
-			this.distance = maxDistance;
+			this.distance = FastMath.min(maxLength, maxDistance);
 			return Optional.of(constructor.apply(this));
 		}
 

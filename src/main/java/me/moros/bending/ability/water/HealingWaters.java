@@ -108,7 +108,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
 			.forEach(target::removePotionEffect);
 		AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
 		if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
-			PotionUtil.addPotion(target, PotionEffectType.REGENERATION, 60, userConfig.power);
+			PotionUtil.tryAddPotion(target, PotionEffectType.REGENERATION, 60, userConfig.power);
 			return true;
 		}
 		return false;

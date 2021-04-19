@@ -106,7 +106,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
 			if (TempBlock.MANAGER.isTemp(block)) continue;
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			TempBlock.create(block, Material.WATER.createBlockData()).ifPresent(this::scheduleRevert);
+			TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);
 		}
 		if (ice) {
 			CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
@@ -130,7 +130,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 		affectedEntities.add(entity);
 		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 		int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-		PotionUtil.addPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+		PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
 		return true;
 	}
 

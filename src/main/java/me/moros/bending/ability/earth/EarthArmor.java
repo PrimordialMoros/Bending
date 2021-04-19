@@ -50,7 +50,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
@@ -96,9 +96,9 @@ public class EarthArmor extends AbilityInstance implements Ability {
 			resistance = userConfig.power;
 			SoundUtil.EARTH_SOUND.play(block.getLocation());
 		}
-		BlockState state = block.getState();
+		BlockData data = block.getBlockData().clone();
 		TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-		fallingBlock = new BendingFallingBlock(block, state.getBlockData(), new Vector3(0, 0.2, 0), false, 10000);
+		fallingBlock = new BendingFallingBlock(block, data, new Vector3(0, 0.2, 0), false, 10000);
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(5000)).build();
 		return true;
 	}
@@ -160,7 +160,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
 		TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
 		int duration = NumberConversions.round(userConfig.duration / 50F);
-		PotionUtil.addPotion(user.getEntity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
+		PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
 		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		formed = true;
@@ -198,6 +198,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
 		} else {
 			center = user.getEntity().getEyeLocation();
 		}
+		user.getEntity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 		SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 2, 1);
 		ParticleUtil.create(Particle.BLOCK_CRACK, center)
 			.count(8).offset(0.5, 0.5, 0.5)

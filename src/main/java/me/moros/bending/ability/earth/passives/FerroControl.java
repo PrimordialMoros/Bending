@@ -71,7 +71,7 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription()) || !user.hasPermission("bending.metal")) {
 			controlledEntity = null;
 			return UpdateResult.CONTINUE;
 		}

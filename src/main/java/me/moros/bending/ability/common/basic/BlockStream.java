@@ -86,9 +86,7 @@ public abstract class BlockStream implements State {
 		if (started) return;
 		this.chain = chain;
 		stream = new ArrayDeque<>();
-		chain.getChainStore().stream().filter(this::isValid).forEach(block -> {
-			if (TempBlock.create(block, material.createBlockData()).isPresent()) stream.addLast(block);
-		});
+		chain.getChainStore().stream().filter(this::isValid).forEach(stream::addLast);
 		started = !stream.isEmpty();
 	}
 

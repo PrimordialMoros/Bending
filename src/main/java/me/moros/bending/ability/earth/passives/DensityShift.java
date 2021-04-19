@@ -89,7 +89,7 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
 		for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
 			if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) continue;
-			TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true);
+			TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::setOverwrite);
 		}
 	}
 

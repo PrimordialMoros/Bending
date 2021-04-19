@@ -40,8 +40,6 @@ public class TempArmor implements Temporary {
 	private final LivingEntity entity;
 	private final ItemStack[] snapshot;
 
-	private RevertTask revertTask;
-
 	public static void init() {
 	}
 
@@ -70,12 +68,6 @@ public class TempArmor implements Temporary {
 	public void revert() {
 		entity.getEquipment().setArmorContents(snapshot);
 		MANAGER.removeEntry(entity);
-		if (revertTask != null) revertTask.execute();
-	}
-
-	@Override
-	public void setRevertTask(RevertTask task) {
-		this.revertTask = task;
 	}
 
 	private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {

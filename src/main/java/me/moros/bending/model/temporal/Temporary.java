@@ -23,11 +23,4 @@ public interface Temporary {
 	long DEFAULT_REVERT = 600_000;
 
 	void revert();
-
-	void setRevertTask(RevertTask task);
-
-	@FunctionalInterface
-	interface RevertTask {
-		void execute();
-	}
 }

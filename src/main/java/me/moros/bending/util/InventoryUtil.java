@@ -32,7 +32,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 /**
- * Utility class to handle intentory modification.
+ * Utility class to handle inventory modification.
  */
 public final class InventoryUtil {
 	private static final ItemStack emptyBottle = new ItemStack(Material.POTION);

@@ -111,7 +111,7 @@ public class Catapult extends AbilityInstance implements Ability {
 		double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
 
 		Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(1).orElse(null);
+		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(3, 1).orElse(null);
 		SoundUtil.EARTH_SOUND.play(base.getLocation());
 
 		double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());

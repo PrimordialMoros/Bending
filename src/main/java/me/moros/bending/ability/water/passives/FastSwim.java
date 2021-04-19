@@ -67,7 +67,7 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 		}
 
 		if (MaterialUtil.isWater(user.getLocBlock())) {
-			PotionUtil.addPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
+			PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
 		}
 		return UpdateResult.CONTINUE;
 	}
