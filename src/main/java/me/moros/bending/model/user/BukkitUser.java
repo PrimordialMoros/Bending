@@ -20,11 +20,17 @@
 package me.moros.bending.model.user;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.Bending;
+import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -36,7 +42,9 @@ import org.bukkit.inventory.MainHand;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public interface BukkitUser {
@@ -151,6 +159,9 @@ public interface BukkitUser {
 		RayTraceResult result = getWorld().rayTraceEntities(getEntity().getEyeLocation(), getEntity().getLocation().getDirection(), range, e -> !e.equals(getEntity()));
 		if (result == null) return Optional.empty();
 		Entity entity = result.getHitEntity();
+		if (getEntity().equals(entity)) {
+			Bending.getLog().info("Targetted same entity, this shouldn't happen: " + entity.getName());
+		}
 		return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
 	}
 
@@ -167,6 +178,51 @@ public interface BukkitUser {
 
 	default boolean isOnGround() {
 		return EntityMethods.isOnGround(getEntity());
+	}
+
+	/**
+	 * @return {@link #getTarget(double, Set)} with an empty material set and ignoreLiquids = true
+	 */
+	default @NonNull Vector3 getTarget(double range) {
+		return getTarget(range, Collections.emptySet(), true);
+	}
+
+	/**
+	 * @return {@link #getTarget(double, Set, boolean)} with an empty material set
+	 */
+	default @NonNull Vector3 getTarget(double range, boolean ignoreLiquids) {
+		return getTarget(range, Collections.emptySet(), ignoreLiquids);
+	}
+
+	/**
+	 * @return {@link #getTarget(double, Set, boolean)} with ignoreLiquids = true
+	 */
+	default @NonNull Vector3 getTarget(double range, @NonNull Set<@NonNull Material> ignored) {
+		return getTarget(range, ignored, true);
+	}
+
+	/**
+	 * Gets the targeted location.
+	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
+	 * @param range the range for the check
+	 * @param ignored an extra set of materials that will be ignored (transparent materials are already ignored)
+	 * @param ignoreLiquids whether liquids should be ignored for collisions
+	 * @return the target location
+	 */
+	default @NonNull Vector3 getTarget(double range, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
+		Ray ray = getRay(range);
+		Vector3 dir = getDirection();
+		for (int i = 1; i <= range; i++) {
+			Vector3 current = ray.origin.add(dir.scalarMultiply(i));
+			for (Block block : BlockMethods.combineFaces(current.toBlock(getWorld()))) {
+				if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) continue;
+				AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
+				if (blockBounds.intersects(ray)) {
+					return current;
+				}
+			}
+		}
+		return ray.origin.add(ray.direction);
 	}
 
 	/**

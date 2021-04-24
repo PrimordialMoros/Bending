@@ -123,6 +123,9 @@ public final class AbilityInitializer {
 		abilities.add(AbilityDescription.builder("AirPunch", AirPunch::new)
 			.element(AIR).activation(ATTACK).build());
 
+		abilities.add(AbilityDescription.builder("AirBreath", AirBreath::new)
+			.element(AIR).activation(SNEAK).build());
+
 		abilities.add(AbilityDescription.builder("Tornado", Tornado::new)
 			.element(AIR).activation(SNEAK).build());
 
@@ -332,6 +335,9 @@ public final class AbilityInitializer {
 
 		abilities.add(AbilityDescription.builder("Blaze", Blaze::new)
 			.element(FIRE).activation(ATTACK, SNEAK).build());
+
+		abilities.add(AbilityDescription.builder("FireBreath", FireBreath::new)
+			.element(FIRE).activation(SNEAK).build());
 
 		AbilityDescription fireShield = AbilityDescription.builder("FireShield", FireShield::new)
 			.element(FIRE).activation(ATTACK, SNEAK).build();

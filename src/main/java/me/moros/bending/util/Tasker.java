@@ -34,19 +34,19 @@ import org.bukkit.scheduler.BukkitTask;
 public final class Tasker {
 	private static TaskChainFactory taskChainFactory;
 
-	public static void init(Bending plugin) {
+	public static void init(@NonNull Bending plugin) {
 		if (taskChainFactory == null) taskChainFactory = BukkitTaskChainFactory.create(plugin);
 	}
 
-	public static <T> TaskChain<T> newChain() {
+	public static <T> @NonNull TaskChain<T> newChain() {
 		return taskChainFactory.newChain();
 	}
 
-	public static <T> TaskChain<T> newSharedChain(@NonNull String name) {
+	public static <T> @NonNull TaskChain<T> newSharedChain(@NonNull String name) {
 		return taskChainFactory.newSharedChain(name);
 	}
 
-	public static BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
+	public static @NonNull BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
 		return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, delay, period);
 	}
 }

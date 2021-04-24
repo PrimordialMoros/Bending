@@ -61,6 +61,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
+import org.bukkit.util.NumberConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,6 +145,13 @@ public class EarthSmash extends AbilityInstance implements Ability {
 		}
 
 		boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
+
+		int minRequired = NumberConversions.ceil(FastMath.pow(userConfig.radius, 3) * 0.43);
+		if (boulder.getData().size() < minRequired) {
+			boulder = null;
+			return false;
+		}
+
 		state = new LiftState();
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;

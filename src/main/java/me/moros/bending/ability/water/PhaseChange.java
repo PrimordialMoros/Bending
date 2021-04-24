@@ -121,7 +121,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 		}
 
 		private void fillQueue(double range, double radius) {
-			Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(range), !isFreeze).toLocation(user.getWorld());
+			Location center = user.getTarget(range, !isFreeze).toLocation(user.getWorld());
 			boolean acted = false;
 			for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
 				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;

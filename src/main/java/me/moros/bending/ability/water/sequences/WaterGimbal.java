@@ -56,6 +56,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -262,12 +263,11 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
 		public GimbalStream() {
 			super(user, Material.WATER, userConfig.range, 70);
-			controllable = true;
 		}
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (affectedEntities.contains(entity)) return false;
+			if (!(entity instanceof LivingEntity) || affectedEntities.contains(entity)) return false;
 			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
 			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());

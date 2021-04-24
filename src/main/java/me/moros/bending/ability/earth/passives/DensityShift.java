@@ -76,7 +76,7 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 			softenArea();
 			return true;
 		}
-		return false;
+		return MaterialUtil.isTransparent(block);
 	}
 
 	public static boolean isSoftened(User user) {

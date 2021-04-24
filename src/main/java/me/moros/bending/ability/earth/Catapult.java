@@ -36,12 +36,14 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -116,7 +118,13 @@ public class Catapult extends AbilityInstance implements Ability {
 
 		double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
 		Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.getDirection();
-		Collider collider = new Sphere(new Vector3(user.getLocBlock()).add(Vector3.HALF), 1.5);
+
+		Vector3 origin = user.getLocation().add(new Vector3(0, 0.5, 0));
+
+		ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.getWorld()))
+			.count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
+
+		Collider collider = new Sphere(origin, 1.5);
 		return CollisionUtil.handleEntityCollisions(user, collider, e -> {
 			e.setVelocity(direction.scalarMultiply(power).clampVelocity());
 			return true;

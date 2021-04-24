@@ -131,7 +131,7 @@ public class FireKick extends AbilityInstance implements Ability {
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
 				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-				FireTick.LARGER.apply(entity, 30);
+				FireTick.LARGER.apply(entity, 20);
 				affectedEntities.add(entity);
 			}
 			return true;

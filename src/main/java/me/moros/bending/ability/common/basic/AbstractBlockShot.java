@@ -33,7 +33,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -154,7 +153,7 @@ public abstract class AbstractBlockShot implements Updatable {
 	public void redirect() {
 		target = user.getTargetEntity(range)
 			.map(EntityMethods::getEntityCenter)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)))
+			.orElseGet(() -> user.getTarget(range, Collections.singleton(material)))
 			.floor().add(Vector3.HALF);
 		settingUp = false;
 	}

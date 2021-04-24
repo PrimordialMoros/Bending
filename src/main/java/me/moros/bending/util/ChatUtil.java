@@ -20,9 +20,6 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
 
 import java.util.regex.Pattern;
 
@@ -41,9 +38,5 @@ public final class ChatUtil {
 	public static @NonNull String sanitizeInput(@NonNull String input) {
 		String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
 		return output.length() > 16 ? output.substring(0, 16) : output;
-	}
-
-	public static @NonNull ChatColor getLegacyColor(@NonNull TextColor color) {
-		return ChatColor.valueOf(NamedTextColor.nearestTo(color).toString().toUpperCase());
 	}
 }

@@ -32,7 +32,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -75,7 +74,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 			locked = true;
 		}
 		targetLocation = entity.map(EntityMethods::getEntityCenter).orElseGet(() ->
-			WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(Material.WATER))
+			user.getTarget(range, Collections.singleton(Material.WATER))
 		);
 		direction = targetLocation.subtract(location).setY(0).normalize();
 	}
@@ -92,7 +91,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 		}
 
 		if (controllable) {
-			targetLocation = WorldMethods.getTarget(user.getWorld(), user.getRay(range));
+			targetLocation = user.getTarget(range);
 			direction = targetLocation.subtract(origin).setY(0).normalize();
 		}
 

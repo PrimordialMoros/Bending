@@ -51,7 +51,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -224,7 +223,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 
 		Vector3 targetLocation = user.getTargetEntity(userConfig.range)
 			.map(EntityMethods::getEntityCenter)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
+			.orElseGet(() -> user.getTarget(userConfig.range));
 
 		if (targetLocation.toBlock(user.getWorld()).isLiquid()) {
 			return false;
@@ -317,7 +316,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 		launched = true;
 		Vector3 targetLocation = user.getTargetEntity(userConfig.projectileRange)
 			.map(EntityMethods::getEntityCenter)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.projectileRange)));
+			.orElseGet(() -> user.getTarget(userConfig.projectileRange));
 
 		Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.launchSpeed);
 		target.getEntity().setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
@@ -412,7 +411,7 @@ public class MetalCable extends AbilityInstance implements Ability {
 			cooldown = abilityNode.node("cooldown").getLong(4500);
 			range = abilityNode.node("range").getDouble(28.0);
 			projectileRange = abilityNode.node("projectile-range").getDouble(48.0);
-			damage = abilityNode.node("damage").getDouble(3.0);
+			damage = abilityNode.node("damage").getDouble(2.5);
 			pullSpeed = abilityNode.node("pull-speed").getDouble(0.9);
 			launchSpeed = abilityNode.node("launch-speed").getDouble(1.6);
 		}

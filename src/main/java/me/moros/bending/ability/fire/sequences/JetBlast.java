@@ -101,8 +101,8 @@ public class JetBlast extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "jetblast");
 
 			cooldown = abilityNode.node("cooldown").getLong(10000);
-			speed = abilityNode.node("speed").getDouble(1.2);
-			duration = abilityNode.node("duration").getLong(5000);
+			speed = abilityNode.node("speed").getDouble(1.4);
+			duration = abilityNode.node("duration").getLong(3500);
 		}
 	}
 }

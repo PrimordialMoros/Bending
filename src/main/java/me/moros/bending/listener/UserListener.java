@@ -151,6 +151,7 @@ public class UserListener implements Listener {
 		if (event.getCause() == DamageCause.FALL) {
 			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
 			if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {
+				event.setDamage(0);
 				event.setCancelled(true);
 			}
 		} else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {

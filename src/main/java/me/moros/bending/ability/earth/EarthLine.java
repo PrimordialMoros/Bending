@@ -349,8 +349,8 @@ public class EarthLine extends AbilityInstance implements Ability {
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthline");
 
-			cooldown = abilityNode.node("cooldown").getLong(4000);
-			range = abilityNode.node("range").getDouble(24.0);
+			cooldown = abilityNode.node("cooldown").getLong(5000);
+			range = abilityNode.node("range").getDouble(20.0);
 			selectRange = abilityNode.node("select-range").getDouble(6.0);
 			damage = abilityNode.node("damage").getDouble(3.0);
 			prisonDuration = abilityNode.node("prison-duration").getLong(1500);

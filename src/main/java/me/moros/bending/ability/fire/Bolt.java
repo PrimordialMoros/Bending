@@ -44,7 +44,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -138,7 +137,7 @@ public class Bolt extends AbilityInstance implements Ability {
 
 	private void strike() {
 		targetLocation = user.getTargetEntity(userConfig.range)
-			.map(EntityMethods::getEntityCenter).orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)));
+			.map(EntityMethods::getEntityCenter).orElseGet(() -> user.getTarget(userConfig.range));
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
 		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
 		user.setCooldown(getDescription(), userConfig.cooldown);

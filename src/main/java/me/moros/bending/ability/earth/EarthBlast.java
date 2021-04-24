@@ -242,10 +242,10 @@ public class EarthBlast extends AbilityInstance implements Ability {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
 
 			cooldown = abilityNode.node("cooldown").getLong(1000);
-			range = abilityNode.node("range").getDouble(28.0);
-			selectRange = abilityNode.node("select-range").getDouble(12.0);
+			range = abilityNode.node("range").getDouble(24.0);
+			selectRange = abilityNode.node("select-range").getDouble(10.0);
 			damage = abilityNode.node("damage").getDouble(2.25);
-			shatterRange = abilityNode.node("max-shatter-range").getDouble(16.0);
+			shatterRange = abilityNode.node("max-shatter-range").getDouble(14.0);
 		}
 	}
 }

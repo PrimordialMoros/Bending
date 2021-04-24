@@ -201,11 +201,11 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				Location loc = getBukkitLocation();
 				if (factor < 1.2) {
 					ParticleUtil.createFire(user, loc)
-						.count(particleCount).offset(0.25, 0.25, 0.25).extra(0.04).spawn();
+						.count(particleCount).offset(0.25, 0.25, 0.25).extra(0.03).spawn();
 				} else {
 					for (Block block : WorldMethods.getNearbyBlocks(loc, displayRadius)) {
 						ParticleUtil.createFire(user, block.getLocation())
-							.count(particleCount).offset(0.5, 0.5, 0.5).extra(0.06).spawn();
+							.count(particleCount).offset(0.5, 0.5, 0.5).extra(0.05).spawn();
 					}
 				}
 				nextRenderTime = time + renderInterval;
@@ -225,6 +225,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				affectedEntities.add(entity);
 				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
 				FireTick.LARGER.apply(entity, userConfig.fireTick);
+				entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
 			}
 			return true;
 		}
@@ -272,8 +273,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireblast");
 
 			cooldown = abilityNode.node("cooldown").getLong(1500);
-			damage = abilityNode.node("damage").getDouble(3.0);
-			range = abilityNode.node("range").getDouble(22.0);
+			damage = abilityNode.node("damage").getDouble(2.5);
+			range = abilityNode.node("range").getDouble(18.0);
 			speed = abilityNode.node("speed").getDouble(0.8);
 			fireTick = abilityNode.node("fire-tick").getInt(20);
 			igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);

@@ -158,7 +158,7 @@ public class Iceberg extends AbilityInstance implements Ability {
 			Optional<Block> src = states.getChainStore().stream().findAny();
 			if (src.isPresent()) {
 				Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
-				Vector3 target = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange + userConfig.length));
+				Vector3 target = user.getTarget(userConfig.selectRange + userConfig.length);
 				Vector3 direction = target.subtract(origin).normalize();
 				tip = origin.add(direction.scalarMultiply(userConfig.length));
 				Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);

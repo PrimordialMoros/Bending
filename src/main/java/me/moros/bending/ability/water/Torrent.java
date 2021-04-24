@@ -46,6 +46,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -168,20 +169,21 @@ public class Torrent extends AbilityInstance implements Ability {
 
 		public TorrentStream() {
 			super(user, Material.WATER, userConfig.range, 90);
-			controllable = true;
 		}
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (hasClicked && !shouldFreeze) {
-				shouldFreeze = true;
-				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription()); // apply bonus damage on freeze
-			}
 			Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
 			entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
-			if (!affectedEntities.contains(entity)) {
-				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-				affectedEntities.add(entity);
+			if (entity instanceof LivingEntity) {
+				if (hasClicked && !shouldFreeze) {
+					shouldFreeze = true;
+				}
+				if (!affectedEntities.contains(entity)) {
+					double damage = shouldFreeze ? userConfig.damage : userConfig.damage + userConfig.freezeDamage;  // apply bonus damage on freeze
+					DamageUtil.damageEntity(entity, user, damage, getDescription());
+					affectedEntities.add(entity);
+				}
 			}
 			return false;
 		}
@@ -220,6 +222,8 @@ public class Torrent extends AbilityInstance implements Ability {
 		public double range;
 		@Attribute(Attribute.DAMAGE)
 		public double damage;
+		@Attribute(Attribute.DAMAGE)
+		public double freezeDamage;
 		@Attribute(Attribute.STRENGTH)
 		public double knockback;
 		@Attribute(Attribute.STRENGTH)
@@ -233,7 +237,8 @@ public class Torrent extends AbilityInstance implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(5000);
 			range = abilityNode.node("range").getDouble(32.0);
-			damage = abilityNode.node("damage").getDouble(4.0);
+			damage = abilityNode.node("damage").getDouble(3.0);
+			freezeDamage = abilityNode.node("freeze-bonus-damage").getDouble(2.0);
 			knockback = abilityNode.node("knockback").getDouble(1.0);
 			verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
 			freezeDuration = abilityNode.node("freeze-duration").getLong(12500);

@@ -34,7 +34,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -65,7 +64,8 @@ public abstract class BlockStream implements State {
 	private int buffer;
 	private final int speed;
 
-	protected boolean controllable = false;
+	protected boolean livingOnly = false;
+	protected boolean controllable = true;
 	protected final double range;
 
 	/**
@@ -107,7 +107,7 @@ public abstract class BlockStream implements State {
 		Vector3 current = new Vector3(head).add(Vector3.HALF);
 		if (controllable || direction == null) {
 			Vector3 targetLoc = user.getTargetEntity(range).map(EntityMethods::getEntityCenter)
-				.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(range), Collections.singleton(material)));
+				.orElseGet(() -> user.getTarget(range, Collections.singleton(material)));
 			// Improve targeting when near
 			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
 				targetLoc = targetLoc.add(user.getDirection());
@@ -153,7 +153,7 @@ public abstract class BlockStream implements State {
 		for (Block block : stream) {
 			Collider collider = BOX.at(new Vector3(block));
 			colliders.add(collider);
-			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
+			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false);
 		}
 
 		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;

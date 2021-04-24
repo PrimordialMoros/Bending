@@ -88,7 +88,7 @@ public class Pillar implements Updatable {
 		long time = System.currentTimeMillis();
 		int offset = currentLength + (time >= nextUpdateTime ? 2 : 1);
 		AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3(0, 0.65, 0)).at(new Vector3(origin.getRelative(direction, offset)));
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true); // Push entities
+		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true); // Push entities
 
 		if (time < nextUpdateTime) return UpdateResult.CONTINUE;
 

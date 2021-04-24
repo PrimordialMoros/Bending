@@ -140,7 +140,7 @@ public class TempBlock implements Temporary {
 	}
 
 	public static Optional<TempBlock> createAir(@NonNull Block block) {
-		return createAir(block,0);
+		return createAir(block, 0);
 	}
 
 	public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {

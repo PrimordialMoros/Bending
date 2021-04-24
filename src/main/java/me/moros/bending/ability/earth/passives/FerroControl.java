@@ -106,21 +106,19 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 			return;
 		}
-		if (block.getType() == Material.IRON_DOOR || block.getType() == Material.IRON_TRAPDOOR) {
-			Openable openable = (Openable) block.getBlockData();
-			openable.setOpen(!openable.isOpen());
-			block.setBlockData(openable);
-			Sound sound;
-			if (block.getType() == Material.IRON_DOOR) {
-				sound = openable.isOpen() ? Sound.BLOCK_IRON_DOOR_OPEN : Sound.BLOCK_IRON_DOOR_CLOSE;
-			} else {
-				sound = openable.isOpen() ? Sound.BLOCK_IRON_TRAPDOOR_OPEN : Sound.BLOCK_IRON_TRAPDOOR_CLOSE;
-			}
-			SoundUtil.playSound(block.getLocation(), sound, 0.5F, 0);
+		Openable openable = (Openable) block.getBlockData();
+		openable.setOpen(!openable.isOpen());
+		block.setBlockData(openable);
+		Sound sound;
+		if (block.getType() == Material.IRON_DOOR) {
+			sound = openable.isOpen() ? Sound.BLOCK_IRON_DOOR_OPEN : Sound.BLOCK_IRON_DOOR_CLOSE;
+		} else {
+			sound = openable.isOpen() ? Sound.BLOCK_IRON_TRAPDOOR_OPEN : Sound.BLOCK_IRON_TRAPDOOR_CLOSE;
 		}
+		SoundUtil.playSound(block.getLocation(), sound, 0.5F, 0);
 	}
 
-	public static void act(User user, Block block) {
+	public static void act(@NonNull User user, @NonNull Block block) {
 		if (block.getType() == Material.IRON_DOOR || block.getType() == Material.IRON_TRAPDOOR) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FerroControl.class)
 				.ifPresent(ability -> ability.act(block));

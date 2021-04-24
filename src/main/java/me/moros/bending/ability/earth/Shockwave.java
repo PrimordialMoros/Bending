@@ -80,7 +80,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 	private final Set<Block> affectedBlocks = new HashSet<>();
 	private final Map<Block, Boolean> recentAffectedBlocks = ExpiringMap.builder()
 		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(1000, TimeUnit.MILLISECONDS).build();
+		.expiration(500, TimeUnit.MILLISECONDS).build();
 	private Vector3 origin;
 
 	private boolean released;
@@ -141,21 +141,22 @@ public class Shockwave extends AbilityInstance implements Ability {
 		}
 
 		if (!recentAffectedBlocks.isEmpty()) {
-			CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), this::onEntityHit, false);
+			Set<Block> positions = new HashSet<>(recentAffectedBlocks.keySet());
+			CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
 		}
 
 		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
 		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
-	public boolean onEntityHit(@NonNull Entity entity) {
+	private boolean onEntityHit(Entity entity, Set<Block> positions) {
 		if (!affectedEntities.contains(entity)) {
 			boolean inRange = false;
-			if (recentAffectedBlocks.containsKey(entity.getLocation().getBlock())) {
+			if (positions.contains(entity.getLocation().getBlock())) {
 				inRange = true;
 			} else if (entity instanceof LivingEntity) {
 				Block eyeBlock = ((LivingEntity) entity).getEyeLocation().getBlock();
-				if (recentAffectedBlocks.containsKey(eyeBlock)) {
+				if (positions.contains(eyeBlock)) {
 					inRange = true;
 				}
 			}
@@ -163,7 +164,7 @@ public class Shockwave extends AbilityInstance implements Ability {
 			Vector3 loc = new Vector3(entity.getLocation());
 
 			if (!inRange) {
-				for (Block block : recentAffectedBlocks.keySet()) {
+				for (Block block : positions) {
 					AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3(0.5, 1, 0.5)).at(new Vector3(block));
 					if (blockBounds.intersects(AABBUtils.getEntityBounds(entity))) {
 						inRange = true;
@@ -238,10 +239,12 @@ public class Shockwave extends AbilityInstance implements Ability {
 			if (affectedBlocks.contains(block)) return;
 			affectedBlocks.add(block);
 			recentAffectedBlocks.put(block, false);
-			double deltaY = FastMath.min(0.35, 0.1 + location.distance(ray.origin) / (1.5 * range));
+			double deltaY = FastMath.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
 			Vector3 velocity = new Vector3(0, deltaY, 0);
 			BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
-			new BendingFallingBlock(block, data, velocity, true, 3000);
+			new BendingFallingBlock(block, data, velocity, true, 450);
+			ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
+				.count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
 			if (ThreadLocalRandom.current().nextInt(6) == 0) {
 				SoundUtil.EARTH_SOUND.play(block.getLocation());
 			}

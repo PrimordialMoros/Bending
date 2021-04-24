@@ -40,7 +40,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -94,7 +93,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 				nextFireTime = time + userConfig.interval;
 				Vector3 rightOrigin = user.getHandSide(true);
 				Vector3 leftOrigin = user.getHandSide(false);
-				Vector3 target = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
+				Vector3 target = user.getTarget(userConfig.range);
 				double distance = target.distance(user.getEyeLocation());
 				for (int i = 0; i < 2; i++) {
 					if (firedShots >= userConfig.maxShots) break;

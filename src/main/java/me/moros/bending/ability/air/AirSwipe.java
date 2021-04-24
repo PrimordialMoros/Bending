@@ -181,7 +181,6 @@ public class AirSwipe extends AbilityInstance implements Ability {
 		@Override
 		public void render() {
 			ParticleUtil.createAir(getBukkitLocation()).spawn();
-
 		}
 
 		@Override

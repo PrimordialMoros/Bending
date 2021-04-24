@@ -109,7 +109,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	private void act() {
 		if (!user.canBend(getDescription())) return;
 		boolean acted = false;
-		Location center = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range)).toLocation(user.getWorld());
+		Location center = user.getTarget(userConfig.range).toLocation(user.getWorld());
 		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> WaterMaterials.isIceBendable(b) || MaterialUtil.isFire(b))) {
 			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
 			acted = true;
@@ -159,7 +159,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "heatcontrol");
 
 			cooldown = abilityNode.node("cooldown").getLong(2000);
-			range = abilityNode.node("range").getDouble(12.0);
+			range = abilityNode.node("range").getDouble(10.0);
 			radius = abilityNode.node("radius").getDouble(5.0);
 			cookInterval = abilityNode.node("cook-interval").getLong(2000);
 		}

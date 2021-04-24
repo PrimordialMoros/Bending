@@ -209,7 +209,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
 			columnMaxHeight = columnNode.node("max-height").getInt(6);
 
 			CommentedConfigurationNode wallNode = abilityNode.node("wall");
-			wallCooldown = wallNode.node("cooldown").getLong(1000);
+			wallCooldown = wallNode.node("cooldown").getLong(1500);
 			wallMaxHeight = wallNode.node("max-height").getInt(6);
 			wallWidth = wallNode.node("width").getInt(6);
 		}

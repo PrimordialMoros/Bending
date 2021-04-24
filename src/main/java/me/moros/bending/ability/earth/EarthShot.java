@@ -310,7 +310,7 @@ public class EarthShot extends AbilityInstance implements Ability {
 		Set<Material> ignored = source == null ? Collections.emptySet() : Collections.singleton(source.getType());
 		return user.getTargetEntity(userConfig.range)
 			.map(EntityMethods::getEntityCenter)
-			.orElseGet(() -> WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), ignored));
+			.orElseGet(() -> user.getTarget(userConfig.range, ignored));
 	}
 
 	@Override

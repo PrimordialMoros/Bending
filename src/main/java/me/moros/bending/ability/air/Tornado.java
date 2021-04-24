@@ -41,7 +41,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -90,7 +89,7 @@ public class Tornado extends AbilityInstance implements Ability {
 		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
 			return UpdateResult.REMOVE;
 		}
-		Vector3 base = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range), false);
+		Vector3 base = user.getTarget(userConfig.range, false);
 		Block baseBlock = base.toBlock(user.getWorld());
 		if (MaterialUtil.isTransparent(baseBlock.getRelative(BlockFace.DOWN))) {
 			return UpdateResult.CONTINUE;

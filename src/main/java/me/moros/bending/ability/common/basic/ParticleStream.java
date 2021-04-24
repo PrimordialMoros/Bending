@@ -49,7 +49,6 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 	protected final Vector3 dir;
 
 	protected boolean livingOnly = true;
-	protected boolean hitSelf = false;
 	protected boolean singleCollision = false;
 	protected boolean controllable = false;
 	protected int steps = 1;
@@ -84,7 +83,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
 			if (i % NumberConversions.ceil(speed * steps) != 0) continue; // Avoid unnecessary collision checks
 			// Use previous collider for entity checks for visual reasons
-			boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, hitSelf, singleCollision);
+			boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
 			if (hitEntity) return UpdateResult.REMOVE;
 			collider = collider.at(location);
 

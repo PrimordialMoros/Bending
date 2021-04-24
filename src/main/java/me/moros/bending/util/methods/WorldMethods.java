@@ -24,9 +24,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.util.collision.AABBUtils;
-import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
@@ -131,51 +129,6 @@ public final class WorldMethods {
 			}
 		}
 		return blocks;
-	}
-
-	/**
-	 * @return {@link #getTarget(World, Ray, Set)} with an empty material set and ignoreLiquids = true
-	 */
-	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray) {
-		return getTarget(world, ray, Collections.emptySet(), true);
-	}
-
-	/**
-	 * @return {@link #getTarget(World, Ray, Set, boolean)} with an empty material set
-	 */
-	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, boolean ignoreLiquids) {
-		return getTarget(world, ray, Collections.emptySet(), ignoreLiquids);
-	}
-
-	/**
-	 * @return {@link #getTarget(World, Ray, Set, boolean)} with ignoreLiquids = true
-	 */
-	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored) {
-		return getTarget(world, ray, ignored, true);
-	}
-
-	/**
-	 * Gets the targeted location.
-	 * <p> Note: {@link Ray#direction} is a {@link Vector3} and its length provides the range for the check.
-	 * @param world the world to check in
-	 * @param ray the ray which holds the origin and direction
-	 * @param ignored an extra set of materials that will be ignored (transparent materials are already ignored)
-	 * @param ignoreLiquids whether liquids should be ignored for collisions
-	 * @return the target location
-	 */
-	public static @NonNull Vector3 getTarget(@NonNull World world, @NonNull Ray ray, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
-		Vector3 dir = ray.direction.normalize();
-		for (int i = 0; i <= ray.direction.getNorm(); i++) {
-			Vector3 current = ray.origin.add(dir.scalarMultiply(i));
-			for (Block block : BlockMethods.combineFaces(current.toBlock(world))) {
-				if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) continue;
-				AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
-				if (blockBounds.intersects(ray)) {
-					return current;
-				}
-			}
-		}
-		return ray.origin.add(ray.direction);
 	}
 
 	/**

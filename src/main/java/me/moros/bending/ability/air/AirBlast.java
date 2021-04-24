@@ -43,7 +43,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -130,7 +129,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	}
 
 	private boolean selectOrigin() {
-		origin = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.selectRange))
+		origin = user.getTarget(userConfig.selectRange)
 			.subtract(user.getDirection().scalarMultiply(0.5));
 		selectedOrigin = true;
 		return Bending.getGame().getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
@@ -138,7 +137,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
 	private void launch() {
 		launched = true;
-		Vector3 target = WorldMethods.getTarget(user.getWorld(), user.getRay(userConfig.range));
+		Vector3 target = user.getTarget(userConfig.range);
 		if (user.isSneaking()) {
 			Vector3 temp = new Vector3(origin.toArray());
 			origin = new Vector3(target.toArray());

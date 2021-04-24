@@ -63,8 +63,7 @@ public final class SourceUtil {
 		BlockIterator it = new BlockIterator(user.getEntity(), FastMath.min(100, NumberConversions.ceil(range)));
 		while (it.hasNext()) {
 			Block block = it.next();
-			Material material = block.getType();
-			if (material.isAir()) continue;
+			if (block.getType().isAir()) continue;
 			if (predicate.test(block) && TempBlock.isBendable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
 				return Optional.of(block);
 			}
