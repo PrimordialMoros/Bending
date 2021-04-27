@@ -22,9 +22,7 @@ package me.moros.bending.ability.fire;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -39,6 +37,7 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
+import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
@@ -47,6 +46,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -55,27 +55,31 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
-public class FireBlast extends AbilityInstance implements Ability, Burstable {
+public class FireBlast extends AbilityInstance implements Ability, Explosive, Burstable {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private final Set<Entity> affectedEntities = new HashSet<>(); // Needed to ensure entities are hit by 1 burst stream only
 	private FireStream stream;
 
 	private boolean charging;
+	private boolean hasExploded = false;
 	private double factor = 1.0;
 	private int particleCount = 6;
 	private long renderInterval = 0;
@@ -117,7 +121,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
+		if (hasExploded || removalPolicy.test(user, getDescription())) {
 			return UpdateResult.REMOVE;
 		}
 		if (charging) {
@@ -140,7 +144,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 		Vector3 origin = user.getMainHandSide();
 		Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
-		stream = new FireStream(new Ray(origin, lookingDir), 1.2 * factor);
+		stream = new FireStream(new Ray(origin, lookingDir), 1 * factor);
 	}
 
 	@Override
@@ -152,7 +156,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 	@Override
 	public void onCollision(@NonNull Collision collision) {
 		Ability collidedAbility = collision.getCollidedAbility();
-		if (factor == userConfig.chargeFactor && collision.shouldRemoveSelf()) {
+		boolean fullyCharged = factor == userConfig.chargeFactor;
+		if (fullyCharged && collision.shouldRemoveSelf()) {
 			String name = collidedAbility.getDescription().getName();
 			if (AbilityInitializer.layer2.contains(name)) {
 				collision.setRemoveCollided(true);
@@ -161,8 +166,21 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			}
 		}
 		if (collidedAbility instanceof FireBlast) {
-			double collidedFactor = ((FireBlast) collidedAbility).factor;
-			if (factor > collidedFactor + 0.1) collision.setRemoveSelf(false);
+			FireBlast other = (FireBlast) collidedAbility;
+			double collidedFactor = other.factor;
+			if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
+				Vector3 first = collision.getColliders().getKey().getPosition();
+				Vector3 second = collision.getColliders().getValue().getPosition();
+				Vector3 center = first.add(second).scalarMultiply(0.5);
+				double radius = userConfig.explosionRadius + other.userConfig.explosionRadius;
+				double dmg = userConfig.damage + other.userConfig.damage;
+				createExplosion(center, radius, dmg * (factor + other.factor - 1));
+				other.hasExploded = true;
+			} else if (factor > collidedFactor + 0.1) {
+				collision.setRemoveSelf(false);
+			}
+		} else if (collidedAbility instanceof Explosive && fullyCharged) {
+			explode();
 		}
 	}
 
@@ -181,17 +199,51 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		removalPolicy = Policies.builder().build();
 		particleCount = 1;
 		renderInterval = 100;
-		stream = new FireStream(new Ray(location, direction), 1.2);
+		stream = new FireStream(new Ray(location, direction), 1);
+	}
+
+	@Override
+	public void explode() {
+		createExplosion(stream.getLocation(), userConfig.explosionRadius, userConfig.damage * factor);
+	}
+
+	private void createExplosion(Vector3 center, double size, double damage) {
+		if (hasExploded || factor < userConfig.chargeFactor) return;
+		hasExploded = true;
+		Location loc = center.toLocation(user.getWorld());
+		ParticleUtil.create(Particle.EXPLOSION_HUGE, loc).spawn();
+		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 5, 1);
+
+		Sphere collider = new Sphere(center, size);
+		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
+			double distance = center.distance(EntityMethods.getEntityCenter(entity));
+			double halfSize = size / 2;
+			double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize) / size);
+			DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
+			FireTick.LARGER.apply(entity, userConfig.fireTick);
+			return true;
+		}, true, true);
 	}
 
 	private class FireStream extends ParticleStream {
-		private final double displayRadius;
+		private double offset = 0.25;
+		private double particleSpeed = 0.03;
+		private final int amount;
+		private final boolean explosive;
 		private long nextRenderTime;
 
 		public FireStream(Ray ray, double collisionRadius) {
 			super(user, ray, userConfig.speed * factor, collisionRadius);
-			displayRadius = FastMath.max(collisionRadius - 1, 1);
 			canCollide = Block::isLiquid;
+			if (factor > 1) {
+				offset += factor - 1;
+				particleSpeed *= factor;
+				amount = NumberConversions.ceil(particleCount * 3 * factor);
+			} else {
+				amount = particleCount;
+			}
+			explosive = factor == userConfig.chargeFactor;
+			singleCollision = explosive;
 		}
 
 		@Override
@@ -199,15 +251,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			long time = System.currentTimeMillis();
 			if (renderInterval == 0 || time > nextRenderTime) {
 				Location loc = getBukkitLocation();
-				if (factor < 1.2) {
-					ParticleUtil.createFire(user, loc)
-						.count(particleCount).offset(0.25, 0.25, 0.25).extra(0.03).spawn();
-				} else {
-					for (Block block : WorldMethods.getNearbyBlocks(loc, displayRadius)) {
-						ParticleUtil.createFire(user, block.getLocation())
-							.count(particleCount).offset(0.5, 0.5, 0.5).extra(0.05).spawn();
-					}
-				}
+				ParticleUtil.createFire(user, loc)
+					.count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
 				nextRenderTime = time + renderInterval;
 			}
 		}
@@ -221,12 +266,13 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
-			if (!affectedEntities.contains(entity)) {
-				affectedEntities.add(entity);
-				DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-				FireTick.LARGER.apply(entity, userConfig.fireTick);
-				entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
+			if (explosive) {
+				explode();
+				return true;
 			}
+			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+			FireTick.LARGER.apply(entity, userConfig.fireTick);
+			entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
 			return true;
 		}
 
@@ -246,7 +292,12 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 				blocks.forEach(b -> TempBlock.create(b, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true));
 			}
 			FragileStructure.tryDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
+			explode();
 			return true;
+		}
+
+		private @NonNull Vector3 getLocation() {
+			return location;
 		}
 	}
 
@@ -263,6 +314,8 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 		public int fireTick;
 		@Attribute(Attribute.RADIUS)
 		public double igniteRadius;
+		@Attribute(Attribute.RADIUS)
+		public double explosionRadius;
 		@Attribute(Attribute.STRENGTH)
 		public double chargeFactor;
 		@Attribute(Attribute.CHARGE_TIME)
@@ -278,6 +331,7 @@ public class FireBlast extends AbilityInstance implements Ability, Burstable {
 			speed = abilityNode.node("speed").getDouble(0.8);
 			fireTick = abilityNode.node("fire-tick").getInt(20);
 			igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
+			explosionRadius = abilityNode.node("explosion-radius").getDouble(2.0);
 
 			chargeFactor = abilityNode.node("charge").node("factor").getDouble(1.5);
 			maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);

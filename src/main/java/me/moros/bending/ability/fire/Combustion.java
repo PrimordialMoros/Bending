@@ -134,9 +134,15 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 	public void onCollision(@NonNull Collision collision) {
 		Ability collidedAbility = collision.getCollidedAbility();
 		if (collidedAbility instanceof Combustion) {
-			createExplosion(beam.getLocation(), userConfig.power * 2, userConfig.damage * 2);
-			((Combustion) collidedAbility).hasExploded = true;
-		} else if (collidedAbility instanceof Explosive || collidedAbility.getDescription().getElement() == Element.EARTH) {
+			Combustion other = (Combustion) collidedAbility;
+			Vector3 first = collision.getColliders().getKey().getPosition();
+			Vector3 second = collision.getColliders().getValue().getPosition();
+			Vector3 center = first.add(second).scalarMultiply(0.5);
+			createExplosion(center, userConfig.power + other.userConfig.power, userConfig.damage + other.userConfig.damage);
+			other.hasExploded = true;
+		} else if (collidedAbility instanceof Explosive) {
+			explode();
+		} else if (collidedAbility.getDescription().getElement() == Element.EARTH && collision.shouldRemoveSelf()) {
 			explode();
 		}
 	}
@@ -158,15 +164,15 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			.offset(1, 1, 1).spawn();
 		ParticleUtil.create(Particle.EXPLOSION_HUGE, loc, userConfig.particleRange).extra(0.5).count(5)
 			.offset(1, 1, 1).spawn();
-		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE);
+		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F);
 
 		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
 			double distance = center.distance(EntityMethods.getEntityCenter(entity));
 			double halfSize = size / 2;
-			double factor = (distance <= halfSize) ? 1 : (distance - halfSize) / size;
+			double factor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
 			DamageUtil.damageEntity(entity, user, damage * factor, getDescription());
-			FireTick.LARGER.apply(entity, NumberConversions.floor(userConfig.fireTick));
+			FireTick.LARGER.apply(entity, userConfig.fireTick);
 			return true;
 		}, true, true);
 
@@ -241,7 +247,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			return true;
 		}
 
-		public @NonNull Vector3 getLocation() {
+		private @NonNull Vector3 getLocation() {
 			return location;
 		}
 	}
