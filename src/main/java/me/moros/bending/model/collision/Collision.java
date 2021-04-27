@@ -42,7 +42,11 @@ public final class Collision {
 	}
 
 	public @NonNull Entry<Collider, Collider> getColliders() {
-		return Maps.immutableEntry(collisionData.c1, collisionData.c2);
+		if (inverse) {
+			return Maps.immutableEntry(collisionData.c2, collisionData.c1);
+		} else {
+			return Maps.immutableEntry(collisionData.c1, collisionData.c2);
+		}
 	}
 
 	public boolean shouldRemoveSelf() {

@@ -51,6 +51,7 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -78,6 +79,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 	private CombustBeam beam;
 
 	private boolean hasExploded;
+	private Collider ignoreCollider;
 
 	public Combustion(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -133,7 +135,14 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 	@Override
 	public void onCollision(@NonNull Collision collision) {
 		Ability collidedAbility = collision.getCollidedAbility();
-		if (collidedAbility instanceof Combustion) {
+		if (collidedAbility instanceof FireShield) {
+			collision.setRemoveCollided(true);
+			boolean sphere = ((FireShield) collidedAbility).isSphere();
+			if (sphere) {
+				ignoreCollider = collision.getColliders().getValue();
+			}
+			explode();
+		} else if (collidedAbility instanceof Combustion) {
 			Combustion other = (Combustion) collidedAbility;
 			Vector3 first = collision.getColliders().getKey().getPosition();
 			Vector3 second = collision.getColliders().getValue().getPosition();
@@ -166,13 +175,23 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 			.offset(1, 1, 1).spawn();
 		SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F);
 
+		double sizeFactor = FastMath.sqrt(size);
+		double halfSize = size / 2;
+
 		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
 			double distance = center.distance(EntityMethods.getEntityCenter(entity));
-			double halfSize = size / 2;
-			double factor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
-			DamageUtil.damageEntity(entity, user, damage * factor, getDescription());
-			FireTick.LARGER.apply(entity, userConfig.fireTick);
+			double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
+			if (ignoreCollider == null || ignoreCollider.intersects(AABBUtils.getEntityBounds(entity))) {
+				DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
+				FireTick.LARGER.apply(entity, userConfig.fireTick);
+			}
+			double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
+			if (entity.equals(user.getEntity())) {
+				knockback *= 0.5;
+			}
+			Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(center).normalize().scalarMultiply(knockback);
+			entity.setVelocity(dir.clampVelocity());
 			return true;
 		}, true, true);
 

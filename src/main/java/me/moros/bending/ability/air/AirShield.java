@@ -50,6 +50,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
@@ -62,7 +63,7 @@ public class AirShield extends AbilityInstance implements Ability {
 	private Config userConfig;
 	private RemovalPolicy removalPolicy;
 
-	private long currentPoint;
+	private long currentPoint = 0;
 	private long startTime;
 
 	public AirShield(@NonNull AbilityDescription desc) {
@@ -94,8 +95,7 @@ public class AirShield extends AbilityInstance implements Ability {
 		}
 		currentPoint++;
 		Vector3 center = getCenter();
-		double height = userConfig.radius * 2;
-		double spacing = height / 8;
+		double spacing = userConfig.radius / 4;
 		for (int i = 1; i < 8; i++) {
 			double y = (i * spacing) - userConfig.radius;
 			double factor = 1 - (y * y) / (userConfig.radius * userConfig.radius);
@@ -128,7 +128,7 @@ public class AirShield extends AbilityInstance implements Ability {
 	}
 
 	private Vector3 getCenter() {
-		return user.getLocation().add(new Vector3(0, 0.9, 0));
+		return EntityMethods.getEntityCenter(user.getEntity());
 	}
 
 	@Override

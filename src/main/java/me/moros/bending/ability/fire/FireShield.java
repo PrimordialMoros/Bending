@@ -21,6 +21,7 @@ package me.moros.bending.ability.fire;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -45,13 +46,13 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 
 public class FireShield extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -61,8 +62,9 @@ public class FireShield extends AbilityInstance implements Ability {
 	private RemovalPolicy removalPolicy;
 
 	private Shield shield;
+	private ThreadLocalRandom rand;
 
-	private long nextRenderTime;
+	private boolean sphere = false;
 
 	public FireShield(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -70,6 +72,8 @@ public class FireShield extends AbilityInstance implements Ability {
 
 	@Override
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireShield.class)) return false;
+
 		this.user = user;
 		recalculateConfig();
 
@@ -77,7 +81,9 @@ public class FireShield extends AbilityInstance implements Ability {
 			return false;
 		}
 
+		rand = ThreadLocalRandom.current();
 		if (method == ActivationMethod.SNEAK) {
+			sphere = true;
 			shield = new SphereShield();
 			removalPolicy = Policies.builder()
 				.add(new SwappedSlotsRemovalPolicy(getDescription()))
@@ -90,7 +96,6 @@ public class FireShield extends AbilityInstance implements Ability {
 				.add(new ExpireRemovalPolicy(userConfig.diskDuration)).build();
 		}
 
-		user.setCooldown(getDescription(), userConfig.cooldown);
 		return true;
 	}
 
@@ -105,11 +110,7 @@ public class FireShield extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		long time = System.currentTimeMillis();
-		if (time >= nextRenderTime) {
-			shield.render();
-			nextRenderTime = time + 200;
-		}
+		shield.render();
 		CollisionUtil.handleEntityCollisions(user, shield.getCollider(), entity -> {
 			FireTick.LARGER.apply(entity, userConfig.fireTicks);
 			return false;
@@ -117,6 +118,15 @@ public class FireShield extends AbilityInstance implements Ability {
 
 		shield.update();
 		return UpdateResult.CONTINUE;
+	}
+
+	public boolean isSphere() {
+		return sphere;
+	}
+
+	@Override
+	public void onDestroy() {
+		user.setCooldown(getDescription(), sphere ? userConfig.shieldCooldown : userConfig.diskCooldown);
 	}
 
 	@Override
@@ -140,6 +150,7 @@ public class FireShield extends AbilityInstance implements Ability {
 	private class DiskShield implements Shield {
 		private Disk disk;
 		private Vector3 location;
+		private long nextRenderTime = 0;
 
 		private DiskShield() {
 			update();
@@ -158,13 +169,19 @@ public class FireShield extends AbilityInstance implements Ability {
 
 		@Override
 		public void render() {
+			long time = System.currentTimeMillis();
+			if (time < nextRenderTime) return;
+			nextRenderTime = time + 200;
 			Rotation rotation = new Rotation(user.getDirection(), FastMath.toRadians(20), RotationConvention.VECTOR_OPERATOR);
 			double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize().toArray();
 			for (int i = 0; i < 18; i++) {
 				for (double j = 0.2; j <= 1; j += 0.2) {
-					Vector3 loc = new Vector3(array).scalarMultiply(j * userConfig.diskRadius);
-					ParticleUtil.createFire(user, location.add(loc).toLocation(user.getWorld()))
-						.offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+					Location spawnLoc = location.add(new Vector3(array).scalarMultiply(j * userConfig.diskRadius)).toLocation(user.getWorld());
+					ParticleUtil.createFire(user, spawnLoc)
+						.offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+					if (rand.nextInt(12) == 0) {
+						SoundUtil.FIRE_SOUND.play(spawnLoc);
+					}
 				}
 				rotation.applyTo(array, array);
 			}
@@ -178,6 +195,7 @@ public class FireShield extends AbilityInstance implements Ability {
 
 	private class SphereShield implements Shield {
 		private Sphere sphere;
+		private int currentPoint = 0;
 
 		private SphereShield() {
 			update();
@@ -190,23 +208,40 @@ public class FireShield extends AbilityInstance implements Ability {
 
 		@Override
 		public void update() {
-			sphere = new Sphere(user.getEyeLocation(), userConfig.shieldRadius);
+			sphere = new Sphere(getCenter(), userConfig.shieldRadius);
 		}
 
 		@Override
 		public void render() {
-			for (Block block : WorldMethods.getNearbyBlocks(user.getHeadBlock().getLocation(), userConfig.shieldRadius)) {
-				Location loc = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+			Vector3 center = getCenter();
+			double radius = userConfig.shieldRadius;
+			currentPoint++;
+			double spacing = radius / 8;
+			for (int i = 1; i < 16; i++) {
+				double y = (i * spacing) - radius;
+				double factor = 1 - (y * y) / (radius * radius);
+				if (factor <= 0.2) continue;
+				double x = radius * factor * FastMath.cos(i * currentPoint);
+				double z = radius * factor * FastMath.sin(i * currentPoint);
+				Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.getWorld());
+				ParticleUtil.createFire(user, spawnLoc)
+					.offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+				if (rand.nextInt(12) == 0) {
+					SoundUtil.FIRE_SOUND.play(spawnLoc);
+				}
 			}
+		}
+
+		private Vector3 getCenter() {
+			return EntityMethods.getEntityCenter(user.getEntity());
 		}
 	}
 
 	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
 		@Attribute(Attribute.DURATION)
 		public int fireTicks;
+		@Attribute(Attribute.COOLDOWN)
+		public long diskCooldown;
 		@Attribute(Attribute.DURATION)
 		public long diskDuration;
 		@Attribute(Attribute.RADIUS)
@@ -214,6 +249,8 @@ public class FireShield extends AbilityInstance implements Ability {
 		@Attribute(Attribute.RANGE)
 		public double diskRange;
 
+		@Attribute(Attribute.COOLDOWN)
+		public long shieldCooldown;
 		@Attribute(Attribute.DURATION)
 		public long shieldDuration;
 		@Attribute(Attribute.RADIUS)
@@ -222,14 +259,14 @@ public class FireShield extends AbilityInstance implements Ability {
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
-
-			cooldown = abilityNode.node("cooldown").getLong(2000);
 			fireTicks = abilityNode.node("fire-ticks").getInt(40);
 
+			diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
 			diskDuration = abilityNode.node("disk", "duration").getLong(1000);
 			diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
 			diskRange = abilityNode.node("disk", "range").getDouble(1.5);
 
+			shieldCooldown = abilityNode.node("shield", "cooldown").getLong(2000);
 			shieldDuration = abilityNode.node("shield", "duration").getLong(10000);
 			shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
 		}

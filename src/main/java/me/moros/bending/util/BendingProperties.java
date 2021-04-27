@@ -25,6 +25,8 @@ public final class BendingProperties {
 	public static final long EXPLOSION_REVERT_TIME = 20000; // 20 seconds
 	public static final long ICE_DURATION = 10000; // 10 seconds
 
+	public static final double EXPLOSION_KNOCKBACK = 0.8;
+
 	public static final double METAL_MODIFIER = 1.25;
 	public static final double MAGMA_MODIFIER = 1.4;
 
