@@ -19,17 +19,17 @@
 
 package me.moros.bending.config;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
-import me.moros.bending.Bending;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.CommentedConfigurationNode;
+import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
+import me.moros.bending.Bending;
 
 public class ConfigManager {
 	private final Collection<Configurable> instances = new ArrayList<>();

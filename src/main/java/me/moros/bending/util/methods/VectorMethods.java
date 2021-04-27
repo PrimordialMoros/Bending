@@ -19,16 +19,17 @@
 
 package me.moros.bending.util.methods;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Utility class with useful {@link Vector3} related methods.
@@ -158,5 +159,13 @@ public final class VectorMethods {
 		}
 		if (possibleCollisions.isEmpty()) return Collections.singletonList(Vector3.ZERO);
 		return possibleCollisions;
+	}
+
+	public static @NonNull Vector3 getRandomOffset(Vector3 target, double offset) {
+		ThreadLocalRandom rand = ThreadLocalRandom.current();
+		double x = rand.nextDouble(-offset, offset);
+		double y = rand.nextDouble(-offset, offset);
+		double z = rand.nextDouble(-offset, offset);
+		return target.add(new Vector3(x, y, z));
 	}
 }

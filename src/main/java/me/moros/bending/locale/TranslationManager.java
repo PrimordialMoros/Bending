@@ -19,17 +19,6 @@
 
 package me.moros.bending.locale;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.bending.Bending;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.translation.TranslationRegistry;
-import net.kyori.adventure.translation.Translator;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -45,6 +34,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
+import me.moros.bending.Bending;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.translation.Translator;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 
 public class TranslationManager {
 	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;

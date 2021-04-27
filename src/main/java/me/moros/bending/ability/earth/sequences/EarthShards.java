@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.earth.sequences;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -40,14 +44,10 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 // TODO restrictions based on earthglove cooldown, add bleed effect
 public class EarthShards extends AbilityInstance implements Ability {
@@ -99,7 +99,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 					if (firedShots >= userConfig.maxShots) break;
 					firedShots++;
 					Vector3 origin = (i == 0) ? rightOrigin : leftOrigin;
-					Vector3 dir = getRandomOffset(target, distance * userConfig.spread).subtract(origin);
+					Vector3 dir = VectorMethods.getRandomOffset(target, distance * userConfig.spread).subtract(origin);
 					streams.add(new ShardStream(new Ray(origin, dir)));
 				}
 			}
@@ -124,13 +124,6 @@ public class EarthShards extends AbilityInstance implements Ability {
 		return user;
 	}
 
-	private Vector3 getRandomOffset(Vector3 target, double offset) {
-		ThreadLocalRandom rand = ThreadLocalRandom.current();
-		double x = rand.nextDouble(-offset, offset);
-		double y = rand.nextDouble(-offset, offset);
-		double z = rand.nextDouble(-offset, offset);
-		return target.add(new Vector3(x, y, z));
-	}
 
 	private class ShardStream extends ParticleStream {
 		public ShardStream(Ray ray) {

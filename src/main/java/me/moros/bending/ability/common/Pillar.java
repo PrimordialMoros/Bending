@@ -19,6 +19,13 @@
 
 package me.moros.bending.ability.common;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.index.qual.NonNegative;
 import me.moros.atlas.cf.checker.index.qual.Positive;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -40,13 +47,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class Pillar implements Updatable {
 	private final User user;

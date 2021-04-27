@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.preset;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-
 import java.util.Arrays;
 import java.util.Objects;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 public class Preset {
 	public static final Preset EMPTY = new Preset(new String[9]);

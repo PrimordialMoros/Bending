@@ -17,15 +17,38 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.removal;
+package me.moros.bending.ability.common.basic;
 
-import java.util.function.BiPredicate;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.user.User;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.bukkit.block.Block;
 
-@FunctionalInterface
-public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-	boolean test(User user, AbilityDescription desc);
+public abstract class PhaseTransformer {
+	private final Deque<Block> queue;
+
+	public PhaseTransformer() {
+		queue = new ArrayDeque<>(32);
+	}
+
+	public boolean fillQueue(@NonNull Collection<Block> blocks) {
+		return queue.addAll(blocks);
+	}
+
+	public void processQueue(int amount) {
+		int counter = 0;
+		while (!queue.isEmpty() && counter <= amount) {
+			if (processBlock(queue.poll())) {
+				counter++;
+			}
+		}
+	}
+
+	public void clear() {
+		queue.clear();
+	}
+
+	protected abstract boolean processBlock(@NonNull Block block);
 }
-

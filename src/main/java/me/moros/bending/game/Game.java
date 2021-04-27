@@ -19,6 +19,9 @@
 
 package me.moros.bending.game;
 
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
@@ -38,9 +41,6 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
-
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * This object holds all the needed bending sub-systems.

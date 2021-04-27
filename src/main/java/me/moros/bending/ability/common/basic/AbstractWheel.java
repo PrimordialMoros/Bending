@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.Collection;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
@@ -40,8 +42,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-
-import java.util.Collection;
 
 public abstract class AbstractWheel implements Updatable, SimpleAbility {
 	private final User user;

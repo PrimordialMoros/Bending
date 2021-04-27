@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -52,11 +57,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class EarthBlast extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

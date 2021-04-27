@@ -19,6 +19,8 @@
 
 package me.moros.bending.command;
 
+import java.util.Collection;
+
 import me.moros.atlas.acf.BaseCommand;
 import me.moros.atlas.acf.CommandHelp;
 import me.moros.atlas.acf.annotation.CommandAlias;
@@ -35,8 +37,6 @@ import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
-
-import java.util.Collection;
 
 @CommandAlias("%presetcommand")
 @CommandPermission("bending.command.preset")

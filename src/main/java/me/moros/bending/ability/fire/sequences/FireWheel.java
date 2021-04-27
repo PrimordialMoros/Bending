@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.fire.sequences;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -50,10 +54,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FireWheel extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

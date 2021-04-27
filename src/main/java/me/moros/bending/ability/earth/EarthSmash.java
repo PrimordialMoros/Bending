@@ -19,11 +19,26 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.ability.fire.FireBreath;
+import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
@@ -35,6 +50,7 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -62,19 +78,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class EarthSmash extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -231,6 +234,19 @@ public class EarthSmash extends AbilityInstance implements Ability {
 	public @NonNull Collection<@NonNull Collider> getColliders() {
 		if (!state.canCollide()) return Collections.emptyList();
 		return Collections.singletonList(boulder.getCollider());
+	}
+
+	@Override
+	public void onCollision(@NonNull Collision collision) {
+		Ability collidedAbility = collision.getCollidedAbility();
+		if (collidedAbility instanceof FrostBreath) {
+			ThreadLocalRandom rand = ThreadLocalRandom.current();
+			boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
+			boulder.shatter();
+		} else if (collidedAbility instanceof FireBreath) {
+			boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
+			boulder.shatter();
+		}
 	}
 
 	interface EarthSmashState extends Updatable {

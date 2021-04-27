@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -45,11 +50,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class AirBlast extends AbilityInstance implements Ability, Burstable {
 	private static final Config config = new Config();

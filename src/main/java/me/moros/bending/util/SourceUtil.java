@@ -19,6 +19,9 @@
 
 package me.moros.bending.util;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
@@ -32,9 +35,6 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
-
-import java.util.Optional;
-import java.util.function.Predicate;
 
 // TODO remake sourcing from bottles
 

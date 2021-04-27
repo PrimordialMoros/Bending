@@ -19,6 +19,9 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.Comparator;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -47,9 +50,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-
-import java.util.Comparator;
-import java.util.function.Predicate;
 
 public class Catapult extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

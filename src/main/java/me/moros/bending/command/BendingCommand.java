@@ -19,6 +19,12 @@
 
 package me.moros.bending.command;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.acf.BaseCommand;
 import me.moros.atlas.acf.CommandHelp;
 import me.moros.atlas.acf.annotation.CommandAlias;
@@ -47,12 +53,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @CommandAlias("%bendingcommand")
 public class BendingCommand extends BaseCommand {

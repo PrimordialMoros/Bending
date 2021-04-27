@@ -19,6 +19,13 @@
 
 package me.moros.bending.game;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -31,13 +38,6 @@ import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.User;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 // TODO Expand system to include rounding, range checking etc and profile performance
 public final class AttributeSystem {

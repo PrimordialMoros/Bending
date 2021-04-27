@@ -19,6 +19,17 @@
 
 package me.moros.bending.ability.water;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
@@ -26,7 +37,7 @@ import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
-import me.moros.bending.ability.water.sequences.*;
+import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -59,17 +70,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WaterRing extends AbilityInstance implements Ability {
 	public static final double RING_RADIUS = 2.8;
@@ -237,7 +237,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
 		for (int i = 0; i < FastMath.min(ring.size(), NumberConversions.ceil(sources * 0.8)); i++) {
 			Block block = ring.get(i);
-			if (MaterialUtil.isWater(block)) {
+			if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
 				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
 					.count(5).offset(0.25, 0.25, 0.25).spawn();
 			} else if (MaterialUtil.isTransparent(block)) {

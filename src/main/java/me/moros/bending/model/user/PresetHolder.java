@@ -19,13 +19,13 @@
 
 package me.moros.bending.model.user;
 
+import java.util.Collections;
+import java.util.Set;
+
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.preset.Preset;
-
-import java.util.Collections;
-import java.util.Set;
 
 public final class PresetHolder {
 	private final AsyncLoadingCache<String, Preset> presetCache = Caffeine.newBuilder()

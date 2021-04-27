@@ -19,6 +19,8 @@
 
 package me.moros.bending.util.methods;
 
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -30,8 +32,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
-
-import java.util.function.Predicate;
 
 /**
  * Utility class with useful {@link Entity} related methods. Note: This is not thread-safe.

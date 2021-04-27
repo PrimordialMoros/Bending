@@ -19,6 +19,13 @@
 
 package me.moros.bending.game.temporal;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.temporal.TemporalManager;
@@ -31,13 +38,6 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class TempBlock implements Temporary {
 	private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
@@ -45,29 +45,29 @@ public class TempBlock implements Temporary {
 
 	private final Deque<TempBlockState> snapshots = new ArrayDeque<>();
 	private final Block block;
-	private final boolean bendable;
+	private boolean bendable;
 
 	public static void init() {
 	}
 
-	private TempBlock(Block block, BlockData data, long duration, boolean bendable) {
+	private TempBlock(Block block, boolean bendable) {
 		TemporalBlockManager.CACHE.add(block);
 		this.block = block;
 		this.bendable = bendable;
-		addState(data, duration);
 	}
 
-	private void addState(BlockData data, long duration) {
+	private TempBlock addState(BlockData data, long duration) {
 		cleanStates();
 		TempBlockState tbs = snapshots.peekLast();
 		if (tbs == null || !tbs.overwrite) {
-			snapshots.offerLast(new TempBlockState(block.getState(false), duration));
+			snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
 		} else {
 			tbs.overwrite = false;
 		}
 		block.setBlockData(data);
 		refreshGravityCache(block);
 		MANAGER.addEntry(block, this, duration);
+		return this;
 	}
 
 	// Cleans up previous states that have already expired
@@ -133,10 +133,11 @@ public class TempBlock implements Temporary {
 				return Optional.empty();
 			}
 			tb.addState(data, duration);
+			tb.bendable = bendable;
 			return Optional.of(tb);
 		}
 
-		return Optional.of(new TempBlock(block, data, duration, bendable));
+		return Optional.of(new TempBlock(block, bendable).addState(data, duration));
 	}
 
 	public static Optional<TempBlock> createAir(@NonNull Block block) {
@@ -179,6 +180,7 @@ public class TempBlock implements Temporary {
 			if (time >= tbs.expirationTime) break;
 		}
 		if (tbs == null) return;
+		bendable = tbs.bendable;
 		BlockState state = tbs.state;
 		state.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
 		TempBlockState nextState = snapshots.peekLast();
@@ -228,11 +230,13 @@ public class TempBlock implements Temporary {
 	private static class TempBlockState {
 		private final BlockState state;
 		private final long expirationTime;
+		private final boolean bendable;
 		private boolean overwrite = false;
 
-		private TempBlockState(BlockState state, long expirationTime) {
+		private TempBlockState(BlockState state, long expirationTime, boolean bendable) {
 			this.state = state;
 			this.expirationTime = System.currentTimeMillis() + expirationTime;
+			this.bendable = bendable;
 		}
 	}
 

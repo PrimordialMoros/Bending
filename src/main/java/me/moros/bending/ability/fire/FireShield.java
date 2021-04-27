@@ -19,6 +19,9 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -49,9 +52,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-
-import java.util.Collection;
-import java.util.Collections;
 
 public class FireShield extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

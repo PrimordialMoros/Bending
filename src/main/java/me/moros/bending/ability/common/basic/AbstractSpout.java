@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
@@ -34,10 +38,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
 	private final User user;

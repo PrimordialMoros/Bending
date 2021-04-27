@@ -19,11 +19,19 @@
 
 package me.moros.bending.ability.water.sequences;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.water.*;
+import me.moros.bending.ability.water.IceCrawl;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -48,14 +56,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Iceberg extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

@@ -45,7 +45,7 @@ public class WaterMaterials {
 
 		ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4);
 
-		ALL = new MaterialSetTag(key).add(PLANT_BENDABLE, ICE_BENDABLE).add(Material.WATER).ensureSize("Waterbendable", 52);
+		ALL = new MaterialSetTag(key).add(PLANT_BENDABLE, ICE_BENDABLE).add(Material.WATER, Material.SNOW, Material.SNOW_BLOCK).ensureSize("Waterbendable", 54);
 	}
 
 	public static boolean isWaterBendable(@NonNull Block block) {

@@ -19,6 +19,11 @@
 
 package me.moros.bending.board;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.IntStream;
+
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -33,11 +38,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.IntStream;
 
 public class Board {
 	private final String[] cachedSlots = new String[10];

@@ -19,6 +19,15 @@
 
 package me.moros.bending.game.manager;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -29,15 +38,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.BendingStorage;
 import org.bukkit.entity.Player;
-
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public final class PlayerManager {
 	private final Map<UUID, BendingPlayer> players = new ConcurrentHashMap<>();

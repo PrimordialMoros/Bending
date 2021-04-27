@@ -19,12 +19,13 @@
 
 package me.moros.bending.model.predicate.general;
 
+import java.util.Set;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.BendingConditions.ConditionBuilder;
 import me.moros.bending.model.user.User;
-
-import java.util.Set;
 
 public class CompositeBendingConditional implements BendingConditional {
 	private final Set<BendingConditional> conditionals;
@@ -36,7 +37,8 @@ public class CompositeBendingConditional implements BendingConditional {
 	@Override
 	public boolean test(User user, AbilityDescription desc) {
 		if (user == null || desc == null) return false;
-		return conditionals.stream().allMatch(cond -> cond.test(user, desc));
+		Predicate<BendingConditional> filter = desc.canBypassCooldown() ? c -> !c.equals(BendingConditions.COOLDOWN) : c -> true;
+		return conditionals.stream().filter(filter).allMatch(cond -> cond.test(user, desc));
 	}
 
 	public boolean hasConditional(@NonNull BendingConditional conditional) {

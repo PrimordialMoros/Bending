@@ -19,15 +19,6 @@
 
 package me.moros.bending.game.manager;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.configurate.ConfigurationNode;
-import me.moros.atlas.configurate.serialize.SerializationException;
-import me.moros.bending.Bending;
-import me.moros.bending.model.DummyAbilityManager;
-import me.moros.bending.model.user.BendingPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +27,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import me.moros.atlas.acf.lib.timings.MCTiming;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.configurate.ConfigurationNode;
+import me.moros.atlas.configurate.serialize.SerializationException;
+import me.moros.bending.Bending;
+import me.moros.bending.model.DummyAbilityManager;
+import me.moros.bending.model.user.BendingPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 public final class WorldManager {
 	private final Map<World, WorldInstance> worlds;
@@ -61,7 +62,11 @@ public final class WorldManager {
 	}
 
 	public void update() {
-		worlds.values().forEach(WorldInstance::update);
+		for (Map.Entry<World, WorldInstance> entry : worlds.entrySet()) {
+			MCTiming timing = Bending.getTimingManager().ofStart(entry.getKey().getName() + ": Bending tick");
+			entry.getValue().update();
+			timing.stopTiming();
+		}
 	}
 
 	public void remove(@NonNull World world) {

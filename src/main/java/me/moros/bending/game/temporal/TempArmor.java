@@ -19,6 +19,11 @@
 
 package me.moros.bending.game.temporal;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
@@ -28,11 +33,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {

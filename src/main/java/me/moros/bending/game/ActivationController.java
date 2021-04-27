@@ -19,6 +19,11 @@
 
 package me.moros.bending.game;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
@@ -40,7 +45,6 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
@@ -48,11 +52,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Handles ability activation.
@@ -76,15 +75,7 @@ public final class ActivationController {
 	}
 
 	public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
-		if (!desc.isActivatedBy(method)) return false;
-
-		boolean removed = false;
-		if (desc.canBypassCooldown()) {
-			removed = user.getBendingConditional().remove(BendingConditions.COOLDOWN);
-		}
-		if (!user.canBend(desc)) return false;
-		if (removed) user.getBendingConditional().add(BendingConditions.COOLDOWN);
-
+		if (!desc.isActivatedBy(method) || !user.canBend(desc)) return false;
 		if (!game.getProtectionSystem().canBuild(user, user.getLocBlock())) return false;
 		Ability ability = desc.createAbility();
 		if (ability.activate(user, method)) {
@@ -140,6 +131,7 @@ public final class ActivationController {
 	public void onUserSneak(@NonNull User user, boolean sneaking) {
 		if (sneaking) {
 			PhaseChange.melt(user);
+			HeatControl.onSneak(user);
 		}
 
 		ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;

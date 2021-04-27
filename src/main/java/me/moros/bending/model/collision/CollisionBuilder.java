@@ -19,17 +19,18 @@
 
 package me.moros.bending.model.collision;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.game.AbilityRegistry;
-import me.moros.bending.model.ability.description.AbilityDescription;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.game.AbilityRegistry;
+import me.moros.bending.model.ability.description.AbilityDescription;
 
 /**
  * A builder to easily register collisions based on a layer system.
@@ -61,10 +62,15 @@ public class CollisionBuilder {
 	}
 
 	public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull String second, boolean removeFirst, boolean removeSecond) {
+		return addSimpleCollision(first, Collections.singletonList(second), removeFirst, removeSecond);
+	}
+
+	public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull Collection<@NonNull String> seconds, boolean removeFirst, boolean removeSecond) {
 		AbilityDescription desc1 = registry.getAbilityDescription(first).orElse(null);
-		AbilityDescription desc2 = registry.getAbilityDescription(second).orElse(null);
-		if (desc1 != null && desc2 != null) {
-			simpleCollisions.add(new RegisteredCollision(desc1, desc2, removeFirst, removeSecond));
+		if (desc1 != null) {
+			for (AbilityDescription desc2 : mapAbilities(seconds)) {
+				simpleCollisions.add(new RegisteredCollision(desc1, desc2, removeFirst, removeSecond));
+			}
 		}
 		return this;
 	}

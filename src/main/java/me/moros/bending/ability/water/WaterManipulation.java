@@ -19,6 +19,13 @@
 
 package me.moros.bending.ability.water;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -61,13 +68,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class WaterManipulation extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -170,10 +170,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 		if (block == null) return;
 		if (MaterialUtil.isTransparentOrWater(block)) {
 			BlockMethods.tryBreakPlant(block);
-			if (MaterialUtil.isWater(block)) {
-				ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-					.count(5).offset(0.25, 0.25, 0.25).spawn();
-			} else {
+			if (!MaterialUtil.isWater(block)) {
 				TempBlock.create(block, MaterialUtil.getWaterData(level));
 			}
 		}

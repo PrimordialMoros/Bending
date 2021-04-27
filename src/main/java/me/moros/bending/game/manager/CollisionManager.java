@@ -19,12 +19,6 @@
 
 package me.moros.bending.game.manager;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.collision.RegisteredCollision;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +26,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Maps;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.RegisteredCollision;
 
 // TODO implement BVH and profile
 public final class CollisionManager {
@@ -43,9 +44,11 @@ public final class CollisionManager {
 	}
 
 	public void update() {
-		if (manager.getInstancesCount() < 2) return;
-		Collection<Ability> instances = manager.getInstances().collect(Collectors.toList());
-		Map<Ability, Collection<Collider>> colliderCache = new HashMap<>();
+		Collection<Ability> instances = manager.getInstances()
+			.filter(ability -> !ability.getColliders().isEmpty())
+			.collect(Collectors.toList());
+		if (instances.size() < 2) return;
+		Map<Ability, Collection<Collider>> colliderCache = new HashMap<>(instances.size());
 		for (RegisteredCollision registeredCollision : collisions) {
 			Collection<Ability> firstAbilities = instances.stream()
 				.filter(ability -> ability.getDescription().equals(registeredCollision.getFirst()))
@@ -61,16 +64,24 @@ public final class CollisionManager {
 					if (first.getUser().equals(second.getUser())) continue;
 					Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::getColliders);
 					if (secondColliders.isEmpty()) continue;
-					for (Collider firstCollider : firstColliders) {
-						for (Collider secondCollider : secondColliders) {
-							if (firstCollider.intersects(secondCollider)) {
-								handleCollision(first, second, firstCollider, secondCollider, registeredCollision);
-							}
-						}
+					Map.Entry<Collider, Collider> collisionResult = checkCollision(firstColliders, secondColliders);
+					if (collisionResult != null) {
+						handleCollision(first, second, collisionResult.getKey(), collisionResult.getValue(), registeredCollision);
 					}
 				}
 			}
 		}
+	}
+
+	private Map.Entry<Collider, Collider> checkCollision(Collection<Collider> firstColliders, Collection<Collider> secondColliders) {
+		for (Collider firstCollider : firstColliders) {
+			for (Collider secondCollider : secondColliders) {
+				if (firstCollider.intersects(secondCollider)) {
+					return Maps.immutableEntry(firstCollider, secondCollider);
+				}
+			}
+		}
+		return null;
 	}
 
 	private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, RegisteredCollision rc) {

@@ -19,6 +19,9 @@
 
 package me.moros.bending.ability.water;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -47,9 +50,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class WaterWave extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

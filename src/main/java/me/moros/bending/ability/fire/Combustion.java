@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -62,11 +67,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 public class Combustion extends AbilityInstance implements Ability, Explosive {
 	private static final Config config = new Config();

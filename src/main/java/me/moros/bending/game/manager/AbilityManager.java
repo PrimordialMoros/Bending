@@ -19,6 +19,13 @@
 
 package me.moros.bending.game.manager;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.moros.atlas.acf.lib.timings.MCTiming;
@@ -29,13 +36,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AbilityManager {
 	private final Multimap<User, Ability> globalInstances;

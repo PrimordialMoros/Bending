@@ -19,15 +19,15 @@
 
 package me.moros.bending.model.ability;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
-
-import java.util.Collection;
-import java.util.Collections;
 
 public interface Ability extends Updatable {
 	boolean activate(@NonNull User user, @NonNull ActivationMethod method); // return true if the ability was activated

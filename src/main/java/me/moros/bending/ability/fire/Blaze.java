@@ -19,6 +19,12 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -45,12 +51,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Blaze extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

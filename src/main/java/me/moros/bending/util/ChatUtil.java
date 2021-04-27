@@ -19,9 +19,9 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-
 import java.util.regex.Pattern;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to handle chat related functionality.

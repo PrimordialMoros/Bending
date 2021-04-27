@@ -19,9 +19,15 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.basic.PhaseTransformer;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -30,11 +36,14 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -42,13 +51,15 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.Optional;
-
 public class HeatControl extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
+	private RemovalPolicy removalPolicy;
+
+	private final Solidify solidify = new Solidify();
+	private final Melt melt = new Melt();
 
 	private long startTime;
 
@@ -60,6 +71,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
+		removalPolicy = Policies.builder().build();
 		startTime = System.currentTimeMillis();
 		return true;
 	}
@@ -71,20 +83,37 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		AbilityDescription selectedAbility = user.getSelectedAbility().orElse(null);
-		if (selectedAbility == null || !user.canBend(selectedAbility) || !getDescription().equals(selectedAbility)) {
+		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+			solidify.clear();
+			melt.clear();
 			return UpdateResult.CONTINUE;
 		}
-		long time = System.currentTimeMillis();
-		if (!user.isSneaking()) {
-			startTime = time;
-		} else {
-			ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
-			if (time > startTime + userConfig.cookInterval && cook()) {
-				startTime = System.currentTimeMillis();
+		melt.processQueue(1);
+		if (getDescription().equals(user.getSelectedAbility().orElse(null))) {
+			long time = System.currentTimeMillis();
+			if (user.isSneaking()) {
+				if (isHoldingFood()) {
+					ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
+					if (time > startTime + userConfig.cookInterval && cook()) {
+						startTime = System.currentTimeMillis();
+					}
+					return UpdateResult.CONTINUE;
+				}
+				solidify.processQueue(1);
+			} else {
+				solidify.clear();
 			}
+			startTime = time;
 		}
 		return UpdateResult.CONTINUE;
+	}
+
+	private boolean isHoldingFood() {
+		if (user instanceof BendingPlayer) {
+			PlayerInventory inventory = ((BendingPlayer) user).getEntity().getInventory();
+			return MaterialUtil.COOKABLE.containsKey(inventory.getItemInMainHand().getType());
+		}
+		return false;
 	}
 
 	private boolean cook() {
@@ -107,29 +136,49 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 	}
 
 	private void act() {
-		if (!user.canBend(getDescription())) return;
+		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
 		boolean acted = false;
 		Location center = user.getTarget(userConfig.range).toLocation(user.getWorld());
-		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, b -> WaterMaterials.isIceBendable(b) || MaterialUtil.isFire(b))) {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
+		Predicate<Block> predicate = b -> TempBlock.isBendable(b) && MaterialUtil.isFire(b) || MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
+		Predicate<Block> safe = b -> Bending.getGame().getProtectionSystem().canBuild(user, b);
+		List<Block> toMelt = new ArrayList<>();
+		for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
 			acted = true;
-			if (WaterMaterials.isIceBendable(block)) {
-				Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
-				if (tb.isPresent()) {
-					tb.get().revert();
-				} else {
-					TempBlock.create(block, Material.WATER.createBlockData(), true);
-				}
-			} else {
-				block.setType(Material.AIR);
+			if (MaterialUtil.isFire(block)) {
+				BlockMethods.tryExtinguishFire(user, block);
+			} else if (MaterialUtil.isSnow(block) || WaterMaterials.isIceBendable(block)) {
+				toMelt.add(block);
 			}
 		}
-		if (acted) user.setCooldown(getDescription(), userConfig.cooldown);
+		if (!toMelt.isEmpty()) {
+			Collections.shuffle(toMelt);
+			melt.fillQueue(toMelt);
+		}
+		if (acted) {
+			user.setCooldown(getDescription(), userConfig.cooldown);
+		}
+	}
+
+	private void onSneak() {
+		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
+		Location center = user.getTarget(userConfig.solidifyRange, false).toLocation(user.getWorld());
+		Predicate<Block> safe = b -> Bending.getGame().getProtectionSystem().canBuild(user, b);
+		List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, userConfig.solidifyRadius, safe.and(MaterialUtil::isLava));
+		if (newBlocks.isEmpty()) return;
+		Collections.shuffle(newBlocks);
+		solidify.fillQueue(newBlocks);
+		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
 	public static void act(User user) {
 		if (user.getSelectedAbilityName().equals("HeatControl")) {
 			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+		}
+	}
+
+	public static void onSneak(User user) {
+		if (user.getSelectedAbilityName().equals("HeatControl")) {
+			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
 		}
 	}
 
@@ -144,6 +193,24 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
+	private class Solidify extends PhaseTransformer {
+		@Override
+		protected boolean processBlock(@NonNull Block block) {
+			if (MaterialUtil.isLava(block) && TempBlock.isBendable(block)) {
+				return BlockMethods.tryCoolLava(user, block);
+			}
+			return false;
+		}
+	}
+
+	private class Melt extends PhaseTransformer {
+		@Override
+		protected boolean processBlock(@NonNull Block block) {
+			if (!TempBlock.isBendable(block)) return false;
+			return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
+		}
+	}
+
 	private static class Config extends Configurable {
 		@Attribute(Attribute.COOLDOWN)
 		public long cooldown;
@@ -151,6 +218,10 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 		public double range;
 		@Attribute(Attribute.RADIUS)
 		public double radius;
+		@Attribute(Attribute.RANGE)
+		public double solidifyRange;
+		@Attribute(Attribute.RADIUS)
+		public double solidifyRadius;
 		@Attribute(Attribute.CHARGE_TIME)
 		public long cookInterval;
 
@@ -161,6 +232,8 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 			cooldown = abilityNode.node("cooldown").getLong(2000);
 			range = abilityNode.node("range").getDouble(10.0);
 			radius = abilityNode.node("radius").getDouble(5.0);
+			solidifyRange = abilityNode.node("solidify-range").getDouble(5.0);
+			solidifyRadius = abilityNode.node("solidify-radius").getDouble(6.0);
 			cookInterval = abilityNode.node("cook-interval").getLong(2000);
 		}
 	}

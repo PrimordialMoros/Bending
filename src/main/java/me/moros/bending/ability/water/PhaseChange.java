@@ -19,9 +19,16 @@
 
 package me.moros.bending.ability.water;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.common.basic.PhaseTransformer;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -30,29 +37,27 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-
-import java.util.ArrayDeque;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 
 	private User user;
 	private Config userConfig;
+	private RemovalPolicy removalPolicy;
 
-	private final PhaseTransformer freeze = new PhaseTransformer(MaterialUtil::isWater, Material.ICE);
-	private final PhaseTransformer melt = new PhaseTransformer(WaterMaterials::isIceBendable, Material.WATER);
+	private final Freeze freeze = new Freeze();
+	private final Melt melt = new Melt();
 
 	public PhaseChange(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -62,6 +67,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
 		this.user = user;
 		recalculateConfig();
+		removalPolicy = Policies.builder().build();
 		return true;
 	}
 
@@ -72,21 +78,40 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 
 	@Override
 	public @NonNull UpdateResult update() {
-		freeze.processQueue();
+		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+			freeze.clear();
+			melt.clear();
+			return UpdateResult.CONTINUE;
+		}
+		freeze.processQueue(userConfig.freezeSpeed);
 		if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
-			melt.processQueue();
+			melt.processQueue(userConfig.meltSpeed);
+		} else {
+			melt.clear();
 		}
 		return UpdateResult.CONTINUE;
 	}
 
 	public void freeze() {
-		if (!user.canBend(getDescription())) return;
-		freeze.fillQueue(userConfig.freezeRange, userConfig.freezeRadius);
+		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
+		Location center = user.getTarget(userConfig.freezeRange, false).toLocation(user.getWorld());
+		if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
+			user.setCooldown(getDescription(), userConfig.freezeCooldown);
+		}
 	}
 
 	public void melt() {
-		if (!user.canBend(getDescription())) return;
-		melt.fillQueue(userConfig.meltRange, userConfig.meltRadius);
+		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
+		user.setCooldown(getDescription(), 500);
+		Location center = user.getTarget(userConfig.meltRange).toLocation(user.getWorld());
+		melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)));
+	}
+
+	private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
+		List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, radius, predicate);
+		newBlocks.removeIf(b -> !Bending.getGame().getProtectionSystem().canBuild(user, b));
+		Collections.shuffle(newBlocks);
+		return newBlocks;
 	}
 
 	public static void freeze(User user) {
@@ -106,80 +131,64 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 		return user;
 	}
 
-	private class PhaseTransformer {
-		private final Queue<Block> queue;
-		private final Predicate<Block> predicate;
-		private final Material material;
-
-		private final boolean isFreeze;
-
-		private PhaseTransformer(@NonNull Predicate<Block> predicate, @NonNull Material material) {
-			queue = new ArrayDeque<>(32);
-			this.predicate = predicate;
-			this.material = material;
-			isFreeze = material == Material.ICE;
-		}
-
-		private void fillQueue(double range, double radius) {
-			Location center = user.getTarget(range, !isFreeze).toLocation(user.getWorld());
-			boolean acted = false;
-			for (Block block : WorldMethods.getNearbyBlocks(center, radius, predicate)) {
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-				queue.offer(block);
-				acted = true;
+	private class Freeze extends PhaseTransformer {
+		@Override
+		protected boolean processBlock(@NonNull Block block) {
+			if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
+				return false;
 			}
-			if (acted) user.setCooldown(getDescription(), userConfig.cooldown);
-		}
-
-		private void processQueue() {
-			int counter = 0;
-			while (!queue.isEmpty() && counter <= userConfig.speed) {
-				Block block = queue.poll();
-				if (TempBlock.isBendable(block) && predicate.test(block)) {
-					Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
-					if (tb.isPresent()) {
-						tb.get().revert();
-					} else {
-						TempBlock.create(block, material.createBlockData(), true);
-						if (isFreeze && ThreadLocalRandom.current().nextInt(12) == 0) {
-							SoundUtil.ICE_SOUND.play(block.getLocation());
-						}
-					}
-					counter++;
-				}
+			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+				return false;
 			}
+
+			TempBlock.create(block, Material.ICE.createBlockData(), true);
+			if (ThreadLocalRandom.current().nextInt(12) == 0) {
+				SoundUtil.ICE_SOUND.play(block.getLocation());
+			}
+			return true;
+		}
+	}
+
+	private class Melt extends PhaseTransformer {
+		@Override
+		protected boolean processBlock(@NonNull Block block) {
+			if (!TempBlock.isBendable(block)) return false;
+			return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
 		}
 	}
 
 	private static class Config extends Configurable {
-		@Attribute(Attribute.SPEED)
-		public long speed;
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
 		@Attribute(Attribute.SELECTION)
 		public double freezeRange;
 		@Attribute(Attribute.RADIUS)
 		public double freezeRadius;
+		@Attribute(Attribute.SPEED)
+		public int freezeSpeed;
+		@Attribute(Attribute.COOLDOWN)
+		public long freezeCooldown;
 
 		@Attribute(Attribute.SELECTION)
 		public double meltRange;
 		@Attribute(Attribute.RADIUS)
 		public double meltRadius;
+		@Attribute(Attribute.SPEED)
+		public int meltSpeed;
 
 		@Override
 		public void onConfigReload() {
 			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "phasechange");
 
-			speed = abilityNode.node("speed").getInt(8);
-			cooldown = abilityNode.node("cooldown").getLong(3000);
-
 			freezeRange = abilityNode.node("freeze").node("range").getDouble(7.0);
 			freezeRadius = abilityNode.node("freeze").node("radius").getDouble(3.5);
+			freezeSpeed = abilityNode.node("freeze").node("speed").getInt(8);
+			freezeCooldown = abilityNode.node("freeze").node("cooldown").getLong(2000);
 
 			meltRange = abilityNode.node("melt").node("range").getDouble(7.0);
 			meltRadius = abilityNode.node("melt").node("radius").getDouble(4.5);
+			meltSpeed = abilityNode.node("melt").node("speed").getInt(8);
 
-			abilityNode.node("speed").comment("How many blocks can be affected per tick.");
+			abilityNode.node("freeze", "speed").comment("How many blocks can be affected per tick.");
+			abilityNode.node("melt", "speed").comment("How many blocks can be affected per tick.");
 		}
 	}
 }

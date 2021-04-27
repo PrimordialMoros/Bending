@@ -19,6 +19,12 @@
 
 package me.moros.bending.protection;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -34,12 +40,6 @@ import me.moros.bending.protection.instances.Protection;
 import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
 import org.bukkit.block.Block;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the protection system which hooks into other region protection plugins.

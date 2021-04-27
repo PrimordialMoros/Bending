@@ -19,6 +19,11 @@
 
 package me.moros.bending.model.user;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -41,11 +46,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public interface BukkitUser {
 	@NonNull LivingEntity getEntity();

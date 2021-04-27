@@ -19,16 +19,16 @@
 
 package me.moros.bending.model;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 
 /**
  * An immutable and thread-safe object that represents a bending element

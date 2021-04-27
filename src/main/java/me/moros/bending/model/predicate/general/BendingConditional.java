@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.predicate.general;
 
+import java.util.function.BiPredicate;
+
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-
-import java.util.function.BiPredicate;
 
 @FunctionalInterface
 public interface BendingConditional extends BiPredicate<User, AbilityDescription> {

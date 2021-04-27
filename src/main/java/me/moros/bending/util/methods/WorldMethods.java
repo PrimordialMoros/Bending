@@ -19,6 +19,13 @@
 
 package me.moros.bending.util.methods;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -30,14 +37,6 @@ import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-
 /**
  * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
  */
@@ -45,14 +44,14 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius) {
 		return getNearbyBlocks(location, radius, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
 		return getNearbyBlocks(location, radius, predicate, 0);
 	}
 
@@ -65,7 +64,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
 		int r = NumberConversions.ceil(radius) + 1;
 		double originX = location.getX();
 		double originY = location.getY();
@@ -91,14 +90,14 @@ public final class WorldMethods {
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box) {
 		return getNearbyBlocks(world, box, block -> true, 0);
 	}
 
 	/**
 	 * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
 		return getNearbyBlocks(world, box, predicate, 0);
 	}
 
@@ -111,7 +110,7 @@ public final class WorldMethods {
 	 * @param limit the amount of blocks to collect
 	 * @return all collected blocks
 	 */
-	public static @NonNull Collection<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
+	public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
 		if (box == AABBUtils.DUMMY_COLLIDER) return Collections.emptyList();
 		Vector3 min = box.min();
 		Vector3 max = box.max();

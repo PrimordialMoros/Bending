@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.user;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.cf.common.value.qual.IntRange;
@@ -34,9 +37,6 @@ import me.moros.bending.model.slots.AbilitySlotContainer;
 import me.moros.bending.util.Tasker;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class BendingUser implements User {
 	private final ElementHolder elementHolder = new ElementHolder();

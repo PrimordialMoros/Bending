@@ -19,10 +19,14 @@
 
 package me.moros.bending.ability.fire.sequences;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Queue;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.fire.*;
+import me.moros.bending.ability.fire.FireWall;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -40,10 +44,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
-
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Queue;
 
 public class FireWave extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

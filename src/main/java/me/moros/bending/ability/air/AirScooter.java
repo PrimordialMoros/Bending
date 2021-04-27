@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -45,11 +50,6 @@ import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class AirScooter extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

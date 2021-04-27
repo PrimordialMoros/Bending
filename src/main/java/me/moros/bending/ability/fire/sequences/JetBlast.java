@@ -22,7 +22,7 @@ package me.moros.bending.ability.fire.sequences;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.fire.*;
+import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;

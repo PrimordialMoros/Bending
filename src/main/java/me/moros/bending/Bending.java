@@ -19,6 +19,8 @@
 
 package me.moros.bending;
 
+import java.util.Objects;
+
 import me.moros.atlas.acf.lib.timings.TimingManager;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
@@ -39,8 +41,6 @@ import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.MetricsLite;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 public class Bending extends JavaPlugin {
 	private static Bending plugin;

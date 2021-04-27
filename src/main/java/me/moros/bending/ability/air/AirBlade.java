@@ -19,10 +19,14 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.air.sequences.*;
+import me.moros.bending.ability.air.sequences.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -50,10 +54,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class AirBlade extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

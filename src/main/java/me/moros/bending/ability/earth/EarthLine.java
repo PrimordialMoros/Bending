@@ -19,6 +19,15 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -75,15 +84,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 public class EarthLine extends AbilityInstance implements Ability {
 	private enum Mode {NORMAL, PRISON, MAGMA}

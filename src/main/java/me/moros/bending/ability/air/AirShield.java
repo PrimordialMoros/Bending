@@ -19,10 +19,14 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.water.sequences.*;
+import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -50,10 +54,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class AirShield extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -104,7 +104,7 @@ public class AirShield extends AbilityInstance implements Ability {
 			double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
 			Vector3 loc = center.add(new Vector3(x, y, z));
 			ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5)
-				.offset(0.2, 0.2, 0.2).extra(0.03).spawn();
+				.offset(0.2, 0.2, 0.2).extra(0.01).spawn();
 			if (ThreadLocalRandom.current().nextInt(12) == 0) {
 				SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
 			}

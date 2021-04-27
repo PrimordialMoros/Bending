@@ -19,14 +19,14 @@
 
 package me.moros.bending.model;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public final class DummyAbilityManager extends AbilityManager {
 	public static final AbilityManager INSTANCE = new DummyAbilityManager();

@@ -19,14 +19,14 @@
 
 package me.moros.bending.model.temporal;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class TemporalManager<K, V extends Temporary> {
 	private final ExpiringMap<K, V> instances;

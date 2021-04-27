@@ -19,6 +19,13 @@
 
 package me.moros.bending.game;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.*;
@@ -38,13 +45,6 @@ import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static me.moros.bending.model.Element.*;
 import static me.moros.bending.model.ability.util.ActivationMethod.*;
@@ -83,6 +83,7 @@ public final class AbilityInitializer {
 	}
 
 	private Collection<RegisteredCollision> buildCollisions() {
+		List<String> breathCollisions = Arrays.asList("EarthBlast", "FireBlast", "WaterManipulation");
 		return new CollisionBuilder(registry)
 			.addLayer(layer0)
 			.addSpecialLayer(spoutLayer)
@@ -90,6 +91,11 @@ public final class AbilityInitializer {
 			.addLayer(layer2)
 			.addSpecialLayer(shieldLayer)
 			.addLayer(layer3)
+			.addSimpleCollision("FrostBreath", breathCollisions, false, true)
+			.addSimpleCollision("FireBreath", breathCollisions, false, true)
+			.addSimpleCollision("FireBreath", "EarthSmash", false, false)
+			.addSimpleCollision("FrostBreath", "EarthSmash", false, false)
+			.addSimpleCollision("FrostBreath", "FireBreath", true, true)
 			.addSimpleCollision("FrostBreath", "AirShield", true, true)
 			.addSimpleCollision("EarthShot", "AirShield", true, false)
 			.addSimpleCollision("IceCrawl", "EarthLine", true, false)
@@ -204,9 +210,8 @@ public final class AbilityInitializer {
 			.element(WATER).activation(SEQUENCE).build();
 		abilities.add(waterGimbal);
 
-		AbilityDescription frostBreath = AbilityDescription.builder("FrostBreath", FrostBreath::new)
-			.element(WATER).activation(SEQUENCE).build();
-		abilities.add(frostBreath);
+		abilities.add(AbilityDescription.builder("FrostBreath", FrostBreath::new)
+			.element(WATER).activation(SNEAK).build());
 
 		AbilityDescription iceberg = AbilityDescription.builder("Iceberg", Iceberg::new)
 			.element(WATER).activation(SEQUENCE).build();
@@ -218,14 +223,6 @@ public final class AbilityInitializer {
 			new AbilityAction(waterRing, SNEAK),
 			new AbilityAction(waterRing, SNEAK_RELEASE),
 			new AbilityAction(torrent, SNEAK)
-		));
-
-		sequences.put(frostBreath, new Sequence(
-			new AbilityAction(iceCrawl, SNEAK),
-			new AbilityAction(iceCrawl, SNEAK_RELEASE),
-			new AbilityAction(phaseChange, SNEAK),
-			new AbilityAction(phaseChange, SNEAK_RELEASE),
-			new AbilityAction(iceCrawl, SNEAK)
 		));
 
 		sequences.put(iceberg, new Sequence(

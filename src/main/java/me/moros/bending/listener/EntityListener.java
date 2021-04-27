@@ -20,7 +20,7 @@
 package me.moros.bending.listener;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.ability.earth.*;
+import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.util.ActionType;

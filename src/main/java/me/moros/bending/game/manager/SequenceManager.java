@@ -19,6 +19,13 @@
 
 package me.moros.bending.game.manager;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
@@ -32,13 +39,6 @@ import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.User;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 public final class SequenceManager {
 	private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();

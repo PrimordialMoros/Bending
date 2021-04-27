@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
@@ -36,8 +38,6 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
-
-import java.util.function.Predicate;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
 	private final User user;

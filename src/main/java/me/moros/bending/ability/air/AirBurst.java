@@ -126,8 +126,8 @@ public class AirBurst extends AbstractBurst implements Ability {
 
 			cooldown = abilityNode.node("cooldown").getLong(6000);
 			chargeTime = abilityNode.node("charge-time").getInt(3500);
-			coneRange = abilityNode.node("cone-range").getDouble(16.0);
-			sphereRange = abilityNode.node("sphere-range").getDouble(12.0);
+			coneRange = abilityNode.node("cone-range").getDouble(11.0);
+			sphereRange = abilityNode.node("sphere-range").getDouble(7.0);
 			fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);
 		}
 	}

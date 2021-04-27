@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -39,10 +43,6 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
 
 public class Bulwark extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

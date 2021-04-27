@@ -19,6 +19,13 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
@@ -40,13 +47,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.function.Predicate;
 
 public abstract class BlockStream implements State {
 	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));

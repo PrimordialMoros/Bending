@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.ability.sequence;
 
+import java.util.Objects;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
-
-import java.util.Objects;
 
 /**
  * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link ActivationMethod}

@@ -19,6 +19,8 @@
 
 package me.moros.bending.command;
 
+import java.util.Arrays;
+
 import me.moros.atlas.acf.BaseCommand;
 import me.moros.atlas.acf.CommandHelp;
 import me.moros.atlas.acf.InvalidCommandArgument;
@@ -39,8 +41,6 @@ import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.command.CommandSender;
 
-import java.util.Arrays;
-
 @CommandAlias("%modifycommand")
 @CommandPermission("bending.command.modify")
 public class ModifyCommand extends BaseCommand {
@@ -52,7 +52,7 @@ public class ModifyCommand extends BaseCommand {
 	}
 
 	@Subcommand("add|a")
-	@CommandCompletion("@elements|@abilities @attributes @players")
+	@CommandCompletion("@elements|@abilities @attributes * * @players")
 	@Description("Add a new modifier to the specified player")
 	public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
 		String validType = Arrays.stream(Attribute.TYPES)

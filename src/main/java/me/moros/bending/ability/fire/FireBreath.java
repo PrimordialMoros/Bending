@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -32,6 +37,7 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -45,6 +51,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -52,10 +59,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FireBreath extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -116,6 +119,11 @@ public class FireBreath extends AbilityInstance implements Ability {
 		return user;
 	}
 
+	@Override
+	public @NonNull Collection<@NonNull Collider> getColliders() {
+		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+	}
+
 	private class FireStream extends ParticleStream {
 		private double distanceTravelled = 0;
 
@@ -151,7 +159,7 @@ public class FireBreath extends AbilityInstance implements Ability {
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
-			// TODO melt snow/ice
+			if (BlockMethods.tryMeltIce(user, block) || BlockMethods.tryMeltSnow(user, block)) return true;
 			Block above = block.getRelative(BlockFace.UP);
 			if (MaterialUtil.isIgnitable(above) && Bending.getGame().getProtectionSystem().canBuild(user, above)) {
 				TempBlock.create(above, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);

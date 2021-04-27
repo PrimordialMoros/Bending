@@ -19,14 +19,6 @@
 
 package me.moros.bending.game;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.Sequence;
-import me.moros.bending.model.ability.util.ActivationMethod;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -37,6 +29,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.util.ActivationMethod;
 
 /**
  * Holds all the registered AbilityDescriptions for the current session.

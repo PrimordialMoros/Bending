@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.user;
 
-import me.moros.bending.model.Element;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+
+import me.moros.bending.model.Element;
 
 public final class ElementHolder {
 	private final Set<Element> elements;

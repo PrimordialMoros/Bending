@@ -19,6 +19,10 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Supplier;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
@@ -28,10 +32,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.function.Supplier;
 
 public abstract class AbstractBurst extends AbilityInstance {
 	private static final double ANGLE_STEP = FastMath.toRadians(10);

@@ -19,6 +19,12 @@
 
 package me.moros.bending.ability.common;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
@@ -31,12 +37,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 public class FragileStructure {
 	private final Collection<Block> fragileBlocks;

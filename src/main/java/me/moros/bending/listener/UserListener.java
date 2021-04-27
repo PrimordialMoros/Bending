@@ -19,6 +19,9 @@
 
 package me.moros.bending.listener;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
@@ -63,9 +66,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public class UserListener implements Listener {
 	private final Game game;

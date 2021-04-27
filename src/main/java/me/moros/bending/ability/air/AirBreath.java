@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -30,6 +35,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -48,10 +54,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class AirBreath extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -108,6 +110,11 @@ public class AirBreath extends AbilityInstance implements Ability {
 	@Override
 	public @NonNull User getUser() {
 		return user;
+	}
+
+	@Override
+	public @NonNull Collection<@NonNull Collider> getColliders() {
+		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
 	}
 
 	private class AirStream extends ParticleStream {

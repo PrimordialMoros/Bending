@@ -19,6 +19,11 @@
 
 package me.moros.bending.model.user;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -27,11 +32,6 @@ import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.profile.BendingProfile;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public final class BendingPlayer extends BendingUser {
 	private final BendingProfile profile;

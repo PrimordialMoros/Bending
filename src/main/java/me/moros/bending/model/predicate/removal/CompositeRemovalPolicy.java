@@ -19,12 +19,12 @@
 
 package me.moros.bending.model.predicate.removal;
 
+import java.util.Set;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.removal.Policies.PolicyBuilder;
 import me.moros.bending.model.user.User;
-
-import java.util.Set;
 
 public class CompositeRemovalPolicy implements RemovalPolicy {
 	private final Set<RemovalPolicy> policies;

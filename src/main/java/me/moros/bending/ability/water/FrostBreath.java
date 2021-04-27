@@ -17,7 +17,14 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.water.sequences;
+package me.moros.bending.ability.water;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -31,33 +38,32 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
-import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
-import org.apache.commons.math3.util.FastMath;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FrostBreath extends AbilityInstance implements Ability {
 	private static final Config config = new Config();
@@ -68,9 +74,6 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
 	private final Collection<FrostStream> streams = new ArrayList<>();
 	private final Set<Entity> affectedEntities = new HashSet<>();
-
-	private boolean charging;
-	private long startTime;
 
 	public FrostBreath(@NonNull AbilityDescription desc) {
 		super(desc);
@@ -83,10 +86,12 @@ public class FrostBreath extends AbilityInstance implements Ability {
 		this.user = user;
 		recalculateConfig();
 
-		removalPolicy = Policies.builder().build();
-
-		charging = true;
-		startTime = System.currentTimeMillis();
+		removalPolicy = Policies.builder()
+			.add(Policies.NOT_SNEAKING)
+			.add(Policies.IN_LIQUID)
+			.add(new ExpireRemovalPolicy(userConfig.duration))
+			.add(new SwappedSlotsRemovalPolicy(getDescription()))
+			.build();
 		return true;
 	}
 
@@ -101,45 +106,16 @@ public class FrostBreath extends AbilityInstance implements Ability {
 			return UpdateResult.REMOVE;
 		}
 
-		if (charging) {
-			if (!user.getSelectedAbilityName().equals("IceCrawl"))
-				return UpdateResult.REMOVE;
-			if (System.currentTimeMillis() > startTime + userConfig.chargeTime) {
-				ParticleUtil.create(Particle.SNOW_SHOVEL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
-				if (!user.isSneaking()) {
-					release();
-				}
-			} else {
-				if (!user.isSneaking()) return UpdateResult.REMOVE;
-			}
-			return UpdateResult.CONTINUE;
-		} else {
-			streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-		}
-
-		return (charging || !streams.isEmpty()) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+		user.getEntity().setRemainingAir(user.getEntity().getRemainingAir() - 5);
+		Vector3 offset = new Vector3(0, -0.1, 0);
+		Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
+		streams.add(new FrostStream(ray));
+		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
 	}
 
-	private void release() {
-		if (!charging) return;
-
-		Vector3 origin = user.getEyeLocation().subtract(new Vector3(0, 0.2, 0));
-		Vector3 userDir = user.getDirection();
-		double angleStep = FastMath.toRadians(20);
-		double maxAngle = FastMath.toRadians(45);
-		for (double theta = 0; theta < FastMath.PI; theta += angleStep) {
-			for (double phi = 0; phi < FastMath.PI * 2; phi += angleStep) {
-				double x = FastMath.cos(phi) * FastMath.sin(theta);
-				double y = FastMath.cos(phi) * FastMath.cos(theta);
-				double z = FastMath.sin(phi);
-				Vector3 direction = new Vector3(x, y, z);
-				if (Vector3.angle(direction, userDir) <= maxAngle) {
-					streams.add(new FrostStream(new Ray(origin, direction.normalize().scalarMultiply(userConfig.range))));
-				}
-			}
-		}
-
-		charging = false;
+	@Override
+	public void onDestroy() {
 		user.setCooldown(getDescription(), userConfig.cooldown);
 	}
 
@@ -148,42 +124,63 @@ public class FrostBreath extends AbilityInstance implements Ability {
 		return user;
 	}
 
+	@Override
+	public @NonNull Collection<@NonNull Collider> getColliders() {
+		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+	}
+
 	private class FrostStream extends ParticleStream {
+		private double distanceTravelled = 0;
+
 		public FrostStream(Ray ray) {
-			super(user, ray, 0.3, 0.5);
+			super(user, ray, 0.6, 0.5);
 			canCollide = Block::isLiquid;
 		}
 
 		@Override
 		public void render() {
+			distanceTravelled += speed;
 			Location spawnLoc = getBukkitLocation();
-			ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(2)
-				.offset(0.4, 0.4, 0.4).extra(0.05).spawn();
-			ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(2)
-				.offset(0.4, 0.4, 0.4).extra(0.05).data(Material.ICE.createBlockData()).spawn();
+			double offset = 0.15 * distanceTravelled;
+			collider = new Sphere(location, collisionRadius + offset);
+			ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
+				.offset(offset, offset, offset).extra(0.02).spawn();
+			ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(NumberConversions.ceil(0.4 * distanceTravelled))
+				.offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
+		}
+
+		@Override
+		public void postRender() {
+			for (Block block : WorldMethods.getNearbyBlocks(getBukkitLocation(), collider.radius)) {
+				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
+				onBlockHit(block);
+			}
 		}
 
 		@Override
 		public boolean onEntityHit(@NonNull Entity entity) {
 			if (!affectedEntities.contains(entity)) {
 				affectedEntities.add(entity);
-				DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
 				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
 				PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
 				ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
 					.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
-
 			}
 			return false;
 		}
 
 		@Override
 		public boolean onBlockHit(@NonNull Block block) {
+			long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
 			if (MaterialUtil.isWater(block)) {
-				long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
 				TempBlock.create(block, Material.ICE.createBlockData(), duration, true);
 				if (ThreadLocalRandom.current().nextInt(6) == 0) {
 					SoundUtil.ICE_SOUND.play(block.getLocation());
+				}
+			} else if (MaterialUtil.isTransparent(block)) {
+				Block below = block.getRelative(BlockFace.DOWN);
+				if (below.isSolid() && !WaterMaterials.isIceBendable(below) && TempBlock.isBendable(below)) {
+					TempBlock.create(block, Material.SNOW.createBlockData(), duration, true);
 				}
 			}
 			BlockMethods.tryCoolLava(user, block);
@@ -196,10 +193,8 @@ public class FrostBreath extends AbilityInstance implements Ability {
 		public long cooldown;
 		@Attribute(Attribute.RANGE)
 		public double range;
-		@Attribute(Attribute.CHARGE_TIME)
-		public long chargeTime;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+		@Attribute(Attribute.DURATION)
+		public long duration;
 		@Attribute(Attribute.STRENGTH)
 		public int power;
 		@Attribute(Attribute.DURATION)
@@ -207,14 +202,13 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
 		@Override
 		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "frostbreath");
+			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "frostbreath");
 
 			cooldown = abilityNode.node("cooldown").getLong(10000);
 			range = abilityNode.node("range").getDouble(7.0);
-			chargeTime = abilityNode.node("charge-time").getLong(1000);
-			damage = abilityNode.node("damage").getDouble(2.0);
+			duration = abilityNode.node("duration").getLong(1500);
 			power = abilityNode.node("slow-power").getInt(2) - 1;
-			slowDuration = abilityNode.node("slow-duration").getLong(5000);
+			slowDuration = abilityNode.node("slow-duration").getLong(2500);
 		}
 	}
 }

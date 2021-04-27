@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.earth.passives;
 
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -38,10 +40,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
-import java.util.function.Predicate;
-
-// TODO make it more consistent, maybe revert to simple block check?
-// Handle tempblocks better so it doesn't create ones
 public class DensityShift extends AbilityInstance implements PassiveAbility {
 	private static final Config config = new Config();
 

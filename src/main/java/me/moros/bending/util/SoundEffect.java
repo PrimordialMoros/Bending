@@ -19,11 +19,11 @@
 
 package me.moros.bending.util;
 
+import java.util.Objects;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-
-import java.util.Objects;
 
 /**
  * Utility class to provide a {@link Sound} along with volume and pitch.

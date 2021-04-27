@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.user.profile;
 
-import me.moros.atlas.cf.checker.index.qual.Positive;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-
 import java.util.Arrays;
 import java.util.UUID;
+
+import me.moros.atlas.cf.checker.index.qual.Positive;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 /**
  * Contains info from the database regarding a bending profile

@@ -19,12 +19,17 @@
 
 package me.moros.bending.ability.air.sequences;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.air.*;
+import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -49,11 +54,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class AirWheel extends AbilityInstance implements Ability {
 	private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));

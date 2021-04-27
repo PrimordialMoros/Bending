@@ -19,6 +19,9 @@
 
 package me.moros.bending.ability.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -34,9 +37,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class SelectedSource implements State {
 	private static final Map<Block, SelectedSource> INSTANCES = new HashMap<>();

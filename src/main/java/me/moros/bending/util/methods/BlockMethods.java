@@ -19,6 +19,15 @@
 
 package me.moros.bending.util.methods;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
@@ -27,6 +36,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
@@ -40,16 +50,9 @@ import org.bukkit.block.Campfire;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
+import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility class with useful {@link Block} related methods. Note: This is not thread-safe.
@@ -119,6 +122,47 @@ public final class BlockMethods {
 			block.setType(Material.AIR);
 			if (ThreadLocalRandom.current().nextInt(4) == 0) {
 				SoundUtil.FIRE_EXTINGUISH_SOUND.play(block.getLocation());
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Try to melt the given block if it's Snow.
+	 * @param user the user trying to melt the snow
+	 * @param block the block to check
+	 * @return true if snow was melted, false otherwise
+	 */
+	public static boolean tryMeltSnow(@NonNull User user, @NonNull Block block) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
+		if (MaterialUtil.isSnow(block) && block.getBlockData() instanceof Snow) {
+			Snow snow = (Snow) block.getBlockData();
+			if (snow.getLayers() == snow.getMinimumLayers()) {
+				block.setType(Material.AIR);
+			} else {
+				snow.setLayers(snow.getLayers() - 1);
+				block.setBlockData(snow);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Try to melt the given block if it's Ice.
+	 * @param user the user trying to melt the ice
+	 * @param block the block to check
+	 * @return true if ice was melted, false otherwise
+	 */
+	public static boolean tryMeltIce(@NonNull User user, @NonNull Block block) {
+		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) return false;
+		if (WaterMaterials.isIceBendable(block)) {
+			Optional<TempBlock> tb = TempBlock.MANAGER.get(block);
+			if (tb.isPresent()) {
+				tb.get().revert();
+			} else {
+				TempBlock.createAir(block);
 			}
 			return true;
 		}

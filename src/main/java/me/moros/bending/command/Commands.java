@@ -19,6 +19,12 @@
 
 package me.moros.bending.command;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
 import me.moros.atlas.acf.BukkitCommandCompletionContext;
 import me.moros.atlas.acf.BukkitCommandExecutionContext;
@@ -40,12 +46,6 @@ import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.entity.Player;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class Commands {
 	private final PaperCommandManager commandManager;

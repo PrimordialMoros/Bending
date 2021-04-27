@@ -19,6 +19,10 @@
 
 package me.moros.bending.util;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.expiringmap.ExpirationPolicy;
@@ -34,10 +38,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class to handle bending damage and death messages.

@@ -19,6 +19,11 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -40,11 +45,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 public class Collapse extends AbilityInstance implements Ability {
 	private static final Config config = new Config();

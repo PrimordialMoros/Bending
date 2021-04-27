@@ -19,12 +19,12 @@
 
 package me.moros.bending.model.predicate.removal;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public enum Policies implements RemovalPolicy {
 	DEAD((u, d) -> u.isDead()),

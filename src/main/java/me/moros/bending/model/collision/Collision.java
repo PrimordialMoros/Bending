@@ -19,11 +19,11 @@
 
 package me.moros.bending.model.collision;
 
+import java.util.Map.Entry;
+
 import com.google.common.collect.Maps;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Ability;
-
-import java.util.Map.Entry;
 
 /**
  * Represents a real collision between 2 abilities.

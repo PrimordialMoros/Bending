@@ -19,16 +19,16 @@
 
 package me.moros.bending.model.ability.sequence;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Immutable and thread-safe representation of a sequence

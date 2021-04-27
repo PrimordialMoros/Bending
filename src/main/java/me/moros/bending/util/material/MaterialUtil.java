@@ -19,6 +19,9 @@
 
 package me.moros.bending.util.material;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -33,9 +36,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class MaterialUtil {
 	public static final Map<Material, Material> COOKABLE = new HashMap<>();
@@ -150,6 +150,10 @@ public final class MaterialUtil {
 
 	public static boolean isWaterLogged(@NonNull BlockData data) {
 		return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
+	}
+
+	public static boolean isSnow(@NonNull Block block) {
+		return block.getType() == Material.SNOW;
 	}
 
 	// Finds a suitable solid block type to replace a falling-type block with.
