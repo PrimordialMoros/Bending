@@ -55,7 +55,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -226,9 +225,10 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
 		double halfSize = size / 2;
 		Sphere collider = new Sphere(center, size);
 		CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-			double distance = center.distance(EntityMethods.getEntityCenter(entity));
+			Vector3 entityCenter = EntityMethods.getEntityCenter(entity);
+			double distance = center.distance(entityCenter);
 			double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize) / size);
-			if (ignoreCollider == null || !ignoreCollider.intersects(AABBUtils.getEntityBounds(entity))) {
+			if (ignoreCollider == null || !ignoreCollider.contains(entityCenter)) {
 				DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
 				FireTick.LARGER.apply(entity, userConfig.fireTick);
 			}
@@ -236,7 +236,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
 			if (entity.equals(user.getEntity())) {
 				knockback *= 0.5;
 			}
-			Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(center).normalize().scalarMultiply(knockback);
+			Vector3 dir = entityCenter.subtract(center).normalize().scalarMultiply(knockback);
 			entity.setVelocity(dir.clampVelocity());
 			return true;
 		}, true, true);
