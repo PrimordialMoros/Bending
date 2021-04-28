@@ -34,42 +34,42 @@ import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 
 public abstract class AbstractBurst extends AbilityInstance {
-	private static final double ANGLE_STEP = FastMath.toRadians(10);
-	private static final double ANGLE = FastMath.toRadians(30);
+  private static final double ANGLE_STEP = FastMath.toRadians(10);
+  private static final double ANGLE = FastMath.toRadians(30);
 
-	protected final Collection<Burstable> blasts = new ArrayList<>();
+  protected final Collection<Burstable> blasts = new ArrayList<>();
 
-	protected AbstractBurst(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  protected AbstractBurst(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
-		createBurst(user, constructor, range, true);
-	}
+  protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
+    createBurst(user, constructor, range, true);
+  }
 
-	protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
-		createBurst(user, constructor, range, false);
-	}
+  protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
+    createBurst(user, constructor, range, false);
+  }
 
-	private <T extends Burstable> void createBurst(User user, Supplier<T> constructor, double range, boolean cone) {
-		for (double theta = 0; theta < FastMath.PI; theta += ANGLE_STEP) {
-			for (double phi = 0; phi < FastMath.PI * 2; phi += ANGLE_STEP) {
-				double x = FastMath.cos(phi) * FastMath.sin(theta);
-				double y = FastMath.cos(phi) * FastMath.cos(theta);
-				double z = FastMath.sin(phi);
-				Vector3 direction = new Vector3(x, y, z);
-				if (cone && Vector3.angle(direction, user.getDirection()) > ANGLE) {
-					continue;
-				}
-				T blast = constructor.get();
-				blast.initialize(user, EntityMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
-				blasts.add(blast);
-			}
-		}
-	}
+  private <T extends Burstable> void createBurst(User user, Supplier<T> constructor, double range, boolean cone) {
+    for (double theta = 0; theta < FastMath.PI; theta += ANGLE_STEP) {
+      for (double phi = 0; phi < FastMath.PI * 2; phi += ANGLE_STEP) {
+        double x = FastMath.cos(phi) * FastMath.sin(theta);
+        double y = FastMath.cos(phi) * FastMath.cos(theta);
+        double z = FastMath.sin(phi);
+        Vector3 direction = new Vector3(x, y, z);
+        if (cone && Vector3.angle(direction, user.getDirection()) > ANGLE) {
+          continue;
+        }
+        T blast = constructor.get();
+        blast.initialize(user, EntityMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
+        blasts.add(blast);
+      }
+    }
+  }
 
-	protected @NonNull UpdateResult updateBurst() {
-		blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
-		return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
+  protected @NonNull UpdateResult updateBurst() {
+    blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
+    return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
 }

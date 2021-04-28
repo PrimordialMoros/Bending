@@ -26,36 +26,36 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 
 public class BendingDamageEvent extends BendingAbilityEvent implements Cancellable {
-	private final Entity target;
+  private final Entity target;
 
-	private boolean cancelled = false;
-	private double damage;
+  private boolean cancelled = false;
+  private double damage;
 
-	BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
-		super(user, desc);
-		this.target = target;
-		this.damage = damage;
-	}
+  BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
+    super(user, desc);
+    this.target = target;
+    this.damage = damage;
+  }
 
-	public @NonNull Entity getTarget() {
-		return target;
-	}
+  public @NonNull Entity getTarget() {
+    return target;
+  }
 
-	public double getDamage() {
-		return damage;
-	}
+  public double getDamage() {
+    return damage;
+  }
 
-	public void setDamage(double damage) {
-		this.damage = damage;
-	}
+  public void setDamage(double damage) {
+    this.damage = damage;
+  }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
 
-	@Override
-	public void setCancelled(boolean cancel) {
-		this.cancelled = cancel;
-	}
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
+  }
 }

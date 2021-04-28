@@ -52,139 +52,142 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 
 public class WaterSpout extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Collection<Block> column = new ArrayList<>();
-	private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || WaterMaterials.isIceBendable(b);
-	private Spout spout;
+  private final Collection<Block> column = new ArrayList<>();
+  private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || WaterMaterials.isIceBendable(b);
+  private Spout spout;
 
-	public WaterSpout(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public WaterSpout(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterSpout.class)) {
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterSpout.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		double h = userConfig.height + 2;
-		if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
-			return false;
-		}
+    double h = userConfig.height + 2;
+    if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
+      return false;
+    }
 
-		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
-		if (block == null || !predicate.test(block)) {
-			return false;
-		}
+    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
+    if (block == null || !predicate.test(block)) {
+      return false;
+    }
 
-		removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().build();
 
-		spout = new Spout();
-		return true;
-	}
+    spout = new Spout();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		return spout.update();
-	}
+    return spout.update();
+  }
 
-	@Override
-	public void onDestroy() {
-		column.forEach(spout::clean);
-		spout.getFlight().setFlying(false);
-		spout.getFlight().release();
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    column.forEach(spout::clean);
+    spout.getFlight().setFlying(false);
+    spout.getFlight().release();
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(spout.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(spout.getCollider());
+  }
 
-	public void handleMovement(Vector velocity) {
-		AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
-	}
+  public void handleMovement(@NonNull Vector3 velocity) {
+    AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
+  }
 
-	private class Spout extends AbstractSpout {
-		private BlockVector blockVector;
-		private final Vector g = new Vector(0, -0.1, 0); // Applied as extra gravity
+  private class Spout extends AbstractSpout {
+    private BlockVector blockVector;
+    private final Vector3 g = new Vector3(0, -0.1, 0); // Applied as extra gravity
 
-		public Spout() {
-			super(user, userConfig.height, userConfig.maxSpeed);
-			validBlock = predicate;
-		}
+    public Spout() {
+      super(user, userConfig.height, userConfig.maxSpeed);
+      validBlock = predicate;
+    }
 
-		@Override
-		public void render() {
-			BlockVector userBlockVector = new BlockVector(user.getLocation().toVector());
-			if (userBlockVector.equals(blockVector)) return;
-			blockVector = userBlockVector;
-			column.forEach(this::clean);
-			column.clear();
-			ignore.clear();
+    @Override
+    public void render() {
+      BlockVector userBlockVector = new BlockVector(user.getLocation().toVector());
+      if (userBlockVector.equals(blockVector)) {
+        return;
+      }
+      blockVector = userBlockVector;
+      column.forEach(this::clean);
+      column.clear();
+      ignore.clear();
 
-			Block block = user.getLocBlock();
-			for (int i = 0; i < distance - 1; i++) {
-				TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.getBlock()));
-			}
-			ignore.addAll(column);
-		}
+      Block block = user.getLocBlock();
+      for (int i = 0; i < distance - 1; i++) {
+        TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.getBlock()));
+      }
+      ignore.addAll(column);
+    }
 
-		@Override
-		public void postRender() {
-			if (!user.isFlying()) {
-				user.getEntity().setVelocity(user.getEntity().getVelocity().add(g));
-			}
-			if (ThreadLocalRandom.current().nextInt(8) == 0) {
-				SoundUtil.WATER_SOUND.play(user.getEntity().getLocation());
-			}
-		}
+    @Override
+    public void postRender() {
+      if (!user.isFlying()) {
+        user.getEntity().setVelocity(user.getVelocity().add(g).clampVelocity());
+      }
+      if (ThreadLocalRandom.current().nextInt(8) == 0) {
+        SoundUtil.WATER_SOUND.play(user.getEntity().getLocation());
+      }
+    }
 
-		protected void clean(Block block) {
-			if (MaterialUtil.isWater(block)) TempBlock.createAir(block);
-		}
-	}
+    protected void clean(Block block) {
+      if (MaterialUtil.isWater(block)) {
+        TempBlock.createAir(block);
+      }
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.HEIGHT)
-		public double height;
-		@Attribute(Attribute.SPEED)
-		public double maxSpeed;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.HEIGHT)
+    public double height;
+    @Attribute(Attribute.SPEED)
+    public double maxSpeed;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterspout");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterspout");
 
-			cooldown = abilityNode.node("cooldown").getLong(0);
-			height = abilityNode.node("height").getDouble(14.0);
-			maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(0);
+      height = abilityNode.node("height").getDouble(14.0);
+      maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
+    }
+  }
 }

@@ -32,21 +32,23 @@ import org.bukkit.scheduler.BukkitTask;
  * @see TaskChain
  */
 public final class Tasker {
-	private static TaskChainFactory taskChainFactory;
+  private static TaskChainFactory taskChainFactory;
 
-	public static void init(@NonNull Bending plugin) {
-		if (taskChainFactory == null) taskChainFactory = BukkitTaskChainFactory.create(plugin);
-	}
+  public static void init(@NonNull Bending plugin) {
+    if (taskChainFactory == null) {
+      taskChainFactory = BukkitTaskChainFactory.create(plugin);
+    }
+  }
 
-	public static <T> @NonNull TaskChain<T> newChain() {
-		return taskChainFactory.newChain();
-	}
+  public static <T> @NonNull TaskChain<T> newChain() {
+    return taskChainFactory.newChain();
+  }
 
-	public static <T> @NonNull TaskChain<T> newSharedChain(@NonNull String name) {
-		return taskChainFactory.newSharedChain(name);
-	}
+  public static <T> @NonNull TaskChain<T> newSharedChain(@NonNull String name) {
+    return taskChainFactory.newSharedChain(name);
+  }
 
-	public static @NonNull BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
-		return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, delay, period);
-	}
+  public static @NonNull BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
+    return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, delay, period);
+  }
 }

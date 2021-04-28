@@ -20,6 +20,6 @@
 package me.moros.bending.model.ability.util;
 
 public enum UpdateResult {
-	CONTINUE,
-	REMOVE
+  CONTINUE,
+  REMOVE
 }

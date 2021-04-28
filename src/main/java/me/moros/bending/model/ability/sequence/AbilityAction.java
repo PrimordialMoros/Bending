@@ -29,40 +29,40 @@ import me.moros.bending.model.ability.util.ActivationMethod;
  * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link ActivationMethod}
  */
 public final class AbilityAction {
-	private final AbilityDescription desc;
-	private final ActivationMethod action;
-	private final int hashcode;
+  private final AbilityDescription desc;
+  private final ActivationMethod action;
+  private final int hashcode;
 
-	public AbilityAction(@NonNull AbilityDescription desc, @NonNull ActivationMethod action) {
-		this.desc = desc;
-		this.action = action;
-		hashcode = Objects.hash(desc, action);
-	}
+  public AbilityAction(@NonNull AbilityDescription desc, @NonNull ActivationMethod action) {
+    this.desc = desc;
+    this.action = action;
+    hashcode = Objects.hash(desc, action);
+  }
 
-	public @NonNull AbilityDescription getAbilityDescription() {
-		return desc;
-	}
+  public @NonNull AbilityDescription getAbilityDescription() {
+    return desc;
+  }
 
-	public @NonNull ActivationMethod getAction() {
-		return action;
-	}
+  public @NonNull ActivationMethod getAction() {
+    return action;
+  }
 
-	@Override
-	public boolean equals(Object other) {
-		if (other instanceof AbilityAction) {
-			AbilityAction otherAction = ((AbilityAction) other);
-			return action == otherAction.action && desc.equals(otherAction.desc);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof AbilityAction) {
+      AbilityAction otherAction = ((AbilityAction) other);
+      return action == otherAction.action && desc.equals(otherAction.desc);
+    }
+    return false;
+  }
 
-	@Override
-	public int hashCode() {
-		return hashcode;
-	}
+  @Override
+  public int hashCode() {
+    return hashcode;
+  }
 
-	@Override
-	public String toString() {
-		return desc.getName() + ": " + action.name();
-	}
+  @Override
+  public String toString() {
+    return desc.getName() + ": " + action.name();
+  }
 }

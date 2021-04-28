@@ -23,11 +23,11 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 
 public interface Collider {
-	boolean intersects(@NonNull Collider collider);
+  boolean intersects(@NonNull Collider collider);
 
-	@NonNull Vector3 getPosition();
+  @NonNull Vector3 getPosition();
 
-	@NonNull Vector3 getHalfExtents();
+  @NonNull Vector3 getHalfExtents();
 
-	boolean contains(@NonNull Vector3 point);
+  boolean contains(@NonNull Vector3 point);
 }

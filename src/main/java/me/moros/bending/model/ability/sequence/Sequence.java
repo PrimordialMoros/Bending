@@ -34,59 +34,65 @@ import net.kyori.adventure.text.TextComponent;
  * Immutable and thread-safe representation of a sequence
  */
 public final class Sequence {
-	private final List<AbilityAction> sequence = new ArrayList<>();
-	private Component instructions;
+  private final List<AbilityAction> sequence = new ArrayList<>();
+  private Component instructions;
 
-	public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction @NonNull ... actions) {
-		this.sequence.add(action);
-		this.sequence.addAll(Arrays.asList(actions));
-	}
+  public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction @NonNull ... actions) {
+    this.sequence.add(action);
+    this.sequence.addAll(Arrays.asList(actions));
+  }
 
-	/**
-	 * @return Unmodifiable view of this sequence's actions
-	 */
-	public @NonNull List<@NonNull AbilityAction> getActions() {
-		return Collections.unmodifiableList(sequence);
-	}
+  /**
+   * @return Unmodifiable view of this sequence's actions
+   */
+  public @NonNull List<@NonNull AbilityAction> getActions() {
+    return Collections.unmodifiableList(sequence);
+  }
 
-	public @NonNull Component getInstructions() {
-		if (instructions == null) {
-			instructions = generateInstructions(sequence);
-		}
-		return instructions;
-	}
+  public @NonNull Component getInstructions() {
+    if (instructions == null) {
+      instructions = generateInstructions(sequence);
+    }
+    return instructions;
+  }
 
-	private static Component generateInstructions(List<AbilityAction> actions) {
-		TextComponent.Builder builder = Component.text();
-		for (int i = 0; i < actions.size(); i++) {
-			AbilityAction abilityAction = actions.get(i);
-			if (i != 0) builder.append(Component.text(" > "));
-			AbilityDescription desc = abilityAction.getAbilityDescription();
-			ActivationMethod action = abilityAction.getAction();
-			String actionKey = action.getKey();
-			if (action == ActivationMethod.SNEAK && i + 1 < actions.size()) {
-				// Check if the next instruction is to release sneak.
-				AbilityAction next = actions.get(i + 1);
-				if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
-					actionKey = "bending.activation.sneak-tap";
-					i++;
-				}
-			}
-			builder.append(Component.text(desc.getName())).append(Component.text(" ("))
-				.append(Component.translatable(actionKey)).append(Component.text(")"));
-		}
-		return builder.build();
-	}
+  private static Component generateInstructions(List<AbilityAction> actions) {
+    TextComponent.Builder builder = Component.text();
+    for (int i = 0; i < actions.size(); i++) {
+      AbilityAction abilityAction = actions.get(i);
+      if (i != 0) {
+        builder.append(Component.text(" > "));
+      }
+      AbilityDescription desc = abilityAction.getAbilityDescription();
+      ActivationMethod action = abilityAction.getAction();
+      String actionKey = action.getKey();
+      if (action == ActivationMethod.SNEAK && i + 1 < actions.size()) {
+        // Check if the next instruction is to release sneak.
+        AbilityAction next = actions.get(i + 1);
+        if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
+          actionKey = "bending.activation.sneak-tap";
+          i++;
+        }
+      }
+      builder.append(Component.text(desc.getName())).append(Component.text(" ("))
+        .append(Component.translatable(actionKey)).append(Component.text(")"));
+    }
+    return builder.build();
+  }
 
-	public boolean matches(@NonNull AbilityAction @NonNull [] actions) {
-		int actionsLength = actions.length - 1;
-		int sequenceLength = sequence.size() - 1;
-		if (actionsLength < sequenceLength) return false;
-		for (int i = 0; i <= sequenceLength; i++) {
-			AbilityAction first = sequence.get(sequenceLength - i);
-			AbilityAction second = actions[actionsLength - i];
-			if (!first.equals(second)) return false;
-		}
-		return true;
-	}
+  public boolean matches(@NonNull AbilityAction @NonNull [] actions) {
+    int actionsLength = actions.length - 1;
+    int sequenceLength = sequence.size() - 1;
+    if (actionsLength < sequenceLength) {
+      return false;
+    }
+    for (int i = 0; i <= sequenceLength; i++) {
+      AbilityAction first = sequence.get(sequenceLength - i);
+      AbilityAction second = actions[actionsLength - i];
+      if (!first.equals(second)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

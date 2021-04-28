@@ -39,76 +39,78 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 public final class WorldManager {
-	private final Map<World, WorldInstance> worlds;
-	private final Set<UUID> disabledWorlds;
+  private final Map<World, WorldInstance> worlds;
+  private final Set<UUID> disabledWorlds;
 
-	public WorldManager() {
-		ConfigurationNode node = Bending.getConfigManager().getConfig().node("properties", "disabled-worlds");
-		List<String> worldNames = Collections.emptyList();
-		try {
-			worldNames = node.getList(String.class, Collections.emptyList());
-		} catch (SerializationException e) {
-			// ignore
-		}
-		disabledWorlds = worldNames.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID)
-			.collect(Collectors.toSet());
-		worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
-			.collect(Collectors.toConcurrentMap(Function.identity(), WorldInstance::new));
-	}
+  public WorldManager() {
+    ConfigurationNode node = Bending.getConfigManager().getConfig().node("properties", "disabled-worlds");
+    List<String> worldNames = Collections.emptyList();
+    try {
+      worldNames = node.getList(String.class, Collections.emptyList());
+    } catch (SerializationException e) {
+      // ignore
+    }
+    disabledWorlds = worldNames.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID)
+      .collect(Collectors.toSet());
+    worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
+      .collect(Collectors.toConcurrentMap(Function.identity(), WorldInstance::new));
+  }
 
-	public @NonNull AbilityManager getInstanceForWorld(@NonNull World world) {
-		if (isDisabledWorld(world.getUID())) return DummyAbilityManager.INSTANCE;
-		return worlds.computeIfAbsent(world, WorldInstance::new).getAbilityManager();
-	}
+  public @NonNull AbilityManager getInstanceForWorld(@NonNull World world) {
+    if (isDisabledWorld(world.getUID())) {
+      return DummyAbilityManager.INSTANCE;
+    }
+    return worlds.computeIfAbsent(world, WorldInstance::new).getAbilityManager();
+  }
 
-	public void update() {
-		for (Map.Entry<World, WorldInstance> entry : worlds.entrySet()) {
-			MCTiming timing = Bending.getTimingManager().ofStart(entry.getKey().getName() + ": Bending tick");
-			entry.getValue().update();
-			timing.stopTiming();
-		}
-	}
+  public void update() {
+    for (Map.Entry<World, WorldInstance> entry : worlds.entrySet()) {
+      MCTiming timing = Bending.getTimingManager().ofStart(entry.getKey().getName() + ": Bending tick");
+      entry.getValue().update();
+      timing.stopTiming();
+    }
+  }
 
-	public void remove(@NonNull World world) {
-		worlds.remove(world);
-	}
+  public void remove(@NonNull World world) {
+    worlds.remove(world);
+  }
 
-	public void clear() {
-		worlds.clear();
-	}
+  public void clear() {
+    worlds.clear();
+  }
 
-	public void destroyAllInstances() {
-		worlds.values().forEach(w -> w.getAbilityManager().destroyAllInstances());
-	}
+  public void destroyAllInstances() {
+    worlds.values().forEach(w -> w.getAbilityManager().destroyAllInstances());
+  }
 
-	public void createPassives(@NonNull BendingPlayer player) {
-		getInstanceForWorld(player.getWorld()).createPassives(player);
-	}
+  public void createPassives(@NonNull BendingPlayer player) {
+    getInstanceForWorld(player.getWorld()).createPassives(player);
+  }
 
-	public boolean isDisabledWorld(@NonNull UUID worldID) {
-		return disabledWorlds.contains(worldID);
-	}
+  public boolean isDisabledWorld(@NonNull UUID worldID) {
+    return disabledWorlds.contains(worldID);
+  }
 
-	private static class WorldInstance {
-		private final AbilityManager abilities;
-		private final CollisionManager collisions;
+  private static class WorldInstance {
+    private final AbilityManager abilities;
+    private final CollisionManager collisions;
 
-		private WorldInstance(World world) {
-			abilities = new AbilityManager();
-			collisions = new CollisionManager(abilities);
-		}
+    private WorldInstance(World world) {
+      abilities = new AbilityManager();
+      collisions = new CollisionManager(abilities);
+    }
 
-		private void update() {
-			abilities.update();
-			collisions.update();
-		}
+    private void update() {
+      abilities.update();
+      collisions.update();
+    }
 
-		private AbilityManager getAbilityManager() {
-			return abilities;
-		}
+    private AbilityManager getAbilityManager() {
+      return abilities;
+    }
 
-		private CollisionManager getCollisionManager() {
-			return collisions;
-		}
-	}
+    private CollisionManager getCollisionManager() {
+      return collisions;
+    }
+  }
 }

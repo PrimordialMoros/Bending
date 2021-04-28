@@ -23,19 +23,19 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.util.UpdateResult;
 
 public final class DummyState implements State {
-	public static final State INSTANCE = new DummyState();
+  public static final State INSTANCE = new DummyState();
 
-	private DummyState() {
-	}
+  private DummyState() {
+  }
 
-	public void start(@NonNull StateChain chain) {
-	}
+  public void start(@NonNull StateChain chain) {
+  }
 
-	public void complete() {
-	}
+  public void complete() {
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		return UpdateResult.REMOVE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    return UpdateResult.REMOVE;
+  }
 }

@@ -31,80 +31,82 @@ import me.moros.bending.model.user.User;
  * If the reference count drops below 1 then the user will lose flight.
  */
 public class Flight {
-	private static final Map<User, Flight> instances = new HashMap<>();
+  private static final Map<User, Flight> instances = new HashMap<>();
 
-	private final User user;
+  private final User user;
 
-	private final boolean couldFly;
-	private final boolean wasFlying;
+  private final boolean couldFly;
+  private final boolean wasFlying;
 
-	private boolean isFlying = false;
-	private boolean changedFlying = false;
-	private int references = 0;
+  private boolean isFlying = false;
+  private boolean changedFlying = false;
+  private int references = 0;
 
-	private Flight(User user) {
-		this.user = user;
-		couldFly = user.getAllowFlight();
-		wasFlying = user.isFlying();
-	}
+  private Flight(User user) {
+    this.user = user;
+    couldFly = user.getAllowFlight();
+    wasFlying = user.isFlying();
+  }
 
-	// Returns the Flight instance for a user. This will also increment the flight counter.
-	// Call release() to decrement the counter.
-	// Call remove() to completely remove flight.
-	public static @NonNull Flight get(@NonNull User user) {
-		return instances.computeIfAbsent(user, Flight::new).increment();
-	}
+  // Returns the Flight instance for a user. This will also increment the flight counter.
+  // Call release() to decrement the counter.
+  // Call remove() to completely remove flight.
+  public static @NonNull Flight get(@NonNull User user) {
+    return instances.computeIfAbsent(user, Flight::new).increment();
+  }
 
-	private Flight increment() {
-		++references;
-		return this;
-	}
+  private Flight increment() {
+    ++references;
+    return this;
+  }
 
-	public void setFlying(boolean value) {
-		isFlying = value;
-		user.setAllowFlight(value);
-		user.setFlying(value);
-		changedFlying = true;
-	}
+  public void setFlying(boolean value) {
+    isFlying = value;
+    user.setAllowFlight(value);
+    user.setFlying(value);
+    changedFlying = true;
+  }
 
-	public @NonNull User getUser() {
-		return user;
-	}
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	// Decrements the user's flight counter. If this goes below 1 then the user loses flight.
-	public void release() {
-		if (--references < 1) remove(user);
-	}
+  // Decrements the user's flight counter. If this goes below 1 then the user loses flight.
+  public void release() {
+    if (--references < 1) {
+      remove(user);
+    }
+  }
 
-	public static boolean hasFlight(@NonNull User user) {
-		return instances.containsKey(user);
-	}
+  public static boolean hasFlight(@NonNull User user) {
+    return instances.containsKey(user);
+  }
 
-	// Completely releases flight for the user.
-	// This will set the user back to the state before any Flight was originally added.
-	public static void remove(@NonNull User user) {
-		revertFlight(instances.remove(user));
-	}
+  // Completely releases flight for the user.
+  // This will set the user back to the state before any Flight was originally added.
+  public static void remove(@NonNull User user) {
+    revertFlight(instances.remove(user));
+  }
 
-	public static void removeAll() {
-		instances.values().forEach(Flight::revertFlight);
-		instances.clear();
-	}
+  public static void removeAll() {
+    instances.values().forEach(Flight::revertFlight);
+    instances.clear();
+  }
 
-	private static void revertFlight(Flight flight) {
-		if (flight != null && flight.changedFlying) {
-			flight.user.setAllowFlight(flight.couldFly);
-			flight.user.setFlying(flight.wasFlying);
-		}
-	}
+  private static void revertFlight(Flight flight) {
+    if (flight != null && flight.changedFlying) {
+      flight.user.setAllowFlight(flight.couldFly);
+      flight.user.setFlying(flight.wasFlying);
+    }
+  }
 
-	public static void updateAll() {
-		for (Map.Entry<User, Flight> entry : instances.entrySet()) {
-			User user = entry.getKey();
-			Flight flight = entry.getValue();
-			if (flight.changedFlying && user.isFlying() != flight.isFlying) {
-				user.setFlying(flight.isFlying);
-			}
-		}
-	}
+  public static void updateAll() {
+    for (Map.Entry<User, Flight> entry : instances.entrySet()) {
+      User user = entry.getKey();
+      Flight flight = entry.getValue();
+      if (flight.changedFlying && user.isFlying() != flight.isFlying) {
+        user.setFlying(flight.isFlying);
+      }
+    }
+  }
 }

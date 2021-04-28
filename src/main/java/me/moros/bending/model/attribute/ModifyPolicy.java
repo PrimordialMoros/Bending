@@ -23,5 +23,5 @@ import me.moros.bending.model.ability.Ability;
 
 @FunctionalInterface
 public interface ModifyPolicy {
-	boolean shouldModify(Ability ability);
+  boolean shouldModify(Ability ability);
 }

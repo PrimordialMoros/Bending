@@ -38,110 +38,112 @@ import me.moros.bending.util.PersistentDataLayer;
 import me.moros.bending.util.Tasker;
 import me.moros.storage.logging.Logger;
 import me.moros.storage.logging.Slf4jLogger;
-import org.bstats.bukkit.MetricsLite;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.LoggerFactory;
 
 public class Bending extends JavaPlugin {
-	private static Bending plugin;
+  private static Bending plugin;
 
-	private Logger logger;
+  private Logger logger;
 
-	private ConfigManager configManager;
-	private TranslationManager translationManager;
-	private TimingManager timingManager;
+  private ConfigManager configManager;
+  private TranslationManager translationManager;
+  private TimingManager timingManager;
 
-	private PersistentDataLayer layer;
-	private BendingEventBus eventBus;
-	private Game game;
+  private PersistentDataLayer layer;
+  private BendingEventBus eventBus;
+  private Game game;
 
-	private String author;
-	private String version;
+  private String author;
+  private String version;
 
-	@Override
-	public void onEnable() {
-		new MetricsLite(this, 8717);
-		plugin = this;
-		logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
-		author = getDescription().getAuthors().get(0);
-		version = getDescription().getVersion();
+  @Override
+  public void onEnable() {
+    new Metrics(this, 8717);
+    plugin = this;
+    logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
+    author = getDescription().getAuthors().get(0);
+    version = getDescription().getVersion();
 
-		Tasker.init(this);
+    Tasker.init(this);
 
-		String dir = getConfigFolder();
+    String dir = getConfigFolder();
 
-		configManager = new ConfigManager(dir);
-		translationManager = new TranslationManager(dir);
-		timingManager = TimingManager.of(this);
-		eventBus = new BendingEventBus(this);
-		layer = new PersistentDataLayer(this);
+    configManager = new ConfigManager(dir);
+    translationManager = new TranslationManager(dir);
+    timingManager = TimingManager.of(this);
+    eventBus = new BendingEventBus(this);
+    layer = new PersistentDataLayer(this);
 
-		BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
-		game = new Game(storage);
-		configManager.save();
+    BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
+    game = new Game(storage);
+    configManager.save();
 
-		getServer().getPluginManager().registerEvents(new WorldListener(game), this);
-		getServer().getPluginManager().registerEvents(new BlockListener(game), this);
-		getServer().getPluginManager().registerEvents(new EntityListener(game), this);
-		getServer().getPluginManager().registerEvents(new UserListener(game), this);
+    getServer().getPluginManager().registerEvents(new WorldListener(game), this);
+    getServer().getPluginManager().registerEvents(new BlockListener(game), this);
+    getServer().getPluginManager().registerEvents(new EntityListener(game), this);
+    getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
-		new Commands(this, game);
-	}
+    new Commands(this, game);
+  }
 
-	@Override
-	public void onDisable() {
-		if (game != null) game.cleanup();
-		getServer().getScheduler().cancelTasks(this);
-	}
+  @Override
+  public void onDisable() {
+    if (game != null) {
+      game.cleanup();
+    }
+    getServer().getScheduler().cancelTasks(this);
+  }
 
-	@Override
-	public void onLoad() {
-		if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-			WorldGuardFlag.registerFlag();
-		}
-	}
+  @Override
+  public void onLoad() {
+    if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
+      WorldGuardFlag.registerFlag();
+    }
+  }
 
-	public static BendingEventBus getEventBus() {
-		return plugin.eventBus;
-	}
+  public static BendingEventBus getEventBus() {
+    return plugin.eventBus;
+  }
 
-	public static TimingManager getTimingManager() {
-		return plugin.timingManager;
-	}
+  public static TimingManager getTimingManager() {
+    return plugin.timingManager;
+  }
 
-	public static Bending getPlugin() {
-		return plugin;
-	}
+  public static Bending getPlugin() {
+    return plugin;
+  }
 
-	public static ConfigManager getConfigManager() {
-		return plugin.configManager;
-	}
+  public static ConfigManager getConfigManager() {
+    return plugin.configManager;
+  }
 
-	public static TranslationManager getTranslationManager() {
-		return plugin.translationManager;
-	}
+  public static TranslationManager getTranslationManager() {
+    return plugin.translationManager;
+  }
 
-	public static String getAuthor() {
-		return plugin.author;
-	}
+  public static String getAuthor() {
+    return plugin.author;
+  }
 
-	public static String getVersion() {
-		return plugin.version;
-	}
+  public static String getVersion() {
+    return plugin.version;
+  }
 
-	public static Logger getLog() {
-		return plugin.logger;
-	}
+  public static Logger getLog() {
+    return plugin.logger;
+  }
 
-	public static PersistentDataLayer getLayer() {
-		return plugin.layer;
-	}
+  public static PersistentDataLayer getLayer() {
+    return plugin.layer;
+  }
 
-	public static Game getGame() {
-		return plugin.game;
-	}
+  public static Game getGame() {
+    return plugin.game;
+  }
 
-	public static String getConfigFolder() {
-		return plugin.getDataFolder().toString();
-	}
+  public static String getConfigFolder() {
+    return plugin.getDataFolder().toString();
+  }
 }

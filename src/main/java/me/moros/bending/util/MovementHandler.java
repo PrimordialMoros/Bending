@@ -43,134 +43,146 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class MovementHandler {
-	public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
-	private static DummyMovementHandler DUMMY;
+  public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
+  private static DummyMovementHandler DUMMY;
 
-	private Set<ActionType> disabled;
-	private BarInfo info;
+  private Set<ActionType> disabled;
+  private BarInfo info;
 
-	private final LivingEntity entity;
-	private final boolean hadAI;
+  private final LivingEntity entity;
+  private final boolean hadAI;
 
-	private MovementHandler() {
-		entity = null;
-		hadAI = true;
-	}
+  private MovementHandler() {
+    entity = null;
+    hadAI = true;
+  }
 
-	private MovementHandler(LivingEntity entity, long duration) {
-		this.entity = entity;
-		hadAI = entity.hasAI();
-		if (entity instanceof Player) {
-			info = new BarInfo((Player) entity, duration);
-		} else {
-			entity.setAI(false);
-		}
-		entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.customMetadata(this));
-		Tasker.newChain().delay((int) duration, TimeUnit.MILLISECONDS).sync(this::reset).execute();
-	}
+  private MovementHandler(LivingEntity entity, long duration) {
+    this.entity = entity;
+    hadAI = entity.hasAI();
+    if (entity instanceof Player) {
+      info = new BarInfo((Player) entity, duration);
+    } else {
+      entity.setAI(false);
+    }
+    entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.customMetadata(this));
+    Tasker.newChain().delay((int) duration, TimeUnit.MILLISECONDS).sync(this::reset).execute();
+  }
 
-	private void reset() {
-		resetWithoutRemoving();
-		instances.remove(entity);
-	}
+  private void reset() {
+    resetWithoutRemoving();
+    instances.remove(entity);
+  }
 
-	private void resetWithoutRemoving() {
-		if (info != null) info.remove();
-		if (!(entity instanceof Player)) entity.setAI(hadAI);
-		if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
-			entity.removeMetadata(Metadata.NO_MOVEMENT, Bending.getPlugin());
-		}
-	}
+  private void resetWithoutRemoving() {
+    if (info != null) {
+      info.remove();
+    }
+    if (!(entity instanceof Player)) {
+      entity.setAI(hadAI);
+    }
+    if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
+      entity.removeMetadata(Metadata.NO_MOVEMENT, Bending.getPlugin());
+    }
+  }
 
-	public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
-		disabled = EnumSet.copyOf(methods);
-		return this;
-	}
+  public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
+    disabled = EnumSet.copyOf(methods);
+    return this;
+  }
 
-	public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
-		Collection<ActionType> c = new ArrayList<>();
-		c.add(method);
-		if (methods != null) c.addAll(Arrays.asList(methods));
-		return disableActions(c);
-	}
+  public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
+    Collection<ActionType> c = new ArrayList<>();
+    c.add(method);
+    if (methods != null) {
+      c.addAll(Arrays.asList(methods));
+    }
+    return disableActions(c);
+  }
 
-	public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
-		BendingRestrictEvent event = Bending.getEventBus().postRestrictEvent(user, entity, duration);
-		if (event.isCancelled()) {
-			if (DUMMY == null) DUMMY = new DummyMovementHandler();
-			return DUMMY;
-		}
-		long finalDuration = FastMath.abs(event.getDuration());
-		return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
-	}
+  public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
+    BendingRestrictEvent event = Bending.getEventBus().postRestrictEvent(user, entity, duration);
+    if (event.isCancelled()) {
+      if (DUMMY == null) {
+        DUMMY = new DummyMovementHandler();
+      }
+      return DUMMY;
+    }
+    long finalDuration = FastMath.abs(event.getDuration());
+    return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
+  }
 
-	public static boolean isRestricted(@NonNull Entity entity) {
-		return isRestricted(entity, null);
-	}
+  public static boolean isRestricted(@NonNull Entity entity) {
+    return isRestricted(entity, null);
+  }
 
-	public static boolean isRestricted(@NonNull Entity entity, @Nullable ActionType method) {
-		if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
-			if (method == null) return true;
-			MovementHandler handler = (MovementHandler) entity.getMetadata(Metadata.NO_MOVEMENT).get(0).value();
-			if (handler != null) return handler.disabled.contains(method);
-		}
-		return false;
-	}
+  public static boolean isRestricted(@NonNull Entity entity, @Nullable ActionType method) {
+    if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
+      if (method == null) {
+        return true;
+      }
+      MovementHandler handler = (MovementHandler) entity.getMetadata(Metadata.NO_MOVEMENT).get(0).value();
+      if (handler != null) {
+        return handler.disabled.contains(method);
+      }
+    }
+    return false;
+  }
 
-	/**
-	 * Resets all instances of MovementHandler
-	 */
-	public static void resetAll() {
-		instances.values().forEach(MovementHandler::resetWithoutRemoving);
-		instances.clear();
-	}
+  /**
+   * Resets all instances of MovementHandler
+   */
+  public static void resetAll() {
+    instances.values().forEach(MovementHandler::resetWithoutRemoving);
+    instances.clear();
+  }
 
-	private static class BarInfo {
-		private final Player player;
-		private final BossBar bar;
-		private final BukkitTask barTask;
+  private static class BarInfo {
+    private final Player player;
+    private final BossBar bar;
+    private final BukkitTask barTask;
 
-		private final long endTime;
-		private final long duration;
+    private final long endTime;
+    private final long duration;
 
-		private BarInfo(Player player, long duration) {
-			this.player = player;
-			this.duration = duration;
-			endTime = System.currentTimeMillis() + duration;
-			Component name = Component.text("Restricted");
-			bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
-			barTask = Tasker.createTaskTimer(this::updateBar, 0, 1);
-		}
+    private BarInfo(Player player, long duration) {
+      this.player = player;
+      this.duration = duration;
+      endTime = System.currentTimeMillis() + duration;
+      Component name = Component.text("Restricted");
+      bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+      barTask = Tasker.createTaskTimer(this::updateBar, 0, 1);
+    }
 
-		private void updateBar() {
-			long time = System.currentTimeMillis();
-			if (time > endTime) {
-				remove();
-			} else {
-				float factor = FastMath.max(0, FastMath.min(1, (endTime - time) / (float) duration));
-				player.showBossBar(bar.progress(factor));
-			}
-		}
+    private void updateBar() {
+      long time = System.currentTimeMillis();
+      if (time > endTime) {
+        remove();
+      } else {
+        float factor = FastMath.max(0, FastMath.min(1, (endTime - time) / (float) duration));
+        player.showBossBar(bar.progress(factor));
+      }
+    }
 
-		private void remove() {
-			player.hideBossBar(bar);
-			barTask.cancel();
-		}
-	}
+    private void remove() {
+      player.hideBossBar(bar);
+      barTask.cancel();
+    }
+  }
 
-	private static class DummyMovementHandler extends MovementHandler {
-		private DummyMovementHandler() {
-			super();
-		}
+  private static class DummyMovementHandler extends MovementHandler {
+    private DummyMovementHandler() {
+      super();
+    }
 
-		@Override
-		public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
-			return this;
-		}
+    @Override
+    public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
+      return this;
+    }
 
-		@Override
-		public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
-			return this;
-		}
-	}
+    @Override
+    public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
+      return this;
+    }
+  }
 }

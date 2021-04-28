@@ -33,34 +33,34 @@ import me.moros.storage.StorageType;
  * @see StorageImpl
  */
 public final class StorageFactory {
-	public static @Nullable BendingStorage createInstance() {
-		CommentedConfigurationNode storageNode = Bending.getConfigManager().getConfig().node("storage");
-		String configValue = storageNode.node("engine").getString("h2");
-		StorageType engine = StorageType.parse(configValue, StorageType.H2);
-		if (!configValue.equalsIgnoreCase(engine.toString())) {
-			Bending.getLog().warn("Failed to parse: " + configValue + ". Defaulting to H2.");
-		}
+  public static @Nullable BendingStorage createInstance() {
+    CommentedConfigurationNode storageNode = Bending.getConfigManager().getConfig().node("storage");
+    String configValue = storageNode.node("engine").getString("h2");
+    StorageType engine = StorageType.parse(configValue, StorageType.H2);
+    if (!configValue.equalsIgnoreCase(engine.toString())) {
+      Bending.getLog().warn("Failed to parse: " + configValue + ". Defaulting to H2.");
+    }
 
-		CommentedConfigurationNode connectionNode = storageNode.node("connection");
-		String host = connectionNode.node("host").getString("localhost");
-		int port = connectionNode.node("port").getInt(engine == StorageType.POSTGRESQL ? 5432 : 3306);
-		String username = connectionNode.node("username").getString("bending");
-		String password = connectionNode.node("password").getString("password");
-		String database = connectionNode.node("database").getString("bending");
+    CommentedConfigurationNode connectionNode = storageNode.node("connection");
+    String host = connectionNode.node("host").getString("localhost");
+    int port = connectionNode.node("port").getInt(engine == StorageType.POSTGRESQL ? 5432 : 3306);
+    String username = connectionNode.node("username").getString("bending");
+    String password = connectionNode.node("password").getString("password");
+    String database = connectionNode.node("database").getString("bending");
 
-		String path = "";
-		if (engine == StorageType.H2) {
-			path = Bending.getConfigFolder() + File.separator + "bending-h2;MODE=PostgreSQL";
-		} else if (engine == StorageType.SQLITE) {
-			path = Bending.getConfigFolder() + File.separator + "bending-sqlite.db";
-		}
+    String path = "";
+    if (engine == StorageType.H2) {
+      path = Bending.getConfigFolder() + File.separator + "bending-h2;MODE=PostgreSQL";
+    } else if (engine == StorageType.SQLITE) {
+      path = Bending.getConfigFolder() + File.separator + "bending-sqlite.db";
+    }
 
-		String poolName = engine.name() + " Bending Hikari Connection Pool";
+    String poolName = engine.name() + " Bending Hikari Connection Pool";
 
-		return ConnectionBuilder.create(StorageImpl::new, engine)
-			.setPath(path).setDatabase(database).setHost(host).setPort(port)
-			.setUsername(username).setPassword(password)
-			.build(poolName, Bending.getLog());
-	}
+    return ConnectionBuilder.create(StorageImpl::new, engine)
+      .setPath(path).setDatabase(database).setHost(host).setPort(port)
+      .setUsername(username).setPassword(password)
+      .build(poolName, Bending.getLog());
+  }
 }
 

@@ -49,108 +49,116 @@ import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 
 public class BlockListener implements Listener {
-	private final Game game;
+  private final Game game;
 
-	public BlockListener(@NonNull Game game) {
-		this.game = game;
-	}
+  public BlockListener(@NonNull Game game) {
+    this.game = game;
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockIgnite(BlockIgniteEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getIgnitingBlock())) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockIgnite(BlockIgniteEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getIgnitingBlock())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockSpread(BlockSpreadEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getSource())) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockSpread(BlockSpreadEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getSource())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockFade(BlockFadeEvent event) {
-		Block block = event.getBlock();
-		if (block.getType() == Material.FIRE) return;
-		if (TempBlock.MANAGER.isTemp(block)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockFade(BlockFadeEvent event) {
+    Block block = event.getBlock();
+    if (block.getType() == Material.FIRE) {
+      return;
+    }
+    if (TempBlock.MANAGER.isTemp(block)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockBurn(BlockBurnEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getIgnitingBlock())) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockBurn(BlockBurnEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getIgnitingBlock())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockPlace(BlockPlaceEvent event) {
-		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT_BLOCK)) {
-			event.setCancelled(true);
-			return;
-		}
-		TempBlock.MANAGER.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockPlace(BlockPlaceEvent event) {
+    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT_BLOCK)) {
+      event.setCancelled(true);
+      return;
+    }
+    TempBlock.MANAGER.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockBreak(BlockBreakEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getBlock())) {
-			event.setDropItems(false);
-		} else if (WaterMaterials.isPlantBendable(event.getBlock())) {
-			BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-			player.getSelectedAbility().ifPresent(desc -> {
-				if (desc.canSourcePlant() && !player.isOnCooldown(desc)) {
-					event.setCancelled(true);
-				}
-			});
-		}
-		TempBlock.MANAGER.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockBreak(BlockBreakEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getBlock())) {
+      event.setDropItems(false);
+    } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
+      BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+      player.getSelectedAbility().ifPresent(desc -> {
+        if (desc.canSourcePlant() && !player.isOnCooldown(desc)) {
+          event.setCancelled(true);
+        }
+      });
+    }
+    TempBlock.MANAGER.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockForm(BlockFormEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getBlock())) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockForm(BlockFormEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getBlock())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockFromTo(BlockFromToEvent event) {
-		if (TempBlock.MANAGER.isTemp(event.getBlock()) || TempBlock.MANAGER.isTemp(event.getToBlock())) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockFromTo(BlockFromToEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getBlock()) || TempBlock.MANAGER.isTemp(event.getToBlock())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockPhysics(BlockPhysicsEvent event) {
-		Block block = event.getBlock();
-		if (block.getType().hasGravity() && TempBlock.isGravityCached(block)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockPhysics(BlockPhysicsEvent event) {
+    Block block = event.getBlock();
+    if (block.getType().hasGravity() && TempBlock.isGravityCached(block)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockChange(EntityChangeBlockEvent event) {
-		if (event.getEntityType() == EntityType.FALLING_BLOCK) {
-			FallingBlock fb = (FallingBlock) event.getEntity();
-			if (fb.hasMetadata(Metadata.FALLING_BLOCK)) {
-				event.setCancelled(true);
-			}
-			BendingFallingBlock.MANAGER.get(fb).ifPresent(BendingFallingBlock::revert);
-		} else {
-			if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockChange(EntityChangeBlockEvent event) {
+    if (event.getEntityType() == EntityType.FALLING_BLOCK) {
+      FallingBlock fb = (FallingBlock) event.getEntity();
+      if (fb.hasMetadata(Metadata.FALLING_BLOCK)) {
+        event.setCancelled(true);
+      }
+      BendingFallingBlock.MANAGER.get(fb).ifPresent(BendingFallingBlock::revert);
+    } else {
+      if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) {
+        event.setCancelled(true);
+      }
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
-		if (event.getBlocks().stream().anyMatch(TempBlock.MANAGER::isTemp)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
+    if (event.getBlocks().stream().anyMatch(TempBlock.MANAGER::isTemp)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockPistonRetractEvent(BlockPistonRetractEvent event) {
-		if (event.getBlocks().stream().anyMatch(TempBlock.MANAGER::isTemp)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onBlockPistonRetractEvent(BlockPistonRetractEvent event) {
+    if (event.getBlocks().stream().anyMatch(TempBlock.MANAGER::isTemp)) {
+      event.setCancelled(true);
+    }
+  }
 }

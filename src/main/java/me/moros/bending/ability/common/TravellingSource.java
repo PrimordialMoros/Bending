@@ -36,97 +36,111 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 
 public class TravellingSource implements State {
-	private final BlockData data;
-	private StateChain chain;
-	private final User user;
-	private Block source;
+  private final BlockData data;
+  private StateChain chain;
+  private final User user;
+  private Block source;
 
-	private boolean started = false;
+  private boolean started = false;
 
-	private final double minDistanceSq, maxDistanceSq;
+  private final double minDistanceSq, maxDistanceSq;
 
-	public TravellingSource(@NonNull User user, @NonNull BlockData data, double minDistance, double maxDistance) {
-		this.user = user;
-		this.data = data;
-		this.minDistanceSq = minDistance * minDistance;
-		this.maxDistanceSq = maxDistance * maxDistance;
-	}
+  public TravellingSource(@NonNull User user, @NonNull BlockData data, double minDistance, double maxDistance) {
+    this.user = user;
+    this.data = data;
+    this.minDistanceSq = minDistance * minDistance;
+    this.maxDistanceSq = maxDistance * maxDistance;
+  }
 
-	@Override
-	public void start(@NonNull StateChain chain) {
-		if (started) return;
-		this.chain = chain;
-		source = chain.getChainStore().stream().findFirst().orElse(null);
-		started = source != null;
-	}
+  @Override
+  public void start(@NonNull StateChain chain) {
+    if (started) {
+      return;
+    }
+    this.chain = chain;
+    source = chain.getChainStore().stream().findFirst().orElse(null);
+    started = source != null;
+  }
 
-	@Override
-	public void complete() {
-		if (!started) return;
-		chain.getChainStore().clear();
-		chain.getChainStore().add(source);
-		chain.nextState();
-	}
+  @Override
+  public void complete() {
+    if (!started) {
+      return;
+    }
+    chain.getChainStore().clear();
+    chain.getChainStore().add(source);
+    chain.nextState();
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (!started) return UpdateResult.REMOVE;
-		clean();
-		Vector3 target = user.getEyeLocation().floor();
-		Vector3 location = new Vector3(source);
+  @Override
+  public @NonNull UpdateResult update() {
+    if (!started) {
+      return UpdateResult.REMOVE;
+    }
+    clean();
+    Vector3 target = user.getEyeLocation().floor();
+    Vector3 location = new Vector3(source);
 
-		double distSq = target.distanceSq(location);
-		if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
-			return UpdateResult.REMOVE;
-		}
-		if (target.distanceSq(location) < minDistanceSq) {
-			complete();
-			return UpdateResult.CONTINUE;
-		}
+    double distSq = target.distanceSq(location);
+    if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
+      return UpdateResult.REMOVE;
+    }
+    if (target.distanceSq(location) < minDistanceSq) {
+      complete();
+      return UpdateResult.CONTINUE;
+    }
 
-		if (isValid(source.getRelative(BlockFace.UP)) && source.getY() < user.getHeadBlock().getY()) {
-			source = source.getRelative(BlockFace.UP);
-		} else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.getHeadBlock().getY()) {
-			source = source.getRelative(BlockFace.DOWN);
-		} else {
-			Vector3 direction = target.subtract(location).normalize();
-			Block nextBlock = location.add(direction).toBlock(user.getWorld());
-			if (source.equals(nextBlock)) {
-				source = findPath(nextBlock);
-			} else {
-				source = nextBlock;
-			}
-		}
-		if (source == null || !isValid(source) || !Bending.getGame().getProtectionSystem().canBuild(user, source)) {
-			return UpdateResult.REMOVE;
-		}
-		TempBlock.create(source, data, 200);
-		return UpdateResult.CONTINUE;
-	}
+    if (isValid(source.getRelative(BlockFace.UP)) && source.getY() < user.getHeadBlock().getY()) {
+      source = source.getRelative(BlockFace.UP);
+    } else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.getHeadBlock().getY()) {
+      source = source.getRelative(BlockFace.DOWN);
+    } else {
+      Vector3 direction = target.subtract(location).normalize();
+      Block nextBlock = location.add(direction).toBlock(user.getWorld());
+      if (source.equals(nextBlock)) {
+        source = findPath(nextBlock);
+      } else {
+        source = nextBlock;
+      }
+    }
+    if (source == null || !isValid(source) || !Bending.getGame().getProtectionSystem().canBuild(user, source)) {
+      return UpdateResult.REMOVE;
+    }
+    TempBlock.create(source, data, 200);
+    return UpdateResult.CONTINUE;
+  }
 
-	private Block findPath(Block check) {
-		Location dest = user.getHeadBlock().getLocation();
-		Block result = null;
-		double minDistance = Double.MAX_VALUE;
-		for (BlockFace face : BlockMethods.CARDINAL_FACES) {
-			Block block = check.getRelative(face);
-			if (!isValid(block)) continue;
-			double d = block.getLocation().distanceSquared(dest);
-			if (d < minDistance) {
-				minDistance = d;
-				result = block;
-			}
-		}
-		return result;
-	}
+  private Block findPath(Block check) {
+    Location dest = user.getHeadBlock().getLocation();
+    Block result = null;
+    double minDistance = Double.MAX_VALUE;
+    for (BlockFace face : BlockMethods.CARDINAL_FACES) {
+      Block block = check.getRelative(face);
+      if (!isValid(block)) {
+        continue;
+      }
+      double d = block.getLocation().distanceSquared(dest);
+      if (d < minDistance) {
+        minDistance = d;
+        result = block;
+      }
+    }
+    return result;
+  }
 
-	private boolean isValid(Block block) {
-		if (!TempBlock.isBendable(block)) return false;
-		if (data.getMaterial() == Material.WATER) return MaterialUtil.isTransparentOrWater(block);
-		return MaterialUtil.isTransparent(block);
-	}
+  private boolean isValid(Block block) {
+    if (!TempBlock.isBendable(block)) {
+      return false;
+    }
+    if (data.getMaterial() == Material.WATER) {
+      return MaterialUtil.isTransparentOrWater(block);
+    }
+    return MaterialUtil.isTransparent(block);
+  }
 
-	private void clean() {
-		if (source.getType() == data.getMaterial()) TempBlock.createAir(source);
-	}
+  private void clean() {
+    if (source.getType() == data.getMaterial()) {
+      TempBlock.createAir(source);
+    }
+  }
 }

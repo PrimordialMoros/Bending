@@ -23,7 +23,7 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Updatable;
 
 public interface State extends Updatable {
-	void start(@NonNull StateChain chain);
+  void start(@NonNull StateChain chain);
 
-	void complete();
+  void complete();
 }

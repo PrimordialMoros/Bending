@@ -28,37 +28,39 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class PersistentDataLayer {
-	private static final byte VALUE = (byte) 0x1;
+  private static final byte VALUE = (byte) 0x1;
 
-	public static final String STR_ARMOR = "bending-armor";
-	public static final String STR_MATERIAL = "bending-material";
+  public static final String STR_ARMOR = "bending-armor";
+  public static final String STR_MATERIAL = "bending-material";
 
-	private final NamespacedKey NSK_ARMOR;
-	private final NamespacedKey NSK_MATERIAL;
+  private final NamespacedKey NSK_ARMOR;
+  private final NamespacedKey NSK_MATERIAL;
 
-	public PersistentDataLayer(@NonNull Bending plugin) {
-		NSK_ARMOR = new NamespacedKey(plugin, STR_ARMOR);
-		NSK_MATERIAL = new NamespacedKey(plugin, STR_MATERIAL);
-	}
+  public PersistentDataLayer(@NonNull Bending plugin) {
+    NSK_ARMOR = new NamespacedKey(plugin, STR_ARMOR);
+    NSK_MATERIAL = new NamespacedKey(plugin, STR_MATERIAL);
+  }
 
-	public boolean hasArmorKey(@Nullable ItemMeta meta) {
-		if (meta == null) return false;
-		PersistentDataContainer container = meta.getPersistentDataContainer();
-		return container.has(NSK_ARMOR, PersistentDataType.BYTE);
-	}
+  public boolean hasArmorKey(@Nullable ItemMeta meta) {
+    if (meta == null) {
+      return false;
+    }
+    PersistentDataContainer container = meta.getPersistentDataContainer();
+    return container.has(NSK_ARMOR, PersistentDataType.BYTE);
+  }
 
-	public boolean addArmorKey(@NonNull ItemMeta meta) {
-		if (meta != null) {
-			PersistentDataContainer container = meta.getPersistentDataContainer();
-			if (!hasArmorKey(meta)) {
-				container.set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
-				return true;
-			}
-		}
-		return false;
-	}
+  public boolean addArmorKey(@NonNull ItemMeta meta) {
+    if (meta != null) {
+      PersistentDataContainer container = meta.getPersistentDataContainer();
+      if (!hasArmorKey(meta)) {
+        container.set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
+        return true;
+      }
+    }
+    return false;
+  }
 
-	public @NonNull NamespacedKey getMaterialKey() {
-		return NSK_MATERIAL;
-	}
+  public @NonNull NamespacedKey getMaterialKey() {
+    return NSK_MATERIAL;
+  }
 }

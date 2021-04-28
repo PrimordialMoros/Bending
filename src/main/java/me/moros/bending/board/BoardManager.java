@@ -35,91 +35,91 @@ import org.bukkit.entity.Player;
  * Manages every individual {@link Board}
  */
 public final class BoardManager extends Configurable {
-	private final Map<UUID, Board> scoreboardPlayers = new HashMap<>();
-	private boolean enabled;
+  private final Map<UUID, Board> scoreboardPlayers;
+  private boolean enabled;
 
-	public BoardManager() {
-		onConfigReload();
-	}
+  public BoardManager() {
+    scoreboardPlayers = new HashMap<>();
+  }
 
-	/**
-	 * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
-	 * @param player the player to force toggle
-	 */
-	public void forceToggleScoreboard(@NonNull Player player) {
-		if (Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
-			UUID uuid = player.getUniqueId();
-			if (scoreboardPlayers.containsKey(uuid)) {
-				scoreboardPlayers.get(uuid).disableScoreboard();
-				scoreboardPlayers.remove(uuid);
-			}
-		} else {
-			canUseScoreboard(player);
-		}
-	}
+  /**
+   * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
+   * @param player the player to force toggle
+   */
+  public void forceToggleScoreboard(@NonNull Player player) {
+    if (Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+      UUID uuid = player.getUniqueId();
+      if (scoreboardPlayers.containsKey(uuid)) {
+        scoreboardPlayers.get(uuid).disableScoreboard();
+        scoreboardPlayers.remove(uuid);
+      }
+    } else {
+      canUseScoreboard(player);
+    }
+  }
 
-	public boolean toggleScoreboard(@NonNull Player player) {
-		if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
-			return false;
-		}
-		UUID uuid = player.getUniqueId();
-		if (scoreboardPlayers.containsKey(uuid)) {
-			scoreboardPlayers.get(uuid).disableScoreboard();
-			scoreboardPlayers.remove(uuid);
-			return false;
-		} else {
-			return canUseScoreboard(player);
-		}
-	}
+  public boolean toggleScoreboard(@NonNull Player player) {
+    if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+      return false;
+    }
+    UUID uuid = player.getUniqueId();
+    if (scoreboardPlayers.containsKey(uuid)) {
+      scoreboardPlayers.get(uuid).disableScoreboard();
+      scoreboardPlayers.remove(uuid);
+      return false;
+    } else {
+      return canUseScoreboard(player);
+    }
+  }
 
-	/**
-	 * Checks if a player can use the bending board and creates a BendingBoardInstance if possible.
-	 * @param player the player to check
-	 * @return true if player can use the bending board, false otherwise
-	 */
-	public boolean canUseScoreboard(@NonNull Player player) {
-		if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
-			return false;
-		}
-		UUID uuid = player.getUniqueId();
-		if (!scoreboardPlayers.containsKey(uuid)) {
-			scoreboardPlayers.put(uuid, new Board(player));
-		}
-		return true;
-	}
+  /**
+   * Checks if a player can use the bending board and creates a BendingBoardInstance if possible.
+   * @param player the player to check
+   * @return true if player can use the bending board, false otherwise
+   */
+  public boolean canUseScoreboard(@NonNull Player player) {
+    if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+      return false;
+    }
+    UUID uuid = player.getUniqueId();
+    if (!scoreboardPlayers.containsKey(uuid)) {
+      scoreboardPlayers.put(uuid, new Board(player));
+    }
+    return true;
+  }
 
-	public void updateBoard(@NonNull Player player) {
-		if (canUseScoreboard(player)) {
-			scoreboardPlayers.get(player.getUniqueId()).updateAll();
-		}
-	}
+  public void updateBoard(@NonNull Player player) {
+    if (canUseScoreboard(player)) {
+      scoreboardPlayers.get(player.getUniqueId()).updateAll();
+    }
+  }
 
-	public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc) {
-		updateBoardSlot(player, desc, false);
-	}
+  public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc) {
+    updateBoardSlot(player, desc, false);
+  }
 
-	public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
-		if (canUseScoreboard(player)) {
-			if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
-				scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
-			} else {
-				scoreboardPlayers.get(player.getUniqueId()).updateAll();
-			}
-		}
-	}
+  public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
+    if (canUseScoreboard(player)) {
+      if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
+        scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
+      } else {
+        scoreboardPlayers.get(player.getUniqueId()).updateAll();
+      }
+    }
+  }
 
-	public void changeActiveSlot(@NonNull Player player, int oldSlot, int newSlot) {
-		if (canUseScoreboard(player)) {
-			scoreboardPlayers.get(player.getUniqueId()).setActiveSlot(++oldSlot, ++newSlot);
-		}
-	}
+  public void changeActiveSlot(@NonNull Player player, int oldSlot, int newSlot) {
+    if (canUseScoreboard(player)) {
+      scoreboardPlayers.get(player.getUniqueId()).setActiveSlot(++oldSlot, ++newSlot);
+    }
+  }
 
-	public void invalidate(@NonNull UUID uuid) {
-		scoreboardPlayers.remove(uuid);
-	}
+  public void invalidate(@NonNull UUID uuid) {
+    scoreboardPlayers.remove(uuid);
+  }
 
-	@Override
-	public void onConfigReload() {
-		enabled = config.node("properties", "bending-board").getBoolean(true);
-	}
+  @Override
+  public void onConfigReload() {
+    enabled = config.node("properties", "bending-board").getBoolean(true);
+  }
 }

@@ -36,19 +36,19 @@ import me.moros.storage.Storage;
  * Handles all Storage tasks and their concurrency
  */
 public interface BendingStorage extends Storage {
-	@NonNull BendingProfile createProfile(@NonNull UUID uuid);
+  @NonNull BendingProfile createProfile(@NonNull UUID uuid);
 
-	void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer);
+  void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer);
 
-	void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
+  void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
 
-	boolean createElements(@NonNull Set<@NonNull Element> elements);
+  boolean createElements(@NonNull Set<@NonNull Element> elements);
 
-	boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities);
+  boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities);
 
-	@Nullable Preset loadPreset(int playerId, @NonNull String name);
+  @Nullable Preset loadPreset(int playerId, @NonNull String name);
 
-	void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer);
+  void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer);
 
-	void deletePresetAsync(int presetId);
+  void deletePresetAsync(int presetId);
 }

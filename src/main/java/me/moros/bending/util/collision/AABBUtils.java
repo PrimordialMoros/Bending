@@ -27,22 +27,24 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 public final class AABBUtils {
-	public static final DummyCollider DUMMY_COLLIDER = new DummyCollider();
+  public static final DummyCollider DUMMY_COLLIDER = new DummyCollider();
 
-	/**
-	 * @param block the block to check
-	 * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block is passable
-	 */
-	public static @NonNull AABB getBlockBounds(@NonNull Block block) {
-		if (block.isPassable()) return DUMMY_COLLIDER;
-		return new AABB(new Vector3(block.getBoundingBox().getMin()), new Vector3(block.getBoundingBox().getMax()));
-	}
+  /**
+   * @param block the block to check
+   * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block is passable
+   */
+  public static @NonNull AABB getBlockBounds(@NonNull Block block) {
+    if (block.isPassable()) {
+      return DUMMY_COLLIDER;
+    }
+    return new AABB(new Vector3(block.getBoundingBox().getMin()), new Vector3(block.getBoundingBox().getMax()));
+  }
 
-	/**
-	 * @param entity the entity to check
-	 * @return the provided entity's {@link AABB}
-	 */
-	public static @NonNull AABB getEntityBounds(@NonNull Entity entity) {
-		return new AABB(new Vector3(entity.getBoundingBox().getMin()), new Vector3(entity.getBoundingBox().getMax()));
-	}
+  /**
+   * @param entity the entity to check
+   * @return the provided entity's {@link AABB}
+   */
+  public static @NonNull AABB getEntityBounds(@NonNull Entity entity) {
+    return new AABB(new Vector3(entity.getBoundingBox().getMin()), new Vector3(entity.getBoundingBox().getMax()));
+  }
 }

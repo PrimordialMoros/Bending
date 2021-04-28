@@ -27,16 +27,16 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
  * Utility class to handle chat related functionality.
  */
 public final class ChatUtil {
-	private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
+  private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
 
-	/**
-	 * Strip input of all non alphabetical values and limit to 16 characters long.
-	 * This is used for preset names mainly.
-	 * @param input input the input string to sanitize
-	 * @return the sanitized output string
-	 */
-	public static @NonNull String sanitizeInput(@NonNull String input) {
-		String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
-		return output.length() > 16 ? output.substring(0, 16) : output;
-	}
+  /**
+   * Strip input of all non alphabetical values and limit to 16 characters long.
+   * This is used for preset names mainly.
+   * @param input input the input string to sanitize
+   * @return the sanitized output string
+   */
+  public static @NonNull String sanitizeInput(@NonNull String input) {
+    String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
+    return output.length() > 16 ? output.substring(0, 16) : output;
+  }
 }

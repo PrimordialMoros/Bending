@@ -27,14 +27,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldUnloadEvent;
 
 public class WorldListener implements Listener {
-	private final Game game;
+  private final Game game;
 
-	public WorldListener(@NonNull Game game) {
-		this.game = game;
-	}
+  public WorldListener(@NonNull Game game) {
+    this.game = game;
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onWorldUnload(WorldUnloadEvent event) {
-		game.clearWorld(event.getWorld());
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onWorldUnload(WorldUnloadEvent event) {
+    game.clearWorld(event.getWorld());
+  }
 }

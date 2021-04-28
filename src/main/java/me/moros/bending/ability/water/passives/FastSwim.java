@@ -37,55 +37,55 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffectType;
 
 public class FastSwim extends AbilityInstance implements PassiveAbility {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	public FastSwim(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FastSwim(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		removalPolicy = Policies.builder().build();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    removalPolicy = Policies.builder().build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
-			return UpdateResult.CONTINUE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+      return UpdateResult.CONTINUE;
+    }
 
-		if (MaterialUtil.isWater(user.getLocBlock())) {
-			PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
-		}
-		return UpdateResult.CONTINUE;
-	}
+    if (MaterialUtil.isWater(user.getLocBlock())) {
+      PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.STRENGTH)
-		public int speedAmplifier;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.STRENGTH)
+    public int speedAmplifier;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "passives", "fastswim");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "passives", "fastswim");
 
-			speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
-		}
-	}
+      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
+    }
+  }
 }

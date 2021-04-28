@@ -66,149 +66,153 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
 public class FrostBreath extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Collection<FrostStream> streams = new ArrayList<>();
-	private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Collection<FrostStream> streams = new ArrayList<>();
+  private final Set<Entity> affectedEntities = new HashSet<>();
 
-	public FrostBreath(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FrostBreath(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FrostBreath.class)) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FrostBreath.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		removalPolicy = Policies.builder()
-			.add(Policies.NOT_SNEAKING)
-			.add(Policies.IN_LIQUID)
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.build();
-		return true;
-	}
+    removalPolicy = Policies.builder()
+      .add(Policies.NOT_SNEAKING)
+      .add(Policies.IN_LIQUID)
+      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		user.getEntity().setRemainingAir(user.getEntity().getRemainingAir() - 5);
-		Vector3 offset = new Vector3(0, -0.1, 0);
-		Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
-		streams.add(new FrostStream(ray));
-		streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-		return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
+    user.getEntity().setRemainingAir(user.getEntity().getRemainingAir() - 5);
+    Vector3 offset = new Vector3(0, -0.1, 0);
+    Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
+    streams.add(new FrostStream(ray));
+    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
 
-	@Override
-	public void onDestroy() {
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  }
 
-	private class FrostStream extends ParticleStream {
-		private double distanceTravelled = 0;
+  private class FrostStream extends ParticleStream {
+    private double distanceTravelled = 0;
 
-		public FrostStream(Ray ray) {
-			super(user, ray, 0.6, 0.5);
-			canCollide = Block::isLiquid;
-		}
+    public FrostStream(Ray ray) {
+      super(user, ray, 0.6, 0.5);
+      canCollide = Block::isLiquid;
+    }
 
-		@Override
-		public void render() {
-			distanceTravelled += speed;
-			Location spawnLoc = getBukkitLocation();
-			double offset = 0.15 * distanceTravelled;
-			collider = new Sphere(location, collisionRadius + offset);
-			ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
-				.offset(offset, offset, offset).extra(0.02).spawn();
-			ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(NumberConversions.ceil(0.4 * distanceTravelled))
-				.offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
-		}
+    @Override
+    public void render() {
+      distanceTravelled += speed;
+      Location spawnLoc = getBukkitLocation();
+      double offset = 0.15 * distanceTravelled;
+      collider = new Sphere(location, collisionRadius + offset);
+      ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
+        .offset(offset, offset, offset).extra(0.02).spawn();
+      ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(NumberConversions.ceil(0.4 * distanceTravelled))
+        .offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
+    }
 
-		@Override
-		public void postRender() {
-			for (Block block : WorldMethods.getNearbyBlocks(getBukkitLocation(), collider.radius)) {
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-				onBlockHit(block);
-			}
-		}
+    @Override
+    public void postRender() {
+      for (Block block : WorldMethods.getNearbyBlocks(getBukkitLocation(), collider.radius)) {
+        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+          continue;
+        }
+        onBlockHit(block);
+      }
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			if (!affectedEntities.contains(entity)) {
-				affectedEntities.add(entity);
-				int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-				PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-				ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
-					.offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
-			}
-			return false;
-		}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      if (!affectedEntities.contains(entity)) {
+        affectedEntities.add(entity);
+        int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+        ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
+          .offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
+      }
+      return false;
+    }
 
-		@Override
-		public boolean onBlockHit(@NonNull Block block) {
-			long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
-			if (MaterialUtil.isWater(block)) {
-				TempBlock.create(block, Material.ICE.createBlockData(), duration, true);
-				if (ThreadLocalRandom.current().nextInt(6) == 0) {
-					SoundUtil.ICE_SOUND.play(block.getLocation());
-				}
-			} else if (MaterialUtil.isTransparent(block)) {
-				Block below = block.getRelative(BlockFace.DOWN);
-				if (below.isSolid() && !WaterMaterials.isIceBendable(below) && TempBlock.isBendable(below)) {
-					TempBlock.create(block, Material.SNOW.createBlockData(), duration, true);
-				}
-			}
-			BlockMethods.tryCoolLava(user, block);
-			return true;
-		}
-	}
+    @Override
+    public boolean onBlockHit(@NonNull Block block) {
+      long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
+      if (MaterialUtil.isWater(block)) {
+        TempBlock.create(block, Material.ICE.createBlockData(), duration, true);
+        if (ThreadLocalRandom.current().nextInt(6) == 0) {
+          SoundUtil.ICE_SOUND.play(block.getLocation());
+        }
+      } else if (MaterialUtil.isTransparent(block)) {
+        Block below = block.getRelative(BlockFace.DOWN);
+        if (below.isSolid() && !WaterMaterials.isIceBendable(below) && TempBlock.isBendable(below)) {
+          TempBlock.create(block, Material.SNOW.createBlockData(), duration, true);
+        }
+      }
+      BlockMethods.tryCoolLava(user, block);
+      return true;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.STRENGTH)
-		public int power;
-		@Attribute(Attribute.DURATION)
-		public long slowDuration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.STRENGTH)
+    public int power;
+    @Attribute(Attribute.DURATION)
+    public long slowDuration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "frostbreath");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "frostbreath");
 
-			cooldown = abilityNode.node("cooldown").getLong(10000);
-			range = abilityNode.node("range").getDouble(7.0);
-			duration = abilityNode.node("duration").getLong(1500);
-			power = abilityNode.node("slow-power").getInt(2) - 1;
-			slowDuration = abilityNode.node("slow-duration").getLong(2500);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(10000);
+      range = abilityNode.node("range").getDouble(7.0);
+      duration = abilityNode.node("duration").getLong(1500);
+      power = abilityNode.node("slow-power").getInt(2) - 1;
+      slowDuration = abilityNode.node("slow-duration").getLong(2500);
+    }
+  }
 }

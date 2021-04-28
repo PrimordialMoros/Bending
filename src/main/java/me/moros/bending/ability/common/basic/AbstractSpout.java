@@ -37,76 +37,75 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
-import org.bukkit.util.Vector;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
-	private final User user;
-	protected final Set<Block> ignore = new HashSet<>();
-	protected final Flight flight;
+  private final User user;
+  protected final Set<Block> ignore = new HashSet<>();
+  protected final Flight flight;
 
-	protected Predicate<Block> validBlock = x -> true;
-	protected AABB collider;
+  protected Predicate<Block> validBlock = x -> true;
+  protected AABB collider;
 
-	protected final int height;
-	protected final double maxHeight;
-	protected final double speed;
+  protected final int height;
+  protected final double maxHeight;
+  protected final double speed;
 
-	protected double distance;
+  protected double distance;
 
-	public AbstractSpout(@NonNull User user, double height, double speed) {
-		this.user = user;
+  public AbstractSpout(@NonNull User user, double height, double speed) {
+    this.user = user;
 
-		this.height = NumberConversions.ceil(height);
-		this.speed = speed;
+    this.height = NumberConversions.ceil(height);
+    this.speed = speed;
 
-		maxHeight = this.height + 2; // Add a buffer for safety
+    maxHeight = this.height + 2; // Add a buffer for safety
 
-		this.flight = Flight.get(user);
-		this.flight.setFlying(true);
-	}
+    this.flight = Flight.get(user);
+    this.flight.setFlying(true);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
-		if (block == null || !validBlock.test(block)) {
-			return UpdateResult.REMOVE;
-		}
-		// Remove if player gets too far away from ground.
-		distance = user.getLocation().getY() - block.getY();
-		if (distance > maxHeight) {
-			return UpdateResult.REMOVE;
-		}
-		flight.setFlying(distance <= height);
-		// Create a bounding box for collision that extends through the spout from the ground to the player.
-		collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.getLocation());
-		render();
-		postRender();
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
+    if (block == null || !validBlock.test(block)) {
+      return UpdateResult.REMOVE;
+    }
+    // Remove if player gets too far away from ground.
+    distance = user.getLocation().getY() - block.getY();
+    if (distance > maxHeight) {
+      return UpdateResult.REMOVE;
+    }
+    flight.setFlying(distance <= height);
+    // Create a bounding box for collision that extends through the spout from the ground to the player.
+    collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.getLocation());
+    render();
+    postRender();
+    return UpdateResult.CONTINUE;
+  }
 
-	@Override
-	public boolean onEntityHit(@NonNull Entity entity) {
-		return true;
-	}
+  @Override
+  public boolean onEntityHit(@NonNull Entity entity) {
+    return true;
+  }
 
-	@Override
-	public boolean onBlockHit(@NonNull Block block) {
-		return true;
-	}
+  @Override
+  public boolean onBlockHit(@NonNull Block block) {
+    return true;
+  }
 
-	@Override
-	public @NonNull Collider getCollider() {
-		return collider;
-	}
+  @Override
+  public @NonNull Collider getCollider() {
+    return collider;
+  }
 
-	public @NonNull Flight getFlight() {
-		return flight;
-	}
+  public @NonNull Flight getFlight() {
+    return flight;
+  }
 
-	public static void limitVelocity(@NonNull User user, @NonNull Vector velocity, double speed) {
-		if (velocity.lengthSquared() > speed * speed) {
-			user.getEntity().setVelocity(velocity.normalize().multiply(speed));
-		}
-	}
+  public static void limitVelocity(@NonNull User user, @NonNull Vector3 velocity, double speed) {
+    if (velocity.getNormSq() > speed * speed) {
+      user.getEntity().setVelocity(velocity.normalize().toVector().multiply(speed));
+    }
+  }
 }
 

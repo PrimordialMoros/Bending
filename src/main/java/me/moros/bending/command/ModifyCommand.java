@@ -44,34 +44,34 @@ import org.bukkit.command.CommandSender;
 @CommandAlias("%modifycommand")
 @CommandPermission("bending.command.modify")
 public class ModifyCommand extends BaseCommand {
-	@HelpCommand
-	@CommandPermission("bending.command.help")
-	public static void doHelp(CommandSender user, CommandHelp help) {
-		user.sendMessage(Message.HELP_HEADER.build());
-		help.showHelp();
-	}
+  @HelpCommand
+  @CommandPermission("bending.command.help")
+  public static void doHelp(CommandSender user, CommandHelp help) {
+    user.sendMessage(Message.HELP_HEADER.build());
+    help.showHelp();
+  }
 
-	@Subcommand("add|a")
-	@CommandCompletion("@elements|@abilities @attributes * * @players")
-	@Description("Add a new modifier to the specified player")
-	public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
-		String validType = Arrays.stream(Attribute.TYPES)
-			.filter(attr -> attr.equalsIgnoreCase(type))
-			.findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
-		AttributeModifier modifier = new AttributeModifier(validType, operation, amount);
-		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		Bending.getGame().getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
-		Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
-		Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.getEntity().getName());
-	}
+  @Subcommand("add|a")
+  @CommandCompletion("@elements|@abilities @attributes * * @players")
+  @Description("Add a new modifier to the specified player")
+  public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
+    String validType = Arrays.stream(Attribute.TYPES)
+      .filter(attr -> attr.equalsIgnoreCase(type))
+      .findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
+    AttributeModifier modifier = new AttributeModifier(validType, operation, amount);
+    BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+    Bending.getGame().getAttributeSystem().addModifier(bendingPlayer, modifier, policy);
+    Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
+    Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.getEntity().getName());
+  }
 
-	@Subcommand("clear|c")
-	@CommandCompletion("@players")
-	@Description("Clear all existing modifiers for a player")
-	public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
-		BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
-		Bending.getGame().getAttributeSystem().clearModifiers(bendingPlayer);
-		Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
-		Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.getEntity().getName());
-	}
+  @Subcommand("clear|c")
+  @CommandCompletion("@players")
+  @Description("Clear all existing modifiers for a player")
+  public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
+    BendingPlayer bendingPlayer = target == null ? player : Bending.getGame().getPlayerManager().getPlayer(target.getPlayer().getUniqueId());
+    Bending.getGame().getAttributeSystem().clearModifiers(bendingPlayer);
+    Bending.getGame().getAttributeSystem().recalculate(bendingPlayer);
+    Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.getEntity().getName());
+  }
 }

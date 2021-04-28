@@ -30,25 +30,25 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.user.User;
 
 public interface Ability extends Updatable {
-	boolean activate(@NonNull User user, @NonNull ActivationMethod method); // return true if the ability was activated
+  boolean activate(@NonNull User user, @NonNull ActivationMethod method); // return true if the ability was activated
 
-	void recalculateConfig();
+  void recalculateConfig();
 
-	@NonNull AbilityDescription getDescription();
+  @NonNull AbilityDescription getDescription();
 
-	@NonNull User getUser();
+  @NonNull User getUser();
 
-	default boolean setUser(@NonNull User newUser) {
-		return false;
-	}
+  default boolean setUser(@NonNull User newUser) {
+    return false;
+  }
 
-	default @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.emptyList();
-	}
+  default @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.emptyList();
+  }
 
-	default void onCollision(@NonNull Collision collision) {
-	}
+  default void onCollision(@NonNull Collision collision) {
+  }
 
-	default void onDestroy() {
-	}
+  default void onDestroy() {
+  }
 }

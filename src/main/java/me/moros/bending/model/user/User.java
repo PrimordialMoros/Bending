@@ -33,95 +33,97 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 
 public interface User extends BukkitUser {
-	@NonNull ElementHolder getElementHolder();
+  @NonNull ElementHolder getElementHolder();
 
-	default boolean hasElement(@NonNull Element element) {
-		return getElementHolder().hasElement(element);
-	}
+  default boolean hasElement(@NonNull Element element) {
+    return getElementHolder().hasElement(element);
+  }
 
-	default boolean addElement(@NonNull Element element) {
-		if (getElementHolder().addElement(element)) {
-			Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
-			return true;
-		}
-		return false;
-	}
+  default boolean addElement(@NonNull Element element) {
+    if (getElementHolder().addElement(element)) {
+      Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
+      return true;
+    }
+    return false;
+  }
 
-	default boolean removeElement(@NonNull Element element) {
-		if (getElementHolder().removeElement(element)) {
-			validateSlots();
-			Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
-			return true;
-		}
-		return false;
-	}
+  default boolean removeElement(@NonNull Element element) {
+    if (getElementHolder().removeElement(element)) {
+      validateSlots();
+      Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
+      return true;
+    }
+    return false;
+  }
 
-	default @NonNull Set<@NonNull Element> getElements() {
-		return getElementHolder().getElements();
-	}
+  default @NonNull Set<@NonNull Element> getElements() {
+    return getElementHolder().getElements();
+  }
 
-	default boolean setElement(@NonNull Element element) {
-		getElementHolder().clear();
-		getElementHolder().addElement(element);
-		validateSlots();
-		Bending.getGame().getAbilityManager(getWorld()).clearPassives(this);
-		Bending.getGame().getAbilityManager(getWorld()).createPassives(this);
-		Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
-		return true;
-	}
+  default boolean setElement(@NonNull Element element) {
+    getElementHolder().clear();
+    getElementHolder().addElement(element);
+    validateSlots();
+    Bending.getGame().getAbilityManager(getWorld()).clearPassives(this);
+    Bending.getGame().getAbilityManager(getWorld()).createPassives(this);
+    Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
+    return true;
+  }
 
-	boolean isOnCooldown(@NonNull AbilityDescription desc);
+  boolean isOnCooldown(@NonNull AbilityDescription desc);
 
-	void setCooldown(@NonNull AbilityDescription desc, long duration);
+  void setCooldown(@NonNull AbilityDescription desc, long duration);
 
-	/**
-	 * Like setSlotAbility but won't call any events
-	 */
-	void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  /**
+   * Like setSlotAbility but won't call any events
+   */
+  void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
-	/**
-	 * This is to be used when setting individual slots.
-	 * If you want to bind or change multiple slots then use dummy presets
-	 */
-	void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  /**
+   * This is to be used when setting individual slots.
+   * If you want to bind or change multiple slots then use dummy presets
+   */
+  void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
-	Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot);
+  Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot);
 
-	Optional<AbilityDescription> getSelectedAbility();
+  Optional<AbilityDescription> getSelectedAbility();
 
 
-	/**
-	 * @return the ability's name or an empty string if no ability is bound to the currently selected slot
-	 */
-	default @NonNull String getSelectedAbilityName() {
-		return getSelectedAbility().map(AbilityDescription::getName).orElse("");
-	}
+  /**
+   * @return the ability's name or an empty string if no ability is bound to the currently selected slot
+   */
+  default @NonNull String getSelectedAbilityName() {
+    return getSelectedAbility().map(AbilityDescription::getName).orElse("");
+  }
 
-	default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
-		setSlotAbility(slot, null);
-	}
+  default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
+    setSlotAbility(slot, null);
+  }
 
-	@NonNull CompositeBendingConditional getBendingConditional();
+  @NonNull CompositeBendingConditional getBendingConditional();
 
-	default boolean canBend(@NonNull AbilityDescription desc) {
-		return getBendingConditional().test(this, desc);
-	}
+  default boolean canBend(@NonNull AbilityDescription desc) {
+    return getBendingConditional().test(this, desc);
+  }
 
-	/**
-	 * Checks bound abilities and clears any invalid ability slots.
-	 * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
-	 */
-	default void validateSlots() {
-		IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
-			if (!hasElement(desc.getElement()) || !hasPermission(desc) || !desc.canBind()) setSlotAbilityInternal(i, null);
-		}));
-	}
+  /**
+   * Checks bound abilities and clears any invalid ability slots.
+   * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
+   */
+  default void validateSlots() {
+    IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
+      if (!hasElement(desc.getElement()) || !hasPermission(desc) || !desc.canBind()) {
+        setSlotAbilityInternal(i, null);
+      }
+    }));
+  }
 
-	default boolean hasPermission(@NonNull String permission) {
-		return true;
-	}
+  default boolean hasPermission(@NonNull String permission) {
+    return true;
+  }
 
-	default boolean hasPermission(@NonNull AbilityDescription desc) {
-		return hasPermission(desc.getPermission());
-	}
+  default boolean hasPermission(@NonNull AbilityDescription desc) {
+    return hasPermission(desc.getPermission());
+  }
 }

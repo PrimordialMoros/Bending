@@ -57,130 +57,134 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class AirShield extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private long currentPoint = 0;
-	private long startTime;
+  private long currentPoint = 0;
+  private long startTime;
 
-	public AirShield(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirShield(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		removalPolicy = Policies.builder()
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.add(Policies.NOT_SNEAKING)
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.build();
-		startTime = System.currentTimeMillis();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    removalPolicy = Policies.builder()
+      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(Policies.NOT_SNEAKING)
+      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .build();
+    startTime = System.currentTimeMillis();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
-			return UpdateResult.REMOVE;
-		}
-		currentPoint++;
-		Vector3 center = getCenter();
-		double spacing = userConfig.radius / 4;
-		for (int i = 1; i < 8; i++) {
-			double y = (i * spacing) - userConfig.radius;
-			double factor = 1 - (y * y) / (userConfig.radius * userConfig.radius);
-			if (factor <= 0.2) continue;
-			double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
-			double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
-			Vector3 loc = center.add(new Vector3(x, y, z));
-			ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5)
-				.offset(0.2, 0.2, 0.2).extra(0.01).spawn();
-			if (ThreadLocalRandom.current().nextInt(12) == 0) {
-				SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
-			}
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+      return UpdateResult.REMOVE;
+    }
+    currentPoint++;
+    Vector3 center = getCenter();
+    double spacing = userConfig.radius / 4;
+    for (int i = 1; i < 8; i++) {
+      double y = (i * spacing) - userConfig.radius;
+      double factor = 1 - (y * y) / (userConfig.radius * userConfig.radius);
+      if (factor <= 0.2) {
+        continue;
+      }
+      double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
+      double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
+      Vector3 loc = center.add(new Vector3(x, y, z));
+      ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5)
+        .offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+      if (ThreadLocalRandom.current().nextInt(12) == 0) {
+        SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
+      }
+    }
 
-		for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
-			BlockMethods.tryCoolLava(user, b);
-			BlockMethods.tryExtinguishFire(user, b);
-		}
+    for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
+      BlockMethods.tryCoolLava(user, b);
+      BlockMethods.tryExtinguishFire(user, b);
+    }
 
-		CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
-			Vector3 toEntity = new Vector3(entity.getLocation()).subtract(center);
-			Vector3 normal = toEntity.setY(0).normalize();
-			double strength = ((userConfig.radius - toEntity.getNorm()) / userConfig.radius) * userConfig.maxPush;
-			strength = FastMath.max(0, FastMath.min(1, strength));
-			entity.setVelocity(entity.getVelocity().add(normal.scalarMultiply(strength).toVector()));
-			return false;
-		}, false);
+    CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
+      Vector3 toEntity = new Vector3(entity.getLocation()).subtract(center);
+      Vector3 normal = toEntity.setY(0).normalize();
+      double strength = ((userConfig.radius - toEntity.getNorm()) / userConfig.radius) * userConfig.maxPush;
+      strength = FastMath.max(0, FastMath.min(1, strength));
+      entity.setVelocity(entity.getVelocity().add(normal.scalarMultiply(strength).toVector()));
+      return false;
+    }, false);
 
-		return UpdateResult.CONTINUE;
-	}
+    return UpdateResult.CONTINUE;
+  }
 
-	private Vector3 getCenter() {
-		return EntityMethods.getEntityCenter(user.getEntity());
-	}
+  private Vector3 getCenter() {
+    return EntityMethods.getEntityCenter(user.getEntity());
+  }
 
-	@Override
-	public void onDestroy() {
-		double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
-		long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
-		user.setCooldown(getDescription(), cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
+    long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
+    user.setCooldown(getDescription(), cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(new Sphere(getCenter(), userConfig.radius));
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(new Sphere(getCenter(), userConfig.radius));
+  }
 
-	@Override
-	public void onCollision(@NonNull Collision collision) {
-		Ability collidedAbility = collision.getCollidedAbility();
-		if (collidedAbility instanceof FrostBreath) {
-			for (Block block : WorldMethods.getNearbyBlocks(getCenter().toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
-				if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-				BlockMethods.tryBreakPlant(block);
-				if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
-					long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
-					TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);
-				}
-			}
-		}
-	}
+  @Override
+  public void onCollision(@NonNull Collision collision) {
+    Ability collidedAbility = collision.getCollidedAbility();
+    if (collidedAbility instanceof FrostBreath) {
+      for (Block block : WorldMethods.getNearbyBlocks(getCenter().toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+          continue;
+        }
+        BlockMethods.tryBreakPlant(block);
+        if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
+          long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
+          TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);
+        }
+      }
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
-		@Attribute(Attribute.STRENGTH)
-		public double maxPush;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
+    @Attribute(Attribute.STRENGTH)
+    public double maxPush;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airshield");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airshield");
 
-			cooldown = abilityNode.node("cooldown").getLong(4000);
-			duration = abilityNode.node("duration").getLong(10000);
-			radius = abilityNode.node("radius").getDouble(4.0);
-			maxPush = abilityNode.node("max-push").getDouble(2.6);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(4000);
+      duration = abilityNode.node("duration").getLong(10000);
+      radius = abilityNode.node("radius").getDouble(4.0);
+      maxPush = abilityNode.node("max-push").getDouble(2.6);
+    }
+  }
 }

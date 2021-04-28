@@ -25,59 +25,63 @@ import java.util.Objects;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
 public class Preset {
-	public static final Preset EMPTY = new Preset(new String[9]);
+  public static final Preset EMPTY = new Preset(new String[9]);
 
-	private final int id;
-	private final String name;
-	private final String[] abilities;
+  private final int id;
+  private final String name;
+  private final String[] abilities;
 
-	/**
-	 * Presets loaded from db have a positive id.
-	 * New presets must use a non positive id as they will acquire a real one when they get saved.
-	 */
-	public Preset(int id, @NonNull String name, @NonNull String[] abilities) {
-		this.id = id;
-		this.name = name;
-		this.abilities = abilities;
-	}
+  /**
+   * Presets loaded from db have a positive id.
+   * New presets must use a non positive id as they will acquire a real one when they get saved.
+   */
+  public Preset(int id, @NonNull String name, @NonNull String[] abilities) {
+    this.id = id;
+    this.name = name;
+    this.abilities = abilities;
+  }
 
-	/**
-	 * Creates a dummy preset with id 0 and an empty name.
-	 * @see #Preset(int, String, String[])
-	 */
-	public Preset(@NonNull String[] abilities) {
-		this(0, "", abilities);
-	}
+  /**
+   * Creates a dummy preset with id 0 and an empty name.
+   * @see #Preset(int, String, String[])
+   */
+  public Preset(@NonNull String[] abilities) {
+    this(0, "", abilities);
+  }
 
-	public int getInternalId() {
-		return id;
-	}
+  public int getInternalId() {
+    return id;
+  }
 
-	public @NonNull String getName() {
-		return name;
-	}
+  public @NonNull String getName() {
+    return name;
+  }
 
-	/**
-	 * Returns an array of the ability names that this preset holds, names can be null!
-	 * @return a copy of the names of the abilities that this preset holds.
-	 */
-	public @NonNull String[] getAbilities() {
-		return Arrays.copyOf(abilities, 9);
-	}
+  /**
+   * Returns an array of the ability names that this preset holds, names can be null!
+   * @return a copy of the names of the abilities that this preset holds.
+   */
+  public @NonNull String[] getAbilities() {
+    return Arrays.copyOf(abilities, 9);
+  }
 
-	public boolean isEmpty() {
-		for (String s : abilities) {
-			if (s != null) return false;
-		}
-		return true;
-	}
+  public boolean isEmpty() {
+    for (String s : abilities) {
+      if (s != null) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-	public int compare(@NonNull Preset preset) {
-		String[] otherAbilities = preset.getAbilities();
-		int count = 0;
-		for (int slot = 0; slot < 9; slot++) {
-			if (!Objects.equals(abilities[slot], otherAbilities[slot])) count++;
-		}
-		return count;
-	}
+  public int compare(@NonNull Preset preset) {
+    String[] otherAbilities = preset.getAbilities();
+    int count = 0;
+    for (int slot = 0; slot < 9; slot++) {
+      if (!Objects.equals(abilities[slot], otherAbilities[slot])) {
+        count++;
+      }
+    }
+    return count;
+  }
 }

@@ -23,17 +23,17 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 
 public abstract class Configurable {
-	protected CommentedConfigurationNode config;
+  protected CommentedConfigurationNode config;
 
-	public Configurable() {
-		Bending.getConfigManager().add(this);
-		reload();
-	}
+  public Configurable() {
+    Bending.getConfigManager().add(this);
+    reload();
+  }
 
-	public abstract void onConfigReload();
+  public abstract void onConfigReload();
 
-	public void reload() {
-		config = Bending.getConfigManager().getConfig();
-		onConfigReload();
-	}
+  public void reload() {
+    config = Bending.getConfigManager().getConfig();
+    onConfigReload();
+  }
 }

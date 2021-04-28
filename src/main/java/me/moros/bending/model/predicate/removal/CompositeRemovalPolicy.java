@@ -27,15 +27,17 @@ import me.moros.bending.model.predicate.removal.Policies.PolicyBuilder;
 import me.moros.bending.model.user.User;
 
 public class CompositeRemovalPolicy implements RemovalPolicy {
-	private final Set<RemovalPolicy> policies;
+  private final Set<RemovalPolicy> policies;
 
-	CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
-		this.policies = builder.getPolicies();
-	}
+  CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
+    this.policies = builder.getPolicies();
+  }
 
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		if (user == null || desc == null) return true;
-		return policies.stream().anyMatch(p -> p.test(user, desc));
-	}
+  @Override
+  public boolean test(User user, AbilityDescription desc) {
+    if (user == null || desc == null) {
+      return true;
+    }
+    return policies.stream().anyMatch(p -> p.test(user, desc));
+  }
 }

@@ -55,220 +55,227 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 
 public class FireShield extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Shield shield;
-	private ThreadLocalRandom rand;
+  private Shield shield;
+  private ThreadLocalRandom rand;
 
-	private boolean sphere = false;
+  private boolean sphere = false;
 
-	public FireShield(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FireShield(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireShield.class)) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireShield.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		if (user.getHeadBlock().isLiquid()) {
-			return false;
-		}
+    if (user.getHeadBlock().isLiquid()) {
+      return false;
+    }
 
-		rand = ThreadLocalRandom.current();
-		if (method == ActivationMethod.SNEAK) {
-			sphere = true;
-			shield = new SphereShield();
-			removalPolicy = Policies.builder()
-				.add(new SwappedSlotsRemovalPolicy(getDescription()))
-				.add(new ExpireRemovalPolicy(userConfig.shieldDuration))
-				.add(Policies.NOT_SNEAKING).build();
-		} else {
-			shield = new DiskShield();
-			removalPolicy = Policies.builder()
-				.add(new SwappedSlotsRemovalPolicy(getDescription()))
-				.add(new ExpireRemovalPolicy(userConfig.diskDuration)).build();
-		}
+    rand = ThreadLocalRandom.current();
+    if (method == ActivationMethod.SNEAK) {
+      sphere = true;
+      shield = new SphereShield();
+      removalPolicy = Policies.builder()
+        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(ExpireRemovalPolicy.of(userConfig.shieldDuration))
+        .add(Policies.NOT_SNEAKING).build();
+    } else {
+      shield = new DiskShield();
+      removalPolicy = Policies.builder()
+        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(ExpireRemovalPolicy.of(userConfig.diskDuration)).build();
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		shield.render();
-		CollisionUtil.handleEntityCollisions(user, shield.getCollider(), entity -> {
-			FireTick.LARGER.apply(entity, userConfig.fireTicks);
-			return false;
-		});
+    shield.render();
+    CollisionUtil.handleEntityCollisions(user, shield.getCollider(), entity -> {
+      FireTick.LARGER.apply(entity, userConfig.fireTicks);
+      return false;
+    });
 
-		shield.update();
-		return UpdateResult.CONTINUE;
-	}
+    shield.update();
+    return UpdateResult.CONTINUE;
+  }
 
-	public boolean isSphere() {
-		return sphere;
-	}
+  public boolean isSphere() {
+    return sphere;
+  }
 
-	@Override
-	public void onDestroy() {
-		user.setCooldown(getDescription(), sphere ? userConfig.shieldCooldown : userConfig.diskCooldown);
-	}
+  @Override
+  public void onDestroy() {
+    user.setCooldown(getDescription(), sphere ? userConfig.shieldCooldown : userConfig.diskCooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(shield.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(shield.getCollider());
+  }
 
-	private interface Shield {
-		void update();
+  private interface Shield {
+    void update();
 
-		void render();
+    void render();
 
-		Collider getCollider();
-	}
+    Collider getCollider();
+  }
 
-	private class DiskShield implements Shield {
-		private Disk disk;
-		private Vector3 location;
-		private long nextRenderTime = 0;
+  private class DiskShield implements Shield {
+    private Disk disk;
+    private Vector3 location;
+    private long nextRenderTime = 0;
 
-		private DiskShield() {
-			update();
-		}
+    private DiskShield() {
+      update();
+    }
 
-		@Override
-		public void update() {
-			location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.diskRange));
-			double r = userConfig.diskRadius;
-			AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
-			Vector3 right = user.getRightSide();
-			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
-			rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getPitch()), RotationConvention.VECTOR_OPERATOR));
-			disk = new Disk(new OBB(aabb, rotation).addPosition(location), new Sphere(location, userConfig.diskRadius));
-		}
+    @Override
+    public void update() {
+      location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.diskRange));
+      double r = userConfig.diskRadius;
+      AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
+      Vector3 right = user.getRightSide();
+      Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
+      rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.getPitch()), RotationConvention.VECTOR_OPERATOR));
+      OBB obb = new OBB(aabb, rotation).addPosition(location);
+      disk = new Disk(obb, new Sphere(location, userConfig.diskRadius));
+    }
 
-		@Override
-		public void render() {
-			long time = System.currentTimeMillis();
-			if (time < nextRenderTime) return;
-			nextRenderTime = time + 200;
-			Rotation rotation = new Rotation(user.getDirection(), FastMath.toRadians(20), RotationConvention.VECTOR_OPERATOR);
-			double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize().toArray();
-			for (int i = 0; i < 18; i++) {
-				for (double j = 0.2; j <= 1; j += 0.2) {
-					Location spawnLoc = location.add(new Vector3(array).scalarMultiply(j * userConfig.diskRadius)).toLocation(user.getWorld());
-					ParticleUtil.createFire(user, spawnLoc)
-						.offset(0.2, 0.1, 0.2).extra(0.01).spawn();
-					if (rand.nextInt(12) == 0) {
-						SoundUtil.FIRE_SOUND.play(spawnLoc);
-					}
-				}
-				rotation.applyTo(array, array);
-			}
-		}
+    @Override
+    public void render() {
+      long time = System.currentTimeMillis();
+      if (time < nextRenderTime) {
+        return;
+      }
+      nextRenderTime = time + 200;
+      Rotation rotation = new Rotation(user.getDirection(), FastMath.toRadians(20), RotationConvention.VECTOR_OPERATOR);
+      double[] array = Vector3.PLUS_J.crossProduct(user.getDirection()).normalize().toArray();
+      for (int i = 0; i < 18; i++) {
+        for (double j = 0.2; j <= 1; j += 0.2) {
+          Location spawnLoc = location.add(new Vector3(array).scalarMultiply(j * userConfig.diskRadius)).toLocation(user.getWorld());
+          ParticleUtil.createFire(user, spawnLoc)
+            .offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+          if (rand.nextInt(12) == 0) {
+            SoundUtil.FIRE_SOUND.play(spawnLoc);
+          }
+        }
+        rotation.applyTo(array, array);
+      }
+    }
 
-		@Override
-		public Collider getCollider() {
-			return disk;
-		}
-	}
+    @Override
+    public Collider getCollider() {
+      return disk;
+    }
+  }
 
-	private class SphereShield implements Shield {
-		private Sphere sphere;
-		private int currentPoint = 0;
+  private class SphereShield implements Shield {
+    private Sphere sphere;
+    private int currentPoint = 0;
 
-		private SphereShield() {
-			update();
-		}
+    private SphereShield() {
+      update();
+    }
 
-		@Override
-		public Collider getCollider() {
-			return sphere;
-		}
+    @Override
+    public Collider getCollider() {
+      return sphere;
+    }
 
-		@Override
-		public void update() {
-			sphere = new Sphere(getCenter(), userConfig.shieldRadius);
-		}
+    @Override
+    public void update() {
+      sphere = new Sphere(getCenter(), userConfig.shieldRadius);
+    }
 
-		@Override
-		public void render() {
-			Vector3 center = getCenter();
-			double radius = userConfig.shieldRadius;
-			currentPoint++;
-			double spacing = radius / 8;
-			for (int i = 1; i < 16; i++) {
-				double y = (i * spacing) - radius;
-				double factor = 1 - (y * y) / (radius * radius);
-				if (factor <= 0.2) continue;
-				double x = radius * factor * FastMath.cos(i * currentPoint);
-				double z = radius * factor * FastMath.sin(i * currentPoint);
-				Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.getWorld());
-				ParticleUtil.createFire(user, spawnLoc)
-					.offset(0.2, 0.1, 0.2).extra(0.01).spawn();
-				if (rand.nextInt(12) == 0) {
-					SoundUtil.FIRE_SOUND.play(spawnLoc);
-				}
-			}
-		}
+    @Override
+    public void render() {
+      Vector3 center = getCenter();
+      double radius = userConfig.shieldRadius;
+      currentPoint++;
+      double spacing = radius / 8;
+      for (int i = 1; i < 16; i++) {
+        double y = (i * spacing) - radius;
+        double factor = 1 - (y * y) / (radius * radius);
+        if (factor <= 0.2) {
+          continue;
+        }
+        double x = radius * factor * FastMath.cos(i * currentPoint);
+        double z = radius * factor * FastMath.sin(i * currentPoint);
+        Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.getWorld());
+        ParticleUtil.createFire(user, spawnLoc)
+          .offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+        if (rand.nextInt(12) == 0) {
+          SoundUtil.FIRE_SOUND.play(spawnLoc);
+        }
+      }
+    }
 
-		private Vector3 getCenter() {
-			return EntityMethods.getEntityCenter(user.getEntity());
-		}
-	}
+    private Vector3 getCenter() {
+      return EntityMethods.getEntityCenter(user.getEntity());
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.DURATION)
-		public int fireTicks;
-		@Attribute(Attribute.COOLDOWN)
-		public long diskCooldown;
-		@Attribute(Attribute.DURATION)
-		public long diskDuration;
-		@Attribute(Attribute.RADIUS)
-		public double diskRadius;
-		@Attribute(Attribute.RANGE)
-		public double diskRange;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.DURATION)
+    public int fireTicks;
+    @Attribute(Attribute.COOLDOWN)
+    public long diskCooldown;
+    @Attribute(Attribute.DURATION)
+    public long diskDuration;
+    @Attribute(Attribute.RADIUS)
+    public double diskRadius;
+    @Attribute(Attribute.RANGE)
+    public double diskRange;
 
-		@Attribute(Attribute.COOLDOWN)
-		public long shieldCooldown;
-		@Attribute(Attribute.DURATION)
-		public long shieldDuration;
-		@Attribute(Attribute.RADIUS)
-		public double shieldRadius;
+    @Attribute(Attribute.COOLDOWN)
+    public long shieldCooldown;
+    @Attribute(Attribute.DURATION)
+    public long shieldDuration;
+    @Attribute(Attribute.RADIUS)
+    public double shieldRadius;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
-			fireTicks = abilityNode.node("fire-ticks").getInt(40);
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
+      fireTicks = abilityNode.node("fire-ticks").getInt(40);
 
-			diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
-			diskDuration = abilityNode.node("disk", "duration").getLong(1000);
-			diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
-			diskRange = abilityNode.node("disk", "range").getDouble(1.5);
+      diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
+      diskDuration = abilityNode.node("disk", "duration").getLong(1000);
+      diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
+      diskRange = abilityNode.node("disk", "range").getDouble(1.5);
 
-			shieldCooldown = abilityNode.node("shield", "cooldown").getLong(2000);
-			shieldDuration = abilityNode.node("shield", "duration").getLong(10000);
-			shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
-		}
-	}
+      shieldCooldown = abilityNode.node("shield", "cooldown").getLong(2000);
+      shieldDuration = abilityNode.node("shield", "duration").getLong(10000);
+      shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
+    }
+  }
 }

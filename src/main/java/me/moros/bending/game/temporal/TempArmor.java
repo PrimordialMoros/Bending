@@ -36,62 +36,66 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
-	public static final TemporalManager<LivingEntity, TempArmor> MANAGER = new TemporalManager<>();
-	private final LivingEntity entity;
-	private final ItemStack[] snapshot;
+  public static final TemporalManager<LivingEntity, TempArmor> MANAGER = new TemporalManager<>();
+  private final LivingEntity entity;
+  private final ItemStack[] snapshot;
 
-	public static void init() {
-	}
+  public static void init() {
+  }
 
-	private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
-		this.entity = entity;
-		this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
-		entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
-		MANAGER.addEntry(entity, this, duration);
-	}
+  private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
+    this.entity = entity;
+    this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
+    entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
+    MANAGER.addEntry(entity, this, duration);
+  }
 
-	public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-		if (MANAGER.isTemp(user.getEntity())) return Optional.empty();
-		if (user.getEntity().getEquipment() == null) return Optional.empty();
-		return Optional.of(new TempArmor(user.getEntity(), armor, duration));
-	}
+  public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
+    if (MANAGER.isTemp(user.getEntity())) {
+      return Optional.empty();
+    }
+    if (user.getEntity().getEquipment() == null) {
+      return Optional.empty();
+    }
+    return Optional.of(new TempArmor(user.getEntity(), armor, duration));
+  }
 
-	public @NonNull LivingEntity getPlayer() {
-		return entity;
-	}
+  public @NonNull LivingEntity getPlayer() {
+    return entity;
+  }
 
-	public @NonNull Collection<ItemStack> getSnapshot() {
-		return Arrays.asList(snapshot);
-	}
+  public @NonNull Collection<ItemStack> getSnapshot() {
+    return Arrays.asList(snapshot);
+  }
 
-	@Override
-	public void revert() {
-		entity.getEquipment().setArmorContents(snapshot);
-		MANAGER.removeEntry(entity);
-	}
+  @Override
+  public void revert() {
+    entity.getEquipment().setArmorContents(snapshot);
+    MANAGER.removeEntry(entity);
+  }
 
-	private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
-		for (ItemStack item : armorItems) {
-			ItemMeta meta = item.getItemMeta();
-			meta.displayName(Component.text("Bending Armor"));
-			meta.lore(Collections.singletonList(Component.text("Temporary")));
-			meta.setUnbreakable(true);
-			Bending.getLayer().addArmorKey(meta);
-			item.setItemMeta(meta);
-		}
-		return armorItems;
-	}
+  private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
+    for (ItemStack item : armorItems) {
+      ItemMeta meta = item.getItemMeta();
+      meta.displayName(Component.text("Bending Armor"));
+      meta.lore(Collections.singletonList(Component.text("Temporary")));
+      meta.setUnbreakable(true);
+      Bending.getLayer().addArmorKey(meta);
+      item.setItemMeta(meta);
+    }
+    return armorItems;
+  }
 
-	private ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
-		ItemStack[] copy = new ItemStack[armorItems.length];
-		for (int i = 0; i < armorItems.length; i++) {
-			ItemStack item = armorItems[i];
-			if (item != null && item.getItemMeta() != null) {
-				if (!Bending.getLayer().hasArmorKey(item.getItemMeta())) {
-					copy[i] = item;
-				}
-			}
-		}
-		return copy;
-	}
+  private ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
+    ItemStack[] copy = new ItemStack[armorItems.length];
+    for (int i = 0; i < armorItems.length; i++) {
+      ItemStack item = armorItems[i];
+      if (item != null && item.getItemMeta() != null) {
+        if (!Bending.getLayer().hasArmorKey(item.getItemMeta())) {
+          copy[i] = item;
+        }
+      }
+    }
+    return copy;
+  }
 }

@@ -42,33 +42,37 @@ import org.bukkit.util.NumberConversions;
  * Utility class to handle bending sourcing.
  */
 public final class SourceUtil {
-	private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
-	private static final ItemStack waterBottle;
+  private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
+  private static final ItemStack waterBottle;
 
-	static {
-		waterBottle = new ItemStack(Material.POTION, 1);
-		PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
-		potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
-		waterBottle.setItemMeta(potionMeta);
-	}
+  static {
+    waterBottle = new ItemStack(Material.POTION, 1);
+    PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
+    potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
+    waterBottle.setItemMeta(potionMeta);
+  }
 
-	/**
-	 * Attempts to find a possible source.
-	 * @param user the user checking for a source
-	 * @param range the max range to check
-	 * @param predicate the predicate to check
-	 * @return an Optional source block
-	 */
-	public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
-		BlockIterator it = new BlockIterator(user.getEntity(), FastMath.min(100, NumberConversions.ceil(range)));
-		while (it.hasNext()) {
-			Block block = it.next();
-			if (block.getType().isAir()) continue;
-			if (predicate.test(block) && TempBlock.isBendable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				return Optional.of(block);
-			}
-			if (!block.isPassable()) break;
-		}
-		return Optional.empty();
-	}
+  /**
+   * Attempts to find a possible source.
+   * @param user the user checking for a source
+   * @param range the max range to check
+   * @param predicate the predicate to check
+   * @return an Optional source block
+   */
+  public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
+    BlockIterator it = new BlockIterator(user.getEntity(), FastMath.min(100, NumberConversions.ceil(range)));
+    while (it.hasNext()) {
+      Block block = it.next();
+      if (block.getType().isAir()) {
+        continue;
+      }
+      if (predicate.test(block) && TempBlock.isBendable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        return Optional.of(block);
+      }
+      if (!block.isPassable()) {
+        break;
+      }
+    }
+    return Optional.empty();
+  }
 }

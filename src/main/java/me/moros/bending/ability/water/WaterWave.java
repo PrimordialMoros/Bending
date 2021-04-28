@@ -52,137 +52,143 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
 public class WaterWave extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<Entity> affectedEntities = new HashSet<>();
 
-	private boolean ice = false;
-	private long startTime;
+  private boolean ice = false;
+  private long startTime;
 
-	public WaterWave(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public WaterWave(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterWave.class)) {
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterWave.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
-		startTime = System.currentTimeMillis();
-		return true;
-	}
+    removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
+    startTime = System.currentTimeMillis();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
-			return UpdateResult.REMOVE;
-		}
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+      return UpdateResult.REMOVE;
+    }
 
-		// scale down to 0.33 * speed near the end
-		double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
+    // scale down to 0.33 * speed near the end
+    double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
 
-		user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());
-		user.getEntity().setFallDistance(0);
+    user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());
+    user.getEntity().setFallDistance(0);
 
-		Vector3 center = user.getLocation().add(Vector3.MINUS_J);
-		for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
-			if (TempBlock.MANAGER.isTemp(block)) continue;
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);
-		}
-		if (ice) {
-			CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
-		}
-		return UpdateResult.CONTINUE;
-	}
+    Vector3 center = user.getLocation().add(Vector3.MINUS_J);
+    for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
+      if (TempBlock.MANAGER.isTemp(block)) {
+        continue;
+      }
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        continue;
+      }
+      TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);
+    }
+    if (ice) {
+      CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	private void scheduleRevert(TempBlock tb) {
-		final Block block = tb.getBlock();
-		Tasker.newChain().delay(20).sync(() -> {
-			if (ice) {
-				TempBlock.create(block, Material.ICE.createBlockData(), 1000);
-			} else {
-				tb.revert();
-			}
-		}).execute();
-	}
+  private void scheduleRevert(TempBlock tb) {
+    final Block block = tb.getBlock();
+    Tasker.newChain().delay(20).sync(() -> {
+      if (ice) {
+        TempBlock.create(block, Material.ICE.createBlockData(), 1000);
+      } else {
+        tb.revert();
+      }
+    }).execute();
+  }
 
-	private boolean onEntityHit(Entity entity) {
-		if (affectedEntities.contains(entity)) return false;
-		affectedEntities.add(entity);
-		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-		PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-		return true;
-	}
+  private boolean onEntityHit(Entity entity) {
+    if (affectedEntities.contains(entity)) {
+      return false;
+    }
+    affectedEntities.add(entity);
+    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+    PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+    return true;
+  }
 
-	public void freeze() {
-		ice = true;
-	}
+  public void freeze() {
+    ice = true;
+  }
 
-	public static void freeze(User user) {
-		if (user.getSelectedAbilityName().equals("PhaseChange")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
-		}
-	}
+  public static void freeze(User user) {
+    if (user.getSelectedAbilityName().equals("PhaseChange")) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
+    }
+  }
 
-	@Override
-	public void onDestroy() {
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.SPEED)
-		public double speed;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.SPEED)
+    public double speed;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
 
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
-		@Attribute(Attribute.STRENGTH)
-		public int power;
-		@Attribute(Attribute.DURATION)
-		public long slowDuration;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.STRENGTH)
+    public int power;
+    @Attribute(Attribute.DURATION)
+    public long slowDuration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
-			duration = abilityNode.node("duration").getLong(3500);
-			speed = abilityNode.node("speed").getDouble(1.2);
-			radius = abilityNode.node("radius").getDouble(1.7);
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      duration = abilityNode.node("duration").getLong(3500);
+      speed = abilityNode.node("speed").getDouble(1.2);
+      radius = abilityNode.node("radius").getDouble(1.7);
 
-			damage = abilityNode.node("ice-damage").getDouble(2.0);
-			power = abilityNode.node("ice-slow-power").getInt(2) - 1;
-			slowDuration = abilityNode.node("ice-slow-duration").getLong(3500);
-		}
-	}
+      damage = abilityNode.node("ice-damage").getDouble(2.0);
+      power = abilityNode.node("ice-slow-power").getInt(2) - 1;
+      slowDuration = abilityNode.node("ice-slow-duration").getLong(3500);
+    }
+  }
 }

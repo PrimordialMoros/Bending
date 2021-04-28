@@ -52,132 +52,142 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 public class Bolt extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Vector3 targetLocation;
+  private Vector3 targetLocation;
 
-	private boolean struck = false;
-	private long startTime;
+  private boolean struck = false;
+  private long startTime;
 
-	public Bolt(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public Bolt(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) return false;
-		this.user = user;
-		recalculateConfig();
-		removalPolicy = Policies.builder()
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.build();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, getDescription())) {
+      return false;
+    }
+    this.user = user;
+    recalculateConfig();
+    removalPolicy = Policies.builder()
+      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .build();
 
-		startTime = System.currentTimeMillis();
-		return true;
-	}
+    startTime = System.currentTimeMillis();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
-			if (user.isSneaking()) {
-				ParticleUtil.createRGB(user.getMainHandSide().toLocation(user.getWorld()), "01E1FF").spawn();
-				return UpdateResult.CONTINUE;
-			} else {
-				strike();
-			}
-		} else if (user.isSneaking()) {
-			return UpdateResult.CONTINUE;
-		}
-		return UpdateResult.REMOVE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
+      if (user.isSneaking()) {
+        ParticleUtil.createRGB(user.getMainHandSide().toLocation(user.getWorld()), "01E1FF").spawn();
+        return UpdateResult.CONTINUE;
+      } else {
+        strike();
+      }
+    } else if (user.isSneaking()) {
+      return UpdateResult.CONTINUE;
+    }
+    return UpdateResult.REMOVE;
+  }
 
-	private boolean onEntityHit(Entity entity) {
-		if (entity instanceof Creeper) ((Creeper) entity).setPowered(true);
-		double distance = EntityMethods.getEntityCenter(entity).distance(targetLocation);
-		if (distance > 5) return false;
-		boolean hitWater = MaterialUtil.isWater(targetLocation.toBlock(user.getWorld()));
+  private boolean onEntityHit(Entity entity) {
+    if (entity instanceof Creeper) {
+      ((Creeper) entity).setPowered(true);
+    }
+    double distance = EntityMethods.getEntityCenter(entity).distance(targetLocation);
+    if (distance > 5) {
+      return false;
+    }
+    boolean hitWater = MaterialUtil.isWater(targetLocation.toBlock(user.getWorld()));
 
-		boolean vulnerable = (entity instanceof LivingEntity && InventoryUtil.hasMetalArmor((LivingEntity) entity));
+    boolean vulnerable = (entity instanceof LivingEntity && InventoryUtil.hasMetalArmor((LivingEntity) entity));
 
-		double damage = (vulnerable || hitWater) ? userConfig.damage * 2 : userConfig.damage;
-		if (distance >= 1.5) {
-			damage -= (hitWater ? distance / 3 : distance / 2);
-		}
-		DamageUtil.damageEntity(entity, user, damage, getDescription());
-		return true;
-	}
+    double damage = (vulnerable || hitWater) ? userConfig.damage * 2 : userConfig.damage;
+    if (distance >= 1.5) {
+      damage -= (hitWater ? distance / 3 : distance / 2);
+    }
+    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    return true;
+  }
 
-	public boolean isNearbyChannel() {
-		Optional<Bolt> instance = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(Bolt.class)
-			.filter(b -> !b.getUser().equals(user))
-			.filter(b -> b.getUser().getLocation().distanceSq(targetLocation) < 4 * 4)
-			.findAny();
-		instance.ifPresent(bolt -> bolt.startTime = 0);
-		return instance.isPresent();
-	}
+  public boolean isNearbyChannel() {
+    Optional<Bolt> instance = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(Bolt.class)
+      .filter(b -> !b.getUser().equals(user))
+      .filter(b -> b.getUser().getLocation().distanceSq(targetLocation) < 4 * 4)
+      .findAny();
+    instance.ifPresent(bolt -> bolt.startTime = 0);
+    return instance.isPresent();
+  }
 
-	public void dealDamage() {
-		Collider collider = new Sphere(targetLocation, 5);
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
-		FragileStructure.tryDamageStructure(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
-	}
+  public void dealDamage() {
+    Collider collider = new Sphere(targetLocation, 5);
+    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
+    FragileStructure.tryDamageStructure(Collections.singletonList(targetLocation.toBlock(user.getWorld())), 8);
+  }
 
-	private void strike() {
-		targetLocation = user.getTargetEntity(userConfig.range)
-			.map(EntityMethods::getEntityCenter).orElseGet(() -> user.getTarget(userConfig.range));
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) return;
-		user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		struck = true;
-		if (!isNearbyChannel()) dealDamage();
-	}
+  private void strike() {
+    targetLocation = user.getTargetEntity(userConfig.range)
+      .map(EntityMethods::getEntityCenter).orElseGet(() -> user.getTarget(userConfig.range));
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, targetLocation.toBlock(user.getWorld()))) {
+      return;
+    }
+    user.getWorld().strikeLightningEffect(targetLocation.toLocation(user.getWorld()));
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    struck = true;
+    if (!isNearbyChannel()) {
+      dealDamage();
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public void onDestroy() {
-		if (!struck && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
-			DamageUtil.damageEntity(user.getEntity(), user, userConfig.damage, getDescription());
-		}
-	}
+  @Override
+  public void onDestroy() {
+    if (!struck && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
+      DamageUtil.damageEntity(user.getEntity(), user, userConfig.damage, getDescription());
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.CHARGE_TIME)
-		public long chargeTime;
-		@Attribute(Attribute.DURATION)
-		public long duration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.CHARGE_TIME)
+    public long chargeTime;
+    @Attribute(Attribute.DURATION)
+    public long duration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "bolt");
-			cooldown = abilityNode.node("cooldown").getLong(6000);
-			damage = abilityNode.node("damage").getDouble(3.0);
-			range = abilityNode.node("range").getDouble(30.0);
-			chargeTime = abilityNode.node("charge-time").getLong(2000);
-			duration = abilityNode.node("duration").getLong(8000);
-		}
-	}
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "bolt");
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      damage = abilityNode.node("damage").getDouble(3.0);
+      range = abilityNode.node("range").getDouble(30.0);
+      chargeTime = abilityNode.node("charge-time").getLong(2000);
+      duration = abilityNode.node("duration").getLong(8000);
+    }
+  }
 }
 

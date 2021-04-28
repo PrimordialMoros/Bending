@@ -24,14 +24,14 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public abstract class BendingAbilityEvent extends BendingUserEvent {
-	protected final AbilityDescription desc;
+  protected final AbilityDescription desc;
 
-	BendingAbilityEvent(User user, AbilityDescription desc) {
-		super(user);
-		this.desc = desc;
-	}
+  BendingAbilityEvent(User user, AbilityDescription desc) {
+    super(user);
+    this.desc = desc;
+  }
 
-	public @NonNull AbilityDescription getAbility() {
-		return desc;
-	}
+  public @NonNull AbilityDescription getAbility() {
+    return desc;
+  }
 }

@@ -28,28 +28,30 @@ import me.moros.bending.model.predicate.general.BendingConditions.ConditionBuild
 import me.moros.bending.model.user.User;
 
 public class CompositeBendingConditional implements BendingConditional {
-	private final Set<BendingConditional> conditionals;
+  private final Set<BendingConditional> conditionals;
 
-	CompositeBendingConditional(@NonNull ConditionBuilder builder) {
-		this.conditionals = builder.getConditionals();
-	}
+  CompositeBendingConditional(@NonNull ConditionBuilder builder) {
+    this.conditionals = builder.getConditionals();
+  }
 
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		if (user == null || desc == null) return false;
-		Predicate<BendingConditional> filter = desc.canBypassCooldown() ? c -> !c.equals(BendingConditions.COOLDOWN) : c -> true;
-		return conditionals.stream().filter(filter).allMatch(cond -> cond.test(user, desc));
-	}
+  @Override
+  public boolean test(User user, AbilityDescription desc) {
+    if (user == null || desc == null) {
+      return false;
+    }
+    Predicate<BendingConditional> filter = desc.canBypassCooldown() ? c -> !c.equals(BendingConditions.COOLDOWN) : c -> true;
+    return conditionals.stream().filter(filter).allMatch(cond -> cond.test(user, desc));
+  }
 
-	public boolean hasConditional(@NonNull BendingConditional conditional) {
-		return conditionals.contains(conditional);
-	}
+  public boolean hasConditional(@NonNull BendingConditional conditional) {
+    return conditionals.contains(conditional);
+  }
 
-	public boolean add(@NonNull BendingConditional conditional) {
-		return conditionals.add(conditional);
-	}
+  public boolean add(@NonNull BendingConditional conditional) {
+    return conditionals.add(conditional);
+  }
 
-	public boolean remove(@NonNull BendingConditional conditional) {
-		return conditionals.remove(conditional);
-	}
+  public boolean remove(@NonNull BendingConditional conditional) {
+    return conditionals.remove(conditional);
+  }
 }

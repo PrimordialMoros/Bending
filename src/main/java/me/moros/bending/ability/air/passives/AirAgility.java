@@ -36,67 +36,69 @@ import me.moros.bending.util.PotionUtil;
 import org.bukkit.potion.PotionEffectType;
 
 public class AirAgility extends AbilityInstance implements PassiveAbility {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	public AirAgility(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirAgility(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		removalPolicy = Policies.builder().build();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    removalPolicy = Policies.builder().build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
-			return UpdateResult.CONTINUE;
-		}
-		handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);
-		handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier);
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+      return UpdateResult.CONTINUE;
+    }
+    handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);
+    handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier);
+    return UpdateResult.CONTINUE;
+  }
 
-	private void handlePotionEffect(PotionEffectType type, int amplifier) {
-		if (amplifier < 0) return;
-		PotionUtil.tryAddPotion(user.getEntity(), type, 100, amplifier);
-	}
+  private void handlePotionEffect(PotionEffectType type, int amplifier) {
+    if (amplifier < 0) {
+      return;
+    }
+    PotionUtil.tryAddPotion(user.getEntity(), type, 100, amplifier);
+  }
 
-	@Override
-	public void onDestroy() {
-		user.getEntity().removePotionEffect(PotionEffectType.JUMP);
-		user.getEntity().removePotionEffect(PotionEffectType.SPEED);
-	}
+  @Override
+  public void onDestroy() {
+    user.getEntity().removePotionEffect(PotionEffectType.JUMP);
+    user.getEntity().removePotionEffect(PotionEffectType.SPEED);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.STRENGTH)
-		public int speedAmplifier;
-		@Attribute(Attribute.STRENGTH)
-		public int jumpAmplifier;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.STRENGTH)
+    public int speedAmplifier;
+    @Attribute(Attribute.STRENGTH)
+    public int jumpAmplifier;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
 
-			speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
-			jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3) - 1;
-		}
-	}
+      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
+      jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3) - 1;
+    }
+  }
 }

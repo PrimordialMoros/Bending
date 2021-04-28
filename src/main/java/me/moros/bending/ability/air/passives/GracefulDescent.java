@@ -29,37 +29,37 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
 
 public class GracefulDescent extends AbilityInstance implements PassiveAbility {
-	private User user;
+  private User user;
 
-	public GracefulDescent(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public GracefulDescent(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-	}
+  @Override
+  public void recalculateConfig() {
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    return UpdateResult.CONTINUE;
+  }
 
-	public static boolean isGraceful(User user) {
-		if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
-			return false;
-		}
-		return Bending.getGame().getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
-	}
+  public static boolean isGraceful(User user) {
+    if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
+      return false;
+    }
+    return Bending.getGame().getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 }

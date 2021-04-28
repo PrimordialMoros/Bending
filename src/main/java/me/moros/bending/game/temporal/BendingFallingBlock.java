@@ -30,44 +30,44 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 
 public class BendingFallingBlock implements Temporary {
-	public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();
-	private final FallingBlock fallingBlock;
+  public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();
+  private final FallingBlock fallingBlock;
 
-	public static void init() {
-	}
+  public static void init() {
+  }
 
-	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
-		fallingBlock = location.getWorld().spawnFallingBlock(location, data);
-		fallingBlock.setVelocity(velocity.clampVelocity());
-		fallingBlock.setGravity(gravity);
-		fallingBlock.setDropItem(false);
-		fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
-		MANAGER.addEntry(fallingBlock, this, duration);
-	}
+  public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
+    fallingBlock = location.getWorld().spawnFallingBlock(location, data);
+    fallingBlock.setVelocity(velocity.clampVelocity());
+    fallingBlock.setGravity(gravity);
+    fallingBlock.setDropItem(false);
+    fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
+    MANAGER.addEntry(fallingBlock, this, duration);
+  }
 
-	public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
-		this(location, data, Vector3.ZERO, false, duration);
-	}
+  public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
+    this(location, data, Vector3.ZERO, false, duration);
+  }
 
-	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
-		this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
-	}
+  public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
+    this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
+  }
 
-	public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, long duration) {
-		this(block, data, Vector3.ZERO, false, duration);
-	}
+  public BendingFallingBlock(@NonNull Block block, @NonNull BlockData data, long duration) {
+    this(block, data, Vector3.ZERO, false, duration);
+  }
 
-	@Override
-	public void revert() {
-		fallingBlock.remove();
-		MANAGER.removeEntry(fallingBlock);
-	}
+  @Override
+  public void revert() {
+    fallingBlock.remove();
+    MANAGER.removeEntry(fallingBlock);
+  }
 
-	public @NonNull FallingBlock getFallingBlock() {
-		return fallingBlock;
-	}
+  public @NonNull FallingBlock getFallingBlock() {
+    return fallingBlock;
+  }
 
-	public @NonNull Vector3 getCenter() {
-		return new Vector3(fallingBlock.getLocation()).add(new Vector3(0, 0.5, 0));
-	}
+  public @NonNull Vector3 getCenter() {
+    return new Vector3(fallingBlock.getLocation()).add(new Vector3(0, 0.5, 0));
+  }
 }

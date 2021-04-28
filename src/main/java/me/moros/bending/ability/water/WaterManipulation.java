@@ -70,235 +70,253 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
 public class WaterManipulation extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private StateChain states;
-	private Manip manip;
-	private final Deque<Block> trail = new ArrayDeque<>(2);
+  private StateChain states;
+  private Manip manip;
+  private final Deque<Block> trail = new ArrayDeque<>(2);
 
-	private boolean isIce;
+  private boolean isIce;
 
-	public WaterManipulation(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public WaterManipulation(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.ATTACK) {
-			Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
-				.collect(Collectors.toList());
-			redirectAny(user);
-			for (WaterManipulation manip : manips) {
-				if (manip.manip == null) {
-					manip.launch();
-				} else {
-					manip.manip.redirect();
-				}
-			}
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (method == ActivationMethod.ATTACK) {
+      Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+        .collect(Collectors.toList());
+      redirectAny(user);
+      for (WaterManipulation manip : manips) {
+        if (manip.manip == null) {
+          manip.launch();
+        } else {
+          manip.manip.redirect();
+        }
+      }
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
-		if (source == null) return false;
+    Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
+    if (source == null) {
+      return false;
+    }
 
-		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
-			.filter(m -> m.manip == null).collect(Collectors.toList());
-		for (WaterManipulation manip : manips) {
-			State state = manip.states.getCurrent();
-			if (state instanceof SelectedSource) {
-				((SelectedSource) state).reselect(source);
-				return false;
-			}
-		}
+    Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+      .filter(m -> m.manip == null).collect(Collectors.toList());
+    for (WaterManipulation manip : manips) {
+      State state = manip.states.getCurrent();
+      if (state instanceof SelectedSource) {
+        ((SelectedSource) state).reselect(source);
+        return false;
+      }
+    }
 
-		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange))
-			.start();
-		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
-		return true;
-	}
+    states = new StateChain()
+      .addState(new SelectedSource(user, source, userConfig.selectRange))
+      .start();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (manip != null) {
-			UpdateResult result = manip.update();
-			if (result == UpdateResult.CONTINUE) {
-				SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
-				if (ThreadLocalRandom.current().nextInt(5) == 0) {
-					effect.play(manip.getCenter().toLocation(user.getWorld()));
-				}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (manip != null) {
+      UpdateResult result = manip.update();
+      if (result == UpdateResult.CONTINUE) {
+        SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
+        if (ThreadLocalRandom.current().nextInt(5) == 0) {
+          effect.play(manip.getCenter().toLocation(user.getWorld()));
+        }
 
-				if (isIce) {
-					Location center = manip.getCenter().toLocation(user.getWorld());
-					ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
-						.offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
-					ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
-						.offset(0.5, 0.5, 0.5).spawn();
-				} else {
-					Block trail1 = manip.getPreviousBlock();
-					if (trail1 != null) {
-						if (!trail.isEmpty()) manip.clean(trail.peekFirst());
-						if (trail.size() == 2) manip.clean(trail.removeLast());
-						trail.addFirst(trail1);
-						renderTrail(trail1, 7);
-						renderTrail(trail.peekLast(), 6);
-					}
-				}
-			}
-			return result;
-		} else {
-			return states.update();
-		}
-	}
+        if (isIce) {
+          Location center = manip.getCenter().toLocation(user.getWorld());
+          ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
+            .offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
+          ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
+            .offset(0.5, 0.5, 0.5).spawn();
+        } else {
+          Block trail1 = manip.getPreviousBlock();
+          if (trail1 != null) {
+            if (!trail.isEmpty()) {
+              manip.clean(trail.peekFirst());
+            }
+            if (trail.size() == 2) {
+              manip.clean(trail.removeLast());
+            }
+            trail.addFirst(trail1);
+            renderTrail(trail1, 7);
+            renderTrail(trail.peekLast(), 6);
+          }
+        }
+      }
+      return result;
+    } else {
+      return states.update();
+    }
+  }
 
-	private void renderTrail(Block block, int level) {
-		if (block == null) return;
-		if (MaterialUtil.isTransparentOrWater(block)) {
-			BlockMethods.tryBreakPlant(block);
-			if (!MaterialUtil.isWater(block)) {
-				TempBlock.create(block, MaterialUtil.getWaterData(level));
-			}
-		}
-	}
+  private void renderTrail(Block block, int level) {
+    if (block == null) {
+      return;
+    }
+    if (MaterialUtil.isTransparentOrWater(block)) {
+      BlockMethods.tryBreakPlant(block);
+      if (!MaterialUtil.isWater(block)) {
+        TempBlock.create(block, MaterialUtil.getWaterData(level));
+      }
+    }
+  }
 
-	private void launch() {
-		if (user.isOnCooldown(getDescription())) return;
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			state.complete();
-			Block source = states.getChainStore().stream().findAny().orElse(null);
-			if (source == null || !TempBlock.isBendable(source)) return;
-			if (WaterMaterials.isWaterBendable(source)) {
-				isIce = WaterMaterials.isIceBendable(source);
-				manip = new Manip(user, source);
-				removalPolicy = Policies.builder().build();
-				user.setCooldown(getDescription(), userConfig.cooldown);
-				TempBlock.createAir(source);
-			}
-		}
-	}
+  private void launch() {
+    if (user.isOnCooldown(getDescription())) {
+      return;
+    }
+    State state = states.getCurrent();
+    if (state instanceof SelectedSource) {
+      state.complete();
+      Block source = states.getChainStore().stream().findAny().orElse(null);
+      if (source == null || !TempBlock.isBendable(source)) {
+        return;
+      }
+      if (WaterMaterials.isWaterBendable(source)) {
+        isIce = WaterMaterials.isIceBendable(source);
+        manip = new Manip(user, source);
+        removalPolicy = Policies.builder().build();
+        user.setCooldown(getDescription(), userConfig.cooldown);
+        TempBlock.createAir(source);
+      }
+    }
+  }
 
-	private static void redirectAny(User user) {
-		Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
-			.filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
-		for (WaterManipulation manip : manips) {
-			Vector3 center = manip.manip.getCenter();
-			double dist = center.distanceSq(manip.getUser().getEyeLocation());
-			double dist2 = center.distanceSq(user.getEyeLocation());
-			if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) continue;
-			Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
-			if (selectSphere.intersects(user.getRay(dist))) {
-				Vector3 dir = center.subtract(user.getEyeLocation());
-				if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.rMax + 2).isPresent()) {
-					Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(manip, user);
-					manip.manip.redirect();
-				}
-			}
-		}
-	}
+  private static void redirectAny(User user) {
+    Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
+      .filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
+    for (WaterManipulation manip : manips) {
+      Vector3 center = manip.manip.getCenter();
+      double dist = center.distanceSq(manip.getUser().getEyeLocation());
+      double dist2 = center.distanceSq(user.getEyeLocation());
+      if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) {
+        continue;
+      }
+      Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
+      if (selectSphere.intersects(user.getRay(dist))) {
+        Vector3 dir = center.subtract(user.getEyeLocation());
+        if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.rMax + 2).isPresent()) {
+          Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(manip, user);
+          manip.manip.redirect();
+        }
+      }
+    }
+  }
 
-	@Override
-	public void onDestroy() {
-		if (manip != null) {
-			trail.forEach(manip::clean);
-			manip.clean();
-		}
-	}
+  @Override
+  public void onDestroy() {
+    if (manip != null) {
+      trail.forEach(manip::clean);
+      manip.clean();
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public boolean setUser(@NonNull User user) {
-		if (manip == null) return false;
-		this.user = user;
-		manip.setUser(user);
-		return true;
-	}
+  @Override
+  public boolean setUser(@NonNull User user) {
+    if (manip == null) {
+      return false;
+    }
+    this.user = user;
+    manip.setUser(user);
+    return true;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		if (manip == null) return Collections.emptyList();
-		return Collections.singletonList(manip.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    if (manip == null) {
+      return Collections.emptyList();
+    }
+    return Collections.singletonList(manip.getCollider());
+  }
 
-	private class Manip extends AbstractBlockShot {
-		public Manip(User user, Block block) {
-			super(user, block, userConfig.range, isIce ? 80 : 100);
-			material = isIce ? block.getType() : Material.WATER;
-			allowUnderWater = true;
-		}
+  private class Manip extends AbstractBlockShot {
+    public Manip(User user, Block block) {
+      super(user, block, userConfig.range, isIce ? 80 : 100);
+      material = isIce ? block.getType() : Material.WATER;
+      allowUnderWater = true;
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			Vector3 origin = getCenter();
-			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
-			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
-			entity.setVelocity(push.clampVelocity());
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
-			PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-			return true;
-		}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      Vector3 origin = getCenter();
+      Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
+      Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
+      entity.setVelocity(push.clampVelocity());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+      PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+      return true;
+    }
 
-		@Override
-		public void onBlockHit(@NonNull Block block) {
-			FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
-		}
-	}
+    @Override
+    public void onBlockHit(@NonNull Block block) {
+      FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
 
-		@Attribute(Attribute.STRENGTH)
-		public int power;
-		@Attribute(Attribute.DURATION)
-		public long slowDuration;
+    @Attribute(Attribute.STRENGTH)
+    public int power;
+    @Attribute(Attribute.DURATION)
+    public long slowDuration;
 
-		public double redirectGrabRadius;
-		public double rMin;
-		public double rMax;
+    public double redirectGrabRadius;
+    public double rMin;
+    public double rMax;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
 
-			cooldown = abilityNode.node("cooldown").getLong(750);
-			range = abilityNode.node("range").getDouble(28.0);
-			selectRange = abilityNode.node("select-range").getDouble(12.0);
-			damage = abilityNode.node("damage").getDouble(2.0);
-			redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
-			rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
-			rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
+      cooldown = abilityNode.node("cooldown").getLong(750);
+      range = abilityNode.node("range").getDouble(28.0);
+      selectRange = abilityNode.node("select-range").getDouble(12.0);
+      damage = abilityNode.node("damage").getDouble(2.0);
+      redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
+      rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
+      rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
 
-			CommentedConfigurationNode iceNode = abilityNode.node("iceblast");
+      CommentedConfigurationNode iceNode = abilityNode.node("iceblast");
 
-			power = iceNode.node("slow-power").getInt(2) - 1;
-			slowDuration = iceNode.node("slow-duration").getLong(1500);
-		}
-	}
+      power = iceNode.node("slow-power").getInt(2) - 1;
+      slowDuration = iceNode.node("slow-duration").getLong(1500);
+    }
+  }
 }

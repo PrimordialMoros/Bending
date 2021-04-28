@@ -35,57 +35,67 @@ import org.bukkit.potion.PotionType;
  * Utility class to handle inventory modification.
  */
 public final class InventoryUtil {
-	private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
-	private static final ItemStack waterBottle;
+  private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
+  private static final ItemStack waterBottle;
 
-	static {
-		waterBottle = new ItemStack(Material.POTION, 1);
-		PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
-		potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
-		waterBottle.setItemMeta(potionMeta);
-	}
+  static {
+    waterBottle = new ItemStack(Material.POTION, 1);
+    PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
+    potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
+    waterBottle.setItemMeta(potionMeta);
+  }
 
-	public static boolean hasItem(@NonNull User user, @NonNull ItemStack itemStack) {
-		return user.getInventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
-	}
+  public static boolean hasItem(@NonNull User user, @NonNull ItemStack itemStack) {
+    return user.getInventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
+  }
 
-	public static boolean hasFullBottle(@NonNull User user) {
-		return hasItem(user, waterBottle);
-	}
+  public static boolean hasFullBottle(@NonNull User user) {
+    return hasItem(user, waterBottle);
+  }
 
-	public static boolean hasEmptyBottle(@NonNull User user) {
-		return hasItem(user, emptyBottle);
-	}
+  public static boolean hasEmptyBottle(@NonNull User user) {
+    return hasItem(user, emptyBottle);
+  }
 
-	public static boolean removeItem(@NonNull User user, @NonNull ItemStack itemStack) {
-		if (!hasItem(user, itemStack)) return false;
-		return user.getInventory().map(i -> i.removeItem(itemStack).isEmpty()).orElse(false);
-	}
+  public static boolean removeItem(@NonNull User user, @NonNull ItemStack itemStack) {
+    if (!hasItem(user, itemStack)) {
+      return false;
+    }
+    return user.getInventory().map(i -> i.removeItem(itemStack).isEmpty()).orElse(false);
+  }
 
-	public static boolean fillBottle(@NonNull User user) {
-		if (!hasEmptyBottle(user)) return false;
-		if (user.getInventory().isPresent()) {
-			Inventory inventory = user.getInventory().get();
-			return inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
-		}
-		return false;
-	}
+  public static boolean fillBottle(@NonNull User user) {
+    if (!hasEmptyBottle(user)) {
+      return false;
+    }
+    if (user.getInventory().isPresent()) {
+      Inventory inventory = user.getInventory().get();
+      return inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
+    }
+    return false;
+  }
 
-	public static boolean emptyBottle(@NonNull User user) {
-		if (!hasFullBottle(user)) return false;
-		if (user.getInventory().isPresent()) {
-			Inventory inventory = user.getInventory().get();
-			return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
-		}
-		return false;
-	}
+  public static boolean emptyBottle(@NonNull User user) {
+    if (!hasFullBottle(user)) {
+      return false;
+    }
+    if (user.getInventory().isPresent()) {
+      Inventory inventory = user.getInventory().get();
+      return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
+    }
+    return false;
+  }
 
-	public static boolean hasMetalArmor(@NonNull LivingEntity entity) {
-		EntityEquipment equipment = entity.getEquipment();
-		if (equipment == null) return false;
-		for (ItemStack item : equipment.getArmorContents()) {
-			if (item != null && MaterialUtil.METAL_ARMOR.isTagged(item)) return true;
-		}
-		return false;
-	}
+  public static boolean hasMetalArmor(@NonNull LivingEntity entity) {
+    EntityEquipment equipment = entity.getEquipment();
+    if (equipment == null) {
+      return false;
+    }
+    for (ItemStack item : equipment.getArmorContents()) {
+      if (item != null && MaterialUtil.METAL_ARMOR.isTagged(item)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

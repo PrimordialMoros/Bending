@@ -25,15 +25,21 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 
 public class SwappedSlotsRemovalPolicy implements RemovalPolicy {
-	private final AbilityDescription expected;
+  private final AbilityDescription expected;
 
-	public SwappedSlotsRemovalPolicy(@NonNull AbilityDescription expected) {
-		this.expected = expected;
-	}
+  private SwappedSlotsRemovalPolicy(AbilityDescription expected) {
+    this.expected = expected;
+  }
 
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		if (!(user instanceof BendingPlayer)) return false;
-		return !expected.equals(user.getSelectedAbility().orElse(null));
-	}
+  @Override
+  public boolean test(User user, AbilityDescription desc) {
+    if (!(user instanceof BendingPlayer)) {
+      return false;
+    }
+    return !expected.equals(user.getSelectedAbility().orElse(null));
+  }
+
+  public static @NonNull RemovalPolicy of(@NonNull AbilityDescription expected) {
+    return new SwappedSlotsRemovalPolicy(expected);
+  }
 }

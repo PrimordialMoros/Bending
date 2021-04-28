@@ -1,16 +1,16 @@
 plugins {
-    java
+    `java-library`
     signing
     `maven-publish`
-    id("com.github.johnrengelman.shadow").version("6.1.0")
+    id("com.github.johnrengelman.shadow").version("7.0.0")
 }
 
 group = "me.moros"
 version = "1.1.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -24,15 +24,15 @@ repositories {
 }
 
 dependencies {
-    implementation("me.moros", "atlas-core", "1.1.0-SNAPSHOT")
-    implementation("org.bstats", "bstats-bukkit-lite", "1.7")
+    api("me.moros", "atlas-core", "1.2.0-SNAPSHOT")
+    implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
-    compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1")
-    compileOnly("com.github.TownyAdvanced", "Towny", "0.96.2.0")
-    compileOnly("com.sk89q.worldedit", "worldedit-core", "7.0.0-SNAPSHOT")
-    compileOnly("com.sk89q.worldedit", "worldedit-bukkit", "7.0.0-SNAPSHOT")
-    compileOnly("com.sk89q.worldguard", "worldguard-core", "7.0.0-SNAPSHOT")
+    compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
+        exclude(module = "worldguard")
+    }
+    compileOnly("com.github.TownyAdvanced", "Towny", "0.96.7.0")
+    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0")
 }
 
 tasks {
@@ -57,6 +57,7 @@ tasks {
             relocate("org.postgresql", "me.moros.atlas.postgresql")
             relocate("org.spongepowered.configurate", "me.moros.atlas.configurate")
         }
+        minimize()
     }
     build {
         dependsOn(shadowJar)

@@ -20,7 +20,7 @@
 package me.moros.bending.model.exception;
 
 public class BendingException extends Exception {
-	public BendingException(String message) {
-		super(message);
-	}
+  public BendingException(String message) {
+    super(message);
+  }
 }

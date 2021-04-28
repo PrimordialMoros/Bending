@@ -22,7 +22,7 @@ package me.moros.bending.model.exception.command;
 import me.moros.atlas.acf.InvalidCommandArgument;
 
 public final class UserException extends InvalidCommandArgument {
-	public UserException(String message) {
-		super(message);
-	}
+  public UserException(String message) {
+    super(message);
+  }
 }

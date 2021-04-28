@@ -41,74 +41,78 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class DensityShift extends AbilityInstance implements PassiveAbility {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
+  private User user;
+  private Config userConfig;
 
-	public DensityShift(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public DensityShift(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    return UpdateResult.CONTINUE;
+  }
 
-	private boolean isSoftened() {
-		if (!user.canBend(getDescription())) return false;
-		Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
-		if (EarthMaterials.isEarthbendable(user, block)) {
-			softenArea();
-			return true;
-		}
-		return MaterialUtil.isTransparent(block);
-	}
+  private boolean isSoftened() {
+    if (!user.canBend(getDescription())) {
+      return false;
+    }
+    Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
+    if (EarthMaterials.isEarthbendable(user, block)) {
+      softenArea();
+      return true;
+    }
+    return MaterialUtil.isTransparent(block);
+  }
 
-	public static boolean isSoftened(User user) {
-		return Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class)
-			.map(DensityShift::isSoftened).orElse(false);
-	}
+  public static boolean isSoftened(User user) {
+    return Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class)
+      .map(DensityShift::isSoftened).orElse(false);
+  }
 
-	private void softenArea() {
-		Location center = user.getLocBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
-		for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
-			if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) continue;
-			TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::setOverwrite);
-		}
-	}
+  private void softenArea() {
+    Location center = user.getLocBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
+    Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
+    for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
+      if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) {
+        continue;
+      }
+      TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::setOverwrite);
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "densityshift");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "densityshift");
 
-			duration = abilityNode.node("duration").getLong(6000);
-			radius = abilityNode.node("radius").getDouble(2.0);
-		}
-	}
+      duration = abilityNode.node("duration").getLong(6000);
+      radius = abilityNode.node("radius").getDouble(2.0);
+    }
+  }
 }
 

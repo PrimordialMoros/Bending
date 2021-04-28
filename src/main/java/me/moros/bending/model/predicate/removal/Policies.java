@@ -27,56 +27,56 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public enum Policies implements RemovalPolicy {
-	DEAD((u, d) -> u.isDead()),
-	OFFLINE((u, d) -> !u.isValid()),
-	SNEAKING((u, d) -> u.isSneaking()),
-	NOT_SNEAKING((u, d) -> !u.isSneaking()),
-	IN_LIQUID((u, d) -> u.getHeadBlock().isLiquid() || u.getLocBlock().isLiquid());
+  DEAD((u, d) -> u.isDead()),
+  OFFLINE((u, d) -> !u.isValid()),
+  SNEAKING((u, d) -> u.isSneaking()),
+  NOT_SNEAKING((u, d) -> !u.isSneaking()),
+  IN_LIQUID((u, d) -> u.getHeadBlock().isLiquid() || u.getLocBlock().isLiquid());
 
-	private final RemovalPolicy policy;
+  private final RemovalPolicy policy;
 
-	Policies(RemovalPolicy policy) {
-		this.policy = policy;
-	}
+  Policies(RemovalPolicy policy) {
+    this.policy = policy;
+  }
 
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		return policy.test(user, desc);
-	}
+  @Override
+  public boolean test(User user, AbilityDescription desc) {
+    return policy.test(user, desc);
+  }
 
-	/**
-	 * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
-	 */
-	public static @NonNull PolicyBuilder builder() {
-		return new PolicyBuilder()
-			.add(Policies.DEAD)
-			.add(Policies.OFFLINE);
-	}
+  /**
+   * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
+   */
+  public static @NonNull PolicyBuilder builder() {
+    return new PolicyBuilder()
+      .add(Policies.DEAD)
+      .add(Policies.OFFLINE);
+  }
 
-	public static class PolicyBuilder {
-		private final Set<RemovalPolicy> policies;
+  public static class PolicyBuilder {
+    private final Set<RemovalPolicy> policies;
 
-		private PolicyBuilder() {
-			policies = new HashSet<>();
-		}
+    private PolicyBuilder() {
+      policies = new HashSet<>();
+    }
 
-		public PolicyBuilder add(@NonNull RemovalPolicy policy) {
-			policies.add(policy);
-			return this;
-		}
+    public PolicyBuilder add(@NonNull RemovalPolicy policy) {
+      policies.add(policy);
+      return this;
+    }
 
-		public PolicyBuilder remove(@NonNull RemovalPolicy policy) {
-			policies.remove(policy);
-			return this;
-		}
+    public PolicyBuilder remove(@NonNull RemovalPolicy policy) {
+      policies.remove(policy);
+      return this;
+    }
 
-		public @NonNull RemovalPolicy build() {
-			return new CompositeRemovalPolicy(this);
-		}
+    public @NonNull RemovalPolicy build() {
+      return new CompositeRemovalPolicy(this);
+    }
 
-		@NonNull Set<@NonNull RemovalPolicy> getPolicies() {
-			return new HashSet<>(policies);
-		}
-	}
+    @NonNull Set<@NonNull RemovalPolicy> getPolicies() {
+      return new HashSet<>(policies);
+    }
+  }
 }
 

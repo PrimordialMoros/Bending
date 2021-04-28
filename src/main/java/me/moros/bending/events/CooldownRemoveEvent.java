@@ -23,7 +23,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public class CooldownRemoveEvent extends BendingAbilityEvent {
-	CooldownRemoveEvent(User user, AbilityDescription desc) {
-		super(user, desc);
-	}
+  CooldownRemoveEvent(User user, AbilityDescription desc) {
+    super(user, desc);
+  }
 }

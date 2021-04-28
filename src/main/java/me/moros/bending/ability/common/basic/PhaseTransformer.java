@@ -27,28 +27,28 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.block.Block;
 
 public abstract class PhaseTransformer {
-	private final Deque<Block> queue;
+  private final Deque<Block> queue;
 
-	public PhaseTransformer() {
-		queue = new ArrayDeque<>(32);
-	}
+  public PhaseTransformer() {
+    queue = new ArrayDeque<>(32);
+  }
 
-	public boolean fillQueue(@NonNull Collection<Block> blocks) {
-		return queue.addAll(blocks);
-	}
+  public boolean fillQueue(@NonNull Collection<Block> blocks) {
+    return queue.addAll(blocks);
+  }
 
-	public void processQueue(int amount) {
-		int counter = 0;
-		while (!queue.isEmpty() && counter <= amount) {
-			if (processBlock(queue.poll())) {
-				counter++;
-			}
-		}
-	}
+  public void processQueue(int amount) {
+    int counter = 0;
+    while (!queue.isEmpty() && counter <= amount) {
+      if (processBlock(queue.poll())) {
+        counter++;
+      }
+    }
+  }
 
-	public void clear() {
-		queue.clear();
-	}
+  public void clear() {
+    queue.clear();
+  }
 
-	protected abstract boolean processBlock(@NonNull Block block);
+  protected abstract boolean processBlock(@NonNull Block block);
 }

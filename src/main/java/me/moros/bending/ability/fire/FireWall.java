@@ -63,172 +63,180 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 public class FireWall extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(125, TimeUnit.MILLISECONDS).build();
+  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+    .expirationPolicy(ExpirationPolicy.CREATED)
+    .expiration(125, TimeUnit.MILLISECONDS).build();
 
-	private Collection<Block> blocks;
-	private OBB collider;
+  private Collection<Block> blocks;
+  private OBB collider;
 
-	private long nextRenderTime;
+  private long nextRenderTime;
 
-	public FireWall(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FireWall(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		int pitch = user.getPitch();
+    int pitch = user.getPitch();
 
-		if (FastMath.abs(pitch) > 50) {
-			return false;
-		}
+    if (FastMath.abs(pitch) > 50) {
+      return false;
+    }
 
-		double hw = userConfig.width / 2.0;
-		double hh = userConfig.height / 2.0;
+    double hw = userConfig.width / 2.0;
+    double hh = userConfig.height / 2.0;
 
-		AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
-		Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
-		Vector3 location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.range));
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
-			return false;
-		}
+    AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
+    Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
+    Vector3 location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.range));
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+      return false;
+    }
 
-		Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
-		rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(pitch), RotationConvention.VECTOR_OPERATOR));
-		collider = new OBB(aabb, rotation).addPosition(location);
-		double radius = collider.getHalfExtents().maxComponent() + 1;
-		blocks = WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
-		if (blocks.isEmpty()) return false;
+    Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
+    rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(pitch), RotationConvention.VECTOR_OPERATOR));
+    collider = new OBB(aabb, rotation).addPosition(location);
+    double radius = collider.getHalfExtents().maxComponent() + 1;
+    blocks = WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
+    if (blocks.isEmpty()) {
+      return false;
+    }
 
-		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(userConfig.duration)).build();
+    removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
-		nextRenderTime = 0;
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		return true;
-	}
+    nextRenderTime = 0;
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		long time = System.currentTimeMillis();
-		if (time > nextRenderTime) {
-			nextRenderTime = time + 200;
-			for (Block block : blocks) {
-				Location location = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleUtil.createFire(user, location).count(3).offset(0.5, 0.5, 0.5).extra(0.01).spawn();
-				if (ThreadLocalRandom.current().nextInt(15) == 0) {
-					SoundUtil.FIRE_SOUND.play(location);
-				}
-			}
-		}
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true);
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    long time = System.currentTimeMillis();
+    if (time > nextRenderTime) {
+      nextRenderTime = time + 200;
+      for (Block block : blocks) {
+        Location location = block.getLocation().add(0.5, 0.5, 0.5);
+        ParticleUtil.createFire(user, location).count(3).offset(0.5, 0.5, 0.5).extra(0.01).spawn();
+        if (ThreadLocalRandom.current().nextInt(15) == 0) {
+          SoundUtil.FIRE_SOUND.play(location);
+        }
+      }
+    }
+    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true);
+    return UpdateResult.CONTINUE;
+  }
 
 
-	private boolean onEntityHit(Entity entity) {
-		if (entity instanceof Arrow) {
-			entity.remove();
-			return true;
-		}
+  private boolean onEntityHit(Entity entity) {
+    if (entity instanceof Arrow) {
+      entity.remove();
+      return true;
+    }
 
-		if (affectedEntities.containsKey(entity)) return false;
-		affectedEntities.put(entity, false);
+    if (affectedEntities.containsKey(entity)) {
+      return false;
+    }
+    affectedEntities.put(entity, false);
 
-		if (!(entity instanceof LivingEntity)) {
-			entity.setVelocity(Vector3.ZERO.toVector());
-			return true;
-		}
+    if (!(entity instanceof LivingEntity)) {
+      entity.setVelocity(Vector3.ZERO.toVector());
+      return true;
+    }
 
-		boolean canBurn = Bending.getGame().getBenderRegistry().getBendingUser((LivingEntity) entity).map(HeatControl::canBurn).orElse(true);
-		if (!canBurn) return false;
+    boolean canBurn = Bending.getGame().getBenderRegistry().getBendingUser((LivingEntity) entity).map(HeatControl::canBurn).orElse(true);
+    if (!canBurn) {
+      return false;
+    }
 
-		((LivingEntity) entity).setNoDamageTicks(0);
-		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		FireTick.ACCUMULATE.apply(entity, 10);
+    ((LivingEntity) entity).setNoDamageTicks(0);
+    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    FireTick.ACCUMULATE.apply(entity, 10);
 
-		Vector3 pos = EntityMethods.getEntityCenter(entity);
-		Vector3 velocity = pos.subtract(collider.getClosestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
-		entity.setVelocity(velocity.clampVelocity());
-		return true;
-	}
+    Vector3 pos = EntityMethods.getEntityCenter(entity);
+    Vector3 velocity = pos.subtract(collider.getClosestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
+    entity.setVelocity(velocity.clampVelocity());
+    return true;
+  }
 
-	public void setWall(Collection<Block> blocks, OBB collider) {
-		if (blocks == null || blocks.isEmpty()) return;
-		this.blocks = blocks;
-		this.collider = collider;
-	}
+  public void setWall(Collection<Block> blocks, OBB collider) {
+    if (blocks == null || blocks.isEmpty()) {
+      return;
+    }
+    this.blocks = blocks;
+    this.collider = collider;
+  }
 
-	public void updateDuration(long duration) {
-		removalPolicy = Policies.builder().add(new ExpireRemovalPolicy(duration)).build();
-	}
+  public void updateDuration(long duration) {
+    removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(duration)).build();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(collider);
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(collider);
+  }
 
-	public double getWidth() {
-		return userConfig.width;
-	}
+  public double getWidth() {
+    return userConfig.width;
+  }
 
-	public double getHeight() {
-		return userConfig.height;
-	}
+  public double getHeight() {
+    return userConfig.height;
+  }
 
-	public double getRange() {
-		return userConfig.range;
-	}
+  public double getRange() {
+    return userConfig.range;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.HEIGHT)
-		public double height;
-		@Attribute(Attribute.RADIUS)
-		public double width;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.STRENGTH)
-		public double knockback;
-		@Attribute(Attribute.DURATION)
-		public long duration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.HEIGHT)
+    public double height;
+    @Attribute(Attribute.RADIUS)
+    public double width;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.STRENGTH)
+    public double knockback;
+    @Attribute(Attribute.DURATION)
+    public long duration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firewall");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firewall");
 
-			cooldown = abilityNode.node("cooldown").getLong(11000);
-			height = abilityNode.node("height").getDouble(5.0);
-			width = abilityNode.node("width").getDouble(6.0);
-			range = abilityNode.node("range").getDouble(3.0);
-			damage = abilityNode.node("damage").getDouble(0.5);
-			knockback = abilityNode.node("knockback").getDouble(0.33);
-			duration = abilityNode.node("duration").getLong(5000);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(11000);
+      height = abilityNode.node("height").getDouble(5.0);
+      width = abilityNode.node("width").getDouble(6.0);
+      range = abilityNode.node("range").getDouble(3.0);
+      damage = abilityNode.node("damage").getDouble(0.5);
+      knockback = abilityNode.node("knockback").getDouble(0.33);
+      duration = abilityNode.node("duration").getLong(5000);
+    }
+  }
 }

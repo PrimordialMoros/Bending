@@ -23,14 +23,14 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 
 public class Ray {
-	public final Vector3 origin, direction, invDir;
+  public final Vector3 origin, direction, invDir;
 
-	public Ray(@NonNull Vector3 origin, @NonNull Vector3 direction) {
-		this.origin = origin;
-		this.direction = direction;
-		double invX = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getX();
-		double invY = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getY();
-		double invZ = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getZ();
-		invDir = new Vector3(invX, invY, invZ);
-	}
+  public Ray(@NonNull Vector3 origin, @NonNull Vector3 direction) {
+    this.origin = origin;
+    this.direction = direction;
+    double invX = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getX();
+    double invY = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getY();
+    double invZ = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getZ();
+    invDir = new Vector3(invX, invY, invZ);
+  }
 }

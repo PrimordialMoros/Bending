@@ -53,135 +53,137 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
 public class EarthPillars extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private static AbilityDescription pillarsDesc;
+  private static AbilityDescription pillarsDesc;
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Collection<Pillar> pillars = new ArrayList<>();
-	private final Collection<Entity> affectedEntities = new HashSet<>();
-	private Predicate<Block> predicate;
+  private final Collection<Pillar> pillars = new ArrayList<>();
+  private final Collection<Entity> affectedEntities = new HashSet<>();
+  private Predicate<Block> predicate;
 
-	private double factor;
+  private double factor;
 
-	public EarthPillars(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public EarthPillars(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		factor = 1;
-		if (method == ActivationMethod.FALL) {
-			double dist = user.getEntity().getFallDistance();
-			if (dist < userConfig.fallThreshold || user.isSneaking()) {
-				return false;
-			}
-			factor += FastMath.min(userConfig.maxScaleFactor, (dist - userConfig.fallThreshold) / (8 * userConfig.fallThreshold));
-		}
+    factor = 1;
+    if (method == ActivationMethod.FALL) {
+      double dist = user.getEntity().getFallDistance();
+      if (dist < userConfig.fallThreshold || user.isSneaking()) {
+        return false;
+      }
+      factor += FastMath.min(userConfig.maxScaleFactor, (dist - userConfig.fallThreshold) / (8 * userConfig.fallThreshold));
+    }
 
-		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		Collider collider = new Sphere(user.getLocation(), userConfig.radius * factor);
-		CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
+    predicate = b -> EarthMaterials.isEarthNotLava(user, b);
+    Collider collider = new Sphere(user.getLocation(), userConfig.radius * factor);
+    CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
 
-		if (!pillars.isEmpty()) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-			removalPolicy = Policies.builder().build();
-			return true;
-		}
-		return false;
-	}
+    if (!pillars.isEmpty()) {
+      user.setCooldown(getDescription(), userConfig.cooldown);
+      removalPolicy = Policies.builder().build();
+      return true;
+    }
+    return false;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-		return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
+    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
 
-	private boolean createPillar(Entity entity) {
-		Block base = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
-		boolean unique = pillars.stream()
-			.noneMatch(p -> p.getOrigin().getX() == base.getX() && p.getOrigin().getZ() == base.getZ());
-		if (predicate.test(base)) {
-			if (unique) {
-				ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
-					.count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
-				int length = NumberConversions.floor(3 * factor);
-				Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(length).ifPresent(pillars::add);
-			}
-			return true;
-		}
-		return false;
-	}
+  private boolean createPillar(Entity entity) {
+    Block base = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
+    boolean unique = pillars.stream()
+      .noneMatch(p -> p.getOrigin().getX() == base.getX() && p.getOrigin().getZ() == base.getZ());
+    if (predicate.test(base)) {
+      if (unique) {
+        ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
+          .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
+        int length = NumberConversions.floor(3 * factor);
+        Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(length).ifPresent(pillars::add);
+      }
+      return true;
+    }
+    return false;
+  }
 
-	public static void onFall(User user) {
-		if (user.getSelectedAbilityName().equals("Catapult")) {
-			if (pillarsDesc == null) {
-				pillarsDesc = Bending.getGame().getAbilityRegistry()
-					.getAbilityDescription("EarthPillars").orElseThrow(RuntimeException::new);
-			}
-			Bending.getGame().getActivationController().activateAbility(user, ActivationMethod.FALL, pillarsDesc);
-		}
-	}
+  public static void onFall(User user) {
+    if (user.getSelectedAbilityName().equals("Catapult")) {
+      if (pillarsDesc == null) {
+        pillarsDesc = Bending.getGame().getAbilityRegistry()
+          .getAbilityDescription("EarthPillars").orElseThrow(RuntimeException::new);
+      }
+      Bending.getGame().getActivationController().activateAbility(user, ActivationMethod.FALL, pillarsDesc);
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private class EarthPillar extends Pillar {
-		protected EarthPillar(@NonNull PillarBuilder builder) {
-			super(builder);
-		}
+  private class EarthPillar extends Pillar {
+    protected EarthPillar(@NonNull PillarBuilder builder) {
+      super(builder);
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) return false;
-			affectedEntities.add(entity);
-			DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-			entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
-			return true;
-		}
-	}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) {
+        return false;
+      }
+      affectedEntities.add(entity);
+      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+      entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
+      return true;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
-		@Attribute(Attribute.DAMAGE)
-		private double damage;
-		@Attribute(Attribute.STRENGTH)
-		private double knockup;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
+    @Attribute(Attribute.DAMAGE)
+    private double damage;
+    @Attribute(Attribute.STRENGTH)
+    private double knockup;
 
-		public double maxScaleFactor;
-		public double fallThreshold;
+    public double maxScaleFactor;
+    public double fallThreshold;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthpillars");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthpillars");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
-			radius = abilityNode.node("radius").getDouble(10.0);
-			damage = abilityNode.node("damage").getDouble(2.0);
-			knockup = abilityNode.node("knock-up").getDouble(1.2);
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      radius = abilityNode.node("radius").getDouble(10.0);
+      damage = abilityNode.node("damage").getDouble(2.0);
+      knockup = abilityNode.node("knock-up").getDouble(1.2);
 
-			maxScaleFactor = abilityNode.node("max-scale-factor").getDouble(1.5);
-			fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
-		}
-	}
+      maxScaleFactor = abilityNode.node("max-scale-factor").getDouble(1.5);
+      fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
+    }
+  }
 }
 

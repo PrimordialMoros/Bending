@@ -23,12 +23,12 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.BendingPlayer;
 
 public class BendingPlayerLoadEvent extends BendingUserEvent {
-	BendingPlayerLoadEvent(BendingPlayer player) {
-		super(player);
-	}
+  BendingPlayerLoadEvent(BendingPlayer player) {
+    super(player);
+  }
 
-	@Override
-	public @NonNull BendingPlayer getUser() {
-		return (BendingPlayer) super.getUser();
-	}
+  @Override
+  public @NonNull BendingPlayer getUser() {
+    return (BendingPlayer) super.getUser();
+  }
 }

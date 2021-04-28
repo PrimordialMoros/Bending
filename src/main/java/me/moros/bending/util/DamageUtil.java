@@ -43,47 +43,55 @@ import org.bukkit.event.entity.EntityDamageEvent;
  * Utility class to handle bending damage and death messages.
  */
 public final class DamageUtil {
-	private static final TranslatableComponent DEATH_MESSAGE = Component.translatable("bending.ability.generic.death");
+  private static final TranslatableComponent DEATH_MESSAGE = Component.translatable("bending.ability.generic.death");
 
-	private static final Map<UUID, BendingDamage> cache = ExpiringMap.builder()
-		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(250, TimeUnit.MILLISECONDS).build();
+  private static final Map<UUID, BendingDamage> cache = ExpiringMap.builder()
+    .expirationPolicy(ExpirationPolicy.CREATED)
+    .expiration(250, TimeUnit.MILLISECONDS).build();
 
-	public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
-		if (target instanceof LivingEntity && damage > 0) {
-			LivingEntity targetEntity = (LivingEntity) target;
-			LivingEntity sourceEntity = source.getEntity();
-			BendingDamageEvent event = Bending.getEventBus().postAbilityDamageEvent(source, target, desc, damage);
-			if (event.isCancelled()) return false;
-			if (target instanceof Player) cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
-			double finalDamage = event.getDamage();
-			targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(target, sourceEntity, EntityDamageEvent.DamageCause.CUSTOM, finalDamage));
-			targetEntity.damage(finalDamage, sourceEntity);
-			return true;
-		}
-		return false;
-	}
+  public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
+    if (target instanceof LivingEntity && damage > 0) {
+      LivingEntity targetEntity = (LivingEntity) target;
+      LivingEntity sourceEntity = source.getEntity();
+      BendingDamageEvent event = Bending.getEventBus().postAbilityDamageEvent(source, target, desc, damage);
+      if (event.isCancelled()) {
+        return false;
+      }
+      if (target instanceof Player) {
+        cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
+      }
+      double finalDamage = event.getDamage();
+      targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(target, sourceEntity, EntityDamageEvent.DamageCause.CUSTOM, finalDamage));
+      targetEntity.damage(finalDamage, sourceEntity);
+      return true;
+    }
+    return false;
+  }
 
-	public static @Nullable Component getBendingDeathMessage(@NonNull Player player) {
-		BendingDamage cause = cache.remove(player.getUniqueId());
-		if (cause == null) return null;
+  public static @Nullable Component getBendingDeathMessage(@NonNull Player player) {
+    BendingDamage cause = cache.remove(player.getUniqueId());
+    if (cause == null) {
+      return null;
+    }
 
-		AbilityDescription ability = cause.desc;
-		String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
-		TranslatableComponent msg = Bending.getTranslationManager().getTranslation(deathKey);
-		if (msg == null) msg = DEATH_MESSAGE;
-		Component target = Component.text(player.getName());
-		Component source = Component.text(cause.source.getName());
-		return msg.args(target, source, ability.getDisplayName());
-	}
+    AbilityDescription ability = cause.desc;
+    String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
+    TranslatableComponent msg = Bending.getTranslationManager().getTranslation(deathKey);
+    if (msg == null) {
+      msg = DEATH_MESSAGE;
+    }
+    Component target = Component.text(player.getName());
+    Component source = Component.text(cause.source.getName());
+    return msg.args(target, source, ability.getDisplayName());
+  }
 
-	private static class BendingDamage {
-		private final Entity source;
-		private final AbilityDescription desc;
+  private static class BendingDamage {
+    private final Entity source;
+    private final AbilityDescription desc;
 
-		private BendingDamage(@NonNull Entity source, @NonNull AbilityDescription desc) {
-			this.source = source;
-			this.desc = desc;
-		}
-	}
+    private BendingDamage(@NonNull Entity source, @NonNull AbilityDescription desc) {
+      this.source = source;
+      this.desc = desc;
+    }
+  }
 }

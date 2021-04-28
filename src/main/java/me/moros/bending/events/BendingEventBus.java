@@ -29,42 +29,44 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.PluginManager;
 
 public class BendingEventBus {
-	private final PluginManager manager;
+  private final PluginManager manager;
 
-	public BendingEventBus(Bending plugin) {
-		manager = plugin.getServer().getPluginManager();
-	}
+  public BendingEventBus(Bending plugin) {
+    manager = plugin.getServer().getPluginManager();
+  }
 
-	public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {
-		manager.callEvent(new BendingPlayerLoadEvent(player));
-	}
+  public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {
+    manager.callEvent(new BendingPlayerLoadEvent(player));
+  }
 
-	public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
-		manager.callEvent(new CooldownAddEvent(user, desc, duration));
-	}
+  public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
+    manager.callEvent(new CooldownAddEvent(user, desc, duration));
+  }
 
-	public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
-		if (!user.isValid()) return; // We post the event 1 tick later so this is needed for safety
-		manager.callEvent(new CooldownRemoveEvent(user, desc));
-	}
+  public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
+    if (!user.isValid()) {
+      return; // We post the event 1 tick later so this is needed for safety
+    }
+    manager.callEvent(new CooldownRemoveEvent(user, desc));
+  }
 
-	public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
-		manager.callEvent(new ElementChangeEvent(user, result));
-	}
+  public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
+    manager.callEvent(new ElementChangeEvent(user, result));
+  }
 
-	public void postBindChangeEvent(@NonNull User user, BindChangeEvent.Result result) {
-		manager.callEvent(new BindChangeEvent(user, result));
-	}
+  public void postBindChangeEvent(@NonNull User user, BindChangeEvent.Result result) {
+    manager.callEvent(new BindChangeEvent(user, result));
+  }
 
-	public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
-		BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
-		manager.callEvent(event);
-		return event;
-	}
+  public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
+    BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
+    manager.callEvent(event);
+    return event;
+  }
 
-	public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
-		BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
-		manager.callEvent(event);
-		return event;
-	}
+  public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
+    BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
+    manager.callEvent(event);
+    return event;
+  }
 }

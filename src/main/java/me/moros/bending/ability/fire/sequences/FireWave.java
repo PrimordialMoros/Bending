@@ -40,128 +40,132 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
 public class FireWave extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
-	private static AbilityDescription wallDesc;
+  private static final Config config = new Config();
+  private static AbilityDescription wallDesc;
 
-	private Config userConfig;
+  private Config userConfig;
 
-	private final Queue<WallInfo> walls = new ArrayDeque<>();
-	private FireWall wall;
+  private final Queue<WallInfo> walls = new ArrayDeque<>();
+  private FireWall wall;
 
-	private long nextTime;
+  private long nextTime;
 
-	public FireWave(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FireWave(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (wallDesc == null) {
-			wallDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
-		}
-		wall = new FireWall(wallDesc);
-		if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.ATTACK)) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (wallDesc == null) {
+      wallDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
+    }
+    wall = new FireWall(wallDesc);
+    if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.ATTACK)) {
+      return false;
+    }
 
-		recalculateConfig();
+    recalculateConfig();
 
-		Vector3 origin = user.getEyeLocation().add(user.getDirection().scalarMultiply(wall.getRange()));
-		Vector3 direction = user.getDirection();
-		double yaw = user.getYaw();
-		double hw = wall.getWidth() / 2.0;
-		double hh = wall.getHeight() / 2.0;
-		for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {
-			Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
-				break;
-			}
-			hh += 0.2;
-			Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(yaw), RotationConvention.VECTOR_OPERATOR);
-			OBB collider = new OBB(new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5)), rotation).addPosition(currentPosition);
-			double radius = collider.getHalfExtents().maxComponent() + 1;
-			Collection<Block> blocks = WorldMethods.getNearbyBlocks(currentPosition.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
-			if (blocks.isEmpty()) break;
-			walls.offer(new WallInfo(blocks, collider));
+    Vector3 origin = user.getEyeLocation().add(user.getDirection().scalarMultiply(wall.getRange()));
+    Vector3 direction = user.getDirection();
+    double yaw = user.getYaw();
+    double hw = wall.getWidth() / 2.0;
+    double hh = wall.getHeight() / 2.0;
+    for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {
+      Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
+        break;
+      }
+      hh += 0.2;
+      AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
+      OBB collider = new OBB(aabb, Vector3.PLUS_J, FastMath.toRadians(yaw)).addPosition(currentPosition);
+      double radius = collider.getHalfExtents().maxComponent() + 1;
+      Collection<Block> blocks = WorldMethods.getNearbyBlocks(currentPosition.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
+      if (blocks.isEmpty()) {
+        break;
+      }
+      walls.offer(new WallInfo(blocks, collider));
 
-		}
-		if (walls.isEmpty()) return false;
-		wall.updateDuration(userConfig.duration);
-		nextTime = 0;
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		return true;
-	}
+    }
+    if (walls.isEmpty()) {
+      return false;
+    }
+    wall.updateDuration(userConfig.duration);
+    nextTime = 0;
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		long time = System.currentTimeMillis();
-		if (time >= nextTime) {
-			nextTime = time + 250;
-			WallInfo info = walls.poll();
-			if (info != null) {
-				wall.setWall(info.getBlocks(), info.getCollider());
-			}
-		}
-		return wall.update();
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    long time = System.currentTimeMillis();
+    if (time >= nextTime) {
+      nextTime = time + 250;
+      WallInfo info = walls.poll();
+      if (info != null) {
+        wall.setWall(info.getBlocks(), info.getCollider());
+      }
+    }
+    return wall.update();
+  }
 
-	@Override
-	public void onDestroy() {
-		wall.onDestroy();
-	}
+  @Override
+  public void onDestroy() {
+    wall.onDestroy();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return wall.getUser();
-	}
+  @Override
+  public @NonNull User getUser() {
+    return wall.getUser();
+  }
 
-	private static class WallInfo {
-		private final Collection<Block> blocks;
-		private final OBB collider;
+  private static class WallInfo {
+    private final Collection<Block> blocks;
+    private final OBB collider;
 
-		private WallInfo(Collection<Block> blocks, OBB collider) {
-			this.blocks = blocks;
-			this.collider = collider;
-		}
+    private WallInfo(Collection<Block> blocks, OBB collider) {
+      this.blocks = blocks;
+      this.collider = collider;
+    }
 
-		private Collection<Block> getBlocks() {
-			return blocks;
-		}
+    private Collection<Block> getBlocks() {
+      return blocks;
+    }
 
-		private OBB getCollider() {
-			return collider;
-		}
-	}
+    private OBB getCollider() {
+      return collider;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.HEIGHT)
-		public double maxHeight;
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.RANGE)
-		public long steps;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.HEIGHT)
+    public double maxHeight;
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.RANGE)
+    public long steps;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewave");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewave");
 
-			cooldown = abilityNode.node("cooldown").getLong(16000);
-			maxHeight = abilityNode.node("max-height").getDouble(10.0);
-			duration = abilityNode.node("duration").getLong(8000);
-			steps = abilityNode.node("steps").getInt(8);
+      cooldown = abilityNode.node("cooldown").getLong(16000);
+      maxHeight = abilityNode.node("max-height").getDouble(10.0);
+      duration = abilityNode.node("duration").getLong(8000);
+      steps = abilityNode.node("steps").getInt(8);
 
-			abilityNode.node("steps").comment("The amount of blocks the FireWave will advance.");
-		}
-	}
+      abilityNode.node("steps").comment("The amount of blocks the FireWave will advance.");
+    }
+  }
 }

@@ -49,151 +49,163 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class EarthTunnel extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Predicate<Block> predicate;
-	private Vector3 center;
+  private Predicate<Block> predicate;
+  private Vector3 center;
 
-	private double distance = 0;
-	private int radius = 0;
-	private int angle = 0;
+  private double distance = 0;
+  private int radius = 0;
+  private int angle = 0;
 
-	public EarthTunnel(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public EarthTunnel(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthTunnel.class)) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthTunnel.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
-		if (!block.isPresent()) return false;
+    predicate = b -> EarthMaterials.isEarthNotLava(user, b);
+    Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
+    if (block.isEmpty()) {
+      return false;
+    }
 
-		center = new Vector3(block.get()).add(Vector3.HALF);
-		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
+    center = new Vector3(block.get()).add(Vector3.HALF);
+    removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		for (int i = 0; i < 2; i++) {
-			if (distance > userConfig.range) {
-				return UpdateResult.REMOVE;
-			}
-			Vector3 offset = VectorMethods.getOrthogonal(user.getDirection(), FastMath.toRadians(angle), radius);
-			Block current = center.add(offset).toBlock(user.getWorld());
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
-				return UpdateResult.REMOVE;
-			}
-			if (predicate.test(current)) {
-				if (userConfig.extractOres) {
-					extract(current);
-				}
-				TempBlock.createAir(current, BendingProperties.EARTHBENDING_REVERT_TIME);
-			}
-			if (angle >= 360) {
-				angle = 0;
-				Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
-				if (!block.isPresent()) return UpdateResult.REMOVE;
-				center = new Vector3(block.get()).add(Vector3.HALF);
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    for (int i = 0; i < 2; i++) {
+      if (distance > userConfig.range) {
+        return UpdateResult.REMOVE;
+      }
+      Vector3 offset = VectorMethods.getOrthogonal(user.getDirection(), FastMath.toRadians(angle), radius);
+      Block current = center.add(offset).toBlock(user.getWorld());
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
+        return UpdateResult.REMOVE;
+      }
+      if (predicate.test(current)) {
+        if (userConfig.extractOres) {
+          extract(current);
+        }
+        TempBlock.createAir(current, BendingProperties.EARTHBENDING_REVERT_TIME);
+      }
+      if (angle >= 360) {
+        angle = 0;
+        Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
+        if (block.isEmpty()) {
+          return UpdateResult.REMOVE;
+        }
+        center = new Vector3(block.get()).add(Vector3.HALF);
 
-				if (++radius > userConfig.radius) {
-					radius = 0;
-					if (++distance > userConfig.range) {
-						return UpdateResult.REMOVE;
-					}
-				}
-			} else {
-				if (radius <= 0) {
-					radius++;
-				} else {
-					angle += 360 / (radius * 16);
-				}
-			}
-		}
-		return UpdateResult.CONTINUE;
-	}
+        if (++radius > userConfig.radius) {
+          radius = 0;
+          if (++distance > userConfig.range) {
+            return UpdateResult.REMOVE;
+          }
+        }
+      } else {
+        if (radius <= 0) {
+          radius++;
+        } else {
+          angle += 360 / (radius * 16);
+        }
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	// TODO tweak drop rates
-	private void extract(Block block) {
-		if (TempBlock.MANAGER.isTemp(block)) return;
-		Material type = block.getType();
-		if (!MaterialUtil.ORES.containsKey(type)) return;
-		Material drop = MaterialUtil.ORES.get(type);
-		int amount = getAmount(drop);
-		if (amount == 0) return;
+  // TODO tweak drop rates
+  private void extract(Block block) {
+    if (TempBlock.MANAGER.isTemp(block)) {
+      return;
+    }
+    Material type = block.getType();
+    if (!MaterialUtil.ORES.containsKey(type)) {
+      return;
+    }
+    Material drop = MaterialUtil.ORES.get(type);
+    int amount = getAmount(drop);
+    if (amount == 0) {
+      return;
+    }
 
-		Material newType = type.name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
-		block.setType(newType);
+    Material newType = type.name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
+    block.setType(newType);
 
-		int rand = ThreadLocalRandom.current().nextInt(100);
-		int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;
-		block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(drop, factor * amount));
-	}
+    int rand = ThreadLocalRandom.current().nextInt(100);
+    int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;
+    block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(drop, factor * amount));
+  }
 
-	private int getAmount(Material type) {
-		switch (type) {
-			case COAL:
-			case DIAMOND:
-			case EMERALD:
-			case QUARTZ:
-			case IRON_INGOT:
-			case GOLD_INGOT:
-				return 1;
-			case REDSTONE:
-				return 5;
-			case GOLD_NUGGET:
-				return 6;
-			case LAPIS_LAZULI:
-				return 9;
-		}
-		return 0;
-	}
+  private int getAmount(Material type) {
+    switch (type) {
+      case COAL:
+      case DIAMOND:
+      case EMERALD:
+      case QUARTZ:
+      case IRON_INGOT:
+      case GOLD_INGOT:
+        return 1;
+      case REDSTONE:
+        return 5;
+      case GOLD_NUGGET:
+        return 6;
+      case LAPIS_LAZULI:
+        return 9;
+    }
+    return 0;
+  }
 
-	@Override
-	public void onDestroy() {
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
-		public boolean extractOres;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
+    public boolean extractOres;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthtunnel");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthtunnel");
 
-			cooldown = abilityNode.node("cooldown").getLong(2000);
-			range = abilityNode.node("range").getDouble(10.0);
-			radius = abilityNode.node("radius").getDouble(1.0);
-			extractOres = abilityNode.node("extract-ores").getBoolean(true);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(2000);
+      range = abilityNode.node("range").getDouble(10.0);
+      radius = abilityNode.node("radius").getDouble(1.0);
+      extractOres = abilityNode.node("extract-ores").getBoolean(true);
+    }
+  }
 }

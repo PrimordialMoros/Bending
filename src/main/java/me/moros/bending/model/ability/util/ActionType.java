@@ -20,10 +20,10 @@
 package me.moros.bending.model.ability.util;
 
 public enum ActionType {
-	ABILITY_ACTIVATION,
-	DAMAGE,
-	SHOOT,
-	INTERACT_BLOCK,
-	INTERACT,
-	MOVE
+  ABILITY_ACTIVATION,
+  DAMAGE,
+  SHOOT,
+  INTERACT_BLOCK,
+  INTERACT,
+  MOVE
 }

@@ -64,160 +64,168 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 public class IceCrawl extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private StateChain states;
-	private Line iceLine;
+  private StateChain states;
+  private Line iceLine;
 
-	public IceCrawl(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public IceCrawl(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.ATTACK) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (method == ActivationMethod.ATTACK) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
-		if (!source.isPresent()) return false;
+    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    if (source.isEmpty()) {
+      return false;
+    }
 
-		Optional<IceCrawl> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
-		if (method == ActivationMethod.SNEAK && line.isPresent()) {
-			State state = line.get().states.getCurrent();
-			if (state instanceof SelectedSource) {
-				((SelectedSource) state).reselect(source.get());
-			}
-			return false;
-		}
+    Optional<IceCrawl> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
+    if (method == ActivationMethod.SNEAK && line.isPresent()) {
+      State state = line.get().states.getCurrent();
+      if (state instanceof SelectedSource) {
+        ((SelectedSource) state).reselect(source.get());
+      }
+      return false;
+    }
 
-		states = new StateChain()
-			.addState(new SelectedSource(user, source.get(), userConfig.selectRange))
-			.start();
+    states = new StateChain()
+      .addState(new SelectedSource(user, source.get(), userConfig.selectRange))
+      .start();
 
-		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
-		return true;
-	}
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (iceLine != null) {
-			return iceLine.update();
-		} else {
-			return states.update();
-		}
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (iceLine != null) {
+      return iceLine.update();
+    } else {
+      return states.update();
+    }
+  }
 
-	private void launch() {
-		if (iceLine != null) return;
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			state.complete();
-			Optional<Block> src = states.getChainStore().stream().findAny();
-			if (src.isPresent()) {
-				iceLine = new Line(src.get());
-				removalPolicy = Policies.builder().build();
-				user.setCooldown(getDescription(), userConfig.cooldown);
-			}
-		}
-	}
+  private void launch() {
+    if (iceLine != null) {
+      return;
+    }
+    State state = states.getCurrent();
+    if (state instanceof SelectedSource) {
+      state.complete();
+      Optional<Block> src = states.getChainStore().stream().findAny();
+      if (src.isPresent()) {
+        iceLine = new Line(src.get());
+        removalPolicy = Policies.builder().build();
+        user.setCooldown(getDescription(), userConfig.cooldown);
+      }
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		if (iceLine == null) return Collections.emptyList();
-		return Collections.singletonList(iceLine.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    if (iceLine == null) {
+      return Collections.emptyList();
+    }
+    return Collections.singletonList(iceLine.getCollider());
+  }
 
-	private class Line extends AbstractLine {
-		public Line(Block source) {
-			super(user, source, userConfig.range, 0.5, true);
-			skipVertical = true;
-		}
+  private class Line extends AbstractLine {
+    public Line(Block source) {
+      super(user, source, userConfig.range, 0.5, true);
+      skipVertical = true;
+    }
 
-		@Override
-		public void render() {
-			double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-			double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-			Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.getWorld());
-			new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
-		}
+    @Override
+    public void render() {
+      double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
+      double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
+      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.getWorld());
+      new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
+    }
 
-		@Override
-		public void postRender() {
-			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				SoundUtil.ICE_SOUND.play(location.toLocation(user.getWorld()));
-			}
-		}
+    @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+        SoundUtil.ICE_SOUND.play(location.toLocation(user.getWorld()));
+      }
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			if (entity.isValid() && entity instanceof LivingEntity) {
-				Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
-				new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
-				MovementHandler.restrictEntity(user, (LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
-			}
-			return true;
-		}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      if (entity.isValid() && entity instanceof LivingEntity) {
+        Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
+        new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
+        MovementHandler.restrictEntity(user, (LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
+      }
+      return true;
+    }
 
-		@Override
-		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isWater(block)) {
-				TempBlock.create(block, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
-			}
-			return BlockMethods.tryCoolLava(user, block);
-		}
+    @Override
+    public boolean onBlockHit(@NonNull Block block) {
+      if (MaterialUtil.isWater(block)) {
+        TempBlock.create(block, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
+      }
+      return BlockMethods.tryCoolLava(user, block);
+    }
 
-		@Override
-		protected boolean isValidBlock(@NonNull Block block) {
-			Block above = block.getRelative(BlockFace.UP);
-			if (!MaterialUtil.isTransparentOrWater(above)) return false;
-			return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();
-		}
-	}
+    @Override
+    protected boolean isValidBlock(@NonNull Block block) {
+      Block above = block.getRelative(BlockFace.UP);
+      if (!MaterialUtil.isTransparentOrWater(above)) {
+        return false;
+      }
+      return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long freezeDuration;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long freezeDuration;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
 
-			cooldown = abilityNode.node("cooldown").getLong(5000);
-			freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
-			range = abilityNode.node("range").getDouble(24.0);
-			selectRange = abilityNode.node("select-range").getDouble(8.0);
-			damage = abilityNode.node("damage").getDouble(4.0);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(5000);
+      freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
+      range = abilityNode.node("range").getDouble(24.0);
+      selectRange = abilityNode.node("select-range").getDouble(8.0);
+      damage = abilityNode.node("damage").getDouble(4.0);
+    }
+  }
 }

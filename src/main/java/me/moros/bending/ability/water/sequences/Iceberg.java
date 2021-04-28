@@ -58,161 +58,172 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
 
 public class Iceberg extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private StateChain states;
-	private Vector3 tip;
+  private StateChain states;
+  private Vector3 tip;
 
-	private final List<BlockIterator> lines = new ArrayList<>();
-	private final Collection<Block> blocks = new HashSet<>();
+  private final List<BlockIterator> lines = new ArrayList<>();
+  private final Collection<Block> blocks = new HashSet<>();
 
-	private boolean started = false;
+  private boolean started = false;
 
-	public Iceberg(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public Iceberg(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, IceCrawl.class)) return false;
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, IceCrawl.class)) {
+      return false;
+    }
 
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
-		if (!source.isPresent()) return false;
+    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    if (source.isEmpty()) {
+      return false;
+    }
 
-		states = new StateChain()
-			.addState(new SelectedSource(user, source.get(), userConfig.selectRange + 2))
-			.start();
+    states = new StateChain()
+      .addState(new SelectedSource(user, source.get(), userConfig.selectRange + 2))
+      .start();
 
-		removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
-		return true;
-	}
+    removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (started) {
-			ListIterator<BlockIterator> iterator = lines.listIterator();
-			while (iterator.hasNext()) {
-				if (ThreadLocalRandom.current().nextInt(1 + lines.size()) == 0) continue;
-				BlockIterator blockLine = iterator.next();
-				if (blockLine.hasNext()) {
-					formIce(blockLine.next());
-				} else {
-					iterator.remove();
-				}
-			}
-			if (lines.isEmpty()) {
-				formIce(tip.toBlock(user.getWorld()));
-				return UpdateResult.REMOVE;
-			}
-			return UpdateResult.CONTINUE;
-		} else {
-			if (!user.getSelectedAbilityName().equals("IceSpike")) {
-				return UpdateResult.REMOVE;
-			}
-			return states.update();
-		}
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (started) {
+      ListIterator<BlockIterator> iterator = lines.listIterator();
+      while (iterator.hasNext()) {
+        if (ThreadLocalRandom.current().nextInt(1 + lines.size()) == 0) {
+          continue;
+        }
+        BlockIterator blockLine = iterator.next();
+        if (blockLine.hasNext()) {
+          formIce(blockLine.next());
+        } else {
+          iterator.remove();
+        }
+      }
+      if (lines.isEmpty()) {
+        formIce(tip.toBlock(user.getWorld()));
+        return UpdateResult.REMOVE;
+      }
+      return UpdateResult.CONTINUE;
+    } else {
+      if (!user.getSelectedAbilityName().equals("IceSpike")) {
+        return UpdateResult.REMOVE;
+      }
+      return states.update();
+    }
+  }
 
-	private void formIce(Block block) {
-		if (blocks.contains(block) || TempBlock.MANAGER.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
-			return;
-		}
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-			return;
-		}
-		blocks.add(block);
-		boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
-		if (canPlaceAir) {
-			TempBlock.createAir(block, BendingProperties.ICE_DURATION + userConfig.regenDelay);
-		}
-		Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-		TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true);
-	}
+  private void formIce(Block block) {
+    if (blocks.contains(block) || TempBlock.MANAGER.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
+      return;
+    }
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      return;
+    }
+    blocks.add(block);
+    boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
+    if (canPlaceAir) {
+      TempBlock.createAir(block, BendingProperties.ICE_DURATION + userConfig.regenDelay);
+    }
+    Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
+    TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true);
+  }
 
-	public static void launch(User user) {
-		if (user.getSelectedAbilityName().equals("IceSpike")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
-		}
-	}
+  public static void launch(User user) {
+    if (user.getSelectedAbilityName().equals("IceSpike")) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
+    }
+  }
 
-	private void launch() {
-		if (started) return;
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			state.complete();
-			Optional<Block> src = states.getChainStore().stream().findAny();
-			if (src.isPresent()) {
-				Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
-				Vector3 target = user.getTarget(userConfig.selectRange + userConfig.length);
-				Vector3 direction = target.subtract(origin).normalize();
-				tip = origin.add(direction.scalarMultiply(userConfig.length));
-				Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
-				double radius = FastMath.ceil(0.2 * userConfig.length);
-				for (Block block : WorldMethods.getNearbyBlocks(origin.toLocation(user.getWorld()), radius, WaterMaterials::isWaterOrIceBendable)) {
-					if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-					lines.add(getLine(new Vector3(block).add(Vector3.HALF), targetLocation));
-				}
-				if (lines.size() < 5) {
-					lines.clear();
-					return;
-				}
-				started = true;
-			}
-		}
-	}
+  private void launch() {
+    if (started) {
+      return;
+    }
+    State state = states.getCurrent();
+    if (state instanceof SelectedSource) {
+      state.complete();
+      Optional<Block> src = states.getChainStore().stream().findAny();
+      if (src.isEmpty()) {
+        return;
+      }
+      Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
+      Vector3 target = user.getTarget(userConfig.selectRange + userConfig.length);
+      Vector3 direction = target.subtract(origin).normalize();
+      tip = origin.add(direction.scalarMultiply(userConfig.length));
+      Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
+      double radius = FastMath.ceil(0.2 * userConfig.length);
+      for (Block block : WorldMethods.getNearbyBlocks(origin.toLocation(user.getWorld()), radius, WaterMaterials::isWaterOrIceBendable)) {
+        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+          continue;
+        }
+        lines.add(getLine(new Vector3(block).add(Vector3.HALF), targetLocation));
+      }
+      if (lines.size() < 5) {
+        lines.clear();
+        return;
+      }
+      started = true;
+    }
+  }
 
-	private BlockIterator getLine(Vector3 origin, Vector3 target) {
-		Vector3 direction = target.subtract(origin);
-		final double length = target.distance(origin);
-		return new BlockIterator(user.getWorld(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
-	}
+  private BlockIterator getLine(Vector3 origin, Vector3 target) {
+    Vector3 direction = target.subtract(origin);
+    final double length = target.distance(origin);
+    return new BlockIterator(user.getWorld(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
+  }
 
-	@Override
-	public void onDestroy() {
-		if (!blocks.isEmpty()) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-		}
-	}
+  @Override
+  public void onDestroy() {
+    if (!blocks.isEmpty()) {
+      user.setCooldown(getDescription(), userConfig.cooldown);
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
 
-		@Attribute(Attribute.DURATION)
-		public long regenDelay;
-		@Attribute(Attribute.HEIGHT)
-		public double length;
+    @Attribute(Attribute.DURATION)
+    public long regenDelay;
+    @Attribute(Attribute.HEIGHT)
+    public double length;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "iceberg");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "iceberg");
 
-			cooldown = abilityNode.node("cooldown").getLong(15000);
-			selectRange = abilityNode.node("select-range").getDouble(16.0);
-			regenDelay = abilityNode.node("regen-delay").getLong(30000);
-			length = abilityNode.node("length").getDouble(16.0);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(15000);
+      selectRange = abilityNode.node("select-range").getDouble(16.0);
+      regenDelay = abilityNode.node("regen-delay").getLong(30000);
+      length = abilityNode.node("length").getDouble(16.0);
+    }
+  }
 }

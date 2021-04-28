@@ -47,129 +47,139 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
 
 public class Collapse extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Predicate<Block> predicate;
-	private final Collection<Pillar> pillars = new ArrayList<>();
+  private Predicate<Block> predicate;
+  private final Collection<Pillar> pillars = new ArrayList<>();
 
-	private int height;
+  private int height;
 
-	public Collapse(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public Collapse(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
-		if (!source.isPresent()) return false;
-		Block origin = source.get();
+    predicate = b -> EarthMaterials.isEarthNotLava(user, b);
+    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+    if (source.isEmpty()) {
+      return false;
+    }
+    Block origin = source.get();
 
-		height = userConfig.maxHeight;
+    height = userConfig.maxHeight;
 
-		boolean sneak = method == ActivationMethod.SNEAK;
-		if (sneak) {
-			int offset = NumberConversions.ceil(userConfig.radius);
-			int size = offset * 2 + 1;
-			// Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
-			boolean[][] checked = new boolean[size][size];
-			for (Block block : WorldMethods.getNearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
-				if (block.getY() < origin.getY()) continue;
-				int dx = offset + origin.getX() - block.getX();
-				int dz = offset + origin.getZ() - block.getZ();
-				if (checked[dx][dz]) continue;
-				Optional<Pillar> pillar = getBottomValid(block).flatMap(this::createPillar);
-				if (pillar.isPresent()) {
-					checked[dx][dz] = true;
-					pillars.add(pillar.get());
-				}
-			}
-		} else {
-			getBottomValid(origin).flatMap(this::createPillar).ifPresent(pillars::add);
-		}
-		if (!pillars.isEmpty()) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-			removalPolicy = Policies.builder().build();
-			return true;
-		}
-		return false;
-	}
+    boolean sneak = method == ActivationMethod.SNEAK;
+    if (sneak) {
+      int offset = NumberConversions.ceil(userConfig.radius);
+      int size = offset * 2 + 1;
+      // Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
+      boolean[][] checked = new boolean[size][size];
+      for (Block block : WorldMethods.getNearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
+        if (block.getY() < origin.getY()) {
+          continue;
+        }
+        int dx = offset + origin.getX() - block.getX();
+        int dz = offset + origin.getZ() - block.getZ();
+        if (checked[dx][dz]) {
+          continue;
+        }
+        Optional<Pillar> pillar = getBottomValid(block).flatMap(this::createPillar);
+        if (pillar.isPresent()) {
+          checked[dx][dz] = true;
+          pillars.add(pillar.get());
+        }
+      }
+    } else {
+      getBottomValid(origin).flatMap(this::createPillar).ifPresent(pillars::add);
+    }
+    if (!pillars.isEmpty()) {
+      user.setCooldown(getDescription(), userConfig.cooldown);
+      removalPolicy = Policies.builder().build();
+      return true;
+    }
+    return false;
+  }
 
-	public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
-		this.user = user;
-		recalculateConfig();
-		predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		this.height = height;
-		for (Block block : sources) {
-			getBottomValid(block).flatMap(this::createPillar).ifPresent(pillars::add);
-		}
-		if (!pillars.isEmpty()) {
-			removalPolicy = Policies.builder().build();
-			return true;
-		}
-		return false;
-	}
+  public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
+    this.user = user;
+    recalculateConfig();
+    predicate = b -> EarthMaterials.isEarthNotLava(user, b);
+    this.height = height;
+    for (Block block : sources) {
+      getBottomValid(block).flatMap(this::createPillar).ifPresent(pillars::add);
+    }
+    if (!pillars.isEmpty()) {
+      removalPolicy = Policies.builder().build();
+      return true;
+    }
+    return false;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-		return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
+    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
 
-	private Optional<Pillar> createPillar(Block block) {
-		if (!predicate.test(block) || !TempBlock.isBendable(block)) return Optional.empty();
-		return Pillar.builder(user, block)
-			.setDirection(BlockFace.DOWN)
-			.setInterval(75)
-			.setPredicate(predicate).build(height);
-	}
+  private Optional<Pillar> createPillar(Block block) {
+    if (!predicate.test(block) || !TempBlock.isBendable(block)) {
+      return Optional.empty();
+    }
+    return Pillar.builder(user, block)
+      .setDirection(BlockFace.DOWN)
+      .setInterval(75)
+      .setPredicate(predicate).build(height);
+  }
 
-	private Optional<Block> getBottomValid(Block block) {
-		for (int i = 1; i <= height; i++) {
-			Block check = block.getRelative(BlockFace.DOWN, i);
-			if (!predicate.test(check)) return Optional.of(check.getRelative(BlockFace.UP));
-		}
-		return Optional.empty();
-	}
+  private Optional<Block> getBottomValid(Block block) {
+    for (int i = 1; i <= height; i++) {
+      Block check = block.getRelative(BlockFace.DOWN, i);
+      if (!predicate.test(check)) {
+        return Optional.of(check.getRelative(BlockFace.UP));
+      }
+    }
+    return Optional.empty();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.HEIGHT)
-		public int maxHeight;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.HEIGHT)
+    public int maxHeight;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "collapse");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "collapse");
 
-			selectRange = abilityNode.node("select-range").getDouble(18.0);
-			radius = abilityNode.node("radius").getDouble(6.0);
-			maxHeight = abilityNode.node("max-height").getInt(6);
-			cooldown = abilityNode.node("cooldown").getLong(500);
-		}
-	}
+      selectRange = abilityNode.node("select-range").getDouble(18.0);
+      radius = abilityNode.node("radius").getDouble(6.0);
+      maxHeight = abilityNode.node("max-height").getInt(6);
+      cooldown = abilityNode.node("cooldown").getLong(500);
+    }
+  }
 }

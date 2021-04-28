@@ -40,76 +40,84 @@ import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
-	private final User user;
-	protected final Ray ray;
+  private final User user;
+  protected final Ray ray;
 
-	protected Predicate<Block> canCollide = b -> false;
-	protected Sphere collider;
-	protected Vector3 location;
-	protected final Vector3 dir;
+  protected Predicate<Block> canCollide = b -> false;
+  protected Sphere collider;
+  protected Vector3 location;
+  protected final Vector3 dir;
 
-	protected boolean livingOnly = true;
-	protected boolean singleCollision = false;
-	protected boolean controllable = false;
-	protected int steps = 1;
+  protected boolean livingOnly = true;
+  protected boolean singleCollision = false;
+  protected boolean controllable = false;
+  protected int steps = 1;
 
-	protected final double speed;
-	protected final double maxRange;
-	protected final double collisionRadius;
+  protected final double speed;
+  protected final double maxRange;
+  protected final double collisionRadius;
 
-	public ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
-		this.user = user;
-		this.ray = ray;
-		this.speed = speed;
-		this.location = ray.origin;
-		this.maxRange = ray.direction.getNormSq();
-		this.collisionRadius = collisionRadius;
-		this.collider = new Sphere(location, collisionRadius);
-		dir = ray.direction.normalize().scalarMultiply(speed);
-		render();
-	}
+  public ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
+    this.user = user;
+    this.ray = ray;
+    this.speed = speed;
+    this.location = ray.origin;
+    this.maxRange = ray.direction.getNormSq();
+    this.collisionRadius = collisionRadius;
+    this.collider = new Sphere(location, collisionRadius);
+    dir = ray.direction.normalize().scalarMultiply(speed);
+    render();
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		Vector3 vector = controllable ? user.getDirection().scalarMultiply(speed) : dir;
-		for (int i = 0; i < steps; i++) {
-			Vector3 originalVector = new Vector3(location.toArray());
-			location = location.add(vector);
-			if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
-				return UpdateResult.REMOVE;
-			}
-			render();
-			postRender();
+  @Override
+  public @NonNull UpdateResult update() {
+    Vector3 vector = controllable ? user.getDirection().scalarMultiply(speed) : dir;
+    for (int i = 0; i < steps; i++) {
+      Vector3 originalVector = new Vector3(location.toArray());
+      location = location.add(vector);
+      if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+        return UpdateResult.REMOVE;
+      }
+      render();
+      postRender();
 
-			if (i % NumberConversions.ceil(speed * steps) != 0) continue; // Avoid unnecessary collision checks
-			// Use previous collider for entity checks for visual reasons
-			boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
-			if (hitEntity) return UpdateResult.REMOVE;
-			collider = collider.at(location);
+      if (i % NumberConversions.ceil(speed * steps) != 0) {
+        continue; // Avoid unnecessary collision checks
+      }
+      // Use previous collider for entity checks for visual reasons
+      boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
+      if (hitEntity) {
+        return UpdateResult.REMOVE;
+      }
+      collider = collider.at(location);
 
-			Block originBlock = originalVector.toBlock(user.getWorld());
-			for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
-				int x = NumberConversions.floor(v.getX());
-				int y = NumberConversions.floor(v.getY());
-				int z = NumberConversions.floor(v.getZ());
-				Block block = originBlock.getRelative(x, y, z);
-				if (canCollide.test(block) && onBlockHit(block)) return UpdateResult.REMOVE;
-				if (!MaterialUtil.isTransparent(block)) {
-					if (AABBUtils.getBlockBounds(block).intersects(collider)) {
-						if (onBlockHit(block)) return UpdateResult.REMOVE;
-					}
-				}
-			}
-		}
-		return UpdateResult.CONTINUE;
-	}
+      Block originBlock = originalVector.toBlock(user.getWorld());
+      for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
+        int x = NumberConversions.floor(v.getX());
+        int y = NumberConversions.floor(v.getY());
+        int z = NumberConversions.floor(v.getZ());
+        Block block = originBlock.getRelative(x, y, z);
+        if (canCollide.test(block) && onBlockHit(block)) {
+          return UpdateResult.REMOVE;
+        }
+        if (!MaterialUtil.isTransparent(block)) {
+          if (AABBUtils.getBlockBounds(block).intersects(collider)) {
+            if (onBlockHit(block)) {
+              return UpdateResult.REMOVE;
+            }
+          }
+        }
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	public @NonNull Location getBukkitLocation() {
-		return location.toLocation(user.getWorld());
-	}
+  public @NonNull Location getBukkitLocation() {
+    return location.toLocation(user.getWorld());
+  }
 
-	@Override
-	public @NonNull Collider getCollider() {
-		return collider;
-	}
+  @Override
+  public @NonNull Collider getCollider() {
+    return collider;
+  }
 }

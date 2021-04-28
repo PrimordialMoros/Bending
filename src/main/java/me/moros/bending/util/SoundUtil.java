@@ -28,33 +28,33 @@ import org.bukkit.Sound;
  * @see SoundEffect
  */
 public final class SoundUtil {
-	public static final SoundEffect AIR_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 2);
+  public static final SoundEffect AIR_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 2);
 
-	public static final SoundEffect WATER_SOUND = new SoundEffect(Sound.BLOCK_WATER_AMBIENT);
-	public static final SoundEffect ICE_SOUND = new SoundEffect(Sound.ITEM_FLINTANDSTEEL_USE);
-	public static final SoundEffect PLANT_SOUND = new SoundEffect(Sound.BLOCK_GRASS_STEP);
+  public static final SoundEffect WATER_SOUND = new SoundEffect(Sound.BLOCK_WATER_AMBIENT);
+  public static final SoundEffect ICE_SOUND = new SoundEffect(Sound.ITEM_FLINTANDSTEEL_USE);
+  public static final SoundEffect PLANT_SOUND = new SoundEffect(Sound.BLOCK_GRASS_STEP);
 
-	public static final SoundEffect EARTH_SOUND = new SoundEffect(Sound.ENTITY_GHAST_SHOOT);
-	public static final SoundEffect SAND_SOUND = new SoundEffect(Sound.BLOCK_SAND_BREAK);
-	public static final SoundEffect METAL_SOUND = new SoundEffect(Sound.ENTITY_IRON_GOLEM_HURT, 1, 1.25F);
-	public static final SoundEffect LAVA_SOUND = new SoundEffect(Sound.BLOCK_LAVA_AMBIENT);
+  public static final SoundEffect EARTH_SOUND = new SoundEffect(Sound.ENTITY_GHAST_SHOOT);
+  public static final SoundEffect SAND_SOUND = new SoundEffect(Sound.BLOCK_SAND_BREAK);
+  public static final SoundEffect METAL_SOUND = new SoundEffect(Sound.ENTITY_IRON_GOLEM_HURT, 1, 1.25F);
+  public static final SoundEffect LAVA_SOUND = new SoundEffect(Sound.BLOCK_LAVA_AMBIENT);
 
-	public static final SoundEffect FIRE_SOUND = new SoundEffect(Sound.BLOCK_FIRE_AMBIENT);
-	public static final SoundEffect COMBUSTION_SOUND = new SoundEffect(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1, 0);
-	public static final SoundEffect LIGHTNING_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 0);
+  public static final SoundEffect FIRE_SOUND = new SoundEffect(Sound.BLOCK_FIRE_AMBIENT);
+  public static final SoundEffect COMBUSTION_SOUND = new SoundEffect(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1, 0);
+  public static final SoundEffect LIGHTNING_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 0);
 
-	public static final SoundEffect FIRE_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_FIRE_EXTINGUISH, 1, 1);
-	public static final SoundEffect LAVA_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
+  public static final SoundEffect FIRE_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_FIRE_EXTINGUISH, 1, 1);
+  public static final SoundEffect LAVA_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
 
-	public static void playSound(@NonNull Location center, @NonNull SoundEffect effect, float volume, float pitch) {
-		playSound(center, effect.getSound(), volume, pitch);
-	}
+  public static void playSound(@NonNull Location center, @NonNull SoundEffect effect, float volume, float pitch) {
+    playSound(center, effect.getSound(), volume, pitch);
+  }
 
-	public static void playSound(@NonNull Location center, @NonNull Sound sound) {
-		playSound(center, sound, 1, 1);
-	}
+  public static void playSound(@NonNull Location center, @NonNull Sound sound) {
+    playSound(center, sound, 1, 1);
+  }
 
-	public static void playSound(@NonNull Location center, @NonNull Sound sound, float volume, float pitch) {
-		center.getWorld().playSound(center, sound, volume, pitch);
-	}
+  public static void playSound(@NonNull Location center, @NonNull Sound sound, float volume, float pitch) {
+    center.getWorld().playSound(center, sound, volume, pitch);
+  }
 }

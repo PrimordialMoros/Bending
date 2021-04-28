@@ -26,6 +26,6 @@ import me.moros.bending.model.user.User;
 
 @FunctionalInterface
 public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-	boolean test(User user, AbilityDescription desc);
+  boolean test(User user, AbilityDescription desc);
 }
 

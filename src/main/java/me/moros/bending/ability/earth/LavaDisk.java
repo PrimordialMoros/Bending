@@ -71,234 +71,255 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
 public class LavaDisk extends AbilityInstance implements Ability {
-	private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
-	private static final Config config = new Config();
+  private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Vector3 location;
+  private Vector3 location;
 
-	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(500, TimeUnit.MILLISECONDS).build();
+  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+    .expirationPolicy(ExpirationPolicy.CREATED)
+    .expiration(500, TimeUnit.MILLISECONDS).build();
 
-	private boolean launched = false;
-	private double distance;
-	private double distanceTravelled = 0;
-	private double currentPower;
-	private int ticks = 0;
-	private int rotationAngle = 0;
+  private boolean launched = false;
+  private double distance;
+  private double distanceTravelled = 0;
+  private double currentPower;
+  private int ticks = 0;
+  private int rotationAngle = 0;
 
-	public LavaDisk(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public LavaDisk(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (!user.hasPermission("bending.lava")) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (!user.hasPermission("bending.lava")) {
+      return false;
+    }
 
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, LavaDisk.class)) return false;
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, LavaDisk.class)) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		currentPower = userConfig.power;
+    currentPower = userConfig.power;
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
-		Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+    Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
+    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
 
-		if (!source.isPresent()) return false;
+    if (source.isEmpty()) {
+      return false;
+    }
 
-		Block block = source.get();
-		for (int i = 1; i < 3; i++) {
-			Block temp = block.getRelative(BlockFace.UP, i);
-			BlockMethods.tryBreakPlant(temp);
-			if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) return false;
-		}
+    Block block = source.get();
+    for (int i = 1; i < 3; i++) {
+      Block temp = block.getRelative(BlockFace.UP, i);
+      BlockMethods.tryBreakPlant(temp);
+      if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) {
+        return false;
+      }
+    }
 
-		if (!MaterialUtil.isLava(block)) {
-			TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-		}
-		location = new Vector3(block).add(Vector3.HALF);
-		distance = location.distance(user.getEyeLocation());
+    if (!MaterialUtil.isLava(block)) {
+      TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+    }
+    location = new Vector3(block).add(Vector3.HALF);
+    distance = location.distance(user.getEyeLocation());
 
-		removalPolicy = Policies.builder()
-			.add(new OutOfRangeRemovalPolicy(userConfig.range, () -> location))
-			.add(new SwappedSlotsRemovalPolicy(getDescription())).build();
+    removalPolicy = Policies.builder()
+      .add(OutOfRangeRemovalPolicy.of(userConfig.range, () -> location))
+      .add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (launched && distanceTravelled > userConfig.range) {
-			return UpdateResult.REMOVE;
-		}
+    if (launched && distanceTravelled > userConfig.range) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (!isLocationSafe() || currentPower <= 0) {
-			return UpdateResult.REMOVE;
-		}
+    if (!isLocationSafe() || currentPower <= 0) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (!user.isSneaking()) {
-			launched = true;
-		}
+    if (!user.isSneaking()) {
+      launched = true;
+    }
 
-		distance = location.distance(user.getEyeLocation());
-		Vector3 targetLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(launched ? userConfig.range + 5 : 3));
-		Vector3 direction = targetLocation.subtract(location).normalize().scalarMultiply(0.35);
+    distance = location.distance(user.getEyeLocation());
+    Vector3 targetLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(launched ? userConfig.range + 5 : 3));
+    Vector3 direction = targetLocation.subtract(location).normalize().scalarMultiply(0.35);
 
-		int times = user.isSneaking() ? 1 : 3;
-		for (int i = 0; i < times; i++) {
-			if (location.distanceSq(targetLocation) < 0.5 * 0.5) break;
-			location = location.add(direction);
-			if (launched) distanceTravelled += 0.35;
-		}
+    int times = user.isSneaking() ? 1 : 3;
+    for (int i = 0; i < times; i++) {
+      if (location.distanceSq(targetLocation) < 0.5 * 0.5) {
+        break;
+      }
+      location = location.add(direction);
+      if (launched) {
+        distanceTravelled += 0.35;
+      }
+    }
 
-		double deltaDistance = distance - userConfig.selectRange;
-		double distanceModifier = (deltaDistance <= 0) ? 1 : ((distance >= userConfig.range) ? 0 : 1 - (deltaDistance / userConfig.range));
-		int deltaSpeed = FastMath.max(5, NumberConversions.ceil(15 * distanceModifier));
-		rotationAngle += (deltaSpeed % 2 == 0) ? ++deltaSpeed : deltaSpeed;
-		if (rotationAngle >= 360) rotationAngle = 0;
-		displayLavaDisk();
-		if (++ticks % 3 == 0) {
-			double damage = FastMath.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
-			CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage));
-		}
-		return UpdateResult.CONTINUE;
-	}
+    double deltaDistance = distance - userConfig.selectRange;
+    double distanceModifier = (deltaDistance <= 0) ? 1 : ((distance >= userConfig.range) ? 0 : 1 - (deltaDistance / userConfig.range));
+    int deltaSpeed = FastMath.max(5, NumberConversions.ceil(15 * distanceModifier));
+    rotationAngle += (deltaSpeed % 2 == 0) ? ++deltaSpeed : deltaSpeed;
+    if (rotationAngle >= 360) {
+      rotationAngle = 0;
+    }
+    displayLavaDisk();
+    if (++ticks % 3 == 0) {
+      double damage = FastMath.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
+      CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage));
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	@Override
-	public void onDestroy() {
-		Location center = location.toLocation(user.getWorld());
-		ParticleUtil.create(Particle.BLOCK_CRACK, center)
-			.count(16).offset(0.1, 0.1, 0.1).extra(0.01)
-			.data(Material.MAGMA_BLOCK.createBlockData()).spawn();
-		ParticleUtil.create(Particle.LAVA, center)
-			.count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
-		SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    Location center = location.toLocation(user.getWorld());
+    ParticleUtil.create(Particle.BLOCK_CRACK, center)
+      .count(16).offset(0.1, 0.1, 0.1).extra(0.01)
+      .data(Material.MAGMA_BLOCK.createBlockData()).spawn();
+    ParticleUtil.create(Particle.LAVA, center)
+      .count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
+    SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return launched ? Collections.singletonList(new Sphere(location, 1.4)) : Collections.emptyList();
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return launched ? Collections.singletonList(new Sphere(location, 1.4)) : Collections.emptyList();
+  }
 
-	private boolean damageEntity(Entity entity, double damage) {
-		if (affectedEntities.containsKey(entity)) return false;
-		affectedEntities.put(entity, false);
-		FireTick.ACCUMULATE.apply(entity, 20);
-		DamageUtil.damageEntity(entity, user, damage, getDescription());
-		currentPower -= userConfig.powerDiminishPerEntity;
-		ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
-			.offset(0.5, 0.5, 0.5).extra(0.1).spawn();
-		return true;
-	}
+  private boolean damageEntity(Entity entity, double damage) {
+    if (affectedEntities.containsKey(entity)) {
+      return false;
+    }
+    affectedEntities.put(entity, false);
+    FireTick.ACCUMULATE.apply(entity, 20);
+    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    currentPower -= userConfig.powerDiminishPerEntity;
+    ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
+      .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
+    return true;
+  }
 
-	private boolean damageBlock(Block block) {
-		if (currentPower <= 0) return false;
-		FragileStructure.tryDamageStructure(Collections.singletonList(block), 0);
-		if (block.isLiquid() || !TempBlock.isBendable(block)) {
-			return false;
-		}
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-			return false;
-		}
-		// TODO add fire ignition to specific blocks, add extra material types to destroy
-		if (EarthMaterials.isEarthOrSand(block)) {
-			currentPower -= block.getType().getHardness();
-			TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-			ParticleUtil.create(Particle.LAVA, block.getLocation())
-				.offset(0.5, 0.5, 0.5).extra(0.05).spawn();
-			if (ThreadLocalRandom.current().nextInt(5) == 0) {
-				Location center = block.getLocation().add(0.5, 0.5, 0.5);
-				SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
-				SoundUtil.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 0.3F, 0.3F);
-			}
-			return true;
-		}
-		return false;
-	}
+  private boolean damageBlock(Block block) {
+    if (currentPower <= 0) {
+      return false;
+    }
+    FragileStructure.tryDamageStructure(Collections.singletonList(block), 0);
+    if (block.isLiquid() || !TempBlock.isBendable(block)) {
+      return false;
+    }
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      return false;
+    }
+    // TODO add fire ignition to specific blocks, add extra material types to destroy
+    if (EarthMaterials.isEarthOrSand(block)) {
+      currentPower -= block.getType().getHardness();
+      TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+      ParticleUtil.create(Particle.LAVA, block.getLocation())
+        .offset(0.5, 0.5, 0.5).extra(0.05).spawn();
+      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+        Location center = block.getLocation().add(0.5, 0.5, 0.5);
+        SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
+        SoundUtil.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 0.3F, 0.3F);
+      }
+      return true;
+    }
+    return false;
+  }
 
-	private void displayLavaDisk() {
-		damageBlock(location.toBlock(user.getWorld()));
-		int angle = user.getYaw() + 90;
-		double cos = FastMath.cos(-angle);
-		double sin = FastMath.sin(-angle);
-		int offset = 0;
-		int index = 0;
-		float size = 0.8f;
-		for (int i = 1; i <= 8; i++) {
-			for (int j = 0; j <= 288; j += 72) {
-				int rotAngle = rotationAngle + j + offset;
-				double length = 0.1 * i;
-				Vector3 temp = new Vector3(length * FastMath.cos(rotAngle), 0, length * FastMath.sin(rotAngle));
-				Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.getWorld());
-				ParticleUtil.createRGB(loc, colors[index], size).spawn();
-				if (length > 0.5) damageBlock(loc.getBlock());
-			}
-			offset += 4;
-			index = FastMath.min(colors.length - 1, ++index);
-			size -= 0.05;
-		}
-	}
+  private void displayLavaDisk() {
+    damageBlock(location.toBlock(user.getWorld()));
+    int angle = user.getYaw() + 90;
+    double cos = FastMath.cos(-angle);
+    double sin = FastMath.sin(-angle);
+    int offset = 0;
+    int index = 0;
+    float size = 0.8f;
+    for (int i = 1; i <= 8; i++) {
+      for (int j = 0; j <= 288; j += 72) {
+        int rotAngle = rotationAngle + j + offset;
+        double length = 0.1 * i;
+        Vector3 temp = new Vector3(length * FastMath.cos(rotAngle), 0, length * FastMath.sin(rotAngle));
+        Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.getWorld());
+        ParticleUtil.createRGB(loc, colors[index], size).spawn();
+        if (length > 0.5) {
+          damageBlock(loc.getBlock());
+        }
+      }
+      offset += 4;
+      index = FastMath.min(colors.length - 1, ++index);
+      size -= 0.05;
+    }
+  }
 
-	private boolean isLocationSafe() {
-		if (location.getY() <= 2 || location.getY() >= user.getWorld().getMaxHeight() - 1)
-			return false;
-		Block block = location.toBlock(user.getWorld());
-		if (MaterialUtil.isWater(block)) {
-			BlockMethods.playLavaExtinguishEffect(block);
-			return false;
-		}
-		return MaterialUtil.isTransparent(block) || damageBlock(block);
-	}
+  private boolean isLocationSafe() {
+    if (location.getY() <= 2 || location.getY() >= user.getWorld().getMaxHeight() - 1) {
+      return false;
+    }
+    Block block = location.toBlock(user.getWorld());
+    if (MaterialUtil.isWater(block)) {
+      BlockMethods.playLavaExtinguishEffect(block);
+      return false;
+    }
+    return MaterialUtil.isTransparent(block) || damageBlock(block);
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DAMAGE)
-		public double minDamage;
-		@Attribute(Attribute.DAMAGE)
-		public double maxDamage;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
-		@Attribute(Attribute.SPEED)
-		public double speed;
-		@Attribute(Attribute.STRENGTH)
-		public double power;
-		public double powerDiminishPerEntity;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DAMAGE)
+    public double minDamage;
+    @Attribute(Attribute.DAMAGE)
+    public double maxDamage;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
+    @Attribute(Attribute.SPEED)
+    public double speed;
+    @Attribute(Attribute.STRENGTH)
+    public double power;
+    public double powerDiminishPerEntity;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
 
-			cooldown = abilityNode.node("cooldown").getLong(9000);
-			minDamage = abilityNode.node("min-damage").getDouble(1.0);
-			maxDamage = abilityNode.node("max-damage").getDouble(4.0);
-			range = abilityNode.node("range").getDouble(18.0);
-			selectRange = abilityNode.node("select-range").getDouble(6.0);
-			speed = abilityNode.node("speed").getDouble(0.8);
-			power = abilityNode.node("power").getDouble(20.0);
-			powerDiminishPerEntity = abilityNode.node("damage-entity-power-cost").getDouble(7.5);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(9000);
+      minDamage = abilityNode.node("min-damage").getDouble(1.0);
+      maxDamage = abilityNode.node("max-damage").getDouble(4.0);
+      range = abilityNode.node("range").getDouble(18.0);
+      selectRange = abilityNode.node("select-range").getDouble(6.0);
+      speed = abilityNode.node("speed").getDouble(0.8);
+      power = abilityNode.node("power").getDouble(20.0);
+      powerDiminishPerEntity = abilityNode.node("damage-entity-power-cost").getDouble(7.5);
+    }
+  }
 }

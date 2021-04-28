@@ -29,45 +29,49 @@ import me.moros.atlas.expiringmap.ExpirationPolicy;
 import me.moros.atlas.expiringmap.ExpiringMap;
 
 public class TemporalManager<K, V extends Temporary> {
-	private final ExpiringMap<K, V> instances;
+  private final ExpiringMap<K, V> instances;
 
-	public TemporalManager() {
-		instances = ExpiringMap.builder().variableExpiration().build();
-		instances.addExpirationListener((key, value) -> value.revert());
-	}
+  public TemporalManager() {
+    instances = ExpiringMap.builder().variableExpiration().build();
+    instances.addExpirationListener((key, value) -> value.revert());
+  }
 
-	public boolean isTemp(@Nullable K key) {
-		if (key == null) return false;
-		return instances.containsKey(key);
-	}
+  public boolean isTemp(@Nullable K key) {
+    if (key == null) {
+      return false;
+    }
+    return instances.containsKey(key);
+  }
 
-	public Optional<V> get(@NonNull K key) {
-		return Optional.ofNullable(instances.get(key));
-	}
+  public Optional<V> get(@NonNull K key) {
+    return Optional.ofNullable(instances.get(key));
+  }
 
-	public void addEntry(@NonNull K key, @NonNull V value, long duration) {
-		if (duration <= 0) duration = Temporary.DEFAULT_REVERT;
-		if (instances.containsKey(key)) {
-			instances.setExpiration(key, duration, TimeUnit.MILLISECONDS);
-			return;
-		}
-		instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
-	}
+  public void addEntry(@NonNull K key, @NonNull V value, long duration) {
+    if (duration <= 0) {
+      duration = Temporary.DEFAULT_REVERT;
+    }
+    if (instances.containsKey(key)) {
+      instances.setExpiration(key, duration, TimeUnit.MILLISECONDS);
+      return;
+    }
+    instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
+  }
 
-	/**
-	 * This is used inside {@link Temporary#revert}
-	 * @param key the key of the entry to remove
-	 */
-	public void removeEntry(@NonNull K key) {
-		instances.remove(key);
-	}
+  /**
+   * This is used inside {@link Temporary#revert}
+   * @param key the key of the entry to remove
+   */
+  public void removeEntry(@NonNull K key) {
+    instances.remove(key);
+  }
 
-	public void removeAll() {
-		instances.values().forEach(Temporary::revert);
-		instances.clear();
-	}
+  public void removeAll() {
+    instances.values().forEach(Temporary::revert);
+    instances.clear();
+  }
 
-	protected Collection<V> getInstances() {
-		return instances.values();
-	}
+  protected Collection<V> getInstances() {
+    return instances.values();
+  }
 }

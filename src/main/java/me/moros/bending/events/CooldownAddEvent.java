@@ -23,14 +23,14 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public class CooldownAddEvent extends BendingAbilityEvent {
-	private final long duration;
+  private final long duration;
 
-	CooldownAddEvent(User user, AbilityDescription desc, long duration) {
-		super(user, desc);
-		this.duration = duration;
-	}
+  CooldownAddEvent(User user, AbilityDescription desc, long duration) {
+    super(user, desc);
+    this.duration = duration;
+  }
 
-	public long getDuration() {
-		return duration;
-	}
+  public long getDuration() {
+    return duration;
+  }
 }

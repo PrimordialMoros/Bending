@@ -45,105 +45,108 @@ import org.bukkit.block.Block;
  * Represents the protection system which hooks into other region protection plugins.
  */
 public class ProtectionSystem extends Configurable {
-	/**
-	 * A multi-layered cache used to check if a User can build in a specific block location.
-	 * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
-	 * might not be thread-safe themselves and we load data from them when results aren't cached.
-	 */
-	private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
-	private final Collection<Protection> protections = new ArrayList<>();
-	private boolean allowHarmless;
+  /**
+   * A multi-layered cache used to check if a User can build in a specific block location.
+   * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
+   * might not be thread-safe themselves and we load data from them when results aren't cached.
+   */
+  private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
+  private final Collection<Protection> protections = new ArrayList<>();
+  private boolean allowHarmless;
 
-	public ProtectionSystem() {
-		onConfigReload();
-		registerProtectMethod("WorldGuard", WorldGuardProtection::new);
-		registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
-		registerProtectMethod("Towny", TownyProtection::new);
-	}
+  public ProtectionSystem() {
+    registerProtectMethod("WorldGuard", WorldGuardProtection::new);
+    registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
+    registerProtectMethod("Towny", TownyProtection::new);
+  }
 
-	@Override
-	public void onConfigReload() {
-		CommentedConfigurationNode node = config.node("protection");
-		allowHarmless = node.node("allow-harmless").getBoolean(true);
-	}
+  @Override
+  public void onConfigReload() {
+    CommentedConfigurationNode node = config.node("protection");
+    allowHarmless = node.node("allow-harmless").getBoolean(true);
+  }
 
-	/**
-	 * Remove the block protection cache for the specified user.
-	 * @param user the user to invalidate
-	 */
-	public void invalidate(@NonNull User user) {
-		cache.remove(user);
-	}
+  /**
+   * Remove the block protection cache for the specified user.
+   * @param user the user to invalidate
+   */
+  public void invalidate(@NonNull User user) {
+    cache.remove(user);
+  }
 
-	/**
-	 * @see #canBuild(User, Block, boolean)
-	 */
-	public boolean canBuild(@NonNull User user, @NonNull Block block) {
-		return canBuild(user, block, false);
-	}
+  /**
+   * @see #canBuild(User, Block, boolean)
+   */
+  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+    return canBuild(user, block, false);
+  }
 
-	/**
-	 * Uses {@link AbilityDescription#isHarmless}
-	 * @see #canBuild(User, Block, boolean)
-	 */
-	public boolean canBuild(@NonNull User user, @NonNull Block block, @Nullable AbilityDescription desc) {
-		return canBuild(user, block, desc != null && desc.isHarmless());
-	}
+  /**
+   * Uses {@link AbilityDescription#isHarmless}
+   * @see #canBuild(User, Block, boolean)
+   */
+  public boolean canBuild(@NonNull User user, @NonNull Block block, @Nullable AbilityDescription desc) {
+    return canBuild(user, block, desc != null && desc.isHarmless());
+  }
 
-	/**
-	 * Checks if a user can build at a block location. First it queries the cache.
-	 * If no result is found it computes it and adds it to the cache before returning the result.
-	 * Harmless actions are automatically allowed if allowHarmless is configured
-	 * @param user the user to check
-	 * @param block the block to check
-	 * @param isHarmless whether the action the user is peforming is harmless
-	 * @return the result.
-	 * @see #canBuildPostCache(User, Block)
-	 */
-	public boolean canBuild(@NonNull User user, @NonNull Block block, boolean isHarmless) {
-		if (isHarmless && allowHarmless) return true;
-		Boolean result = cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
-		return result != null && result;
-	}
+  /**
+   * Checks if a user can build at a block location. First it queries the cache.
+   * If no result is found it computes it and adds it to the cache before returning the result.
+   * Harmless actions are automatically allowed if allowHarmless is configured
+   * @param user the user to check
+   * @param block the block to check
+   * @param isHarmless whether the action the user is peforming is harmless
+   * @return the result.
+   * @see #canBuildPostCache(User, Block)
+   */
+  public boolean canBuild(@NonNull User user, @NonNull Block block, boolean isHarmless) {
+    if (isHarmless && allowHarmless) {
+      return true;
+    }
+    Boolean result = cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
+    return result != null && result;
+  }
 
-	/**
-	 * Checks if a user can build at a block location.
-	 * @param user the user to check
-	 * @param block the block to check
-	 * @return true if all enabled protections allow it, false otherwise
-	 */
-	private boolean canBuildPostCache(User user, Block block) {
-		return protections.stream().allMatch(m -> m.canBuild(user, block));
-	}
+  /**
+   * Checks if a user can build at a block location.
+   * @param user the user to check
+   * @param block the block to check
+   * @return true if all enabled protections allow it, false otherwise
+   */
+  private boolean canBuildPostCache(User user, Block block) {
+    return protections.stream().allMatch(m -> m.canBuild(user, block));
+  }
 
-	/**
-	 * Register a new {@link Protection}
-	 * @param name the name of the protection to register
-	 * @param creator the factory function that creates the protection instance
-	 */
-	public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
-		CommentedConfigurationNode node = config.node("protection", name);
-		if (!node.getBoolean(true)) return;
-		try {
-			Protection method = creator.create();
-			protections.add(method);
-			Bending.getLog().info("Registered bending protection for " + name);
-		} catch (PluginNotFoundException e) {
-			Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
-		}
-	}
+  /**
+   * Register a new {@link Protection}
+   * @param name the name of the protection to register
+   * @param creator the factory function that creates the protection instance
+   */
+  public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
+    CommentedConfigurationNode node = config.node("protection", name);
+    if (!node.getBoolean(true)) {
+      return;
+    }
+    try {
+      Protection method = creator.create();
+      protections.add(method);
+      Bending.getLog().info("Registered bending protection for " + name);
+    } catch (PluginNotFoundException e) {
+      Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+    }
+  }
 
-	/**
-	 * Creates a block cache in which entries expire 5000ms after their last access time.
-	 * @return the created cache
-	 * @see Caffeine
-	 */
-	private static Cache<Block, Boolean> buildCache() {
-		return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
-	}
+  /**
+   * Creates a block cache in which entries expire 5000ms after their last access time.
+   * @return the created cache
+   * @see Caffeine
+   */
+  private static Cache<Block, Boolean> buildCache() {
+    return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
+  }
 
-	@FunctionalInterface
-	public interface ProtectionFactory {
-		@NonNull Protection create() throws PluginNotFoundException;
-	}
+  @FunctionalInterface
+  public interface ProtectionFactory {
+    @NonNull Protection create() throws PluginNotFoundException;
+  }
 }

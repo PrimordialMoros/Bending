@@ -27,43 +27,43 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 
 public class AbilitySlotContainer {
-	protected final AbilityDescription[] abilities;
+  protected final AbilityDescription[] abilities;
 
-	public AbilitySlotContainer() {
-		this.abilities = new AbilityDescription[9];
-	}
+  public AbilitySlotContainer() {
+    this.abilities = new AbilityDescription[9];
+  }
 
-	public AbilityDescription getAbility(@IntRange(from = 1, to = 9) int slot) {
-		return abilities[slot - 1];
-	}
+  public AbilityDescription getAbility(@IntRange(from = 1, to = 9) int slot) {
+    return abilities[slot - 1];
+  }
 
-	/**
-	 * Sets the given slot to a specific ability
-	 * @param slot the slot to put the ability in
-	 * @param desc the ability description to put
-	 */
-	public void setAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
-		abilities[slot - 1] = desc;
-	}
+  /**
+   * Sets the given slot to a specific ability
+   * @param slot the slot to put the ability in
+   * @param desc the ability description to put
+   */
+  public void setAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
+    abilities[slot - 1] = desc;
+  }
 
-	/**
-	 * Makes a preset out of this container
-	 * @param name the name of the preset to be created
-	 * @return the constructed preset
-	 */
-	public @NonNull Preset toPreset(@NonNull String name) {
-		String[] copy = new String[9];
-		for (int slot = 0; slot < 9; slot++) {
-			AbilityDescription desc = abilities[slot];
-			copy[slot] = desc == null ? null : desc.getName();
-		}
-		return new Preset(0, name, copy);
-	}
+  /**
+   * Makes a preset out of this container
+   * @param name the name of the preset to be created
+   * @return the constructed preset
+   */
+  public @NonNull Preset toPreset(@NonNull String name) {
+    String[] copy = new String[9];
+    for (int slot = 0; slot < 9; slot++) {
+      AbilityDescription desc = abilities[slot];
+      copy[slot] = desc == null ? null : desc.getName();
+    }
+    return new Preset(0, name, copy);
+  }
 
-	public void fromPreset(@NonNull Preset preset) {
-		String[] presetAbilities = preset.getAbilities();
-		for (int slot = 0; slot < 9; slot++) {
-			abilities[slot] = Bending.getGame().getAbilityRegistry().getAbilityDescription(presetAbilities[slot]).orElse(null);
-		}
-	}
+  public void fromPreset(@NonNull Preset preset) {
+    String[] presetAbilities = preset.getAbilities();
+    for (int slot = 0; slot < 9; slot++) {
+      abilities[slot] = Bending.getGame().getAbilityRegistry().getAbilityDescription(presetAbilities[slot]).orElse(null);
+    }
+  }
 }

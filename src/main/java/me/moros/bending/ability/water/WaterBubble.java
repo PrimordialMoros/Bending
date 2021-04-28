@@ -44,132 +44,144 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 
 public class WaterBubble extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Collection<Block> bubble = new HashSet<>();
-	private Block center;
+  private final Collection<Block> bubble = new HashSet<>();
+  private Block center;
 
-	private double radius = 1.5;
-	private long nextUpdateTime = 0;
+  private double radius = 1.5;
+  private long nextUpdateTime = 0;
 
-	public WaterBubble(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public WaterBubble(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterBubble.class)) {
-			return false;
-		}
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterBubble.class)) {
+      return false;
+    }
+    this.user = user;
+    recalculateConfig();
 
-		center = user.getLocBlock();
-		removalPolicy = Policies.builder()
-			.add(Policies.NOT_SNEAKING)
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.build();
+    center = user.getLocBlock();
+    removalPolicy = Policies.builder()
+      .add(Policies.NOT_SNEAKING)
+      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .build();
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		long time = System.currentTimeMillis();
-		if (time < nextUpdateTime) return UpdateResult.CONTINUE;
-		nextUpdateTime = time + 250;
+    long time = System.currentTimeMillis();
+    if (time < nextUpdateTime) {
+      return UpdateResult.CONTINUE;
+    }
+    nextUpdateTime = time + 250;
 
-		boolean updateBubble = false;
-		if (radius < userConfig.radius) {
-			radius += userConfig.speed;
-			updateBubble = true;
-		}
+    boolean updateBubble = false;
+    if (radius < userConfig.radius) {
+      radius += userConfig.speed;
+      updateBubble = true;
+    }
 
-		Block currentBlock = user.getLocBlock();
-		if (!currentBlock.equals(center)) {
-			center = currentBlock;
-			updateBubble = true;
-		}
+    Block currentBlock = user.getLocBlock();
+    if (!currentBlock.equals(center)) {
+      center = currentBlock;
+      updateBubble = true;
+    }
 
-		if (updateBubble) pushWater();
+    if (updateBubble) {
+      pushWater();
+    }
 
-		return UpdateResult.CONTINUE;
-	}
+    return UpdateResult.CONTINUE;
+  }
 
-	private boolean checkBlockOutOfRange(Block block) {
-		if (block.getLocation().distanceSquared(user.getEntity().getLocation()) > radius * radius) {
-			fastClean(block);
-			return true;
-		}
-		return false;
-	}
+  private boolean checkBlockOutOfRange(Block block) {
+    if (block.getLocation().distanceSquared(user.getEntity().getLocation()) > radius * radius) {
+      fastClean(block);
+      return true;
+    }
+    return false;
+  }
 
-	private void pushWater() {
-		bubble.removeIf(this::checkBlockOutOfRange);
-		for (Block block : WorldMethods.getNearbyBlocks(user.getEntity().getLocation(), radius, MaterialUtil::isWater)) {
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) continue;
-			if (TempBlock.MANAGER.isTemp(block)) continue;
-			TempBlock.forceCreateAir(block).ifPresent(tb -> bubble.add(block));
-		}
-	}
+  private void pushWater() {
+    bubble.removeIf(this::checkBlockOutOfRange);
+    for (Block block : WorldMethods.getNearbyBlocks(user.getEntity().getLocation(), radius, MaterialUtil::isWater)) {
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        continue;
+      }
+      if (TempBlock.MANAGER.isTemp(block)) {
+        continue;
+      }
+      TempBlock.forceCreateAir(block).ifPresent(tb -> bubble.add(block));
+    }
+  }
 
-	private void fastClean(Block block) {
-		TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.getBlock())).ifPresent(TempBlock::revert);
-	}
+  private void fastClean(Block block) {
+    TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.getBlock())).ifPresent(TempBlock::revert);
+  }
 
-	@Override
-	public void onDestroy() {
-		Vector3 centerLoc = new Vector3(center);
-		for (Block block : bubble) {
-			if (!MaterialUtil.isAir(block)) continue;
-			TempBlock tb = TempBlock.MANAGER.get(block).orElse(null);
-			if (tb == null) continue;
-			double distance = new Vector3(block).distanceSq(centerLoc);
-			double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
-			long delay = (long) (1500 * factor);
-			tb.revert();
-			TempBlock.createAir(block, delay);
-		}
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    Vector3 centerLoc = new Vector3(center);
+    for (Block block : bubble) {
+      if (!MaterialUtil.isAir(block)) {
+        continue;
+      }
+      TempBlock tb = TempBlock.MANAGER.get(block).orElse(null);
+      if (tb == null) {
+        continue;
+      }
+      double distance = new Vector3(block).distanceSq(centerLoc);
+      double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
+      long delay = (long) (1500 * factor);
+      tb.revert();
+      TempBlock.createAir(block, delay);
+    }
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long duration;
-		@Attribute(Attribute.RADIUS)
-		public int radius;
-		@Attribute(Attribute.SPEED)
-		public double speed;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long duration;
+    @Attribute(Attribute.RADIUS)
+    public int radius;
+    @Attribute(Attribute.SPEED)
+    public double speed;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterbubble");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterbubble");
 
-			cooldown = abilityNode.node("cooldown").getLong(3000);
-			duration = abilityNode.node("duration").getLong(15000);
-			radius = abilityNode.node("radius").getInt(5);
-			speed = abilityNode.node("speed").getDouble(0.5);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(3000);
+      duration = abilityNode.node("duration").getLong(15000);
+      radius = abilityNode.node("radius").getInt(5);
+      speed = abilityNode.node("speed").getDouble(0.5);
+    }
+  }
 }

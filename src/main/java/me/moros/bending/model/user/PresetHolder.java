@@ -28,41 +28,45 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.preset.Preset;
 
 public final class PresetHolder {
-	private final AsyncLoadingCache<String, Preset> presetCache = Caffeine.newBuilder()
-		.maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
-		.buildAsync(this::loadPreset);
+  private final AsyncLoadingCache<String, Preset> presetCache = Caffeine.newBuilder()
+    .maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
+    .buildAsync(this::loadPreset);
 
-	private final Set<String> presets;
-	private final int id;
+  private final Set<String> presets;
+  private final int id;
 
-	PresetHolder(int id, Set<String> presets) {
-		this.id = id;
-		this.presets = presets;
-	}
+  PresetHolder(int id, Set<String> presets) {
+    this.id = id;
+    this.presets = presets;
+  }
 
-	Set<String> getPresets() {
-		return Collections.unmodifiableSet(presets);
-	}
+  Set<String> getPresets() {
+    return Collections.unmodifiableSet(presets);
+  }
 
-	boolean hasPreset(String name) {
-		return presets.contains(name);
-	}
+  boolean hasPreset(String name) {
+    return presets.contains(name);
+  }
 
-	Preset getPresetByName(String name) {
-		if (!hasPreset(name)) return null;
-		return presetCache.synchronous().get(name);
-	}
+  Preset getPresetByName(String name) {
+    if (!hasPreset(name)) {
+      return null;
+    }
+    return presetCache.synchronous().get(name);
+  }
 
-	boolean addPreset(String name) {
-		return presets.add(name);
-	}
+  boolean addPreset(String name) {
+    return presets.add(name);
+  }
 
-	boolean removePreset(String name) {
-		return presets.remove(name);
-	}
+  boolean removePreset(String name) {
+    return presets.remove(name);
+  }
 
-	private Preset loadPreset(String name) {
-		if (!hasPreset(name)) return null;
-		return Bending.getGame().getStorage().loadPreset(id, name);
-	}
+  private Preset loadPreset(String name) {
+    if (!hasPreset(name)) {
+      return null;
+    }
+    return Bending.getGame().getStorage().loadPreset(id, name);
+  }
 }

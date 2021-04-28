@@ -35,49 +35,51 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 
 public class HydroSink extends AbilityInstance implements PassiveAbility {
-	private User user;
+  private User user;
 
-	public HydroSink(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public HydroSink(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-	}
+  @Override
+  public void recalculateConfig() {
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    return UpdateResult.CONTINUE;
+  }
 
-	public static boolean canHydroSink(User user) {
-		if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false)) {
-			return false;
-		}
+  public static boolean canHydroSink(User user) {
+    if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false)) {
+      return false;
+    }
 
-		if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
-			return false;
-		}
+    if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
+      return false;
+    }
 
-		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
-		for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), WaterMaterials::isWaterBendable)) {
-			if (block.getY() > entityBounds.getPosition().getY()) continue;
-			if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
+    for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), WaterMaterials::isWaterBendable)) {
+      if (block.getY() > entityBounds.getPosition().getY()) {
+        continue;
+      }
+      if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 }

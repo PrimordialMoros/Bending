@@ -33,102 +33,106 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 
 public class AirBurst extends AbstractBurst implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
+  private User user;
+  private Config userConfig;
 
-	private boolean released;
-	private long startTime;
+  private boolean released;
+  private long startTime;
 
-	public AirBurst(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirBurst(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.ATTACK) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
-				.ifPresent(b -> b.release(true));
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (method == ActivationMethod.ATTACK) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+        .ifPresent(b -> b.release(true));
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		released = false;
-		if (method == ActivationMethod.FALL) {
-			if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
-				return false;
-			}
-			release(false);
-		}
-		startTime = System.currentTimeMillis();
-		return true;
-	}
+    released = false;
+    if (method == ActivationMethod.FALL) {
+      if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
+        return false;
+      }
+      release(false);
+    }
+    startTime = System.currentTimeMillis();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (!released) {
-			boolean charged = isCharged();
-			if (charged) {
-				ParticleUtil.createAir(user.getMainHandSide().toLocation(user.getWorld())).spawn();
-				if (!user.isSneaking()) {
-					release(false);
-				}
-			} else {
-				if (!user.isSneaking()) return UpdateResult.REMOVE;
-			}
-			return UpdateResult.CONTINUE;
-		}
-		return updateBurst();
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (!released) {
+      boolean charged = isCharged();
+      if (charged) {
+        ParticleUtil.createAir(user.getMainHandSide().toLocation(user.getWorld())).spawn();
+        if (!user.isSneaking()) {
+          release(false);
+        }
+      } else {
+        if (!user.isSneaking()) {
+          return UpdateResult.REMOVE;
+        }
+      }
+      return UpdateResult.CONTINUE;
+    }
+    return updateBurst();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private boolean isCharged() {
-		return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
-	}
+  private boolean isCharged() {
+    return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
+  }
 
-	private void release(boolean cone) {
-		if (released || !isCharged()) return;
-		released = true;
-		if (cone) {
-			createCone(user, () -> new AirBlast(getDescription()), userConfig.coneRange);
-		} else {
-			createSphere(user, () -> new AirBlast(getDescription()), userConfig.sphereRange);
-		}
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  private void release(boolean cone) {
+    if (released || !isCharged()) {
+      return;
+    }
+    released = true;
+    if (cone) {
+      createCone(user, () -> new AirBlast(getDescription()), userConfig.coneRange);
+    } else {
+      createSphere(user, () -> new AirBlast(getDescription()), userConfig.sphereRange);
+    }
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.CHARGE_TIME)
-		public int chargeTime;
-		@Attribute(Attribute.RANGE)
-		public double sphereRange;
-		@Attribute(Attribute.RANGE)
-		public double coneRange;
-		public double fallThreshold;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.CHARGE_TIME)
+    public int chargeTime;
+    @Attribute(Attribute.RANGE)
+    public double sphereRange;
+    @Attribute(Attribute.RANGE)
+    public double coneRange;
+    public double fallThreshold;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
 
-			cooldown = abilityNode.node("cooldown").getLong(6000);
-			chargeTime = abilityNode.node("charge-time").getInt(3500);
-			coneRange = abilityNode.node("cone-range").getDouble(11.0);
-			sphereRange = abilityNode.node("sphere-range").getDouble(7.0);
-			fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      chargeTime = abilityNode.node("charge-time").getInt(3500);
+      coneRange = abilityNode.node("cone-range").getDouble(11.0);
+      sphereRange = abilityNode.node("sphere-range").getDouble(7.0);
+      fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);
+    }
+  }
 }

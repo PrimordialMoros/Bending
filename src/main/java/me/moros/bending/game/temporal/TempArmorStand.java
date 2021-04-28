@@ -34,44 +34,44 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
 public class TempArmorStand implements Temporary {
-	public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
-	private final ArmorStand armorStand;
+  public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
+  private final ArmorStand armorStand;
 
-	public static void init() {
-	}
+  public static void init() {
+  }
 
-	public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration, boolean particles) {
-		armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
-			entity.setInvulnerable(true);
-			entity.setVisible(false);
-			entity.setGravity(false);
-			Objects.requireNonNull(entity.getEquipment()).setHelmet(new ItemStack(material));
-			entity.setMetadata(Metadata.NO_INTERACT, Metadata.emptyMetadata());
-		});
+  public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration, boolean particles) {
+    armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
+      entity.setInvulnerable(true);
+      entity.setVisible(false);
+      entity.setGravity(false);
+      Objects.requireNonNull(entity.getEquipment()).setHelmet(new ItemStack(material));
+      entity.setMetadata(Metadata.NO_INTERACT, Metadata.emptyMetadata());
+    });
 
-		if (particles) {
-			Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
-			BlockData data = material.createBlockData();
-			ParticleUtil.create(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
-				.data(data).spawn();
-			ParticleUtil.create(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
-				.data(data).spawn();
-		}
+    if (particles) {
+      Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
+      BlockData data = material.createBlockData();
+      ParticleUtil.create(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
+        .data(data).spawn();
+      ParticleUtil.create(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
+        .data(data).spawn();
+    }
 
-		MANAGER.addEntry(armorStand, this, duration);
-	}
+    MANAGER.addEntry(armorStand, this, duration);
+  }
 
-	public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
-		this(location, material, duration, true);
-	}
+  public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
+    this(location, material, duration, true);
+  }
 
-	public @NonNull ArmorStand getArmorStand() {
-		return armorStand;
-	}
+  public @NonNull ArmorStand getArmorStand() {
+    return armorStand;
+  }
 
-	@Override
-	public void revert() {
-		armorStand.remove();
-		MANAGER.removeEntry(armorStand);
-	}
+  @Override
+  public void revert() {
+    armorStand.remove();
+    MANAGER.removeEntry(armorStand);
+  }
 }

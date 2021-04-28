@@ -49,131 +49,129 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 public class AirWheel extends AbilityInstance implements Ability {
-	private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
-	private static final Config config = new Config();
-	private static AbilityDescription scooterDesc;
+  private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
+  private static final Config config = new Config();
+  private static AbilityDescription scooterDesc;
 
-	private User user;
-	private Config userConfig;
+  private User user;
+  private Config userConfig;
 
-	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(250, TimeUnit.MILLISECONDS).build();
+  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+    .expirationPolicy(ExpirationPolicy.CREATED)
+    .expiration(250, TimeUnit.MILLISECONDS).build();
 
-	private AirScooter scooter;
-	private Collider collider;
-	private Vector3 center;
+  private AirScooter scooter;
+  private Collider collider;
+  private Vector3 center;
 
-	private long nextRenderTime;
+  private long nextRenderTime;
 
-	public AirWheel(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirWheel(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (scooterDesc == null) {
-			scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
-		}
-		scooter = new AirScooter(scooterDesc);
-		if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.ATTACK))
-			return false;
-		scooter.canRender = false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (scooterDesc == null) {
+      scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
+    }
+    scooter = new AirScooter(scooterDesc);
+    if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.ATTACK)) {
+      return false;
+    }
+    scooter.canRender = false;
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
+    user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
 
-		nextRenderTime = 0;
-		return true;
-	}
+    nextRenderTime = 0;
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		long time = System.currentTimeMillis();
-		center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
+  @Override
+  public @NonNull UpdateResult update() {
+    long time = System.currentTimeMillis();
+    center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
+    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, FastMath.toRadians(user.getYaw())), new Sphere(center, 2));
 
-		OBB obb = new OBB(BOUNDS, new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR));
-		collider = new Disk(obb, new Sphere(center, 2));
+    if (time > nextRenderTime) {
+      render();
+      nextRenderTime = time + 100;
+    }
 
-		if (time > nextRenderTime) {
-			render();
-			nextRenderTime = time + 100;
-		}
+    Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
+    BlockMethods.tryCoolLava(user, base);
+    BlockMethods.tryExtinguishFire(user, base);
 
-		Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
-		BlockMethods.tryCoolLava(user, base);
-		BlockMethods.tryExtinguishFire(user, base);
+    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
+    return scooter.update();
+  }
 
-		CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
-		return scooter.update();
-	}
+  private boolean onEntityHit(Entity entity) {
+    if (affectedEntities.containsKey(entity)) {
+      return false;
+    }
+    affectedEntities.put(entity, false);
+    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    return true;
+  }
 
-	private boolean onEntityHit(Entity entity) {
-		if (affectedEntities.containsKey(entity)) return false;
-		affectedEntities.put(entity, false);
-		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		return true;
-	}
+  @Override
+  public void onDestroy() {
+    scooter.onDestroy();
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public void onDestroy() {
-		scooter.onDestroy();
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  private void render() {
+    Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.getDirection().setY(0));
+    VectorMethods.circle(user.getDirection().scalarMultiply(1.6), rotateAxis, 40).forEach(v ->
+      ParticleUtil.createAir(center.add(v).toLocation(user.getWorld())).spawn()
+    );
+  }
 
-	private void render() {
-		Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.getDirection().setY(0));
-		Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 20, RotationConvention.VECTOR_OPERATOR);
-		VectorMethods.rotate(user.getDirection().scalarMultiply(1.6), rotation, 40).forEach(v ->
-			ParticleUtil.createAir(center.add(v).toLocation(user.getWorld())).spawn()
-		);
-	}
+  public Vector3 getCenter() {
+    return center;
+  }
 
-	public Vector3 getCenter() {
-		return center;
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(collider);
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(collider);
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+    public Config() {
+      super();
+    }
 
-		public Config() {
-			super();
-		}
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
-
-			cooldown = abilityNode.node("cooldown").getLong(8000);
-			damage = abilityNode.node("damage").getDouble(2.0);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(8000);
+      damage = abilityNode.node("damage").getDouble(2.0);
+    }
+  }
 }
 

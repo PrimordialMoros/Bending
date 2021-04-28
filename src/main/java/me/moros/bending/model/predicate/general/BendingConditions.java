@@ -28,60 +28,60 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public enum BendingConditions implements BendingConditional {
-	COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
-	ELEMENT((u, d) -> u.hasElement(d.getElement())),
-	GAMEMODE((u, d) -> !u.isSpectator()),
-	PERMISSION((u, d) -> u.hasPermission(d)),
-	TOGGLED((u, d) -> false),
-	WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID()));
+  COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
+  ELEMENT((u, d) -> u.hasElement(d.getElement())),
+  GAMEMODE((u, d) -> !u.isSpectator()),
+  PERMISSION((u, d) -> u.hasPermission(d)),
+  TOGGLED((u, d) -> false),
+  WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID()));
 
-	private final BendingConditional predicate;
+  private final BendingConditional predicate;
 
-	BendingConditions(BendingConditional predicate) {
-		this.predicate = predicate;
-	}
+  BendingConditions(BendingConditional predicate) {
+    this.predicate = predicate;
+  }
 
-	@Override
-	public boolean test(User user, AbilityDescription desc) {
-		return predicate.test(user, desc);
-	}
+  @Override
+  public boolean test(User user, AbilityDescription desc) {
+    return predicate.test(user, desc);
+  }
 
-	/**
-	 * Constructs a new builder that includes {@link BendingConditions#ELEMENT}, {@link BendingConditions#WORLD},
-	 * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
-	 */
-	public static @NonNull ConditionBuilder builder() {
-		return new ConditionBuilder()
-			.add(BendingConditions.COOLDOWN)
-			.add(BendingConditions.ELEMENT)
-			.add(BendingConditions.GAMEMODE)
-			.add(BendingConditions.WORLD)
-			.add(BendingConditions.PERMISSION);
-	}
+  /**
+   * Constructs a new builder that includes {@link BendingConditions#ELEMENT}, {@link BendingConditions#WORLD},
+   * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
+   */
+  public static @NonNull ConditionBuilder builder() {
+    return new ConditionBuilder()
+      .add(BendingConditions.COOLDOWN)
+      .add(BendingConditions.ELEMENT)
+      .add(BendingConditions.GAMEMODE)
+      .add(BendingConditions.WORLD)
+      .add(BendingConditions.PERMISSION);
+  }
 
-	public static class ConditionBuilder {
-		private final Set<BendingConditional> conditionals;
+  public static class ConditionBuilder {
+    private final Set<BendingConditional> conditionals;
 
-		private ConditionBuilder() {
-			conditionals = new HashSet<>();
-		}
+    private ConditionBuilder() {
+      conditionals = new HashSet<>();
+    }
 
-		public @NonNull ConditionBuilder add(@NonNull BendingConditional conditional) {
-			conditionals.add(conditional);
-			return this;
-		}
+    public @NonNull ConditionBuilder add(@NonNull BendingConditional conditional) {
+      conditionals.add(conditional);
+      return this;
+    }
 
-		public @NonNull ConditionBuilder remove(@NonNull BendingConditional conditional) {
-			conditionals.remove(conditional);
-			return this;
-		}
+    public @NonNull ConditionBuilder remove(@NonNull BendingConditional conditional) {
+      conditionals.remove(conditional);
+      return this;
+    }
 
-		public @NonNull CompositeBendingConditional build() {
-			return new CompositeBendingConditional(this);
-		}
+    public @NonNull CompositeBendingConditional build() {
+      return new CompositeBendingConditional(this);
+    }
 
-		@NonNull Set<@NonNull BendingConditional> getConditionals() {
-			return new HashSet<>(conditionals);
-		}
-	}
+    @NonNull Set<@NonNull BendingConditional> getConditionals() {
+      return new HashSet<>(conditionals);
+    }
+  }
 }

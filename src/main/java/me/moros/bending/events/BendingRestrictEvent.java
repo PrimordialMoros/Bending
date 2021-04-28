@@ -25,36 +25,36 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 
 public class BendingRestrictEvent extends BendingUserEvent implements Cancellable {
-	private final LivingEntity target;
+  private final LivingEntity target;
 
-	private boolean cancelled = false;
-	private long duration;
+  private boolean cancelled = false;
+  private long duration;
 
-	BendingRestrictEvent(User user, LivingEntity target, long duration) {
-		super(user);
-		this.target = target;
-		this.duration = duration;
-	}
+  BendingRestrictEvent(User user, LivingEntity target, long duration) {
+    super(user);
+    this.target = target;
+    this.duration = duration;
+  }
 
-	public @NonNull LivingEntity getTarget() {
-		return target;
-	}
+  public @NonNull LivingEntity getTarget() {
+    return target;
+  }
 
-	public long getDuration() {
-		return duration;
-	}
+  public long getDuration() {
+    return duration;
+  }
 
-	public void setDuration(long duration) {
-		this.duration = duration;
-	}
+  public void setDuration(long duration) {
+    this.duration = duration;
+  }
 
-	@Override
-	public boolean isCancelled() {
-		return cancelled;
-	}
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
 
-	@Override
-	public void setCancelled(boolean cancel) {
-		this.cancelled = cancel;
-	}
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
+  }
 }

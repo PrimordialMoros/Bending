@@ -35,49 +35,40 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 
 public class WorldGuardProtection implements Protection {
-	private final WorldGuardPlugin worldGuard;
-	private final StateFlag bendingFlag;
+  private final WorldGuard worldGuard;
+  private final StateFlag bendingFlag;
 
-	public WorldGuardProtection() throws PluginNotFoundException {
-		worldGuard = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
-		if (worldGuard == null)
-			throw new PluginNotFoundException("WorldGuard");
-		bendingFlag = (StateFlag) WorldGuard.getInstance().getFlagRegistry().get("bending");
-	}
+  public WorldGuardProtection() throws PluginNotFoundException {
+    if (!Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+      throw new PluginNotFoundException("WorldGuard");
+    }
+    worldGuard = WorldGuard.getInstance();
+    bendingFlag = (StateFlag) worldGuard.getFlagRegistry().get("bending");
+  }
 
-	@Override
-	public boolean canBuild(@NonNull User user, @NonNull Block block) {
-		RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+  @Override
+  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+    RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
+    Location location = BukkitAdapter.adapt(block.getLocation());
+    if (user instanceof BendingPlayer) {
+      LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(((BendingPlayer) user).getEntity());
+      World world = BukkitAdapter.adapt(block.getWorld());
+      if (worldGuard.getPlatform().getSessionManager().hasBypass(player, world)) {
+        return true;
+      }
+      if (bendingFlag != null && query.testState(location, player, bendingFlag)) {
+        return true;
+      }
+      return query.testState(location, player, Flags.BUILD);
+    }
+    // Query WorldGuard to see if a non-member (entity) can build in a region.
+    return query.testState(location, list -> Association.NON_MEMBER, Flags.BUILD);
+  }
 
-		Location adaptedLocation = BukkitAdapter.adapt(block.getLocation());
-		World adaptedWorld = BukkitAdapter.adapt(block.getWorld());
-
-		if (user instanceof BendingPlayer) {
-			Player player = ((BendingPlayer) user).getEntity();
-			LocalPlayer adaptedPlayer = worldGuard.wrapPlayer(player);
-			boolean hasBypass = WorldGuard.getInstance()
-				.getPlatform()
-				.getSessionManager()
-				.hasBypass(adaptedPlayer, adaptedWorld);
-
-			if (hasBypass) return true;
-
-			if (bendingFlag != null) {
-				boolean bendingResult = query.testState(adaptedLocation, adaptedPlayer, bendingFlag);
-				if (bendingResult) return true;
-			}
-			return query.testState(adaptedLocation, adaptedPlayer, Flags.BUILD);
-		}
-
-		// Query WorldGuard to see if a non-member (entity) can build in a region.
-		return query.testState(adaptedLocation, list -> Association.NON_MEMBER, Flags.BUILD);
-	}
-
-	@Override
-	public String toString() {
-		return "WorldGuard";
-	}
+  @Override
+  public String toString() {
+    return "WorldGuard";
+  }
 }

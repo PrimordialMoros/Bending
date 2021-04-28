@@ -29,19 +29,19 @@ import org.bukkit.metadata.FixedMetadataValue;
  * @see FixedMetadataValue
  */
 public final class Metadata {
-	public static final String NO_INTERACT = "bending-no-interact";
-	public static final String NO_PICKUP = "bending-no-pickup";
-	public static final String GLOVE_KEY = "bending-earth-glove";
-	public static final String FALLING_BLOCK = "bending-falling-block";
-	public static final String METAL_CABLE = "bending-metal-cable";
-	public static final String DESTRUCTIBLE = "bending-destructible";
-	public static final String NO_MOVEMENT = "bending-no-movement";
+  public static final String NO_INTERACT = "bending-no-interact";
+  public static final String NO_PICKUP = "bending-no-pickup";
+  public static final String GLOVE_KEY = "bending-earth-glove";
+  public static final String FALLING_BLOCK = "bending-falling-block";
+  public static final String METAL_CABLE = "bending-metal-cable";
+  public static final String DESTRUCTIBLE = "bending-destructible";
+  public static final String NO_MOVEMENT = "bending-no-movement";
 
-	public static FixedMetadataValue emptyMetadata() {
-		return new FixedMetadataValue(Bending.getPlugin(), "");
-	}
+  public static FixedMetadataValue emptyMetadata() {
+    return new FixedMetadataValue(Bending.getPlugin(), "");
+  }
 
-	public static @NonNull FixedMetadataValue customMetadata(@Nullable Object obj) {
-		return new FixedMetadataValue(Bending.getPlugin(), obj);
-	}
+  public static @NonNull FixedMetadataValue customMetadata(@Nullable Object obj) {
+    return new FixedMetadataValue(Bending.getPlugin(), obj);
+  }
 }

@@ -50,146 +50,152 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class PhaseChange extends AbilityInstance implements PassiveAbility {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Freeze freeze = new Freeze();
-	private final Melt melt = new Melt();
+  private final Freeze freeze = new Freeze();
+  private final Melt melt = new Melt();
 
-	public PhaseChange(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public PhaseChange(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
-		removalPolicy = Policies.builder().build();
-		return true;
-	}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
+    removalPolicy = Policies.builder().build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
-			freeze.clear();
-			melt.clear();
-			return UpdateResult.CONTINUE;
-		}
-		freeze.processQueue(userConfig.freezeSpeed);
-		if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
-			melt.processQueue(userConfig.meltSpeed);
-		} else {
-			melt.clear();
-		}
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+      freeze.clear();
+      melt.clear();
+      return UpdateResult.CONTINUE;
+    }
+    freeze.processQueue(userConfig.freezeSpeed);
+    if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
+      melt.processQueue(userConfig.meltSpeed);
+    } else {
+      melt.clear();
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	public void freeze() {
-		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
-		Location center = user.getTarget(userConfig.freezeRange, false).toLocation(user.getWorld());
-		if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
-			user.setCooldown(getDescription(), userConfig.freezeCooldown);
-		}
-	}
+  public void freeze() {
+    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+      return;
+    }
+    Location center = user.getTarget(userConfig.freezeRange, false).toLocation(user.getWorld());
+    if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
+      user.setCooldown(getDescription(), userConfig.freezeCooldown);
+    }
+  }
 
-	public void melt() {
-		if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) return;
-		user.setCooldown(getDescription(), 500);
-		Location center = user.getTarget(userConfig.meltRange).toLocation(user.getWorld());
-		melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)));
-	}
+  public void melt() {
+    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+      return;
+    }
+    user.setCooldown(getDescription(), 500);
+    Location center = user.getTarget(userConfig.meltRange).toLocation(user.getWorld());
+    melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)));
+  }
 
-	private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
-		List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, radius, predicate);
-		newBlocks.removeIf(b -> !Bending.getGame().getProtectionSystem().canBuild(user, b));
-		Collections.shuffle(newBlocks);
-		return newBlocks;
-	}
+  private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
+    List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, radius, predicate);
+    newBlocks.removeIf(b -> !Bending.getGame().getProtectionSystem().canBuild(user, b));
+    Collections.shuffle(newBlocks);
+    return newBlocks;
+  }
 
-	public static void freeze(User user) {
-		if (user.getSelectedAbilityName().equals("PhaseChange")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
-		}
-	}
+  public static void freeze(User user) {
+    if (user.getSelectedAbilityName().equals("PhaseChange")) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+    }
+  }
 
-	public static void melt(User user) {
-		if (user.getSelectedAbilityName().equals("PhaseChange")) {
-			Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
-		}
-	}
+  public static void melt(User user) {
+    if (user.getSelectedAbilityName().equals("PhaseChange")) {
+      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private class Freeze extends PhaseTransformer {
-		@Override
-		protected boolean processBlock(@NonNull Block block) {
-			if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
-				return false;
-			}
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				return false;
-			}
+  private class Freeze extends PhaseTransformer {
+    @Override
+    protected boolean processBlock(@NonNull Block block) {
+      if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
+        return false;
+      }
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        return false;
+      }
 
-			TempBlock.create(block, Material.ICE.createBlockData(), true);
-			if (ThreadLocalRandom.current().nextInt(12) == 0) {
-				SoundUtil.ICE_SOUND.play(block.getLocation());
-			}
-			return true;
-		}
-	}
+      TempBlock.create(block, Material.ICE.createBlockData(), true);
+      if (ThreadLocalRandom.current().nextInt(12) == 0) {
+        SoundUtil.ICE_SOUND.play(block.getLocation());
+      }
+      return true;
+    }
+  }
 
-	private class Melt extends PhaseTransformer {
-		@Override
-		protected boolean processBlock(@NonNull Block block) {
-			if (!TempBlock.isBendable(block)) return false;
-			return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
-		}
-	}
+  private class Melt extends PhaseTransformer {
+    @Override
+    protected boolean processBlock(@NonNull Block block) {
+      if (!TempBlock.isBendable(block)) {
+        return false;
+      }
+      return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.SELECTION)
-		public double freezeRange;
-		@Attribute(Attribute.RADIUS)
-		public double freezeRadius;
-		@Attribute(Attribute.SPEED)
-		public int freezeSpeed;
-		@Attribute(Attribute.COOLDOWN)
-		public long freezeCooldown;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.SELECTION)
+    public double freezeRange;
+    @Attribute(Attribute.RADIUS)
+    public double freezeRadius;
+    @Attribute(Attribute.SPEED)
+    public int freezeSpeed;
+    @Attribute(Attribute.COOLDOWN)
+    public long freezeCooldown;
 
-		@Attribute(Attribute.SELECTION)
-		public double meltRange;
-		@Attribute(Attribute.RADIUS)
-		public double meltRadius;
-		@Attribute(Attribute.SPEED)
-		public int meltSpeed;
+    @Attribute(Attribute.SELECTION)
+    public double meltRange;
+    @Attribute(Attribute.RADIUS)
+    public double meltRadius;
+    @Attribute(Attribute.SPEED)
+    public int meltSpeed;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "phasechange");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "phasechange");
 
-			freezeRange = abilityNode.node("freeze").node("range").getDouble(7.0);
-			freezeRadius = abilityNode.node("freeze").node("radius").getDouble(3.5);
-			freezeSpeed = abilityNode.node("freeze").node("speed").getInt(8);
-			freezeCooldown = abilityNode.node("freeze").node("cooldown").getLong(2000);
+      freezeRange = abilityNode.node("freeze").node("range").getDouble(7.0);
+      freezeRadius = abilityNode.node("freeze").node("radius").getDouble(3.5);
+      freezeSpeed = abilityNode.node("freeze").node("speed").getInt(8);
+      freezeCooldown = abilityNode.node("freeze").node("cooldown").getLong(2000);
 
-			meltRange = abilityNode.node("melt").node("range").getDouble(7.0);
-			meltRadius = abilityNode.node("melt").node("radius").getDouble(4.5);
-			meltSpeed = abilityNode.node("melt").node("speed").getInt(8);
+      meltRange = abilityNode.node("melt").node("range").getDouble(7.0);
+      meltRadius = abilityNode.node("melt").node("radius").getDouble(4.5);
+      meltSpeed = abilityNode.node("melt").node("speed").getInt(8);
 
-			abilityNode.node("freeze", "speed").comment("How many blocks can be affected per tick.");
-			abilityNode.node("melt", "speed").comment("How many blocks can be affected per tick.");
-		}
-	}
+      abilityNode.node("freeze", "speed").comment("How many blocks can be affected per tick.");
+      abilityNode.node("melt", "speed").comment("How many blocks can be affected per tick.");
+    }
+  }
 }
 

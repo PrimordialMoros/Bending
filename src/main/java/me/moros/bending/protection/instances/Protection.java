@@ -25,5 +25,5 @@ import org.bukkit.block.Block;
 
 @FunctionalInterface
 public interface Protection {
-	boolean canBuild(@NonNull User user, @NonNull Block block);
+  boolean canBuild(@NonNull User user, @NonNull Block block);
 }

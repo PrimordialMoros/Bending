@@ -25,14 +25,14 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 public interface SimpleAbility {
-	void render();
+  void render();
 
-	default void postRender() {
-	}
+  default void postRender() {
+  }
 
-	boolean onEntityHit(@NonNull Entity entity);
+  boolean onEntityHit(@NonNull Entity entity);
 
-	boolean onBlockHit(@NonNull Block block);
+  boolean onBlockHit(@NonNull Block block);
 
-	@NonNull Collider getCollider();
+  @NonNull Collider getCollider();
 }

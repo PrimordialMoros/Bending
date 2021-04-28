@@ -59,193 +59,207 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 
 public class EarthBlast extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private StateChain states;
-	private Blast blast;
+  private StateChain states;
+  private Blast blast;
 
-	public EarthBlast(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public EarthBlast(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.SNEAK && tryDestroy(user)) {
-			return false;
-		} else if (method == ActivationMethod.ATTACK) {
-			Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
-				.collect(Collectors.toList());
-			for (EarthBlast eblast : eblasts) {
-				if (eblast.blast == null) {
-					eblast.launch();
-				} else {
-					eblast.blast.redirect();
-				}
-			}
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (method == ActivationMethod.SNEAK && tryDestroy(user)) {
+      return false;
+    } else if (method == ActivationMethod.ATTACK) {
+      Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+        .collect(Collectors.toList());
+      for (EarthBlast eblast : eblasts) {
+        if (eblast.blast == null) {
+          eblast.launch();
+        } else {
+          eblast.blast.redirect();
+        }
+      }
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-		Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
-		if (source == null) return false;
-		BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
+    Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
+    Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
+    if (source == null) {
+      return false;
+    }
+    BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 
-		Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
-			.filter(eb -> eb.blast == null).collect(Collectors.toList());
-		for (EarthBlast eblast : eblasts) {
-			State state = eblast.states.getCurrent();
-			if (state instanceof SelectedSource) {
-				((SelectedSource) state).reselect(source, fakeData);
-				return false;
-			}
-		}
+    Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+      .filter(eb -> eb.blast == null).collect(Collectors.toList());
+    for (EarthBlast eblast : eblasts) {
+      State state = eblast.states.getCurrent();
+      if (state instanceof SelectedSource) {
+        ((SelectedSource) state).reselect(source, fakeData);
+        return false;
+      }
+    }
 
-		states = new StateChain()
-			.addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
-			.start();
-		removalPolicy = Policies.builder().add(new SwappedSlotsRemovalPolicy(getDescription())).build();
-		return true;
-	}
+    states = new StateChain()
+      .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
+      .start();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (blast != null) {
-			return blast.update();
-		} else {
-			return states.update();
-		}
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (blast != null) {
+      return blast.update();
+    } else {
+      return states.update();
+    }
+  }
 
-	private void launch() {
-		if (user.isOnCooldown(getDescription())) return;
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			state.complete();
-			Block source = states.getChainStore().stream().findAny().orElse(null);
-			if (source == null) return;
-			if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
-				blast = new Blast(user, source);
-				SoundUtil.EARTH_SOUND.play(source.getLocation());
-				removalPolicy = Policies.builder().build();
-				user.setCooldown(getDescription(), userConfig.cooldown);
-				TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
-			}
-		}
-	}
+  private void launch() {
+    if (user.isOnCooldown(getDescription())) {
+      return;
+    }
+    State state = states.getCurrent();
+    if (state instanceof SelectedSource) {
+      state.complete();
+      Block source = states.getChainStore().stream().findAny().orElse(null);
+      if (source == null) {
+        return;
+      }
+      if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
+        blast = new Blast(user, source);
+        SoundUtil.EARTH_SOUND.play(source.getLocation());
+        removalPolicy = Policies.builder().build();
+        user.setCooldown(getDescription(), userConfig.cooldown);
+        TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
+      }
+    }
+  }
 
-	private static boolean tryDestroy(User user) {
-		Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
-			.filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
-		for (EarthBlast eb : blasts) {
-			Vector3 center = eb.blast.getCenter();
-			double dist = center.distanceSq(user.getEyeLocation());
-			if (dist > config.shatterRange * config.shatterRange) continue;
-			if (eb.blast.getCollider().intersects(user.getRay(dist))) {
-				Vector3 dir = center.subtract(user.getEyeLocation());
-				if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
-					Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(eb);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+  private static boolean tryDestroy(User user) {
+    Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
+      .filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
+    for (EarthBlast eb : blasts) {
+      Vector3 center = eb.blast.getCenter();
+      double dist = center.distanceSq(user.getEyeLocation());
+      if (dist > config.shatterRange * config.shatterRange) {
+        continue;
+      }
+      if (eb.blast.getCollider().intersects(user.getRay(dist))) {
+        Vector3 dir = center.subtract(user.getEyeLocation());
+        if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
+          Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(eb);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
-	@Override
-	public void onDestroy() {
-		State state = states.getCurrent();
-		if (state instanceof SelectedSource) {
-			((SelectedSource) state).onDestroy();
-		}
-		if (blast != null) blast.clean();
-	}
+  @Override
+  public void onDestroy() {
+    State state = states.getCurrent();
+    if (state instanceof SelectedSource) {
+      ((SelectedSource) state).onDestroy();
+    }
+    if (blast != null) {
+      blast.clean();
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public boolean setUser(@NonNull User user) {
-		if (blast == null) return false;
-		this.user = user;
-		blast.setUser(user);
-		return true;
-	}
+  @Override
+  public boolean setUser(@NonNull User user) {
+    if (blast == null) {
+      return false;
+    }
+    this.user = user;
+    blast.setUser(user);
+    return true;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		if (blast == null) return Collections.emptyList();
-		return Collections.singletonList(blast.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    if (blast == null) {
+      return Collections.emptyList();
+    }
+    return Collections.singletonList(blast.getCollider());
+  }
 
-	private class Blast extends AbstractBlockShot {
-		private final double damage;
+  private class Blast extends AbstractBlockShot {
+    private final double damage;
 
-		public Blast(User user, Block block) {
-			super(user, block, userConfig.range, 100);
-			allowUnderWater = false;
-			if (EarthMaterials.isMetalBendable(block)) {
-				damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
-			} else if (EarthMaterials.isLavaBendable(block)) {
-				damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
-			} else {
-				damage = userConfig.damage;
-			}
-		}
+    public Blast(User user, Block block) {
+      super(user, block, userConfig.range, 100);
+      allowUnderWater = false;
+      if (EarthMaterials.isMetalBendable(block)) {
+        damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
+      } else if (EarthMaterials.isLavaBendable(block)) {
+        damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
+      } else {
+        damage = userConfig.damage;
+      }
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			Vector3 origin = getCenter();
-			Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
-			Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
-			entity.setVelocity(push.clampVelocity());
-			DamageUtil.damageEntity(entity, user, damage, getDescription());
-			return true;
-		}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      Vector3 origin = getCenter();
+      Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
+      Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
+      entity.setVelocity(push.clampVelocity());
+      DamageUtil.damageEntity(entity, user, damage, getDescription());
+      return true;
+    }
 
-		@Override
-		public void onBlockHit(@NonNull Block block) {
-			FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
-		}
-	}
+    @Override
+    public void onBlockHit(@NonNull Block block) {
+      FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.SELECTION)
-		public double selectRange;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.SELECTION)
+    public double selectRange;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
 
-		public double shatterRange;
+    public double shatterRange;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
 
-			cooldown = abilityNode.node("cooldown").getLong(1000);
-			range = abilityNode.node("range").getDouble(24.0);
-			selectRange = abilityNode.node("select-range").getDouble(10.0);
-			damage = abilityNode.node("damage").getDouble(2.25);
-			shatterRange = abilityNode.node("max-shatter-range").getDouble(14.0);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(1000);
+      range = abilityNode.node("range").getDouble(24.0);
+      selectRange = abilityNode.node("select-range").getDouble(10.0);
+      damage = abilityNode.node("damage").getDouble(2.25);
+      shatterRange = abilityNode.node("max-shatter-range").getDouble(14.0);
+    }
+  }
 }

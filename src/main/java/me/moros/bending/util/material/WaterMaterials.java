@@ -29,38 +29,38 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 
 public class WaterMaterials {
-	public static final MaterialSetTag PLANT_BENDABLE;
-	public static final MaterialSetTag ICE_BENDABLE;
-	public static final MaterialSetTag ALL;
+  public static final MaterialSetTag PLANT_BENDABLE;
+  public static final MaterialSetTag ICE_BENDABLE;
+  public static final MaterialSetTag ALL;
 
-	static {
-		NamespacedKey key = Bending.getLayer().getMaterialKey();
-		PLANT_BENDABLE = new MaterialSetTag(key)
-			.add(Material.DEAD_BUSH, Material.CACTUS, Material.MELON, Material.VINE)
-			.add(Tag.FLOWERS.getValues())
-			.add(Tag.SAPLINGS.getValues())
-			.add(Tag.CROPS.getValues())
-			.add(Tag.LEAVES.getValues())
-			.add(MaterialTags.MUSHROOMS, MaterialTags.MUSHROOM_BLOCKS, MaterialTags.PUMPKINS).ensureSize("Plants", 47);
+  static {
+    NamespacedKey key = Bending.getLayer().getMaterialKey();
+    PLANT_BENDABLE = new MaterialSetTag(key)
+      .add(Material.DEAD_BUSH, Material.CACTUS, Material.MELON, Material.VINE)
+      .add(Tag.FLOWERS.getValues())
+      .add(Tag.SAPLINGS.getValues())
+      .add(Tag.CROPS.getValues())
+      .add(Tag.LEAVES.getValues())
+      .add(MaterialTags.MUSHROOMS, MaterialTags.MUSHROOM_BLOCKS, MaterialTags.PUMPKINS).ensureSize("Plants", 47);
 
-		ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4);
+    ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4);
 
-		ALL = new MaterialSetTag(key).add(PLANT_BENDABLE, ICE_BENDABLE).add(Material.WATER, Material.SNOW, Material.SNOW_BLOCK).ensureSize("Waterbendable", 54);
-	}
+    ALL = new MaterialSetTag(key).add(PLANT_BENDABLE, ICE_BENDABLE).add(Material.WATER, Material.SNOW, Material.SNOW_BLOCK).ensureSize("Waterbendable", 54);
+  }
 
-	public static boolean isWaterBendable(@NonNull Block block) {
-		return ALL.isTagged(block);
-	}
+  public static boolean isWaterBendable(@NonNull Block block) {
+    return ALL.isTagged(block);
+  }
 
-	public static boolean isIceBendable(@NonNull Block block) {
-		return ICE_BENDABLE.isTagged(block);
-	}
+  public static boolean isIceBendable(@NonNull Block block) {
+    return ICE_BENDABLE.isTagged(block);
+  }
 
-	public static boolean isWaterOrIceBendable(@NonNull Block block) {
-		return block.getType() == Material.WATER || ICE_BENDABLE.isTagged(block);
-	}
+  public static boolean isWaterOrIceBendable(@NonNull Block block) {
+    return block.getType() == Material.WATER || ICE_BENDABLE.isTagged(block);
+  }
 
-	public static boolean isPlantBendable(@NonNull Block block) {
-		return PLANT_BENDABLE.isTagged(block);
-	}
+  public static boolean isPlantBendable(@NonNull Block block) {
+    return PLANT_BENDABLE.isTagged(block);
+  }
 }

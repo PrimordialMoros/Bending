@@ -32,45 +32,45 @@ import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
 
 public class ConfigManager {
-	private final Collection<Configurable> instances = new ArrayList<>();
-	private final HoconConfigurationLoader loader;
+  private final Collection<Configurable> instances = new ArrayList<>();
+  private final HoconConfigurationLoader loader;
 
-	private CommentedConfigurationNode configRoot;
+  private CommentedConfigurationNode configRoot;
 
-	public ConfigManager(@NonNull String directory) {
-		Path path = Paths.get(directory, "bending.conf");
-		loader = HoconConfigurationLoader.builder().path(path).build();
-		try {
-			Files.createDirectories(path.getParent());
-			configRoot = loader.load();
-		} catch (IOException e) {
-			Bending.getLog().warn(e.getMessage());
-		}
-	}
+  public ConfigManager(@NonNull String directory) {
+    Path path = Paths.get(directory, "bending.conf");
+    loader = HoconConfigurationLoader.builder().path(path).build();
+    try {
+      Files.createDirectories(path.getParent());
+      configRoot = loader.load();
+    } catch (IOException e) {
+      Bending.getLog().warn(e.getMessage());
+    }
+  }
 
-	public void reload() {
-		try {
-			configRoot = loader.load();
-			instances.forEach(Configurable::reload);
-		} catch (IOException e) {
-			Bending.getLog().warn(e.getMessage());
-		}
-	}
+  public void reload() {
+    try {
+      configRoot = loader.load();
+      instances.forEach(Configurable::reload);
+    } catch (IOException e) {
+      Bending.getLog().warn(e.getMessage());
+    }
+  }
 
-	public void save() {
-		try {
-			Bending.getLog().info("Saving bending config");
-			loader.save(configRoot);
-		} catch (IOException e) {
-			Bending.getLog().warn(e.getMessage());
-		}
-	}
+  public void save() {
+    try {
+      Bending.getLog().info("Saving bending config");
+      loader.save(configRoot);
+    } catch (IOException e) {
+      Bending.getLog().warn(e.getMessage());
+    }
+  }
 
-	public @NonNull CommentedConfigurationNode getConfig() {
-		return configRoot;
-	}
+  public @NonNull CommentedConfigurationNode getConfig() {
+    return configRoot;
+  }
 
-	public void add(@NonNull Configurable c) {
-		instances.add(c);
-	}
+  public void add(@NonNull Configurable c) {
+    instances.add(c);
+  }
 }

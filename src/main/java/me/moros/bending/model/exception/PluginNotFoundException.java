@@ -20,7 +20,7 @@
 package me.moros.bending.model.exception;
 
 public class PluginNotFoundException extends BendingException {
-	public PluginNotFoundException(String pluginName) {
-		super(pluginName + " not found in plugin manager.");
-	}
+  public PluginNotFoundException(String pluginName) {
+    super(pluginName + " not found in plugin manager.");
+  }
 }

@@ -29,91 +29,91 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public final class DummyAbilityManager extends AbilityManager {
-	public static final AbilityManager INSTANCE = new DummyAbilityManager();
+  public static final AbilityManager INSTANCE = new DummyAbilityManager();
 
-	private DummyAbilityManager() {
-		super();
-	}
+  private DummyAbilityManager() {
+    super();
+  }
 
-	@Override
-	public void addAbility(@NonNull User user, @NonNull Ability instance) {
-	}
+  @Override
+  public void addAbility(@NonNull User user, @NonNull Ability instance) {
+  }
 
-	@Override
-	public void changeOwner(@NonNull Ability ability, @NonNull User user) {
-	}
+  @Override
+  public void changeOwner(@NonNull Ability ability, @NonNull User user) {
+  }
 
-	@Override
-	public void createPassives(@NonNull User user) {
-	}
+  @Override
+  public void createPassives(@NonNull User user) {
+  }
 
-	@Override
-	public void clearPassives(@NonNull User user) {
-	}
+  @Override
+  public void clearPassives(@NonNull User user) {
+  }
 
-	@Override
-	public int getInstancesCount() {
-		return 0;
-	}
+  @Override
+  public int getInstancesCount() {
+    return 0;
+  }
 
-	@Override
-	public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
-		return false;
-	}
+  @Override
+  public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
+    return false;
+  }
 
-	@Override
-	public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
-		return false;
-	}
+  @Override
+  public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
+    return false;
+  }
 
-	@Override
-	public void destroyInstance(@NonNull Ability ability) {
-	}
+  @Override
+  public void destroyInstance(@NonNull Ability ability) {
+  }
 
-	@Override
-	public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
-		return true;
-	}
+  @Override
+  public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
+    return true;
+  }
 
-	@Override
-	public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
-		return true;
-	}
+  @Override
+  public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
+    return true;
+  }
 
-	@Override
-	public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
-		return Stream.empty();
-	}
+  @Override
+  public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
+    return Stream.empty();
+  }
 
-	@Override
-	public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
-		return Stream.empty();
-	}
+  @Override
+  public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
+    return Stream.empty();
+  }
 
-	@Override
-	public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
-		return Optional.empty();
-	}
+  @Override
+  public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
+    return Optional.empty();
+  }
 
-	@Override
-	public @NonNull Stream<Ability> getInstances() {
-		return Stream.empty();
-	}
+  @Override
+  public @NonNull Stream<Ability> getInstances() {
+    return Stream.empty();
+  }
 
-	@Override
-	public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
-		return Stream.empty();
-	}
+  @Override
+  public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
+    return Stream.empty();
+  }
 
-	@Override
-	public void destroyUserInstances(@NonNull User user) {
-	}
+  @Override
+  public void destroyUserInstances(@NonNull User user) {
+  }
 
-	@Override
-	public void destroyAllInstances() {
-	}
+  @Override
+  public void destroyAllInstances() {
+  }
 
-	@Override
-	public void update() {
-	}
+  @Override
+  public void update() {
+  }
 }

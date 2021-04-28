@@ -23,18 +23,18 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 
 public class BindChangeEvent extends BendingUserEvent {
-	private final Result result;
+  private final Result result;
 
-	BindChangeEvent(User user, Result result) {
-		super(user);
-		this.result = result;
-	}
+  BindChangeEvent(User user, Result result) {
+    super(user);
+    this.result = result;
+  }
 
-	public @NonNull Result getResult() {
-		return result;
-	}
+  public @NonNull Result getResult() {
+    return result;
+  }
 
-	public enum Result {
-		SINGLE, MULTIPLE
-	}
+  public enum Result {
+    SINGLE, MULTIPLE
+  }
 }

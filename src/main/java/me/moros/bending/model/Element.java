@@ -34,42 +34,44 @@ import net.kyori.adventure.text.format.TextColor;
  * An immutable and thread-safe object that represents a bending element
  */
 public enum Element {
-	AIR("Air", NamedTextColor.GRAY),
-	WATER("Water", NamedTextColor.AQUA),
-	EARTH("Earth", NamedTextColor.GREEN),
-	FIRE("Fire", NamedTextColor.RED);
+  AIR("Air", NamedTextColor.GRAY),
+  WATER("Water", NamedTextColor.AQUA),
+  EARTH("Earth", NamedTextColor.GREEN),
+  FIRE("Fire", NamedTextColor.RED);
 
-	private final String elementName;
-	private final TextColor color;
+  private final String elementName;
+  private final TextColor color;
 
-	Element(String elementName, TextColor color) {
-		this.elementName = elementName;
-		this.color = color;
-	}
+  Element(String elementName, TextColor color) {
+    this.elementName = elementName;
+    this.color = color;
+  }
 
-	@Override
-	public String toString() {
-		return elementName;
-	}
+  @Override
+  public String toString() {
+    return elementName;
+  }
 
-	public @NonNull Component getDisplayName() {
-		return Component.text(elementName, color);
-	}
+  public @NonNull Component getDisplayName() {
+    return Component.text(elementName, color);
+  }
 
-	public @NonNull TextColor getColor() {
-		return color;
-	}
+  public @NonNull TextColor getColor() {
+    return color;
+  }
 
-	public static Optional<Element> getElementByName(@NonNull String value) {
-		if (value.isEmpty()) return Optional.empty();
-		return getAll().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
-	}
+  public static Optional<Element> getElementByName(@NonNull String value) {
+    if (value.isEmpty()) {
+      return Optional.empty();
+    }
+    return getAll().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
+  }
 
-	public static Collection<String> getElementNames() {
-		return Arrays.asList("Air", "Water", "Earth", "Fire");
-	}
+  public static Collection<String> getElementNames() {
+    return Arrays.asList("Air", "Water", "Earth", "Fire");
+  }
 
-	public static @NonNull Set<@NonNull Element> getAll() {
-		return EnumSet.allOf(Element.class);
-	}
+  public static @NonNull Set<@NonNull Element> getAll() {
+    return EnumSet.allOf(Element.class);
+  }
 }

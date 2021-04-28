@@ -24,5 +24,5 @@ import org.bukkit.entity.Entity;
 
 @FunctionalInterface
 public interface FireTickMethod {
-	void apply(@NonNull Entity user, int amount);
+  void apply(@NonNull Entity user, int amount);
 }

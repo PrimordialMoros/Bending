@@ -30,74 +30,76 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import org.bukkit.block.Block;
 
 public class StateChain implements Updatable {
-	private final Collection<Block> chainStore;
-	private final Queue<State> chainQueue;
-	private State currentState = DummyState.INSTANCE;
+  private final Collection<Block> chainStore;
+  private final Queue<State> chainQueue;
+  private State currentState = DummyState.INSTANCE;
 
-	private boolean started = false;
-	private boolean finished = false;
+  private boolean started = false;
+  private boolean finished = false;
 
-	public StateChain() {
-		this(new ArrayList<>());
-	}
+  public StateChain() {
+    this(new ArrayList<>());
+  }
 
-	public StateChain(@NonNull Collection<@NonNull Block> store) {
-		chainStore = store;
-		chainQueue = new ArrayDeque<>();
-	}
+  public StateChain(@NonNull Collection<@NonNull Block> store) {
+    chainStore = store;
+    chainQueue = new ArrayDeque<>();
+  }
 
-	public @NonNull StateChain addState(@NonNull State state) {
-		if (started) {
-			throw new RuntimeException("State is executing");
-		}
-		chainQueue.offer(state);
-		return this;
-	}
+  public @NonNull StateChain addState(@NonNull State state) {
+    if (started) {
+      throw new RuntimeException("State is executing");
+    }
+    chainQueue.offer(state);
+    return this;
+  }
 
-	public @NonNull StateChain start() {
-		if (started) {
-			throw new RuntimeException("State is executing");
-		}
-		if (chainQueue.isEmpty()) {
-			throw new RuntimeException("Chain is empty");
-		}
-		started = true;
-		nextState();
-		return this;
-	}
+  public @NonNull StateChain start() {
+    if (started) {
+      throw new RuntimeException("State is executing");
+    }
+    if (chainQueue.isEmpty()) {
+      throw new RuntimeException("Chain is empty");
+    }
+    started = true;
+    nextState();
+    return this;
+  }
 
-	public @NonNull State getCurrent() {
-		return currentState;
-	}
+  public @NonNull State getCurrent() {
+    return currentState;
+  }
 
-	public void nextState() {
-		if (chainQueue.isEmpty()) {
-			finished = true;
-			return;
-		}
-		currentState = chainQueue.poll();
-		currentState.start(this);
-	}
+  public void nextState() {
+    if (chainQueue.isEmpty()) {
+      finished = true;
+      return;
+    }
+    currentState = chainQueue.poll();
+    currentState.start(this);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (!started || finished) return UpdateResult.REMOVE;
-		return currentState.update();
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (!started || finished) {
+      return UpdateResult.REMOVE;
+    }
+    return currentState.update();
+  }
 
-	public void abort() {
-		finished = true;
-	}
+  public void abort() {
+    finished = true;
+  }
 
-	public boolean isComplete() {
-		return finished && chainQueue.isEmpty();
-	}
+  public boolean isComplete() {
+    return finished && chainQueue.isEmpty();
+  }
 
-	public boolean isFinished() {
-		return finished;
-	}
+  public boolean isFinished() {
+    return finished;
+  }
 
-	public @NonNull Collection<@NonNull Block> getChainStore() {
-		return chainStore;
-	}
+  public @NonNull Collection<@NonNull Block> getChainStore() {
+    return chainStore;
+  }
 }

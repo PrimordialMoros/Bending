@@ -23,13 +23,13 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 
 public abstract class BendingUserEvent extends BendingEvent {
-	protected final User user;
+  protected final User user;
 
-	BendingUserEvent(User user) {
-		this.user = user;
-	}
+  BendingUserEvent(User user) {
+    this.user = user;
+  }
 
-	public @NonNull User getUser() {
-		return user;
-	}
+  public @NonNull User getUser() {
+    return user;
+  }
 }

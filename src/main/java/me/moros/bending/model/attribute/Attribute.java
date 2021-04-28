@@ -27,19 +27,19 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Attribute {
-	String value() default "";
+  String value() default "";
 
-	String RANGE = "Range";
-	String SELECTION = "Selection";
-	String COOLDOWN = "Cooldown";
-	String SPEED = "Speed";
-	String STRENGTH = "Strength";
-	String DAMAGE = "Damage";
-	String CHARGE_TIME = "ChargeTime";
-	String DURATION = "Duration";
-	String RADIUS = "Radius";
-	String HEIGHT = "Height";
-	String AMOUNT = "Amount";
+  String RANGE = "Range";
+  String SELECTION = "Selection";
+  String COOLDOWN = "Cooldown";
+  String SPEED = "Speed";
+  String STRENGTH = "Strength";
+  String DAMAGE = "Damage";
+  String CHARGE_TIME = "ChargeTime";
+  String DURATION = "Duration";
+  String RADIUS = "Radius";
+  String HEIGHT = "Height";
+  String AMOUNT = "Amount";
 
-	String[] TYPES = {RANGE, SELECTION, COOLDOWN, SPEED, STRENGTH, DAMAGE, CHARGE_TIME, DURATION, RADIUS, HEIGHT, AMOUNT};
+  String[] TYPES = {RANGE, SELECTION, COOLDOWN, SPEED, STRENGTH, DAMAGE, CHARGE_TIME, DURATION, RADIUS, HEIGHT, AMOUNT};
 }

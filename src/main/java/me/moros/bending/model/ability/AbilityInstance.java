@@ -23,13 +23,13 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
 public abstract class AbilityInstance {
-	private final AbilityDescription desc;
+  private final AbilityDescription desc;
 
-	protected AbilityInstance(@NonNull AbilityDescription desc) {
-		this.desc = desc;
-	}
+  protected AbilityInstance(@NonNull AbilityDescription desc) {
+    this.desc = desc;
+  }
 
-	public AbilityDescription getDescription() {
-		return desc;
-	}
+  public AbilityDescription getDescription() {
+    return desc;
+  }
 }

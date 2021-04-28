@@ -22,7 +22,7 @@ package me.moros.bending.model.exception.command;
 import me.moros.atlas.acf.InvalidCommandArgument;
 
 public final class InvalidSlotException extends InvalidCommandArgument {
-	public InvalidSlotException(int value) {
-		super("Invalid slot number " + value + " . Slots must be in the 1-9 range!");
-	}
+  public InvalidSlotException(int value) {
+    super("Invalid slot number " + value + " . Slots must be in the 1-9 range!");
+  }
 }

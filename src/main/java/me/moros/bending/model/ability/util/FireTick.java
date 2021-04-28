@@ -24,21 +24,23 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 
 public enum FireTick implements FireTickMethod {
-	OVERWRITE(Entity::setFireTicks),
-	LARGER((e, a) -> {
-		if (e.getFireTicks() < a) e.setFireTicks(a);
-	}),
-	ACCUMULATE((e, a) -> e.setFireTicks(FastMath.max(0, e.getFireTicks()) + a));
+  OVERWRITE(Entity::setFireTicks),
+  LARGER((e, a) -> {
+    if (e.getFireTicks() < a) {
+      e.setFireTicks(a);
+    }
+  }),
+  ACCUMULATE((e, a) -> e.setFireTicks(FastMath.max(0, e.getFireTicks()) + a));
 
-	private final FireTickMethod method;
+  private final FireTickMethod method;
 
-	FireTick(FireTickMethod method) {
-		this.method = method;
-	}
+  FireTick(FireTickMethod method) {
+    this.method = method;
+  }
 
-	@Override
-	public void apply(@NonNull Entity entity, int amount) {
-		method.apply(entity, amount);
-	}
+  @Override
+  public void apply(@NonNull Entity entity, int amount) {
+    method.apply(entity, amount);
+  }
 }
 

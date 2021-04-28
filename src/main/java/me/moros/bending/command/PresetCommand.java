@@ -41,57 +41,57 @@ import org.bukkit.command.CommandSender;
 @CommandAlias("%presetcommand")
 @CommandPermission("bending.command.preset")
 public class PresetCommand extends BaseCommand {
-	@Default
-	@Subcommand("list|ls|l")
-	@Description("List all available presets")
-	public static void onPresetList(BendingPlayer player) {
-		Collection<String> presets = player.getPresets();
-		if (presets.isEmpty()) {
-			Message.NO_PRESETS.send(player);
-		} else {
-			player.getEntity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
-		}
-	}
+  @Default
+  @Subcommand("list|ls|l")
+  @Description("List all available presets")
+  public static void onPresetList(BendingPlayer player) {
+    Collection<String> presets = player.getPresets();
+    if (presets.isEmpty()) {
+      Message.NO_PRESETS.send(player);
+    } else {
+      player.getEntity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+    }
+  }
 
-	@HelpCommand
-	@CommandPermission("bending.command.help")
-	public static void doHelp(CommandSender user, CommandHelp help) {
-		user.sendMessage(Message.HELP_HEADER.build());
-		help.showHelp();
-	}
+  @HelpCommand
+  @CommandPermission("bending.command.help")
+  public static void doHelp(CommandSender user, CommandHelp help) {
+    user.sendMessage(Message.HELP_HEADER.build());
+    help.showHelp();
+  }
 
-	@Subcommand("create|c")
-	@Description("Create a new preset")
-	public static void onPresetCreate(BendingPlayer player, String name) {
-		String input = ChatUtil.sanitizeInput(name);
-		Preset preset = player.createPresetFromSlots(input);
-		if (preset.isEmpty()) {
-			Message.EMPTY_PRESET.send(player);
-			return;
-		}
-		player.addPreset(preset, result -> player.getEntity().sendMessage(result.getMessage(input)));
-	}
+  @Subcommand("create|c")
+  @Description("Create a new preset")
+  public static void onPresetCreate(BendingPlayer player, String name) {
+    String input = ChatUtil.sanitizeInput(name);
+    Preset preset = player.createPresetFromSlots(input);
+    if (preset.isEmpty()) {
+      Message.EMPTY_PRESET.send(player);
+      return;
+    }
+    player.addPreset(preset, result -> player.getEntity().sendMessage(result.getMessage(input)));
+  }
 
-	@Subcommand("remove|rm|r|delete|del|d")
-	@CommandCompletion("@presets")
-	@Description("Remove an existing preset")
-	public static void onPresetRemove(BendingPlayer player, Preset preset) {
-		if (player.removePreset(preset)) {
-			Message.PRESET_REMOVE_SUCCESS.send(player, preset.getName());
-		} else {
-			Message.PRESET_REMOVE_FAIL.send(player, preset.getName());
-		}
-	}
+  @Subcommand("remove|rm|r|delete|del|d")
+  @CommandCompletion("@presets")
+  @Description("Remove an existing preset")
+  public static void onPresetRemove(BendingPlayer player, Preset preset) {
+    if (player.removePreset(preset)) {
+      Message.PRESET_REMOVE_SUCCESS.send(player, preset.getName());
+    } else {
+      Message.PRESET_REMOVE_FAIL.send(player, preset.getName());
+    }
+  }
 
-	@Subcommand("bind|b")
-	@CommandCompletion("@presets")
-	@Description("Bind an existing preset")
-	public static void onPresetBind(BendingPlayer player, Preset preset) {
-		int count = player.bindPreset(preset);
-		if (count > 0) {
-			Message.PRESET_BIND_SUCCESS.send(player, count, preset.getName());
-		} else {
-			Message.PRESET_BIND_FAIL.send(player, preset.getName());
-		}
-	}
+  @Subcommand("bind|b")
+  @CommandCompletion("@presets")
+  @Description("Bind an existing preset")
+  public static void onPresetBind(BendingPlayer player, Preset preset) {
+    int count = player.bindPreset(preset);
+    if (count > 0) {
+      Message.PRESET_BIND_SUCCESS.send(player, count, preset.getName());
+    } else {
+      Message.PRESET_BIND_FAIL.send(player, preset.getName());
+    }
+  }
 }

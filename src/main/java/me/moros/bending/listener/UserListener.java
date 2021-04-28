@@ -32,6 +32,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
@@ -65,207 +66,216 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
 
 public class UserListener implements Listener {
-	private final Game game;
+  private final Game game;
 
-	public UserListener(@NonNull Game game) {
-		this.game = game;
-	}
+  public UserListener(@NonNull Game game) {
+    this.game = game;
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
-		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on pre-login");
-		UUID uuid = event.getUniqueId();
-		long startTime = System.currentTimeMillis();
-		game.getPlayerManager().getProfile(uuid);
-		long time = System.currentTimeMillis() - startTime;
-		if (time >= 1000) {
-			Bending.getLog().warn("Processing login for " + uuid + " took " + time + "ms.");
-		}
-		timing.stopTiming();
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
+    MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on pre-login");
+    UUID uuid = event.getUniqueId();
+    long startTime = System.currentTimeMillis();
+    game.getPlayerManager().getProfile(uuid);
+    long time = System.currentTimeMillis() - startTime;
+    if (time >= 1000) {
+      Bending.getLog().warn("Processing login for " + uuid + " took " + time + "ms.");
+    }
+    timing.stopTiming();
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerJoin(PlayerJoinEvent event) {
-		MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on join");
-		Player player = event.getPlayer();
-		UUID uuid = player.getUniqueId();
-		String name = player.getName();
-		Optional<BendingProfile> profile = game.getPlayerManager().getProfile(uuid);
-		if (profile.isPresent()) {
-			game.getPlayerManager().createPlayer(player, profile.get());
-		} else {
-			Bending.getLog().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
-		}
-		timing.stopTiming();
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    MCTiming timing = Bending.getTimingManager().ofStart("BendingProfile on join");
+    Player player = event.getPlayer();
+    UUID uuid = player.getUniqueId();
+    String name = player.getName();
+    BendingProfile profile = game.getPlayerManager().getProfile(uuid);
+    if (profile != null) {
+      game.getPlayerManager().createPlayer(player, profile);
+    } else {
+      Bending.getLog().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
+    }
+    timing.stopTiming();
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerLogout(PlayerQuitEvent event) {
-		game.getActivationController().onPlayerLogout(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerLogout(PlayerQuitEvent event) {
+    game.getActivationController().onPlayerLogout(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityDeath(EntityDeathEvent event) {
-		event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
-		boolean keepInventory = (event instanceof PlayerDeathEvent) && ((PlayerDeathEvent) event).getKeepInventory();
-		TempArmor.MANAGER.get(event.getEntity()).ifPresent(tempArmor -> {
-			if (!keepInventory) event.getDrops().addAll(tempArmor.getSnapshot());
-			tempArmor.revert();
-		});
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDeath(EntityDeathEvent event) {
+    event.getDrops().removeIf(item -> Bending.getLayer().hasArmorKey(item.getItemMeta()));
+    boolean keepInventory = (event instanceof PlayerDeathEvent) && ((PlayerDeathEvent) event).getKeepInventory();
+    TempArmor.MANAGER.get(event.getEntity()).ifPresent(tempArmor -> {
+      if (!keepInventory) {
+        event.getDrops().addAll(tempArmor.getSnapshot());
+      }
+      tempArmor.revert();
+    });
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerDeath(PlayerDeathEvent event) {
-		Component msg = DamageUtil.getBendingDeathMessage(event.getEntity());
-		if (msg != null) {
-			event.deathMessage(msg);
-		}
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerDeath(PlayerDeathEvent event) {
+    Component msg = DamageUtil.getBendingDeathMessage(event.getEntity());
+    if (msg != null) {
+      event.deathMessage(msg);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onInventoryClick(InventoryClickEvent event) {
-		ItemStack item = event.getCurrentItem();
-		if (item == null || !(event.getClickedInventory() instanceof PlayerInventory)) {
-			return;
-		}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onInventoryClick(InventoryClickEvent event) {
+    ItemStack item = event.getCurrentItem();
+    if (item == null || !(event.getClickedInventory() instanceof PlayerInventory)) {
+      return;
+    }
 
-		ItemMeta meta = item.getItemMeta();
-		if (meta != null && Bending.getLayer().hasArmorKey(meta)) {
-			PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
-			if (inventory.getHolder() instanceof Player) {
-				Player player = ((Player) inventory.getHolder()).getPlayer();
-				if (!TempArmor.MANAGER.isTemp(player) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
-					inventory.remove(item);
-				}
-			}
-			event.setCancelled(true);
-		}
-	}
+    ItemMeta meta = item.getItemMeta();
+    if (meta != null && Bending.getLayer().hasArmorKey(meta)) {
+      PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
+      if (inventory.getHolder() instanceof Player) {
+        Player player = ((Player) inventory.getHolder()).getPlayer();
+        if (!TempArmor.MANAGER.isTemp(player) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
+          inventory.remove(item);
+        }
+      }
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityDamageLow(EntityDamageEvent event) {
-		if (!(event.getEntity() instanceof LivingEntity)) return;
-		if (event.getCause() == DamageCause.FALL) {
-			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
-			if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {
-				event.setDamage(0);
-				event.setCancelled(true);
-			}
-		} else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
-			Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
-			if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
-				event.getEntity().setFireTicks(0);
-				event.setCancelled(true);
-			}
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamageLow(EntityDamageEvent event) {
+    if (!(event.getEntity() instanceof LivingEntity)) {
+      return;
+    }
+    if (event.getCause() == DamageCause.FALL) {
+      Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+      if (user.isPresent() && !game.getActivationController().onFallDamage(user.get())) {
+        event.setDamage(0);
+        event.setCancelled(true);
+      }
+    } else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
+      Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
+      if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
+        event.getEntity().setFireTicks(0);
+        event.setCancelled(true);
+      }
+    }
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onEntityDamage(EntityDamageEvent event) {
-		if (!(event.getEntity() instanceof LivingEntity)) return;
-		game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity())
-			.ifPresent(game.getActivationController()::onUserDamage);
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityDamage(EntityDamageEvent event) {
+    if (!(event.getEntity() instanceof LivingEntity)) {
+      return;
+    }
+    game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity())
+      .ifPresent(game.getActivationController()::onUserDamage);
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPlayerMove(PlayerMoveEvent event) {
-		Location from = event.getFrom();
-		Location to = event.getTo();
-		if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
-			return;
-		}
-		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.MOVE)) {
-			event.setCancelled(true);
-			return;
-		}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerMove(PlayerMoveEvent event) {
+    Location from = event.getFrom();
+    Location to = event.getTo();
+    if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+      return;
+    }
+    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.MOVE)) {
+      event.setCancelled(true);
+      return;
+    }
 
-		final Vector velocity = to.toVector().subtract(from.toVector());
-		game.getActivationController().onUserMove(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), velocity);
-	}
+    final Vector3 velocity = new Vector3(to).subtract(new Vector3(from));
+    game.getActivationController().onUserMove(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), velocity);
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPlayerInteractLow(PlayerInteractEvent event) {
-		if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerInteractLow(PlayerInteractEvent event) {
+    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPlayerInteractEntityLow(PlayerInteractEntityEvent event) {
-		if (event.getRightClicked().hasMetadata(Metadata.NO_INTERACT)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerInteractEntityLow(PlayerInteractEntityEvent event) {
+    if (event.getRightClicked().hasMetadata(Metadata.NO_INTERACT)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.getHand() != EquipmentSlot.HAND) return;
-		BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-		switch (event.getAction()) {
-			case RIGHT_CLICK_AIR:
-				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT);
-				break;
-			case RIGHT_CLICK_BLOCK:
-				game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK, event.getClickedBlock());
-				break;
-			case LEFT_CLICK_AIR:
-			case LEFT_CLICK_BLOCK:
-				game.getActivationController().onUserSwing(player);
-				break;
-		}
-	}
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerInteract(PlayerInteractEvent event) {
+    if (event.getHand() != EquipmentSlot.HAND) {
+      return;
+    }
+    BendingPlayer player = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+    switch (event.getAction()) {
+      case RIGHT_CLICK_AIR:
+        game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT);
+        break;
+      case RIGHT_CLICK_BLOCK:
+        game.getActivationController().onUserInteract(player, ActivationMethod.INTERACT_BLOCK, event.getClickedBlock());
+        break;
+      case LEFT_CLICK_AIR:
+      case LEFT_CLICK_BLOCK:
+        game.getActivationController().onUserSwing(player);
+        break;
+    }
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayDropItem(PlayerDropItemEvent event) {
-		game.getActivationController().ignoreNextSwing(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayDropItem(PlayerDropItemEvent event) {
+    game.getActivationController().ignoreNextSwing(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-		if (event.getHand() != EquipmentSlot.HAND) return;
-		User user = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-		game.getActivationController().onUserInteract(user, ActivationMethod.INTERACT_ENTITY, event.getRightClicked());
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+    if (event.getHand() != EquipmentSlot.HAND) {
+      return;
+    }
+    User user = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+    game.getActivationController().onUserInteract(user, ActivationMethod.INTERACT_ENTITY, event.getRightClicked());
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
-		game.getActivationController().onUserSneak(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), event.isSneaking());
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+    game.getActivationController().onUserSneak(game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId()), event.isSneaking());
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-		game.getBoardManager().forceToggleScoreboard(event.getPlayer());
-		BendingPlayer bendingPlayer = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-		game.getAbilityManager(event.getFrom()).destroyUserInstances(bendingPlayer);
-		game.getAbilityManager(event.getPlayer().getWorld()).createPassives(bendingPlayer);
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+    game.getBoardManager().forceToggleScoreboard(event.getPlayer());
+    BendingPlayer bendingPlayer = game.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+    game.getAbilityManager(event.getFrom()).destroyUserInstances(bendingPlayer);
+    game.getAbilityManager(event.getPlayer().getWorld()).createPassives(bendingPlayer);
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerSlotChange(PlayerItemHeldEvent event) {
-		game.getBoardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerSlotChange(PlayerItemHeldEvent event) {
+    game.getBoardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onCooldownAdd(CooldownAddEvent event) {
-		if (event.getUser() instanceof BendingPlayer) {
-			game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), event.getAbility(), true);
-		}
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onCooldownAdd(CooldownAddEvent event) {
+    if (event.getUser() instanceof BendingPlayer) {
+      game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), event.getAbility(), true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onCooldownRemove(CooldownRemoveEvent event) {
-		if (event.getUser() instanceof BendingPlayer) {
-			game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), event.getAbility(), false);
-		}
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onCooldownRemove(CooldownRemoveEvent event) {
+    if (event.getUser() instanceof BendingPlayer) {
+      game.getBoardManager().updateBoardSlot((Player) event.getUser().getEntity(), event.getAbility(), false);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onElementChange(ElementChangeEvent event) {
-		if (event.getUser() instanceof BendingPlayer && event.getResult() != ElementChangeEvent.Result.ADD) {
-			game.getBoardManager().updateBoard((Player) event.getUser().getEntity());
-		}
-	}
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onElementChange(ElementChangeEvent event) {
+    if (event.getUser() instanceof BendingPlayer && event.getResult() != ElementChangeEvent.Result.ADD) {
+      game.getBoardManager().updateBoard((Player) event.getUser().getEntity());
+    }
+  }
 }

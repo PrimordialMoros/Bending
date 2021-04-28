@@ -23,6 +23,7 @@ import com.palmergames.bukkit.towny.Towny;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Coord;
 import com.palmergames.bukkit.towny.object.PlayerCache;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.palmergames.bukkit.towny.object.WorldCoord;
@@ -39,52 +40,46 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class TownyProtection implements Protection {
-	private final Towny towny;
+  private final Towny towny;
+  private final TownyAPI api;
 
-	public TownyProtection() throws PluginNotFoundException {
-		towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
+  public TownyProtection() throws PluginNotFoundException {
+    towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
+    if (towny == null) {
+      throw new PluginNotFoundException("Towny");
+    }
+    api = TownyAPI.getInstance();
+  }
 
-		if (towny == null)
-			throw new PluginNotFoundException("Towny");
-	}
+  @Override
+  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+    if (user instanceof BendingPlayer) {
+      Player player = ((BendingPlayer) user).getEntity();
+      boolean canBuild = PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.DIRT, TownyPermission.ActionType.BUILD);
+      if (!canBuild && api.isWarTime()) {
+        PlayerCache cache = towny.getCache(player);
+        PlayerCache.TownBlockStatus status = cache.getStatus();
+        if (status == PlayerCache.TownBlockStatus.ENEMY && !WarUtil.isPlayerNeutral(player)) {
+          try {
+            TownyWorld townyWorld = api.getDataSource().getWorld(player.getWorld().getName());
+            WorldCoord worldCoord = new WorldCoord(townyWorld.getName(), Coord.parseCoord(block));
+            FlagWar.callAttackCellEvent(towny, player, block, worldCoord);
+          } catch (Exception e) {
+            // Do nothing
+          }
+          canBuild = true;
+        } else if (status == PlayerCache.TownBlockStatus.WARZONE) {
+          canBuild = true;
+        }
+      }
+      return canBuild;
+    }
+    TownBlock townBlock = api.getTownBlock(block.getLocation());
+    return townBlock == null || !townBlock.hasTown();
+  }
 
-	@Override
-	public boolean canBuild(@NonNull User user, @NonNull Block block) {
-		if (user instanceof BendingPlayer) {
-			Player player = ((BendingPlayer) user).getEntity();
-			return canPlayerBuild(player, block);
-		}
-		try {
-			if (TownyAPI.getInstance().getTownBlock(block.getLocation()).getTown() != null) return false;
-		} catch (Exception e) {
-			// Do nothing
-		}
-		return true;
-	}
-
-	private boolean canPlayerBuild(Player player, Block block) {
-		boolean canBuild = PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.STONE, TownyPermission.ActionType.BUILD);
-		if (!canBuild && TownyAPI.getInstance().isWarTime()) {
-			PlayerCache cache = towny.getCache(player);
-			PlayerCache.TownBlockStatus status = cache.getStatus();
-			if (status == PlayerCache.TownBlockStatus.ENEMY && !WarUtil.isPlayerNeutral(player)) {
-				try {
-					TownyWorld townyWorld = TownyAPI.getInstance().getDataSource().getWorld(player.getWorld().getName());
-					WorldCoord worldCoord = new WorldCoord(townyWorld.getName(), Coord.parseCoord(block));
-					FlagWar.callAttackCellEvent(towny, player, block, worldCoord);
-				} catch (Exception e) {
-					// Do nothing
-				}
-				canBuild = true;
-			} else if (status == PlayerCache.TownBlockStatus.WARZONE) {
-				canBuild = true;
-			}
-		}
-		return canBuild;
-	}
-
-	@Override
-	public String toString() {
-		return "Towny";
-	}
+  @Override
+  public String toString() {
+    return "Towny";
+  }
 }

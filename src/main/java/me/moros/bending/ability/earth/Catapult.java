@@ -52,122 +52,124 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 
 public class Catapult extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
+  private User user;
+  private Config userConfig;
 
-	private Block base;
-	private Pillar pillar;
+  private Block base;
+  private Pillar pillar;
 
-	private boolean sneak;
-	private long startTime;
+  private boolean sneak;
+  private long startTime;
 
-	public Catapult(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public Catapult(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (!user.isOnGround()) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (!user.isOnGround()) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		base = getBase();
-		if (!TempBlock.isBendable(base) || !Bending.getGame().getProtectionSystem().canBuild(user, base)) {
-			return false;
-		}
+    base = getBase();
+    if (!TempBlock.isBendable(base) || !Bending.getGame().getProtectionSystem().canBuild(user, base)) {
+      return false;
+    }
 
-		sneak = method == ActivationMethod.SNEAK;
+    sneak = method == ActivationMethod.SNEAK;
 
-		launch();
-		startTime = System.currentTimeMillis();
-		return true;
-	}
+    launch();
+    startTime = System.currentTimeMillis();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (System.currentTimeMillis() > startTime + 100) {
-			return pillar == null ? UpdateResult.REMOVE : pillar.update();
-		}
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (System.currentTimeMillis() > startTime + 100) {
+      return pillar == null ? UpdateResult.REMOVE : pillar.update();
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	private Block getBase() {
-		AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).grow(new Vector3(0, 0.1, 0));
-		AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.getLocation());
-		Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.getBlockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
-		return WorldMethods.getNearbyBlocks(user.getWorld(), floorBounds, predicate).stream()
-			.min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.getLocation())))
-			.orElse(user.getLocBlock().getRelative(BlockFace.DOWN));
-	}
+  private Block getBase() {
+    AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).grow(new Vector3(0, 0.1, 0));
+    AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.getLocation());
+    Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.getBlockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
+    return WorldMethods.getNearbyBlocks(user.getWorld(), floorBounds, predicate).stream()
+      .min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.getLocation())))
+      .orElse(user.getLocBlock().getRelative(BlockFace.DOWN));
+  }
 
-	private boolean launch() {
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
+  private boolean launch() {
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
 
-		Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-		pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(3, 1).orElse(null);
-		SoundUtil.EARTH_SOUND.play(base.getLocation());
+    Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
+    pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(3, 1).orElse(null);
+    SoundUtil.EARTH_SOUND.play(base.getLocation());
 
-		double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
-		Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.getDirection();
+    double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
+    Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.getDirection();
 
-		Vector3 origin = user.getLocation().add(new Vector3(0, 0.5, 0));
+    Vector3 origin = user.getLocation().add(new Vector3(0, 0.5, 0));
 
-		ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.getWorld()))
-			.count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
+    ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.getWorld()))
+      .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
 
-		Collider collider = new Sphere(origin, 1.5);
-		return CollisionUtil.handleEntityCollisions(user, collider, e -> {
-			e.setVelocity(direction.scalarMultiply(power).clampVelocity());
-			return true;
-		}, true, true);
-	}
+    Collider collider = new Sphere(origin, 1.5);
+    return CollisionUtil.handleEntityCollisions(user, collider, e -> {
+      e.setVelocity(direction.scalarMultiply(power).clampVelocity());
+      return true;
+    }, true, true);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class EarthPillar extends Pillar {
-		protected EarthPillar(@NonNull PillarBuilder builder) {
-			super(builder);
-		}
+  private static class EarthPillar extends Pillar {
+    protected EarthPillar(@NonNull PillarBuilder builder) {
+      super(builder);
+    }
 
-		@Override
-		public void playSound(@NonNull Block block) {
-		}
+    @Override
+    public void playSound(@NonNull Block block) {
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			return true;
-		}
-	}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      return true;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.STRENGTH)
-		public double sneakPower;
-		@Attribute(Attribute.STRENGTH)
-		public double clickPower;
-		public double angle;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.STRENGTH)
+    public double sneakPower;
+    @Attribute(Attribute.STRENGTH)
+    public double clickPower;
+    public double angle;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
 
-			cooldown = abilityNode.node("cooldown").getLong(3000);
-			sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
-			clickPower = abilityNode.node("click-power").getDouble(1.8);
-			angle = FastMath.toRadians(abilityNode.node("angle").getInt(60));
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(3000);
+      sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
+      clickPower = abilityNode.node("click-power").getDouble(1.8);
+      angle = FastMath.toRadians(abilityNode.node("angle").getInt(60));
+    }
+  }
 }

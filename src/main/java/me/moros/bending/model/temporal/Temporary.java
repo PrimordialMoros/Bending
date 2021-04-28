@@ -20,7 +20,7 @@
 package me.moros.bending.model.temporal;
 
 public interface Temporary {
-	long DEFAULT_REVERT = 600_000;
+  long DEFAULT_REVERT = 600_000;
 
-	void revert();
+  void revert();
 }

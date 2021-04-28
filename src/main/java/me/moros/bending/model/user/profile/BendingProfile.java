@@ -31,59 +31,59 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
  * If it takes a long time to load during that event, it will be loaded async after player has logged in instead.
  */
 public final class BendingProfile {
-	private final UUID uuid;
-	private final int id;
-	private final BenderData data;
-	private boolean board;
+  private final UUID uuid;
+  private final int id;
+  private final BenderData data;
+  private boolean board;
 
-	public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data, boolean board) {
-		this.uuid = uuid;
-		this.id = id;
-		this.data = data;
-		this.board = board;
-	}
+  public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data, boolean board) {
+    this.uuid = uuid;
+    this.id = id;
+    this.data = data;
+    this.board = board;
+  }
 
-	public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data) {
-		this(uuid, id, data, true);
-	}
+  public BendingProfile(@NonNull UUID uuid, @Positive int id, @NonNull BenderData data) {
+    this(uuid, id, data, true);
+  }
 
-	public @NonNull UUID getUniqueId() {
-		return uuid;
-	}
+  public @NonNull UUID getUniqueId() {
+    return uuid;
+  }
 
-	public @Positive int getInternalId() {
-		return id;
-	}
+  public @Positive int getInternalId() {
+    return id;
+  }
 
-	public boolean hasBoard() {
-		return board;
-	}
+  public boolean hasBoard() {
+    return board;
+  }
 
-	public void setBoard(boolean value) {
-		board = value;
-	}
+  public void setBoard(boolean value) {
+    board = value;
+  }
 
-	public @NonNull BenderData getData() {
-		return data;
-	}
+  public @NonNull BenderData getData() {
+    return data;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof BendingProfile && id == ((BendingProfile) obj).id;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof BendingProfile && id == ((BendingProfile) obj).id;
+  }
 
-	@Override
-	public int hashCode() {
-		return id;
-	}
+  @Override
+  public int hashCode() {
+    return id;
+  }
 
-	@Override
-	public String toString() {
-		return "ID: " + id + "\n" +
-			"UUID: " + uuid + "\n" +
-			"Board: " + board + "\n" +
-			"Elements: " + data.elements.toString() + "\n" +
-			"Slots: " + Arrays.toString(data.slots) + "\n" +
-			"Presets: " + data.presets.toString();
-	}
+  @Override
+  public String toString() {
+    return "ID: " + id + "\n" +
+      "UUID: " + uuid + "\n" +
+      "Board: " + board + "\n" +
+      "Elements: " + data.elements.toString() + "\n" +
+      "Slots: " + Arrays.toString(data.slots) + "\n" +
+      "Presets: " + data.presets.toString();
+  }
 }

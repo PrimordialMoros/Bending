@@ -45,130 +45,131 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
-import org.bukkit.util.Vector;
 
 public class AirSpout extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private AbstractSpout spout;
+  private AbstractSpout spout;
 
-	public AirSpout(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirSpout(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, AirSpout.class)) {
-			return false;
-		}
-		if (user.getHeadBlock().isLiquid()) {
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, AirSpout.class)) {
+      return false;
+    }
+    if (user.getHeadBlock().isLiquid()) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		double h = userConfig.height + 2;
-		if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
-			return false;
-		}
+    double h = userConfig.height + 2;
+    if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
+      return false;
+    }
 
-		Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
-		if (block == null) {
-			return false;
-		}
+    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
+    if (block == null) {
+      return false;
+    }
 
-		removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().build();
 
-		spout = new Spout();
-		return true;
-	}
+    spout = new Spout();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (user.getHeadBlock().isLiquid()) {
-			return UpdateResult.REMOVE;
-		}
+    if (user.getHeadBlock().isLiquid()) {
+      return UpdateResult.REMOVE;
+    }
 
-		return spout.update();
-	}
+    return spout.update();
+  }
 
-	@Override
-	public void onDestroy() {
-		spout.getFlight().setFlying(false);
-		spout.getFlight().release();
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    spout.getFlight().setFlying(false);
+    spout.getFlight().release();
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(spout.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(spout.getCollider());
+  }
 
-	public void handleMovement(Vector velocity) {
-		AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
-	}
+  public void handleMovement(@NonNull Vector3 velocity) {
+    AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
+  }
 
-	private class Spout extends AbstractSpout {
-		private long nextRenderTime;
+  private class Spout extends AbstractSpout {
+    private long nextRenderTime;
 
-		public Spout() {
-			super(user, userConfig.height, userConfig.maxSpeed);
-			nextRenderTime = 0;
-		}
+    public Spout() {
+      super(user, userConfig.height, userConfig.maxSpeed);
+      nextRenderTime = 0;
+    }
 
-		@Override
-		public void render() {
-			long time = System.currentTimeMillis();
-			if (time < nextRenderTime) return;
-			for (int i = 0; i < distance; i++) {
-				ParticleUtil.createAir(user.getEntity().getLocation().subtract(0, i, 0))
-					.count(3).offset(0.4, 0.4, 0.4).spawn();
-			}
-			nextRenderTime = time + 100;
-		}
+    @Override
+    public void render() {
+      long time = System.currentTimeMillis();
+      if (time < nextRenderTime) {
+        return;
+      }
+      for (int i = 0; i < distance; i++) {
+        ParticleUtil.createAir(user.getEntity().getLocation().subtract(0, i, 0))
+          .count(3).offset(0.4, 0.4, 0.4).spawn();
+      }
+      nextRenderTime = time + 100;
+    }
 
-		@Override
-		public void postRender() {
-			if (ThreadLocalRandom.current().nextInt(8) == 0) {
-				SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
-			}
-		}
-	}
+    @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(8) == 0) {
+        SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
+      }
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.HEIGHT)
-		public double height;
-		@Attribute(Attribute.SPEED)
-		public double maxSpeed;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.HEIGHT)
+    public double height;
+    @Attribute(Attribute.SPEED)
+    public double maxSpeed;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airspout");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airspout");
 
-			cooldown = abilityNode.node("cooldown").getLong(2000);
-			height = abilityNode.node("height").getDouble(11.0);
-			maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(2000);
+      height = abilityNode.node("height").getDouble(11.0);
+      maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
+    }
+  }
 }

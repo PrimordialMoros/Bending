@@ -24,17 +24,17 @@ import me.moros.bending.locale.Message;
 import net.kyori.adventure.text.Component;
 
 public enum PresetCreateResult {
-	SUCCESS(Message.PRESET_SUCCESS),
-	EXISTS(Message.PRESET_EXISTS),
-	FAIL(Message.PRESET_FAIL);
+  SUCCESS(Message.PRESET_SUCCESS),
+  EXISTS(Message.PRESET_EXISTS),
+  FAIL(Message.PRESET_FAIL);
 
-	private final Message.Args1<String> message;
+  private final Message.Args1<String> message;
 
-	PresetCreateResult(Message.Args1<String> message) {
-		this.message = message;
-	}
+  PresetCreateResult(Message.Args1<String> message) {
+    this.message = message;
+  }
 
-	public @NonNull Component getMessage(@NonNull String name) {
-		return message.build(name);
-	}
+  public @NonNull Component getMessage(@NonNull String name) {
+    return message.build(name);
+  }
 }

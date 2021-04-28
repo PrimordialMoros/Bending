@@ -45,89 +45,93 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class Bulwark extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Updatable wall;
-	private final Collection<Block> bases = new ArrayList<>();
+  private Updatable wall;
+  private final Collection<Block> bases = new ArrayList<>();
 
-	private boolean collapsing = false;
-	private long startTime;
+  private boolean collapsing = false;
+  private long startTime;
 
-	public Bulwark(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public Bulwark(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
-		if (!source.isPresent()) return false;
+    Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
+    if (source.isEmpty()) {
+      return false;
+    }
 
-		RaiseEarth raiseWall = new RaiseEarth(getDescription());
-		if (raiseWall.activate(user, source.get(), 2, 3, 75)) {
-			removalPolicy = Policies.builder()
-				.add(new ExpireRemovalPolicy(5000 + userConfig.wallDuration))
-				.build();
-			user.setCooldown(getDescription(), userConfig.wallCooldown);
-			raiseWall.getPillars().stream().map(Pillar::getOrigin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
-			wall = raiseWall;
-			startTime = System.currentTimeMillis();
-			return true;
-		}
-		return false;
-	}
+    RaiseEarth raiseWall = new RaiseEarth(getDescription());
+    if (raiseWall.activate(user, source.get(), 2, 3, 75)) {
+      removalPolicy = Policies.builder()
+        .add(ExpireRemovalPolicy.of(5000 + userConfig.wallDuration))
+        .build();
+      user.setCooldown(getDescription(), userConfig.wallCooldown);
+      raiseWall.getPillars().stream().map(Pillar::getOrigin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
+      wall = raiseWall;
+      startTime = System.currentTimeMillis();
+      return true;
+    }
+    return false;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (System.currentTimeMillis() > startTime + userConfig.wallDuration) {
-			collapse();
-		}
+    if (System.currentTimeMillis() > startTime + userConfig.wallDuration) {
+      collapse();
+    }
 
-		UpdateResult result = wall.update();
-		return collapsing ? result : UpdateResult.CONTINUE;
-	}
+    UpdateResult result = wall.update();
+    return collapsing ? result : UpdateResult.CONTINUE;
+  }
 
-	private void collapse() {
-		if (collapsing) return;
-		collapsing = true;
-		Collapse collapseWall = new Collapse(getDescription());
-		if (collapseWall.activate(user, bases, 2)) {
-			wall = collapseWall;
-		}
-	}
+  private void collapse() {
+    if (collapsing) {
+      return;
+    }
+    collapsing = true;
+    Collapse collapseWall = new Collapse(getDescription());
+    if (collapseWall.activate(user, bases, 2)) {
+      wall = collapseWall;
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long wallCooldown;
-		@Attribute(Attribute.DURATION)
-		public long wallDuration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long wallCooldown;
+    @Attribute(Attribute.DURATION)
+    public long wallDuration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor", "wall");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor", "wall");
 
-			wallCooldown = abilityNode.node("cooldown").getLong(3000);
-			wallDuration = abilityNode.node("duration").getLong(2000);
-		}
-	}
+      wallCooldown = abilityNode.node("cooldown").getLong(3000);
+      wallDuration = abilityNode.node("duration").getLong(2000);
+    }
+  }
 }

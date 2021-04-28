@@ -23,18 +23,18 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 
 public class ElementChangeEvent extends BendingUserEvent {
-	private final Result result;
+  private final Result result;
 
-	ElementChangeEvent(User user, Result result) {
-		super(user);
-		this.result = result;
-	}
+  ElementChangeEvent(User user, Result result) {
+    super(user);
+    this.result = result;
+  }
 
-	public @NonNull Result getResult() {
-		return result;
-	}
+  public @NonNull Result getResult() {
+    return result;
+  }
 
-	public enum Result {
-		CHOOSE, ADD, REMOVE, CLEAR
-	}
+  public enum Result {
+    CHOOSE, ADD, REMOVE, CLEAR
+  }
 }

@@ -24,77 +24,77 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 
 public final class DummyCollider extends AABB {
-	public DummyCollider() {
-		super(Vector3.ZERO, Vector3.ZERO);
-	}
+  public DummyCollider() {
+    super(Vector3.ZERO, Vector3.ZERO);
+  }
 
-	@Override
-	public @NonNull AABB at(@NonNull Vector3 pos) {
-		return this;
-	}
+  @Override
+  public @NonNull AABB at(@NonNull Vector3 pos) {
+    return this;
+  }
 
-	@Override
-	public @NonNull AABB grow(@NonNull Vector3 diff) {
-		return this;
-	}
+  @Override
+  public @NonNull AABB grow(@NonNull Vector3 diff) {
+    return this;
+  }
 
-	@Override
-	public @NonNull AABB scale(@NonNull Vector3 diff) {
-		return this;
-	}
+  @Override
+  public @NonNull AABB scale(@NonNull Vector3 diff) {
+    return this;
+  }
 
-	@Override
-	public @NonNull Vector3 min() {
-		return Vector3.ZERO;
-	}
+  @Override
+  public @NonNull Vector3 min() {
+    return Vector3.ZERO;
+  }
 
-	@Override
-	public @NonNull Vector3 max() {
-		return Vector3.ZERO;
-	}
+  @Override
+  public @NonNull Vector3 max() {
+    return Vector3.ZERO;
+  }
 
-	@Override
-	public @NonNull Vector3 mid() {
-		return Vector3.ZERO;
-	}
+  @Override
+  public @NonNull Vector3 mid() {
+    return Vector3.ZERO;
+  }
 
-	@Override
-	public boolean contains(@NonNull Vector3 test) {
-		return false;
-	}
+  @Override
+  public boolean contains(@NonNull Vector3 test) {
+    return false;
+  }
 
-	@Override
-	public boolean intersects(@NonNull AABB other) {
-		return false;
-	}
+  @Override
+  public boolean intersects(@NonNull AABB other) {
+    return false;
+  }
 
-	@Override
-	public boolean intersects(@NonNull Sphere sphere) {
-		return false;
-	}
+  @Override
+  public boolean intersects(@NonNull Sphere sphere) {
+    return false;
+  }
 
-	@Override
-	public boolean intersects(@NonNull Ray ray) {
-		return false;
-	}
+  @Override
+  public boolean intersects(@NonNull Ray ray) {
+    return false;
+  }
 
-	@Override
-	public boolean intersects(@NonNull Collider collider) {
-		return false;
-	}
+  @Override
+  public boolean intersects(@NonNull Collider collider) {
+    return false;
+  }
 
-	@Override
-	public @NonNull Vector3 getPosition() {
-		return Vector3.ZERO;
-	}
+  @Override
+  public @NonNull Vector3 getPosition() {
+    return Vector3.ZERO;
+  }
 
-	@Override
-	public @NonNull Vector3 getHalfExtents() {
-		return Vector3.ZERO;
-	}
+  @Override
+  public @NonNull Vector3 getHalfExtents() {
+    return Vector3.ZERO;
+  }
 
-	@Override
-	public String toString() {
-		return "DummyCollider";
-	}
+  @Override
+  public String toString() {
+    return "DummyCollider";
+  }
 }

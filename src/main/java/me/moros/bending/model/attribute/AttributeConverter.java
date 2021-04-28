@@ -22,22 +22,22 @@ package me.moros.bending.model.attribute;
 import java.util.function.DoubleFunction;
 
 public enum AttributeConverter {
-	DOUBLE(x -> x),
-	INT(x -> (int) x),
-	LONG(x -> (long) x);
+  DOUBLE(x -> x),
+  INT(x -> (int) x),
+  LONG(x -> (long) x);
 
-	private final Converter converter;
+  private final Converter converter;
 
-	AttributeConverter(Converter converter) {
-		this.converter = converter;
-	}
+  AttributeConverter(Converter converter) {
+    this.converter = converter;
+  }
 
-	public Number apply(double input) {
-		return converter.apply(input);
-	}
+  public Number apply(double input) {
+    return converter.apply(input);
+  }
 
-	@FunctionalInterface
-	private interface Converter extends DoubleFunction<Number> {
-		Number apply(double input);
-	}
+  @FunctionalInterface
+  private interface Converter extends DoubleFunction<Number> {
+    Number apply(double input);
+  }
 }

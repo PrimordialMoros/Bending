@@ -29,22 +29,27 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 
 public class GriefPreventionProtection implements Protection {
-	public GriefPreventionProtection() throws PluginNotFoundException {
-		GriefPrevention griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
-		if (griefPrevention == null)
-			throw new PluginNotFoundException("GriefPrevention");
-	}
+  private final GriefPrevention griefPrevention;
 
-	@Override
-	public boolean canBuild(@NonNull User user, @NonNull Block block) {
-		if (!(user instanceof BendingPlayer)) return true;
-		String reason = GriefPrevention.instance.allowBuild(((BendingPlayer) user).getEntity(), block.getLocation());
-		Claim claim = GriefPrevention.instance.dataStore.getClaimAt(block.getLocation(), true, null);
-		return reason == null || claim == null || claim.siegeData != null;
-	}
+  public GriefPreventionProtection() throws PluginNotFoundException {
+    griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
+    if (griefPrevention == null) {
+      throw new PluginNotFoundException("GriefPrevention");
+    }
+  }
 
-	@Override
-	public String toString() {
-		return "GriefPrevention";
-	}
+  @Override
+  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+    if (user instanceof BendingPlayer) {
+      String reason = griefPrevention.allowBuild(((BendingPlayer) user).getEntity(), block.getLocation());
+      Claim claim = griefPrevention.dataStore.getClaimAt(block.getLocation(), true, null);
+      return reason == null || claim == null || claim.siegeData != null;
+    }
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return "GriefPrevention";
+  }
 }

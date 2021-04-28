@@ -62,267 +62,274 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 // TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance implements Ability {
-	public enum Side {RIGHT, LEFT}
+  public enum Side {RIGHT, LEFT}
 
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private static final Map<UUID, Side> lastUsedSide = new ConcurrentHashMap<>();
-	private static final double GLOVE_SPEED = 1.2;
-	private static final double GLOVE_GRABBED_SPEED = 0.6;
+  private static final Map<UUID, Side> lastUsedSide = new ConcurrentHashMap<>();
+  private static final double GLOVE_SPEED = 1.2;
+  private static final double GLOVE_GRABBED_SPEED = 0.6;
 
-	private static final ItemStack STONE = new ItemStack(Material.STONE, 1);
-	private static final ItemStack INGOT = new ItemStack(Material.IRON_INGOT, 1);
+  private static final ItemStack STONE = new ItemStack(Material.STONE, 1);
+  private static final ItemStack INGOT = new ItemStack(Material.IRON_INGOT, 1);
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Item glove;
-	private Vector3 location;
-	private Vector3 lastVelocity;
-	private LivingEntity grabbedTarget;
+  private Item glove;
+  private Vector3 location;
+  private Vector3 lastVelocity;
+  private LivingEntity grabbedTarget;
 
-	private boolean isMetal = false;
-	private boolean returning = false;
-	private boolean grabbed = false;
+  private boolean isMetal = false;
+  private boolean returning = false;
+  private boolean grabbed = false;
 
-	public EarthGlove(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public EarthGlove(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (method == ActivationMethod.SNEAK) {
-			tryDestroy(user);
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (method == ActivationMethod.SNEAK) {
+      tryDestroy(user);
+      return false;
+    }
 
-		if (user.isOnCooldown(getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count() >= 2) {
-			return false;
-		}
+    if (user.isOnCooldown(getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count() >= 2) {
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		if (launchEarthGlove()) {
-			removalPolicy = Policies.builder()
-				.add(Policies.IN_LIQUID)
-				.add(new SwappedSlotsRemovalPolicy(getDescription()))
-				.add(new OutOfRangeRemovalPolicy(userConfig.range + 5, () -> location))
-				.build();
-			user.setCooldown(getDescription(), userConfig.cooldown);
-			return true;
-		}
+    if (launchEarthGlove()) {
+      removalPolicy = Policies.builder()
+        .add(Policies.IN_LIQUID)
+        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
+        .build();
+      user.setCooldown(getDescription(), userConfig.cooldown);
+      return true;
+    }
 
-		return false;
-	}
+    return false;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (glove == null || !glove.isValid()) {
-			return UpdateResult.REMOVE;
-		}
+    if (glove == null || !glove.isValid()) {
+      return UpdateResult.REMOVE;
+    }
 
-		location = new Vector3(glove.getLocation());
-		if (location.distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) {
-			returning = true;
-		}
+    location = new Vector3(glove.getLocation());
+    if (location.distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) {
+      returning = true;
+    }
 
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, glove.getLocation().getBlock())) {
-			shatterGlove();
-			return UpdateResult.REMOVE;
-		}
-		double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
-		if (returning) {
-			if (!user.isSneaking()) {
-				shatterGlove();
-				return UpdateResult.REMOVE;
-			}
-			Vector3 returnLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(isMetal ? 5 : 1.5));
-			if (location.distanceSq(returnLocation) < 1) {
-				if (grabbed && grabbedTarget != null) grabbedTarget.setVelocity(new Vector());
-				return UpdateResult.REMOVE;
-			}
-			if (grabbed) {
-				if (grabbedTarget == null || !grabbedTarget.isValid() || (grabbedTarget instanceof Player && !((Player) grabbedTarget).isOnline())) {
-					shatterGlove();
-					return UpdateResult.REMOVE;
-				}
-				Vector3 dir = returnLocation.subtract(new Vector3(grabbedTarget.getLocation())).normalize().scalarMultiply(GLOVE_GRABBED_SPEED);
-				grabbedTarget.setVelocity(dir.clampVelocity());
-				glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
-				return UpdateResult.CONTINUE;
-			} else {
-				Vector3 dir = returnLocation.subtract(location).normalize().scalarMultiply(GLOVE_SPEED * factor);
-				setGloveVelocity(dir);
-			}
-		} else {
-			double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
-			Vector3 gloveVelocity = new Vector3(glove.getVelocity());
-			if (glove.isOnGround() || Vector3.angle(lastVelocity, gloveVelocity) > FastMath.PI / 6 || gloveVelocity.getNormSq() < velocityLimit * velocityLimit) {
-				shatterGlove();
-				return UpdateResult.REMOVE;
-			}
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, glove.getLocation().getBlock())) {
+      shatterGlove();
+      return UpdateResult.REMOVE;
+    }
+    double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
+    if (returning) {
+      if (!user.isSneaking()) {
+        shatterGlove();
+        return UpdateResult.REMOVE;
+      }
+      Vector3 returnLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(isMetal ? 5 : 1.5));
+      if (location.distanceSq(returnLocation) < 1) {
+        if (grabbed && grabbedTarget != null) {
+          grabbedTarget.setVelocity(Vector3.ZERO.toVector());
+        }
+        return UpdateResult.REMOVE;
+      }
+      if (grabbed) {
+        if (grabbedTarget == null || !grabbedTarget.isValid() || (grabbedTarget instanceof Player && !((Player) grabbedTarget).isOnline())) {
+          shatterGlove();
+          return UpdateResult.REMOVE;
+        }
+        Vector3 dir = returnLocation.subtract(new Vector3(grabbedTarget.getLocation())).normalize().scalarMultiply(GLOVE_GRABBED_SPEED);
+        grabbedTarget.setVelocity(dir.clampVelocity());
+        glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
+        return UpdateResult.CONTINUE;
+      } else {
+        Vector3 dir = returnLocation.subtract(location).normalize().scalarMultiply(GLOVE_SPEED * factor);
+        setGloveVelocity(dir);
+      }
+    } else {
+      double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
+      Vector3 gloveVelocity = new Vector3(glove.getVelocity());
+      if (glove.isOnGround() || Vector3.angle(lastVelocity, gloveVelocity) > FastMath.PI / 6 || gloveVelocity.getNormSq() < velocityLimit * velocityLimit) {
+        shatterGlove();
+        return UpdateResult.REMOVE;
+      }
 
-			setGloveVelocity(lastVelocity.normalize().scalarMultiply(GLOVE_SPEED * factor));
-			boolean sneaking = user.isSneaking();
-			boolean collided = CollisionUtil.handleEntityCollisions(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
-			if (collided && !grabbed) {
-				return UpdateResult.REMOVE;
-			}
-		}
-		return UpdateResult.CONTINUE;
-	}
+      setGloveVelocity(lastVelocity.normalize().scalarMultiply(GLOVE_SPEED * factor));
+      boolean sneaking = user.isSneaking();
+      boolean collided = CollisionUtil.handleEntityCollisions(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
+      if (collided && !grabbed) {
+        return UpdateResult.REMOVE;
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	private boolean onEntityHit(Entity entity) {
-		if (user.isSneaking()) {
-			return grabTarget((LivingEntity) entity);
-		}
-		double damage = isMetal ? BendingProperties.METAL_MODIFIER * userConfig.damage : userConfig.damage;
-		DamageUtil.damageEntity(entity, user, damage, getDescription());
-		shatterGlove();
-		return false;
-	}
+  private boolean onEntityHit(Entity entity) {
+    if (user.isSneaking()) {
+      return grabTarget((LivingEntity) entity);
+    }
+    double damage = isMetal ? BendingProperties.METAL_MODIFIER * userConfig.damage : userConfig.damage;
+    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    shatterGlove();
+    return false;
+  }
 
-	private boolean grabTarget(LivingEntity entity) {
-		if (grabbed || grabbedTarget != null) {
-			return false;
-		}
-		returning = true;
-		grabbed = true;
-		grabbedTarget = entity;
-		glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
-		grabbedTarget.setFallDistance(0);
-		if (isMetal) {
-			removalPolicy = Policies.builder()
-				.add(Policies.IN_LIQUID)
-				.add(new SwappedSlotsRemovalPolicy(getDescription()))
-				.add(new OutOfRangeRemovalPolicy(userConfig.range + 5, () -> location))
-				.add(new ExpireRemovalPolicy(userConfig.grabDuration))
-				.build();
-		}
-		return true;
-	}
+  private boolean grabTarget(LivingEntity entity) {
+    if (grabbed || grabbedTarget != null) {
+      return false;
+    }
+    returning = true;
+    grabbed = true;
+    grabbedTarget = entity;
+    glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
+    grabbedTarget.setFallDistance(0);
+    if (isMetal) {
+      removalPolicy = Policies.builder()
+        .add(Policies.IN_LIQUID)
+        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
+        .add(ExpireRemovalPolicy.of(userConfig.grabDuration))
+        .build();
+    }
+    return true;
+  }
 
-	private boolean launchEarthGlove() {
-		Side side;
-		if (lastUsedSide.getOrDefault(user.getEntity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
-			side = Side.LEFT;
-		} else {
-			side = Side.RIGHT;
-		}
-		Vector3 gloveSpawnLocation = user.getHandSide(side == Side.RIGHT);
-		lastUsedSide.put(user.getEntity().getUniqueId(), side);
-		Vector3 target = user.getTargetEntity(userConfig.range)
-			.map(EntityMethods::getEntityCenter)
-			.orElseGet(() -> user.getTarget(userConfig.range));
+  private boolean launchEarthGlove() {
+    Side side;
+    if (lastUsedSide.getOrDefault(user.getEntity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
+      side = Side.LEFT;
+    } else {
+      side = Side.RIGHT;
+    }
+    Vector3 gloveSpawnLocation = user.getHandSide(side == Side.RIGHT);
+    lastUsedSide.put(user.getEntity().getUniqueId(), side);
+    Vector3 target = user.getTargetEntity(userConfig.range)
+      .map(EntityMethods::getEntityCenter)
+      .orElseGet(() -> user.getTarget(userConfig.range));
 
-		glove = buildGlove(gloveSpawnLocation);
+    glove = buildGlove(gloveSpawnLocation);
 
-		if (isMetal) {
-			SoundUtil.METAL_SOUND.play(gloveSpawnLocation.toLocation(user.getWorld()));
-		} else {
-			SoundUtil.playSound(gloveSpawnLocation.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
-		}
+    if (isMetal) {
+      SoundUtil.METAL_SOUND.play(gloveSpawnLocation.toLocation(user.getWorld()));
+    } else {
+      SoundUtil.playSound(gloveSpawnLocation.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+    }
 
-		double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
-		Vector3 velocity = target.subtract(gloveSpawnLocation).normalize().scalarMultiply(GLOVE_SPEED * factor);
-		setGloveVelocity(velocity);
-		location = new Vector3(glove.getLocation());
-		return true;
-	}
+    double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
+    Vector3 velocity = target.subtract(gloveSpawnLocation).normalize().scalarMultiply(GLOVE_SPEED * factor);
+    setGloveVelocity(velocity);
+    location = new Vector3(glove.getLocation());
+    return true;
+  }
 
-	private Item buildGlove(Vector3 spawnLocation) {
-		isMetal = user.hasPermission("bending.metal") && InventoryUtil.hasItem(user, INGOT);
-		Item item = user.getWorld().dropItem(spawnLocation.toLocation(user.getWorld()), isMetal ? INGOT : STONE);
-		item.setInvulnerable(true);
-		item.setGravity(false);
-		item.setMetadata(Metadata.GLOVE_KEY, Metadata.customMetadata(this));
-		if (isMetal && InventoryUtil.removeItem(user, INGOT)) return item;
-		item.setCanMobPickup(false);
-		item.setCanPlayerPickup(false);
-		item.setMetadata(Metadata.NO_PICKUP, Metadata.emptyMetadata());
-		return item;
-	}
+  private Item buildGlove(Vector3 spawnLocation) {
+    isMetal = user.hasPermission("bending.metal") && InventoryUtil.hasItem(user, INGOT);
+    Item item = user.getWorld().dropItem(spawnLocation.toLocation(user.getWorld()), isMetal ? INGOT : STONE);
+    item.setInvulnerable(true);
+    item.setGravity(false);
+    item.setMetadata(Metadata.GLOVE_KEY, Metadata.customMetadata(this));
+    if (isMetal && InventoryUtil.removeItem(user, INGOT)) {
+      return item;
+    }
+    item.setCanMobPickup(false);
+    item.setCanPlayerPickup(false);
+    item.setMetadata(Metadata.NO_PICKUP, Metadata.emptyMetadata());
+    return item;
+  }
 
-	private void setGloveVelocity(Vector3 velocity) {
-		glove.setVelocity(velocity.clampVelocity());
-		lastVelocity = new Vector3(glove.getVelocity());
-	}
+  private void setGloveVelocity(Vector3 velocity) {
+    glove.setVelocity(velocity.clampVelocity());
+    lastVelocity = new Vector3(glove.getVelocity());
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public void onDestroy() {
-		if (glove != null) glove.remove();
-	}
+  @Override
+  public void onDestroy() {
+    if (glove != null) {
+      glove.remove();
+    }
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		if (glove == null || returning) return Collections.emptyList();
-		return Collections.singletonList(new Sphere(location, 0.8));
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    if (glove == null || returning) {
+      return Collections.emptyList();
+    }
+    return Collections.singletonList(new Sphere(location, 0.8));
+  }
 
-	public void shatterGlove() {
-		if (!glove.isValid()) {
-			return;
-		}
-		BlockData data = isMetal ? Material.IRON_BLOCK.createBlockData() : Material.STONE.createBlockData();
-		ParticleUtil.create(Particle.BLOCK_CRACK, glove.getLocation())
-			.count(3).offset(0.1, 0.1, 0.1).data(data).spawn();
-		ParticleUtil.create(Particle.BLOCK_DUST, glove.getLocation())
-			.count(2).offset(0.1, 0.1, 0.1).data(data).spawn();
-		onDestroy();
-	}
+  public void shatterGlove() {
+    if (!glove.isValid()) {
+      return;
+    }
+    BlockData data = isMetal ? Material.IRON_BLOCK.createBlockData() : Material.STONE.createBlockData();
+    ParticleUtil.create(Particle.BLOCK_CRACK, glove.getLocation())
+      .count(3).offset(0.1, 0.1, 0.1).data(data).spawn();
+    ParticleUtil.create(Particle.BLOCK_DUST, glove.getLocation())
+      .count(2).offset(0.1, 0.1, 0.1).data(data).spawn();
+    onDestroy();
+  }
 
-	private static void tryDestroy(@NonNull User user) {
-		CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
-			if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
-				EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
-				if (ability != null && !user.equals(ability.getUser())) {
-					ability.shatterGlove();
-				}
-			}
-			return true;
-		}, false, false);
-	}
+  private static void tryDestroy(@NonNull User user) {
+    CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
+      if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
+        EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
+        if (ability != null && !user.equals(ability.getUser())) {
+          ability.shatterGlove();
+        }
+      }
+      return true;
+    }, false, false);
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.DURATION)
-		public long grabDuration;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.DURATION)
+    public long grabDuration;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthglove");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthglove");
 
-			cooldown = abilityNode.node("cooldown").getLong(750);
-			range = abilityNode.node("range").getDouble(16.0);
-			grabDuration = abilityNode.node("duration").getLong(4000);
-			damage = abilityNode.node("damage").getDouble(1.0);
+      cooldown = abilityNode.node("cooldown").getLong(750);
+      range = abilityNode.node("range").getDouble(16.0);
+      grabDuration = abilityNode.node("duration").getLong(4000);
+      damage = abilityNode.node("damage").getDouble(1.0);
 
-			abilityNode.node("duration").comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips.");
-		}
-	}
+      abilityNode.node("duration").comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips.");
+    }
+  }
 }

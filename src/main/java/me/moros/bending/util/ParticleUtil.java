@@ -32,53 +32,57 @@ import org.bukkit.Particle;
  * @see ParticleBuilder
  */
 public final class ParticleUtil {
-	public static final int DEFAULT_DIST = 32;
-	public static final Color AIR = fromHex("EEEEEE");
+  public static final int DEFAULT_DIST = 32;
+  public static final Color AIR = fromHex("EEEEEE");
 
-	public static ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
-		Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
-		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
-	}
+  public static ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
+    Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
+    return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
+  }
 
-	public static ParticleBuilder createAir(@NonNull Location center) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8F).force(true);
-	}
+  public static ParticleBuilder createAir(@NonNull Location center) {
+    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8F).force(true);
+  }
 
-	public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
-	}
+  public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
+    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
+  }
 
-	public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
-		return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal), size).force(true);
-	}
+  public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
+    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal), size).force(true);
+  }
 
-	public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
-		return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
-	}
+  public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
+    return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
+  }
 
-	public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
-		return effect.builder().location(center).receivers(range).extra(0).force(true);
-	}
+  public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
+    return effect.builder().location(center).receivers(range).extra(0).force(true);
+  }
 
-	/**
-	 * Asynchronously spawns and sends the given particle effect to its receivers.
-	 * Make sure you have collected the receivers in a sync thread first.
-	 * @param pb the particle effect builder that holds the particle data to display
-	 */
-	public static void displayAsync(@NonNull ParticleBuilder pb) {
-		if (pb.hasReceivers()) Tasker.newChain().async(pb::spawn).execute();
-	}
+  /**
+   * Asynchronously spawns and sends the given particle effect to its receivers.
+   * Make sure you have collected the receivers in a sync thread first.
+   * @param pb the particle effect builder that holds the particle data to display
+   */
+  public static void displayAsync(@NonNull ParticleBuilder pb) {
+    if (pb.hasReceivers()) {
+      Tasker.newChain().async(pb::spawn).execute();
+    }
+  }
 
-	/**
-	 * Convert a hex string into a {@link Color}.
-	 * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
-	 * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
-	 */
-	public static Color fromHex(@NonNull String hexValue) {
-		if (hexValue.length() < 6) return Color.BLACK;
-		int r = Integer.valueOf(hexValue.substring(0, 2), 16);
-		int g = Integer.valueOf(hexValue.substring(2, 4), 16);
-		int b = Integer.valueOf(hexValue.substring(4, 6), 16);
-		return Color.fromRGB(r, g, b);
-	}
+  /**
+   * Convert a hex string into a {@link Color}.
+   * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
+   * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
+   */
+  public static Color fromHex(@NonNull String hexValue) {
+    if (hexValue.length() < 6) {
+      return Color.BLACK;
+    }
+    int r = Integer.valueOf(hexValue.substring(0, 2), 16);
+    int g = Integer.valueOf(hexValue.substring(2, 4), 16);
+    int b = Integer.valueOf(hexValue.substring(4, 6), 16);
+    return Color.fromRGB(r, g, b);
+  }
 }

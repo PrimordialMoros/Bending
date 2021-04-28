@@ -61,235 +61,249 @@ import org.bukkit.entity.Entity;
 
 // TODO make tentacle extension animation
 public class OctopusForm extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
-	private static final double RADIUS = 3.0;
-	private static final AABB TENTACLE_BOX = new AABB(new Vector3(-1, 0.0, -1), new Vector3(1, 2.5, 1));
+  private static final Config config = new Config();
+  private static final double RADIUS = 3.0;
+  private static final AABB TENTACLE_BOX = new AABB(new Vector3(-1, 0.0, -1), new Vector3(1, 2.5, 1));
 
-	private static AbilityDescription ringDesc;
+  private static AbilityDescription ringDesc;
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private final Collection<Block> base = new ArrayList<>();
-	private final List<Tentacle> tentacles = new ArrayList<>();
+  private final Collection<Block> base = new ArrayList<>();
+  private final List<Tentacle> tentacles = new ArrayList<>();
 
-	private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-		.expirationPolicy(ExpirationPolicy.CREATED)
-		.expiration(250, TimeUnit.MILLISECONDS).build();
+  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
+    .expirationPolicy(ExpirationPolicy.CREATED)
+    .expiration(250, TimeUnit.MILLISECONDS).build();
 
-	private WaterRing ring;
-	private Block lastBlock;
+  private WaterRing ring;
+  private Block lastBlock;
 
-	private boolean formed = false;
-	private long nextTentacleFormTime = 0;
+  private boolean formed = false;
+  private long nextTentacleFormTime = 0;
 
-	public OctopusForm(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public OctopusForm(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		OctopusForm octopusForm = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, OctopusForm.class).orElse(null);
-		if (octopusForm != null) {
-			octopusForm.punch();
-			return false;
-		}
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    OctopusForm octopusForm = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, OctopusForm.class).orElse(null);
+    if (octopusForm != null) {
+      octopusForm.punch();
+      return false;
+    }
 
-		this.user = user;
-		recalculateConfig();
+    this.user = user;
+    recalculateConfig();
 
-		removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().build();
 
-		if (ringDesc == null) {
-			ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
-		}
+    if (ringDesc == null) {
+      ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+    }
 
-		ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
-		if (ring == null) {
-			ring = new WaterRing(ringDesc);
-			if (ring.activate(user, method)) {
-				Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
-				return true;
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
+    ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+    if (ring == null) {
+      ring = new WaterRing(ringDesc);
+      if (ring.activate(user, method)) {
+        Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (formed) {
-			cleanAll();
-			if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
-				return UpdateResult.REMOVE;
-			}
-			boolean forceUpdate = false;
-			Block current = user.getLocBlock();
-			if (!current.equals(lastBlock)) {
-				base.clear();
-				base.addAll(BlockMethods.createBlockRing(user.getLocBlock(), RADIUS));
-				lastBlock = current;
-				forceUpdate = true;
-			}
-			if (base.stream().noneMatch(b -> Bending.getGame().getProtectionSystem().canBuild(user, b))) {
-				return UpdateResult.REMOVE;
-			}
-			renderBase();
-			int size = tentacles.size();
-			if (size < 8 && System.currentTimeMillis() > nextTentacleFormTime) tentacles.add(new Tentacle(size));
-			renderTentacles(forceUpdate);
-		} else {
-			if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
-				return UpdateResult.REMOVE;
-			}
-			if (ring.isReady() && user.isSneaking()) form();
-		}
-		return UpdateResult.CONTINUE;
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (formed) {
+      cleanAll();
+      if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+        return UpdateResult.REMOVE;
+      }
+      boolean forceUpdate = false;
+      Block current = user.getLocBlock();
+      if (!current.equals(lastBlock)) {
+        base.clear();
+        base.addAll(BlockMethods.createBlockRing(user.getLocBlock(), RADIUS));
+        lastBlock = current;
+        forceUpdate = true;
+      }
+      if (base.stream().noneMatch(b -> Bending.getGame().getProtectionSystem().canBuild(user, b))) {
+        return UpdateResult.REMOVE;
+      }
+      renderBase();
+      int size = tentacles.size();
+      if (size < 8 && System.currentTimeMillis() > nextTentacleFormTime) {
+        tentacles.add(new Tentacle(size));
+      }
+      renderTentacles(forceUpdate);
+    } else {
+      if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
+        return UpdateResult.REMOVE;
+      }
+      if (ring.isReady() && user.isSneaking()) {
+        form();
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	private void form() {
-		if (!user.getSelectedAbilityName().equals("OctopusForm")) return;
-		ring.complete().forEach(this::clean);
-		formed = true;
-		nextTentacleFormTime = System.currentTimeMillis() + 150;
-		removalPolicy = Policies.builder()
-			.add(Policies.NOT_SNEAKING)
-			.add(new SwappedSlotsRemovalPolicy(getDescription()))
-			.build();
-	}
+  private void form() {
+    if (!user.getSelectedAbilityName().equals("OctopusForm")) {
+      return;
+    }
+    ring.complete().forEach(this::clean);
+    formed = true;
+    nextTentacleFormTime = System.currentTimeMillis() + 150;
+    removalPolicy = Policies.builder()
+      .add(Policies.NOT_SNEAKING)
+      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .build();
+  }
 
-	private void renderBase() {
-		for (Block block : base) {
-			Block below = block.getRelative(BlockFace.DOWN);
-			if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
-				TempBlock.create(below, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
-			}
-			renderWaterBlock(block);
-		}
-	}
+  private void renderBase() {
+    for (Block block : base) {
+      Block below = block.getRelative(BlockFace.DOWN);
+      if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
+        TempBlock.create(below, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
+      }
+      renderWaterBlock(block);
+    }
+  }
 
-	private void renderTentacles(boolean forceUpdate) {
-		Vector3 center = user.getLocation().floor().add(Vector3.HALF);
-		long time = System.currentTimeMillis();
-		for (Tentacle tentacle : tentacles) {
-			if (forceUpdate || time > tentacle.nextUpdateTime) {
-				tentacle.updateBlocks(center);
-			}
-			tentacle.blocks.forEach(this::renderWaterBlock);
-		}
-	}
+  private void renderTentacles(boolean forceUpdate) {
+    Vector3 center = user.getLocation().floor().add(Vector3.HALF);
+    long time = System.currentTimeMillis();
+    for (Tentacle tentacle : tentacles) {
+      if (forceUpdate || time > tentacle.nextUpdateTime) {
+        tentacle.updateBlocks(center);
+      }
+      tentacle.blocks.forEach(this::renderWaterBlock);
+    }
+  }
 
-	private void renderWaterBlock(Block block) {
-		if (!TempBlock.isBendable(block)) return;
-		if (MaterialUtil.isWater(block)) {
-			ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-				.count(5).offset(0.25, 0.25, 0.25).spawn();
-		} else if (MaterialUtil.isTransparent(block)) {
-			TempBlock.create(block, Material.WATER.createBlockData(), 250);
-		}
-	}
+  private void renderWaterBlock(Block block) {
+    if (!TempBlock.isBendable(block)) {
+      return;
+    }
+    if (MaterialUtil.isWater(block)) {
+      ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
+        .count(5).offset(0.25, 0.25, 0.25).spawn();
+    } else if (MaterialUtil.isTransparent(block)) {
+      TempBlock.create(block, Material.WATER.createBlockData(), 250);
+    }
+  }
 
-	private void punch() {
-		if (!formed) return;
-		Vector3 center = user.getLocation().floor().add(new Vector3(0.5, 0, 0.5));
-		double r = RADIUS + 0.5;
-		for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.PI / 4) {
-			Vector3 tentacleBase = center.add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
-			CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
-		}
-	}
+  private void punch() {
+    if (!formed) {
+      return;
+    }
+    Vector3 center = user.getLocation().floor().add(new Vector3(0.5, 0, 0.5));
+    double r = RADIUS + 0.5;
+    for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.PI / 4) {
+      Vector3 tentacleBase = center.add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
+      CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
+    }
+  }
 
-	private boolean onEntityHit(Entity entity) {
-		if (affectedEntities.containsKey(entity)) return false;
-		DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-		Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(user.getLocation());
-		entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
-		affectedEntities.put(entity, false);
-		return true;
-	}
+  private boolean onEntityHit(Entity entity) {
+    if (affectedEntities.containsKey(entity)) {
+      return false;
+    }
+    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(user.getLocation());
+    entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
+    affectedEntities.put(entity, false);
+    return true;
+  }
 
-	private void clean(Block block) {
-		if (MaterialUtil.isWater(block)) TempBlock.createAir(block);
-	}
+  private void clean(Block block) {
+    if (MaterialUtil.isWater(block)) {
+      TempBlock.createAir(block);
+    }
+  }
 
-	private void cleanAll() {
-		for (Tentacle t : tentacles) {
-			t.blocks.forEach(this::clean);
-		}
-		base.forEach(this::clean);
-	}
+  private void cleanAll() {
+    for (Tentacle t : tentacles) {
+      t.blocks.forEach(this::clean);
+    }
+    base.forEach(this::clean);
+  }
 
-	@Override
-	public void onDestroy() {
-		if (formed) {
-			user.setCooldown(getDescription(), userConfig.cooldown);
-			cleanAll();
-		}
-	}
+  @Override
+  public void onDestroy() {
+    if (formed) {
+      user.setCooldown(getDescription(), userConfig.cooldown);
+      cleanAll();
+    }
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private class Tentacle {
-		private final Collection<Block> blocks;
-		private final double cos, sin;
-		private final long topFormTime;
+  private class Tentacle {
+    private final Collection<Block> blocks;
+    private final double cos, sin;
+    private final long topFormTime;
 
-		private long nextUpdateTime;
+    private long nextUpdateTime;
 
-		private Tentacle(int index) {
-			blocks = new ArrayList<>();
-			double phi = index * FastMath.PI / 4;
-			cos = FastMath.cos(phi);
-			sin = FastMath.sin(phi);
-			topFormTime = System.currentTimeMillis() + 150;
-			updateBlocks(user.getLocation().floor().add(Vector3.HALF));
-		}
+    private Tentacle(int index) {
+      blocks = new ArrayList<>();
+      double phi = index * FastMath.PI / 4;
+      cos = FastMath.cos(phi);
+      sin = FastMath.sin(phi);
+      topFormTime = System.currentTimeMillis() + 150;
+      updateBlocks(user.getLocation().floor().add(Vector3.HALF));
+    }
 
-		private void updateBlocks(Vector3 center) {
-			blocks.clear();
-			long time = System.currentTimeMillis();
-			nextUpdateTime = time + ThreadLocalRandom.current().nextLong(250, 550);
-			double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
-			double xBottom = cos * (RADIUS + bottomOffset);
-			double zBottom = sin * (RADIUS + bottomOffset);
-			blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.getWorld()));
-			if (time > topFormTime) {
-				double topOffset = ThreadLocalRandom.current().nextDouble(1);
-				double xTop = cos * (RADIUS + topOffset);
-				double zTop = sin * (RADIUS + topOffset);
-				blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.getWorld()));
-			}
-		}
-	}
+    private void updateBlocks(Vector3 center) {
+      blocks.clear();
+      long time = System.currentTimeMillis();
+      nextUpdateTime = time + ThreadLocalRandom.current().nextLong(250, 550);
+      double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
+      double xBottom = cos * (RADIUS + bottomOffset);
+      double zBottom = sin * (RADIUS + bottomOffset);
+      blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.getWorld()));
+      if (time > topFormTime) {
+        double topOffset = ThreadLocalRandom.current().nextDouble(1);
+        double xTop = cos * (RADIUS + topOffset);
+        double zTop = sin * (RADIUS + topOffset);
+        blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.getWorld()));
+      }
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
-		@Attribute(Attribute.STRENGTH)
-		public double knockback;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.STRENGTH)
+    public double knockback;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "water", "octopusform");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "octopusform");
 
-			cooldown = abilityNode.node("cooldown").getLong(1000);
-			damage = abilityNode.node("damage").getDouble(2.0);
-			knockback = abilityNode.node("knockback").getDouble(1.75);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(1000);
+      damage = abilityNode.node("damage").getDouble(2.0);
+      knockback = abilityNode.node("knockback").getDouble(1.75);
+    }
+  }
 }

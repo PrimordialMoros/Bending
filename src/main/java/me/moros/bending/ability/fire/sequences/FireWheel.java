@@ -48,128 +48,128 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
 public class FireWheel extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private Wheel wheel;
+  private Wheel wheel;
 
-	public FireWheel(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public FireWheel(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		Vector3 direction = user.getDirection().setY(0).normalize();
-		Vector3 location = user.getLocation().add(direction);
-		location = location.add(new Vector3(0, userConfig.radius, 0));
-		if (location.toBlock(user.getWorld()).isLiquid()) return false;
+    Vector3 direction = user.getDirection().setY(0).normalize();
+    Vector3 location = user.getLocation().add(direction);
+    location = location.add(new Vector3(0, userConfig.radius, 0));
+    if (location.toBlock(user.getWorld()).isLiquid()) {
+      return false;
+    }
 
-		wheel = new Wheel(new Ray(location, direction));
-		if (!wheel.resolveMovement(userConfig.radius)) return false;
+    wheel = new Wheel(new Ray(location, direction));
+    if (!wheel.resolveMovement(userConfig.radius)) {
+      return false;
+    }
 
-		removalPolicy = Policies.builder()
-			.add(new OutOfRangeRemovalPolicy(userConfig.range, location, () -> wheel.getLocation())).build();
+    removalPolicy = Policies.builder()
+      .add(OutOfRangeRemovalPolicy.of(userConfig.range, location, () -> wheel.getLocation())).build();
 
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		return true;
-	}
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		return wheel.update();
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    return wheel.update();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(wheel.getCollider());
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(wheel.getCollider());
+  }
 
-	private class Wheel extends AbstractWheel {
-		public Wheel(Ray ray) {
-			super(user, ray, userConfig.radius, userConfig.speed);
-		}
+  private class Wheel extends AbstractWheel {
+    public Wheel(Ray ray) {
+      super(user, ray, userConfig.radius, userConfig.speed);
+    }
 
-		@Override
-		public void render() {
-			Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
-			Rotation rotation = new Rotation(rotateAxis, FastMath.PI / 18, RotationConvention.VECTOR_OPERATOR);
-			VectorMethods.rotate(this.ray.direction.scalarMultiply(this.radius), rotation, 36).forEach(v ->
-				ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).extra(0.01).spawn()
-			);
-		}
+    @Override
+    public void render() {
+      Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
+      VectorMethods.circle(this.ray.direction.scalarMultiply(this.radius), rotateAxis, 36).forEach(v ->
+        ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).extra(0.01).spawn()
+      );
+    }
 
-		@Override
-		public void postRender() {
-			if (ThreadLocalRandom.current().nextInt(6) == 0) {
-				SoundUtil.FIRE_SOUND.play(location.toLocation(user.getWorld()));
-			}
-		}
+    @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(6) == 0) {
+        SoundUtil.FIRE_SOUND.play(location.toLocation(user.getWorld()));
+      }
+    }
 
-		@Override
-		public boolean onEntityHit(@NonNull Entity entity) {
-			DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-			return true;
-		}
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      return true;
+    }
 
-		@Override
-		public boolean onBlockHit(@NonNull Block block) {
-			if (MaterialUtil.isIgnitable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-				TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
-			}
-			return true;
-		}
-	}
+    @Override
+    public boolean onBlockHit(@NonNull Block block) {
+      if (MaterialUtil.isIgnitable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+      }
+      return true;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.RADIUS)
-		public double radius;
-		@Attribute(Attribute.DAMAGE)
-		public double damage;
-		@Attribute(Attribute.RANGE)
-		public double range;
-		@Attribute(Attribute.SPEED)
-		public double speed;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.RADIUS)
+    public double radius;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.RANGE)
+    public double range;
+    @Attribute(Attribute.SPEED)
+    public double speed;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewheel");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firewheel");
 
-			cooldown = abilityNode.node("cooldown").getLong(8000);
-			radius = abilityNode.node("radius").getDouble(1.0);
-			damage = abilityNode.node("damage").getDouble(3.5);
-			range = abilityNode.node("range").getDouble(20.0);
-			speed = abilityNode.node("speed").getDouble(0.75);
+      cooldown = abilityNode.node("cooldown").getLong(8000);
+      radius = abilityNode.node("radius").getDouble(1.0);
+      damage = abilityNode.node("damage").getDouble(3.5);
+      range = abilityNode.node("range").getDouble(20.0);
+      speed = abilityNode.node("speed").getDouble(0.75);
 
-			abilityNode.node("speed").comment("How many blocks the wheel advances every tick.");
-		}
-	}
+      abilityNode.node("speed").comment("How many blocks the wheel advances every tick.");
+    }
+  }
 }

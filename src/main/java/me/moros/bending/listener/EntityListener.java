@@ -46,99 +46,115 @@ import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 
 public class EntityListener implements Listener {
-	private final Game game;
+  private final Game game;
 
-	public EntityListener(@NonNull Game game) {
-		this.game = game;
-	}
+  public EntityListener(@NonNull Game game) {
+    this.game = game;
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onArrowHit(ProjectileHitEvent event) {
-		if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(Metadata.METAL_CABLE)) {
-			MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE).get(0).value();
-			if (cable != null) {
-				if (event.getHitBlock() != null) {
-					cable.setHitBlock(event.getHitBlock());
-				} else if (event.getHitEntity() instanceof LivingEntity) {
-					cable.setHitEntity(event.getHitEntity());
-				} else {
-					event.getEntity().remove();
-				}
-			}
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onArrowHit(ProjectileHitEvent event) {
+    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(Metadata.METAL_CABLE)) {
+      MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE).get(0).value();
+      if (cable != null) {
+        if (event.getHitBlock() != null) {
+          cable.setHitBlock(event.getHitBlock());
+        } else if (event.getHitEntity() instanceof LivingEntity) {
+          cable.setHitEntity(event.getHitEntity());
+        } else {
+          event.getEntity().remove();
+        }
+      }
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityExplodeEvent(EntityExplodeEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityExplodeEvent(EntityExplodeEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityInteractEvent(EntityInteractEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityInteractEvent(EntityInteractEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityShootBowEvent(EntityShootBowEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityShootBowEvent(EntityShootBowEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity(), ActionType.SHOOT)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onSlimeSplitEvent(SlimeSplitEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onSlimeSplitEvent(SlimeSplitEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityTarget(EntityTargetEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityTarget(EntityTargetEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
-		if (MovementHandler.isRestricted(event.getEntity())) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
+    if (MovementHandler.isRestricted(event.getEntity())) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityDamage(EntityDamageEvent event) {
-		if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION && event.getEntity() instanceof LivingEntity) {
-			if (TempBlock.MANAGER.isTemp(((LivingEntity) event.getEntity()).getEyeLocation().getBlock())) {
-				event.setCancelled(true);
-			}
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamage(EntityDamageEvent event) {
+    if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION && event.getEntity() instanceof LivingEntity) {
+      if (TempBlock.MANAGER.isTemp(((LivingEntity) event.getEntity()).getEyeLocation().getBlock())) {
+        event.setCancelled(true);
+      }
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
-			event.setCancelled(true);
-		}
-		if (MovementHandler.isRestricted(event.getDamager(), ActionType.DAMAGE)) event.setCancelled(true);
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
+      event.setCancelled(true);
+    }
+    if (MovementHandler.isRestricted(event.getDamager(), ActionType.DAMAGE)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onItemMerge(ItemMergeEvent event) {
-		if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onItemMerge(ItemMergeEvent event) {
+    if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onItemPickup(EntityPickupItemEvent event) {
-		if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onItemPickup(EntityPickupItemEvent event) {
+    if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onHopperItemPickup(InventoryPickupItemEvent event) {
-		if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
-			event.setCancelled(true);
-			event.getItem().remove();
-		}
-	}
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onHopperItemPickup(InventoryPickupItemEvent event) {
+    if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+      event.setCancelled(true);
+      event.getItem().remove();
+    }
+  }
 }

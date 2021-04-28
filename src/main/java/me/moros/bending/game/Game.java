@@ -47,131 +47,131 @@ import org.bukkit.World;
  * @see Bending#getGame
  */
 public final class Game {
-	private final BendingStorage storage;
-	private final ProtectionSystem protectionSystem;
+  private final BendingStorage storage;
+  private final ProtectionSystem protectionSystem;
 
-	private final AbilityRegistry abilityRegistry;
-	private final SequenceManager sequenceManager;
-	private final WorldManager worldManager;
+  private final AbilityRegistry abilityRegistry;
+  private final SequenceManager sequenceManager;
+  private final WorldManager worldManager;
 
-	private final AttributeSystem attributeSystem;
-	private final ActivationController activationController;
-	private final BoardManager boardManager;
+  private final AttributeSystem attributeSystem;
+  private final ActivationController activationController;
+  private final BoardManager boardManager;
 
-	private final BenderRegistry benderRegistry;
-	private final PlayerManager playerManager;
+  private final BenderRegistry benderRegistry;
+  private final PlayerManager playerManager;
 
-	public Game(@NonNull BendingStorage storage) {
-		this.storage = storage;
-		protectionSystem = new ProtectionSystem();
+  public Game(@NonNull BendingStorage storage) {
+    this.storage = storage;
+    protectionSystem = new ProtectionSystem();
 
-		abilityRegistry = new AbilityRegistry();
-		sequenceManager = new SequenceManager(this);
-		worldManager = new WorldManager();
+    abilityRegistry = new AbilityRegistry();
+    sequenceManager = new SequenceManager(this);
+    worldManager = new WorldManager();
 
-		attributeSystem = new AttributeSystem();
-		activationController = new ActivationController(this);
-		boardManager = new BoardManager();
+    attributeSystem = new AttributeSystem();
+    activationController = new ActivationController(this);
+    boardManager = new BoardManager();
 
-		new AbilityInitializer(this);
-		loadStorage();
+    new AbilityInitializer(this);
+    loadStorage();
 
-		TempArmor.init();
-		TempBlock.init();
-		TempArmorStand.init();
-		BendingFallingBlock.init();
+    TempArmor.init();
+    TempBlock.init();
+    TempArmorStand.init();
+    BendingFallingBlock.init();
 
-		benderRegistry = new BenderRegistry();
-		playerManager = new PlayerManager(storage);
+    benderRegistry = new BenderRegistry();
+    playerManager = new PlayerManager(storage);
 
-		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
+    playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
 
-		Tasker.createTaskTimer(this::update, 1, 1);
-	}
+    Tasker.createTaskTimer(this::update, 1, 1);
+  }
 
-	private void update() {
-		MCTiming timing = Bending.getTimingManager().ofStart("Bending Update");
-		activationController.clearSpoutCache();
-		worldManager.update();
-		Flight.updateAll();
-		timing.stopTiming();
-	}
+  private void update() {
+    MCTiming timing = Bending.getTimingManager().ofStart("Bending Update");
+    activationController.clearSpoutCache();
+    worldManager.update();
+    Flight.updateAll();
+    timing.stopTiming();
+  }
 
-	public boolean isDisabledWorld(@NonNull UUID worldID) {
-		return worldManager.isDisabledWorld(worldID);
-	}
+  public boolean isDisabledWorld(@NonNull UUID worldID) {
+    return worldManager.isDisabledWorld(worldID);
+  }
 
-	public void reload() {
-		worldManager.destroyAllInstances();
-		sequenceManager.clear();
-		removeTemporary();
-		Bending.getConfigManager().reload();
-		Bending.getTranslationManager().reload();
-		playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
-	}
+  public void reload() {
+    worldManager.destroyAllInstances();
+    sequenceManager.clear();
+    removeTemporary();
+    Bending.getConfigManager().reload();
+    Bending.getTranslationManager().reload();
+    playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
+  }
 
-	public void cleanup() {
-		worldManager.destroyAllInstances();
-		removeTemporary();
-		Flight.removeAll();
-		MovementHandler.resetAll();
-		playerManager.getOnlinePlayers().forEach(storage::savePlayerAsync);
-		storage.close();
-	}
+  public void cleanup() {
+    worldManager.destroyAllInstances();
+    removeTemporary();
+    Flight.removeAll();
+    MovementHandler.resetAll();
+    playerManager.getOnlinePlayers().forEach(storage::savePlayerAsync);
+    storage.close();
+  }
 
-	private void removeTemporary() {
-		TempArmor.MANAGER.removeAll();
-		TempBlock.MANAGER.removeAll();
-		TempArmorStand.MANAGER.removeAll();
-		BendingFallingBlock.MANAGER.removeAll();
-	}
+  private void removeTemporary() {
+    TempArmor.MANAGER.removeAll();
+    TempBlock.MANAGER.removeAll();
+    TempArmorStand.MANAGER.removeAll();
+    BendingFallingBlock.MANAGER.removeAll();
+  }
 
-	private void loadStorage() {
-		storage.createElements(Element.getAll());
-		storage.createAbilities(abilityRegistry.getAbilities().collect(Collectors.toSet()));
-	}
+  private void loadStorage() {
+    storage.createElements(Element.getAll());
+    storage.createAbilities(abilityRegistry.getAbilities().collect(Collectors.toSet()));
+  }
 
-	public @NonNull BendingStorage getStorage() {
-		return storage;
-	}
+  public @NonNull BendingStorage getStorage() {
+    return storage;
+  }
 
-	public @NonNull ProtectionSystem getProtectionSystem() {
-		return protectionSystem;
-	}
+  public @NonNull ProtectionSystem getProtectionSystem() {
+    return protectionSystem;
+  }
 
-	public @NonNull AbilityRegistry getAbilityRegistry() {
-		return abilityRegistry;
-	}
+  public @NonNull AbilityRegistry getAbilityRegistry() {
+    return abilityRegistry;
+  }
 
-	public @NonNull SequenceManager getSequenceManager() {
-		return sequenceManager;
-	}
+  public @NonNull SequenceManager getSequenceManager() {
+    return sequenceManager;
+  }
 
-	public @NonNull AbilityManager getAbilityManager(@NonNull World world) {
-		return worldManager.getInstanceForWorld(world);
-	}
+  public @NonNull AbilityManager getAbilityManager(@NonNull World world) {
+    return worldManager.getInstanceForWorld(world);
+  }
 
-	public void clearWorld(@NonNull World world) {
-		worldManager.remove(world);
-	}
+  public void clearWorld(@NonNull World world) {
+    worldManager.remove(world);
+  }
 
-	public @NonNull AttributeSystem getAttributeSystem() {
-		return attributeSystem;
-	}
+  public @NonNull AttributeSystem getAttributeSystem() {
+    return attributeSystem;
+  }
 
-	public @NonNull ActivationController getActivationController() {
-		return activationController;
-	}
+  public @NonNull ActivationController getActivationController() {
+    return activationController;
+  }
 
-	public @NonNull BoardManager getBoardManager() {
-		return boardManager;
-	}
+  public @NonNull BoardManager getBoardManager() {
+    return boardManager;
+  }
 
-	public @NonNull BenderRegistry getBenderRegistry() {
-		return benderRegistry;
-	}
+  public @NonNull BenderRegistry getBenderRegistry() {
+    return benderRegistry;
+  }
 
-	public @NonNull PlayerManager getPlayerManager() {
-		return playerManager;
-	}
+  public @NonNull PlayerManager getPlayerManager() {
+    return playerManager;
+  }
 }

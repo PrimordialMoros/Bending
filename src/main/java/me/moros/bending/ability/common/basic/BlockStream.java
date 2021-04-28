@@ -49,147 +49,159 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
 public abstract class BlockStream implements State {
-	private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
 
-	private StateChain chain;
-	private final User user;
-	private final Collection<Collider> colliders = new ArrayList<>();
-	private final Material material;
+  private StateChain chain;
+  private final User user;
+  private final Collection<Collider> colliders = new ArrayList<>();
+  private final Material material;
 
-	protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
-	protected Deque<Block> stream;
-	protected Vector3 direction;
+  protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
+  protected Deque<Block> stream;
+  protected Vector3 direction;
 
-	private boolean started = false;
-	private int buffer;
-	private final int speed;
+  private boolean started = false;
+  private int buffer;
+  private final int speed;
 
-	protected boolean livingOnly = false;
-	protected boolean controllable = true;
-	protected final double range;
+  protected boolean livingOnly = false;
+  protected boolean controllable = true;
+  protected final double range;
 
-	/**
-	 * The maximum speed is 100 and represents movement of 1 block per tick.
-	 * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
-	 * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
-	 */
-	public BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
-		this.user = user;
-		this.material = material;
-		this.range = range;
-		this.speed = FastMath.min(100, speed);
-		buffer = speed;
-	}
+  /**
+   * The maximum speed is 100 and represents movement of 1 block per tick.
+   * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
+   * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
+   */
+  public BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
+    this.user = user;
+    this.material = material;
+    this.range = range;
+    this.speed = FastMath.min(100, speed);
+    buffer = speed;
+  }
 
-	@Override
-	public void start(@NonNull StateChain chain) {
-		if (started) return;
-		this.chain = chain;
-		stream = new ArrayDeque<>();
-		chain.getChainStore().stream().filter(this::isValid).forEach(stream::addLast);
-		started = !stream.isEmpty();
-	}
+  @Override
+  public void start(@NonNull StateChain chain) {
+    if (started) {
+      return;
+    }
+    this.chain = chain;
+    stream = new ArrayDeque<>();
+    chain.getChainStore().stream().filter(this::isValid).forEach(stream::addLast);
+    started = !stream.isEmpty();
+  }
 
-	@Override
-	public void complete() {
-		if (!started) return;
-		chain.nextState();
-	}
+  @Override
+  public void complete() {
+    if (!started) {
+      return;
+    }
+    chain.nextState();
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		// Since this moves block by block, our only choice is to skip an update every x ticks based on our buffer speed
-		buffer += speed;
-		if (buffer < 100) return UpdateResult.CONTINUE;
-		if (!started || stream.stream().noneMatch(this::isValid)) return UpdateResult.REMOVE;
+  @Override
+  public @NonNull UpdateResult update() {
+    // Since this moves block by block, our only choice is to skip an update every x ticks based on our buffer speed
+    buffer += speed;
+    if (buffer < 100) {
+      return UpdateResult.CONTINUE;
+    }
+    if (!started || stream.stream().noneMatch(this::isValid)) {
+      return UpdateResult.REMOVE;
+    }
 
-		Block head = stream.getFirst();
-		Vector3 current = new Vector3(head).add(Vector3.HALF);
-		if (controllable || direction == null) {
-			Vector3 targetLoc = user.getTargetEntity(range).map(EntityMethods::getEntityCenter)
-				.orElseGet(() -> user.getTarget(range, Collections.singleton(material)));
-			// Improve targeting when near
-			if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
-				targetLoc = targetLoc.add(user.getDirection());
-			}
-			direction = targetLoc.subtract(current).normalize();
-		}
+    Block head = stream.getFirst();
+    Vector3 current = new Vector3(head).add(Vector3.HALF);
+    if (controllable || direction == null) {
+      Vector3 targetLoc = user.getTargetEntity(range).map(EntityMethods::getEntityCenter)
+        .orElseGet(() -> user.getTarget(range, Collections.singleton(material)));
+      // Improve targeting when near
+      if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
+        targetLoc = targetLoc.add(user.getDirection());
+      }
+      direction = targetLoc.subtract(current).normalize();
+    }
 
-		buffer -= 100; // Reduce buffer by one since we moved
+    buffer -= 100; // Reduce buffer by one since we moved
 
-		Vector3 originalVector = new Vector3(current.toArray());
-		Block originBlock = originalVector.toBlock(user.getWorld());
+    Vector3 originalVector = new Vector3(current.toArray());
+    Block originBlock = originalVector.toBlock(user.getWorld());
 
-		current = current.add(direction);
-		head = current.toBlock(user.getWorld());
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, head)) {
-			return UpdateResult.REMOVE;
-		}
+    current = current.add(direction);
+    head = current.toBlock(user.getWorld());
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, head)) {
+      return UpdateResult.REMOVE;
+    }
 
-		clean(stream.removeLast());
-		if (current.distanceSq(user.getEyeLocation()) <= range * range) {
-			boolean canRender = true;
-			for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
-				int x = NumberConversions.floor(v.getX());
-				int y = NumberConversions.floor(v.getY());
-				int z = NumberConversions.floor(v.getZ());
-				Block b = originBlock.getRelative(x, y, z);
-				if (diagonalsPredicate.test(b)) {
-					canRender = false;
-					onBlockHit(b);
-					break;
-				}
-			}
-			if (canRender) {
-				renderHead(head);
-				stream.addFirst(head);
-			}
-		}
+    clean(stream.removeLast());
+    if (current.distanceSq(user.getEyeLocation()) <= range * range) {
+      boolean canRender = true;
+      for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
+        int x = NumberConversions.floor(v.getX());
+        int y = NumberConversions.floor(v.getY());
+        int z = NumberConversions.floor(v.getZ());
+        Block b = originBlock.getRelative(x, y, z);
+        if (diagonalsPredicate.test(b)) {
+          canRender = false;
+          onBlockHit(b);
+          break;
+        }
+      }
+      if (canRender) {
+        renderHead(head);
+        stream.addFirst(head);
+      }
+    }
 
-		postRender();
+    postRender();
 
-		colliders.clear();
-		boolean hit = false;
-		for (Block block : stream) {
-			Collider collider = BOX.at(new Vector3(block));
-			colliders.add(collider);
-			hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false);
-		}
+    colliders.clear();
+    boolean hit = false;
+    for (Block block : stream) {
+      Collider collider = BOX.at(new Vector3(block));
+      colliders.add(collider);
+      hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false);
+    }
 
-		return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-	}
+    return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
 
-	public void postRender() {
-	}
+  public void postRender() {
+  }
 
-	public abstract boolean onEntityHit(@NonNull Entity entity);
+  public abstract boolean onEntityHit(@NonNull Entity entity);
 
-	public void onBlockHit(@NonNull Block block) {
-	}
+  public void onBlockHit(@NonNull Block block) {
+  }
 
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return colliders;
-	}
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return colliders;
+  }
 
-	protected void renderHead(@NonNull Block block) {
-		if (material == Material.WATER && MaterialUtil.isWater(block)) {
-			ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-				.count(5).offset(0.25, 0.25, 0.25).spawn();
-		} else {
-			TempBlock.create(block, material.createBlockData());
-		}
-	}
+  protected void renderHead(@NonNull Block block) {
+    if (material == Material.WATER && MaterialUtil.isWater(block)) {
+      ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
+        .count(5).offset(0.25, 0.25, 0.25).spawn();
+    } else {
+      TempBlock.create(block, material.createBlockData());
+    }
+  }
 
-	public boolean isValid(@NonNull Block block) {
-		if (material == Material.WATER) return MaterialUtil.isWater(block);
-		return material == block.getType();
-	}
+  public boolean isValid(@NonNull Block block) {
+    if (material == Material.WATER) {
+      return MaterialUtil.isWater(block);
+    }
+    return material == block.getType();
+  }
 
-	public void cleanAll() {
-		stream.forEach(this::clean);
-	}
+  public void cleanAll() {
+    stream.forEach(this::clean);
+  }
 
-	private void clean(@NonNull Block block) {
-		if (isValid(block)) TempBlock.createAir(block);
-	}
+  private void clean(@NonNull Block block) {
+    if (isValid(block)) {
+      TempBlock.createAir(block);
+    }
+  }
 }

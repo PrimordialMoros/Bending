@@ -39,41 +39,41 @@ import org.bukkit.entity.Player;
  * If you only need BendingPlayers then use {@link PlayerManager}
  */
 public final class BenderRegistry {
-	private Predicate<UUID> isBendingUser = (id -> false);
-	private Function<UUID, BendingUser> entityToUser = (id -> null);
-	private Function<String, BendingUser> nameToUser = (name -> null);
+  private Predicate<UUID> isBendingUser = (id -> false);
+  private Function<UUID, BendingUser> entityToUser = (id -> null);
+  private Function<String, BendingUser> nameToUser = (name -> null);
 
-	public boolean isBender(@NonNull LivingEntity entity) {
-		if (entity instanceof Player) {
-			return true;
-		}
-		return isBendingUser.test(entity.getUniqueId());
-	}
+  public boolean isBender(@NonNull LivingEntity entity) {
+    if (entity instanceof Player) {
+      return true;
+    }
+    return isBendingUser.test(entity.getUniqueId());
+  }
 
-	public Optional<User> getBendingUser(@NonNull LivingEntity entity) {
-		if (entity instanceof Player) {
-			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(entity.getUniqueId()));
-		}
-		return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
-	}
+  public Optional<User> getBendingUser(@NonNull LivingEntity entity) {
+    if (entity instanceof Player) {
+      return Optional.of(Bending.getGame().getPlayerManager().getPlayer(entity.getUniqueId()));
+    }
+    return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
+  }
 
-	public Optional<User> getBendingUserByName(@NonNull String name) {
-		Player player = Bukkit.getPlayer(name);
-		if (player != null) {
-			return Optional.of(Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()));
-		}
-		return Optional.ofNullable(nameToUser.apply(name));
-	}
+  public Optional<User> getBendingUserByName(@NonNull String name) {
+    Player player = Bukkit.getPlayer(name);
+    if (player != null) {
+      return Optional.of(Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()));
+    }
+    return Optional.ofNullable(nameToUser.apply(name));
+  }
 
-	public void registerPredicate(@NonNull Predicate<@NonNull UUID> predicate) {
-		isBendingUser = predicate;
-	}
+  public void registerPredicate(@NonNull Predicate<@NonNull UUID> predicate) {
+    isBendingUser = predicate;
+  }
 
-	public void registerCache(@NonNull Function<@NonNull UUID, @Nullable BendingUser> function) {
-		entityToUser = function;
-	}
+  public void registerCache(@NonNull Function<@NonNull UUID, @Nullable BendingUser> function) {
+    entityToUser = function;
+  }
 
-	public void registerNameCache(@NonNull Function<@NonNull String, @Nullable BendingUser> function) {
-		nameToUser = function;
-	}
+  public void registerNameCache(@NonNull Function<@NonNull String, @Nullable BendingUser> function) {
+    nameToUser = function;
+  }
 }

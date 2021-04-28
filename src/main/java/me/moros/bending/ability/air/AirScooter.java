@@ -52,170 +52,176 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
 public class AirScooter extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
+  private static final Config config = new Config();
 
-	private User user;
-	private Config userConfig;
-	private RemovalPolicy removalPolicy;
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
-	private HeightSmoother heightSmoother;
+  private HeightSmoother heightSmoother;
 
-	public boolean canRender = true;
-	private double verticalPosition = 0;
-	private int stuckCount = 0;
+  public boolean canRender = true;
+  private double verticalPosition = 0;
+  private int stuckCount = 0;
 
-	public AirScooter(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public AirScooter(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		this.user = user;
-		recalculateConfig();
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    this.user = user;
+    recalculateConfig();
 
-		if (Policies.IN_LIQUID.test(user, getDescription())) return false;
+    if (Policies.IN_LIQUID.test(user, getDescription())) {
+      return false;
+    }
 
-		heightSmoother = new HeightSmoother();
+    heightSmoother = new HeightSmoother();
 
-		double dist = EntityMethods.distanceAboveGround(user.getEntity());
-		if ((dist < 0.5 || dist > 3)) {
-			return false;
-		}
+    double dist = EntityMethods.distanceAboveGround(user.getEntity());
+    if ((dist < 0.5 || dist > 3)) {
+      return false;
+    }
 
-		removalPolicy = Policies.builder()
-			.add(Policies.SNEAKING)
-			.add(new ExpireRemovalPolicy(userConfig.duration))
-			.build();
-		return true;
-	}
+    removalPolicy = Policies.builder()
+      .add(Policies.SNEAKING)
+      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .build();
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		if (removalPolicy.test(user, getDescription())) {
-			return UpdateResult.REMOVE;
-		}
-		if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock(), getDescription())) {
-			return UpdateResult.REMOVE;
-		}
+  @Override
+  public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, getDescription())) {
+      return UpdateResult.REMOVE;
+    }
+    if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock(), getDescription())) {
+      return UpdateResult.REMOVE;
+    }
 
-		stuckCount = user.getVelocity().getNormSq() < 0.1 ? stuckCount + 1 : 0;
-		if (stuckCount > 10 || !move()) {
-			return UpdateResult.REMOVE;
-		}
+    stuckCount = user.getVelocity().getNormSq() < 0.1 ? stuckCount + 1 : 0;
+    if (stuckCount > 10 || !move()) {
+      return UpdateResult.REMOVE;
+    }
 
-		if (canRender) render();
-		if (ThreadLocalRandom.current().nextInt(4) == 0) {
-			SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
-		}
-		return UpdateResult.CONTINUE;
-	}
+    if (canRender) {
+      render();
+    }
+    if (ThreadLocalRandom.current().nextInt(4) == 0) {
+      SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
+    }
+    return UpdateResult.CONTINUE;
+  }
 
-	@Override
-	public void onDestroy() {
-		user.setCooldown(getDescription(), userConfig.cooldown);
-	}
+  @Override
+  public void onDestroy() {
+    user.setCooldown(getDescription(), userConfig.cooldown);
+  }
 
-	private void render() {
-		verticalPosition += 0.25 * FastMath.PI;
-		for (double theta = 0; theta < 2 * FastMath.PI * 2; theta += FastMath.PI / 5) {
-			double sin = FastMath.sin(verticalPosition);
-			double x = 0.6 * FastMath.cos(theta) * sin;
-			double y = 0.6 * FastMath.cos(verticalPosition);
-			double z = 0.6 * FastMath.sin(theta) * sin;
-			ParticleUtil.createAir(user.getEntity().getLocation().add(x, y, z)).spawn();
-		}
-	}
+  private void render() {
+    verticalPosition += 0.25 * FastMath.PI;
+    for (double theta = 0; theta < 2 * FastMath.PI * 2; theta += FastMath.PI / 5) {
+      double sin = FastMath.sin(verticalPosition);
+      double x = 0.6 * FastMath.cos(theta) * sin;
+      double y = 0.6 * FastMath.cos(verticalPosition);
+      double z = 0.6 * FastMath.sin(theta) * sin;
+      ParticleUtil.createAir(user.getEntity().getLocation().add(x, y, z)).spawn();
+    }
+  }
 
-	@Override
-	public @NonNull Collection<@NonNull Collider> getColliders() {
-		return Collections.singletonList(new Sphere(user.getLocation(), 1.5));
-	}
+  @Override
+  public @NonNull Collection<@NonNull Collider> getColliders() {
+    return Collections.singletonList(new Sphere(user.getLocation(), 1.5));
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return user;
-	}
+  @Override
+  public @NonNull User getUser() {
+    return user;
+  }
 
-	private boolean move() {
-		if (isColliding()) return false;
-		Vector3 direction = user.getDirection().setY(0).normalize();
-		double height = EntityMethods.distanceAboveGround(user.getEntity());
-		double smoothedHeight = heightSmoother.add(height);
-		if (user.getLocBlock().isLiquid()) {
-			height = 0.5;
-		} else if (smoothedHeight > 3.25) {
-			return false;
-		}
-		double force = FastMath.max(-0.5, FastMath.min(0.5, -0.3 * (height - getPrediction())));
-		Vector3 velocity = direction.scalarMultiply(userConfig.speed).setY(force);
-		user.getEntity().setVelocity(velocity.clampVelocity());
-		user.getEntity().setFallDistance(0);
-		return true;
-	}
+  private boolean move() {
+    if (isColliding()) {
+      return false;
+    }
+    Vector3 direction = user.getDirection().setY(0).normalize();
+    double height = EntityMethods.distanceAboveGround(user.getEntity());
+    double smoothedHeight = heightSmoother.add(height);
+    if (user.getLocBlock().isLiquid()) {
+      height = 0.5;
+    } else if (smoothedHeight > 3.25) {
+      return false;
+    }
+    double force = FastMath.max(-0.5, FastMath.min(0.5, -0.3 * (height - getPrediction())));
+    Vector3 velocity = direction.scalarMultiply(userConfig.speed).setY(force);
+    user.getEntity().setVelocity(velocity.clampVelocity());
+    user.getEntity().setFallDistance(0);
+    return true;
+  }
 
-	private boolean isColliding() {
-		double speed = user.getVelocity().setY(0).getNorm();
-		Vector3 direction = user.getDirection().setY(0).normalize(Vector3.ZERO);
-		Vector3 front = user.getEyeLocation().subtract(new Vector3(0, 0.5, 0))
-			.add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
-		Block block = front.toBlock(user.getWorld());
-		return !MaterialUtil.isTransparentOrWater(block) || !block.isPassable();
-	}
+  private boolean isColliding() {
+    double speed = user.getVelocity().setY(0).getNorm();
+    Vector3 direction = user.getDirection().setY(0).normalize(Vector3.ZERO);
+    Vector3 front = user.getEyeLocation().subtract(new Vector3(0, 0.5, 0))
+      .add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
+    Block block = front.toBlock(user.getWorld());
+    return !MaterialUtil.isTransparentOrWater(block) || !block.isPassable();
+  }
 
-	private double getPrediction() {
-		Vector3 currentDirection = user.getDirection().setY(0).normalize();
-		double playerSpeed = user.getVelocity().setY(0).getNorm();
-		double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
-		Vector3 location = user.getLocation().add(currentDirection.scalarMultiply(speed));
-		AABB userBounds = AABBUtils.getEntityBounds(user.getEntity());
-		for (Block block : BlockMethods.combineFaces(location.toBlock(user.getWorld()))) {
-			if (AABBUtils.getBlockBounds(block).intersects(userBounds)) {
-				return 2.25;
-			}
-		}
-		return 1.25;
-	}
+  private double getPrediction() {
+    Vector3 currentDirection = user.getDirection().setY(0).normalize();
+    double playerSpeed = user.getVelocity().setY(0).getNorm();
+    double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
+    Vector3 location = user.getLocation().add(currentDirection.scalarMultiply(speed));
+    AABB userBounds = AABBUtils.getEntityBounds(user.getEntity());
+    for (Block block : BlockMethods.combineFaces(location.toBlock(user.getWorld()))) {
+      if (AABBUtils.getBlockBounds(block).intersects(userBounds)) {
+        return 2.25;
+      }
+    }
+    return 1.25;
+  }
 
-	private static class HeightSmoother {
-		private final double[] values;
-		private int index;
+  private static class HeightSmoother {
+    private final double[] values;
+    private int index;
 
-		private HeightSmoother() {
-			index = 0;
-			values = new double[10];
-		}
+    private HeightSmoother() {
+      index = 0;
+      values = new double[10];
+    }
 
-		private double add(double value) {
-			values[index] = value;
-			index = (index + 1) % values.length;
-			return get();
-		}
+    private double add(double value) {
+      values[index] = value;
+      index = (index + 1) % values.length;
+      return get();
+    }
 
-		private double get() {
-			return Arrays.stream(values).sum() / values.length;
-		}
-	}
+    private double get() {
+      return Arrays.stream(values).sum() / values.length;
+    }
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.SPEED)
-		public double speed;
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.DURATION)
-		public long duration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.SPEED)
+    public double speed;
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long duration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
 
-			speed = abilityNode.node("speed").getDouble(0.7);
-			cooldown = abilityNode.node("cooldown").getLong(2000);
-			duration = abilityNode.node("duration").getLong(15000);
-		}
-	}
+      speed = abilityNode.node("speed").getDouble(0.7);
+      cooldown = abilityNode.node("cooldown").getLong(2000);
+      duration = abilityNode.node("duration").getLong(15000);
+    }
+  }
 }

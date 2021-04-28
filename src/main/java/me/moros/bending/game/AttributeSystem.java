@@ -41,134 +41,134 @@ import me.moros.bending.model.user.User;
 
 // TODO Expand system to include rounding, range checking etc and profile performance
 public final class AttributeSystem {
-	private static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>(); // Converts a double into some other numeric type
-	private final Map<User, Collection<UserModifier>> modifierMap = new HashMap<>();
+  private static final Map<Class<? extends Number>, AttributeConverter> converters = new HashMap<>(); // Converts a double into some other numeric type
+  private final Map<User, Collection<UserModifier>> modifierMap = new HashMap<>();
 
-	static {
-		converters.put(Double.class, AttributeConverter.DOUBLE);
-		converters.put(Integer.class, AttributeConverter.INT);
-		converters.put(Long.class, AttributeConverter.LONG);
-		converters.put(double.class, AttributeConverter.DOUBLE);
-		converters.put(int.class, AttributeConverter.INT);
-		converters.put(long.class, AttributeConverter.LONG);
-	}
+  static {
+    converters.put(Double.class, AttributeConverter.DOUBLE);
+    converters.put(Integer.class, AttributeConverter.INT);
+    converters.put(Long.class, AttributeConverter.LONG);
+    converters.put(double.class, AttributeConverter.DOUBLE);
+    converters.put(int.class, AttributeConverter.INT);
+    converters.put(long.class, AttributeConverter.LONG);
+  }
 
-	// Add a modifier that's only active according to some policy.
-	public @NonNull UserModifier addModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
-		Collection<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
-		UserModifier userModifier = new UserModifier(modifier, policy);
-		modifiers.add(userModifier);
-		return userModifier;
-	}
+  // Add a modifier that's only active according to some policy.
+  public @NonNull UserModifier addModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
+    Collection<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
+    UserModifier userModifier = new UserModifier(modifier, policy);
+    modifiers.add(userModifier);
+    return userModifier;
+  }
 
-	public void clearModifiers(@NonNull User user) {
-		modifierMap.remove(user);
-	}
+  public void clearModifiers(@NonNull User user) {
+    modifierMap.remove(user);
+  }
 
-	public boolean removeModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
-		return removeModifier(user, new UserModifier(modifier, policy));
-	}
+  public boolean removeModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
+    return removeModifier(user, new UserModifier(modifier, policy));
+  }
 
-	public boolean removeModifier(@NonNull User user, @NonNull UserModifier modifier) {
-		Collection<UserModifier> modifiers = modifierMap.get(user);
-		if (modifiers == null) {
-			return false;
-		}
-		boolean result = modifiers.remove(modifier);
-		if (modifiers.isEmpty()) {
-			modifierMap.remove(user);
-		}
-		return result;
-	}
+  public boolean removeModifier(@NonNull User user, @NonNull UserModifier modifier) {
+    Collection<UserModifier> modifiers = modifierMap.get(user);
+    if (modifiers == null) {
+      return false;
+    }
+    boolean result = modifiers.remove(modifier);
+    if (modifiers.isEmpty()) {
+      modifierMap.remove(user);
+    }
+    return result;
+  }
 
-	// Recalculates all of the config values for the user's instances.
-	public void recalculate(@NonNull User user) {
-		Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
-	}
+  // Recalculates all of the config values for the user's instances.
+  public void recalculate(@NonNull User user) {
+    Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
+  }
 
-	public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
-		User user = ability.getUser();
-		if (!modifierMap.containsKey(user)) {
-			return config;
-		}
-		Collection<UserModifier> activeModifiers = modifierMap.get(user).stream()
-			.filter(modifier -> modifier.policy.shouldModify(ability))
-			.collect(Collectors.toList());
+  public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
+    User user = ability.getUser();
+    if (!modifierMap.containsKey(user)) {
+      return config;
+    }
+    Collection<UserModifier> activeModifiers = modifierMap.get(user).stream()
+      .filter(modifier -> modifier.policy.shouldModify(ability))
+      .collect(Collectors.toList());
 
-		for (Field field : config.getClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(Attribute.class)) {
-				boolean wasAccessible = field.isAccessible();
-				field.setAccessible(true);
-				modifyField(field, config, activeModifiers);
-				field.setAccessible(wasAccessible);
-			}
-		}
+    for (Field field : config.getClass().getDeclaredFields()) {
+      if (field.isAnnotationPresent(Attribute.class)) {
+        boolean wasAccessible = field.isAccessible();
+        field.setAccessible(true);
+        modifyField(field, config, activeModifiers);
+        field.setAccessible(wasAccessible);
+      }
+    }
 
-		return config;
-	}
+    return config;
+  }
 
-	private boolean modifyField(Field field, Configurable config, Collection<UserModifier> userModifiers) {
-		double value;
-		try {
-			value = ((Number) field.get(config)).doubleValue();
-		} catch (IllegalAccessException e) {
-			Bending.getLog().warn(e.getMessage());
-			return false;
-		}
+  private boolean modifyField(Field field, Configurable config, Collection<UserModifier> userModifiers) {
+    double value;
+    try {
+      value = ((Number) field.get(config)).doubleValue();
+    } catch (IllegalAccessException e) {
+      Bending.getLog().warn(e.getMessage());
+      return false;
+    }
 
-		double addOperation = 0.0;
-		double multiplyOperation = 1.0;
-		Collection<Double> multiplicativeOperations = new ArrayList<>();
-		for (UserModifier userModifier : userModifiers) {
-			AttributeModifier modifier = userModifier.modifier;
-			if (hasAttribute(field, modifier.getAttribute())) {
-				if (modifier.getType() == ModifierOperation.ADDITIVE) {
-					addOperation += modifier.getAmount();
-				} else if (modifier.getType() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
-					multiplyOperation += modifier.getAmount();
-				} else if (modifier.getType() == ModifierOperation.MULTIPLICATIVE) {
-					multiplicativeOperations.add(modifier.getAmount());
-				}
-			}
-		}
-		value = (value + addOperation) * multiplyOperation;
-		for (double amount : multiplicativeOperations) {
-			value *= amount;
-		}
-		try {
-			field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
-		} catch (IllegalAccessException e) {
-			Bending.getLog().warn(e.getMessage());
-			return false;
-		}
+    double addOperation = 0.0;
+    double multiplyOperation = 1.0;
+    Collection<Double> multiplicativeOperations = new ArrayList<>();
+    for (UserModifier userModifier : userModifiers) {
+      AttributeModifier modifier = userModifier.modifier;
+      if (hasAttribute(field, modifier.getAttribute())) {
+        if (modifier.getType() == ModifierOperation.ADDITIVE) {
+          addOperation += modifier.getAmount();
+        } else if (modifier.getType() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
+          multiplyOperation += modifier.getAmount();
+        } else if (modifier.getType() == ModifierOperation.MULTIPLICATIVE) {
+          multiplicativeOperations.add(modifier.getAmount());
+        }
+      }
+    }
+    value = (value + addOperation) * multiplyOperation;
+    for (double amount : multiplicativeOperations) {
+      value *= amount;
+    }
+    try {
+      field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
+    } catch (IllegalAccessException e) {
+      Bending.getLog().warn(e.getMessage());
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	private boolean hasAttribute(Field field, String attributeName) {
-		for (Attribute attribute : field.getAnnotationsByType(Attribute.class)) {
-			if (attribute.value().equals(attributeName)) {
-				return true;
-			}
-		}
-		return false;
-	}
+  private boolean hasAttribute(Field field, String attributeName) {
+    for (Attribute attribute : field.getAnnotationsByType(Attribute.class)) {
+      if (attribute.value().equals(attributeName)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	private static class UserModifier {
-		final AttributeModifier modifier;
-		final ModifyPolicy policy;
+  private static class UserModifier {
+    final AttributeModifier modifier;
+    final ModifyPolicy policy;
 
-		UserModifier(AttributeModifier modifier, ModifyPolicy policy) {
-			this.modifier = modifier;
-			this.policy = policy;
-		}
-	}
+    UserModifier(AttributeModifier modifier, ModifyPolicy policy) {
+      this.modifier = modifier;
+      this.policy = policy;
+    }
+  }
 
-	public static @NonNull ModifyPolicy getElementPolicy(@NonNull Element element) {
-		return ability -> ability.getDescription().getElement() == element;
-	}
+  public static @NonNull ModifyPolicy getElementPolicy(@NonNull Element element) {
+    return ability -> ability.getDescription().getElement() == element;
+  }
 
-	public static @NonNull ModifyPolicy getAbilityPolicy(@NonNull AbilityDescription desc) {
-		return ability -> ability.getDescription().equals(desc);
-	}
+  public static @NonNull ModifyPolicy getAbilityPolicy(@NonNull AbilityDescription desc) {
+    return ability -> ability.getDescription().equals(desc);
+  }
 }

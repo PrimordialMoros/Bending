@@ -36,73 +36,75 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 
 public class JetBlast extends AbilityInstance implements Ability {
-	private static final Config config = new Config();
-	private static AbilityDescription jetDesc;
+  private static final Config config = new Config();
+  private static AbilityDescription jetDesc;
 
-	private Config userConfig;
+  private Config userConfig;
 
-	private FireJet jet;
+  private FireJet jet;
 
-	public JetBlast(@NonNull AbilityDescription desc) {
-		super(desc);
-	}
+  public JetBlast(@NonNull AbilityDescription desc) {
+    super(desc);
+  }
 
-	@Override
-	public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-		if (jetDesc == null) {
-			jetDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
-		}
-		jet = new FireJet(jetDesc);
-		if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.ATTACK)) return false;
+  @Override
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (jetDesc == null) {
+      jetDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
+    }
+    jet = new FireJet(jetDesc);
+    if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.ATTACK)) {
+      return false;
+    }
 
-		recalculateConfig();
+    recalculateConfig();
 
-		jet.setDuration(userConfig.duration);
-		jet.setSpeed(userConfig.speed);
+    jet.setDuration(userConfig.duration);
+    jet.setSpeed(userConfig.speed);
 
-		user.getWorld().playSound(user.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 4, 0);
+    user.getWorld().playSound(user.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 4, 0);
 
-		user.setCooldown(getDescription(), userConfig.cooldown);
-		return true;
-	}
+    user.setCooldown(getDescription(), userConfig.cooldown);
+    return true;
+  }
 
-	@Override
-	public void recalculateConfig() {
-		userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
-	}
+  @Override
+  public void recalculateConfig() {
+    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+  }
 
-	@Override
-	public @NonNull UpdateResult update() {
-		ParticleUtil.create(Particle.SMOKE_NORMAL, jet.getUser().getEntity().getLocation()).count(5)
-			.offset(0.3, 0.3, 0.3).spawn();
-		return jet.update();
-	}
+  @Override
+  public @NonNull UpdateResult update() {
+    ParticleUtil.create(Particle.SMOKE_NORMAL, jet.getUser().getEntity().getLocation()).count(5)
+      .offset(0.3, 0.3, 0.3).spawn();
+    return jet.update();
+  }
 
-	@Override
-	public void onDestroy() {
-		jet.onDestroy();
-	}
+  @Override
+  public void onDestroy() {
+    jet.onDestroy();
+  }
 
-	@Override
-	public @NonNull User getUser() {
-		return jet.getUser();
-	}
+  @Override
+  public @NonNull User getUser() {
+    return jet.getUser();
+  }
 
-	private static class Config extends Configurable {
-		@Attribute(Attribute.COOLDOWN)
-		public long cooldown;
-		@Attribute(Attribute.SPEED)
-		public double speed;
-		@Attribute(Attribute.DURATION)
-		private long duration;
+  private static class Config extends Configurable {
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
+    @Attribute(Attribute.SPEED)
+    public double speed;
+    @Attribute(Attribute.DURATION)
+    private long duration;
 
-		@Override
-		public void onConfigReload() {
-			CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "jetblast");
+    @Override
+    public void onConfigReload() {
+      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "jetblast");
 
-			cooldown = abilityNode.node("cooldown").getLong(10000);
-			speed = abilityNode.node("speed").getDouble(1.4);
-			duration = abilityNode.node("duration").getLong(3500);
-		}
-	}
+      cooldown = abilityNode.node("cooldown").getLong(10000);
+      speed = abilityNode.node("speed").getDouble(1.4);
+      duration = abilityNode.node("duration").getLong(3500);
+    }
+  }
 }
