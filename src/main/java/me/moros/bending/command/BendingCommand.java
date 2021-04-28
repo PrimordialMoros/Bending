@@ -171,7 +171,7 @@ public class BendingCommand extends BaseCommand {
   @Description("View version info about the bending plugin")
   public static void onVersion(CommandSender user) {
     String link = "https://github.com/PrimordialMoros/Bending";
-    Component version = Component.text("Version: ", NamedTextColor.DARK_AQUA)
+    Component version = Message.brand(Component.text("Version: ", NamedTextColor.DARK_AQUA))
       .append(Component.text(Bending.getVersion(), NamedTextColor.GREEN))
       .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.getAuthor(), link)))
       .clickEvent(ClickEvent.openUrl(link));
