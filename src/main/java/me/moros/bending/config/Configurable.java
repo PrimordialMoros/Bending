@@ -22,7 +22,7 @@ package me.moros.bending.config;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 
-public abstract class Configurable {
+public abstract class Configurable implements Cloneable {
   protected CommentedConfigurationNode config;
 
   public Configurable() {
@@ -35,5 +35,10 @@ public abstract class Configurable {
   public void reload() {
     config = Bending.getConfigManager().getConfig();
     onConfigReload();
+  }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    return super.clone();
   }
 }

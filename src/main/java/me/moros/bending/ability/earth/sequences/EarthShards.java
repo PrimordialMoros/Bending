@@ -89,7 +89,7 @@ public class EarthShards extends AbilityInstance implements Ability {
 
     if (firedShots < userConfig.maxShots) {
       long time = System.currentTimeMillis();
-      if (time > nextFireTime) {
+      if (time >= nextFireTime) {
         nextFireTime = time + userConfig.interval;
         Vector3 rightOrigin = user.getHandSide(true);
         Vector3 leftOrigin = user.getHandSide(false);

@@ -172,7 +172,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     this.direction = direction;
     removalPolicy = Policies.builder().build();
     particleCount = 1;
-    renderInterval = 100;
+    renderInterval = 75;
     stream = new AirStream(new Ray(location, direction));
   }
 
@@ -188,7 +188,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     @Override
     public void render() {
       long time = System.currentTimeMillis();
-      if (time > nextRenderTime) {
+      if (renderInterval == 0 || time >= nextRenderTime) {
         ParticleUtil.createAir(getBukkitLocation()).count(particleCount)
           .offset(0.275, 0.275, 0.275)
           .spawn();
@@ -218,7 +218,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
       if (factor == 0) {
         return false;
       }
-      factor *= 1.0 - (location.distance(origin) / (2 * userConfig.range));
+      factor *= 1 - (location.distance(origin) / (2 * userConfig.range));
       // Reduce the push if the player is on the ground.
       if (isUser && user.isOnGround()) {
         factor *= 0.5;
@@ -267,14 +267,14 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airblast");
 
-      cooldown = abilityNode.node("cooldown").getLong(1500);
-      range = abilityNode.node("range").getDouble(25.0);
-      speed = abilityNode.node("speed").getDouble(1.25);
+      cooldown = abilityNode.node("cooldown").getLong(1250);
+      range = abilityNode.node("range").getDouble(20.0);
+      speed = abilityNode.node("speed").getDouble(1.2);
 
-      selfPush = abilityNode.node("push").node("self").getDouble(2.2);
-      otherPush = abilityNode.node("push").node("other").getDouble(2.2);
+      selfPush = abilityNode.node("push").node("self").getDouble(2.1);
+      otherPush = abilityNode.node("push").node("other").getDouble(2.1);
 
-      selectRange = abilityNode.node("select-range").getDouble(10.0);
+      selectRange = abilityNode.node("select-range").getDouble(8.0);
     }
   }
 }

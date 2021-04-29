@@ -31,6 +31,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -118,9 +119,9 @@ public class EntityListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onEntityDamage(EntityDamageEvent event) {
-    if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION && event.getEntity() instanceof LivingEntity) {
-      if (TempBlock.MANAGER.isTemp(((LivingEntity) event.getEntity()).getEyeLocation().getBlock())) {
+  public void onEntityDamageByBlock(EntityDamageByBlockEvent event) {
+    if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION) {
+      if (TempBlock.MANAGER.isTemp(event.getDamager())) {
         event.setCancelled(true);
       }
     }

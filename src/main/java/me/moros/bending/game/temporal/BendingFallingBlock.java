@@ -24,14 +24,17 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Metadata;
+import me.moros.bending.util.Tasker;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.scheduler.BukkitTask;
 
 public class BendingFallingBlock implements Temporary {
   public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();
   private final FallingBlock fallingBlock;
+  private final BukkitTask revertTask;
 
   public static void init() {
   }
@@ -42,7 +45,8 @@ public class BendingFallingBlock implements Temporary {
     fallingBlock.setGravity(gravity);
     fallingBlock.setDropItem(false);
     fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
-    MANAGER.addEntry(fallingBlock, this, duration);
+    MANAGER.addEntry(fallingBlock, this);
+    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
   }
 
   public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
@@ -59,8 +63,12 @@ public class BendingFallingBlock implements Temporary {
 
   @Override
   public void revert() {
+    if (revertTask.isCancelled()) {
+      return;
+    }
     fallingBlock.remove();
     MANAGER.removeEntry(fallingBlock);
+    revertTask.cancel();
   }
 
   public @NonNull FallingBlock getFallingBlock() {

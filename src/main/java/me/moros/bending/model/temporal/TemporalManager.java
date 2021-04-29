@@ -19,21 +19,20 @@
 
 package me.moros.bending.model.temporal;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 
 public class TemporalManager<K, V extends Temporary> {
-  private final ExpiringMap<K, V> instances;
+  private final Map<K, V> instances;
 
   public TemporalManager() {
-    instances = ExpiringMap.builder().variableExpiration().build();
-    instances.addExpirationListener((key, value) -> value.revert());
+    instances = new ConcurrentHashMap<>();
   }
 
   public boolean isTemp(@Nullable K key) {
@@ -47,15 +46,11 @@ public class TemporalManager<K, V extends Temporary> {
     return Optional.ofNullable(instances.get(key));
   }
 
-  public void addEntry(@NonNull K key, @NonNull V value, long duration) {
-    if (duration <= 0) {
-      duration = Temporary.DEFAULT_REVERT;
-    }
-    if (instances.containsKey(key)) {
-      instances.setExpiration(key, duration, TimeUnit.MILLISECONDS);
+  public void addEntry(@NonNull K key, @NonNull V value) {
+    if (isTemp(key)) {
       return;
     }
-    instances.put(key, value, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
+    instances.put(key, value);
   }
 
   /**
@@ -67,11 +62,15 @@ public class TemporalManager<K, V extends Temporary> {
   }
 
   public void removeAll() {
-    instances.values().forEach(Temporary::revert);
-    instances.clear();
+    new ArrayList<>(instances.values()).forEach(Temporary::revert);
+    clear();
   }
 
-  protected Collection<V> getInstances() {
-    return instances.values();
+  protected @NonNull Map<K, V> getInstances() {
+    return Collections.unmodifiableMap(instances);
+  }
+
+  protected void clear() {
+    instances.clear();
   }
 }

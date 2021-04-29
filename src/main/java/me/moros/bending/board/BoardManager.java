@@ -26,7 +26,6 @@ import java.util.UUID;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
-import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import org.bukkit.entity.Player;
@@ -34,12 +33,13 @@ import org.bukkit.entity.Player;
 /**
  * Manages every individual {@link Board}
  */
-public final class BoardManager extends Configurable {
+public final class BoardManager {
   private final Map<UUID, Board> scoreboardPlayers;
-  private boolean enabled;
+  private final boolean enabled;
 
   public BoardManager() {
     scoreboardPlayers = new HashMap<>();
+    enabled = Bending.getConfigManager().getConfig().node("properties", "bending-board").getBoolean(true);
   }
 
   /**
@@ -116,10 +116,5 @@ public final class BoardManager extends Configurable {
 
   public void invalidate(@NonNull UUID uuid) {
     scoreboardPlayers.remove(uuid);
-  }
-
-  @Override
-  public void onConfigReload() {
-    enabled = config.node("properties", "bending-board").getBoolean(true);
   }
 }

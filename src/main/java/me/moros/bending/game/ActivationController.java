@@ -20,14 +20,13 @@
 package me.moros.bending.game;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.passives.GracefulDescent;
@@ -65,17 +64,12 @@ import org.bukkit.entity.LivingEntity;
  * Handles ability activation.
  */
 public final class ActivationController {
-  private final Map<User, Boolean> ignoreSwing = ExpiringMap.builder()
-    .expiration(100, TimeUnit.MILLISECONDS)
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .build();
-
   private final Game game;
-  private final MovementCache cache;
+  private final ControllerCache cache;
 
   public ActivationController(@NonNull Game game) {
     this.game = game;
-    this.cache = new MovementCache();
+    this.cache = new ControllerCache();
   }
 
   public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
@@ -111,9 +105,10 @@ public final class ActivationController {
   }
 
   public void onUserSwing(@NonNull User user) {
-    if (ignoreSwing.containsKey(user)) {
+    if (cache.ignoreSwing.contains(user)) {
       return;
     }
+    ignoreNextSwing(user);
     AbilityManager manager = game.getAbilityManager(user.getWorld());
     AbilityDescription desc = user.getSelectedAbility().orElse(null);
     boolean removed = false;
@@ -140,7 +135,6 @@ public final class ActivationController {
     } else {
       game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK);
     }
-
     activateAbility(user, ActivationMethod.ATTACK);
   }
 
@@ -222,7 +216,7 @@ public final class ActivationController {
   }
 
   public void ignoreNextSwing(@NonNull User user) {
-    ignoreSwing.put(user, true);
+    cache.ignoreSwing.add(user);
   }
 
   public boolean onFireTickDamage(@NonNull User user) {
@@ -230,13 +224,15 @@ public final class ActivationController {
   }
 
   // Optimize player move events by caching instances every tick
-  private class MovementCache {
+  private class ControllerCache {
     private final Map<User, AirSpout> airSpoutCache;
     private final Map<User, WaterSpout> waterSpoutCache;
+    private final Set<User> ignoreSwing;
 
-    private MovementCache() {
+    private ControllerCache() {
       airSpoutCache = new HashMap<>();
       waterSpoutCache = new HashMap<>();
+      ignoreSwing = new HashSet<>();
     }
 
     private @Nullable AirSpout getAirSpout(@NonNull User user) {
@@ -246,10 +242,15 @@ public final class ActivationController {
     private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
       return waterSpoutCache.computeIfAbsent(user, u -> game.getAbilityManager(u.getWorld()).getFirstInstance(u, WaterSpout.class).orElse(null));
     }
+
+    private void clear() {
+      airSpoutCache.clear();
+      waterSpoutCache.clear();
+      ignoreSwing.clear();
+    }
   }
 
-  public void clearSpoutCache() {
-    cache.airSpoutCache.clear();
-    cache.waterSpoutCache.clear();
+  public void clearCache() {
+    cache.clear();
   }
 }

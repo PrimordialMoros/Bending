@@ -29,9 +29,7 @@ import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
@@ -44,7 +42,7 @@ import org.bukkit.block.Block;
 /**
  * Represents the protection system which hooks into other region protection plugins.
  */
-public class ProtectionSystem extends Configurable {
+public class ProtectionSystem {
   /**
    * A multi-layered cache used to check if a User can build in a specific block location.
    * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
@@ -52,18 +50,13 @@ public class ProtectionSystem extends Configurable {
    */
   private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
   private final Collection<Protection> protections = new ArrayList<>();
-  private boolean allowHarmless;
+  private final boolean allowHarmless;
 
   public ProtectionSystem() {
+    allowHarmless = Bending.getConfigManager().getConfig().node("protection").node("allow-harmless").getBoolean(true);
     registerProtectMethod("WorldGuard", WorldGuardProtection::new);
     registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
     registerProtectMethod("Towny", TownyProtection::new);
-  }
-
-  @Override
-  public void onConfigReload() {
-    CommentedConfigurationNode node = config.node("protection");
-    allowHarmless = node.node("allow-harmless").getBoolean(true);
   }
 
   /**
@@ -123,16 +116,14 @@ public class ProtectionSystem extends Configurable {
    * @param creator the factory function that creates the protection instance
    */
   public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
-    CommentedConfigurationNode node = config.node("protection", name);
-    if (!node.getBoolean(true)) {
-      return;
-    }
-    try {
-      Protection method = creator.create();
-      protections.add(method);
-      Bending.getLog().info("Registered bending protection for " + name);
-    } catch (PluginNotFoundException e) {
-      Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+    if (Bending.getConfigManager().getConfig().node("protection", name).getBoolean(true)) {
+      try {
+        Protection method = creator.create();
+        protections.add(method);
+        Bending.getLog().info("Registered bending protection for " + name);
+      } catch (PluginNotFoundException e) {
+        Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+      }
     }
   }
 

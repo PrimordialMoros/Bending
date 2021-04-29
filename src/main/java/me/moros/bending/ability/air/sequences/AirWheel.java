@@ -77,19 +77,20 @@ public class AirWheel extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirWheel.class)) {
+      return false;
+    }
     if (scooterDesc == null) {
       scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
     }
     scooter = new AirScooter(scooterDesc);
-    if (user.isOnCooldown(scooter.getDescription()) || !scooter.activate(user, ActivationMethod.ATTACK)) {
+    if (user.isOnCooldown(scooterDesc) || !scooter.activate(user, ActivationMethod.ATTACK)) {
       return false;
     }
     scooter.canRender = false;
 
     this.user = user;
     recalculateConfig();
-
-    user.setCooldown(scooter.getDescription(), 1000); // Ensures airscooter won't be activated twice
 
     nextRenderTime = 0;
     return true;
@@ -106,7 +107,7 @@ public class AirWheel extends AbilityInstance implements Ability {
     center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
     collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, FastMath.toRadians(user.getYaw())), new Sphere(center, 2));
 
-    if (time > nextRenderTime) {
+    if (time >= nextRenderTime) {
       render();
       nextRenderTime = time + 100;
     }

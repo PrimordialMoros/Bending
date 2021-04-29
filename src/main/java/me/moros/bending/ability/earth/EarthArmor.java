@@ -92,11 +92,12 @@ public class EarthArmor extends AbilityInstance implements Ability {
     }
 
     Block block = source.get();
-    mode = getType(block);
     if (EarthMaterials.isMetalBendable(block)) {
+      mode = block.getType() == Material.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
       resistance = userConfig.metalPower;
       SoundUtil.METAL_SOUND.play(block.getLocation());
     } else {
+      mode = Mode.ROCK;
       resistance = userConfig.power;
       SoundUtil.EARTH_SOUND.play(block.getLocation());
     }
@@ -124,17 +125,6 @@ public class EarthArmor extends AbilityInstance implements Ability {
     }
 
     return moveBlock() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
-  }
-
-  private Mode getType(Block block) {
-    switch (block.getType()) {
-      case IRON_BLOCK:
-        return Mode.IRON;
-      case GOLD_BLOCK:
-        return Mode.GOLD;
-      default:
-        return Mode.ROCK;
-    }
   }
 
   private void formArmor() {

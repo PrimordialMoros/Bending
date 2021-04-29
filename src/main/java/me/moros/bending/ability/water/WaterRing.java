@@ -318,7 +318,7 @@ public class WaterRing extends AbilityInstance implements Ability {
       return;
     }
     long time = System.currentTimeMillis();
-    if (time > nextShardTime) {
+    if (time >= nextShardTime) {
       launchedShards++;
       nextShardTime = time + userConfig.cooldown;
       Vector3 origin = new Vector3(getClosestRingBlock());

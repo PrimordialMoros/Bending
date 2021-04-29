@@ -127,8 +127,14 @@ public class AirSwipe extends AbilityInstance implements Ability {
   }
 
   private void launch() {
-    double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
-    factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
+    long deltaTime = System.currentTimeMillis() - startTime;
+    factor = 1;
+    if (deltaTime >= userConfig.maxChargeTime) {
+      factor = userConfig.chargeFactor;
+    } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      factor += deltaFactor;
+    }
     charging = false;
     user.setCooldown(getDescription(), userConfig.cooldown);
     Vector3 origin = user.getMainHandSide();

@@ -48,7 +48,11 @@ public final class Tasker {
     return taskChainFactory.newSharedChain(name);
   }
 
-  public static @NonNull BukkitTask createTaskTimer(@NonNull Runnable runnable, long delay, long period) {
-    return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, delay, period);
+  public static @NonNull BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
+    return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, 1, interval);
+  }
+
+  public static @NonNull BukkitTask simpleTask(@NonNull Runnable runnable, long delay) {
+    return Bukkit.getScheduler().runTaskLater(Bending.getPlugin(), runnable, delay);
   }
 }

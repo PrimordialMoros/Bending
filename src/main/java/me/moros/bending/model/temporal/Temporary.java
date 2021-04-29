@@ -19,8 +19,14 @@
 
 package me.moros.bending.model.temporal;
 
+import org.bukkit.util.NumberConversions;
+
 public interface Temporary {
   long DEFAULT_REVERT = 600_000;
 
   void revert();
+
+  static int toTicks(long duration) {
+    return NumberConversions.ceil(duration <= 0 ? DEFAULT_REVERT : duration / 50.0);
+  }
 }

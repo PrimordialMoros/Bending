@@ -96,7 +96,7 @@ public class WaterWave extends AbilityInstance implements Ability {
       return UpdateResult.REMOVE;
     }
 
-    // scale down to 0.33 * speed near the end
+    // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
 
     user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());

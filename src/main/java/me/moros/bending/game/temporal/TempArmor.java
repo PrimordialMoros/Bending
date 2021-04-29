@@ -29,16 +29,19 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.Tasker;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
   public static final TemporalManager<LivingEntity, TempArmor> MANAGER = new TemporalManager<>();
   private final LivingEntity entity;
   private final ItemStack[] snapshot;
+  private final BukkitTask revertTask;
 
   public static void init() {
   }
@@ -47,7 +50,8 @@ public class TempArmor implements Temporary {
     this.entity = entity;
     this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
     entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
-    MANAGER.addEntry(entity, this, duration);
+    MANAGER.addEntry(entity, this);
+    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
@@ -70,8 +74,12 @@ public class TempArmor implements Temporary {
 
   @Override
   public void revert() {
+    if (revertTask.isCancelled()) {
+      return;
+    }
     entity.getEquipment().setArmorContents(snapshot);
     MANAGER.removeEntry(entity);
+    revertTask.cancel();
   }
 
   private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {

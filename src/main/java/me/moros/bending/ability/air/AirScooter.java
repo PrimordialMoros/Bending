@@ -20,13 +20,12 @@
 package me.moros.bending.ability.air;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.air.sequences.AirWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -34,9 +33,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -70,6 +67,12 @@ public class AirScooter extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirScooter.class)) {
+      return false;
+    }
+    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirWheel.class)) {
+      return false;
+    }
     this.user = user;
     recalculateConfig();
 
@@ -131,13 +134,8 @@ public class AirScooter extends AbilityInstance implements Ability {
       double x = 0.6 * FastMath.cos(theta) * sin;
       double y = 0.6 * FastMath.cos(verticalPosition);
       double z = 0.6 * FastMath.sin(theta) * sin;
-      ParticleUtil.createAir(user.getEntity().getLocation().add(x, y, z)).spawn();
+      ParticleUtil.createAir(user.getEntity().getLocation().add(x, y - 0.25, z)).spawn();
     }
-  }
-
-  @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(new Sphere(user.getLocation(), 1.5));
   }
 
   @Override
@@ -149,7 +147,6 @@ public class AirScooter extends AbilityInstance implements Ability {
     if (isColliding()) {
       return false;
     }
-    Vector3 direction = user.getDirection().setY(0).normalize();
     double height = EntityMethods.distanceAboveGround(user.getEntity());
     double smoothedHeight = heightSmoother.add(height);
     if (user.getLocBlock().isLiquid()) {
@@ -157,8 +154,9 @@ public class AirScooter extends AbilityInstance implements Ability {
     } else if (smoothedHeight > 3.25) {
       return false;
     }
-    double force = FastMath.max(-0.5, FastMath.min(0.5, -0.3 * (height - getPrediction())));
-    Vector3 velocity = direction.scalarMultiply(userConfig.speed).setY(force);
+    double delta = getPrediction() - height;
+    double force = FastMath.max(-0.5, FastMath.min(0.5, 0.3 * delta));
+    Vector3 velocity = user.getDirection().setY(0).normalize().scalarMultiply(userConfig.speed).setY(force);
     user.getEntity().setVelocity(velocity.clampVelocity());
     user.getEntity().setFallDistance(0);
     return true;
@@ -174,11 +172,11 @@ public class AirScooter extends AbilityInstance implements Ability {
   }
 
   private double getPrediction() {
-    Vector3 currentDirection = user.getDirection().setY(0).normalize();
     double playerSpeed = user.getVelocity().setY(0).getNorm();
     double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
-    Vector3 location = user.getLocation().add(currentDirection.scalarMultiply(speed));
-    AABB userBounds = AABBUtils.getEntityBounds(user.getEntity());
+    Vector3 offset = user.getDirection().setY(0).normalize().scalarMultiply(speed);
+    Vector3 location = user.getLocation().add(offset);
+    AABB userBounds = AABBUtils.getEntityBounds(user.getEntity()).at(offset);
     for (Block block : BlockMethods.combineFaces(location.toBlock(user.getWorld()))) {
       if (AABBUtils.getBlockBounds(block).intersects(userBounds)) {
         return 2.25;

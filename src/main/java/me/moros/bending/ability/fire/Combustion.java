@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
@@ -203,17 +204,18 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
       return;
     }
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = WorldMethods.getNearbyBlocks(loc, size, predicate);
-    for (Block block : blocks) {
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
-        return;
+    Collection<Block> blocks = new ArrayList<>();
+    for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
+      if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+        blocks.add(block);
+        long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+        TempBlock.createAir(block, delay);
       }
-      long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-      TempBlock.createAir(block, delay);
     }
     for (Block block : blocks) {
       if (MaterialUtil.isIgnitable(block) && ThreadLocalRandom.current().nextInt(3) == 0) {
-        TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+        long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+        TempBlock.create(block, Material.FIRE.createBlockData(), delay, true);
       }
     }
   }

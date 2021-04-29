@@ -146,7 +146,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
       }
       renderBase();
       int size = tentacles.size();
-      if (size < 8 && System.currentTimeMillis() > nextTentacleFormTime) {
+      if (size < 8 && System.currentTimeMillis() >= nextTentacleFormTime) {
         tentacles.add(new Tentacle(size));
       }
       renderTentacles(forceUpdate);

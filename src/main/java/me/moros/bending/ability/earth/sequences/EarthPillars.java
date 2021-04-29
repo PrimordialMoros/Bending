@@ -45,7 +45,6 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -82,7 +81,13 @@ public class EarthPillars extends AbilityInstance implements Ability {
       if (dist < userConfig.fallThreshold || user.isSneaking()) {
         return false;
       }
-      factor += FastMath.min(userConfig.maxScaleFactor, (dist - userConfig.fallThreshold) / (8 * userConfig.fallThreshold));
+      if (dist >= userConfig.maxFallThreshold) {
+        factor = userConfig.maxScaleFactor;
+      } else {
+        double fd = userConfig.fallThreshold;
+        double deltaFactor = (userConfig.maxScaleFactor - factor) * (dist - fd) / (userConfig.maxFallThreshold - fd);
+        factor += deltaFactor;
+      }
     }
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
@@ -149,11 +154,13 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) {
+      if (entity.equals(user.getEntity())) {
         return false;
       }
-      affectedEntities.add(entity);
-      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+      if (!affectedEntities.contains(entity)) {
+        affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+      }
       entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
       return true;
     }
@@ -171,6 +178,7 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
     public double maxScaleFactor;
     public double fallThreshold;
+    public double maxFallThreshold;
 
     @Override
     public void onConfigReload() {
@@ -179,10 +187,11 @@ public class EarthPillars extends AbilityInstance implements Ability {
       cooldown = abilityNode.node("cooldown").getLong(6000);
       radius = abilityNode.node("radius").getDouble(10.0);
       damage = abilityNode.node("damage").getDouble(2.0);
-      knockup = abilityNode.node("knock-up").getDouble(1.2);
+      knockup = abilityNode.node("knock-up").getDouble(0.8);
 
       maxScaleFactor = abilityNode.node("max-scale-factor").getDouble(1.5);
       fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
+      maxFallThreshold = abilityNode.node("max-fall-threshold").getDouble(60.0);
     }
   }
 }

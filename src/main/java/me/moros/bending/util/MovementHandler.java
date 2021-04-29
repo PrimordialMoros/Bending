@@ -151,7 +151,7 @@ public class MovementHandler {
       endTime = System.currentTimeMillis() + duration;
       Component name = Component.text("Restricted");
       bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
-      barTask = Tasker.createTaskTimer(this::updateBar, 0, 1);
+      barTask = Tasker.repeatingTask(this::updateBar, 1);
     }
 
     private void updateBar() {

@@ -20,6 +20,7 @@
 package me.moros.bending.game.temporal;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Optional;
@@ -27,60 +28,71 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.util.Tasker;
 import me.moros.bending.util.methods.BlockMethods;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
+import org.bukkit.scheduler.BukkitTask;
 
 public class TempBlock implements Temporary {
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
-  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalBlockManager();
+  public static final TemporalManager<Block, TempBlock> MANAGER = new TempBlockManager();
 
-  private final Deque<TempBlockState> snapshots = new ArrayDeque<>();
+  private final Deque<TempBlockState> snapshots;
   private final Block block;
+  private BukkitTask revertTask;
   private boolean bendable;
 
   public static void init() {
   }
 
-  private TempBlock(Block block, boolean bendable) {
-    TemporalBlockManager.CACHE.add(block);
+  private TempBlock(Block block, BlockData data, long duration, boolean bendable) {
+    snapshots = new ArrayDeque<>();
     this.block = block;
     this.bendable = bendable;
-  }
-
-  private TempBlock addState(BlockData data, long duration) {
-    cleanStates();
-    TempBlockState tbs = snapshots.peekLast();
-    if (tbs == null || !tbs.overwrite) {
-      snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
-    } else {
-      tbs.overwrite = false;
-    }
+    snapshots.offerLast(new TempBlockState(block.getState(), duration, bendable));
     block.setBlockData(data);
     refreshGravityCache(block);
-    MANAGER.addEntry(block, this, duration);
-    return this;
+    MANAGER.addEntry(block, this);
+    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+  }
+
+  private void addState(BlockData data, long duration, boolean bendable) {
+    cleanStates();
+    if (!snapshots.isEmpty()) {
+      TempBlockState tbs = snapshots.peekLast();
+      if (!tbs.overwrite) {
+        snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
+      } else {
+        tbs.overwrite = false;
+      }
+      this.bendable = bendable;
+      block.setBlockData(data);
+      refreshGravityCache(block);
+      revertTask.cancel();
+      revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+    }
   }
 
   // Cleans up previous states that have already expired
   private void cleanStates() {
-    if (snapshots.size() < 2) {
+    if (snapshots.size() <= 1) {
       return;
     }
-    long time = System.currentTimeMillis();
+    int currentTick = Bukkit.getCurrentTick();
     Iterator<TempBlockState> it = snapshots.iterator();
     it.next(); // ignore original snapshot
     while (it.hasNext()) {
       TempBlockState tbs = it.next();
-      if (time > tbs.expirationTime + 5000) {
+      if (currentTick > tbs.expirationTicks) {
         it.remove();
       }
     }
@@ -144,12 +156,11 @@ public class TempBlock implements Temporary {
         MANAGER.removeEntry(block);
         return Optional.empty();
       }
-      tb.addState(data, duration);
-      tb.bendable = bendable;
+      tb.addState(data, duration, bendable);
       return Optional.of(tb);
     }
 
-    return Optional.of(new TempBlock(block, bendable).addState(data, duration));
+    return Optional.of(new TempBlock(block, data, duration, bendable));
   }
 
   public static Optional<TempBlock> createAir(@NonNull Block block) {
@@ -173,11 +184,6 @@ public class TempBlock implements Temporary {
     }
   }
 
-  private static void invalidateCache(Block block) {
-    GRAVITY_CACHE.remove(block);
-    TemporalBlockManager.CACHE.remove(block);
-  }
-
   public void setOverwrite() {
     TempBlockState tbs = snapshots.peekLast();
     if (tbs != null) {
@@ -185,42 +191,60 @@ public class TempBlock implements Temporary {
     }
   }
 
-  @Override
-  public void revert() {
-    TempBlockState tbs = null;
-    long time = System.currentTimeMillis();
-    while (!snapshots.isEmpty()) {
-      tbs = snapshots.pollLast();
-      if (time >= tbs.expirationTime) {
+  private TempBlockState cleanStatesReverse() {
+    int currentTick = Bukkit.getCurrentTick();
+    TempBlockState toRevert = snapshots.pollLast();
+    Iterator<TempBlockState> it = snapshots.descendingIterator();
+    while (it.hasNext()) {
+      TempBlockState next = it.next();
+      if (currentTick >= next.expirationTicks) {
+        it.remove();
+        toRevert = next;
+      } else {
         break;
       }
     }
-    if (tbs == null) {
+    return toRevert;
+  }
+
+  @Override
+  public void revert() {
+    if (revertTask.isCancelled() || snapshots.isEmpty()) {
       return;
     }
-    bendable = tbs.bendable;
-    BlockState state = tbs.state;
-    state.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+    revertTask.cancel();
+    TempBlockState toRevert = cleanStatesReverse();
+    if (snapshots.isEmpty()) {
+      snapshots.offer(toRevert); // Add original snapshot back
+      revertFully();
+      return;
+    }
+    revertToSnapshot(toRevert);
     TempBlockState nextState = snapshots.peekLast();
-    if (nextState == null) {
-      MANAGER.removeEntry(block);
-      invalidateCache(block);
-    } else {
-      refreshGravityCache(block);
-      long deltaTime = nextState.expirationTime - time;
-      if (deltaTime >= 50) {
-        MANAGER.addEntry(block, this, deltaTime);
+    if (nextState != null) {
+      int deltaTicks = nextState.expirationTicks - Bukkit.getCurrentTick();
+      if (deltaTicks > 0) {
+        revertTask = Tasker.simpleTask(this::revert, deltaTicks);
       }
     }
   }
 
+  private void revertToSnapshot(final TempBlockState tempBlockState) {
+    bendable = tempBlockState.bendable;
+    BlockState state = tempBlockState.state;
+    block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+    refreshGravityCache(block);
+  }
+
   private void revertFully() {
-    TempBlockState tbs = snapshots.pollFirst();
-    if (tbs == null) {
+    if (snapshots.isEmpty()) {
       return;
     }
-    block.getWorld().getChunkAtAsync(block).thenRun(() -> tbs.state.update(true, false));
-    invalidateCache(block);
+    revertToSnapshot(snapshots.pollFirst());
+    snapshots.clear();
+    GRAVITY_CACHE.remove(block);
+    MANAGER.removeEntry(block);
+    revertTask.cancel();
   }
 
   public @NonNull Block getBlock() {
@@ -228,6 +252,7 @@ public class TempBlock implements Temporary {
   }
 
   public void removeWithoutReverting() {
+    revertTask.cancel();
     MANAGER.removeEntry(block);
   }
 
@@ -247,31 +272,24 @@ public class TempBlock implements Temporary {
     return GRAVITY_CACHE.contains(block);
   }
 
+  private static class TempBlockManager extends TemporalManager<Block, TempBlock> {
+    @Override
+    public void removeAll() {
+      new ArrayList<>(getInstances().values()).forEach(TempBlock::revertFully);
+      clear();
+    }
+  }
+
   private static class TempBlockState {
     private final BlockState state;
-    private final long expirationTime;
+    private final int expirationTicks;
     private final boolean bendable;
     private boolean overwrite = false;
 
     private TempBlockState(BlockState state, long expirationTime, boolean bendable) {
       this.state = state;
-      this.expirationTime = System.currentTimeMillis() + expirationTime;
+      this.expirationTicks = Bukkit.getCurrentTick() + Temporary.toTicks(expirationTime);
       this.bendable = bendable;
-    }
-  }
-
-  private static class TemporalBlockManager extends TemporalManager<Block, TempBlock> {
-    private static final Set<Block> CACHE = ConcurrentHashMap.newKeySet();
-
-    @Override
-    public boolean isTemp(@Nullable Block key) {
-      return CACHE.contains(key);
-    }
-
-    @Override
-    public void removeAll() {
-      getInstances().forEach(TempBlock::revertFully);
-      getInstances().clear();
     }
   }
 }

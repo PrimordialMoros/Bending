@@ -82,7 +82,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
       return UpdateResult.REMOVE;
     }
     long time = System.currentTimeMillis();
-    if (time > nextTime) {
+    if (time >= nextTime) {
       nextTime = time + 250;
       if (!tryHeal()) {
         return UpdateResult.REMOVE;

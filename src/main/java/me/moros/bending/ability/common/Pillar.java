@@ -55,7 +55,6 @@ public class Pillar implements Updatable {
   private final Collection<Block> pillarBlocks;
   private final Predicate<Block> predicate;
 
-  private final boolean solidify;
   private final int length;
   private final int distance;
   private final long interval;
@@ -75,7 +74,6 @@ public class Pillar implements Updatable {
     this.duration = builder.duration;
     this.predicate = builder.predicate;
     this.pillarBlocks = new ArrayList<>(length);
-    solidify = (direction != BlockFace.UP && direction != BlockFace.DOWN);
     currentLength = 0;
     nextUpdateTime = 0;
   }
@@ -86,11 +84,11 @@ public class Pillar implements Updatable {
       return UpdateResult.REMOVE;
     }
 
-    long time = System.currentTimeMillis();
-    int offset = currentLength + (time >= nextUpdateTime ? 2 : 1);
-    AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3(0, 0.65, 0)).at(new Vector3(origin.getRelative(direction, offset)));
+    Vector3 location = new Vector3(origin.getRelative(direction, currentLength + 1));
+    AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3(0, 0.65, 0)).at(location);
     CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true); // Push entities
 
+    long time = System.currentTimeMillis();
     if (time < nextUpdateTime) {
       return UpdateResult.CONTINUE;
     }
@@ -120,7 +118,7 @@ public class Pillar implements Updatable {
         return false;
       }
       BlockData data = TempBlock.getLastValidData(backwardBlock);
-      TempBlock.create(forwardBlock, solidify ? MaterialUtil.getSolidType(data) : data, duration, true);
+      TempBlock.create(forwardBlock, MaterialUtil.getSolidType(data), duration, true);
     }
     pillarBlocks.add(newBlock);
     TempBlock.createAir(newBlock.getRelative(opposite, length), duration);
@@ -128,8 +126,7 @@ public class Pillar implements Updatable {
     return true;
   }
 
-  private Vector3 normalizeVelocity(Vector3 velocity) {
-    double factor = 0.75 * (length - 0.4 * currentLength) / length;
+  protected @NonNull Vector3 normalizeVelocity(Vector3 velocity, double factor) {
     switch (direction) {
       case NORTH:
       case SOUTH:
@@ -157,7 +154,8 @@ public class Pillar implements Updatable {
   }
 
   public boolean onEntityHit(@NonNull Entity entity) {
-    entity.setVelocity(normalizeVelocity(new Vector3(entity.getVelocity())).clampVelocity());
+    double factor = 0.75 * (length - 0.4 * currentLength) / length;
+    entity.setVelocity(normalizeVelocity(new Vector3(entity.getVelocity()), factor).clampVelocity());
     return true;
   }
 

@@ -86,6 +86,7 @@ public final class AttributeSystem {
     Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
   }
 
+  @SuppressWarnings("unchecked")
   public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
     User user = ability.getUser();
     if (!modifierMap.containsKey(user)) {
@@ -95,16 +96,24 @@ public final class AttributeSystem {
       .filter(modifier -> modifier.policy.shouldModify(ability))
       .collect(Collectors.toList());
 
-    for (Field field : config.getClass().getDeclaredFields()) {
+    T newConfig;
+    try {
+      newConfig = (T) config.clone();
+    } catch (CloneNotSupportedException e) {
+      e.printStackTrace();
+      return config;
+    }
+
+    for (Field field : newConfig.getClass().getDeclaredFields()) {
       if (field.isAnnotationPresent(Attribute.class)) {
         boolean wasAccessible = field.isAccessible();
         field.setAccessible(true);
-        modifyField(field, config, activeModifiers);
+        modifyField(field, newConfig, activeModifiers);
         field.setAccessible(wasAccessible);
       }
     }
 
-    return config;
+    return newConfig;
   }
 
   private boolean modifyField(Field field, Configurable config, Collection<UserModifier> userModifiers) {

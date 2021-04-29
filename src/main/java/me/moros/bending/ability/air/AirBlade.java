@@ -104,7 +104,6 @@ public class AirBlade extends AbilityInstance implements Ability {
         .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.getLocation())).build();
       user.setCooldown(getDescription(), userConfig.cooldown);
       Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(wheel);
-      launch();
     }
     return true;
   }
@@ -142,8 +141,14 @@ public class AirBlade extends AbilityInstance implements Ability {
   }
 
   private void launch() {
-    double timeFactor = FastMath.min(1, (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime);
-    factor = FastMath.max(1, timeFactor * userConfig.chargeFactor);
+    long deltaTime = System.currentTimeMillis() - startTime;
+    factor = 1;
+    if (deltaTime >= userConfig.maxChargeTime) {
+      factor = userConfig.chargeFactor;
+    } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      factor += deltaFactor;
+    }
     charging = false;
     blade = new Blade(new Ray(origin, direction));
     removalPolicy = Policies.builder()

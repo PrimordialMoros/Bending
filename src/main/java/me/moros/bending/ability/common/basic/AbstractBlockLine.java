@@ -46,21 +46,22 @@ public abstract class AbstractBlockLine implements Updatable {
 
   protected long interval = 0;
 
-  private long nextUpdate;
+  private double distanceTravelled = 0;
+  private long nextUpdate = 0;
 
   public AbstractBlockLine(@NonNull User user, @NonNull Ray ray) {
     this.user = user;
     this.ray = ray;
     this.maxRange = ray.direction.getNormSq();
-    dir = ray.direction.normalize().setY(0);
-    this.location = ray.origin.add(dir);
+    dir = ray.direction.setY(0).normalize();
+    this.location = ray.origin;
   }
 
   @Override
   public @NonNull UpdateResult update() {
     if (interval >= 50) {
       long time = System.currentTimeMillis();
-      if (time <= nextUpdate) {
+      if (time < nextUpdate) {
         return UpdateResult.CONTINUE;
       }
       nextUpdate = time + interval;
@@ -100,7 +101,9 @@ public abstract class AbstractBlockLine implements Updatable {
       return UpdateResult.REMOVE;
     }
 
-    render(block);
+    if (++distanceTravelled > 1) {
+      render(block);
+    }
 
     return UpdateResult.CONTINUE;
   }

@@ -86,12 +86,12 @@ public final class Game {
 
     playerManager.getOnlinePlayers().forEach(worldManager::createPassives);
 
-    Tasker.createTaskTimer(this::update, 1, 1);
+    Tasker.repeatingTask(this::update, 1);
   }
 
   private void update() {
     MCTiming timing = Bending.getTimingManager().ofStart("Bending Update");
-    activationController.clearSpoutCache();
+    activationController.clearCache();
     worldManager.update();
     Flight.updateAll();
     timing.stopTiming();

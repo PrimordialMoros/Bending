@@ -176,7 +176,7 @@ public class EarthLine extends AbilityInstance implements Ability {
         mode = Mode.MAGMA;
       }
       earthLine = new Line(source);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
       user.setCooldown(getDescription(), userConfig.cooldown);
     }
   }

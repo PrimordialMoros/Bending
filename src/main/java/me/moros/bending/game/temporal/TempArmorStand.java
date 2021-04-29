@@ -26,16 +26,19 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.Tasker;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 public class TempArmorStand implements Temporary {
   public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
   private final ArmorStand armorStand;
+  private final BukkitTask revertTask;
 
   public static void init() {
   }
@@ -58,20 +61,25 @@ public class TempArmorStand implements Temporary {
         .data(data).spawn();
     }
 
-    MANAGER.addEntry(armorStand, this, duration);
+    MANAGER.addEntry(armorStand, this);
+    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
   }
 
   public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
     this(location, material, duration, true);
   }
 
-  public @NonNull ArmorStand getArmorStand() {
-    return armorStand;
-  }
-
   @Override
   public void revert() {
+    if (revertTask.isCancelled()) {
+      return;
+    }
     armorStand.remove();
     MANAGER.removeEntry(armorStand);
+    revertTask.cancel();
+  }
+
+  public @NonNull ArmorStand getArmorStand() {
+    return armorStand;
   }
 }

@@ -19,10 +19,8 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -139,8 +137,14 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
   }
 
   private void launch() {
-    double timeFactor = (System.currentTimeMillis() - startTime) / (double) userConfig.maxChargeTime;
-    factor = FastMath.max(1, FastMath.min(userConfig.chargeFactor, timeFactor * userConfig.chargeFactor));
+    long deltaTime = System.currentTimeMillis() - startTime;
+    factor = 1;
+    if (deltaTime >= userConfig.maxChargeTime) {
+      factor = userConfig.chargeFactor;
+    } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      factor += deltaFactor;
+    }
     charging = false;
     user.setCooldown(getDescription(), userConfig.cooldown);
     Vector3 origin = user.getMainHandSide();
@@ -208,7 +212,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     charging = false;
     removalPolicy = Policies.builder().build();
     particleCount = 1;
-    renderInterval = 100;
+    renderInterval = 75;
     stream = new FireStream(new Ray(location, direction), 1);
   }
 
@@ -270,7 +274,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     @Override
     public void render() {
       long time = System.currentTimeMillis();
-      if (renderInterval == 0 || time > nextRenderTime) {
+      if (renderInterval == 0 || time >= nextRenderTime) {
         Location loc = getBukkitLocation();
         ParticleUtil.createFire(user, loc)
           .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
@@ -302,7 +306,6 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
       Vector3 reverse = ray.direction.scalarMultiply(-1);
       Location center = getBukkitLocation();
       if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
-        List<Block> blocks = new ArrayList<>();
         for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.igniteRadius * factor)) {
           if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) {
             continue;
@@ -312,10 +315,10 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
           }
           BlockMethods.tryLightBlock(b);
           if (MaterialUtil.isIgnitable(b)) {
-            blocks.add(b);
+            long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+            TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);
           }
         }
-        blocks.forEach(b -> TempBlock.create(b, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true));
       }
       FragileStructure.tryDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
       explode();
@@ -359,7 +362,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
       igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
       explosionRadius = abilityNode.node("explosion-radius").getDouble(2.0);
 
-      chargeFactor = abilityNode.node("charge").node("factor").getDouble(1.5);
+      chargeFactor = FastMath.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
       maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);
 
       abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");

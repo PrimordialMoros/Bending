@@ -130,7 +130,7 @@ public class FireWall extends AbilityInstance implements Ability {
       return UpdateResult.REMOVE;
     }
     long time = System.currentTimeMillis();
-    if (time > nextRenderTime) {
+    if (time >= nextRenderTime) {
       nextRenderTime = time + 200;
       for (Block block : blocks) {
         Location location = block.getLocation().add(0.5, 0.5, 0.5);
