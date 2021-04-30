@@ -34,6 +34,7 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
@@ -214,7 +215,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     public boolean onEntityHit(@NonNull Entity entity) {
       boolean isUser = entity.equals(user.getEntity());
       double factor = isUser ? userConfig.selfPush : userConfig.otherPush;
-      entity.setFireTicks(0);
+      FireTick.extinguish(entity);
       if (factor == 0) {
         return false;
       }

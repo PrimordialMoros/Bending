@@ -187,7 +187,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreCollider == null || ignoreCollider.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
-        FireTick.LARGER.apply(entity, userConfig.fireTick);
+        FireTick.LARGER.apply(user, entity, userConfig.fireTick);
       }
       double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
       if (entity.equals(user.getEntity())) {

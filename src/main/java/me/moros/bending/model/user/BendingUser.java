@@ -20,16 +20,17 @@
 package me.moros.bending.model.user;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
+import me.moros.atlas.caffeine.cache.Cache;
+import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.Scheduler;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.cf.common.value.qual.IntRange;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.description.CooldownExpiry;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
@@ -41,14 +42,18 @@ import org.bukkit.entity.Player;
 public class BendingUser implements User {
   private final ElementHolder elementHolder = new ElementHolder();
   private final AbilitySlotContainer slotContainer;
-  private final ExpiringMap<AbilityDescription, Boolean> cooldowns = ExpiringMap.builder().variableExpiration().build();
+  private final Cache<AbilityDescription, Long> cooldowns;
   private final CompositeBendingConditional bendingConditional;
   private final LivingEntity entity;
 
   protected BendingUser(@NonNull LivingEntity entity) {
     this.entity = entity;
-    cooldowns.addExpirationListener((key, value) ->
-      Tasker.newChain().delay(1).execute(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key)));
+    cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
+      .removalListener((key, value, cause) ->
+        Tasker.simpleTask(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key), 0)
+      )
+      .scheduler(Scheduler.systemScheduler())
+      .build();
     slotContainer = new AbilitySlotContainer();
     bendingConditional = BendingConditions.builder().build();
   }
@@ -103,7 +108,7 @@ public class BendingUser implements User {
 
   @Override
   public boolean isOnCooldown(@NonNull AbilityDescription desc) {
-    return cooldowns.containsKey(desc);
+    return cooldowns.getIfPresent(desc) != null;
   }
 
   @Override
@@ -111,13 +116,8 @@ public class BendingUser implements User {
     if (duration <= 0) {
       return;
     }
-    if (!isOnCooldown(desc)) {
-      cooldowns.put(desc, false, ExpirationPolicy.CREATED, duration, TimeUnit.MILLISECONDS);
-      Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
-    } else if (duration > cooldowns.getExpectedExpiration(desc)) {
-      cooldowns.setExpiration(desc, duration, TimeUnit.MILLISECONDS);
-      Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
-    }
+    cooldowns.put(desc, duration);
+    Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
   }
 
   @Override

@@ -19,17 +19,35 @@
 
 package me.moros.bending.util;
 
-public final class BendingProperties {
-  public static final long EARTHBENDING_REVERT_TIME = 300_000; // 5 minutes
-  public static final long FIRE_REVERT_TIME = 10_000; // 10 seconds
-  public static final long EXPLOSION_REVERT_TIME = 20_000; // 20 seconds
-  public static final long ICE_DURATION = 10_000; // 10 seconds
+import java.time.Duration;
+import java.util.Set;
 
-  public static final double EXPLOSION_KNOCKBACK = 0.8;
+import me.moros.atlas.caffeine.cache.Cache;
+import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 
-  public static final double METAL_MODIFIER = 1.25;
-  public static final double MAGMA_MODIFIER = 1.4;
+public class Expiring<T> {
+  private final Cache<T, Boolean> cache;
 
-  public static final double WATER_NIGHT_MODIFIER = 1.25;
-  public static final double FIRE_DAY_MODIFIER = 1.25;
+  public Expiring(long duration) {
+    cache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMillis(duration)).build();
+  }
+
+  public void add(@NonNull T key) {
+    cache.put(key, false);
+  }
+
+  public boolean contains(@NonNull T key) {
+    return cache.getIfPresent(key) != null;
+  }
+
+  public boolean isEmpty() {
+    cache.cleanUp();
+    return cache.asMap().isEmpty();
+  }
+
+  public @NonNull Set<T> all() {
+    cache.cleanUp();
+    return Set.copyOf(cache.asMap().keySet());
+  }
 }

@@ -157,7 +157,7 @@ public class FireBreath extends AbilityInstance implements Ability {
     public boolean onEntityHit(@NonNull Entity entity) {
       double factor = 1 - FastMath.min(0.9, distanceTravelled / maxRange);
       DamageUtil.damageEntity(entity, user, factor * userConfig.damage, getDescription());
-      FireTick.LARGER.apply(entity, NumberConversions.ceil(factor * userConfig.fireTick));
+      FireTick.LARGER.apply(user, entity, NumberConversions.ceil(factor * userConfig.fireTick));
       return false;
     }
 

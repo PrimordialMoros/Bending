@@ -22,15 +22,11 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBlockLine;
 import me.moros.bending.config.Configurable;
@@ -50,6 +46,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
@@ -76,9 +73,7 @@ public class Shockwave extends AbilityInstance implements Ability {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
-  private final Map<Block, Boolean> recentAffectedBlocks = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(500, TimeUnit.MILLISECONDS).build();
+  private final Expiring<Block> recentAffectedBlocks = new Expiring<>(500);
   private Vector3 origin;
 
   private boolean released;
@@ -143,7 +138,7 @@ public class Shockwave extends AbilityInstance implements Ability {
     }
 
     if (!recentAffectedBlocks.isEmpty()) {
-      Set<Block> positions = new HashSet<>(recentAffectedBlocks.keySet());
+      Set<Block> positions = recentAffectedBlocks.all();
       CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
     }
 
@@ -245,7 +240,7 @@ public class Shockwave extends AbilityInstance implements Ability {
         return;
       }
       affectedBlocks.add(block);
-      recentAffectedBlocks.put(block, false);
+      recentAffectedBlocks.add(block);
       double deltaY = FastMath.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
       Vector3 velocity = new Vector3(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();

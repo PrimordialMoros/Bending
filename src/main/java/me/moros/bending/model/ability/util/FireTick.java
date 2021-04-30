@@ -19,18 +19,27 @@
 
 package me.moros.bending.model.ability.util;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.bending.Bending;
+import me.moros.bending.model.user.User;
+import me.moros.bending.util.Tasker;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.util.NumberConversions;
 
 public enum FireTick implements FireTickMethod {
-  OVERWRITE(Entity::setFireTicks),
-  LARGER((e, a) -> {
-    if (e.getFireTicks() < a) {
-      e.setFireTicks(a);
+  OVERWRITE(FireTick::igniteEntity),
+  LARGER((u, e, t) -> {
+    if (e.getFireTicks() < t) {
+      igniteEntity(u, e, t);
     }
   }),
-  ACCUMULATE((e, a) -> e.setFireTicks(FastMath.max(0, e.getFireTicks()) + a));
+  ACCUMULATE((u, e, t) -> igniteEntity(u, e, FastMath.max(0, e.getFireTicks()) + t));
 
   private final FireTickMethod method;
 
@@ -39,8 +48,45 @@ public enum FireTick implements FireTickMethod {
   }
 
   @Override
-  public void apply(@NonNull Entity entity, int amount) {
-    method.apply(entity, amount);
+  public void apply(@NonNull User source, @NonNull Entity target, int ticks) {
+    method.apply(source, target, ticks);
+  }
+
+  public static final int MAX_TICKS = 90;
+  private static final Map<LivingEntity, User> INSTANCES = new ConcurrentHashMap<>();
+
+  static {
+    Tasker.repeatingTask(FireTick::cleanup, 5);
+  }
+
+  private static void cleanup() {
+    INSTANCES.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);
+  }
+
+  public static void extinguish(@NonNull Entity entity) {
+    entity.setFireTicks(0);
+    if (entity instanceof LivingEntity) {
+      INSTANCES.remove((LivingEntity) entity);
+    }
+  }
+
+  private static void igniteEntity(@NonNull User source, @NonNull Entity entity, int ticks) {
+    if (ticks <= 0) {
+      return;
+    }
+    if (ticks > MAX_TICKS) {
+      ticks = MAX_TICKS;
+    }
+    if (entity instanceof LivingEntity) {
+      int duration = NumberConversions.ceil(ticks / 20.0);
+      EntityCombustByEntityEvent event = Bending.getEventBus().callEvent(new EntityCombustByEntityEvent(source.getEntity(), entity, duration));
+      if (!event.isCancelled() && event.getDuration() > 0) {
+        entity.setFireTicks(FastMath.min(ticks, event.getDuration() * 20));
+        INSTANCES.put((LivingEntity) entity, source);
+      }
+    } else {
+      entity.setFireTicks(ticks);
+    }
   }
 }
 

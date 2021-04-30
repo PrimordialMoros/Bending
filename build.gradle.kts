@@ -47,7 +47,6 @@ tasks {
             relocate("com.typesafe", "me.moros.atlas.typesafe")
             relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
             relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
-            relocate("net.jodah.expiringmap", "me.moros.atlas.expiringmap")
             relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
             relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
             relocate("org.bstats", "me.moros.bending.bstats")

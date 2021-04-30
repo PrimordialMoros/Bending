@@ -24,6 +24,7 @@ import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.util.ActionType;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
 import org.bukkit.entity.Arrow;
@@ -31,6 +32,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -45,6 +47,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.util.NumberConversions;
 
 public class EntityListener implements Listener {
   private final Game game;
@@ -115,6 +118,16 @@ public class EntityListener implements Listener {
   public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
     if (MovementHandler.isRestricted(event.getEntity())) {
       event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityCombustByBlock(EntityCombustByBlockEvent event) {
+    if (TempBlock.MANAGER.isTemp(event.getCombuster())) {
+      int ticks = event.getDuration() * 20;
+      if (ticks > FireTick.MAX_TICKS) {
+        event.setDuration(NumberConversions.ceil(FireTick.MAX_TICKS / 20.0));
+      }
     }
   }
 

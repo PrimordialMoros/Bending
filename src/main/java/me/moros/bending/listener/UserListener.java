@@ -32,6 +32,7 @@ import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -161,7 +162,7 @@ public class UserListener implements Listener {
     } else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
       Optional<User> user = game.getBenderRegistry().getBendingUser((LivingEntity) event.getEntity());
       if (user.isPresent() && !game.getActivationController().onFireTickDamage(user.get())) {
-        event.getEntity().setFireTicks(0);
+        FireTick.extinguish(event.getEntity());
         event.setCancelled(true);
       }
     }

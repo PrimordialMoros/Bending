@@ -32,6 +32,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
@@ -120,7 +121,7 @@ public class EarthArmor extends AbilityInstance implements Ability {
     }
 
     if (formed) {
-      user.getEntity().setFireTicks(0);
+      FireTick.extinguish(user.getEntity());
       return UpdateResult.CONTINUE;
     }
 

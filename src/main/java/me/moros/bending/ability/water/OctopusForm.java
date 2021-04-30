@@ -22,14 +22,10 @@ package me.moros.bending.ability.water;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -47,6 +43,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -74,9 +71,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
   private final Collection<Block> base = new ArrayList<>();
   private final List<Tentacle> tentacles = new ArrayList<>();
 
-  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(250, TimeUnit.MILLISECONDS).build();
+  private final Expiring<Entity> affectedEntities = new Expiring<>(250);
 
   private WaterRing ring;
   private Block lastBlock;
@@ -220,13 +215,13 @@ public class OctopusForm extends AbilityInstance implements Ability {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (affectedEntities.containsKey(entity)) {
+    if (affectedEntities.contains(entity)) {
       return false;
     }
     DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
     Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(user.getLocation());
     entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
-    affectedEntities.put(entity, false);
+    affectedEntities.add(entity);
     return true;
   }
 

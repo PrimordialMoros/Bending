@@ -21,16 +21,12 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
@@ -52,6 +48,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -80,9 +77,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
   private Vector3 location;
 
-  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(500, TimeUnit.MILLISECONDS).build();
+  private final Expiring<Entity> affectedEntities = new Expiring<>(500);
 
   private boolean launched = false;
   private double distance;
@@ -215,11 +210,11 @@ public class LavaDisk extends AbilityInstance implements Ability {
   }
 
   private boolean damageEntity(Entity entity, double damage) {
-    if (affectedEntities.containsKey(entity)) {
+    if (affectedEntities.contains(entity)) {
       return false;
     }
-    affectedEntities.put(entity, false);
-    FireTick.ACCUMULATE.apply(entity, 20);
+    affectedEntities.add(entity);
+    FireTick.ACCUMULATE.apply(user, entity, 20);
     DamageUtil.damageEntity(entity, user, damage, getDescription());
     currentPower -= userConfig.powerDiminishPerEntity;
     ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)

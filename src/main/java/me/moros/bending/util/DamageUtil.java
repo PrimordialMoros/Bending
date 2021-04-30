@@ -19,14 +19,13 @@
 
 package me.moros.bending.util;
 
-import java.util.Map;
+import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
+import me.moros.atlas.caffeine.cache.Cache;
+import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -45,9 +44,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 public final class DamageUtil {
   private static final TranslatableComponent DEATH_MESSAGE = Component.translatable("bending.ability.generic.death");
 
-  private static final Map<UUID, BendingDamage> cache = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(250, TimeUnit.MILLISECONDS).build();
+  private static final Cache<UUID, BendingDamage> cache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMillis(250)).build();
 
   public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
     if (target instanceof LivingEntity && damage > 0) {
@@ -69,11 +66,11 @@ public final class DamageUtil {
   }
 
   public static @Nullable Component getBendingDeathMessage(@NonNull Player player) {
-    BendingDamage cause = cache.remove(player.getUniqueId());
+    BendingDamage cause = cache.getIfPresent(player.getUniqueId());
     if (cause == null) {
       return null;
     }
-
+    cache.invalidate(player.getUniqueId());
     AbilityDescription ability = cause.desc;
     String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
     TranslatableComponent msg = Bending.getTranslationManager().getTranslation(deathKey);

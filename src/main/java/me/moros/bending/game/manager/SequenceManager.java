@@ -19,17 +19,17 @@
 
 package me.moros.bending.game.manager;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.LoadingCache;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.game.Game;
@@ -42,9 +42,9 @@ import me.moros.bending.model.user.User;
 
 public final class SequenceManager {
   private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
-  private final ExpiringMap<User, Deque<AbilityAction>> cache = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.ACCESSED)
-    .expiration(10, TimeUnit.SECONDS).build();
+  private final LoadingCache<User, Deque<AbilityAction>> cache = Caffeine.newBuilder()
+    .expireAfterAccess(Duration.ofSeconds(10))
+    .build(u -> new ArrayDeque<>(16));
   private final Game game;
 
   public SequenceManager(@NonNull Game game) {
@@ -52,7 +52,7 @@ public final class SequenceManager {
   }
 
   public void clear() {
-    cache.clear();
+    cache.invalidateAll();
   }
 
   /**
@@ -91,7 +91,7 @@ public final class SequenceManager {
     if (desc == null) {
       return;
     }
-    Deque<AbilityAction> buffer = cache.computeIfAbsent(user, u -> new ArrayDeque<>(16));
+    Deque<AbilityAction> buffer = cache.get(user);
     if (buffer.size() >= 16) {
       buffer.removeFirst();
     }

@@ -17,19 +17,27 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.util;
+package me.moros.bending.model.ability.description;
 
-public final class BendingProperties {
-  public static final long EARTHBENDING_REVERT_TIME = 300_000; // 5 minutes
-  public static final long FIRE_REVERT_TIME = 10_000; // 10 seconds
-  public static final long EXPLOSION_REVERT_TIME = 20_000; // 20 seconds
-  public static final long ICE_DURATION = 10_000; // 10 seconds
+import java.util.concurrent.TimeUnit;
 
-  public static final double EXPLOSION_KNOCKBACK = 0.8;
+import me.moros.atlas.caffeine.cache.Expiry;
+import org.apache.commons.math3.util.FastMath;
 
-  public static final double METAL_MODIFIER = 1.25;
-  public static final double MAGMA_MODIFIER = 1.4;
+public class CooldownExpiry implements Expiry<AbilityDescription, Long> {
+  @Override
+  public long expireAfterCreate(AbilityDescription key, Long cooldown, long currentTime) {
+    return TimeUnit.MILLISECONDS.toNanos(cooldown);
+  }
 
-  public static final double WATER_NIGHT_MODIFIER = 1.25;
-  public static final double FIRE_DAY_MODIFIER = 1.25;
+  @Override
+  public long expireAfterUpdate(AbilityDescription key, Long cooldown, long currentTime, long currentDuration) {
+    return FastMath.max(currentDuration, TimeUnit.MILLISECONDS.toNanos(cooldown));
+  }
+
+  @Override
+  public long expireAfterRead(AbilityDescription key, Long cooldown, long currentTime, long currentDuration) {
+    return currentDuration;
+  }
 }
+

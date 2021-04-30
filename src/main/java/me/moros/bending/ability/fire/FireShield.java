@@ -53,6 +53,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
+import org.bukkit.entity.Projectile;
 
 public class FireShield extends AbilityInstance implements Ability {
   private static final Config config = new Config();
@@ -114,9 +115,13 @@ public class FireShield extends AbilityInstance implements Ability {
 
     shield.render();
     CollisionUtil.handleEntityCollisions(user, shield.getCollider(), entity -> {
-      FireTick.LARGER.apply(entity, userConfig.fireTicks);
-      return false;
-    });
+      if (sphere && entity instanceof Projectile) {
+        entity.remove();
+        return true;
+      }
+      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
+      return true;
+    }, false);
 
     shield.update();
     return UpdateResult.CONTINUE;

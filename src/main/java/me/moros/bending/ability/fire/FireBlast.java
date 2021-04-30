@@ -238,7 +238,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize) / size);
       if (ignoreCollider == null || !ignoreCollider.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
-        FireTick.LARGER.apply(entity, userConfig.fireTick);
+        FireTick.LARGER.apply(user, entity, userConfig.fireTick);
       }
       double knockback = factor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
       if (entity.equals(user.getEntity())) {
@@ -296,7 +296,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
         return true;
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-      FireTick.LARGER.apply(entity, userConfig.fireTick);
+      FireTick.LARGER.apply(user, entity, userConfig.fireTick);
       entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
       return true;
     }

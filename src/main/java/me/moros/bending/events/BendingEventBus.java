@@ -26,6 +26,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginManager;
 
 public class BendingEventBus {
@@ -40,14 +41,15 @@ public class BendingEventBus {
   }
 
   public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
-    manager.callEvent(new CooldownAddEvent(user, desc, duration));
+    if (user.isValid()) { // User might not be valid when cooldown is added
+      manager.callEvent(new CooldownAddEvent(user, desc, duration));
+    }
   }
 
   public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
-    if (!user.isValid()) {
-      return; // We post the event 1 tick later so this is needed for safety
+    if (user.isValid()) { // User might not be valid when cooldown expires
+      manager.callEvent(new CooldownRemoveEvent(user, desc));
     }
-    manager.callEvent(new CooldownRemoveEvent(user, desc));
   }
 
   public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
@@ -66,6 +68,11 @@ public class BendingEventBus {
 
   public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
     BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
+    manager.callEvent(event);
+    return event;
+  }
+
+  public <T extends Event> @NonNull T callEvent(@NonNull T event) {
     manager.callEvent(event);
     return event;
   }

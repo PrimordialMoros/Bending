@@ -28,6 +28,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
@@ -86,7 +87,7 @@ public class FireJet extends AbilityInstance implements Ability {
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
 
-    user.getEntity().setFireTicks(0);
+    FireTick.extinguish(user.getEntity());
     user.setCooldown(getDescription(), userConfig.cooldown);
     startTime = System.currentTimeMillis();
     return true;

@@ -21,14 +21,10 @@ package me.moros.bending.ability.fire;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -47,6 +43,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -58,9 +55,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 
 public class FireWall extends AbilityInstance implements Ability {
   private static final Config config = new Config();
@@ -69,9 +66,7 @@ public class FireWall extends AbilityInstance implements Ability {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(125, TimeUnit.MILLISECONDS).build();
+  private final Expiring<Entity> affectedEntities = new Expiring<>(125);
 
   private Collection<Block> blocks;
   private OBB collider;
@@ -146,15 +141,15 @@ public class FireWall extends AbilityInstance implements Ability {
 
 
   private boolean onEntityHit(Entity entity) {
-    if (entity instanceof Arrow) {
+    if (entity instanceof Projectile) {
       entity.remove();
       return true;
     }
 
-    if (affectedEntities.containsKey(entity)) {
+    if (affectedEntities.contains(entity)) {
       return false;
     }
-    affectedEntities.put(entity, false);
+    affectedEntities.add(entity);
 
     if (!(entity instanceof LivingEntity)) {
       entity.setVelocity(Vector3.ZERO.toVector());
@@ -168,7 +163,7 @@ public class FireWall extends AbilityInstance implements Ability {
 
     ((LivingEntity) entity).setNoDamageTicks(0);
     DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-    FireTick.ACCUMULATE.apply(entity, 10);
+    FireTick.ACCUMULATE.apply(user, entity, 10);
 
     Vector3 pos = EntityMethods.getEntityCenter(entity);
     Vector3 velocity = pos.subtract(collider.getClosestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);

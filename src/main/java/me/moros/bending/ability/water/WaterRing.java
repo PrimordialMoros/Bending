@@ -23,17 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.expiringmap.ExpirationPolicy;
-import me.moros.atlas.expiringmap.ExpiringMap;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -56,6 +52,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -86,9 +83,7 @@ public class WaterRing extends AbilityInstance implements Ability {
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
-  private final Map<Entity, Boolean> affectedEntities = ExpiringMap.builder()
-    .expirationPolicy(ExpirationPolicy.CREATED)
-    .expiration(250, TimeUnit.MILLISECONDS).build();
+  private final Expiring<Entity> affectedEntities = new Expiring<>(250);
 
   private boolean ready = false;
   private boolean completed = false;
@@ -264,7 +259,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
   private boolean checkCollisions(Entity entity) {
     for (Block block : ring) {
-      if (affectedEntities.containsKey(entity)) {
+      if (affectedEntities.contains(entity)) {
         return false;
       }
       AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block.getLocation()));
@@ -273,7 +268,7 @@ public class WaterRing extends AbilityInstance implements Ability {
         DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
         Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.getEyeLocation()).setY(0).normalize();
         entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
-        affectedEntities.put(entity, false);
+        affectedEntities.add(entity);
       }
     }
     return false;
