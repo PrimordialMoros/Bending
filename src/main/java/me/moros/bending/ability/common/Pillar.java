@@ -21,7 +21,7 @@ package me.moros.bending.ability.common;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -142,7 +142,7 @@ public class Pillar implements Updatable {
   }
 
   public @NonNull Collection<Block> getPillarBlocks() {
-    return Collections.unmodifiableCollection(pillarBlocks);
+    return List.copyOf(pillarBlocks);
   }
 
   public @NonNull Block getOrigin() {

@@ -20,7 +20,6 @@
 package me.moros.bending.model.temporal;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +66,7 @@ public class TemporalManager<K, V extends Temporary> {
   }
 
   protected @NonNull Map<K, V> getInstances() {
-    return Collections.unmodifiableMap(instances);
+    return Map.copyOf(instances);
   }
 
   protected void clear() {

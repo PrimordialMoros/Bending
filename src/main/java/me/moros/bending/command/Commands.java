@@ -21,11 +21,11 @@ package me.moros.bending.command;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
 import me.moros.atlas.acf.BukkitCommandCompletionContext;
 import me.moros.atlas.acf.BukkitCommandExecutionContext;
 import me.moros.atlas.acf.CommandCompletions;
@@ -96,8 +96,8 @@ public class Commands {
       return game.getPlayerManager().getPlayer(player.getUniqueId()).getPresets();
     });
 
-    commandCompletions.registerStaticCompletion("elements", ImmutableList.copyOf(Element.getElementNames()));
-    commandCompletions.registerStaticCompletion("attributes", ImmutableList.copyOf(Attribute.TYPES));
+    commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.getElementNames()));
+    commandCompletions.registerStaticCompletion("attributes", List.of(Attribute.TYPES));
   }
 
   private void registerCommandContexts() {

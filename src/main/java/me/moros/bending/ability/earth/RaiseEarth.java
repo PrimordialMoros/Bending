@@ -21,7 +21,7 @@ package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -184,7 +184,7 @@ public class RaiseEarth extends AbilityInstance implements Ability {
    * @return an unmodifiable view of the pillars
    */
   public @NonNull Collection<Pillar> getPillars() {
-    return Collections.unmodifiableCollection(pillars);
+    return List.copyOf(pillars);
   }
 
   @Override

@@ -20,8 +20,6 @@
 package me.moros.bending.util.methods;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -54,8 +52,8 @@ import org.bukkit.util.NumberConversions;
  * Utility class with useful {@link Block} related methods. Note: This is not thread-safe.
  */
 public final class BlockMethods {
-  public static final Set<BlockFace> MAIN_FACES = Collections.unmodifiableSet(EnumSet.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN));
-  public static final Set<BlockFace> CARDINAL_FACES = Collections.unmodifiableSet(EnumSet.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH));
+  public static final Set<BlockFace> MAIN_FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
+  public static final Set<BlockFace> CARDINAL_FACES = Set.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
 
   /**
    * Try to light a block if it's a furnace, smoker, blast furnace or campfire.

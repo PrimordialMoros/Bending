@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.Collider;
@@ -85,7 +84,7 @@ public final class CollisionManager {
     for (Collider firstCollider : firstColliders) {
       for (Collider secondCollider : secondColliders) {
         if (firstCollider.intersects(secondCollider)) {
-          return Maps.immutableEntry(firstCollider, secondCollider);
+          return Map.entry(firstCollider, secondCollider);
         }
       }
     }

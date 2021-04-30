@@ -20,8 +20,8 @@
 package me.moros.bending.ability.common;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -44,7 +44,7 @@ public class FragileStructure {
   private int health;
 
   private FragileStructure(Collection<Block> fragileBlocks, int health, Predicate<Block> predicate) {
-    this.fragileBlocks = fragileBlocks;
+    this.fragileBlocks = Set.copyOf(fragileBlocks);
     this.health = health;
     this.predicate = predicate;
     this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.customMetadata(this)));
@@ -58,7 +58,7 @@ public class FragileStructure {
    * @return unmodifiable collection of blocks belonging to the same fragile structure
    */
   public Collection<Block> getFragileBlocks() {
-    return Collections.unmodifiableCollection(fragileBlocks);
+    return fragileBlocks;
   }
 
   /**

@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -33,7 +32,7 @@ public final class ElementHolder {
   }
 
   Set<Element> getElements() {
-    return Collections.unmodifiableSet(elements);
+    return Set.copyOf(elements);
   }
 
   boolean hasElement(Element element) {

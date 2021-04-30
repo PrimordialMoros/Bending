@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Collections;
 import java.util.Set;
 
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
@@ -41,7 +40,7 @@ public final class PresetHolder {
   }
 
   Set<String> getPresets() {
-    return Collections.unmodifiableSet(presets);
+    return Set.copyOf(presets);
   }
 
   boolean hasPreset(String name) {

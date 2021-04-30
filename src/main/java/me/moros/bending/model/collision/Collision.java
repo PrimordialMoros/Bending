@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.collision;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.common.collect.Maps;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Ability;
 
@@ -43,9 +43,9 @@ public final class Collision {
 
   public @NonNull Entry<Collider, Collider> getColliders() {
     if (inverse) {
-      return Maps.immutableEntry(collisionData.c2, collisionData.c1);
+      return Map.entry(collisionData.c2, collisionData.c1);
     } else {
-      return Maps.immutableEntry(collisionData.c1, collisionData.c2);
+      return Map.entry(collisionData.c1, collisionData.c2);
     }
   }
 

@@ -21,7 +21,6 @@ package me.moros.bending.model.ability.sequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -46,7 +45,7 @@ public final class Sequence {
    * @return Unmodifiable view of this sequence's actions
    */
   public @NonNull List<@NonNull AbilityAction> getActions() {
-    return Collections.unmodifiableList(sequence);
+    return List.copyOf(sequence);
   }
 
   public @NonNull Component getInstructions() {
