@@ -77,8 +77,8 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
     factor = 1;
     if (method == ActivationMethod.FALL) {
-      double dist = user.getEntity().getFallDistance();
-      if (dist < userConfig.fallThreshold || user.isSneaking()) {
+      double dist = user.entity().getFallDistance();
+      if (dist < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       if (dist >= userConfig.maxFallThreshold) {
@@ -91,11 +91,11 @@ public class EarthPillars extends AbilityInstance implements Ability {
     }
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Collider collider = new Sphere(user.getLocation(), userConfig.radius * factor);
+    Collider collider = new Sphere(user.location(), userConfig.radius * factor);
     CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
 
     if (!pillars.isEmpty()) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
       removalPolicy = Policies.builder().build();
       return true;
     }
@@ -104,12 +104,12 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
@@ -119,13 +119,13 @@ public class EarthPillars extends AbilityInstance implements Ability {
   private boolean createPillar(Entity entity) {
     Block base = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
     boolean unique = pillars.stream()
-      .noneMatch(p -> p.getOrigin().getX() == base.getX() && p.getOrigin().getZ() == base.getZ());
+      .noneMatch(p -> p.origin().getX() == base.getX() && p.origin().getZ() == base.getZ());
     if (predicate.test(base)) {
       if (unique) {
         ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
           .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
         int length = NumberConversions.floor(3 * factor);
-        Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(length).ifPresent(pillars::add);
+        Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(length).ifPresent(pillars::add);
       }
       return true;
     }
@@ -133,17 +133,17 @@ public class EarthPillars extends AbilityInstance implements Ability {
   }
 
   public static void onFall(User user) {
-    if (user.getSelectedAbilityName().equals("Catapult")) {
+    if (user.selectedAbilityName().equals("Catapult")) {
       if (pillarsDesc == null) {
-        pillarsDesc = Bending.getGame().getAbilityRegistry()
-          .getAbilityDescription("EarthPillars").orElseThrow(RuntimeException::new);
+        pillarsDesc = Bending.game().abilityRegistry()
+          .abilityDescription("EarthPillars").orElseThrow(RuntimeException::new);
       }
-      Bending.getGame().getActivationController().activateAbility(user, ActivationMethod.FALL, pillarsDesc);
+      Bending.game().activationController().activateAbility(user, ActivationMethod.FALL, pillarsDesc);
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -154,12 +154,12 @@ public class EarthPillars extends AbilityInstance implements Ability {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (entity.equals(user.getEntity())) {
+      if (entity.equals(user.entity())) {
         return false;
       }
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
-        DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+        DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       }
       entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
       return true;

@@ -27,11 +27,11 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public enum Policies implements RemovalPolicy {
-  DEAD((u, d) -> u.isDead()),
-  OFFLINE((u, d) -> !u.isValid()),
-  SNEAKING((u, d) -> u.isSneaking()),
-  NOT_SNEAKING((u, d) -> !u.isSneaking()),
-  IN_LIQUID((u, d) -> u.getHeadBlock().isLiquid() || u.getLocBlock().isLiquid());
+  DEAD((u, d) -> u.dead()),
+  OFFLINE((u, d) -> !u.valid()),
+  SNEAKING((u, d) -> u.sneaking()),
+  NOT_SNEAKING((u, d) -> !u.sneaking()),
+  IN_LIQUID((u, d) -> u.headBlock().isLiquid() || u.locBlock().isLiquid());
 
   private final RemovalPolicy policy;
 
@@ -40,7 +40,7 @@ public enum Policies implements RemovalPolicy {
   }
 
   @Override
-  public boolean test(User user, AbilityDescription desc) {
+  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
     return policy.test(user, desc);
   }
 
@@ -60,12 +60,12 @@ public enum Policies implements RemovalPolicy {
       policies = new HashSet<>();
     }
 
-    public PolicyBuilder add(@NonNull RemovalPolicy policy) {
+    public @NonNull PolicyBuilder add(@NonNull RemovalPolicy policy) {
       policies.add(policy);
       return this;
     }
 
-    public PolicyBuilder remove(@NonNull RemovalPolicy policy) {
+    public @NonNull PolicyBuilder remove(@NonNull RemovalPolicy policy) {
       policies.remove(policy);
       return this;
     }
@@ -73,9 +73,18 @@ public enum Policies implements RemovalPolicy {
     public @NonNull RemovalPolicy build() {
       return new CompositeRemovalPolicy(this);
     }
+  }
 
-    @NonNull Set<@NonNull RemovalPolicy> getPolicies() {
-      return new HashSet<>(policies);
+  private static class CompositeRemovalPolicy implements RemovalPolicy {
+    private final Set<RemovalPolicy> policies;
+
+    private CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
+      this.policies = Set.copyOf(builder.policies);
+    }
+
+    @Override
+    public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
+      return policies.stream().anyMatch(p -> p.test(user, desc));
     }
   }
 }

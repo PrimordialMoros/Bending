@@ -67,13 +67,13 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
     this.origin = location;
     this.range = range;
     this.speed = speed;
-    target = user.getTargetEntity(range).orElse(null);
+    target = user.rayTraceEntity(range).orElse(null);
     if (followTarget && target != null) {
-      targetLocation = EntityMethods.getEntityCenter(target);
+      targetLocation = EntityMethods.entityCenter(target);
       locked = true;
     } else {
       target = null;
-      targetLocation = user.getTarget(range, Collections.singleton(Material.WATER));
+      targetLocation = user.rayTrace(range, Collections.singleton(Material.WATER));
     }
     direction = targetLocation.subtract(location).setY(0).normalize();
   }
@@ -90,11 +90,11 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
     }
 
     if (controllable) {
-      targetLocation = user.getTarget(range);
+      targetLocation = user.rayTrace(range);
       direction = targetLocation.subtract(origin).setY(0).normalize();
     }
 
-    if (onBlockHit(location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN))) {
+    if (onBlockHit(location.toBlock(user.world()).getRelative(BlockFace.DOWN))) {
       return UpdateResult.REMOVE;
     }
 
@@ -108,7 +108,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 
     Vector3 originalVector = new Vector3(location.toArray());
     location = location.add(direction.scalarMultiply(speed));
-    Block baseBlock = location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN);
+    Block baseBlock = location.toBlock(user.world()).getRelative(BlockFace.DOWN);
 
     if (!isValidBlock(baseBlock)) {
       if (isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
@@ -129,7 +129,7 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
       }
     }
 
-    Block originBlock = originalVector.toBlock(user.getWorld());
+    Block originBlock = originalVector.toBlock(user.world());
     for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction.scalarMultiply(speed))) {
       int x = NumberConversions.floor(v.getX());
       int y = NumberConversions.floor(v.getY());
@@ -142,14 +142,14 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
     if (location.distanceSq(origin) > range * range) {
       return UpdateResult.REMOVE;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+    if (!Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
       return UpdateResult.REMOVE;
     }
     return UpdateResult.CONTINUE;
   }
 
   @Override
-  public @NonNull Collider getCollider() {
+  public @NonNull Collider collider() {
     return collider;
   }
 
@@ -165,6 +165,6 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
     if (target instanceof Player && !((Player) target).isOnline()) {
       return false;
     }
-    return target.getWorld().equals(user.getWorld()) && targetLocation.distanceSq(new Vector3(target.getLocation())) < 5 * 5;
+    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(new Vector3(target.getLocation())) < 5 * 5;
   }
 }

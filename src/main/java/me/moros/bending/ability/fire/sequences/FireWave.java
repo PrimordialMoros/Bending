@@ -61,30 +61,30 @@ public class FireWave extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (wallDesc == null) {
-      wallDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireWall").orElseThrow(RuntimeException::new);
+      wallDesc = Bending.game().abilityRegistry().abilityDescription("FireWall").orElseThrow(RuntimeException::new);
     }
     wall = new FireWall(wallDesc);
-    if (user.isOnCooldown(wall.getDescription()) || !wall.activate(user, ActivationMethod.ATTACK)) {
+    if (user.isOnCooldown(wall.description()) || !wall.activate(user, ActivationMethod.ATTACK)) {
       return false;
     }
 
     recalculateConfig();
 
-    Vector3 origin = user.getEyeLocation().add(user.getDirection().scalarMultiply(wall.getRange()));
-    Vector3 direction = user.getDirection();
-    double yaw = user.getYaw();
-    double hw = wall.getWidth() / 2.0;
-    double hh = wall.getHeight() / 2.0;
+    Vector3 origin = user.eyeLocation().add(user.direction().scalarMultiply(wall.range()));
+    Vector3 direction = user.direction();
+    double yaw = user.yaw();
+    double hw = wall.width() / 2.0;
+    double hh = wall.height() / 2.0;
     for (double i = 0.5; i <= 2 * userConfig.steps; i += 0.5) {
       Vector3 currentPosition = origin.add(direction.scalarMultiply(i));
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, currentPosition.toBlock(user.getWorld()))) {
+      if (!Bending.game().protectionSystem().canBuild(user, currentPosition.toBlock(user.world()))) {
         break;
       }
       hh += 0.2;
       AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
       OBB collider = new OBB(aabb, Vector3.PLUS_J, FastMath.toRadians(yaw)).addPosition(currentPosition);
-      double radius = collider.getHalfExtents().maxComponent() + 1;
-      Collection<Block> blocks = WorldMethods.getNearbyBlocks(currentPosition.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
+      double radius = collider.halfExtents().maxComponent() + 1;
+      Collection<Block> blocks = WorldMethods.nearbyBlocks(currentPosition.toLocation(user.world()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
       if (blocks.isEmpty()) {
         break;
       }
@@ -96,13 +96,13 @@ public class FireWave extends AbilityInstance implements Ability {
     }
     wall.updateDuration(userConfig.duration);
     nextTime = 0;
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -112,7 +112,7 @@ public class FireWave extends AbilityInstance implements Ability {
       nextTime = time + 250;
       WallInfo info = walls.poll();
       if (info != null) {
-        wall.setWall(info.getBlocks(), info.getCollider());
+        wall.wall(info.blocks(), info.collider());
       }
     }
     return wall.update();
@@ -124,8 +124,8 @@ public class FireWave extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
-    return wall.getUser();
+  public @NonNull User user() {
+    return wall.user();
   }
 
   private static class WallInfo {
@@ -137,11 +137,11 @@ public class FireWave extends AbilityInstance implements Ability {
       this.collider = collider;
     }
 
-    private Collection<Block> getBlocks() {
+    private Collection<Block> blocks() {
       return blocks;
     }
 
-    private OBB getCollider() {
+    private OBB collider() {
       return collider;
     }
   }

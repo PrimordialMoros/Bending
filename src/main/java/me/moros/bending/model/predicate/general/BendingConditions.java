@@ -29,11 +29,11 @@ import me.moros.bending.model.user.User;
 
 public enum BendingConditions implements BendingConditional {
   COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
-  ELEMENT((u, d) -> u.hasElement(d.getElement())),
-  GAMEMODE((u, d) -> !u.isSpectator()),
+  ELEMENT((u, d) -> u.hasElement(d.element())),
+  GAMEMODE((u, d) -> !u.spectator()),
   PERMISSION((u, d) -> u.hasPermission(d)),
   TOGGLED((u, d) -> false),
-  WORLD((u, d) -> !Bending.getGame().isDisabledWorld(u.getWorld().getUID()));
+  WORLD((u, d) -> !Bending.game().isDisabledWorld(u.world().getUID()));
 
   private final BendingConditional predicate;
 
@@ -42,7 +42,7 @@ public enum BendingConditions implements BendingConditional {
   }
 
   @Override
-  public boolean test(User user, AbilityDescription desc) {
+  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
     return predicate.test(user, desc);
   }
 
@@ -80,8 +80,8 @@ public enum BendingConditions implements BendingConditional {
       return new CompositeBendingConditional(this);
     }
 
-    @NonNull Set<@NonNull BendingConditional> getConditionals() {
-      return new HashSet<>(conditionals);
+    @NonNull Set<@NonNull BendingConditional> conditionals() {
+      return conditionals;
     }
   }
 }

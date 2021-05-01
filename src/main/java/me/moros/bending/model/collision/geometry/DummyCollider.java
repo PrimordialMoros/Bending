@@ -84,12 +84,12 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull Vector3 getPosition() {
+  public @NonNull Vector3 position() {
     return Vector3.ZERO;
   }
 
   @Override
-  public @NonNull Vector3 getHalfExtents() {
+  public @NonNull Vector3 halfExtents() {
     return Vector3.ZERO;
   }
 

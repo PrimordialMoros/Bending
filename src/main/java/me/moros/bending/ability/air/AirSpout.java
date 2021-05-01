@@ -61,10 +61,10 @@ public class AirSpout extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, AirSpout.class)) {
+    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
       return false;
     }
-    if (user.getHeadBlock().isLiquid()) {
+    if (user.headBlock().isLiquid()) {
       return false;
     }
 
@@ -72,11 +72,11 @@ public class AirSpout extends AbilityInstance implements Ability {
     recalculateConfig();
 
     double h = userConfig.height + 2;
-    if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
+    if (EntityMethods.distanceAboveGround(user.entity()) > h) {
       return false;
     }
 
-    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
+    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), h).orElse(null);
     if (block == null) {
       return false;
     }
@@ -89,16 +89,16 @@ public class AirSpout extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
-    if (user.getHeadBlock().isLiquid()) {
+    if (user.headBlock().isLiquid()) {
       return UpdateResult.REMOVE;
     }
 
@@ -107,19 +107,19 @@ public class AirSpout extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    spout.getFlight().setFlying(false);
-    spout.getFlight().release();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    spout.flight().flying(false);
+    spout.flight().release();
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(spout.getCollider());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(spout.collider());
   }
 
   public void handleMovement(@NonNull Vector3 velocity) {
@@ -141,7 +141,7 @@ public class AirSpout extends AbilityInstance implements Ability {
         return;
       }
       for (int i = 0; i < distance; i++) {
-        ParticleUtil.createAir(user.getEntity().getLocation().subtract(0, i, 0))
+        ParticleUtil.createAir(user.entity().getLocation().subtract(0, i, 0))
           .count(3).offset(0.4, 0.4, 0.4).spawn();
       }
       nextRenderTime = time + 100;
@@ -150,7 +150,7 @@ public class AirSpout extends AbilityInstance implements Ability {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundUtil.AIR_SOUND.play(user.getEntity().getLocation());
+        SoundUtil.AIR_SOUND.play(user.entity().getLocation());
       }
     }
   }

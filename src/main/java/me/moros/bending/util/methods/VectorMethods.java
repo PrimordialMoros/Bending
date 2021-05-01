@@ -110,7 +110,7 @@ public final class VectorMethods {
   /**
    * Get an orthogonal vector.
    */
-  public static @NonNull Vector3 getOrthogonal(@NonNull Vector3 axis, double radians, double length) {
+  public static @NonNull Vector3 orthogonal(@NonNull Vector3 axis, double radians, double length) {
     double[] orthogonal = new Vector3(axis.getY(), -axis.getX(), 0).normalize().scalarMultiply(length).toArray();
     Rotation rotation = new Rotation(axis, radians, RotationConvention.VECTOR_OPERATOR);
     rotation.applyTo(orthogonal, orthogonal);
@@ -183,7 +183,7 @@ public final class VectorMethods {
     return possibleCollisions;
   }
 
-  public static @NonNull Vector3 getRandomOffset(Vector3 target, double offset) {
+  public static @NonNull Vector3 randomOffset(Vector3 target, double offset) {
     ThreadLocalRandom rand = ThreadLocalRandom.current();
     double x = rand.nextDouble(-offset, offset);
     double y = rand.nextDouble(-offset, offset);

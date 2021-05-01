@@ -33,8 +33,8 @@ public class PersistentDataLayer {
   public static final String STR_ARMOR = "bending-armor";
   public static final String STR_MATERIAL = "bending-material";
 
-  private final NamespacedKey NSK_ARMOR;
-  private final NamespacedKey NSK_MATERIAL;
+  public final NamespacedKey NSK_ARMOR;
+  public final NamespacedKey NSK_MATERIAL;
 
   public PersistentDataLayer(@NonNull Bending plugin) {
     NSK_ARMOR = new NamespacedKey(plugin, STR_ARMOR);
@@ -50,17 +50,10 @@ public class PersistentDataLayer {
   }
 
   public boolean addArmorKey(@NonNull ItemMeta meta) {
-    if (meta != null) {
-      PersistentDataContainer container = meta.getPersistentDataContainer();
-      if (!hasArmorKey(meta)) {
-        container.set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
-        return true;
-      }
+    if (!hasArmorKey(meta)) {
+      meta.getPersistentDataContainer().set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
+      return true;
     }
     return false;
-  }
-
-  public @NonNull NamespacedKey getMaterialKey() {
-    return NSK_MATERIAL;
   }
 }

@@ -100,24 +100,24 @@ public class MetalCable extends AbilityInstance implements Ability {
     }
 
     if (method == ActivationMethod.SNEAK) {
-      Location center = user.getEntity().getEyeLocation();
+      Location center = user.entity().getEyeLocation();
       Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
       for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
         MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
-        if (ability != null && !entity.equals(ability.getUser().getEntity())) {
+        if (ability != null && !entity.equals(ability.user().entity())) {
           ability.remove();
         }
       }
       return false;
     } else if (method == ActivationMethod.ATTACK) {
-      Optional<MetalCable> cable = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, MetalCable.class);
+      Optional<MetalCable> cable = Bending.game().abilityManager(user.world()).firstInstance(user, MetalCable.class);
       if (cable.isPresent()) {
         cable.get().tryLaunchTarget();
         return false;
       }
     }
 
-    if (user.isOnCooldown(getDescription())) {
+    if (user.isOnCooldown(description())) {
       return false;
     }
 
@@ -129,12 +129,12 @@ public class MetalCable extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     ticks++;
@@ -145,7 +145,7 @@ public class MetalCable extends AbilityInstance implements Ability {
       return UpdateResult.REMOVE;
     }
     location = new Vector3(cable.getLocation());
-    double distance = user.getLocation().distance(location);
+    double distance = user.location().distance(location);
     if (hasHit) {
       if (!handleMovement(distance)) {
         return UpdateResult.REMOVE;
@@ -155,14 +155,14 @@ public class MetalCable extends AbilityInstance implements Ability {
   }
 
   private UpdateResult updateProjectile() {
-    if (projectile == null || !projectile.getFallingBlock().isValid()) {
+    if (projectile == null || !projectile.fallingBlock().isValid()) {
       return UpdateResult.REMOVE;
     }
-    location = projectile.getCenter();
+    location = projectile.center();
     if (ticks % 4 == 0) {
       if (CollisionUtil.handleEntityCollisions(user, BOX.at(location), this::onProjectileHit)) {
-        BlockData bd = projectile.getFallingBlock().getBlockData();
-        Location bukkitLocation = location.toLocation(user.getWorld());
+        BlockData bd = projectile.fallingBlock().getBlockData();
+        Location bukkitLocation = location.toLocation(user.world());
         ParticleUtil.create(Particle.BLOCK_CRACK, bukkitLocation).count(4)
           .offset(0.25, 0.15, 0.25).data(bd).spawn();
         ParticleUtil.create(Particle.BLOCK_DUST, bukkitLocation).count(6)
@@ -174,14 +174,14 @@ public class MetalCable extends AbilityInstance implements Ability {
   }
 
   private boolean onProjectileHit(Entity entity) {
-    Material mat = projectile.getFallingBlock().getBlockData().getMaterial();
+    Material mat = projectile.fallingBlock().getBlockData().getMaterial();
     double damage = userConfig.damage;
     if (EarthMaterials.METAL_BENDABLE.isTagged(mat)) {
       damage *= BendingProperties.METAL_MODIFIER;
     } else if (EarthMaterials.LAVA_BENDABLE.isTagged(mat)) {
       damage *= BendingProperties.MAGMA_MODIFIER;
     }
-    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    DamageUtil.damageEntity(entity, user, damage, description());
     return true;
   }
 
@@ -189,13 +189,15 @@ public class MetalCable extends AbilityInstance implements Ability {
     if (target == null || !target.isValid(user)) {
       return false;
     }
-    Entity entityToMove = user.getEntity();
+    Entity entityToMove = user.entity();
     Vector3 targetLocation = location;
-    if (target.getType() == MetalCable.CableTarget.Type.ENTITY) {
-      cable.teleport(target.getEntity().getLocation());
-      if (user.isSneaking() || projectile != null) {
-        entityToMove = target.getEntity();
-        Ray ray = user.getRay(distance / 2);
+    if (target.type == CableTarget.Type.ENTITY) {
+      if (target.entity != null) {
+        cable.teleport(target.entity.getLocation());
+      }
+      if (user.sneaking() || projectile != null) {
+        entityToMove = target.entity;
+        Ray ray = user.ray(distance / 2);
         targetLocation = ray.origin.add(ray.direction);
       }
     }
@@ -203,23 +205,23 @@ public class MetalCable extends AbilityInstance implements Ability {
     if (distance > 3) {
       entityToMove.setVelocity(direction.scalarMultiply(userConfig.pullSpeed).clampVelocity());
     } else {
-      if (target.getType() == MetalCable.CableTarget.Type.ENTITY) {
+      if (target.type == CableTarget.Type.ENTITY) {
         entityToMove.setVelocity(Vector3.ZERO.toVector());
-        if (target.getEntity() instanceof FallingBlock) {
-          FallingBlock fb = (FallingBlock) target.getEntity();
+        if (target.entity instanceof FallingBlock) {
+          FallingBlock fb = (FallingBlock) target.entity;
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
           ParticleUtil.create(Particle.BLOCK_CRACK, tempLocation).count(4)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
           ParticleUtil.create(Particle.BLOCK_DUST, tempLocation).count(6)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
-          target.getEntity().remove();
+          target.entity.remove();
         }
         return false;
       } else {
         if (distance <= 3 && distance > 1.5) {
           entityToMove.setVelocity(direction.scalarMultiply(0.4 * userConfig.pullSpeed).clampVelocity());
         } else {
-          user.getEntity().setVelocity(new Vector3(0, 0.5, 0).toVector());
+          user.entity().setVelocity(new Vector3(0, 0.5, 0).toVector());
           return false;
         }
       }
@@ -232,18 +234,18 @@ public class MetalCable extends AbilityInstance implements Ability {
       return false;
     }
 
-    Vector3 targetLocation = user.getTargetEntity(userConfig.range)
-      .map(EntityMethods::getEntityCenter)
-      .orElseGet(() -> user.getTarget(userConfig.range));
+    Vector3 targetLocation = user.rayTraceEntity(userConfig.range)
+      .map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(userConfig.range));
 
-    if (targetLocation.toBlock(user.getWorld()).isLiquid()) {
+    if (targetLocation.toBlock(user.world()).isLiquid()) {
       return false;
     }
 
-    Vector3 origin = user.getMainHandSide();
+    Vector3 origin = user.mainHandSide();
     Vector3 dir = targetLocation.subtract(origin).normalize();
-    Arrow arrow = user.getWorld().spawnArrow(origin.toLocation(user.getWorld()), dir.toVector(), 1.8F, 0);
-    arrow.setShooter(user.getEntity());
+    Arrow arrow = user.world().spawnArrow(origin.toLocation(user.world()), dir.toVector(), 1.8F, 0);
+    arrow.setShooter(user.entity());
     arrow.setGravity(false);
     arrow.setInvulnerable(true);
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
@@ -253,10 +255,10 @@ public class MetalCable extends AbilityInstance implements Ability {
     SoundUtil.METAL_SOUND.play(arrow.getLocation());
 
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
       .build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
@@ -265,16 +267,16 @@ public class MetalCable extends AbilityInstance implements Ability {
       return true;
     }
     pointLocations.clear();
-    pointLocations.addAll(getLinePoints(user.getMainHandSide(), location, NumberConversions.ceil(distance * 2)));
+    pointLocations.addAll(getLinePoints(user.mainHandSide(), location, NumberConversions.ceil(distance * 2)));
     int counter = 0;
     for (Vector3 temp : pointLocations) {
-      Block block = temp.toBlock(user.getWorld());
+      Block block = temp.toBlock(user.world());
       if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
         if (++counter > 2) {
           return false;
         }
       }
-      ParticleUtil.createRGB(temp.toLocation(user.getWorld()), "444444").spawn();
+      ParticleUtil.createRGB(temp.toLocation(user.world()), "444444").spawn();
     }
     return true;
   }
@@ -285,31 +287,31 @@ public class MetalCable extends AbilityInstance implements Ability {
       .collect(Collectors.toList());
   }
 
-  public void setHitBlock(@NonNull Block block) {
+  public void hitBlock(@NonNull Block block) {
     if (target != null) {
       return;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       remove();
       return;
     }
-    if (user.isSneaking() && !MaterialUtil.isUnbreakable(block)) {
+    if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockData data = block.getBlockData();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-      Vector3 velocity = user.getEyeLocation().subtract(location).normalize().scalarMultiply(0.2);
+      Vector3 velocity = user.eyeLocation().subtract(location).normalize().scalarMultiply(0.2);
       projectile = new BendingFallingBlock(block, data, velocity, true, 30000);
-      target = new CableTarget(projectile.getFallingBlock());
+      target = new CableTarget(projectile.fallingBlock());
     } else {
       target = new CableTarget(block);
     }
     hasHit = true;
   }
 
-  public void setHitEntity(@NonNull Entity entity) {
+  public void hitEntity(@NonNull Entity entity) {
     if (target != null) {
       return;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, entity.getLocation().getBlock())) {
+    if (!Bending.game().protectionSystem().canBuild(user, entity.getLocation().getBlock())) {
       remove();
       return;
     }
@@ -319,10 +321,10 @@ public class MetalCable extends AbilityInstance implements Ability {
   }
 
   private boolean hasRequiredInv() {
-    if (InventoryUtil.hasMetalArmor(user.getEntity())) {
+    if (InventoryUtil.hasMetalArmor(user.entity())) {
       return true;
     }
-    return user.getInventory().map(itemStacks -> itemStacks.contains(Material.IRON_INGOT)).orElse(false);
+    return user.inventory().map(itemStacks -> itemStacks.contains(Material.IRON_INGOT)).orElse(false);
   }
 
   private void remove() {
@@ -330,19 +332,19 @@ public class MetalCable extends AbilityInstance implements Ability {
   }
 
   private void tryLaunchTarget() {
-    if (launched || target == null || target.getType() == MetalCable.CableTarget.Type.BLOCK) {
+    if (launched || target == null || target.type == CableTarget.Type.BLOCK || target.entity == null) {
       return;
     }
 
     launched = true;
-    Vector3 targetLocation = user.getTargetEntity(userConfig.projectileRange)
-      .map(EntityMethods::getEntityCenter)
-      .orElseGet(() -> user.getTarget(userConfig.projectileRange));
+    Vector3 targetLocation = user.rayTraceEntity(userConfig.projectileRange)
+      .map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(userConfig.projectileRange));
 
     Vector3 velocity = targetLocation.subtract(location).normalize().scalarMultiply(userConfig.launchSpeed);
-    target.getEntity().setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
-    target.getEntity().setFallDistance(0);
-    if (target.getEntity() instanceof FallingBlock) {
+    target.entity.setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
+    target.entity.setFallDistance(0);
+    if (target.entity instanceof FallingBlock) {
       removalPolicy = Policies.builder()
         .add(OutOfRangeRemovalPolicy.of(userConfig.projectileRange, location, () -> location))
         .build();
@@ -360,19 +362,19 @@ public class MetalCable extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (launched && projectile != null) {
-      return Collections.singletonList(BOX.at(projectile.getCenter()));
+      return Collections.singletonList(BOX.at(projectile.center()));
     }
     return Collections.singletonList(new Sphere(location, 0.8));
   }
 
-  public static class CableTarget {
+  private static class CableTarget {
     private enum Type {ENTITY, BLOCK}
 
     private final Type type;
@@ -380,35 +382,23 @@ public class MetalCable extends AbilityInstance implements Ability {
     private final Block block;
     private final Material material;
 
-    public CableTarget(Entity entity) {
+    private CableTarget(Entity entity) {
       block = null;
       material = null;
       this.entity = entity;
       type = Type.ENTITY;
     }
 
-    public CableTarget(Block block) {
+    private CableTarget(Block block) {
       entity = null;
       this.block = block;
       material = block.getType();
       type = Type.BLOCK;
     }
 
-    public Type getType() {
-      return type;
-    }
-
-    public Entity getEntity() {
-      return entity;
-    }
-
-    public Block getBlock() {
-      return block;
-    }
-
     public boolean isValid(User u) {
       if (type == Type.ENTITY) {
-        return entity != null && entity.isValid() && entity.getWorld().equals(u.getWorld());
+        return entity != null && entity.isValid() && entity.getWorld().equals(u.world());
       } else {
         return block.getType() == material;
       }

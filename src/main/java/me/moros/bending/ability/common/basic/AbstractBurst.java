@@ -58,11 +58,11 @@ public abstract class AbstractBurst extends AbilityInstance {
         double y = FastMath.cos(phi) * FastMath.cos(theta);
         double z = FastMath.sin(phi);
         Vector3 direction = new Vector3(x, y, z);
-        if (cone && Vector3.angle(direction, user.getDirection()) > ANGLE) {
+        if (cone && Vector3.angle(direction, user.direction()) > ANGLE) {
           continue;
         }
         T blast = constructor.get();
-        blast.initialize(user, EntityMethods.getEntityCenter(user.getEntity()).add(direction), direction.scalarMultiply(range));
+        blast.initialize(user, EntityMethods.entityCenter(user.entity()).add(direction), direction.scalarMultiply(range));
         blasts.add(blast);
       }
     }

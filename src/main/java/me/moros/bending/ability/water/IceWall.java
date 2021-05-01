@@ -74,12 +74,12 @@ public class IceWall extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    Block targetBlock = WorldMethods.blockCast(user.getWorld(), user.getRay(), userConfig.selectRange).orElse(null);
+    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), userConfig.selectRange).orElse(null);
     if (targetBlock != null && FragileStructure.tryDamageStructure(Collections.singletonList(targetBlock), 0)) {
       return false;
     }
 
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
     if (source.isEmpty()) {
       return false;
     }
@@ -87,7 +87,7 @@ public class IceWall extends AbilityInstance implements Ability {
 
     raiseWall(userConfig.maxHeight, userConfig.width);
     if (!pillars.isEmpty()) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
       removalPolicy = Policies.builder().build();
       return true;
     }
@@ -96,12 +96,12 @@ public class IceWall extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -120,12 +120,12 @@ public class IceWall extends AbilityInstance implements Ability {
     if (!WaterMaterials.isIceBendable(block) || !TempBlock.isBendable(block)) {
       return 0;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return 0;
     }
     for (int i = 0; i < height; i++) {
       Block forwardBlock = block.getRelative(BlockFace.UP, i + 1);
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock)) {
+      if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
         return i;
       }
       if (!MaterialUtil.isTransparent(forwardBlock) && forwardBlock.getType() != Material.WATER) {
@@ -137,10 +137,10 @@ public class IceWall extends AbilityInstance implements Ability {
 
   private void raiseWall(int height, int width) {
     double w = (width - 1) / 2.0;
-    Vector3 side = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
+    Vector3 side = user.direction().crossProduct(Vector3.PLUS_J).normalize();
     Vector3 center = new Vector3(origin).add(Vector3.HALF);
     for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
-      Block check = center.add(side.scalarMultiply(i)).toBlock(user.getWorld());
+      Block check = center.add(side.scalarMultiply(i)).toBlock(user.world());
       int h = height - FastMath.min(NumberConversions.ceil(height / 3.0), FastMath.abs(i));
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < h; j++) {
@@ -153,19 +153,9 @@ public class IceWall extends AbilityInstance implements Ability {
           }
         }
       } else {
-        getTopValid(check, h).ifPresent(b -> createPillar(b, h));
+        BlockMethods.getTopValid(check, h, WaterMaterials::isIceBendable).ifPresent(b -> createPillar(b, h));
       }
     }
-  }
-
-  private Optional<Block> getTopValid(Block block, int height) {
-    for (int i = 1; i <= height; i++) {
-      Block check = block.getRelative(BlockFace.UP, i);
-      if (!WaterMaterials.isIceBendable(check)) {
-        return Optional.of(check.getRelative(BlockFace.DOWN));
-      }
-    }
-    return Optional.empty();
   }
 
   @Override
@@ -174,7 +164,7 @@ public class IceWall extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -216,7 +206,7 @@ public class IceWall extends AbilityInstance implements Ability {
       if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      if (!Bending.game().protectionSystem().canBuild(user, block)) {
         return false;
       }
       if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER) {

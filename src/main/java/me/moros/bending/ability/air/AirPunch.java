@@ -70,17 +70,17 @@ public class AirPunch extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    if (user.getHeadBlock().isLiquid()) {
+    if (user.headBlock().isLiquid()) {
       return false;
     }
 
     removalPolicy = Policies.builder().build();
 
-    user.setCooldown(getDescription(), userConfig.cooldown);
-    Vector3 origin = user.getMainHandSide();
-    Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range);
+    user.addCooldown(description(), userConfig.cooldown);
+    Vector3 origin = user.mainHandSide();
+    Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range);
 
-    double length = user.getVelocity().subtract(user.getDirection()).getNorm();
+    double length = user.velocity().subtract(user.direction()).getNorm();
     double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
     stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
     return true;
@@ -88,24 +88,24 @@ public class AirPunch extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     return stream.update();
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(stream.getCollider());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(stream.collider());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -120,8 +120,8 @@ public class AirPunch extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      VectorMethods.circle(Vector3.ONE.scalarMultiply(0.75), user.getDirection(), 10).forEach(v ->
-        ParticleUtil.create(Particle.CLOUD, getBukkitLocation().add(v.toVector()))
+      VectorMethods.circle(Vector3.ONE.scalarMultiply(0.75), user.direction(), 10).forEach(v ->
+        ParticleUtil.create(Particle.CLOUD, bukkitLocation().add(v.toVector()))
           .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
       );
     }
@@ -129,14 +129,14 @@ public class AirPunch extends AbilityInstance implements Ability {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR_SOUND.play(getBukkitLocation());
+        SoundUtil.AIR_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-      Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
+      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
       entity.setVelocity(velocity.clampVelocity());
       return true;
     }

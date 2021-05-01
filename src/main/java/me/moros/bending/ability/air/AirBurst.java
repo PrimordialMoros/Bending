@@ -48,7 +48,7 @@ public class AirBurst extends AbstractBurst implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirBurst.class)
+      Bending.game().abilityManager(user.world()).firstInstance(user, AirBurst.class)
         .ifPresent(b -> b.release(true));
       return false;
     }
@@ -58,7 +58,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 
     released = false;
     if (method == ActivationMethod.FALL) {
-      if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
+      if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       release(false);
@@ -69,7 +69,7 @@ public class AirBurst extends AbstractBurst implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -77,12 +77,12 @@ public class AirBurst extends AbstractBurst implements Ability {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.createAir(user.getMainHandSide().toLocation(user.getWorld())).spawn();
-        if (!user.isSneaking()) {
+        ParticleUtil.createAir(user.mainHandSide().toLocation(user.world())).spawn();
+        if (!user.sneaking()) {
           release(false);
         }
       } else {
-        if (!user.isSneaking()) {
+        if (!user.sneaking()) {
           return UpdateResult.REMOVE;
         }
       }
@@ -92,7 +92,7 @@ public class AirBurst extends AbstractBurst implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -106,11 +106,11 @@ public class AirBurst extends AbstractBurst implements Ability {
     }
     released = true;
     if (cone) {
-      createCone(user, () -> new AirBlast(getDescription()), userConfig.coneRange);
+      createCone(user, () -> new AirBlast(description()), userConfig.coneRange);
     } else {
-      createSphere(user, () -> new AirBlast(getDescription()), userConfig.sphereRange);
+      createSphere(user, () -> new AirBlast(description()), userConfig.sphereRange);
     }
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   private static class Config extends Configurable {

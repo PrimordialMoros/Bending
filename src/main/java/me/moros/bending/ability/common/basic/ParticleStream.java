@@ -71,11 +71,11 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
   @Override
   public @NonNull UpdateResult update() {
-    Vector3 vector = controllable ? user.getDirection().scalarMultiply(speed) : dir;
+    Vector3 vector = controllable ? user.direction().scalarMultiply(speed) : dir;
     for (int i = 0; i < steps; i++) {
       Vector3 originalVector = new Vector3(location.toArray());
       location = location.add(vector);
-      if (location.distanceSq(ray.origin) > maxRange || !Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+      if (location.distanceSq(ray.origin) > maxRange || !Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
         return UpdateResult.REMOVE;
       }
       render();
@@ -91,7 +91,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       }
       collider = collider.at(location);
 
-      Block originBlock = originalVector.toBlock(user.getWorld());
+      Block originBlock = originalVector.toBlock(user.world());
       for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
         int x = NumberConversions.floor(v.getX());
         int y = NumberConversions.floor(v.getY());
@@ -101,7 +101,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
           return UpdateResult.REMOVE;
         }
         if (!MaterialUtil.isTransparent(block)) {
-          if (AABBUtils.getBlockBounds(block).intersects(collider)) {
+          if (AABBUtils.blockBounds(block).intersects(collider)) {
             if (onBlockHit(block)) {
               return UpdateResult.REMOVE;
             }
@@ -112,12 +112,12 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     return UpdateResult.CONTINUE;
   }
 
-  public @NonNull Location getBukkitLocation() {
-    return location.toLocation(user.getWorld());
+  public @NonNull Location bukkitLocation() {
+    return location.toLocation(user.world());
   }
 
   @Override
-  public @NonNull Collider getCollider() {
+  public @NonNull Collider collider() {
     return collider;
   }
 }

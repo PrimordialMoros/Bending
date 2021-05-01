@@ -69,7 +69,7 @@ public abstract class AbstractBlockLine implements Updatable {
 
     Vector3 originalVector = new Vector3(location.toArray());
     location = location.add(dir);
-    Block block = location.toBlock(user.getWorld());
+    Block block = location.toBlock(user.world());
 
     if (!isValidBlock(block)) {
       if (isValidBlock(block.getRelative(BlockFace.UP))) {
@@ -87,7 +87,7 @@ public abstract class AbstractBlockLine implements Updatable {
       return UpdateResult.REMOVE;
     }
 
-    Block originBlock = originalVector.toBlock(user.getWorld());
+    Block originBlock = originalVector.toBlock(user.world());
     for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, dir)) {
       int x = NumberConversions.floor(v.getX());
       int y = NumberConversions.floor(v.getY());
@@ -97,7 +97,7 @@ public abstract class AbstractBlockLine implements Updatable {
       }
     }
 
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return UpdateResult.REMOVE;
     }
 

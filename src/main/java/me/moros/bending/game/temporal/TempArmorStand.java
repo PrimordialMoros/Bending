@@ -79,7 +79,7 @@ public class TempArmorStand implements Temporary {
     revertTask.cancel();
   }
 
-  public @NonNull ArmorStand getArmorStand() {
+  public @NonNull ArmorStand armorStand() {
     return armorStand;
   }
 }

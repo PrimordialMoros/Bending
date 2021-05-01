@@ -41,6 +41,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -68,7 +69,7 @@ public class Collapse extends AbilityInstance implements Ability {
     recalculateConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
     if (source.isEmpty()) {
       return false;
     }
@@ -82,7 +83,7 @@ public class Collapse extends AbilityInstance implements Ability {
       int size = offset * 2 + 1;
       // Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
       boolean[][] checked = new boolean[size][size];
-      for (Block block : WorldMethods.getNearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
+      for (Block block : WorldMethods.nearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
         if (block.getY() < origin.getY()) {
           continue;
         }
@@ -91,17 +92,17 @@ public class Collapse extends AbilityInstance implements Ability {
         if (checked[dx][dz]) {
           continue;
         }
-        Optional<Pillar> pillar = getBottomValid(block).flatMap(this::createPillar);
+        Optional<Pillar> pillar = BlockMethods.getBottomValid(block, height, predicate).flatMap(this::createPillar);
         if (pillar.isPresent()) {
           checked[dx][dz] = true;
           pillars.add(pillar.get());
         }
       }
     } else {
-      getBottomValid(origin).flatMap(this::createPillar).ifPresent(pillars::add);
+      BlockMethods.getBottomValid(origin, height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
       removalPolicy = Policies.builder().build();
       return true;
     }
@@ -114,7 +115,7 @@ public class Collapse extends AbilityInstance implements Ability {
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     this.height = height;
     for (Block block : sources) {
-      getBottomValid(block).flatMap(this::createPillar).ifPresent(pillars::add);
+      BlockMethods.getBottomValid(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
       removalPolicy = Policies.builder().build();
@@ -125,12 +126,12 @@ public class Collapse extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
@@ -142,23 +143,13 @@ public class Collapse extends AbilityInstance implements Ability {
       return Optional.empty();
     }
     return Pillar.builder(user, block)
-      .setDirection(BlockFace.DOWN)
-      .setInterval(75)
-      .setPredicate(predicate).build(height);
-  }
-
-  private Optional<Block> getBottomValid(Block block) {
-    for (int i = 1; i <= height; i++) {
-      Block check = block.getRelative(BlockFace.DOWN, i);
-      if (!predicate.test(check)) {
-        return Optional.of(check.getRelative(BlockFace.UP));
-      }
-    }
-    return Optional.empty();
+      .direction(BlockFace.DOWN)
+      .interval(75)
+      .predicate(predicate).build(height);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

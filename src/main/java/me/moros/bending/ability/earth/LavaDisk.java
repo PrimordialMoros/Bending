@@ -96,7 +96,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
       return false;
     }
 
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, LavaDisk.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, LavaDisk.class)) {
       return false;
     }
 
@@ -106,7 +106,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
     currentPower = userConfig.power;
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, predicate);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
 
     if (source.isEmpty()) {
       return false;
@@ -125,23 +125,23 @@ public class LavaDisk extends AbilityInstance implements Ability {
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
     location = new Vector3(block).add(Vector3.HALF);
-    distance = location.distance(user.getEyeLocation());
+    distance = location.distance(user.eyeLocation());
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, () -> location))
-      .add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+      .add(SwappedSlotsRemovalPolicy.of(description())).build();
 
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -153,15 +153,15 @@ public class LavaDisk extends AbilityInstance implements Ability {
       return UpdateResult.REMOVE;
     }
 
-    if (!user.isSneaking()) {
+    if (!user.sneaking()) {
       launched = true;
     }
 
-    distance = location.distance(user.getEyeLocation());
-    Vector3 targetLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(launched ? userConfig.range + 5 : 3));
+    distance = location.distance(user.eyeLocation());
+    Vector3 targetLocation = user.eyeLocation().add(user.direction().scalarMultiply(launched ? userConfig.range + 5 : 3));
     Vector3 direction = targetLocation.subtract(location).normalize().scalarMultiply(0.35);
 
-    int times = user.isSneaking() ? 1 : 3;
+    int times = user.sneaking() ? 1 : 3;
     for (int i = 0; i < times; i++) {
       if (location.distanceSq(targetLocation) < 0.5 * 0.5) {
         break;
@@ -189,23 +189,23 @@ public class LavaDisk extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    Location center = location.toLocation(user.getWorld());
+    Location center = location.toLocation(user.world());
     ParticleUtil.create(Particle.BLOCK_CRACK, center)
       .count(16).offset(0.1, 0.1, 0.1).extra(0.01)
       .data(Material.MAGMA_BLOCK.createBlockData()).spawn();
     ParticleUtil.create(Particle.LAVA, center)
       .count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
     SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     return launched ? Collections.singletonList(new Sphere(location, 1.4)) : Collections.emptyList();
   }
 
@@ -215,7 +215,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
     }
     affectedEntities.add(entity);
     FireTick.ACCUMULATE.apply(user, entity, 20);
-    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    DamageUtil.damageEntity(entity, user, damage, description());
     currentPower -= userConfig.powerDiminishPerEntity;
     ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
       .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
@@ -230,7 +230,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
     if (block.isLiquid() || !TempBlock.isBendable(block)) {
       return false;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return false;
     }
     // TODO add fire ignition to specific blocks, add extra material types to destroy
@@ -250,8 +250,8 @@ public class LavaDisk extends AbilityInstance implements Ability {
   }
 
   private void displayLavaDisk() {
-    damageBlock(location.toBlock(user.getWorld()));
-    int angle = user.getYaw() + 90;
+    damageBlock(location.toBlock(user.world()));
+    int angle = user.yaw() + 90;
     double cos = FastMath.cos(-angle);
     double sin = FastMath.sin(-angle);
     int offset = 0;
@@ -262,7 +262,7 @@ public class LavaDisk extends AbilityInstance implements Ability {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
         Vector3 temp = new Vector3(length * FastMath.cos(rotAngle), 0, length * FastMath.sin(rotAngle));
-        Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.getWorld());
+        Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
         ParticleUtil.createRGB(loc, colors[index], size).spawn();
         if (length > 0.5) {
           damageBlock(loc.getBlock());
@@ -275,10 +275,10 @@ public class LavaDisk extends AbilityInstance implements Ability {
   }
 
   private boolean isLocationSafe() {
-    if (location.getY() <= 2 || location.getY() >= user.getWorld().getMaxHeight() - 1) {
+    if (location.getY() <= 2 || location.getY() >= user.world().getMaxHeight() - 1) {
       return false;
     }
-    Block block = location.toBlock(user.getWorld());
+    Block block = location.toBlock(user.world());
     if (MaterialUtil.isWater(block)) {
       BlockMethods.playLavaExtinguishEffect(block);
       return false;

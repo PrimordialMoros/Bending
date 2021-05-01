@@ -33,7 +33,7 @@ public final class AABBUtils {
    * @param block the block to check
    * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block is passable
    */
-  public static @NonNull AABB getBlockBounds(@NonNull Block block) {
+  public static @NonNull AABB blockBounds(@NonNull Block block) {
     if (block.isPassable()) {
       return DUMMY_COLLIDER;
     }
@@ -44,7 +44,7 @@ public final class AABBUtils {
    * @param entity the entity to check
    * @return the provided entity's {@link AABB}
    */
-  public static @NonNull AABB getEntityBounds(@NonNull Entity entity) {
+  public static @NonNull AABB entityBounds(@NonNull Entity entity) {
     return new AABB(new Vector3(entity.getBoundingBox().getMin()), new Vector3(entity.getBoundingBox().getMax()));
   }
 }

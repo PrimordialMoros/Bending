@@ -52,7 +52,7 @@ public class Sphere implements Collider {
   }
 
   public boolean intersects(@NonNull OBB obb) {
-    Vector3 v = center.subtract(obb.getClosestPosition(center));
+    Vector3 v = center.subtract(obb.closestPosition(center));
     return v.dotProduct(v) <= radius * radius;
   }
 
@@ -82,12 +82,12 @@ public class Sphere implements Collider {
   }
 
   @Override
-  public @NonNull Vector3 getPosition() {
+  public @NonNull Vector3 position() {
     return center;
   }
 
   @Override
-  public @NonNull Vector3 getHalfExtents() {
+  public @NonNull Vector3 halfExtents() {
     return new Vector3(radius, radius, radius);
   }
 

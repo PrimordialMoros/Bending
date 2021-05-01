@@ -80,21 +80,21 @@ public class IceCrawl extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+      Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
     if (source.isEmpty()) {
       return false;
     }
 
-    Optional<IceCrawl> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, IceCrawl.class);
+    Optional<IceCrawl> line = Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class);
     if (method == ActivationMethod.SNEAK && line.isPresent()) {
-      State state = line.get().states.getCurrent();
+      State state = line.get().states.current();
       if (state instanceof SelectedSource) {
         ((SelectedSource) state).reselect(source.get());
       }
@@ -105,18 +105,18 @@ public class IceCrawl extends AbilityInstance implements Ability {
       .addState(new SelectedSource(user, source.get(), userConfig.selectRange))
       .start();
 
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (iceLine != null) {
@@ -130,29 +130,29 @@ public class IceCrawl extends AbilityInstance implements Ability {
     if (iceLine != null) {
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       state.complete();
-      Optional<Block> src = states.getChainStore().stream().findAny();
+      Optional<Block> src = states.chainStore().stream().findAny();
       if (src.isPresent()) {
         iceLine = new Line(src.get());
         removalPolicy = Policies.builder().build();
-        user.setCooldown(getDescription(), userConfig.cooldown);
+        user.addCooldown(description(), userConfig.cooldown);
       }
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (iceLine == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(iceLine.getCollider());
+    return Collections.singletonList(iceLine.collider());
   }
 
   private class Line extends AbstractLine {
@@ -165,20 +165,20 @@ public class IceCrawl extends AbilityInstance implements Ability {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.getWorld());
+      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.world());
       new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.ICE_SOUND.play(location.toLocation(user.getWorld()));
+        SoundUtil.ICE_SOUND.play(location.toLocation(user.world()));
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       if (entity.isValid() && entity instanceof LivingEntity) {
         Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
         new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);

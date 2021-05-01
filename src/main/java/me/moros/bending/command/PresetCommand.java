@@ -45,11 +45,11 @@ public class PresetCommand extends BaseCommand {
   @Subcommand("list|ls|l")
   @Description("List all available presets")
   public static void onPresetList(BendingPlayer player) {
-    Collection<String> presets = player.getPresets();
+    Collection<String> presets = player.presets();
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(player);
     } else {
-      player.getEntity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+      player.entity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
     }
   }
 
@@ -69,7 +69,7 @@ public class PresetCommand extends BaseCommand {
       Message.EMPTY_PRESET.send(player);
       return;
     }
-    player.addPreset(preset, result -> player.getEntity().sendMessage(result.getMessage(input)));
+    player.addPreset(preset, result -> player.entity().sendMessage(result.message(input)));
   }
 
   @Subcommand("remove|rm|r|delete|del|d")
@@ -77,9 +77,9 @@ public class PresetCommand extends BaseCommand {
   @Description("Remove an existing preset")
   public static void onPresetRemove(BendingPlayer player, Preset preset) {
     if (player.removePreset(preset)) {
-      Message.PRESET_REMOVE_SUCCESS.send(player, preset.getName());
+      Message.PRESET_REMOVE_SUCCESS.send(player, preset.name());
     } else {
-      Message.PRESET_REMOVE_FAIL.send(player, preset.getName());
+      Message.PRESET_REMOVE_FAIL.send(player, preset.name());
     }
   }
 
@@ -89,9 +89,9 @@ public class PresetCommand extends BaseCommand {
   public static void onPresetBind(BendingPlayer player, Preset preset) {
     int count = player.bindPreset(preset);
     if (count > 0) {
-      Message.PRESET_BIND_SUCCESS.send(player, count, preset.getName());
+      Message.PRESET_BIND_SUCCESS.send(player, count, preset.name());
     } else {
-      Message.PRESET_BIND_FAIL.send(player, preset.getName());
+      Message.PRESET_BIND_FAIL.send(player, preset.name());
     }
   }
 }

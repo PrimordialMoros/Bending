@@ -71,7 +71,7 @@ public class AirBreath extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirBreath.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirBreath.class)) {
       return false;
     }
 
@@ -81,7 +81,7 @@ public class AirBreath extends AbilityInstance implements Ability {
     removalPolicy = Policies.builder()
       .add(Policies.NOT_SNEAKING)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
     return true;
@@ -89,17 +89,17 @@ public class AirBreath extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    user.getEntity().setRemainingAir(user.getEntity().getRemainingAir() - 5);
+    user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
     streams.add(new AirStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
@@ -107,17 +107,17 @@ public class AirBreath extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   private class AirStream extends ParticleStream {
@@ -132,7 +132,7 @@ public class AirBreath extends AbilityInstance implements Ability {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = getBukkitLocation();
+      Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       if (MaterialUtil.isWater(spawnLoc.getBlock())) {
@@ -145,7 +145,7 @@ public class AirBreath extends AbilityInstance implements Ability {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.AIR_SOUND.play(getBukkitLocation());
+        SoundUtil.AIR_SOUND.play(bukkitLocation());
       }
     }
 
@@ -166,9 +166,9 @@ public class AirBreath extends AbilityInstance implements Ability {
         return false;
       }
       BlockMethods.tryCoolLava(user, block);
-      if (!MaterialUtil.isTransparentOrWater(block) && user.getPitch() > 30) {
-        user.getEntity().setVelocity(user.getDirection().scalarMultiply(-userConfig.knockback).clampVelocity());
-        FireTick.extinguish(user.getEntity());
+      if (!MaterialUtil.isTransparentOrWater(block) && user.pitch() > 30) {
+        user.entity().setVelocity(user.direction().scalarMultiply(-userConfig.knockback).clampVelocity());
+        FireTick.extinguish(user.entity());
       }
       return !MaterialUtil.isWater(block);
     }

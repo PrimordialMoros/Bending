@@ -34,7 +34,7 @@ public enum PresetCreateResult {
     this.message = message;
   }
 
-  public @NonNull Component getMessage(@NonNull String name) {
+  public @NonNull Component message(@NonNull String name) {
     return message.build(name);
   }
 }

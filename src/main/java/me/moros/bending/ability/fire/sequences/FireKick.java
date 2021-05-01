@@ -51,7 +51,6 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 
 public class FireKick extends AbilityInstance implements Ability {
   private static final Config config = new Config();
@@ -71,22 +70,22 @@ public class FireKick extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    double height = user.getEntity().getEyeHeight();
-    Vector3 direction = user.getDirection().scalarMultiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
-    Vector3 origin = user.getLocation();
-    Vector3 dir = user.getDirection();
+    double height = user.entity().getEyeHeight();
+    Vector3 direction = user.direction().scalarMultiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
+    Vector3 origin = user.location();
+    Vector3 dir = user.direction();
     Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
     VectorMethods.createArc(direction, rotateAxis, FastMath.PI / 30, 11).forEach(
       v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
     );
 
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -96,12 +95,12 @@ public class FireKick extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -113,23 +112,23 @@ public class FireKick extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      ParticleUtil.createFire(user, getBukkitLocation()).count(2)
+      ParticleUtil.createFire(user, bukkitLocation()).count(2)
         .offset(0.25, 0.25, 0.25).extra(0.01).spawn();
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE_SOUND.play(getBukkitLocation());
+        SoundUtil.FIRE_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
-        DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-        FireTick.LARGER.apply(user, entity, 20);
+      if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
       }
       return true;
     }
@@ -146,6 +145,8 @@ public class FireKick extends AbilityInstance implements Ability {
     public long cooldown;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.SPEED)
@@ -157,6 +158,7 @@ public class FireKick extends AbilityInstance implements Ability {
 
       cooldown = abilityNode.node("cooldown").getLong(4000);
       damage = abilityNode.node("damage").getDouble(2.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(7.0);
       speed = abilityNode.node("speed").getDouble(1.0);
 

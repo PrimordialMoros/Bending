@@ -83,12 +83,12 @@ public final class AttributeSystem {
 
   // Recalculates all of the config values for the user's instances.
   public void recalculate(@NonNull User user) {
-    Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user).forEach(Ability::recalculateConfig);
+    Bending.game().abilityManager(user.world()).userInstances(user).forEach(Ability::recalculateConfig);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "deprecation"})
   public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
-    User user = ability.getUser();
+    User user = ability.user();
     if (!modifierMap.containsKey(user)) {
       return config;
     }
@@ -121,7 +121,7 @@ public final class AttributeSystem {
     try {
       value = ((Number) field.get(config)).doubleValue();
     } catch (IllegalAccessException e) {
-      Bending.getLog().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage());
       return false;
     }
 
@@ -130,13 +130,13 @@ public final class AttributeSystem {
     Collection<Double> multiplicativeOperations = new ArrayList<>();
     for (UserModifier userModifier : userModifiers) {
       AttributeModifier modifier = userModifier.modifier;
-      if (hasAttribute(field, modifier.getAttribute())) {
-        if (modifier.getType() == ModifierOperation.ADDITIVE) {
-          addOperation += modifier.getAmount();
-        } else if (modifier.getType() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
-          multiplyOperation += modifier.getAmount();
-        } else if (modifier.getType() == ModifierOperation.MULTIPLICATIVE) {
-          multiplicativeOperations.add(modifier.getAmount());
+      if (hasAttribute(field, modifier.attribute())) {
+        if (modifier.type() == ModifierOperation.ADDITIVE) {
+          addOperation += modifier.value();
+        } else if (modifier.type() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
+          multiplyOperation += modifier.value();
+        } else if (modifier.type() == ModifierOperation.MULTIPLICATIVE) {
+          multiplicativeOperations.add(modifier.value());
         }
       }
     }
@@ -147,7 +147,7 @@ public final class AttributeSystem {
     try {
       field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
     } catch (IllegalAccessException e) {
-      Bending.getLog().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage());
       return false;
     }
 
@@ -173,11 +173,11 @@ public final class AttributeSystem {
     }
   }
 
-  public static @NonNull ModifyPolicy getElementPolicy(@NonNull Element element) {
-    return ability -> ability.getDescription().getElement() == element;
+  public static @NonNull ModifyPolicy elementPolicy(@NonNull Element element) {
+    return ability -> ability.description().element() == element;
   }
 
-  public static @NonNull ModifyPolicy getAbilityPolicy(@NonNull AbilityDescription desc) {
-    return ability -> ability.getDescription().equals(desc);
+  public static @NonNull ModifyPolicy abilityPolicy(@NonNull AbilityDescription desc) {
+    return ability -> ability.description().equals(desc);
   }
 }

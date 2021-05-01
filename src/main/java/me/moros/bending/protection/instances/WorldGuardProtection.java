@@ -53,7 +53,7 @@ public class WorldGuardProtection implements Protection {
     RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
     Location location = BukkitAdapter.adapt(block.getLocation());
     if (user instanceof BendingPlayer) {
-      LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(((BendingPlayer) user).getEntity());
+      LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(((BendingPlayer) user).entity());
       World world = BukkitAdapter.adapt(block.getWorld());
       if (worldGuard.getPlatform().getSessionManager().hasBypass(player, world)) {
         return true;

@@ -70,14 +70,14 @@ public final class MaterialUtil {
     ORES.put(Material.GOLD_ORE, Material.GOLD_INGOT);
     ORES.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
 
-    NamespacedKey key = Bending.getLayer().getMaterialKey();
+    NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     BREAKABLE_PLANTS = new MaterialSetTag(key)
       .add(Tag.SAPLINGS.getValues())
       .add(Tag.FLOWERS.getValues())
       .add(Tag.SMALL_FLOWERS.getValues())
       .add(Tag.TALL_FLOWERS.getValues())
       .add(Tag.CROPS.getValues())
-      .add(MaterialTags.MUSHROOMS)
+      .add(MaterialTags.MUSHROOMS.getValues())
       .add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN,
         Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakble plants", 38);
 
@@ -165,9 +165,7 @@ public final class MaterialUtil {
   public static @NonNull BlockData getSolidType(@NonNull BlockData data, BlockData def) {
     if (MaterialTags.CONCRETE_POWDER.isTagged(data)) {
       Material material = Material.getMaterial(data.getMaterial().name().replace("_POWDER", ""));
-      if (material != null) {
-        return material.createBlockData();
-      }
+      return material == null ? def : material.createBlockData();
     }
     switch (data.getMaterial()) {
       case SAND:
@@ -223,11 +221,11 @@ public final class MaterialUtil {
     return blockData instanceof Levelled && ((Levelled) blockData).getLevel() == 0;
   }
 
-  public static @NonNull BlockData getLavaData(int level) {
+  public static @NonNull BlockData lavaData(int level) {
     return Material.LAVA.createBlockData(d -> ((Levelled) d).setLevel((level < 0 || level > ((Levelled) d).getMaximumLevel()) ? 0 : level));
   }
 
-  public static @NonNull BlockData getWaterData(int level) {
+  public static @NonNull BlockData waterData(int level) {
     return Material.WATER.createBlockData(d -> ((Levelled) d).setLevel((level < 0 || level > ((Levelled) d).getMaximumLevel()) ? 0 : level));
   }
 }

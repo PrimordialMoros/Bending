@@ -101,14 +101,14 @@ public class WaterRing extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
-    Optional<WaterRing> ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class);
+    Optional<WaterRing> ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class);
     if (ring.isPresent()) {
-      if (method == ActivationMethod.ATTACK && user.getSelectedAbilityName().equals("WaterRing")) {
-        if (user.isSneaking()) {
-          Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(ring.get());
+      if (method == ActivationMethod.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
+        if (user.sneaking()) {
+          Bending.game().abilityManager(user.world()).destroyInstance(ring.get());
         } else {
           ring.get().launchShard();
         }
@@ -118,7 +118,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
     this.user = user;
     recalculateConfig();
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterBendable);
     if (source.isEmpty()) {
       return false;
     }
@@ -131,7 +131,7 @@ public class WaterRing extends AbilityInstance implements Ability {
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
     if (waveDesc == null) {
-      waveDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterWave").orElseThrow(RuntimeException::new);
+      waveDesc = Bending.game().abilityRegistry().abilityDescription("WaterWave").orElseThrow(RuntimeException::new);
     }
 
     return true;
@@ -139,7 +139,7 @@ public class WaterRing extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   public @NonNull List<Block> complete() {
@@ -156,8 +156,8 @@ public class WaterRing extends AbilityInstance implements Ability {
   }
 
   private Block getClosestRingBlock() {
-    Vector3 dir = user.getDirection().setY(0).normalize().scalarMultiply(radius);
-    Block target = new Vector3(user.getHeadBlock()).add(Vector3.HALF).add(dir).toBlock(user.getWorld());
+    Vector3 dir = user.direction().setY(0).normalize().scalarMultiply(radius);
+    Block target = new Vector3(user.headBlock()).add(Vector3.HALF).add(dir).toBlock(user.world());
     Block result = ring.get(0);
     Vector3 targetVector = new Vector3(target);
     double minDistance = Double.MAX_VALUE;
@@ -175,20 +175,20 @@ public class WaterRing extends AbilityInstance implements Ability {
   }
 
   private int getDirectionIndex() {
-    Vector3 dir = user.getDirection().setY(0).normalize().scalarMultiply(radius);
-    Block target = new Vector3(user.getHeadBlock()).add(Vector3.HALF).add(dir).toBlock(user.getWorld());
+    Vector3 dir = user.direction().setY(0).normalize().scalarMultiply(radius);
+    Block target = new Vector3(user.headBlock()).add(Vector3.HALF).add(dir).toBlock(user.world());
     return FastMath.max(0, ring.indexOf(target));
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (completed || removalPolicy.test(user, getDescription())) {
+    if (completed || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (!ready) {
       if (states.update() == UpdateResult.REMOVE) {
-        if (states.isComplete() && !states.getChainStore().isEmpty()) {
-          ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
+        if (states.completed() && !states.chainStore().isEmpty()) {
+          ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
           sources = ring.size();
           ready = true;
         } else {
@@ -198,30 +198,30 @@ public class WaterRing extends AbilityInstance implements Ability {
       return UpdateResult.CONTINUE;
     }
     cleanAll();
-    if (sources <= 0 || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+    if (sources <= 0 || !Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
       return UpdateResult.REMOVE;
     }
-    Block current = user.getLocBlock();
+    Block current = user.locBlock();
     if (!current.equals(lastBlock)) {
       ring.clear();
-      ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
+      ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
       Collections.rotate(ring, index);
       lastBlock = current;
     }
 
-    if (user.isSneaking() && !user.getSelectedAbilityName().equals("OctopusForm")) {
+    if (user.sneaking() && !user.selectedAbilityName().equals("OctopusForm")) {
       long time = System.currentTimeMillis();
       if (sneakStartTime == 0) {
         sneakStartTime = time;
         ringNextShrinkTime = time + 250;
       } else {
         if (ringNextShrinkTime > time && radius > 1.3) {
-          setRadius(radius - 0.3);
+          radius(radius - 0.3);
           ringNextShrinkTime = time + 250;
         }
         if (time > sneakStartTime + userConfig.chargeTime) {
           if (!complete().isEmpty()) {
-            Bending.getGame().getActivationController().activateAbility(user, ActivationMethod.SNEAK, waveDesc);
+            Bending.game().activationController().activateAbility(user, ActivationMethod.SNEAK, waveDesc);
           }
           return UpdateResult.REMOVE;
         }
@@ -229,11 +229,11 @@ public class WaterRing extends AbilityInstance implements Ability {
     } else {
       sneakStartTime = 0;
       if (radius < RING_RADIUS) {
-        setRadius(FastMath.min(radius + 0.3, RING_RADIUS));
+        radius(FastMath.min(radius + 0.3, RING_RADIUS));
       }
     }
 
-    if (ring.stream().noneMatch(b -> Bending.getGame().getProtectionSystem().canBuild(user, b))) {
+    if (ring.stream().noneMatch(b -> Bending.game().protectionSystem().canBuild(user, b))) {
       return UpdateResult.REMOVE;
     }
     Collections.rotate(ring, 1);
@@ -250,7 +250,7 @@ public class WaterRing extends AbilityInstance implements Ability {
     }
 
     if (userConfig.affectEntities) {
-      CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), radius + 2), this::checkCollisions, false);
+      CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), radius + 2), this::checkCollisions, false);
     }
 
     shards.removeIf(shard -> shard.update() == UpdateResult.REMOVE);
@@ -263,10 +263,10 @@ public class WaterRing extends AbilityInstance implements Ability {
         return false;
       }
       AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block.getLocation()));
-      AABB entityBounds = AABBUtils.getEntityBounds(entity);
+      AABB entityBounds = AABBUtils.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
-        DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-        Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.getEyeLocation()).setY(0).normalize();
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
         entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
         affectedEntities.add(entity);
       }
@@ -278,18 +278,18 @@ public class WaterRing extends AbilityInstance implements Ability {
     return ready;
   }
 
-  public void setRadius(double radius) {
+  public double radius() {
+    return radius;
+  }
+
+  public void radius(double radius) {
     if (radius < 1 || radius > 8 || this.radius == radius) {
       return;
     }
     this.radius = radius;
     cleanAll();
     ring.clear();
-    ring.addAll(BlockMethods.createBlockRing(user.getHeadBlock(), this.radius));
-  }
-
-  public double getRadius() {
-    return radius;
+    ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
   }
 
   private void cleanAll() {
@@ -304,12 +304,12 @@ public class WaterRing extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   private void launchShard() {
-    if (!user.canBend(getDescription()) || ring.isEmpty() || launchedShards >= userConfig.shardAmount) {
+    if (!user.canBend(description()) || ring.isEmpty() || launchedShards >= userConfig.shardAmount) {
       return;
     }
     long time = System.currentTimeMillis();
@@ -317,7 +317,7 @@ public class WaterRing extends AbilityInstance implements Ability {
       launchedShards++;
       nextShardTime = time + userConfig.cooldown;
       Vector3 origin = new Vector3(getClosestRingBlock());
-      Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.shardRange + radius);
+      Vector3 lookingDir = user.direction().scalarMultiply(userConfig.shardRange + radius);
       shards.add(new IceShard(new Ray(origin, lookingDir)));
     }
   }
@@ -331,20 +331,20 @@ public class WaterRing extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      ParticleUtil.create(Particle.SNOW_SHOVEL, getBukkitLocation()).count(3)
+      ParticleUtil.create(Particle.SNOW_SHOVEL, bukkitLocation()).count(3)
         .offset(0.25, 0.25, 0.25).spawn();
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.ICE_SOUND.play(getBukkitLocation());
+        SoundUtil.ICE_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.shardDamage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.shardDamage, description());
       return true;
     }
 

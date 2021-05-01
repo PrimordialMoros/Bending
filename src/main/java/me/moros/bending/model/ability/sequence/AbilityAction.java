@@ -39,11 +39,11 @@ public final class AbilityAction {
     hashcode = Objects.hash(desc, action);
   }
 
-  public @NonNull AbilityDescription getAbilityDescription() {
+  public @NonNull AbilityDescription abilityDescription() {
     return desc;
   }
 
-  public @NonNull ActivationMethod getAction() {
+  public @NonNull ActivationMethod action() {
     return action;
   }
 
@@ -63,6 +63,6 @@ public final class AbilityAction {
 
   @Override
   public String toString() {
-    return desc.getName() + ": " + action.name();
+    return desc.name() + ": " + action.name();
   }
 }

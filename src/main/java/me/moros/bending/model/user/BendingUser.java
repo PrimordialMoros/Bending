@@ -50,7 +50,7 @@ public class BendingUser implements User {
     this.entity = entity;
     cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
       .removalListener((key, value, cause) ->
-        Tasker.simpleTask(() -> Bending.getEventBus().postCooldownRemoveEvent(this, key), 0)
+        Tasker.simpleTask(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0)
       )
       .scheduler(Scheduler.systemScheduler())
       .build();
@@ -59,12 +59,12 @@ public class BendingUser implements User {
   }
 
   @Override
-  public @NonNull LivingEntity getEntity() {
+  public @NonNull LivingEntity entity() {
     return entity;
   }
 
   @Override
-  public @NonNull ElementHolder getElementHolder() {
+  public @NonNull ElementHolder elementHolder() {
     return elementHolder;
   }
 
@@ -76,33 +76,33 @@ public class BendingUser implements User {
     slotContainer.fromPreset(preset);
     validateSlots();
     if (this instanceof BendingPlayer) {
-      Bending.getGame().getBoardManager().updateBoard((Player) getEntity());
+      Bending.game().boardManager().updateBoard((Player) entity());
     }
-    Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.MULTIPLE);
+    Bending.eventBus().postBindChangeEvent(this, BindChangeEvent.Result.MULTIPLE);
     return preset.compare(createPresetFromSlots(""));
   }
 
   @Override
-  public Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot) {
-    return Optional.ofNullable(slotContainer.getAbility(slot));
+  public Optional<AbilityDescription> slotAbility(@IntRange(from = 1, to = 9) int slot) {
+    return Optional.ofNullable(slotContainer.slot(slot));
   }
 
   @Override
-  public void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
-    slotContainer.setAbility(slot, desc);
+  public void slotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
+    slotContainer.slot(slot, desc);
   }
 
   @Override
-  public void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
-    setSlotAbilityInternal(slot, desc);
+  public void slotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
+    slotAbilityInternal(slot, desc);
     if (this instanceof BendingPlayer) {
-      Bending.getGame().getBoardManager().updateBoardSlot((Player) getEntity(), desc);
+      Bending.game().boardManager().updateBoardSlot((Player) entity(), desc);
     }
-    Bending.getEventBus().postBindChangeEvent(this, BindChangeEvent.Result.SINGLE);
+    Bending.eventBus().postBindChangeEvent(this, BindChangeEvent.Result.SINGLE);
   }
 
   @Override
-  public Optional<AbilityDescription> getSelectedAbility() {
+  public Optional<AbilityDescription> selectedAbility() {
     return Optional.empty(); // Non-player bending users don't have anything selected.
   }
 
@@ -112,25 +112,25 @@ public class BendingUser implements User {
   }
 
   @Override
-  public void setCooldown(@NonNull AbilityDescription desc, long duration) {
+  public void addCooldown(@NonNull AbilityDescription desc, long duration) {
     if (duration <= 0) {
       return;
     }
     cooldowns.put(desc, duration);
-    Bending.getEventBus().postCooldownAddEvent(this, desc, duration);
+    Bending.eventBus().postCooldownAddEvent(this, desc, duration);
   }
 
   @Override
-  public @NonNull CompositeBendingConditional getBendingConditional() {
+  public @NonNull CompositeBendingConditional bendingConditional() {
     return bendingConditional;
   }
 
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof BendingUser) {
-      return getEntity().equals(((BendingUser) obj).getEntity());
+      return entity().equals(((BendingUser) obj).entity());
     }
-    return getEntity().equals(obj);
+    return entity().equals(obj);
   }
 
   @Override
@@ -142,8 +142,8 @@ public class BendingUser implements User {
     if (entity instanceof Player) {
       return Optional.empty();
     }
-    if (Bending.getGame().getBenderRegistry().isBender(entity)) {
-      return Bending.getGame().getBenderRegistry().getBendingUser(entity);
+    if (Bending.game().benderRegistry().isBender(entity)) {
+      return Bending.game().benderRegistry().user(entity);
     }
     return Optional.of(new BendingUser(entity));
   }

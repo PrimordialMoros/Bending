@@ -42,17 +42,17 @@ import org.bukkit.util.NumberConversions;
  */
 public final class WorldMethods {
   /**
-   * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
+   * @return {@link #nearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius) {
-    return getNearbyBlocks(location, radius, block -> true, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius) {
+    return nearbyBlocks(location, radius, block -> true, 0);
   }
 
   /**
-   * @return {@link #getNearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
+   * @return {@link #nearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
-    return getNearbyBlocks(location, radius, predicate, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
+    return nearbyBlocks(location, radius, predicate, 0);
   }
 
   /**
@@ -64,7 +64,7 @@ public final class WorldMethods {
    * @param limit the amount of blocks to collect
    * @return all collected blocks
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
     int r = NumberConversions.ceil(radius) + 1;
     double originX = location.getX();
     double originY = location.getY();
@@ -92,17 +92,17 @@ public final class WorldMethods {
   }
 
   /**
-   * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
+   * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box) {
-    return getNearbyBlocks(world, box, block -> true, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box) {
+    return nearbyBlocks(world, box, block -> true, 0);
   }
 
   /**
-   * @return {@link #getNearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
+   * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
-    return getNearbyBlocks(world, box, predicate, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
+    return nearbyBlocks(world, box, predicate, 0);
   }
 
   /**
@@ -114,7 +114,7 @@ public final class WorldMethods {
    * @param limit the amount of blocks to collect
    * @return all collected blocks
    */
-  public static @NonNull List<@NonNull Block> getNearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
     if (box == AABBUtils.DUMMY_COLLIDER) {
       return Collections.emptyList();
     }

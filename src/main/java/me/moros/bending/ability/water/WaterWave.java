@@ -69,7 +69,7 @@ public class WaterWave extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterWave.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterWave.class)) {
       return false;
     }
 
@@ -83,31 +83,31 @@ public class WaterWave extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+    if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
       return UpdateResult.REMOVE;
     }
 
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
 
-    user.getEntity().setVelocity(user.getDirection().scalarMultiply(userConfig.speed * factor).toVector());
-    user.getEntity().setFallDistance(0);
+    user.entity().setVelocity(user.direction().scalarMultiply(userConfig.speed * factor).toVector());
+    user.entity().setFallDistance(0);
 
-    Vector3 center = user.getLocation().add(Vector3.MINUS_J);
-    for (Block block : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparent)) {
+    Vector3 center = user.location().add(Vector3.MINUS_J);
+    for (Block block : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
       }
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      if (!Bending.game().protectionSystem().canBuild(user, block)) {
         continue;
       }
       TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);
@@ -119,7 +119,7 @@ public class WaterWave extends AbilityInstance implements Ability {
   }
 
   private void scheduleRevert(TempBlock tb) {
-    final Block block = tb.getBlock();
+    final Block block = tb.block();
     Tasker.newChain().delay(20).sync(() -> {
       if (ice) {
         TempBlock.create(block, Material.ICE.createBlockData(), 1000);
@@ -134,7 +134,7 @@ public class WaterWave extends AbilityInstance implements Ability {
       return false;
     }
     affectedEntities.add(entity);
-    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    DamageUtil.damageEntity(entity, user, userConfig.damage, description());
     int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
     PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
     return true;
@@ -145,18 +145,18 @@ public class WaterWave extends AbilityInstance implements Ability {
   }
 
   public static void freeze(User user) {
-    if (user.getSelectedAbilityName().equals("PhaseChange")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
+    if (user.selectedAbilityName().equals("PhaseChange")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
     }
   }
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

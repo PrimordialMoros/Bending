@@ -81,7 +81,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FrostBreath.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, FrostBreath.class)) {
       return false;
     }
 
@@ -92,25 +92,25 @@ public class FrostBreath extends AbilityInstance implements Ability {
       .add(Policies.NOT_SNEAKING)
       .add(Policies.IN_LIQUID)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
-    user.getEntity().setRemainingAir(user.getEntity().getRemainingAir() - 5);
+    user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
     streams.add(new FrostStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
@@ -118,17 +118,17 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   private class FrostStream extends ParticleStream {
@@ -142,7 +142,7 @@ public class FrostBreath extends AbilityInstance implements Ability {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = getBukkitLocation();
+      Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
@@ -153,8 +153,8 @@ public class FrostBreath extends AbilityInstance implements Ability {
 
     @Override
     public void postRender() {
-      for (Block block : WorldMethods.getNearbyBlocks(getBukkitLocation(), collider.radius)) {
-        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      for (Block block : WorldMethods.nearbyBlocks(bukkitLocation(), collider.radius)) {
+        if (!Bending.game().protectionSystem().canBuild(user, block)) {
           continue;
         }
         onBlockHit(block);

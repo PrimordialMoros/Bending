@@ -39,7 +39,7 @@ public final class BoardManager {
 
   public BoardManager() {
     scoreboardPlayers = new HashMap<>();
-    enabled = Bending.getConfigManager().getConfig().node("properties", "bending-board").getBoolean(true);
+    enabled = Bending.configManager().config().node("properties", "bending-board").getBoolean(true);
   }
 
   /**
@@ -47,7 +47,7 @@ public final class BoardManager {
    * @param player the player to force toggle
    */
   public void forceToggleScoreboard(@NonNull Player player) {
-    if (Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+    if (Bending.game().isDisabledWorld(player.getWorld().getUID())) {
       UUID uuid = player.getUniqueId();
       if (scoreboardPlayers.containsKey(uuid)) {
         scoreboardPlayers.get(uuid).disableScoreboard();
@@ -59,7 +59,7 @@ public final class BoardManager {
   }
 
   public boolean toggleScoreboard(@NonNull Player player) {
-    if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+    if (!enabled || Bending.game().isDisabledWorld(player.getWorld().getUID())) {
       return false;
     }
     UUID uuid = player.getUniqueId();
@@ -78,7 +78,7 @@ public final class BoardManager {
    * @return true if player can use the bending board, false otherwise
    */
   public boolean canUseScoreboard(@NonNull Player player) {
-    if (!enabled || Bending.getGame().isDisabledWorld(player.getWorld().getUID())) {
+    if (!enabled || Bending.game().isDisabledWorld(player.getWorld().getUID())) {
       return false;
     }
     UUID uuid = player.getUniqueId();
@@ -110,7 +110,7 @@ public final class BoardManager {
 
   public void changeActiveSlot(@NonNull Player player, int oldSlot, int newSlot) {
     if (canUseScoreboard(player)) {
-      scoreboardPlayers.get(player.getUniqueId()).setActiveSlot(++oldSlot, ++newSlot);
+      scoreboardPlayers.get(player.getUniqueId()).activeSlot(++oldSlot, ++newSlot);
     }
   }
 

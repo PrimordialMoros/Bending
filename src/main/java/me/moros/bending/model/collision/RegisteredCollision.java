@@ -39,19 +39,19 @@ public final class RegisteredCollision {
     this.removeSecond = removeSecond;
   }
 
-  public @NonNull AbilityDescription getFirst() {
+  public @NonNull AbilityDescription first() {
     return first;
   }
 
-  public @NonNull AbilityDescription getSecond() {
+  public @NonNull AbilityDescription second() {
     return second;
   }
 
-  public boolean shouldRemoveFirst() {
+  public boolean removeFirst() {
     return removeFirst;
   }
 
-  public boolean shouldRemoveSecond() {
+  public boolean removeSecond() {
     return removeSecond;
   }
 
@@ -76,6 +76,6 @@ public final class RegisteredCollision {
 
   @Override
   public String toString() {
-    return first.getName() + " (Remove: " + removeFirst + ") - " + second.getName() + "(Remove: " + removeSecond + ")";
+    return first.name() + " (Remove: " + removeFirst + ") - " + second.name() + "(Remove: " + removeSecond + ")";
   }
 }

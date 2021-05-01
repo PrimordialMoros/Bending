@@ -57,23 +57,23 @@ public class FastSwim extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       return UpdateResult.CONTINUE;
     }
 
-    if (MaterialUtil.isWater(user.getLocBlock())) {
-      PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
+    if (MaterialUtil.isWater(user.locBlock())) {
+      PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
     }
     return UpdateResult.CONTINUE;
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

@@ -42,7 +42,6 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Expiring;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -82,7 +81,7 @@ public class FireWall extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    int pitch = user.getPitch();
+    int pitch = user.pitch();
 
     if (FastMath.abs(pitch) > 50) {
       return false;
@@ -92,17 +91,17 @@ public class FireWall extends AbilityInstance implements Ability {
     double hh = userConfig.height / 2.0;
 
     AABB aabb = new AABB(new Vector3(-hw, -hh, -0.5), new Vector3(hw, hh, 0.5));
-    Vector3 right = user.getDirection().crossProduct(Vector3.PLUS_J).normalize();
-    Vector3 location = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.range));
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, location.toBlock(user.getWorld()))) {
+    Vector3 right = user.direction().crossProduct(Vector3.PLUS_J).normalize();
+    Vector3 location = user.eyeLocation().add(user.direction().scalarMultiply(userConfig.range));
+    if (!Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
       return false;
     }
 
-    Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.getYaw()), RotationConvention.VECTOR_OPERATOR);
+    Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.yaw()), RotationConvention.VECTOR_OPERATOR);
     rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(pitch), RotationConvention.VECTOR_OPERATOR));
     collider = new OBB(aabb, rotation).addPosition(location);
-    double radius = collider.getHalfExtents().maxComponent() + 1;
-    blocks = WorldMethods.getNearbyBlocks(location.toLocation(user.getWorld()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
+    double radius = collider.halfExtents().maxComponent() + 1;
+    blocks = WorldMethods.nearbyBlocks(location.toLocation(user.world()), radius, b -> collider.contains(new Vector3(b)) && MaterialUtil.isTransparent(b));
     if (blocks.isEmpty()) {
       return false;
     }
@@ -110,18 +109,18 @@ public class FireWall extends AbilityInstance implements Ability {
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
     nextRenderTime = 0;
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     long time = System.currentTimeMillis();
@@ -156,23 +155,17 @@ public class FireWall extends AbilityInstance implements Ability {
       return true;
     }
 
-    boolean canBurn = Bending.getGame().getBenderRegistry().getBendingUser((LivingEntity) entity).map(HeatControl::canBurn).orElse(true);
-    if (!canBurn) {
-      return false;
+    if (Bending.game().benderRegistry().user((LivingEntity) entity).map(HeatControl::canBurn).orElse(true)) {
+      FireTick.ACCUMULATE.apply(user, entity, 10);
+      Vector3 pos = EntityMethods.entityCenter(entity);
+      Vector3 velocity = pos.subtract(collider.closestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
+      entity.setVelocity(velocity.clampVelocity());
     }
-
-    ((LivingEntity) entity).setNoDamageTicks(0);
-    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-    FireTick.ACCUMULATE.apply(user, entity, 10);
-
-    Vector3 pos = EntityMethods.getEntityCenter(entity);
-    Vector3 velocity = pos.subtract(collider.getClosestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
-    entity.setVelocity(velocity.clampVelocity());
-    return true;
+    return false;
   }
 
-  public void setWall(Collection<Block> blocks, OBB collider) {
-    if (blocks == null || blocks.isEmpty()) {
+  public void wall(@NonNull Collection<@NonNull Block> blocks, @NonNull OBB collider) {
+    if (blocks.isEmpty()) {
       return;
     }
     this.blocks = blocks;
@@ -184,24 +177,24 @@ public class FireWall extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     return Collections.singletonList(collider);
   }
 
-  public double getWidth() {
+  public double width() {
     return userConfig.width;
   }
 
-  public double getHeight() {
+  public double height() {
     return userConfig.height;
   }
 
-  public double getRange() {
+  public double range() {
     return userConfig.range;
   }
 
@@ -212,10 +205,10 @@ public class FireWall extends AbilityInstance implements Ability {
     public double height;
     @Attribute(Attribute.RADIUS)
     public double width;
-    @Attribute(Attribute.DAMAGE)
-    public double damage;
     @Attribute(Attribute.RANGE)
     public double range;
+    @Attribute(Attribute.FIRE_TICKS)
+    public double fireTicks;
     @Attribute(Attribute.STRENGTH)
     public double knockback;
     @Attribute(Attribute.DURATION)
@@ -229,7 +222,7 @@ public class FireWall extends AbilityInstance implements Ability {
       height = abilityNode.node("height").getDouble(5.0);
       width = abilityNode.node("width").getDouble(6.0);
       range = abilityNode.node("range").getDouble(3.0);
-      damage = abilityNode.node("damage").getDouble(0.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(10);
       knockback = abilityNode.node("knockback").getDouble(0.33);
       duration = abilityNode.node("duration").getLong(5000);
     }

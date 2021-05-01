@@ -58,20 +58,20 @@ public class HydroSink extends AbilityInstance implements PassiveAbility {
   }
 
   public static boolean canHydroSink(User user) {
-    if (!Bending.getGame().getAbilityRegistry().getAbilityDescription("HydroSink").map(user::canBend).orElse(false)) {
+    if (!Bending.game().abilityRegistry().abilityDescription("HydroSink").map(user::canBend).orElse(false)) {
       return false;
     }
 
-    if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HydroSink.class)) {
+    if (!Bending.game().abilityManager(user.world()).hasAbility(user, HydroSink.class)) {
       return false;
     }
 
-    AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).at(new Vector3(0, -0.5, 0));
-    for (Block block : WorldMethods.getNearbyBlocks(user.getWorld(), entityBounds.grow(Vector3.HALF), WaterMaterials::isWaterBendable)) {
-      if (block.getY() > entityBounds.getPosition().getY()) {
+    AABB entityBounds = AABBUtils.entityBounds(user.entity()).at(new Vector3(0, -0.5, 0));
+    for (Block block : WorldMethods.nearbyBlocks(user.world(), entityBounds.grow(Vector3.HALF), WaterMaterials::isWaterBendable)) {
+      if (block.getY() > entityBounds.position().getY()) {
         continue;
       }
-      if (AABBUtils.getBlockBounds(block).intersects(entityBounds)) {
+      if (AABBUtils.blockBounds(block).intersects(entityBounds)) {
         return true;
       }
     }
@@ -79,7 +79,7 @@ public class HydroSink extends AbilityInstance implements PassiveAbility {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 }

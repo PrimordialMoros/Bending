@@ -48,7 +48,7 @@ public class FireBurst extends AbstractBurst implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FireBurst.class)
+      Bending.game().abilityManager(user.world()).firstInstance(user, FireBurst.class)
         .ifPresent(b -> b.release(true));
       return false;
     }
@@ -63,7 +63,7 @@ public class FireBurst extends AbstractBurst implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -71,12 +71,12 @@ public class FireBurst extends AbstractBurst implements Ability {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
-        if (!user.isSneaking()) {
+        ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        if (!user.sneaking()) {
           release(false);
         }
       } else {
-        if (!user.isSneaking()) {
+        if (!user.sneaking()) {
           return UpdateResult.REMOVE;
         }
       }
@@ -86,7 +86,7 @@ public class FireBurst extends AbstractBurst implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -100,11 +100,11 @@ public class FireBurst extends AbstractBurst implements Ability {
     }
     released = true;
     if (cone) {
-      createCone(user, () -> new FireBlast(getDescription()), userConfig.coneRange);
+      createCone(user, () -> new FireBlast(description()), userConfig.coneRange);
     } else {
-      createSphere(user, () -> new FireBlast(getDescription()), userConfig.sphereRange);
+      createSphere(user, () -> new FireBlast(description()), userConfig.sphereRange);
     }
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   private static class Config extends Configurable {

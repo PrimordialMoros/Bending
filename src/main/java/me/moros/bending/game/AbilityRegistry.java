@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.Sequence;
@@ -55,9 +56,9 @@ public final class AbilityRegistry {
   }
 
   private boolean registerAbility(@NonNull AbilityDescription desc) {
-    abilities.put(desc.getName().toLowerCase(), desc);
+    abilities.put(desc.name().toLowerCase(), desc);
     if (desc.isActivatedBy(ActivationMethod.PASSIVE)) {
-      passives.computeIfAbsent(desc.getElement(), e -> new HashSet<>()).add(desc);
+      passives.computeIfAbsent(desc.element(), e -> new HashSet<>()).add(desc);
     }
     return true;
   }
@@ -67,15 +68,15 @@ public final class AbilityRegistry {
    * @param desc the ability to check
    * @return result
    */
-  public boolean isRegistered(@NonNull AbilityDescription desc) {
-    return abilities.containsKey(desc.getName().toLowerCase());
+  public boolean registered(@NonNull AbilityDescription desc) {
+    return abilities.containsKey(desc.name().toLowerCase());
   }
 
   /**
    * Note: this will include hidden abilities. You will need to filter them.
    * @return a stream of all the abilities in this registry
    */
-  public Stream<AbilityDescription> getAbilities() {
+  public @NonNull Stream<AbilityDescription> abilities() {
     return abilities.values().stream();
   }
 
@@ -83,7 +84,7 @@ public final class AbilityRegistry {
    * Note: this will include hidden passives. You will need to filter them.
    * @return a stream of all the passives in this registry
    */
-  public Stream<AbilityDescription> getPassives(Element element) {
+  public @NonNull Stream<AbilityDescription> passives(@NonNull Element element) {
     return passives.getOrDefault(element, Collections.emptySet()).stream();
   }
 
@@ -91,7 +92,7 @@ public final class AbilityRegistry {
    * @param name the name to match
    * @return Optional ability description
    */
-  public Optional<AbilityDescription> getAbilityDescription(String name) {
+  public Optional<AbilityDescription> abilityDescription(@Nullable String name) {
     if (name == null || name.isEmpty()) {
       return Optional.empty();
     }
@@ -110,11 +111,11 @@ public final class AbilityRegistry {
       addonSequences.put(desc, sequence);
     }
 
-    public static @NonNull Collection<AbilityDescription> getAddonAbilities() {
+    public static @NonNull Collection<AbilityDescription> addonAbilities() {
       return List.copyOf(addonAbilities);
     }
 
-    public static @NonNull Map<AbilityDescription, Sequence> getAddonSequences() {
+    public static @NonNull Map<AbilityDescription, Sequence> addonSequences() {
       return Map.copyOf(addonSequences);
     }
   }

@@ -42,17 +42,17 @@ public class OBB implements Collider {
   }
 
   private OBB(AABB aabb) {
-    this.center = aabb.getPosition();
+    this.center = aabb.position();
     this.basis = MatrixUtils.createRealIdentityMatrix(3);
-    this.e = aabb.getHalfExtents();
+    this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
     double[] arr = new double[3];
-    rotation.applyTo(aabb.getPosition().toArray(), arr);
+    rotation.applyTo(aabb.position().toArray(), arr);
     this.center = new Vector3(arr);
     this.basis = MatrixUtils.createRealMatrix(rotation.getMatrix());
-    this.e = aabb.getHalfExtents();
+    this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Vector3 axis, double angle) {
@@ -193,7 +193,7 @@ public class OBB implements Collider {
   }
 
   // Returns the position closest to the target that lies on/in the OBB.
-  public @NonNull Vector3 getClosestPosition(@NonNull Vector3 target) {
+  public @NonNull Vector3 closestPosition(@NonNull Vector3 target) {
     Vector3 t = target.subtract(center);
     Vector3 closest = center;
     // Project target onto basis axes and move toward it.
@@ -207,12 +207,12 @@ public class OBB implements Collider {
   }
 
   @Override
-  public @NonNull Vector3 getPosition() {
+  public @NonNull Vector3 position() {
     return center;
   }
 
   @Override
-  public @NonNull Vector3 getHalfExtents() {
+  public @NonNull Vector3 halfExtents() {
     double x = e.dotProduct(Vector3.PLUS_I);
     double y = e.dotProduct(Vector3.PLUS_J);
     double z = e.dotProduct(Vector3.PLUS_K);
@@ -221,6 +221,6 @@ public class OBB implements Collider {
 
   @Override
   public boolean contains(@NonNull Vector3 point) {
-    return getClosestPosition(point).distanceSq(point) <= epsilon;
+    return closestPosition(point).distanceSq(point) <= epsilon;
   }
 }

@@ -20,9 +20,9 @@
 package me.moros.bending.model.ability.description;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -48,7 +48,7 @@ public class AbilityDescription {
   private final boolean hidden;
   private final boolean canBind;
   private final boolean harmless;
-  private final boolean sourcesPlants;
+  private final boolean sourcePlant;
   private final boolean bypassCooldown;
   private final int hashcode;
 
@@ -60,21 +60,21 @@ public class AbilityDescription {
     canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
     hidden = builder.hidden;
     harmless = builder.harmless;
-    sourcesPlants = builder.sourcesPlants;
+    sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
-    hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcesPlants, bypassCooldown);
+    hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcePlant, bypassCooldown);
     createAbility(); // Init config values
   }
 
-  public @NonNull String getName() {
+  public @NonNull String name() {
     return name;
   }
 
-  public @NonNull Component getDisplayName() {
-    return Component.text(name, element.getColor());
+  public @NonNull Component displayName() {
+    return Component.text(name, element.color());
   }
 
-  public @NonNull Element getElement() {
+  public @NonNull Element element() {
     return element;
   }
 
@@ -82,19 +82,19 @@ public class AbilityDescription {
     return canBind;
   }
 
-  public boolean isHidden() {
+  public boolean hidden() {
     return hidden;
   }
 
-  public boolean isHarmless() {
+  public boolean harmless() {
     return harmless;
   }
 
-  public boolean canSourcePlant() {
-    return sourcesPlants;
+  public boolean sourcePlant() {
+    return sourcePlant;
   }
 
-  public boolean canBypassCooldown() {
+  public boolean bypassCooldown() {
     return bypassCooldown;
   }
 
@@ -106,29 +106,29 @@ public class AbilityDescription {
     return constructor.apply(this);
   }
 
-  public @NonNull String getPermission() {
+  public @NonNull String permission() {
     return "bending.ability." + name;
   }
 
-  public @NonNull Component getMeta() {
+  public @NonNull Component meta() {
     String type = "Ability";
     if (isActivatedBy(ActivationMethod.PASSIVE)) {
       type = "Passive";
     } else if (isActivatedBy(ActivationMethod.SEQUENCE)) {
       type = "Sequence";
     }
-    Component details = getDisplayName().append(Component.newline())
+    Component details = displayName().append(Component.newline())
       .append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
-      .append(getElement().getDisplayName().append(Component.newline()))
+      .append(element().displayName().append(Component.newline()))
       .append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
       .append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
       .append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
-      .append(Component.text(getPermission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
+      .append(Component.text(permission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
       .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY));
 
-    return Component.text(getName(), getElement().getColor())
+    return Component.text(name(), element().color())
       .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/bending info " + getName()));
+      .clickEvent(ClickEvent.runCommand("/bending info " + name()));
   }
 
   @Override
@@ -140,7 +140,7 @@ public class AbilityDescription {
       return false;
     }
     AbilityDescription desc = (AbilityDescription) obj;
-    return getName().equals(desc.getName()) && getElement() == desc.getElement();
+    return name().equals(desc.name()) && element() == desc.element();
   }
 
   @Override
@@ -156,7 +156,7 @@ public class AbilityDescription {
     return new AbilityDescriptionBuilder(name, constructor)
       .element(element).activation(activationMethods)
       .hidden(hidden).harmless(harmless)
-      .sourcesPlants(sourcesPlants);
+      .sourcePlant(sourcePlant).bypassCooldown(bypassCooldown);
   }
 
   public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
@@ -171,7 +171,7 @@ public class AbilityDescription {
     private boolean canBind = true;
     private boolean hidden = false;
     private boolean harmless = false;
-    private boolean sourcesPlants = false;
+    private boolean sourcePlant = false;
     private boolean bypassCooldown = false;
 
     public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
@@ -184,7 +184,7 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder activation(@NonNull Collection<@NonNull ActivationMethod> methods) {
+    private AbilityDescriptionBuilder activation(@NonNull Collection<@NonNull ActivationMethod> methods) {
       activationMethods = EnumSet.copyOf(methods);
       return this;
     }
@@ -192,7 +192,7 @@ public class AbilityDescription {
     public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod @NonNull ... methods) {
       Collection<ActivationMethod> c = new ArrayList<>();
       if (methods != null) {
-        c.addAll(Arrays.asList(methods));
+        c.addAll(List.of(methods));
       }
       c.add(method);
       return activation(c);
@@ -213,8 +213,8 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder sourcesPlants(boolean sourcesPlants) {
-      this.sourcesPlants = sourcesPlants;
+    public @NonNull AbilityDescriptionBuilder sourcePlant(boolean sourcePlant) {
+      this.sourcePlant = sourcePlant;
       return this;
     }
 

@@ -29,7 +29,7 @@ public abstract class BendingUserEvent extends BendingEvent {
     this.user = user;
   }
 
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 }

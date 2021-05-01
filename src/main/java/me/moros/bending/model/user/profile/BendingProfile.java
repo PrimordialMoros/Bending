@@ -47,23 +47,19 @@ public final class BendingProfile {
     this(uuid, id, data, true);
   }
 
-  public @NonNull UUID getUniqueId() {
-    return uuid;
-  }
-
-  public @Positive int getInternalId() {
+  public @Positive int id() {
     return id;
   }
 
-  public boolean hasBoard() {
+  public boolean board() {
     return board;
   }
 
-  public void setBoard(boolean value) {
+  public void board(boolean value) {
     board = value;
   }
 
-  public @NonNull BenderData getData() {
+  public @NonNull BenderData data() {
     return data;
   }
 
@@ -82,8 +78,8 @@ public final class BendingProfile {
     return "ID: " + id + "\n" +
       "UUID: " + uuid + "\n" +
       "Board: " + board + "\n" +
-      "Elements: " + data.elements.toString() + "\n" +
-      "Slots: " + Arrays.toString(data.slots) + "\n" +
-      "Presets: " + data.presets.toString();
+      "Elements: " + data.elements().toString() + "\n" +
+      "Slots: " + Arrays.toString(data.slots()) + "\n" +
+      "Presets: " + data.presets().toString();
   }
 }

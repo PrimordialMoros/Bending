@@ -70,15 +70,15 @@ public class Board {
     if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
       return;
     }
-    BendingPlayer bendingPlayer = Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId());
+    BendingPlayer bendingPlayer = Bending.game().playerManager().player(player);
     String prefix = slot == selectedSlot ? ">" : "  ";
 
-    AbilityDescription desc = bendingPlayer.getSlotAbility(slot).orElse(null);
+    AbilityDescription desc = bendingPlayer.slotAbility(slot).orElse(null);
     Component component;
     if (desc == null) {
       component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
     } else {
-      Component name = Component.text(desc.getName(), desc.getElement().getColor());
+      Component name = Component.text(desc.name(), desc.element().color());
       if (bendingPlayer.isOnCooldown(desc)) {
         name = name.decorate(TextDecoration.STRIKETHROUGH);
       }
@@ -96,7 +96,7 @@ public class Board {
     IntStream.rangeClosed(1, 9).forEach(this::updateSlot);
   }
 
-  protected void setActiveSlot(int oldSlot, int newSlot) {
+  protected void activeSlot(int oldSlot, int newSlot) {
     if (selectedSlot != oldSlot) {
       oldSlot = selectedSlot; // Fixes bug when slot is set using setHeldItemSlot
     }
@@ -106,7 +106,7 @@ public class Board {
   }
 
   protected void updateMisc(AbilityDescription desc, boolean show) {
-    Component component = Component.text("  ").append(desc.getDisplayName().decorate(TextDecoration.STRIKETHROUGH));
+    Component component = Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH));
     String legacy = LegacyComponentSerializer.legacySection().serialize(component);
     if (show) {
       if (misc.isEmpty()) {

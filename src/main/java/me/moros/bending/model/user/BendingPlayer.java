@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,108 +36,108 @@ public final class BendingPlayer extends BendingUser {
   private final BendingProfile profile;
   private final PresetHolder presetHolder;
 
-  private BendingPlayer(Player player, BendingProfile profile, Set<String> presets) {
+  private BendingPlayer(Player player, BendingProfile profile) {
     super(player);
     this.profile = profile;
-    presetHolder = new PresetHolder(profile.getInternalId(), presets);
+    presetHolder = new PresetHolder(profile.id(), profile.data().presets());
   }
 
-  public @NonNull BendingProfile getProfile() {
+  public @NonNull BendingProfile profile() {
     return profile;
   }
 
   @Override
-  public @NonNull Player getEntity() {
-    return (Player) super.getEntity();
+  public @NonNull Player entity() {
+    return (Player) super.entity();
   }
 
   /**
    * @return a slot index in the 1-9 range (inclusive)
    */
-  public int getHeldItemSlot() {
-    return getEntity().getInventory().getHeldItemSlot() + 1;
+  public int currentSlot() {
+    return entity().getInventory().getHeldItemSlot() + 1;
   }
 
   @Override
-  public Optional<AbilityDescription> getSelectedAbility() {
-    return getSlotAbility(getHeldItemSlot());
+  public Optional<AbilityDescription> selectedAbility() {
+    return slotAbility(currentSlot());
   }
 
   @Override
-  public boolean isValid() {
-    return getEntity().isOnline();
+  public boolean valid() {
+    return entity().isOnline();
   }
 
   @Override
-  public boolean isSpectator() {
-    return getEntity().getGameMode() == GameMode.SPECTATOR;
+  public boolean spectator() {
+    return entity().getGameMode() == GameMode.SPECTATOR;
   }
 
   @Override
-  public boolean isSneaking() {
-    return getEntity().isSneaking();
+  public boolean sneaking() {
+    return entity().isSneaking();
   }
 
   @Override
-  public boolean getAllowFlight() {
-    return getEntity().getAllowFlight();
+  public boolean allowFlight() {
+    return entity().getAllowFlight();
   }
 
   @Override
-  public boolean isFlying() {
-    return getEntity().isFlying();
+  public boolean flying() {
+    return entity().isFlying();
   }
 
   @Override
-  public void setAllowFlight(boolean allow) {
-    getEntity().setAllowFlight(allow);
+  public void allowFlight(boolean allow) {
+    entity().setAllowFlight(allow);
   }
 
   @Override
-  public void setFlying(boolean flying) {
-    getEntity().setFlying(flying);
+  public void flying(boolean flying) {
+    entity().setFlying(flying);
   }
 
   // Presets
-  public @NonNull Set<@NonNull String> getPresets() {
-    return presetHolder.getPresets();
+  public @NonNull Set<@NonNull String> presets() {
+    return presetHolder.presets();
   }
 
-  public Optional<Preset> getPresetByName(@NonNull String name) {
-    return Optional.ofNullable(presetHolder.getPresetByName(name.toLowerCase()));
+  public Optional<Preset> presetByName(@NonNull String name) {
+    return Optional.ofNullable(presetHolder.presetByName(name.toLowerCase()));
   }
 
   public void addPreset(@NonNull Preset preset, @NonNull Consumer<PresetCreateResult> consumer) {
-    String name = preset.getName().toLowerCase();
-    if (preset.getInternalId() > 0 || presetHolder.hasPreset(name)) {
+    String name = preset.name().toLowerCase();
+    if (preset.id() > 0 || presetHolder.hasPreset(name)) {
       consumer.accept(PresetCreateResult.EXISTS);
       return;
     }
     presetHolder.addPreset(name);
-    Bending.getGame().getStorage().savePresetAsync(profile.getInternalId(), preset, result ->
+    Bending.game().storage().savePresetAsync(profile.id(), preset, result ->
       consumer.accept(result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL)
     );
   }
 
   public boolean removePreset(@NonNull Preset preset) {
-    String name = preset.getName().toLowerCase();
-    if (preset.getInternalId() <= 0 || !presetHolder.hasPreset(name)) {
+    String name = preset.name().toLowerCase();
+    if (preset.id() <= 0 || !presetHolder.hasPreset(name)) {
       return false;
     }
-    Bending.getGame().getStorage().deletePresetAsync(preset.getInternalId());
+    Bending.game().storage().deletePresetAsync(preset.id());
     return presetHolder.removePreset(name);
   }
 
   @Override
   public boolean hasPermission(@NonNull String permission) {
-    return getEntity().hasPermission(permission);
+    return entity().hasPermission(permission);
   }
 
   public static Optional<BendingPlayer> createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
-    if (Bending.getGame().getPlayerManager().playerExists(player.getUniqueId())) {
+    if (Bending.game().playerManager().playerExists(player.getUniqueId())) {
       return Optional.empty();
     }
-    BendingPlayer bendingPlayer = new BendingPlayer(player, profile, new HashSet<>(profile.getData().presets));
+    BendingPlayer bendingPlayer = new BendingPlayer(player, profile);
     return Optional.of(bendingPlayer);
   }
 }

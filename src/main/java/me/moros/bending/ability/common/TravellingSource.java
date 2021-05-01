@@ -58,7 +58,7 @@ public class TravellingSource implements State {
       return;
     }
     this.chain = chain;
-    source = chain.getChainStore().stream().findFirst().orElse(null);
+    source = chain.chainStore().stream().findFirst().orElse(null);
     started = source != null;
   }
 
@@ -67,8 +67,8 @@ public class TravellingSource implements State {
     if (!started) {
       return;
     }
-    chain.getChainStore().clear();
-    chain.getChainStore().add(source);
+    chain.chainStore().clear();
+    chain.chainStore().add(source);
     chain.nextState();
   }
 
@@ -78,7 +78,7 @@ public class TravellingSource implements State {
       return UpdateResult.REMOVE;
     }
     clean();
-    Vector3 target = user.getEyeLocation().floor();
+    Vector3 target = user.eyeLocation().floor();
     Vector3 location = new Vector3(source);
 
     double distSq = target.distanceSq(location);
@@ -90,20 +90,20 @@ public class TravellingSource implements State {
       return UpdateResult.CONTINUE;
     }
 
-    if (isValid(source.getRelative(BlockFace.UP)) && source.getY() < user.getHeadBlock().getY()) {
+    if (isValid(source.getRelative(BlockFace.UP)) && source.getY() < user.headBlock().getY()) {
       source = source.getRelative(BlockFace.UP);
-    } else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.getHeadBlock().getY()) {
+    } else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.headBlock().getY()) {
       source = source.getRelative(BlockFace.DOWN);
     } else {
       Vector3 direction = target.subtract(location).normalize();
-      Block nextBlock = location.add(direction).toBlock(user.getWorld());
+      Block nextBlock = location.add(direction).toBlock(user.world());
       if (source.equals(nextBlock)) {
         source = findPath(nextBlock);
       } else {
         source = nextBlock;
       }
     }
-    if (source == null || !isValid(source) || !Bending.getGame().getProtectionSystem().canBuild(user, source)) {
+    if (source == null || !isValid(source) || !Bending.game().protectionSystem().canBuild(user, source)) {
       return UpdateResult.REMOVE;
     }
     TempBlock.create(source, data, 200);
@@ -111,7 +111,7 @@ public class TravellingSource implements State {
   }
 
   private Block findPath(Block check) {
-    Location dest = user.getHeadBlock().getLocation();
+    Location dest = user.headBlock().getLocation();
     Block result = null;
     double minDistance = Double.MAX_VALUE;
     for (BlockFace face : BlockMethods.CARDINAL_FACES) {

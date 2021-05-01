@@ -96,7 +96,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    Optional<EarthSmash> grabbed = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthSmash.class)
+    Optional<EarthSmash> grabbed = Bending.game().abilityManager(user.world()).userInstances(user, EarthSmash.class)
       .filter(s -> s.state instanceof GrabState).findAny();
 
     if (method == ActivationMethod.SNEAK) {
@@ -108,7 +108,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
       return false;
     }
 
-    if (user.isOnCooldown(getDescription())) {
+    if (user.isOnCooldown(description())) {
       return false;
     }
 
@@ -117,22 +117,22 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
     state = new ChargeState();
     removalPolicy = Policies.builder().build();
-    swappedSlotsPolicy = SwappedSlotsRemovalPolicy.of(getDescription());
+    swappedSlotsPolicy = SwappedSlotsRemovalPolicy.of(description());
 
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (!state.canSlotSwitch() && swappedSlotsPolicy.test(user, getDescription())) {
+    if (!state.canSlotSwitch() && swappedSlotsPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (boulder != null && boulder.data.isEmpty()) {
@@ -142,7 +142,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
   }
 
   private boolean createBoulder() {
-    Block center = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b)).orElse(null);
+    Block center = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b)).orElse(null);
     if (center == null) {
       return false;
     }
@@ -150,7 +150,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
     // Check blocks above center
     for (int i = 0; i <= userConfig.radius; i++) {
       Block b = center.getRelative(BlockFace.UP, i + 1);
-      if (!MaterialUtil.isTransparent(b) || !TempBlock.isBendable(b) || !Bending.getGame().getProtectionSystem().canBuild(user, b)) {
+      if (!MaterialUtil.isTransparent(b) || !TempBlock.isBendable(b) || !Bending.game().protectionSystem().canBuild(user, b)) {
         return false;
       }
     }
@@ -158,13 +158,13 @@ public class EarthSmash extends AbilityInstance implements Ability {
     boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
 
     int minRequired = NumberConversions.ceil(FastMath.pow(userConfig.radius, 3) * 0.43);
-    if (boulder.getData().size() < minRequired) {
+    if (boulder.data().size() < minRequired) {
       boulder = null;
       return false;
     }
 
     state = new LiftState();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
@@ -177,18 +177,18 @@ public class EarthSmash extends AbilityInstance implements Ability {
   }
 
   private static boolean tryGrab(@NonNull User user) {
-    Block target = WorldMethods.blockCast(user.getWorld(), user.getRay(), config.grabRange).orElse(null);
+    Block target = WorldMethods.blockCast(user.world(), user.ray(), config.grabRange).orElse(null);
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;
     }
-    Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(earthSmash, user);
+    Bending.game().abilityManager(user.world()).changeOwner(earthSmash, user);
     earthSmash.grabBoulder();
     return true;
   }
 
   public static void tryDestroy(@NonNull User user, @NonNull Block block) {
-    if (user.isSneaking() && user.getSelectedAbilityName().equals("EarthSmash")) {
+    if (user.sneaking() && user.selectedAbilityName().equals("EarthSmash")) {
       EarthSmash earthSmash = getInstance(user, block, x -> true);
       if (earthSmash != null && earthSmash.boulder != null) {
         earthSmash.boulder.shatter();
@@ -201,14 +201,14 @@ public class EarthSmash extends AbilityInstance implements Ability {
       return null;
     }
     AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
-    return Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthSmash.class)
+    return Bending.game().abilityManager(user.world()).instances(EarthSmash.class)
       .filter(filter)
       .filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
       .findAny().orElse(null);
   }
 
   private void cleanAll() {
-    for (Map.Entry<Block, BlockData> entry : boulder.getData().entrySet()) {
+    for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
       Block block = entry.getKey();
       if (block.getType() != entry.getValue().getMaterial()) {
         continue;
@@ -218,7 +218,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
   }
 
   private void render() {
-    for (Map.Entry<Block, BlockData> entry : boulder.getData().entrySet()) {
+    for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
       Block block = entry.getKey();
       if (!MaterialUtil.isTransparent(block)) {
         continue;
@@ -236,12 +236,12 @@ public class EarthSmash extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public boolean setUser(@NonNull User user) {
+  public boolean user(@NonNull User user) {
     if (boulder == null) {
       return false;
     }
@@ -251,16 +251,16 @@ public class EarthSmash extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (!state.canCollide()) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(boulder.getCollider());
+    return Collections.singletonList(boulder.collider());
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
+    Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
@@ -295,13 +295,13 @@ public class EarthSmash extends AbilityInstance implements Ability {
     @Override
     public @NonNull UpdateResult update() {
       if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
-        if (user.isSneaking()) {
-          ParticleUtil.create(Particle.SMOKE_NORMAL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
+        if (user.sneaking()) {
+          ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
           return UpdateResult.CONTINUE;
         } else {
           return createBoulder() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
         }
-      } else if (user.isSneaking()) {
+      } else if (user.sneaking()) {
         return UpdateResult.CONTINUE;
       }
       return UpdateResult.REMOVE;
@@ -324,9 +324,9 @@ public class EarthSmash extends AbilityInstance implements Ability {
     @Override
     public @NonNull UpdateResult update() {
       cleanAll();
-      boulder.setCenter(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
+      boulder.center(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
       SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
-      CollisionUtil.handleEntityCollisions(user, boulder.getCollider(), entity -> {
+      CollisionUtil.handleEntityCollisions(user, boulder.collider(), entity -> {
         entity.setVelocity(new Vector3(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
         return true;
       }, true, true);
@@ -370,21 +370,21 @@ public class EarthSmash extends AbilityInstance implements Ability {
     private final double grabbedDistance;
 
     private GrabState() {
-      this.grabbedDistance = FastMath.min(boulder.center.distance(user.getEyeLocation()), userConfig.grabRange);
+      this.grabbedDistance = FastMath.min(boulder.center.distance(user.eyeLocation()), userConfig.grabRange);
     }
 
     @Override
     public @NonNull UpdateResult update() {
-      if (user.isSneaking()) {
-        Vector3 dir = user.getDirection().normalize().scalarMultiply(grabbedDistance);
-        Block newCenter = user.getEyeLocation().add(dir).toBlock(boulder.world);
+      if (user.sneaking()) {
+        Vector3 dir = user.direction().normalize().scalarMultiply(grabbedDistance);
+        Block newCenter = user.eyeLocation().add(dir).toBlock(boulder.world);
         if (newCenter.equals(boulder.center.toBlock(boulder.world))) {
           return UpdateResult.CONTINUE;
         }
         boulder.updateData();
         cleanAll();
         if (boulder.isValidCenter(newCenter)) {
-          boulder.setCenter(newCenter);
+          boulder.center(newCenter);
         }
         render();
       } else {
@@ -402,19 +402,19 @@ public class EarthSmash extends AbilityInstance implements Ability {
     private ShotState() {
       affectedEntities = new HashSet<>();
       origin = new Vector3(boulder.center.toArray());
-      direction = user.getDirection();
+      direction = user.direction();
       SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
     }
 
     @Override
     public @NonNull UpdateResult update() {
-      CollisionUtil.handleEntityCollisions(user, boulder.getCollider(), this::onEntityHit);
+      CollisionUtil.handleEntityCollisions(user, boulder.collider(), this::onEntityHit);
       cleanAll();
       Block newCenter = boulder.center.add(direction).toBlock(boulder.world);
       if (!boulder.isValidBlock(newCenter)) {
         return UpdateResult.REMOVE;
       }
-      boulder.setCenter(newCenter);
+      boulder.center(newCenter);
       if (origin.distanceSq(boulder.center) > userConfig.shootRange * userConfig.shootRange) {
         return UpdateResult.REMOVE;
       }
@@ -430,8 +430,8 @@ public class EarthSmash extends AbilityInstance implements Ability {
         return false;
       }
       affectedEntities.add(entity);
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-      Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
       entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
       return false;
     }
@@ -477,7 +477,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
 
     private Boulder(User user, Block centerBlock, int size, long duration) {
       this.user = user;
-      this.world = user.getWorld();
+      this.world = user.world();
       this.size = size;
       expireTime = System.currentTimeMillis() + duration;
       data = new HashMap<>();
@@ -492,7 +492,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
           for (int dx = -half; dx <= half; dx++) {
             BlockVector point = new BlockVector(dx, dy, dz);
             Block block = tempVector.add(new Vector3(point)).toBlock(world);
-            if (!EarthMaterials.isEarthNotLava(user, block) || !Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+            if (!EarthMaterials.isEarthNotLava(user, block) || !Bending.game().protectionSystem().canBuild(user, block)) {
               continue;
             }
             if ((FastMath.abs(dx) + FastMath.abs(dy) + FastMath.abs(dz)) % 2 == 0) {
@@ -507,7 +507,7 @@ public class EarthSmash extends AbilityInstance implements Ability {
       if (!MaterialUtil.isTransparent(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      return Bending.getGame().getProtectionSystem().canBuild(user, block);
+      return Bending.game().protectionSystem().canBuild(user, block);
     }
 
     private void updateData() {
@@ -537,22 +537,22 @@ public class EarthSmash extends AbilityInstance implements Ability {
       return data.keySet().stream().map(bv -> temp.add(new Vector3(bv)).toBlock(world)).allMatch(this::isValidBlock);
     }
 
-    private void setCenter(Block block) {
+    private void center(Block block) {
       this.center = new Vector3(block).add(Vector3.HALF);
     }
 
-    private Collider getCollider() {
+    private Collider collider() {
       return bounds.at(center);
     }
 
-    private Map<Block, BlockData> getData() {
+    private Map<Block, BlockData> data() {
       return data.entrySet().stream()
         .collect(Collectors.toMap(e -> center.add(new Vector3(e.getKey())).toBlock(world), Map.Entry::getValue));
     }
 
     private void shatter() {
       ThreadLocalRandom rnd = ThreadLocalRandom.current();
-      for (Map.Entry<Block, BlockData> entry : getData().entrySet()) {
+      for (Map.Entry<Block, BlockData> entry : data().entrySet()) {
         Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();

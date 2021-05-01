@@ -64,30 +64,30 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || user.isOnGround()) {
+    if (removalPolicy.test(user, description()) || user.isOnGround()) {
       return UpdateResult.CONTINUE;
     }
-    if (!user.getSelectedAbilityName().equals("EarthGlove")) {
+    if (!user.selectedAbilityName().equals("EarthGlove")) {
       return UpdateResult.CONTINUE;
     }
-    long counter = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count();
-    if (counter > 0 && EntityMethods.isAgainstWall(user.getEntity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
+    long counter = Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count();
+    if (counter > 0 && EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
       if (counter == 2) {
-        user.getEntity().setVelocity(Vector3.ZERO.toVector());
-        user.getEntity().setFallDistance(0);
+        user.entity().setVelocity(Vector3.ZERO.toVector());
+        user.entity().setFallDistance(0);
       } else {
-        if (user.getVelocity().getY() < 0) {
-          double fallDistance = FastMath.max(0, user.getEntity().getFallDistance() - userConfig.speed);
-          user.getEntity().setFallDistance((float) fallDistance);
-          user.getEntity().setVelocity(user.getVelocity().scalarMultiply(userConfig.speed).clampVelocity());
-          ParticleUtil.create(Particle.CRIT, user.getEntity().getEyeLocation()).count(2)
+        if (user.velocity().getY() < 0) {
+          double fallDistance = FastMath.max(0, user.entity().getFallDistance() - userConfig.speed);
+          user.entity().setFallDistance((float) fallDistance);
+          user.entity().setVelocity(user.velocity().scalarMultiply(userConfig.speed).clampVelocity());
+          ParticleUtil.create(Particle.CRIT, user.entity().getEyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05);
-          ParticleUtil.create(Particle.BLOCK_CRACK, user.getEntity().getEyeLocation()).count(3)
+          ParticleUtil.create(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)
             .offset(0.1, 0.4, 0.1).data(STONE);
         }
       }
@@ -96,7 +96,7 @@ public class EarthCling extends AbilityInstance implements PassiveAbility {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

@@ -66,7 +66,7 @@ public class StateChain implements Updatable {
     return this;
   }
 
-  public @NonNull State getCurrent() {
+  public @NonNull State current() {
     return currentState;
   }
 
@@ -91,15 +91,15 @@ public class StateChain implements Updatable {
     finished = true;
   }
 
-  public boolean isComplete() {
+  public boolean completed() {
     return finished && chainQueue.isEmpty();
   }
 
-  public boolean isFinished() {
+  public boolean finished() {
     return finished;
   }
 
-  public @NonNull Collection<@NonNull Block> getChainStore() {
+  public @NonNull Collection<@NonNull Block> chainStore() {
     return chainStore;
   }
 }

@@ -141,11 +141,11 @@ public class Pillar implements Updatable {
     }
   }
 
-  public @NonNull Collection<Block> getPillarBlocks() {
+  public @NonNull Collection<Block> pillarBlocks() {
     return List.copyOf(pillarBlocks);
   }
 
-  public @NonNull Block getOrigin() {
+  public @NonNull Block origin() {
     return origin;
   }
 
@@ -184,7 +184,7 @@ public class Pillar implements Updatable {
       this.constructor = constructor;
     }
 
-    public @NonNull PillarBuilder setDirection(@NonNull BlockFace direction) {
+    public @NonNull PillarBuilder direction(@NonNull BlockFace direction) {
       if (!BlockMethods.MAIN_FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
@@ -192,17 +192,17 @@ public class Pillar implements Updatable {
       return this;
     }
 
-    public @NonNull PillarBuilder setInterval(@NonNegative long interval) {
+    public @NonNull PillarBuilder interval(@NonNegative long interval) {
       this.interval = interval;
       return this;
     }
 
-    public @NonNull PillarBuilder setDuration(@NonNegative long duration) {
+    public @NonNull PillarBuilder duration(@NonNegative long duration) {
       this.duration = duration;
       return this;
     }
 
-    public @NonNull PillarBuilder setPredicate(@NonNull Predicate<Block> predicate) {
+    public @NonNull PillarBuilder predicate(@NonNull Predicate<Block> predicate) {
       this.predicate = predicate;
       return this;
     }
@@ -231,7 +231,7 @@ public class Pillar implements Updatable {
     private int validateLength(int max) {
       for (int i = 0; i < max; i++) {
         Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
-        if (!TempBlock.isBendable(backwardBlock) || !Bending.getGame().getProtectionSystem().canBuild(user, backwardBlock)) {
+        if (!TempBlock.isBendable(backwardBlock) || !Bending.game().protectionSystem().canBuild(user, backwardBlock)) {
           return i;
         }
       }
@@ -241,7 +241,7 @@ public class Pillar implements Updatable {
     private int validateDistance(int max) {
       for (int i = 0; i < max; i++) {
         Block forwardBlock = origin.getRelative(direction, i + 1);
-        if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock)) {
+        if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
           return i;
         }
       }

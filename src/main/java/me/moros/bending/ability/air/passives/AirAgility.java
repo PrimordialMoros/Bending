@@ -56,12 +56,12 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       return UpdateResult.CONTINUE;
     }
     handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);
@@ -73,17 +73,17 @@ public class AirAgility extends AbilityInstance implements PassiveAbility {
     if (amplifier < 0) {
       return;
     }
-    PotionUtil.tryAddPotion(user.getEntity(), type, 100, amplifier);
+    PotionUtil.tryAddPotion(user.entity(), type, 100, amplifier);
   }
 
   @Override
   public void onDestroy() {
-    user.getEntity().removePotionEffect(PotionEffectType.JUMP);
-    user.getEntity().removePotionEffect(PotionEffectType.SPEED);
+    user.entity().removePotionEffect(PotionEffectType.JUMP);
+    user.entity().removePotionEffect(PotionEffectType.SPEED);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

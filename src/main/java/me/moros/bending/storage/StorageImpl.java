@@ -70,7 +70,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private void init() {
-    InputStream stream = Objects.requireNonNull(Bending.getPlugin().getResource(type.getSchemaPath()), "Null schema.");
+    InputStream stream = Objects.requireNonNull(Bending.plugin().getResource(type.getSchemaPath()), "Null schema.");
     Collection<String> statements = SqlStreamReader.parseQueries(stream);
     DB.useHandle(handle -> {
       Batch batch = handle.createBatch();
@@ -97,7 +97,7 @@ public final class StorageImpl implements BendingStorage {
     BendingProfile profile = loadProfile(uuid);
     if (profile == null) {
       profile = DB.withHandle(handle -> {
-        int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.getQuery()).bind(0, uuid)
+        int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
           .executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
         return new BendingProfile(uuid, id, new BenderData());
       });
@@ -122,7 +122,7 @@ public final class StorageImpl implements BendingStorage {
    */
   public void savePlayerAsync(@NonNull BendingPlayer bendingPlayer) {
     Tasker.newChain().async(() -> {
-      updateProfile(bendingPlayer.getProfile());
+      updateProfile(bendingPlayer.profile());
       saveElements(bendingPlayer);
       saveSlots(bendingPlayer);
     }).execute();
@@ -159,7 +159,7 @@ public final class StorageImpl implements BendingStorage {
       DB.useHandle(handle -> {
         PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
         for (AbilityDescription desc : abilities) {
-          batch.bind(0, desc.getName()).add();
+          batch.bind(0, desc.name()).add();
         }
         batch.execute();
       });
@@ -183,7 +183,7 @@ public final class StorageImpl implements BendingStorage {
     String[] abilities = new String[9];
     try {
       return DB.withHandle(handle -> {
-        Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT_BY_ID.getQuery()).bind(0, presetId);
+        Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT_BY_ID.query()).bind(0, presetId);
         for (Map<String, Object> map : query.mapToMap()) {
           int slot = (int) map.get("slot");
           String abilityName = (String) map.get("ability_name");
@@ -210,7 +210,7 @@ public final class StorageImpl implements BendingStorage {
     BendingProfile profile = null;
     try {
       return DB.withHandle(handle -> {
-        Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.getQuery())
+        Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
           .bind(0, uuid).mapToMap().findOne();
         if (result.isEmpty()) {
           return null;
@@ -229,8 +229,8 @@ public final class StorageImpl implements BendingStorage {
   private boolean updateProfile(BendingProfile profile) {
     try {
       DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.getQuery())
-          .bind(0, profile.hasBoard()).bind(1, profile.getInternalId()).execute()
+        handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.query())
+          .bind(0, profile.board()).bind(1, profile.id()).execute()
       );
       return true;
     } catch (Exception e) {
@@ -240,12 +240,12 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean saveElements(BendingPlayer player) {
-    int id = player.getProfile().getInternalId();
+    int id = player.profile().id();
     try {
       DB.useHandle(handle -> {
-        handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE_FOR_ID.getQuery()).bind(0, id).execute();
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT_FOR_NAME.getQuery());
-        for (Element element : player.getElements()) {
+        handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE_FOR_ID.query()).bind(0, id).execute();
+        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT_FOR_NAME.query());
+        for (Element element : player.elements()) {
           batch.bind(0, id).bind(1, element.name()).add();
         }
         batch.execute();
@@ -258,14 +258,14 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean saveSlots(BendingPlayer player) {
-    int id = player.getProfile().getInternalId();
+    int id = player.profile().id();
     Preset temp = player.createPresetFromSlots("");
     try {
       DB.useHandle(handle -> {
-        handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_FOR_ID.getQuery()).bind(0, id).execute();
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT_NEW.getQuery());
-        for (int slot = 0; slot < temp.getAbilities().length; slot++) {
-          int abilityId = getAbilityId(temp.getAbilities()[slot]);
+        handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_FOR_ID.query()).bind(0, id).execute();
+        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT_NEW.query());
+        for (int slot = 0; slot < temp.abilities().length; slot++) {
+          int abilityId = getAbilityId(temp.abilities()[slot]);
           if (abilityId == 0) {
             continue;
           }
@@ -281,20 +281,20 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean savePreset(int playerId, Preset preset) {
-    if (preset.getInternalId() > 0) {
+    if (preset.id() > 0) {
       return false; // Must be a new preset!
     }
-    if (!deletePreset(playerId, preset.getName())) {
+    if (!deletePreset(playerId, preset.name())) {
       return false; // needed for overwriting
     }
     try {
       DB.useHandle(handle -> {
-        int presetId = (int) handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.getQuery())
-          .bind(0, playerId).bind(1, preset.getName())
+        int presetId = (int) handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
+          .bind(0, playerId).bind(1, preset.name())
           .executeAndReturnGeneratedKeys()
           .mapToMap().one().get("preset_id");
-        String[] abilities = preset.getAbilities();
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT_NEW.getQuery());
+        String[] abilities = preset.abilities();
+        PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT_NEW.query());
         batch.execute();
         for (int i = 0; i < 9; i++) {
           String abilityName = abilities[i];
@@ -322,7 +322,7 @@ public final class StorageImpl implements BendingStorage {
     }
     try {
       DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.getQuery()).bind(0, presetId).execute()
+        handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, presetId).execute()
       );
       return true;
     } catch (Exception e) {
@@ -337,7 +337,7 @@ public final class StorageImpl implements BendingStorage {
     }
     try {
       return DB.withHandle(handle ->
-        (int) handle.createQuery(SqlQueries.ABILITIES_SELECT_ID_BY_NAME.getQuery()).bind(0, name).mapToMap().one().get("ability_id")
+        (int) handle.createQuery(SqlQueries.ABILITIES_SELECT_ID_BY_NAME.query()).bind(0, name).mapToMap().one().get("ability_id")
       );
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -349,7 +349,7 @@ public final class StorageImpl implements BendingStorage {
     String[] slots = new String[9];
     try {
       DB.useHandle(handle -> {
-        Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT_FOR_ID.getQuery()).bind(0, playerId);
+        Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT_FOR_ID.query()).bind(0, playerId);
         for (Map<String, Object> map : query.mapToMap()) {
           int slot = (int) map.get("slot");
           String abilityName = (String) map.get("ability_name");
@@ -365,7 +365,7 @@ public final class StorageImpl implements BendingStorage {
   private Set<String> getElements(int playerId) {
     try {
       return DB.withHandle(handle ->
-        handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT_FOR_ID.getQuery()).bind(0, playerId)
+        handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT_FOR_ID.query()).bind(0, playerId)
           .mapToMap().stream().map(r -> (String) r.get("element_name")).collect(Collectors.toSet())
       );
     } catch (Exception e) {
@@ -377,7 +377,7 @@ public final class StorageImpl implements BendingStorage {
   private Set<String> getPresets(int playerId) {
     try {
       return DB.withHandle(handle ->
-        handle.createQuery(SqlQueries.PRESET_NAMES_SELECT_BY_PLAYER_ID.getQuery()).bind(0, playerId)
+        handle.createQuery(SqlQueries.PRESET_NAMES_SELECT_BY_PLAYER_ID.query()).bind(0, playerId)
           .mapToMap().stream().map(r -> (String) r.get("preset_name")).collect(Collectors.toSet())
       );
     } catch (Exception e) {
@@ -389,7 +389,7 @@ public final class StorageImpl implements BendingStorage {
   private boolean deletePreset(int playerId, String presetName) {
     try {
       DB.withHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.getQuery()).bind(0, playerId).bind(1, presetName)
+        handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, playerId).bind(1, presetName)
       );
       return true;
     } catch (Exception e) {
@@ -402,7 +402,7 @@ public final class StorageImpl implements BendingStorage {
   private int getPresetId(int playerId, String presetName) {
     try {
       return DB.withHandle(handle -> {
-        Query query = handle.createQuery(SqlQueries.PRESET_SELECT_ID_BY_ID_AND_NAME.getQuery())
+        Query query = handle.createQuery(SqlQueries.PRESET_SELECT_ID_BY_ID_AND_NAME.query())
           .bind(0, playerId).bind(1, presetName);
         return (int) query.mapToMap().one().get("preset_id");
       });

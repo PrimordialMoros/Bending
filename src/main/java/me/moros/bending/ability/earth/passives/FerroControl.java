@@ -65,26 +65,26 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription()) || !user.hasPermission("bending.metal")) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description()) || !user.hasPermission("bending.metal")) {
       controlledEntity = null;
       return UpdateResult.CONTINUE;
     }
 
     if (controlledEntity == null || !controlledEntity.isValid()) {
-      controlledEntity = user.getTargetEntity(userConfig.entitySelectRange, Minecart.class).orElse(null);
+      controlledEntity = user.rayTraceEntity(userConfig.entitySelectRange, Minecart.class).orElse(null);
     }
 
     if (controlledEntity != null) {
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, controlledEntity.getLocation().getBlock())) {
+      if (!Bending.game().protectionSystem().canBuild(user, controlledEntity.getLocation().getBlock())) {
         controlledEntity = null;
         return UpdateResult.CONTINUE;
       }
-      Vector3 targetLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(userConfig.entityRange));
+      Vector3 targetLocation = user.eyeLocation().add(user.direction().scalarMultiply(userConfig.entityRange));
       Vector3 entityLocation = new Vector3(controlledEntity.getLocation());
       if (entityLocation.distanceSq(targetLocation) < 1) {
         controlledEntity.setVelocity(Vector3.ZERO.toVector());
@@ -98,7 +98,7 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
   }
 
   private void act(Block block) {
-    if (!user.canBend(getDescription()) || !user.hasPermission("bending.metal")) {
+    if (!user.canBend(description()) || !user.hasPermission("bending.metal")) {
       return;
     }
     long time = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
       return;
     }
     nextInteractTime = time + userConfig.cooldown;
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return;
     }
     Openable openable = (Openable) block.getBlockData();
@@ -123,13 +123,13 @@ public class FerroControl extends AbilityInstance implements PassiveAbility {
 
   public static void act(@NonNull User user, @NonNull Block block) {
     if (block.getType() == Material.IRON_DOOR || block.getType() == Material.IRON_TRAPDOOR) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, FerroControl.class)
+      Bending.game().abilityManager(user.world()).firstInstance(user, FerroControl.class)
         .ifPresent(ability -> ability.act(block));
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

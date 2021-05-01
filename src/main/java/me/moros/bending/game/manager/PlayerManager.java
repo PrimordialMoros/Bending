@@ -48,16 +48,15 @@ public final class PlayerManager {
   }
 
   /**
-   * UUID must correspond to an online player
-   * @param uuid the uuid of the player object
+   * @param player the bukkit player object
    * @return the BendingPlayer instance associated with the specified player
    */
-  public @NonNull BendingPlayer getPlayer(@NonNull UUID uuid) {
-    return Objects.requireNonNull(players.get(uuid));
+  public @NonNull BendingPlayer player(@NonNull Player player) {
+    return Objects.requireNonNull(players.get(player.getUniqueId()));
   }
 
-  public @NonNull Collection<@NonNull BendingPlayer> getOnlinePlayers() {
-    return players.values().stream().filter(BendingPlayer::isValid).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull BendingPlayer> onlinePlayers() {
+    return players.values().stream().filter(BendingPlayer::valid).collect(Collectors.toList());
   }
 
   public void invalidatePlayer(@NonNull UUID uuid) {
@@ -71,16 +70,16 @@ public final class PlayerManager {
 
   public void createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
     BendingPlayer.createPlayer(player, profile).ifPresent(p -> {
-      players.put(p.getProfile().getUniqueId(), p);
-      p.getProfile().getData().elements.stream().map(Element::getElementByName).forEach(o -> o.ifPresent(p::addElement));
-      p.bindPreset(new Preset(p.getProfile().getData().slots));
-      Bending.getGame().getBoardManager().canUseScoreboard(p.getEntity());
-      Bending.getGame().getAbilityManager(p.getWorld()).createPassives(p);
-      Bending.getEventBus().postBendingPlayerLoadEvent(p);
+      players.put(player.getUniqueId(), p);
+      p.profile().data().elements().stream().map(Element::elementByName).forEach(o -> o.ifPresent(p::addElement));
+      p.bindPreset(new Preset(p.profile().data().slots()));
+      Bending.game().boardManager().canUseScoreboard(p.entity());
+      Bending.game().abilityManager(p.world()).createPassives(p);
+      Bending.eventBus().postBendingPlayerLoadEvent(p);
     });
   }
 
-  public @Nullable BendingProfile getProfile(@NonNull UUID uuid) {
+  public @Nullable BendingProfile profile(@NonNull UUID uuid) {
     return cache.synchronous().get(uuid);
   }
 }

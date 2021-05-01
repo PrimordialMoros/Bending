@@ -20,7 +20,6 @@
 package me.moros.bending.game;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -106,37 +105,37 @@ import static me.moros.bending.model.ability.util.ActivationMethod.*;
  * Used to initialize all ability descriptions, sequences and collisions
  */
 public final class AbilityInitializer {
-  public static final List<String> spoutLayer = Arrays.asList("AirSpout", "WaterSpout");
-  public static final List<String> shieldLayer = Arrays.asList("AirShield", "FireShield", "WallOfFire");
-  public static final List<String> layer0 = Arrays.asList("EarthGlove", "MetalCable");
-  public static final List<String> layer1 = Arrays.asList("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
-  public static final List<String> layer2 = Arrays.asList("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
-  public static final List<String> layer3 = Arrays.asList("LavaDisk", "Combustion", "EarthSmash");
+  public static final List<String> spoutLayer = List.of("AirSpout", "WaterSpout");
+  public static final List<String> shieldLayer = List.of("AirShield", "FireShield", "WallOfFire");
+  public static final List<String> breathCollisions = List.of("EarthBlast", "FireBlast", "WaterManipulation");
+  public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
+  public static final List<String> layer1 = List.of("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
+  public static final List<String> layer2 = List.of("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
+  public static final List<String> layer3 = List.of("LavaDisk", "Combustion", "EarthSmash");
 
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
   private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
   private final AbilityRegistry registry;
 
   protected AbilityInitializer(@NonNull Game game) {
-    registry = game.getAbilityRegistry();
+    registry = game.abilityRegistry();
     initAir();
     initWater();
     initEarth();
     initFire();
 
     int abilityAmount = registry.registerAbilities(abilities);
-    int addonAmount = registry.registerAbilities(AbilityRegistry.AddonRegistry.getAddonAbilities());
-    int sequenceAmount = game.getSequenceManager().registerSequences(sequences);
-    int addonSequences = game.getSequenceManager().registerSequences(AbilityRegistry.AddonRegistry.getAddonSequences());
+    int addonAmount = registry.registerAbilities(AbilityRegistry.AddonRegistry.addonAbilities());
+    int sequenceAmount = game.sequenceManager().registerSequences(sequences);
+    int addonSequences = game.sequenceManager().registerSequences(AbilityRegistry.AddonRegistry.addonSequences());
     int collisionAmount = CollisionManager.registerCollisions(buildCollisions());
 
-    Bending.getLog().info("Registered " + abilityAmount + " core abilities and " + addonAmount + " addon abilities!");
-    Bending.getLog().info("Registered " + sequenceAmount + " core sequences and " + addonSequences + " addon sequences!");
-    Bending.getLog().info("Registered " + collisionAmount + " collisions!");
+    Bending.logger().info("Registered " + abilityAmount + " core abilities and " + addonAmount + " addon abilities!");
+    Bending.logger().info("Registered " + sequenceAmount + " core sequences and " + addonSequences + " addon sequences!");
+    Bending.logger().info("Registered " + collisionAmount + " collisions!");
   }
 
   private Collection<RegisteredCollision> buildCollisions() {
-    List<String> breathCollisions = Arrays.asList("EarthBlast", "FireBlast", "WaterManipulation");
     return new CollisionBuilder(registry)
       .addLayer(layer0)
       .addSpecialLayer(spoutLayer)
@@ -217,7 +216,7 @@ public final class AbilityInitializer {
       .element(WATER).activation(PASSIVE).canBind(false).harmless(true).build());
 
     AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
-      .element(WATER).activation(SNEAK, ATTACK).sourcesPlants(true).bypassCooldown(true).build();
+      .element(WATER).activation(SNEAK, ATTACK).sourcePlant(true).bypassCooldown(true).build();
     abilities.add(waterManipulation);
 
     abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
@@ -230,10 +229,10 @@ public final class AbilityInitializer {
       .element(WATER).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("OctopusForm", OctopusForm::new)
-      .element(WATER).activation(ATTACK).sourcesPlants(true).build());
+      .element(WATER).activation(ATTACK).sourcePlant(true).build());
 
     AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
-      .element(WATER).activation(ATTACK).sourcesPlants(true).build();
+      .element(WATER).activation(ATTACK).sourcePlant(true).build();
     abilities.add(waterRing);
 
     AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
@@ -241,7 +240,7 @@ public final class AbilityInitializer {
     abilities.add(waterWave);
 
     AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
-      .element(WATER).activation(ATTACK).sourcesPlants(true).bypassCooldown(true).build();
+      .element(WATER).activation(ATTACK).sourcePlant(true).bypassCooldown(true).build();
     abilities.add(torrent);
 
     AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange::new)

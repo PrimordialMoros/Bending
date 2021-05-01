@@ -71,11 +71,11 @@ public class BendingFallingBlock implements Temporary {
     revertTask.cancel();
   }
 
-  public @NonNull FallingBlock getFallingBlock() {
+  public @NonNull FallingBlock fallingBlock() {
     return fallingBlock;
   }
 
-  public @NonNull Vector3 getCenter() {
+  public @NonNull Vector3 center() {
     return new Vector3(fallingBlock.getLocation()).add(new Vector3(0, 0.5, 0));
   }
 }

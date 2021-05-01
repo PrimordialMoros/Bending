@@ -25,9 +25,9 @@ import me.moros.bending.model.math.Vector3;
 public interface Collider {
   boolean intersects(@NonNull Collider collider);
 
-  @NonNull Vector3 getPosition();
+  @NonNull Vector3 position();
 
-  @NonNull Vector3 getHalfExtents();
+  @NonNull Vector3 halfExtents();
 
   boolean contains(@NonNull Vector3 point);
 }

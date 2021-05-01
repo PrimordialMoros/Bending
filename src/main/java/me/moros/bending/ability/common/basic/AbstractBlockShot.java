@@ -23,8 +23,10 @@ import java.util.Collections;
 import java.util.function.Predicate;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -41,11 +43,9 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
-
-public abstract class AbstractBlockShot implements Updatable {
+public abstract class AbstractBlockShot implements Updatable, SimpleAbility {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
   private User user;
@@ -82,7 +82,7 @@ public abstract class AbstractBlockShot implements Updatable {
 
     redirect();
     settingUp = true;
-    firstDestination = getCenter();
+    firstDestination = center();
     int targetY = NumberConversions.floor(target.getY());
     int currentY = current.getY();
     Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
@@ -106,12 +106,12 @@ public abstract class AbstractBlockShot implements Updatable {
       settingUp = false;
     }
     Vector3 dest = settingUp ? firstDestination : target;
-    Vector3 currentVector = getCenter();
+    Vector3 currentVector = center();
     direction = dest.subtract(currentVector).normalize();
     Vector3 originalVector = new Vector3(currentVector.toArray());
     currentVector = currentVector.add(direction).floor().add(Vector3.HALF);
 
-    Block originBlock = originalVector.toBlock(user.getWorld());
+    Block originBlock = originalVector.toBlock(user.world());
     for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
       int x = NumberConversions.floor(v.getX());
       int y = NumberConversions.floor(v.getY());
@@ -121,17 +121,17 @@ public abstract class AbstractBlockShot implements Updatable {
       }
     }
 
-    if (currentVector.distanceSq(user.getEyeLocation()) > range * range) {
+    if (currentVector.distanceSq(user.eyeLocation()) > range * range) {
       return UpdateResult.REMOVE;
     }
 
     previousBlock = current;
-    current = currentVector.toBlock(user.getWorld());
+    current = currentVector.toBlock(user.world());
 
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
+    if (!Bending.game().protectionSystem().canBuild(user, current)) {
       return UpdateResult.REMOVE;
     }
-    collider = BOX.at(getCenter().floor());
+    collider = BOX.at(center().floor());
     if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
       return UpdateResult.REMOVE;
     }
@@ -153,27 +153,27 @@ public abstract class AbstractBlockShot implements Updatable {
   }
 
   public void redirect() {
-    target = user.getTargetEntity(range)
-      .map(EntityMethods::getEntityCenter)
-      .orElseGet(() -> user.getTarget(range, Collections.singleton(material)))
+    target = user.rayTraceEntity(range)
+      .map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(range, Collections.singleton(material)))
       .floor().add(Vector3.HALF);
     settingUp = false;
   }
 
-  public Block getPreviousBlock() {
+  public @Nullable Block previousBlock() {
     return previousBlock;
   }
 
-  public Vector3 getCenter() {
+  public @NonNull Vector3 center() {
     return new Vector3(current).add(Vector3.HALF);
   }
 
-  public abstract boolean onEntityHit(@NonNull Entity entity);
-
-  public void onBlockHit(@NonNull Block block) {
+  @Override
+  public void render() {
   }
 
-  public @NonNull AABB getCollider() {
+  @Override
+  public @NonNull AABB collider() {
     return collider;
   }
 
@@ -194,7 +194,7 @@ public abstract class AbstractBlockShot implements Updatable {
     }
   }
 
-  public void setUser(@NonNull User user) {
+  public void user(@NonNull User user) {
     this.user = user;
   }
 }

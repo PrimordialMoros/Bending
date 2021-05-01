@@ -28,7 +28,7 @@ public class BendingPlayerLoadEvent extends BendingUserEvent {
   }
 
   @Override
-  public @NonNull BendingPlayer getUser() {
-    return (BendingPlayer) super.getUser();
+  public @NonNull BendingPlayer user() {
+    return (BendingPlayer) super.user();
   }
 }

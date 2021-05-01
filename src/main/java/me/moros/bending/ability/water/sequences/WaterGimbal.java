@@ -85,21 +85,21 @@ public class WaterGimbal extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    WaterRing ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+    WaterRing ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
     List<Block> sources = new ArrayList<>();
     if (ring != null && ring.isReady()) {
       sources.addAll(ring.complete());
     }
 
     if (sources.isEmpty()) {
-      Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+      Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
       if (source.isEmpty()) {
         return false;
       }
@@ -114,7 +114,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
       .addState(new GimbalStream())
       .start();
 
-    AbilityDescription torrentDesc = user.getSelectedAbility().orElse(null);
+    AbilityDescription torrentDesc = user.selectedAbility().orElse(null);
     if (torrentDesc == null) {
       return false;
     }
@@ -125,28 +125,28 @@ public class WaterGimbal extends AbilityInstance implements Ability {
       .add(SwappedSlotsRemovalPolicy.of(torrentDesc))
       .build();
 
-    Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, Torrent.class);
-    Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterRing.class);
+    Bending.game().abilityManager(user.world()).destroyInstanceType(user, Torrent.class);
+    Bending.game().abilityManager(user.world()).destroyInstanceType(user, WaterRing.class);
 
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     return states.update();
   }
 
   public static void launch(User user) {
-    if (user.getSelectedAbilityName().equals("Torrent")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
+    if (user.selectedAbilityName().equals("Torrent")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
     }
   }
 
@@ -154,33 +154,33 @@ public class WaterGimbal extends AbilityInstance implements Ability {
     if (launched) {
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof Gimbal) {
       launched = true;
       removalPolicy = Policies.builder().build();
       state.complete();
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
   @Override
   public void onDestroy() {
-    State current = states.getCurrent();
+    State current = states.current();
     if (current instanceof GimbalStream) {
       ((GimbalStream) current).cleanAll();
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    State current = states.getCurrent();
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    State current = states.current();
     if (current instanceof GimbalStream) {
-      return ((GimbalStream) current).getColliders();
+      return ((GimbalStream) current).colliders();
     }
     return Collections.emptyList();
   }
@@ -204,7 +204,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
         return;
       }
       this.chain = chain;
-      started = !chain.getChainStore().isEmpty();
+      started = !chain.chainStore().isEmpty();
     }
 
     @Override
@@ -213,11 +213,11 @@ public class WaterGimbal extends AbilityInstance implements Ability {
         return;
       }
       if (center == null) {
-        center = user.getLocation().add(Vector3.PLUS_J).add(user.getDirection().setY(0).scalarMultiply(2)).toBlock(user.getWorld());
+        center = user.location().add(Vector3.PLUS_J).add(user.direction().setY(0).scalarMultiply(2)).toBlock(user.world());
         TempBlock.create(center, Material.WATER.createBlockData(), 50);
       }
-      chain.getChainStore().clear();
-      chain.getChainStore().addAll(Collections.nCopies(10, center));
+      chain.chainStore().clear();
+      chain.chainStore().addAll(Collections.nCopies(10, center));
       chain.nextState();
     }
 
@@ -226,15 +226,15 @@ public class WaterGimbal extends AbilityInstance implements Ability {
       if (!started) {
         return UpdateResult.REMOVE;
       }
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+      if (!Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
         return UpdateResult.REMOVE;
       }
 
       Set<Block> ring = new HashSet<>();
-      double yaw = FastMath.toRadians(-user.getYaw()) - FastMath.PI / 2;
+      double yaw = FastMath.toRadians(-user.yaw()) - FastMath.PI / 2;
       double cos = FastMath.cos(yaw);
       double sin = FastMath.sin(yaw);
-      Vector3 center = user.getLocation().add(Vector3.PLUS_J);
+      Vector3 center = user.location().add(Vector3.PLUS_J);
       for (int i = 0; i < 2; i++) {
         double theta = FastMath.toRadians(angle);
         angle += 18;
@@ -247,8 +247,8 @@ public class WaterGimbal extends AbilityInstance implements Ability {
         v1 = VectorMethods.rotateAroundAxisY(v1, cos, sin);
         v2 = VectorMethods.rotateAroundAxisX(v2, 0.7, -0.7);
         v2 = VectorMethods.rotateAroundAxisY(v2, cos, sin);
-        Block block1 = center.add(v1).toBlock(user.getWorld());
-        Block block2 = center.add(v2).toBlock(user.getWorld());
+        Block block1 = center.add(v1).toBlock(user.world());
+        Block block2 = center.add(v2).toBlock(user.world());
         if (!ring.contains(block1)) {
           addValidBlock(block1, ring);
         }
@@ -296,7 +296,7 @@ public class WaterGimbal extends AbilityInstance implements Ability {
       if (!(entity instanceof LivingEntity) || affectedEntities.contains(entity)) {
         return false;
       }
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
       entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
       affectedEntities.add(entity);

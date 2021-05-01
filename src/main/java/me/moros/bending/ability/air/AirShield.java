@@ -75,7 +75,7 @@ public class AirShield extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(Policies.NOT_SNEAKING)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
@@ -85,16 +85,16 @@ public class AirShield extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !Bending.getGame().getProtectionSystem().canBuild(user, user.getHeadBlock())) {
+    if (removalPolicy.test(user, description()) || !Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
       return UpdateResult.REMOVE;
     }
     currentPoint++;
-    Vector3 center = getCenter();
+    Vector3 center = center();
     double spacing = userConfig.radius / 4;
     for (int i = 1; i < 8; i++) {
       double y = (i * spacing) - userConfig.radius;
@@ -105,14 +105,14 @@ public class AirShield extends AbilityInstance implements Ability {
       double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
       double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
       Vector3 loc = center.add(new Vector3(x, y, z));
-      ParticleUtil.createAir(loc.toLocation(user.getWorld())).count(5)
+      ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
         .offset(0.2, 0.2, 0.2).extra(0.01).spawn();
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.AIR_SOUND.play(loc.toLocation(user.getWorld()));
+        SoundUtil.AIR_SOUND.play(loc.toLocation(user.world()));
       }
     }
 
-    for (Block b : WorldMethods.getNearbyBlocks(center.toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isFire)) {
+    for (Block b : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isFire)) {
       BlockMethods.tryCoolLava(user, b);
       BlockMethods.tryExtinguishFire(user, b);
     }
@@ -129,33 +129,33 @@ public class AirShield extends AbilityInstance implements Ability {
     return UpdateResult.CONTINUE;
   }
 
-  private Vector3 getCenter() {
-    return EntityMethods.getEntityCenter(user.getEntity());
+  private Vector3 center() {
+    return EntityMethods.entityCenter(user.entity());
   }
 
   @Override
   public void onDestroy() {
     double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
     long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
-    user.setCooldown(getDescription(), cooldown);
+    user.addCooldown(description(), cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(new Sphere(getCenter(), userConfig.radius));
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(new Sphere(center(), userConfig.radius));
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
+    Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
-      for (Block block : WorldMethods.getNearbyBlocks(getCenter().toLocation(user.getWorld()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
-        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      for (Block block : WorldMethods.nearbyBlocks(center().toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+        if (!Bending.game().protectionSystem().canBuild(user, block)) {
           continue;
         }
         BlockMethods.tryBreakPlant(block);

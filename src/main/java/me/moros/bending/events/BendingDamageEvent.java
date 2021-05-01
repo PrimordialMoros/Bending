@@ -37,15 +37,15 @@ public class BendingDamageEvent extends BendingAbilityEvent implements Cancellab
     this.damage = damage;
   }
 
-  public @NonNull Entity getTarget() {
+  public @NonNull Entity target() {
     return target;
   }
 
-  public double getDamage() {
+  public double damage() {
     return damage;
   }
 
-  public void setDamage(double damage) {
+  public void damage(double damage) {
     this.damage = damage;
   }
 

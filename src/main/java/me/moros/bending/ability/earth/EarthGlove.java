@@ -100,7 +100,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
       return false;
     }
 
-    if (user.isOnCooldown(getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthGlove.class).count() >= 2) {
+    if (user.isOnCooldown(description()) || Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count() >= 2) {
       return false;
     }
 
@@ -110,10 +110,10 @@ public class EarthGlove extends AbilityInstance implements Ability {
     if (launchEarthGlove()) {
       removalPolicy = Policies.builder()
         .add(Policies.IN_LIQUID)
-        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
         .build();
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
       return true;
     }
 
@@ -122,12 +122,12 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -136,21 +136,21 @@ public class EarthGlove extends AbilityInstance implements Ability {
     }
 
     location = new Vector3(glove.getLocation());
-    if (location.distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) {
+    if (location.distanceSq(user.eyeLocation()) > userConfig.range * userConfig.range) {
       returning = true;
     }
 
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, glove.getLocation().getBlock())) {
+    if (!Bending.game().protectionSystem().canBuild(user, glove.getLocation().getBlock())) {
       shatterGlove();
       return UpdateResult.REMOVE;
     }
     double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
     if (returning) {
-      if (!user.isSneaking()) {
+      if (!user.sneaking()) {
         shatterGlove();
         return UpdateResult.REMOVE;
       }
-      Vector3 returnLocation = user.getEyeLocation().add(user.getDirection().scalarMultiply(isMetal ? 5 : 1.5));
+      Vector3 returnLocation = user.eyeLocation().add(user.direction().scalarMultiply(isMetal ? 5 : 1.5));
       if (location.distanceSq(returnLocation) < 1) {
         if (grabbed && grabbedTarget != null) {
           grabbedTarget.setVelocity(Vector3.ZERO.toVector());
@@ -168,7 +168,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
         return UpdateResult.CONTINUE;
       } else {
         Vector3 dir = returnLocation.subtract(location).normalize().scalarMultiply(GLOVE_SPEED * factor);
-        setGloveVelocity(dir);
+        updateGloveVelocity(dir);
       }
     } else {
       double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
@@ -178,8 +178,8 @@ public class EarthGlove extends AbilityInstance implements Ability {
         return UpdateResult.REMOVE;
       }
 
-      setGloveVelocity(lastVelocity.normalize().scalarMultiply(GLOVE_SPEED * factor));
-      boolean sneaking = user.isSneaking();
+      updateGloveVelocity(lastVelocity.normalize().scalarMultiply(GLOVE_SPEED * factor));
+      boolean sneaking = user.sneaking();
       boolean collided = CollisionUtil.handleEntityCollisions(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
       if (collided && !grabbed) {
         return UpdateResult.REMOVE;
@@ -189,11 +189,11 @@ public class EarthGlove extends AbilityInstance implements Ability {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (user.isSneaking()) {
+    if (user.sneaking()) {
       return grabTarget((LivingEntity) entity);
     }
     double damage = isMetal ? BendingProperties.METAL_MODIFIER * userConfig.damage : userConfig.damage;
-    DamageUtil.damageEntity(entity, user, damage, getDescription());
+    DamageUtil.damageEntity(entity, user, damage, description());
     shatterGlove();
     return false;
   }
@@ -210,7 +210,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
     if (isMetal) {
       removalPolicy = Policies.builder()
         .add(Policies.IN_LIQUID)
-        .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+        .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
         .add(ExpireRemovalPolicy.of(userConfig.grabDuration))
         .build();
@@ -220,35 +220,35 @@ public class EarthGlove extends AbilityInstance implements Ability {
 
   private boolean launchEarthGlove() {
     Side side;
-    if (lastUsedSide.getOrDefault(user.getEntity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
+    if (lastUsedSide.getOrDefault(user.entity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
       side = Side.LEFT;
     } else {
       side = Side.RIGHT;
     }
-    Vector3 gloveSpawnLocation = user.getHandSide(side == Side.RIGHT);
-    lastUsedSide.put(user.getEntity().getUniqueId(), side);
-    Vector3 target = user.getTargetEntity(userConfig.range)
-      .map(EntityMethods::getEntityCenter)
-      .orElseGet(() -> user.getTarget(userConfig.range));
+    Vector3 gloveSpawnLocation = user.handSide(side == Side.RIGHT);
+    lastUsedSide.put(user.entity().getUniqueId(), side);
+    Vector3 target = user.rayTraceEntity(userConfig.range)
+      .map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(userConfig.range));
 
     glove = buildGlove(gloveSpawnLocation);
 
     if (isMetal) {
-      SoundUtil.METAL_SOUND.play(gloveSpawnLocation.toLocation(user.getWorld()));
+      SoundUtil.METAL_SOUND.play(gloveSpawnLocation.toLocation(user.world()));
     } else {
-      SoundUtil.playSound(gloveSpawnLocation.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+      SoundUtil.playSound(gloveSpawnLocation.toLocation(user.world()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
     }
 
     double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
     Vector3 velocity = target.subtract(gloveSpawnLocation).normalize().scalarMultiply(GLOVE_SPEED * factor);
-    setGloveVelocity(velocity);
+    updateGloveVelocity(velocity);
     location = new Vector3(glove.getLocation());
     return true;
   }
 
   private Item buildGlove(Vector3 spawnLocation) {
     isMetal = user.hasPermission("bending.metal") && InventoryUtil.hasItem(user, INGOT);
-    Item item = user.getWorld().dropItem(spawnLocation.toLocation(user.getWorld()), isMetal ? INGOT : STONE);
+    Item item = user.world().dropItem(spawnLocation.toLocation(user.world()), isMetal ? INGOT : STONE);
     item.setInvulnerable(true);
     item.setGravity(false);
     item.setMetadata(Metadata.GLOVE_KEY, Metadata.customMetadata(this));
@@ -261,13 +261,13 @@ public class EarthGlove extends AbilityInstance implements Ability {
     return item;
   }
 
-  private void setGloveVelocity(Vector3 velocity) {
+  private void updateGloveVelocity(Vector3 velocity) {
     glove.setVelocity(velocity.clampVelocity());
     lastVelocity = new Vector3(glove.getVelocity());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -279,7 +279,7 @@ public class EarthGlove extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (glove == null || returning) {
       return Collections.emptyList();
     }
@@ -299,10 +299,10 @@ public class EarthGlove extends AbilityInstance implements Ability {
   }
 
   private static void tryDestroy(@NonNull User user) {
-    CollisionUtil.handleEntityCollisions(user, new Sphere(user.getEyeLocation(), 8), e -> {
-      if (e instanceof Item && user.getEntity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
+    CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), 8), e -> {
+      if (e instanceof Item && user.entity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
         EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
-        if (ability != null && !user.equals(ability.getUser())) {
+        if (ability != null && !user.equals(ability.user())) {
           ability.shatterGlove();
         }
       }

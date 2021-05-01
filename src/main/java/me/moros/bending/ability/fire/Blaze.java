@@ -66,7 +66,7 @@ public class Blaze extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Blaze.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, Blaze.class)) {
       return false;
     }
 
@@ -77,14 +77,14 @@ public class Blaze extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   private boolean release(boolean cone) {
     double range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    Vector3 origin = user.getLocation().floor().add(Vector3.HALF);
-    Vector3 dir = user.getDirection().setY(0).normalize();
+    Vector3 origin = user.location().floor().add(Vector3.HALF);
+    Vector3 dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = FastMath.PI / (3 * range);
       VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 2)).forEach(v ->
@@ -102,13 +102,13 @@ public class Blaze extends AbilityInstance implements Ability {
       return false;
     }
     removalPolicy = Policies.builder().build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
@@ -118,12 +118,12 @@ public class Blaze extends AbilityInstance implements Ability {
   @Override
   public void onDestroy() {
     if (!affectedBlocks.isEmpty()) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

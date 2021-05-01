@@ -66,18 +66,18 @@ public class Bulwark extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    Optional<Block> source = SourceUtil.getSource(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
+    Optional<Block> source = SourceUtil.find(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
     if (source.isEmpty()) {
       return false;
     }
 
-    RaiseEarth raiseWall = new RaiseEarth(getDescription());
+    RaiseEarth raiseWall = new RaiseEarth(description());
     if (raiseWall.activate(user, source.get(), 2, 3, 75)) {
       removalPolicy = Policies.builder()
         .add(ExpireRemovalPolicy.of(5000 + userConfig.wallDuration))
         .build();
-      user.setCooldown(getDescription(), userConfig.wallCooldown);
-      raiseWall.getPillars().stream().map(Pillar::getOrigin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
+      user.addCooldown(description(), userConfig.wallCooldown);
+      raiseWall.pillars().stream().map(Pillar::origin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
       wall = raiseWall;
       startTime = System.currentTimeMillis();
       return true;
@@ -87,12 +87,12 @@ public class Bulwark extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -109,14 +109,14 @@ public class Bulwark extends AbilityInstance implements Ability {
       return;
     }
     collapsing = true;
-    Collapse collapseWall = new Collapse(getDescription());
+    Collapse collapseWall = new Collapse(description());
     if (collapseWall.activate(user, bases, 2)) {
       wall = collapseWall;
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

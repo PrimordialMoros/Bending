@@ -67,7 +67,7 @@ public class Tornado extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(Policies.NOT_SNEAKING)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
@@ -77,24 +77,24 @@ public class Tornado extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || user.getHeadBlock().isLiquid()) {
+    if (removalPolicy.test(user, description()) || user.headBlock().isLiquid()) {
       return UpdateResult.REMOVE;
     }
 
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+    if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
       return UpdateResult.REMOVE;
     }
-    Vector3 base = user.getTarget(userConfig.range, false);
-    Block baseBlock = base.toBlock(user.getWorld());
+    Vector3 base = user.rayTrace(userConfig.range, false);
+    Block baseBlock = base.toBlock(user.world());
     if (MaterialUtil.isTransparent(baseBlock.getRelative(BlockFace.DOWN))) {
       return UpdateResult.CONTINUE;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, baseBlock)) {
+    if (!Bending.game().protectionSystem().canBuild(user, baseBlock)) {
       return UpdateResult.REMOVE;
     }
 
@@ -107,13 +107,13 @@ public class Tornado extends AbilityInstance implements Ability {
     CollisionUtil.handleEntityCollisions(user, box, entity -> {
       double dy = entity.getLocation().getY() - base.getY();
       double r = 2 + (radius - 2) * dy;
-      Vector3 delta = EntityMethods.getEntityCenter(entity).subtract(base);
+      Vector3 delta = EntityMethods.entityCenter(entity).subtract(base);
       double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
       if (distSq > r * r) {
         return false;
       }
 
-      if (entity.equals(user.getEntity())) {
+      if (entity.equals(user.entity())) {
         double velY;
         if (dy >= height * .95) {
           velY = 0;
@@ -122,7 +122,7 @@ public class Tornado extends AbilityInstance implements Ability {
         } else {
           velY = 0.6;
         }
-        Vector3 velocity = user.getDirection().setY(velY).scalarMultiply(factor);
+        Vector3 velocity = user.direction().setY(velY).scalarMultiply(factor);
         entity.setVelocity(velocity.clampVelocity());
       } else {
         Vector3 normal = delta.setY(0).normalize();
@@ -149,7 +149,7 @@ public class Tornado extends AbilityInstance implements Ability {
         double r = 2 + (radius - 2) * y / height;
         double x = r * FastMath.cos(y + offset);
         double z = r * FastMath.sin(y + offset);
-        Location loc = base.add(new Vector3(x, y, z)).toLocation(user.getWorld());
+        Location loc = base.add(new Vector3(x, y, z)).toLocation(user.world());
         ParticleUtil.createAir(loc).spawn();
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
           SoundUtil.AIR_SOUND.play(loc);
@@ -160,11 +160,11 @@ public class Tornado extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

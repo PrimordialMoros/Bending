@@ -75,11 +75,11 @@ public class FireBreath extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireBreath.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireBreath.class)) {
       return false;
     }
 
-    if (Policies.IN_LIQUID.test(user, getDescription())) {
+    if (Policies.IN_LIQUID.test(user, description())) {
       return false;
     }
 
@@ -90,7 +90,7 @@ public class FireBreath extends AbilityInstance implements Ability {
       .add(Policies.NOT_SNEAKING)
       .add(Policies.IN_LIQUID)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
     return true;
@@ -98,16 +98,16 @@ public class FireBreath extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.getEyeLocation().add(offset), user.getDirection().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
     streams.add(new FireStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
@@ -115,17 +115,17 @@ public class FireBreath extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   private class FireStream extends ParticleStream {
@@ -139,7 +139,7 @@ public class FireBreath extends AbilityInstance implements Ability {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = getBukkitLocation();
+      Location spawnLoc = bukkitLocation();
       double offset = 0.2 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       ParticleUtil.createFire(user, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
@@ -149,15 +149,15 @@ public class FireBreath extends AbilityInstance implements Ability {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.FIRE_SOUND.play(getBukkitLocation());
+        SoundUtil.FIRE_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       double factor = 1 - FastMath.min(0.9, distanceTravelled / maxRange);
-      DamageUtil.damageEntity(entity, user, factor * userConfig.damage, getDescription());
-      FireTick.LARGER.apply(user, entity, NumberConversions.ceil(factor * userConfig.fireTick));
+      DamageUtil.damageEntity(entity, user, factor * userConfig.damage, description());
+      FireTick.LARGER.apply(user, entity, NumberConversions.ceil(factor * userConfig.fireTicks));
       return false;
     }
 
@@ -167,7 +167,7 @@ public class FireBreath extends AbilityInstance implements Ability {
         return true;
       }
       Block above = block.getRelative(BlockFace.UP);
-      if (MaterialUtil.isIgnitable(above) && Bending.getGame().getProtectionSystem().canBuild(user, above)) {
+      if (MaterialUtil.isIgnitable(above) && Bending.game().protectionSystem().canBuild(user, above)) {
         TempBlock.create(above, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
       }
       return true;
@@ -184,7 +184,7 @@ public class FireBreath extends AbilityInstance implements Ability {
     @Attribute(Attribute.DAMAGE)
     public double damage;
     @Attribute(Attribute.DURATION)
-    public int fireTick;
+    public int fireTicks;
 
     @Override
     public void onConfigReload() {
@@ -194,7 +194,7 @@ public class FireBreath extends AbilityInstance implements Ability {
       range = abilityNode.node("range").getDouble(9.0);
       duration = abilityNode.node("duration").getLong(2000);
       damage = abilityNode.node("damage").getDouble(0.5);
-      fireTick = abilityNode.node("fire-tick").getInt(40);
+      fireTicks = abilityNode.node("fire-ticks").getInt(40);
     }
   }
 }

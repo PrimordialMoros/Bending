@@ -144,7 +144,7 @@ public interface Message {
     @NonNull Component build();
 
     default void send(@NonNull User user) {
-      user.getEntity().sendMessage(build());
+      user.entity().sendMessage(build());
     }
   }
 
@@ -152,7 +152,7 @@ public interface Message {
     @NonNull Component build(@NonNull A0 arg0);
 
     default void send(@NonNull User user, @NonNull A0 arg0) {
-      user.getEntity().sendMessage(build(arg0));
+      user.entity().sendMessage(build(arg0));
     }
   }
 
@@ -160,7 +160,7 @@ public interface Message {
     @NonNull Component build(@NonNull A0 arg0, @NonNull A1 arg1);
 
     default void send(@NonNull User user, @NonNull A0 arg0, @NonNull A1 arg1) {
-      user.getEntity().sendMessage(build(arg0, arg1));
+      user.entity().sendMessage(build(arg0, arg1));
     }
   }
 }

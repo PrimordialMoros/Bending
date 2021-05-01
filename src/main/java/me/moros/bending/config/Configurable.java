@@ -26,14 +26,14 @@ public abstract class Configurable implements Cloneable {
   protected CommentedConfigurationNode config;
 
   public Configurable() {
-    Bending.getConfigManager().add(this);
+    Bending.configManager().add(this);
     reload();
   }
 
   public abstract void onConfigReload();
 
   public void reload() {
-    config = Bending.getConfigManager().getConfig();
+    config = Bending.configManager().config();
     onConfigReload();
   }
 

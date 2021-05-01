@@ -37,11 +37,11 @@ public final class Collision {
     this.inverse = inverse;
   }
 
-  public @NonNull Ability getCollidedAbility() {
+  public @NonNull Ability collidedAbility() {
     return inverse ? collisionData.first : collisionData.second;
   }
 
-  public @NonNull Entry<Collider, Collider> getColliders() {
+  public @NonNull Entry<Collider, Collider> colliders() {
     if (inverse) {
       return Map.entry(collisionData.c2, collisionData.c1);
     } else {
@@ -49,11 +49,11 @@ public final class Collision {
     }
   }
 
-  public boolean shouldRemoveSelf() {
+  public boolean removeSelf() {
     return inverse ? collisionData.removeSecond : collisionData.removeFirst;
   }
 
-  public void setRemoveSelf(boolean value) {
+  public void removeSelf(boolean value) {
     if (inverse) {
       collisionData.removeSecond = value;
     } else {
@@ -61,11 +61,11 @@ public final class Collision {
     }
   }
 
-  public boolean shouldRemoveCollided() {
+  public boolean removeOther() {
     return inverse ? collisionData.removeFirst : collisionData.removeSecond;
   }
 
-  public void setRemoveCollided(boolean value) {
+  public void removeOther(boolean value) {
     if (inverse) {
       collisionData.removeFirst = value;
     } else {
@@ -88,11 +88,11 @@ public final class Collision {
       this.removeSecond = removeSecond;
     }
 
-    public boolean shouldRemoveFirst() {
+    public boolean removeFirst() {
       return removeFirst;
     }
 
-    public boolean shouldRemoveSecond() {
+    public boolean removeSecond() {
       return removeSecond;
     }
 

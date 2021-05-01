@@ -72,18 +72,18 @@ public class EarthShards extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
     removalPolicy = Policies.builder().build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -91,17 +91,17 @@ public class EarthShards extends AbilityInstance implements Ability {
       long time = System.currentTimeMillis();
       if (time >= nextFireTime) {
         nextFireTime = time + userConfig.interval;
-        Vector3 rightOrigin = user.getHandSide(true);
-        Vector3 leftOrigin = user.getHandSide(false);
-        Vector3 target = user.getTarget(userConfig.range);
-        double distance = target.distance(user.getEyeLocation());
+        Vector3 rightOrigin = user.handSide(true);
+        Vector3 leftOrigin = user.handSide(false);
+        Vector3 target = user.rayTrace(userConfig.range);
+        double distance = target.distance(user.eyeLocation());
         for (int i = 0; i < 2; i++) {
           if (firedShots >= userConfig.maxShots) {
             break;
           }
           firedShots++;
           Vector3 origin = (i == 0) ? rightOrigin : leftOrigin;
-          Vector3 dir = VectorMethods.getRandomOffset(target, distance * userConfig.spread).subtract(origin);
+          Vector3 dir = VectorMethods.randomOffset(target, distance * userConfig.spread).subtract(origin);
           streams.add(new ShardStream(new Ray(origin, dir)));
         }
       }
@@ -113,16 +113,16 @@ public class EarthShards extends AbilityInstance implements Ability {
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(this);
+    Bending.game().abilityManager(user.world()).destroyInstance(this);
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -131,18 +131,18 @@ public class EarthShards extends AbilityInstance implements Ability {
     public ShardStream(Ray ray) {
       super(user, ray, userConfig.speed, 0.5);
       canCollide = Block::isLiquid;
-      SoundUtil.playSound(ray.origin.toLocation(user.getWorld()), Sound.BLOCK_STONE_BREAK, 1, 2);
+      SoundUtil.playSound(ray.origin.toLocation(user.world()), Sound.BLOCK_STONE_BREAK, 1, 2);
     }
 
     @Override
     public void render() {
-      ParticleUtil.createRGB(getBukkitLocation(), "555555", 0.8F)
+      ParticleUtil.createRGB(bukkitLocation(), "555555", 0.8F)
         .count(3).offset(0.1, 0.1, 0.1).spawn();
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       return true;
     }
 

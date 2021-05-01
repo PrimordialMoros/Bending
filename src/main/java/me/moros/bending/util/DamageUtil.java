@@ -49,15 +49,15 @@ public final class DamageUtil {
   public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
     if (target instanceof LivingEntity && damage > 0) {
       LivingEntity targetEntity = (LivingEntity) target;
-      LivingEntity sourceEntity = source.getEntity();
-      BendingDamageEvent event = Bending.getEventBus().postAbilityDamageEvent(source, target, desc, damage);
+      LivingEntity sourceEntity = source.entity();
+      BendingDamageEvent event = Bending.eventBus().postAbilityDamageEvent(source, target, desc, damage);
       if (event.isCancelled()) {
         return false;
       }
       if (target instanceof Player) {
-        cache.put(target.getUniqueId(), new BendingDamage(source.getEntity(), desc));
+        cache.put(target.getUniqueId(), new BendingDamage(source.entity(), desc));
       }
-      double finalDamage = event.getDamage();
+      double finalDamage = event.damage();
       targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(target, sourceEntity, EntityDamageEvent.DamageCause.CUSTOM, finalDamage));
       targetEntity.damage(finalDamage, sourceEntity);
       return true;
@@ -65,21 +65,21 @@ public final class DamageUtil {
     return false;
   }
 
-  public static @Nullable Component getBendingDeathMessage(@NonNull Player player) {
+  public static @Nullable Component bendingDeathMessage(@NonNull Player player) {
     BendingDamage cause = cache.getIfPresent(player.getUniqueId());
     if (cause == null) {
       return null;
     }
     cache.invalidate(player.getUniqueId());
     AbilityDescription ability = cause.desc;
-    String deathKey = "bending.ability." + ability.getName().toLowerCase() + ".death";
-    TranslatableComponent msg = Bending.getTranslationManager().getTranslation(deathKey);
+    String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
+    TranslatableComponent msg = Bending.translationManager().getTranslation(deathKey);
     if (msg == null) {
       msg = DEATH_MESSAGE;
     }
     Component target = Component.text(player.getName());
     Component source = Component.text(cause.source.getName());
-    return msg.args(target, source, ability.getDisplayName());
+    return msg.args(target, source, ability.displayName());
   }
 
   private static class BendingDamage {

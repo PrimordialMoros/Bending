@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.Bending;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Tasker;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
@@ -64,7 +64,7 @@ public enum FireTick implements FireTickMethod {
   }
 
   public static void extinguish(@NonNull Entity entity) {
-    entity.setFireTicks(0);
+    entity.setFireTicks(-1);
     if (entity instanceof LivingEntity) {
       INSTANCES.remove((LivingEntity) entity);
     }
@@ -79,7 +79,8 @@ public enum FireTick implements FireTickMethod {
     }
     if (entity instanceof LivingEntity) {
       int duration = NumberConversions.ceil(ticks / 20.0);
-      EntityCombustByEntityEvent event = Bending.getEventBus().callEvent(new EntityCombustByEntityEvent(source.getEntity(), entity, duration));
+      EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(source.entity(), entity, duration);
+      Bukkit.getPluginManager().callEvent(event);
       if (!event.isCancelled() && event.getDuration() > 0) {
         entity.setFireTicks(FastMath.min(ticks, event.getDuration() * 20));
         INSTANCES.put((LivingEntity) entity, source);

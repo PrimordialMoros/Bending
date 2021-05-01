@@ -54,7 +54,7 @@ public class TownyProtection implements Protection {
   @Override
   public boolean canBuild(@NonNull User user, @NonNull Block block) {
     if (user instanceof BendingPlayer) {
-      Player player = ((BendingPlayer) user).getEntity();
+      Player player = ((BendingPlayer) user).entity();
       boolean canBuild = PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.DIRT, TownyPermission.ActionType.BUILD);
       if (!canBuild && api.isWarTime()) {
         PlayerCache cache = towny.getCache(player);

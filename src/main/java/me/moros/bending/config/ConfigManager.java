@@ -44,7 +44,7 @@ public class ConfigManager {
       Files.createDirectories(path.getParent());
       configRoot = loader.load();
     } catch (IOException e) {
-      Bending.getLog().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage());
     }
   }
 
@@ -53,20 +53,20 @@ public class ConfigManager {
       configRoot = loader.load();
       instances.forEach(Configurable::reload);
     } catch (IOException e) {
-      Bending.getLog().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage());
     }
   }
 
   public void save() {
     try {
-      Bending.getLog().info("Saving bending config");
+      Bending.logger().info("Saving bending config");
       loader.save(configRoot);
     } catch (IOException e) {
-      Bending.getLog().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage());
     }
   }
 
-  public @NonNull CommentedConfigurationNode getConfig() {
+  public @NonNull CommentedConfigurationNode config() {
     return configRoot;
   }
 

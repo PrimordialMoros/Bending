@@ -53,7 +53,7 @@ public class ProtectionSystem {
   private final boolean allowHarmless;
 
   public ProtectionSystem() {
-    allowHarmless = Bending.getConfigManager().getConfig().node("protection").node("allow-harmless").getBoolean(true);
+    allowHarmless = Bending.configManager().config().node("protection").node("allow-harmless").getBoolean(true);
     registerProtectMethod("WorldGuard", WorldGuardProtection::new);
     registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
     registerProtectMethod("Towny", TownyProtection::new);
@@ -75,11 +75,11 @@ public class ProtectionSystem {
   }
 
   /**
-   * Uses {@link AbilityDescription#isHarmless}
+   * Uses {@link AbilityDescription#harmless}
    * @see #canBuild(User, Block, boolean)
    */
   public boolean canBuild(@NonNull User user, @NonNull Block block, @Nullable AbilityDescription desc) {
-    return canBuild(user, block, desc != null && desc.isHarmless());
+    return canBuild(user, block, desc != null && desc.harmless());
   }
 
   /**
@@ -116,13 +116,13 @@ public class ProtectionSystem {
    * @param creator the factory function that creates the protection instance
    */
   public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
-    if (Bending.getConfigManager().getConfig().node("protection", name).getBoolean(true)) {
+    if (Bending.configManager().config().node("protection", name).getBoolean(true)) {
       try {
         Protection method = creator.create();
         protections.add(method);
-        Bending.getLog().info("Registered bending protection for " + name);
+        Bending.logger().info("Registered bending protection for " + name);
       } catch (PluginNotFoundException e) {
-        Bending.getLog().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+        Bending.logger().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
       }
     }
   }

@@ -55,7 +55,7 @@ public enum SqlQueries {
   /**
    * @return The SQL query for this enumeration.
    */
-  public String getQuery() {
+  public @NonNull String query() {
     return query;
   }
 

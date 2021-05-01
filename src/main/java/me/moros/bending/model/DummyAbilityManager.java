@@ -52,7 +52,7 @@ public final class DummyAbilityManager extends AbilityManager {
   }
 
   @Override
-  public int getInstancesCount() {
+  public int size() {
     return 0;
   }
 
@@ -81,27 +81,27 @@ public final class DummyAbilityManager extends AbilityManager {
   }
 
   @Override
-  public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
+  public @NonNull Stream<Ability> userInstances(@NonNull User user) {
     return Stream.empty();
   }
 
   @Override
-  public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
+  public <T extends Ability> @NonNull Stream<T> userInstances(@NonNull User user, @NonNull Class<T> type) {
     return Stream.empty();
   }
 
   @Override
-  public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
+  public <T extends Ability> Optional<T> firstInstance(@NonNull User user, @NonNull Class<T> type) {
     return Optional.empty();
   }
 
   @Override
-  public @NonNull Stream<Ability> getInstances() {
+  public @NonNull Stream<Ability> instances() {
     return Stream.empty();
   }
 
   @Override
-  public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
+  public <T extends Ability> @NonNull Stream<T> instances(@NonNull Class<T> type) {
     return Stream.empty();
   }
 

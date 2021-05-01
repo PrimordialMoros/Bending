@@ -62,9 +62,9 @@ public class EntityListener implements Listener {
       MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE).get(0).value();
       if (cable != null) {
         if (event.getHitBlock() != null) {
-          cable.setHitBlock(event.getHitBlock());
+          cable.hitBlock(event.getHitBlock());
         } else if (event.getHitEntity() instanceof LivingEntity) {
-          cable.setHitEntity(event.getHitEntity());
+          cable.hitEntity(event.getHitEntity());
         } else {
           event.getEntity().remove();
         }

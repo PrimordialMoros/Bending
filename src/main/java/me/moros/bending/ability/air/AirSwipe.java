@@ -82,11 +82,11 @@ public class AirSwipe extends AbilityInstance implements Ability {
     recalculateConfig();
     startTime = System.currentTimeMillis();
     charging = true;
-    if (user.getHeadBlock().isLiquid()) {
+    if (user.headBlock().isLiquid()) {
       return false;
     }
 
-    for (AirSwipe swipe : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, AirSwipe.class).collect(Collectors.toList())) {
+    for (AirSwipe swipe : Bending.game().abilityManager(user.world()).userInstances(user, AirSwipe.class).collect(Collectors.toList())) {
       if (swipe.charging) {
         swipe.launch();
         return false;
@@ -96,7 +96,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
       launch();
     }
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(Policies.IN_LIQUID)
       .build();
 
@@ -105,18 +105,18 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (charging) {
-      if (user.isSneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-        ParticleUtil.createAir(user.getMainHandSide().toLocation(user.getWorld())).spawn();
-      } else if (!user.isSneaking()) {
+      if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
+        ParticleUtil.createAir(user.mainHandSide().toLocation(user.world())).spawn();
+      } else if (!user.sneaking()) {
         launch();
       }
     } else {
@@ -136,9 +136,9 @@ public class AirSwipe extends AbilityInstance implements Ability {
       factor += deltaFactor;
     }
     charging = false;
-    user.setCooldown(getDescription(), userConfig.cooldown);
-    Vector3 origin = user.getMainHandSide();
-    Vector3 dir = user.getDirection();
+    user.addCooldown(description(), userConfig.cooldown);
+    Vector3 origin = user.mainHandSide();
+    Vector3 dir = user.direction();
     Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
     int steps = userConfig.arc / 5;
     VectorMethods.createArc(dir, rotateAxis, FastMath.PI / 36, steps).forEach(
@@ -149,30 +149,30 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
-    if (factor == userConfig.chargeFactor && collision.shouldRemoveSelf()) {
-      String name = collidedAbility.getDescription().getName();
+    Ability collidedAbility = collision.collidedAbility();
+    if (factor == userConfig.chargeFactor && collision.removeSelf()) {
+      String name = collidedAbility.description().name();
       if (AbilityInitializer.layer2.contains(name)) {
-        collision.setRemoveCollided(true);
+        collision.removeOther(true);
       } else {
-        collision.setRemoveSelf(false);
+        collision.removeSelf(false);
       }
     }
     if (collidedAbility instanceof AirSwipe) {
       double collidedFactor = ((AirSwipe) collidedAbility).factor;
       if (factor > collidedFactor + 0.1) {
-        collision.setRemoveSelf(false);
+        collision.removeSelf(false);
       }
     }
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -185,21 +185,21 @@ public class AirSwipe extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      ParticleUtil.createAir(getBukkitLocation()).spawn();
+      ParticleUtil.createAir(bukkitLocation()).spawn();
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR_SOUND.play(getBukkitLocation());
+        SoundUtil.AIR_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       if (!affectedEntities.contains(entity)) {
-        DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-        Vector3 velocity = EntityMethods.getEntityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+        DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
+        Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
         entity.setVelocity(velocity.clampVelocity());
         affectedEntities.add(entity);
         return true;

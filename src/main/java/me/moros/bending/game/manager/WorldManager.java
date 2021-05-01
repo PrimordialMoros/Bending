@@ -43,7 +43,7 @@ public final class WorldManager {
   private final Set<UUID> disabledWorlds;
 
   public WorldManager() {
-    ConfigurationNode node = Bending.getConfigManager().getConfig().node("properties", "disabled-worlds");
+    ConfigurationNode node = Bending.configManager().config().node("properties", "disabled-worlds");
     List<String> worldNames = Collections.emptyList();
     try {
       worldNames = node.getList(String.class, Collections.emptyList());
@@ -56,16 +56,16 @@ public final class WorldManager {
       .collect(Collectors.toConcurrentMap(Function.identity(), WorldInstance::new));
   }
 
-  public @NonNull AbilityManager getInstanceForWorld(@NonNull World world) {
+  public @NonNull AbilityManager instance(@NonNull World world) {
     if (isDisabledWorld(world.getUID())) {
       return DummyAbilityManager.INSTANCE;
     }
-    return worlds.computeIfAbsent(world, WorldInstance::new).getAbilityManager();
+    return worlds.computeIfAbsent(world, WorldInstance::new).abilities;
   }
 
   public void update() {
     for (Map.Entry<World, WorldInstance> entry : worlds.entrySet()) {
-      MCTiming timing = Bending.getTimingManager().ofStart(entry.getKey().getName() + ": Bending tick");
+      MCTiming timing = Bending.timingManager().ofStart(entry.getKey().getName() + ": Bending tick");
       entry.getValue().update();
       timing.stopTiming();
     }
@@ -80,11 +80,11 @@ public final class WorldManager {
   }
 
   public void destroyAllInstances() {
-    worlds.values().forEach(w -> w.getAbilityManager().destroyAllInstances());
+    worlds.values().forEach(w -> w.abilities.destroyAllInstances());
   }
 
   public void createPassives(@NonNull BendingPlayer player) {
-    getInstanceForWorld(player.getWorld()).createPassives(player);
+    instance(player.world()).createPassives(player);
   }
 
   public boolean isDisabledWorld(@NonNull UUID worldID) {
@@ -103,14 +103,6 @@ public final class WorldManager {
     private void update() {
       abilities.update();
       collisions.update();
-    }
-
-    private AbilityManager getAbilityManager() {
-      return abilities;
-    }
-
-    private CollisionManager getCollisionManager() {
-      return collisions;
     }
   }
 }

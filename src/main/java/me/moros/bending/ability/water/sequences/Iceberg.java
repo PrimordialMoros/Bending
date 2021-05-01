@@ -81,11 +81,11 @@ public class Iceberg extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, IceCrawl.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, IceCrawl.class)) {
       return false;
     }
 
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
     if (source.isEmpty()) {
       return false;
     }
@@ -100,12 +100,12 @@ public class Iceberg extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (started) {
@@ -122,12 +122,12 @@ public class Iceberg extends AbilityInstance implements Ability {
         }
       }
       if (lines.isEmpty()) {
-        formIce(tip.toBlock(user.getWorld()));
+        formIce(tip.toBlock(user.world()));
         return UpdateResult.REMOVE;
       }
       return UpdateResult.CONTINUE;
     } else {
-      if (!user.getSelectedAbilityName().equals("IceSpike")) {
+      if (!user.selectedAbilityName().equals("IceSpike")) {
         return UpdateResult.REMOVE;
       }
       return states.update();
@@ -138,7 +138,7 @@ public class Iceberg extends AbilityInstance implements Ability {
     if (blocks.contains(block) || TempBlock.MANAGER.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
       return;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return;
     }
     blocks.add(block);
@@ -151,8 +151,8 @@ public class Iceberg extends AbilityInstance implements Ability {
   }
 
   public static void launch(User user) {
-    if (user.getSelectedAbilityName().equals("IceSpike")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
+    if (user.selectedAbilityName().equals("IceSpike")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
     }
   }
 
@@ -160,24 +160,24 @@ public class Iceberg extends AbilityInstance implements Ability {
     if (started) {
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       state.complete();
-      Optional<Block> src = states.getChainStore().stream().findAny();
+      Optional<Block> src = states.chainStore().stream().findAny();
       if (src.isEmpty()) {
         return;
       }
       Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
-      Vector3 target = user.getTarget(userConfig.selectRange + userConfig.length);
+      Vector3 target = user.rayTrace(userConfig.selectRange + userConfig.length);
       Vector3 direction = target.subtract(origin).normalize();
       tip = origin.add(direction.scalarMultiply(userConfig.length));
       Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
       double radius = FastMath.ceil(0.2 * userConfig.length);
-      for (Block block : WorldMethods.getNearbyBlocks(origin.toLocation(user.getWorld()), radius, WaterMaterials::isWaterOrIceBendable)) {
-        if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      for (Block block : WorldMethods.nearbyBlocks(origin.toLocation(user.world()), radius, WaterMaterials::isWaterOrIceBendable)) {
+        if (!Bending.game().protectionSystem().canBuild(user, block)) {
           continue;
         }
-        lines.add(getLine(new Vector3(block).add(Vector3.HALF), targetLocation));
+        lines.add(line(new Vector3(block).add(Vector3.HALF), targetLocation));
       }
       if (lines.size() < 5) {
         lines.clear();
@@ -187,21 +187,21 @@ public class Iceberg extends AbilityInstance implements Ability {
     }
   }
 
-  private BlockIterator getLine(Vector3 origin, Vector3 target) {
+  private BlockIterator line(Vector3 origin, Vector3 target) {
     Vector3 direction = target.subtract(origin);
     final double length = target.distance(origin);
-    return new BlockIterator(user.getWorld(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
+    return new BlockIterator(user.world(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
   }
 
   @Override
   public void onDestroy() {
     if (!blocks.isEmpty()) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

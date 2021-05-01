@@ -67,21 +67,21 @@ public final class CollisionUtil {
    */
   public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
     final double buffer = 4.0; // Buffer needed to check for nearby entities that have locations outside the check range but still intersect
-    Vector3 extent = collider.getHalfExtents().add(new Vector3(buffer, buffer, buffer));
-    Vector3 pos = collider.getPosition();
+    Vector3 extent = collider.halfExtents().add(new Vector3(buffer, buffer, buffer));
+    Vector3 pos = collider.position();
     boolean hit = false;
-    for (Entity entity : user.getWorld().getNearbyEntities(pos.toLocation(user.getWorld()), extent.getX(), extent.getY(), extent.getZ())) {
+    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ())) {
       if (livingOnly && !(entity instanceof LivingEntity)) {
         continue;
       }
-      if (!selfCollision && entity.equals(user.getEntity())) {
+      if (!selfCollision && entity.equals(user.entity())) {
         continue;
       }
       if (!isValidEntity(entity)) {
         continue;
       }
-      if (collider.intersects(AABBUtils.getEntityBounds(entity))) {
-        if (!Bending.getGame().getProtectionSystem().canBuild(user, entity.getLocation().getBlock())) {
+      if (collider.intersects(AABBUtils.entityBounds(entity))) {
+        if (!Bending.game().protectionSystem().canBuild(user, entity.getLocation().getBlock())) {
           continue;
         }
         boolean result = callback.onCollision(entity);

@@ -87,22 +87,22 @@ public class Shockwave extends AbilityInstance implements Ability {
   @Override
   public boolean activate(User user, ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Shockwave.class)
+      Bending.game().abilityManager(user.world()).firstInstance(user, Shockwave.class)
         .ifPresent(s -> s.release(true));
       return false;
     }
 
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Shockwave.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, Shockwave.class)) {
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
     if (method == ActivationMethod.FALL) {
-      if (user.getEntity().getFallDistance() < userConfig.fallThreshold || user.isSneaking()) {
+      if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       release(false);
@@ -114,23 +114,23 @@ public class Shockwave extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.create(Particle.SMOKE_NORMAL, user.getMainHandSide().toLocation(user.getWorld())).spawn();
-        if (!user.isSneaking()) {
+        ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+        if (!user.sneaking()) {
           release(false);
         }
       } else {
-        if (!user.isSneaking()) {
+        if (!user.sneaking()) {
           return UpdateResult.REMOVE;
         }
       }
@@ -163,7 +163,7 @@ public class Shockwave extends AbilityInstance implements Ability {
       if (!inRange) {
         for (Block block : positions) {
           AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3(0.5, 1, 0.5)).at(new Vector3(block));
-          if (blockBounds.intersects(AABBUtils.getEntityBounds(entity))) {
+          if (blockBounds.intersects(AABBUtils.entityBounds(entity))) {
             inRange = true;
             break;
           }
@@ -171,7 +171,7 @@ public class Shockwave extends AbilityInstance implements Ability {
       }
 
       if (inRange) {
-        DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         double deltaY = FastMath.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
         Vector3 push = loc.subtract(origin).normalize().setY(deltaY).scalarMultiply(userConfig.knockback);
         entity.setVelocity(push.clampVelocity());
@@ -192,8 +192,8 @@ public class Shockwave extends AbilityInstance implements Ability {
     released = true;
     range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    origin = user.getLocation().floor().add(Vector3.HALF);
-    Vector3 dir = user.getDirection().setY(0).normalize();
+    origin = user.location().floor().add(Vector3.HALF);
+    Vector3 dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = FastMath.PI / (3 * range);
       VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 1.5)).forEach(v ->
@@ -211,12 +211,12 @@ public class Shockwave extends AbilityInstance implements Ability {
       removalPolicy = (u, d) -> true;
     } else {
       removalPolicy = Policies.builder().build();
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
   @Override
-  public User getUser() {
+  public User user() {
     return user;
   }
 

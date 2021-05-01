@@ -31,7 +31,7 @@ public final class ElementHolder {
     elements = EnumSet.noneOf(Element.class);
   }
 
-  Set<Element> getElements() {
+  Set<Element> elements() {
     return Set.copyOf(elements);
   }
 

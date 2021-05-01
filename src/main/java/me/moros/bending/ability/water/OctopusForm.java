@@ -85,7 +85,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    OctopusForm octopusForm = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, OctopusForm.class).orElse(null);
+    OctopusForm octopusForm = Bending.game().abilityManager(user.world()).firstInstance(user, OctopusForm.class).orElse(null);
     if (octopusForm != null) {
       octopusForm.punch();
       return false;
@@ -97,14 +97,14 @@ public class OctopusForm extends AbilityInstance implements Ability {
     removalPolicy = Policies.builder().build();
 
     if (ringDesc == null) {
-      ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing").orElseThrow(RuntimeException::new);
     }
 
-    ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+    ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
     if (ring == null) {
       ring = new WaterRing(ringDesc);
       if (ring.activate(user, method)) {
-        Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
+        Bending.game().abilityManager(user.world()).addAbility(user, ring);
         return true;
       } else {
         return false;
@@ -115,28 +115,28 @@ public class OctopusForm extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (formed) {
       cleanAll();
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, user.getLocBlock())) {
+      if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
         return UpdateResult.REMOVE;
       }
       boolean forceUpdate = false;
-      Block current = user.getLocBlock();
+      Block current = user.locBlock();
       if (!current.equals(lastBlock)) {
         base.clear();
-        base.addAll(BlockMethods.createBlockRing(user.getLocBlock(), RADIUS));
+        base.addAll(BlockMethods.createBlockRing(user.locBlock(), RADIUS));
         lastBlock = current;
         forceUpdate = true;
       }
-      if (base.stream().noneMatch(b -> Bending.getGame().getProtectionSystem().canBuild(user, b))) {
+      if (base.stream().noneMatch(b -> Bending.game().protectionSystem().canBuild(user, b))) {
         return UpdateResult.REMOVE;
       }
       renderBase();
@@ -146,10 +146,10 @@ public class OctopusForm extends AbilityInstance implements Ability {
       }
       renderTentacles(forceUpdate);
     } else {
-      if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
+      if (!Bending.game().abilityManager(user.world()).hasAbility(user, WaterRing.class)) {
         return UpdateResult.REMOVE;
       }
-      if (ring.isReady() && user.isSneaking()) {
+      if (ring.isReady() && user.sneaking()) {
         form();
       }
     }
@@ -157,7 +157,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
   }
 
   private void form() {
-    if (!user.getSelectedAbilityName().equals("OctopusForm")) {
+    if (!user.selectedAbilityName().equals("OctopusForm")) {
       return;
     }
     ring.complete().forEach(this::clean);
@@ -165,7 +165,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
     nextTentacleFormTime = System.currentTimeMillis() + 150;
     removalPolicy = Policies.builder()
       .add(Policies.NOT_SNEAKING)
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
   }
 
@@ -180,7 +180,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
   }
 
   private void renderTentacles(boolean forceUpdate) {
-    Vector3 center = user.getLocation().floor().add(Vector3.HALF);
+    Vector3 center = user.location().floor().add(Vector3.HALF);
     long time = System.currentTimeMillis();
     for (Tentacle tentacle : tentacles) {
       if (forceUpdate || time > tentacle.nextUpdateTime) {
@@ -206,7 +206,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
     if (!formed) {
       return;
     }
-    Vector3 center = user.getLocation().floor().add(new Vector3(0.5, 0, 0.5));
+    Vector3 center = user.location().floor().add(new Vector3(0.5, 0, 0.5));
     double r = RADIUS + 0.5;
     for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.PI / 4) {
       Vector3 tentacleBase = center.add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
@@ -218,8 +218,8 @@ public class OctopusForm extends AbilityInstance implements Ability {
     if (affectedEntities.contains(entity)) {
       return false;
     }
-    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-    Vector3 dir = EntityMethods.getEntityCenter(entity).subtract(user.getLocation());
+    DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+    Vector3 dir = EntityMethods.entityCenter(entity).subtract(user.location());
     entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
     affectedEntities.add(entity);
     return true;
@@ -241,13 +241,13 @@ public class OctopusForm extends AbilityInstance implements Ability {
   @Override
   public void onDestroy() {
     if (formed) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
       cleanAll();
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -264,7 +264,7 @@ public class OctopusForm extends AbilityInstance implements Ability {
       cos = FastMath.cos(phi);
       sin = FastMath.sin(phi);
       topFormTime = System.currentTimeMillis() + 150;
-      updateBlocks(user.getLocation().floor().add(Vector3.HALF));
+      updateBlocks(user.location().floor().add(Vector3.HALF));
     }
 
     private void updateBlocks(Vector3 center) {
@@ -274,12 +274,12 @@ public class OctopusForm extends AbilityInstance implements Ability {
       double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
       double xBottom = cos * (RADIUS + bottomOffset);
       double zBottom = sin * (RADIUS + bottomOffset);
-      blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.getWorld()));
+      blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.world()));
       if (time > topFormTime) {
         double topOffset = ThreadLocalRandom.current().nextDouble(1);
         double xTop = cos * (RADIUS + topOffset);
         double zTop = sin * (RADIUS + topOffset);
-        blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.getWorld()));
+        blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.world()));
       }
     }
   }

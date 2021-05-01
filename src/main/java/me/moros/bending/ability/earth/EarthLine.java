@@ -20,9 +20,9 @@
 package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -104,21 +104,21 @@ public class EarthLine extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+      Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    Block source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
+    Block source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
     if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) {
       return false;
     }
     BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
-    Optional<EarthLine> line = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class);
+    Optional<EarthLine> line = Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
-      State state = line.get().states.getCurrent();
+      State state = line.get().states.current();
       if (state instanceof SelectedSource) {
         ((SelectedSource) state).reselect(source, fakeData);
       }
@@ -129,18 +129,18 @@ public class EarthLine extends AbilityInstance implements Ability {
       .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
       .start();
 
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (earthLine != null) {
@@ -148,7 +148,7 @@ public class EarthLine extends AbilityInstance implements Ability {
         spikes.removeIf(p -> p.update() == UpdateResult.REMOVE);
         return spikes.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
       }
-      earthLine.setControllable(mode != Mode.MAGMA && user.isSneaking());
+      earthLine.controllable(user.sneaking());
       UpdateResult result = earthLine.update();
       // Handle case where spikes are raised on entity collision and line is removed
       if (result == UpdateResult.REMOVE && earthLine.raisedSpikes) {
@@ -165,10 +165,10 @@ public class EarthLine extends AbilityInstance implements Ability {
       earthLine.raiseSpikes();
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       state.complete();
-      Block source = states.getChainStore().stream().findAny().orElse(null);
+      Block source = states.chainStore().stream().findAny().orElse(null);
       if (source == null) {
         return;
       }
@@ -176,43 +176,43 @@ public class EarthLine extends AbilityInstance implements Ability {
         mode = Mode.MAGMA;
       }
       earthLine = new Line(source);
-      removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
-  public static void setPrisonMode(User user) {
-    if (user.getSelectedAbilityName().equals("EarthLine")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, EarthLine.class).ifPresent(EarthLine::setPrisonMode);
+  public static void prisonMode(User user) {
+    if (user.selectedAbilityName().equals("EarthLine")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::prisonMode);
     }
   }
 
-  private void setPrisonMode() {
+  private void prisonMode() {
     if (mode == Mode.NORMAL) {
       mode = Mode.PRISON;
-      user.getEntity().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
+      user.entity().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
     }
   }
 
   @Override
   public void onDestroy() {
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       ((SelectedSource) state).onDestroy();
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (earthLine == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(earthLine.getCollider());
+    return Collections.singletonList(earthLine.collider());
   }
 
   private class Line extends AbstractLine {
@@ -227,15 +227,15 @@ public class EarthLine extends AbilityInstance implements Ability {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.getWorld());
-      Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.getWorld()).getRelative(BlockFace.DOWN).getType();
+      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.world());
+      Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getType();
       new TempArmorStand(spawnLoc, type, 700);
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.EARTH_SOUND.play(location.toLocation(user.getWorld()));
+        SoundUtil.EARTH_SOUND.play(location.toLocation(user.world()));
       }
     }
 
@@ -254,7 +254,7 @@ public class EarthLine extends AbilityInstance implements Ability {
           FireTick.LARGER.apply(user, entity, 40);
           break;
       }
-      DamageUtil.damageEntity(entity, user, damage, getDescription());
+      DamageUtil.damageEntity(entity, user, damage, description());
       return true;
     }
 
@@ -285,16 +285,16 @@ public class EarthLine extends AbilityInstance implements Ability {
 
     @Override
     protected void onCollision() {
-      FragileStructure.tryDamageStructure(Collections.singletonList(location.toBlock(user.getWorld())), mode == Mode.MAGMA ? 0 : 5);
+      FragileStructure.tryDamageStructure(Collections.singletonList(location.toBlock(user.world())), mode == Mode.MAGMA ? 0 : 5);
       if (mode != Mode.MAGMA) {
         return;
       }
-      Location center = location.toLocation(user.getWorld());
+      Location center = location.toLocation(user.world());
       SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1, 0.5F);
       ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
       CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit);
       Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
-      List<Block> wall = new ArrayList<>(WorldMethods.getNearbyBlocks(center, 3, predicate));
+      List<Block> wall = new ArrayList<>(WorldMethods.nearbyBlocks(center, 3, predicate));
       Collections.shuffle(wall);
       ThreadLocalRandom rnd = ThreadLocalRandom.current();
       for (Block block : wall) {
@@ -312,8 +312,8 @@ public class EarthLine extends AbilityInstance implements Ability {
       Vector3 loc = location.add(Vector3.MINUS_J);
       Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 
-      Pillar.builder(user, loc.toBlock(user.getWorld())).setPredicate(predicate).build(1).ifPresent(spikes::add);
-      Pillar.builder(user, loc.add(direction).toBlock(user.getWorld())).setPredicate(predicate).build(2).ifPresent(spikes::add);
+      Pillar.builder(user, loc.toBlock(user.world())).predicate(predicate).build(1).ifPresent(spikes::add);
+      Pillar.builder(user, loc.add(direction).toBlock(user.world())).predicate(predicate).build(2).ifPresent(spikes::add);
     }
 
     private void imprisonTarget(LivingEntity entity) {
@@ -326,7 +326,7 @@ public class EarthLine extends AbilityInstance implements Ability {
         material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
       } else {
         Location center = blockToCheck.getLocation().add(0.5, 0.5, 0.5);
-        for (Block block : WorldMethods.getNearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
+        for (Block block : WorldMethods.nearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
           material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
         }
       }
@@ -343,10 +343,10 @@ public class EarthLine extends AbilityInstance implements Ability {
         new TempArmorStand(loc.add(v.toVector()), mat, userConfig.prisonDuration);
         new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
       });
-      MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(Arrays.asList(ActionType.values()));
+      MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(EnumSet.allOf(ActionType.class));
     }
 
-    public void setControllable(boolean value) {
+    public void controllable(boolean value) {
       if (mode != Mode.MAGMA) {
         controllable = value;
       }

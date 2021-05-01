@@ -79,14 +79,14 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthArmor.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthArmor.class)) {
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    Optional<Block> source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
 
     if (source.isEmpty()) {
       return false;
@@ -111,17 +111,17 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
     if (formed) {
-      FireTick.extinguish(user.getEntity());
+      FireTick.extinguish(user.entity());
       return UpdateResult.CONTINUE;
     }
 
@@ -157,25 +157,25 @@ public class EarthArmor extends AbilityInstance implements Ability {
 
     TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
     int duration = NumberConversions.round(userConfig.duration / 50F);
-    PotionUtil.tryAddPotion(user.getEntity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
+    PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     formed = true;
   }
 
   private boolean moveBlock() {
-    if (!fallingBlock.getFallingBlock().isValid()) {
+    if (!fallingBlock.fallingBlock().isValid()) {
       return false;
     }
-    Vector3 center = fallingBlock.getCenter();
+    Vector3 center = fallingBlock.center();
 
-    Block currentBlock = center.toBlock(user.getWorld());
+    Block currentBlock = center.toBlock(user.world());
     BlockMethods.tryBreakPlant(currentBlock);
     if (!(currentBlock.isLiquid() || MaterialUtil.isAir(currentBlock) || EarthMaterials.isEarthbendable(user, currentBlock))) {
       return false;
     }
 
-    final double distanceSquared = user.getEyeLocation().distanceSq(center);
+    final double distanceSquared = user.eyeLocation().distanceSq(center);
     final double speedFactor = (distanceSquared > userConfig.selectRange * userConfig.selectRange) ? 1.5 : 0.8;
     if (distanceSquared < 0.5) {
       fallingBlock.revert();
@@ -183,8 +183,8 @@ public class EarthArmor extends AbilityInstance implements Ability {
       return true;
     }
 
-    Vector3 dir = user.getEyeLocation().subtract(center).normalize().scalarMultiply(speedFactor);
-    fallingBlock.getFallingBlock().setVelocity(dir.clampVelocity());
+    Vector3 dir = user.eyeLocation().subtract(center).normalize().scalarMultiply(speedFactor);
+    fallingBlock.fallingBlock().setVelocity(dir.clampVelocity());
     return true;
   }
 
@@ -192,20 +192,20 @@ public class EarthArmor extends AbilityInstance implements Ability {
   public void onDestroy() {
     Location center;
     if (!formed && fallingBlock != null) {
-      center = fallingBlock.getCenter().toLocation(user.getWorld());
+      center = fallingBlock.center().toLocation(user.world());
       fallingBlock.revert();
     } else {
-      center = user.getEntity().getEyeLocation();
+      center = user.entity().getEyeLocation();
     }
-    user.getEntity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+    user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
     SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 2, 1);
     ParticleUtil.create(Particle.BLOCK_CRACK, center)
       .count(8).offset(0.5, 0.5, 0.5)
-      .data(fallingBlock.getFallingBlock().getBlockData()).spawn();
+      .data(fallingBlock.fallingBlock().getBlockData()).spawn();
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

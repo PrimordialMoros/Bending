@@ -84,7 +84,7 @@ public class TranslationManager {
     int amount = installed.size();
     if (amount > 0) {
       String translations = installed.stream().map(Locale::getLanguage).collect(Collectors.joining(", ", "[", "]"));
-      Bending.getLog().info("Loaded " + amount + " translations: " + translations);
+      Bending.logger().info("Loaded " + amount + " translations: " + translations);
     }
   }
 
@@ -92,14 +92,14 @@ public class TranslationManager {
     String localeString = removeFileExtension(path);
     Locale locale = Translator.parseLocale(localeString);
     if (locale == null) {
-      Bending.getLog().warn("Unknown locale: " + localeString);
+      Bending.logger().warn("Unknown locale: " + localeString);
       return;
     }
     PropertyResourceBundle bundle;
     try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       bundle = new PropertyResourceBundle(reader);
     } catch (IOException e) {
-      Bending.getLog().warn("Error loading locale file: " + localeString);
+      Bending.logger().warn("Error loading locale file: " + localeString);
       return;
     }
     registry.registerAll(locale, bundle, false);

@@ -19,9 +19,9 @@
 
 package me.moros.bending.model;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,26 +52,26 @@ public enum Element {
     return elementName;
   }
 
-  public @NonNull Component getDisplayName() {
+  public @NonNull Component displayName() {
     return Component.text(elementName, color);
   }
 
-  public @NonNull TextColor getColor() {
+  public @NonNull TextColor color() {
     return color;
   }
 
-  public static Optional<Element> getElementByName(@NonNull String value) {
+  public static Optional<Element> elementByName(@NonNull String value) {
     if (value.isEmpty()) {
       return Optional.empty();
     }
-    return getAll().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
+    return all().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
   }
 
-  public static Collection<String> getElementNames() {
-    return Arrays.asList("Air", "Water", "Earth", "Fire");
+  public static @NonNull Collection<@NonNull String> elementNames() {
+    return List.of("Air", "Water", "Earth", "Fire");
   }
 
-  public static @NonNull Set<@NonNull Element> getAll() {
+  public static @NonNull Set<@NonNull Element> all() {
     return EnumSet.allOf(Element.class);
   }
 }

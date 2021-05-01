@@ -72,11 +72,11 @@ public class Torrent extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterGimbal.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
-    Optional<Torrent> torrent = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Torrent.class);
+    Optional<Torrent> torrent = Bending.game().abilityManager(user.world()).firstInstance(user, Torrent.class);
     if (torrent.isPresent()) {
       torrent.get().launch();
       return false;
@@ -86,14 +86,14 @@ public class Torrent extends AbilityInstance implements Ability {
     recalculateConfig();
 
     if (ringDesc == null) {
-      ringDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing").orElseThrow(RuntimeException::new);
     }
 
-    ring = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, WaterRing.class).orElse(null);
+    ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
     if (ring == null) {
       ring = new WaterRing(ringDesc);
       if (ring.activate(user, method)) {
-        Bending.getGame().getAbilityManager(user.getWorld()).addAbility(user, ring);
+        Bending.game().abilityManager(user.world()).addAbility(user, ring);
       } else {
         return false;
       }
@@ -106,38 +106,38 @@ public class Torrent extends AbilityInstance implements Ability {
       states = new StateChain(sources).addState(new TorrentStream()).start();
     }
 
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
   private void launch() {
     if (states == null) {
-      if (ring.isReady() && !user.isOnCooldown(getDescription())) {
+      if (ring.isReady() && !user.isOnCooldown(description())) {
         states = new StateChain(ring.complete()).addState(new TorrentStream()).start();
-        user.setCooldown(getDescription(), userConfig.cooldown);
+        user.addCooldown(description(), userConfig.cooldown);
       }
     } else {
-      State current = states.getCurrent();
+      State current = states.current();
       if (current instanceof TorrentStream) {
-        ((TorrentStream) current).hasClicked = true;
+        ((TorrentStream) current).clicked = true;
       }
     }
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (states != null) {
       return states.update();
     } else {
-      if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterRing.class)) {
+      if (!Bending.game().abilityManager(user.world()).hasAbility(user, WaterRing.class)) {
         return UpdateResult.REMOVE;
       }
     }
@@ -147,7 +147,7 @@ public class Torrent extends AbilityInstance implements Ability {
   @Override
   public void onDestroy() {
     if (states != null) {
-      State current = states.getCurrent();
+      State current = states.current();
       if (current instanceof TorrentStream) {
         ((TorrentStream) current).cleanAll();
       }
@@ -155,16 +155,16 @@ public class Torrent extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (states != null) {
-      State current = states.getCurrent();
+      State current = states.current();
       if (current instanceof TorrentStream) {
-        return ((TorrentStream) current).getColliders();
+        return ((TorrentStream) current).colliders();
       }
     }
     return Collections.emptyList();
@@ -173,7 +173,7 @@ public class Torrent extends AbilityInstance implements Ability {
   private class TorrentStream extends BlockStream {
     private final Set<Entity> affectedEntities = new HashSet<>();
     private boolean shouldFreeze = false;
-    private boolean hasClicked = false;
+    private boolean clicked = false;
 
     public TorrentStream() {
       super(user, Material.WATER, userConfig.range, 90);
@@ -184,12 +184,12 @@ public class Torrent extends AbilityInstance implements Ability {
       Vector3 velocity = direction.setY(FastMath.min(direction.getY(), userConfig.verticalPush));
       entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
       if (entity instanceof LivingEntity) {
-        if (hasClicked && !shouldFreeze) {
+        if (clicked && !shouldFreeze) {
           shouldFreeze = true;
         }
         if (!affectedEntities.contains(entity)) {
           double damage = shouldFreeze ? userConfig.damage : userConfig.damage + userConfig.freezeDamage;  // apply bonus damage on freeze
-          DamageUtil.damageEntity(entity, user, damage, getDescription());
+          DamageUtil.damageEntity(entity, user, damage, description());
           affectedEntities.add(entity);
         }
       }
@@ -204,7 +204,7 @@ public class Torrent extends AbilityInstance implements Ability {
     }
 
     public void freeze() {
-      if (!hasClicked || stream.isEmpty()) {
+      if (!clicked || stream.isEmpty()) {
         return;
       }
       Block head = stream.getFirst();
@@ -221,7 +221,7 @@ public class Torrent extends AbilityInstance implements Ability {
 
     @Override
     public void onBlockHit(@NonNull Block block) {
-      if (hasClicked) {
+      if (clicked) {
         freeze();
         return;
       }

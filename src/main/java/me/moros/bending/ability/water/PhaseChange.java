@@ -73,18 +73,18 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       freeze.clear();
       melt.clear();
       return UpdateResult.CONTINUE;
     }
     freeze.processQueue(userConfig.freezeSpeed);
-    if (user.isSneaking() && getDescription().equals(user.getSelectedAbility().orElse(null))) {
+    if (user.sneaking() && description().equals(user.selectedAbility().orElse(null))) {
       melt.processQueue(userConfig.meltSpeed);
     } else {
       melt.clear();
@@ -93,45 +93,45 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
   }
 
   public void freeze() {
-    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+    if (!user.canBend(description()) || user.isOnCooldown(description())) {
       return;
     }
-    Location center = user.getTarget(userConfig.freezeRange, false).toLocation(user.getWorld());
+    Location center = user.rayTrace(userConfig.freezeRange, false).toLocation(user.world());
     if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
-      user.setCooldown(getDescription(), userConfig.freezeCooldown);
+      user.addCooldown(description(), userConfig.freezeCooldown);
     }
   }
 
   public void melt() {
-    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+    if (!user.canBend(description()) || user.isOnCooldown(description())) {
       return;
     }
-    user.setCooldown(getDescription(), 500);
-    Location center = user.getTarget(userConfig.meltRange).toLocation(user.getWorld());
+    user.addCooldown(description(), 500);
+    Location center = user.rayTrace(userConfig.meltRange).toLocation(user.world());
     melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)));
   }
 
   private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
-    List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, radius, predicate);
-    newBlocks.removeIf(b -> !Bending.getGame().getProtectionSystem().canBuild(user, b));
+    List<Block> newBlocks = WorldMethods.nearbyBlocks(center, radius, predicate);
+    newBlocks.removeIf(b -> !Bending.game().protectionSystem().canBuild(user, b));
     Collections.shuffle(newBlocks);
     return newBlocks;
   }
 
   public static void freeze(User user) {
-    if (user.getSelectedAbilityName().equals("PhaseChange")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+    if (user.selectedAbilityName().equals("PhaseChange")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
     }
   }
 
   public static void melt(User user) {
-    if (user.getSelectedAbilityName().equals("PhaseChange")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+    if (user.selectedAbilityName().equals("PhaseChange")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -141,7 +141,7 @@ public class PhaseChange extends AbilityInstance implements PassiveAbility {
       if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      if (!Bending.game().protectionSystem().canBuild(user, block)) {
         return false;
       }
 

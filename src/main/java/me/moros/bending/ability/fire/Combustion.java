@@ -76,7 +76,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
   private CombustBeam beam;
 
-  private boolean hasExploded;
+  private boolean exploded;
   private Collider ignoreCollider;
 
   public Combustion(@NonNull AbilityDescription desc) {
@@ -86,34 +86,34 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, Combustion.class).ifPresent(Combustion::explode);
+      Bending.game().abilityManager(user.world()).firstInstance(user, Combustion.class).ifPresent(Combustion::explode);
       return false;
     }
 
-    if (user.isOnCooldown(getDescription())) {
+    if (user.isOnCooldown(description())) {
       return false;
     }
 
     this.user = user;
     recalculateConfig();
 
-    if (Policies.IN_LIQUID.test(user, getDescription()) || Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, Combustion.class)) {
+    if (Policies.IN_LIQUID.test(user, description()) || Bending.game().abilityManager(user.world()).hasAbility(user, Combustion.class)) {
       return false;
     }
     beam = new CombustBeam();
     removalPolicy = Policies.builder().build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (hasExploded || removalPolicy.test(user, getDescription())) {
+    if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (beam.distanceTravelled > userConfig.range) {
@@ -123,50 +123,50 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(beam.getCollider());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(beam.collider());
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
+    Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FireShield) {
-      collision.setRemoveCollided(true);
+      collision.removeOther(true);
       boolean sphere = ((FireShield) collidedAbility).isSphere();
       if (sphere) {
-        ignoreCollider = collision.getColliders().getValue();
+        ignoreCollider = collision.colliders().getValue();
       }
       explode();
     } else if (collidedAbility instanceof Combustion) {
       Combustion other = (Combustion) collidedAbility;
-      Vector3 first = collision.getColliders().getKey().getPosition();
-      Vector3 second = collision.getColliders().getValue().getPosition();
+      Vector3 first = collision.colliders().getKey().position();
+      Vector3 second = collision.colliders().getValue().position();
       Vector3 center = first.add(second).scalarMultiply(0.5);
       createExplosion(center, userConfig.power + other.userConfig.power, userConfig.damage + other.userConfig.damage);
-      other.hasExploded = true;
+      other.exploded = true;
     } else if (collidedAbility instanceof Explosive) {
       explode();
-    } else if (collidedAbility.getDescription().getElement() == Element.EARTH && collision.shouldRemoveSelf()) {
+    } else if (collidedAbility.description().element() == Element.EARTH && collision.removeSelf()) {
       explode();
     }
   }
 
   @Override
   public void explode() {
-    createExplosion(beam.getLocation(), userConfig.power, userConfig.damage);
+    createExplosion(beam.location(), userConfig.power, userConfig.damage);
   }
 
   private void createExplosion(Vector3 center, double size, double damage) {
-    if (hasExploded) {
+    if (exploded) {
       return;
     }
-    hasExploded = true;
-    Location loc = center.toLocation(user.getWorld());
+    exploded = true;
+    Location loc = center.toLocation(user.world());
     ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.5).count(20)
       .offset(1, 1, 1).spawn();
     ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.5).count(20)
@@ -182,15 +182,15 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
     Sphere collider = new Sphere(center, size);
     CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-      Vector3 entityCenter = EntityMethods.getEntityCenter(entity);
+      Vector3 entityCenter = EntityMethods.entityCenter(entity);
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreCollider == null || ignoreCollider.contains(entityCenter)) {
-        DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
-        FireTick.LARGER.apply(user, entity, userConfig.fireTick);
+        DamageUtil.damageEntity(entity, user, damage * distanceFactor, description());
+        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
       }
       double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
-      if (entity.equals(user.getEntity())) {
+      if (entity.equals(user.entity())) {
         knockback *= 0.5;
       }
       Vector3 dir = entityCenter.subtract(center).normalize().scalarMultiply(knockback);
@@ -198,15 +198,15 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
       return true;
     }, true, true);
 
-    FragileStructure.tryDamageStructure(WorldMethods.getNearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+    FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 
     if (loc.getBlock().isLiquid()) {
       return;
     }
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
     Collection<Block> blocks = new ArrayList<>();
-    for (Block block : WorldMethods.getNearbyBlocks(loc, size, predicate)) {
-      if (Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    for (Block block : WorldMethods.nearbyBlocks(loc, size, predicate)) {
+      if (Bending.game().protectionSystem().canBuild(user, block)) {
         blocks.add(block);
         long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
         TempBlock.createAir(block, delay);
@@ -225,7 +225,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
     private double distanceTravelled = 0;
 
     public CombustBeam() {
-      super(user, user.getRay(userConfig.range), 0.35, 1);
+      super(user, user.ray(userConfig.range), 0.35, 1);
       canCollide = Block::isLiquid;
       singleCollision = true;
       controllable = true;
@@ -236,19 +236,19 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
     public void render() {
       distanceTravelled += speed;
       renderRing();
-      Location bukkitLocation = getBukkitLocation();
+      Location bukkitLocation = bukkitLocation();
       ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
       ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
     }
 
     private void renderRing() {
       if (distanceTravelled >= randomBeamDistance) {
-        SoundUtil.playSound(getBukkitLocation(), SoundUtil.COMBUSTION_SOUND.getSound(), 1.5F, 0);
+        SoundUtil.playSound(bukkitLocation(), SoundUtil.COMBUSTION_SOUND.sound(), 1.5F, 0);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
-        VectorMethods.circle(Vector3.ONE, user.getDirection(), 20).forEach(v -> {
+        VectorMethods.circle(Vector3.ONE, user.direction(), 20).forEach(v -> {
           Vector3 velocity = v.scalarMultiply(radius);
-          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.scalarMultiply(0.2)).toLocation(user.getWorld()), userConfig.particleRange)
+          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.scalarMultiply(0.2)).toLocation(user.world()), userConfig.particleRange)
             .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
         });
       }
@@ -257,7 +257,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.COMBUSTION_SOUND.play(getBukkitLocation());
+        SoundUtil.COMBUSTION_SOUND.play(bukkitLocation());
       }
     }
 
@@ -273,7 +273,7 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
       return true;
     }
 
-    private @NonNull Vector3 getLocation() {
+    private @NonNull Vector3 location() {
       return location;
     }
   }
@@ -283,10 +283,10 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
     public long cooldown;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
     @Attribute(Attribute.STRENGTH)
     public double power;
-    @Attribute(Attribute.DURATION)
-    public int fireTick;
     @Attribute(Attribute.RANGE)
     public double range;
 
@@ -298,8 +298,8 @@ public class Combustion extends AbilityInstance implements Ability, Explosive {
 
       cooldown = abilityNode.node("cooldown").getLong(12000);
       damage = abilityNode.node("damage").getDouble(5.0);
+      fireTicks = abilityNode.node("fire-ticks").getInt(50);
       power = abilityNode.node("power").getDouble(2.4);
-      fireTick = abilityNode.node("fire-tick").getInt(60);
       range = abilityNode.node("range").getDouble(56.0);
 
       particleRange = NumberConversions.ceil(range);

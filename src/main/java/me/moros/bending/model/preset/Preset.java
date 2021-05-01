@@ -49,11 +49,11 @@ public class Preset {
     this(0, "", abilities);
   }
 
-  public int getInternalId() {
+  public int id() {
     return id;
   }
 
-  public @NonNull String getName() {
+  public @NonNull String name() {
     return name;
   }
 
@@ -61,7 +61,7 @@ public class Preset {
    * Returns an array of the ability names that this preset holds, names can be null!
    * @return a copy of the names of the abilities that this preset holds.
    */
-  public @NonNull String[] getAbilities() {
+  public @NonNull String[] abilities() {
     return Arrays.copyOf(abilities, 9);
   }
 
@@ -75,7 +75,7 @@ public class Preset {
   }
 
   public int compare(@NonNull Preset preset) {
-    String[] otherAbilities = preset.getAbilities();
+    String[] otherAbilities = preset.abilities();
     int count = 0;
     for (int slot = 0; slot < 9; slot++) {
       if (!Objects.equals(abilities[slot], otherAbilities[slot])) {

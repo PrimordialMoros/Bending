@@ -22,6 +22,7 @@ package me.moros.bending.ability.fire;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.fire.sequences.JetBlast;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -61,14 +62,19 @@ public class FireJet extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, FireJet.class)) {
-      return false;
+    if (method == ActivationMethod.ATTACK) {
+      if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, FireJet.class)) {
+        return false;
+      }
+      if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, JetBlast.class)) {
+        return false;
+      }
     }
 
     this.user = user;
     recalculateConfig();
 
-    Block block = user.getLocBlock();
+    Block block = user.locBlock();
     boolean ignitable = MaterialUtil.isIgnitable(block);
     if (!ignitable && !MaterialUtil.isAir(block)) {
       return false;
@@ -87,28 +93,27 @@ public class FireJet extends AbilityInstance implements Ability {
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
 
-    FireTick.extinguish(user.getEntity());
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    FireTick.extinguish(user.entity());
     startTime = System.currentTimeMillis();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     // scale down to 0.5 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (2.0 * duration));
 
-    user.getEntity().setVelocity(user.getDirection().scalarMultiply(speed * factor).toVector());
-    user.getEntity().setFallDistance(0);
-    ParticleUtil.createFire(user, user.getEntity().getLocation()).count(10)
+    user.entity().setVelocity(user.direction().scalarMultiply(speed * factor).toVector());
+    user.entity().setFallDistance(0);
+    ParticleUtil.createFire(user, user.entity().getLocation()).count(10)
       .offset(0.3, 0.3, 0.3).extra(0.03).spawn();
 
     return UpdateResult.CONTINUE;
@@ -116,19 +121,20 @@ public class FireJet extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
+    user.addCooldown(description(), userConfig.cooldown);
     flight.release();
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
-  public void setSpeed(double newSpeed) {
-    this.speed = newSpeed;
+  public void speed(double speed) {
+    this.speed = speed;
   }
 
-  public void setDuration(long duration) {
+  public void duration(long duration) {
     this.duration = duration;
     removalPolicy = Policies.builder().add(Policies.IN_LIQUID).add(ExpireRemovalPolicy.of(duration)).build();
   }

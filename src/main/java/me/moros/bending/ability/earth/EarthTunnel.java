@@ -68,7 +68,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, EarthTunnel.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthTunnel.class)) {
       return false;
     }
 
@@ -76,7 +76,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
     recalculateConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
+    Optional<Block> block = SourceUtil.find(user, userConfig.range, predicate);
     if (block.isEmpty()) {
       return false;
     }
@@ -89,21 +89,21 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     for (int i = 0; i < 2; i++) {
       if (distance > userConfig.range) {
         return UpdateResult.REMOVE;
       }
-      Vector3 offset = VectorMethods.getOrthogonal(user.getDirection(), FastMath.toRadians(angle), radius);
-      Block current = center.add(offset).toBlock(user.getWorld());
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, current)) {
+      Vector3 offset = VectorMethods.orthogonal(user.direction(), FastMath.toRadians(angle), radius);
+      Block current = center.add(offset).toBlock(user.world());
+      if (!Bending.game().protectionSystem().canBuild(user, current)) {
         return UpdateResult.REMOVE;
       }
       if (predicate.test(current)) {
@@ -114,7 +114,7 @@ public class EarthTunnel extends AbilityInstance implements Ability {
       }
       if (angle >= 360) {
         angle = 0;
-        Optional<Block> block = SourceUtil.getSource(user, userConfig.range, predicate);
+        Optional<Block> block = SourceUtil.find(user, userConfig.range, predicate);
         if (block.isEmpty()) {
           return UpdateResult.REMOVE;
         }
@@ -181,11 +181,11 @@ public class EarthTunnel extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

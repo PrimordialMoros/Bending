@@ -50,17 +50,17 @@ public final class BenderRegistry {
     return isBendingUser.test(entity.getUniqueId());
   }
 
-  public Optional<User> getBendingUser(@NonNull LivingEntity entity) {
+  public Optional<User> user(@NonNull LivingEntity entity) {
     if (entity instanceof Player) {
-      return Optional.of(Bending.getGame().getPlayerManager().getPlayer(entity.getUniqueId()));
+      return Optional.of(Bending.game().playerManager().player((Player) entity));
     }
     return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
   }
 
-  public Optional<User> getBendingUserByName(@NonNull String name) {
+  public Optional<User> userByName(@NonNull String name) {
     Player player = Bukkit.getPlayer(name);
     if (player != null) {
-      return Optional.of(Bending.getGame().getPlayerManager().getPlayer(player.getUniqueId()));
+      return Optional.of(Bending.game().playerManager().player(player));
     }
     return Optional.ofNullable(nameToUser.apply(name));
   }

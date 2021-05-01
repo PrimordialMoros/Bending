@@ -51,8 +51,8 @@ public class Commands {
   private final PaperCommandManager commandManager;
   private final Game game;
 
-  private final Predicate<AbilityDescription> validBinds = desc -> desc.canBind() && !desc.isHidden();
-  private final Predicate<AbilityDescription> nonHidden = desc -> !desc.isHidden();
+  private final Predicate<AbilityDescription> validBinds = desc -> desc.canBind() && !desc.hidden();
+  private final Predicate<AbilityDescription> nonHidden = desc -> !desc.hidden();
 
   public Commands(@NonNull Bending plugin, @NonNull Game game) {
     this.game = game;
@@ -71,32 +71,32 @@ public class Commands {
     commandManager.registerCommand(new ModifyCommand());
   }
 
-  private Collection<String> getAbilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
+  private Collection<String> abilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
     Predicate<AbilityDescription> permissionPredicate = x -> true;
     if (player != null) {
-      BendingPlayer bendingPlayer = game.getPlayerManager().getPlayer(player.getUniqueId());
+      BendingPlayer bendingPlayer = game.playerManager().player(player);
       permissionPredicate = bendingPlayer::hasPermission;
     }
-    return game.getAbilityRegistry().getAbilities().filter(predicate)
-      .filter(permissionPredicate).map(AbilityDescription::getName).collect(Collectors.toList());
+    return game.abilityRegistry().abilities().filter(predicate)
+      .filter(permissionPredicate).map(AbilityDescription::name).collect(Collectors.toList());
   }
 
   private void registerCommandCompletions() {
     CommandCompletions<BukkitCommandCompletionContext> commandCompletions = commandManager.getCommandCompletions();
 
-    commandCompletions.registerAsyncCompletion("abilities", c -> getAbilityCompletions(c.getPlayer(), validBinds));
+    commandCompletions.registerAsyncCompletion("abilities", c -> abilityCompletions(c.getPlayer(), validBinds));
 
-    commandCompletions.registerAsyncCompletion("allabilities", c -> getAbilityCompletions(c.getPlayer(), nonHidden));
+    commandCompletions.registerAsyncCompletion("allabilities", c -> abilityCompletions(c.getPlayer(), nonHidden));
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
       if (player == null) {
         return Collections.emptyList();
       }
-      return game.getPlayerManager().getPlayer(player.getUniqueId()).getPresets();
+      return game.playerManager().player(player).presets();
     });
 
-    commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.getElementNames()));
+    commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.elementNames()));
     commandCompletions.registerStaticCompletion("attributes", List.of(Attribute.TYPES));
   }
 
@@ -108,12 +108,12 @@ public class Commands {
       if (player == null) {
         throw new UserException("You must be player!");
       }
-      return game.getPlayerManager().getPlayer(player.getUniqueId());
+      return game.playerManager().player(player);
     });
 
     commandContexts.registerContext(Element.class, c -> {
       String name = c.popFirstArg().toLowerCase();
-      return Element.getElementByName(name)
+      return Element.elementByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
     });
 
@@ -125,12 +125,12 @@ public class Commands {
       Player player = c.getPlayer();
       Predicate<AbilityDescription> permissionPredicate = x -> true;
       if (player != null) {
-        BendingPlayer bendingPlayer = game.getPlayerManager().getPlayer(player.getUniqueId());
+        BendingPlayer bendingPlayer = game.playerManager().player(player);
         permissionPredicate = bendingPlayer::hasPermission;
       }
-      return game.getAbilityRegistry().getAbilities()
+      return game.abilityRegistry().abilities()
         .filter(nonHidden)
-        .filter(desc -> desc.getName().equalsIgnoreCase(name))
+        .filter(desc -> desc.name().equalsIgnoreCase(name))
         .filter(permissionPredicate)
         .findAny().orElseThrow(() -> new InvalidCommandArgument("Could not find ability " + name));
     });
@@ -141,19 +141,19 @@ public class Commands {
         throw new UserException("You must be player!");
       }
       String name = c.popFirstArg().toLowerCase();
-      return game.getPlayerManager().getPlayer(player.getUniqueId()).getPresetByName(name)
+      return game.playerManager().player(player).presetByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
     });
 
     commandContexts.registerContext(ModifyPolicy.class, c -> {
       String name = c.popFirstArg().toLowerCase();
-      Optional<Element> element = Element.getElementByName(name);
+      Optional<Element> element = Element.elementByName(name);
       if (element.isPresent()) {
-        return AttributeSystem.getElementPolicy(element.get());
+        return AttributeSystem.elementPolicy(element.get());
       }
-      AbilityDescription desc = game.getAbilityRegistry().getAbilityDescription(name)
+      AbilityDescription desc = game.abilityRegistry().abilityDescription(name)
         .orElseThrow(() -> new InvalidCommandArgument("Invalid policy. Policy must be an element or ability name"));
-      return AttributeSystem.getAbilityPolicy(desc);
+      return AttributeSystem.abilityPolicy(desc);
     });
 
     commandContexts.registerContext(ModifierOperation.class, c -> {

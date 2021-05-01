@@ -65,29 +65,29 @@ public final class SequenceManager {
     int i = 0;
     for (Map.Entry<AbilityDescription, Sequence> entry : sequences.entrySet()) {
       AbilityDescription desc = entry.getKey();
-      if (!game.getAbilityRegistry().isRegistered(desc)) {
+      if (!game.abilityRegistry().registered(desc)) {
         continue;
       }
       Sequence sequence = entry.getValue();
-      boolean valid = sequence.getActions().stream()
-        .map(AbilityAction::getAbilityDescription)
-        .allMatch(game.getAbilityRegistry()::isRegistered);
+      boolean valid = sequence.actions().stream()
+        .map(AbilityAction::abilityDescription)
+        .allMatch(game.abilityRegistry()::registered);
       if (valid) {
         registeredSequences.put(entry.getKey(), sequence);
         i++;
       } else {
-        Bending.getLog().warn(desc.getName() + " sequence will be disabled as it requires an invalid ability to activate.");
+        Bending.logger().warn(desc.name() + " sequence will be disabled as it requires an invalid ability to activate.");
       }
     }
     return i;
   }
 
-  public @Nullable Sequence getSequence(@NonNull AbilityDescription desc) {
+  public @Nullable Sequence sequence(@NonNull AbilityDescription desc) {
     return registeredSequences.get(desc);
   }
 
   public void registerAction(@NonNull User user, @NonNull ActivationMethod action) {
-    AbilityDescription desc = user.getSelectedAbility().orElse(null);
+    AbilityDescription desc = user.selectedAbility().orElse(null);
     if (desc == null) {
       return;
     }
@@ -105,7 +105,7 @@ public final class SequenceManager {
         }
         Ability ability = sequenceDesc.createAbility();
         if (ability.activate(user, ActivationMethod.SEQUENCE)) {
-          game.getAbilityManager(user.getWorld()).addAbility(user, ability);
+          game.abilityManager(user.world()).addAbility(user, ability);
         }
         buffer.clear(); // Consume all actions in the buffer
         return;
@@ -117,7 +117,7 @@ public final class SequenceManager {
    * Note: this will include hidden abilities. You will need to filter them.
    * @return a stream of all the registered sequences
    */
-  public Stream<AbilityDescription> getRegisteredSequences() {
+  public @NonNull Stream<AbilityDescription> sequences() {
     return registeredSequences.keySet().stream();
   }
 }

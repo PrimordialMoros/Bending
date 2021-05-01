@@ -47,7 +47,7 @@ public final class SoundUtil {
   public static final SoundEffect LAVA_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
 
   public static void playSound(@NonNull Location center, @NonNull SoundEffect effect, float volume, float pitch) {
-    playSound(center, effect.getSound(), volume, pitch);
+    playSound(center, effect.sound(), volume, pitch);
   }
 
   public static void playSound(@NonNull Location center, @NonNull Sound sound) {

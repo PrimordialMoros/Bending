@@ -20,6 +20,7 @@
 package me.moros.bending.util;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.taskchain.BukkitTaskChainFactory;
 import me.moros.atlas.taskchain.TaskChain;
 import me.moros.atlas.taskchain.TaskChainFactory;
@@ -33,9 +34,11 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public final class Tasker {
   private static TaskChainFactory taskChainFactory;
+  private static Bending bendingPlugin;
 
   public static void init(@NonNull Bending plugin) {
     if (taskChainFactory == null) {
+      bendingPlugin = plugin;
       taskChainFactory = BukkitTaskChainFactory.create(plugin);
     }
   }
@@ -48,11 +51,17 @@ public final class Tasker {
     return taskChainFactory.newSharedChain(name);
   }
 
-  public static @NonNull BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
-    return Bukkit.getScheduler().runTaskTimer(Bending.getPlugin(), runnable, 1, interval);
+  public static @Nullable BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
+    if (bendingPlugin.isEnabled()) {
+      return Bukkit.getScheduler().runTaskTimer(Bending.plugin(), runnable, 1, interval);
+    }
+    return null;
   }
 
-  public static @NonNull BukkitTask simpleTask(@NonNull Runnable runnable, long delay) {
-    return Bukkit.getScheduler().runTaskLater(Bending.getPlugin(), runnable, delay);
+  public static @Nullable BukkitTask simpleTask(@NonNull Runnable runnable, long delay) {
+    if (bendingPlugin.isEnabled()) {
+      return Bukkit.getScheduler().runTaskLater(Bending.plugin(), runnable, delay);
+    }
+    return null;
   }
 }

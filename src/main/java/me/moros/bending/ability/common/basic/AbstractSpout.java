@@ -61,23 +61,23 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     maxHeight = this.height + 2; // Add a buffer for safety
 
     this.flight = Flight.get(user);
-    this.flight.setFlying(true);
+    this.flight.flying(true);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
+    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
     }
     // Remove if player gets too far away from ground.
-    distance = user.getLocation().getY() - block.getY();
+    distance = user.location().getY() - block.getY();
     if (distance > maxHeight) {
       return UpdateResult.REMOVE;
     }
-    flight.setFlying(distance <= height);
+    flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
-    collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.getLocation());
+    collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.location());
     render();
     postRender();
     return UpdateResult.CONTINUE;
@@ -94,17 +94,17 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull Collider getCollider() {
+  public @NonNull Collider collider() {
     return collider;
   }
 
-  public @NonNull Flight getFlight() {
+  public @NonNull Flight flight() {
     return flight;
   }
 
   public static void limitVelocity(@NonNull User user, @NonNull Vector3 velocity, double speed) {
     if (velocity.getNormSq() > speed * speed) {
-      user.getEntity().setVelocity(velocity.normalize().toVector().multiply(speed));
+      user.entity().setVelocity(velocity.normalize().toVector().multiply(speed));
     }
   }
 }

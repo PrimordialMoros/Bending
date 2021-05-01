@@ -51,7 +51,7 @@ public class Bending extends JavaPlugin {
   private TranslationManager translationManager;
   private TimingManager timingManager;
 
-  private PersistentDataLayer layer;
+  private PersistentDataLayer dataLayer;
   private BendingEventBus eventBus;
   private Game game;
 
@@ -68,13 +68,13 @@ public class Bending extends JavaPlugin {
 
     Tasker.init(this);
 
-    String dir = getConfigFolder();
+    String dir = configFolder();
 
     configManager = new ConfigManager(dir);
     translationManager = new TranslationManager(dir);
     timingManager = TimingManager.of(this);
     eventBus = new BendingEventBus(this);
-    layer = new PersistentDataLayer(this);
+    dataLayer = new PersistentDataLayer(this);
 
     BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
     game = new Game(storage);
@@ -103,47 +103,47 @@ public class Bending extends JavaPlugin {
     }
   }
 
-  public static BendingEventBus getEventBus() {
+  public static BendingEventBus eventBus() {
     return plugin.eventBus;
   }
 
-  public static TimingManager getTimingManager() {
+  public static TimingManager timingManager() {
     return plugin.timingManager;
   }
 
-  public static Bending getPlugin() {
+  public static Bending plugin() {
     return plugin;
   }
 
-  public static ConfigManager getConfigManager() {
+  public static ConfigManager configManager() {
     return plugin.configManager;
   }
 
-  public static TranslationManager getTranslationManager() {
+  public static TranslationManager translationManager() {
     return plugin.translationManager;
   }
 
-  public static String getAuthor() {
+  public static String author() {
     return plugin.author;
   }
 
-  public static String getVersion() {
+  public static String version() {
     return plugin.version;
   }
 
-  public static Logger getLog() {
+  public static Logger logger() {
     return plugin.logger;
   }
 
-  public static PersistentDataLayer getLayer() {
-    return plugin.layer;
+  public static PersistentDataLayer dataLayer() {
+    return plugin.dataLayer;
   }
 
-  public static Game getGame() {
+  public static Game game() {
     return plugin.game;
   }
 
-  public static String getConfigFolder() {
+  public static String configFolder() {
     return plugin.getDataFolder().toString();
   }
 }

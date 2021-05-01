@@ -47,25 +47,17 @@ public class Disk implements Collider {
   }
 
   @Override
-  public @NonNull Vector3 getPosition() {
+  public @NonNull Vector3 position() {
     return sphere.center;
   }
 
   @Override
-  public @NonNull Vector3 getHalfExtents() {
-    return obb.getHalfExtents();
+  public @NonNull Vector3 halfExtents() {
+    return obb.halfExtents();
   }
 
   @Override
   public boolean contains(@NonNull Vector3 point) {
     return sphere.contains(point) && obb.contains(point);
-  }
-
-  public @NonNull OBB getOBB() {
-    return obb;
-  }
-
-  public @NonNull Sphere getSphere() {
-    return sphere;
   }
 }

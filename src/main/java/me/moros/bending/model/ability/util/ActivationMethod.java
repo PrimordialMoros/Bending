@@ -49,7 +49,7 @@ public enum ActivationMethod {
     return interact;
   }
 
-  public @NonNull String getKey() {
+  public @NonNull String key() {
     return key;
   }
 }

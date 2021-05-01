@@ -36,15 +36,15 @@ public class BendingRestrictEvent extends BendingUserEvent implements Cancellabl
     this.duration = duration;
   }
 
-  public @NonNull LivingEntity getTarget() {
+  public @NonNull LivingEntity target() {
     return target;
   }
 
-  public long getDuration() {
+  public long duration() {
     return duration;
   }
 
-  public void setDuration(long duration) {
+  public void duration(long duration) {
     this.duration = duration;
   }
 

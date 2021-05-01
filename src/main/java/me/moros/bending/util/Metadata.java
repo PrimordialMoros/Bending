@@ -38,10 +38,10 @@ public final class Metadata {
   public static final String NO_MOVEMENT = "bending-no-movement";
 
   public static FixedMetadataValue emptyMetadata() {
-    return new FixedMetadataValue(Bending.getPlugin(), "");
+    return new FixedMetadataValue(Bending.plugin(), "");
   }
 
   public static @NonNull FixedMetadataValue customMetadata(@Nullable Object obj) {
-    return new FixedMetadataValue(Bending.getPlugin(), obj);
+    return new FixedMetadataValue(Bending.plugin(), obj);
   }
 }

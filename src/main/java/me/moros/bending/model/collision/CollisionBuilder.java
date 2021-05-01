@@ -66,7 +66,7 @@ public class CollisionBuilder {
   }
 
   public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull Collection<@NonNull String> seconds, boolean removeFirst, boolean removeSecond) {
-    AbilityDescription desc1 = registry.getAbilityDescription(first).orElse(null);
+    AbilityDescription desc1 = registry.abilityDescription(first).orElse(null);
     if (desc1 != null) {
       for (AbilityDescription desc2 : mapAbilities(seconds)) {
         simpleCollisions.add(new RegisteredCollision(desc1, desc2, removeFirst, removeSecond));
@@ -96,7 +96,7 @@ public class CollisionBuilder {
   }
 
   private List<AbilityDescription> mapAbilities(Collection<String> abilities) {
-    return abilities.stream().map(registry::getAbilityDescription).flatMap(Optional::stream).collect(Collectors.toList());
+    return abilities.stream().map(registry::abilityDescription).flatMap(Optional::stream).collect(Collectors.toList());
   }
 
   private static Collection<RegisteredCollision> registerSelfCancellingCollisions(List<AbilityDescription> layer) {

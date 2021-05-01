@@ -50,7 +50,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 
 public class FireSpin extends AbilityInstance implements Ability {
   private static final Config config = new Config();
@@ -70,18 +69,18 @@ public class FireSpin extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    Vector3 origin = user.getLocation().add(Vector3.PLUS_J);
+    Vector3 origin = user.location().add(Vector3.PLUS_J);
     VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 40).forEach(
       v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
     );
 
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -91,12 +90,12 @@ public class FireSpin extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return streams.stream().map(ParticleStream::getCollider).collect(Collectors.toList());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -108,23 +107,23 @@ public class FireSpin extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      ParticleUtil.createFire(user, getBukkitLocation())
+      ParticleUtil.createFire(user, bukkitLocation())
         .offset(0.1, 0.1, 0.1).extra(0.01).spawn();
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.FIRE_SOUND.play(getBukkitLocation());
+        SoundUtil.FIRE_SOUND.play(bukkitLocation());
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
+      if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
-        DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-        FireTick.LARGER.apply(user, entity, 20);
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
         entity.setVelocity(ray.direction.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
       }
       return true;
@@ -142,6 +141,8 @@ public class FireSpin extends AbilityInstance implements Ability {
     public long cooldown;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.SPEED)
@@ -155,6 +156,7 @@ public class FireSpin extends AbilityInstance implements Ability {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       damage = abilityNode.node("damage").getDouble(2.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(6.0);
       speed = abilityNode.node("speed").getDouble(0.55);
       knockback = abilityNode.node("knockback").getDouble(1.8);

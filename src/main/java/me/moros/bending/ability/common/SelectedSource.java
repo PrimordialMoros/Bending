@@ -74,7 +74,7 @@ public class SelectedSource implements State {
       return false;
     }
     Vector3 newOrigin = new Vector3(block).add(Vector3.HALF);
-    if (user.getEyeLocation().distanceSq(newOrigin) > distanceSq) {
+    if (user.eyeLocation().distanceSq(newOrigin) > distanceSq) {
       return false;
     }
     onDestroy();
@@ -109,11 +109,11 @@ public class SelectedSource implements State {
       forceRemove = true;
     }
     onDestroy();
-    chain.getChainStore().clear();
+    chain.chainStore().clear();
     if (forceRemove) {
       return;
     }
-    chain.getChainStore().add(block);
+    chain.chainStore().add(block);
     chain.nextState();
   }
 
@@ -122,17 +122,17 @@ public class SelectedSource implements State {
     if (!started || forceRemove) {
       return UpdateResult.REMOVE;
     }
-    if (user.getEyeLocation().distanceSq(origin) > distanceSq) {
+    if (user.eyeLocation().distanceSq(origin) > distanceSq) {
       return UpdateResult.REMOVE;
     }
-    Location loc = origin.toLocation(user.getWorld());
+    Location loc = origin.toLocation(user.world());
     if (particles) {
       ParticleUtil.create(Particle.SMOKE_NORMAL, loc.add(0, 0.5, 0)).spawn();
     }
     return UpdateResult.CONTINUE;
   }
 
-  public @NonNull Block getSelectedSource() {
+  public @NonNull Block selectedSource() {
     return block;
   }
 

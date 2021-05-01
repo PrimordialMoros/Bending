@@ -21,10 +21,11 @@ package me.moros.bending.model.predicate.general;
 
 import java.util.function.BiPredicate;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 @FunctionalInterface
 public interface BendingConditional extends BiPredicate<User, AbilityDescription> {
-  boolean test(User user, AbilityDescription desc);
+  boolean test(@NonNull User user, @NonNull AbilityDescription desc);
 }

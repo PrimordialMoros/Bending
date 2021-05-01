@@ -30,7 +30,7 @@ public class CooldownAddEvent extends BendingAbilityEvent {
     this.duration = duration;
   }
 
-  public long getDuration() {
+  public long duration() {
     return duration;
   }
 }

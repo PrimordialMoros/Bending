@@ -44,15 +44,15 @@ public class SoundEffect {
     this.pitch = pitch;
   }
 
-  public @NonNull Sound getSound() {
+  public @NonNull Sound sound() {
     return sound;
   }
 
-  public float getVolume() {
+  public float volume() {
     return volume;
   }
 
-  public float getPitch() {
+  public float pitch() {
     return pitch;
   }
 

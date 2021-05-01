@@ -52,14 +52,14 @@ public class GracefulDescent extends AbilityInstance implements PassiveAbility {
   }
 
   public static boolean isGraceful(User user) {
-    if (!Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, GracefulDescent.class)) {
+    if (!Bending.game().abilityManager(user.world()).hasAbility(user, GracefulDescent.class)) {
       return false;
     }
-    return Bending.getGame().getAbilityRegistry().getAbilityDescription("GracefulDescent").map(user::canBend).orElse(false);
+    return Bending.game().abilityRegistry().abilityDescription("GracefulDescent").map(user::canBend).orElse(false);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 }

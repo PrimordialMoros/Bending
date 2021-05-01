@@ -19,9 +19,9 @@
 
 package me.moros.bending.game.temporal;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -55,21 +55,24 @@ public class TempArmor implements Temporary {
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-    if (MANAGER.isTemp(user.getEntity())) {
+    if (MANAGER.isTemp(user.entity())) {
       return Optional.empty();
     }
-    if (user.getEntity().getEquipment() == null) {
+    if (user.entity().getEquipment() == null) {
       return Optional.empty();
     }
-    return Optional.of(new TempArmor(user.getEntity(), armor, duration));
+    return Optional.of(new TempArmor(user.entity(), armor, duration));
   }
 
-  public @NonNull LivingEntity getPlayer() {
+  public @NonNull LivingEntity entity() {
     return entity;
   }
 
-  public @NonNull Collection<ItemStack> getSnapshot() {
-    return Arrays.asList(snapshot);
+  /**
+   * @return an unmodifiable view of the snapshot
+   */
+  public @NonNull Collection<ItemStack> snapshot() {
+    return List.of(snapshot);
   }
 
   @Override
@@ -88,7 +91,7 @@ public class TempArmor implements Temporary {
       meta.displayName(Component.text("Bending Armor"));
       meta.lore(Collections.singletonList(Component.text("Temporary")));
       meta.setUnbreakable(true);
-      Bending.getLayer().addArmorKey(meta);
+      Bending.dataLayer().addArmorKey(meta);
       item.setItemMeta(meta);
     }
     return armorItems;
@@ -99,7 +102,7 @@ public class TempArmor implements Temporary {
     for (int i = 0; i < armorItems.length; i++) {
       ItemStack item = armorItems[i];
       if (item != null && item.getItemMeta() != null) {
-        if (!Bending.getLayer().hasArmorKey(item.getItemMeta())) {
+        if (!Bending.dataLayer().hasArmorKey(item.getItemMeta())) {
           copy[i] = item;
         }
       }

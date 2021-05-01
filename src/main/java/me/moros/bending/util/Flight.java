@@ -44,8 +44,8 @@ public class Flight {
 
   private Flight(User user) {
     this.user = user;
-    couldFly = user.getAllowFlight();
-    wasFlying = user.isFlying();
+    couldFly = user.allowFlight();
+    wasFlying = user.flying();
   }
 
   // Returns the Flight instance for a user. This will also increment the flight counter.
@@ -60,14 +60,14 @@ public class Flight {
     return this;
   }
 
-  public void setFlying(boolean value) {
+  public void flying(boolean value) {
     isFlying = value;
-    user.setAllowFlight(value);
-    user.setFlying(value);
+    user.allowFlight(value);
+    user.flying(value);
     changedFlying = true;
   }
 
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -95,8 +95,8 @@ public class Flight {
 
   private static void revertFlight(Flight flight) {
     if (flight != null && flight.changedFlying) {
-      flight.user.setAllowFlight(flight.couldFly);
-      flight.user.setFlying(flight.wasFlying);
+      flight.user.allowFlight(flight.couldFly);
+      flight.user.flying(flight.wasFlying);
     }
   }
 
@@ -104,8 +104,8 @@ public class Flight {
     for (Map.Entry<User, Flight> entry : instances.entrySet()) {
       User user = entry.getKey();
       Flight flight = entry.getValue();
-      if (flight.changedFlying && user.isFlying() != flight.isFlying) {
-        user.setFlying(flight.isFlying);
+      if (flight.changedFlying && user.flying() != flight.isFlying) {
+        user.flying(flight.isFlying);
       }
     }
   }

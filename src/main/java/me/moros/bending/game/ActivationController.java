@@ -36,9 +36,7 @@ import me.moros.bending.ability.earth.EarthSmash;
 import me.moros.bending.ability.earth.passives.DensityShift;
 import me.moros.bending.ability.earth.passives.FerroControl;
 import me.moros.bending.ability.earth.sequences.EarthPillars;
-import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.ability.fire.HeatControl;
-import me.moros.bending.ability.fire.sequences.JetBlast;
 import me.moros.bending.ability.water.HealingWaters;
 import me.moros.bending.ability.water.PhaseChange;
 import me.moros.bending.ability.water.WaterSpout;
@@ -73,56 +71,46 @@ public final class ActivationController {
   }
 
   public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
-    return user.getSelectedAbility().map(desc -> activateAbility(user, method, desc)).orElse(false);
+    return user.selectedAbility().map(desc -> activateAbility(user, method, desc)).orElse(false);
   }
 
   public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
     if (!desc.isActivatedBy(method) || !user.canBend(desc)) {
       return false;
     }
-    if (!game.getProtectionSystem().canBuild(user, user.getLocBlock())) {
+    if (!game.protectionSystem().canBuild(user, user.locBlock())) {
       return false;
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
-      game.getAbilityManager(user.getWorld()).addAbility(user, ability);
+      game.abilityManager(user.world()).addAbility(user, ability);
       return true;
     }
     return false;
   }
 
   public void onPlayerLogout(@NonNull BendingPlayer player) {
-    TempArmor.MANAGER.get(player.getEntity()).ifPresent(TempArmor::revert);
-    game.getAttributeSystem().clearModifiers(player);
-    game.getStorage().savePlayerAsync(player);
+    TempArmor.MANAGER.get(player.entity()).ifPresent(TempArmor::revert);
+    game.attributeSystem().clearModifiers(player);
+    game.storage().savePlayerAsync(player);
     Flight.remove(player);
 
-    UUID uuid = player.getProfile().getUniqueId();
-    game.getBoardManager().invalidate(uuid);
-    game.getPlayerManager().invalidatePlayer(uuid);
-    game.getProtectionSystem().invalidate(player);
-    game.getAbilityManager(player.getWorld()).clearPassives(player);
+    UUID uuid = player.entity().getUniqueId();
+    game.boardManager().invalidate(uuid);
+    game.playerManager().invalidatePlayer(uuid);
+    game.protectionSystem().invalidate(player);
+    game.abilityManager(player.world()).clearPassives(player);
   }
 
   public void onUserSwing(@NonNull User user) {
     if (cache.ignoreSwing.contains(user)) {
       return;
     }
-    ignoreNextSwing(user);
-    AbilityManager manager = game.getAbilityManager(user.getWorld());
-    AbilityDescription desc = user.getSelectedAbility().orElse(null);
-    boolean removed = false;
-    if (desc != null) {
-      if (desc.getName().equals("FireJet")) {
-        removed |= manager.destroyInstanceType(user, FireJet.class);
-        removed |= manager.destroyInstanceType(user, JetBlast.class);
-      }
-    }
-    removed |= manager.destroyInstanceType(user, AirScooter.class);
-    removed |= manager.destroyInstanceType(user, AirWheel.class);
-    if (removed) {
+    AbilityManager manager = game.abilityManager(user.world());
+    if (manager.destroyInstanceType(user, AirScooter.class) || manager.destroyInstanceType(user, AirWheel.class)) {
       return;
     }
+    ignoreNextSwing(user);
 
     PhaseChange.freeze(user);
     WaterWave.freeze(user);
@@ -130,10 +118,10 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    if (user.getTargetEntity(4).isPresent()) {
-      game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
+    if (user.rayTraceEntity(4).isPresent()) {
+      game.sequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
     } else {
-      game.getSequenceManager().registerAction(user, ActivationMethod.ATTACK);
+      game.sequenceManager().registerAction(user, ActivationMethod.ATTACK);
     }
     activateAbility(user, ActivationMethod.ATTACK);
   }
@@ -145,9 +133,9 @@ public final class ActivationController {
     }
 
     ActivationMethod action = sneaking ? ActivationMethod.SNEAK : ActivationMethod.SNEAK_RELEASE;
-    game.getSequenceManager().registerAction(user, action);
+    game.sequenceManager().registerAction(user, action);
     activateAbility(user, action);
-    game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
+    game.abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
   }
 
   public void onUserMove(@NonNull User user, @NonNull Vector3 velocity) {
@@ -166,7 +154,7 @@ public final class ActivationController {
   }
 
   public void onUserDamage(@NonNull User user) {
-    game.getAbilityManager(user.getWorld()).destroyInstanceType(user, AirScooter.class);
+    game.abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
   }
 
   public boolean onFallDamage(@NonNull User user) {
@@ -203,15 +191,15 @@ public final class ActivationController {
     ignoreNextSwing(user);
 
     if (entity instanceof LivingEntity) {
-      HealingWaters.setTarget(user, (LivingEntity) entity);
+      HealingWaters.healTarget(user, (LivingEntity) entity);
     }
     if (block != null) {
       FerroControl.act(user, block);
       EarthSmash.tryDestroy(user, block);
     }
-    EarthLine.setPrisonMode(user);
+    EarthLine.prisonMode(user);
 
-    game.getSequenceManager().registerAction(user, method);
+    game.sequenceManager().registerAction(user, method);
     activateAbility(user, method);
   }
 
@@ -236,11 +224,11 @@ public final class ActivationController {
     }
 
     private @Nullable AirSpout getAirSpout(@NonNull User user) {
-      return airSpoutCache.computeIfAbsent(user, u -> game.getAbilityManager(u.getWorld()).getFirstInstance(u, AirSpout.class).orElse(null));
+      return airSpoutCache.computeIfAbsent(user, u -> game.abilityManager(u.world()).firstInstance(u, AirSpout.class).orElse(null));
     }
 
     private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
-      return waterSpoutCache.computeIfAbsent(user, u -> game.getAbilityManager(u.getWorld()).getFirstInstance(u, WaterSpout.class).orElse(null));
+      return waterSpoutCache.computeIfAbsent(user, u -> game.abilityManager(u.world()).firstInstance(u, WaterSpout.class).orElse(null));
     }
 
     private void clear() {

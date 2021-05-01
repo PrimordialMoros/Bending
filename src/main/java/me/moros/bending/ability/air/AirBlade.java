@@ -74,7 +74,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirBlade.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirBlade.class)) {
       return false;
     }
 
@@ -82,56 +82,56 @@ public class AirBlade extends AbilityInstance implements Ability {
     recalculateConfig();
 
     charging = true;
-    direction = user.getDirection().setY(0).normalize();
+    direction = user.direction().setY(0).normalize();
     double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
-    origin = user.getLocation().add(direction).add(new Vector3(0, maxRadius, 0));
+    origin = user.location().add(direction).add(new Vector3(0, maxRadius, 0));
 
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(OutOfRangeRemovalPolicy.of(userConfig.prepareRange, () -> origin))
       .add(Policies.IN_LIQUID)
       .build();
 
     startTime = System.currentTimeMillis();
 
-    AirWheel wheel = Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, AirWheel.class).orElse(null);
+    AirWheel wheel = Bending.game().abilityManager(user.world()).firstInstance(user, AirWheel.class).orElse(null);
     if (wheel != null) {
-      origin = wheel.getCenter();
+      origin = wheel.center();
       factor = userConfig.chargeFactor;
       charging = false;
       blade = new Blade(new Ray(origin, direction), userConfig.speed * factor * 0.5);
       removalPolicy = Policies.builder()
-        .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.getLocation())).build();
-      user.setCooldown(getDescription(), userConfig.cooldown);
-      Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(wheel);
+        .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
+      user.addCooldown(description(), userConfig.cooldown);
+      Bending.game().abilityManager(user.world()).destroyInstance(wheel);
     }
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
     if (charging) {
-      if (origin.toBlock(user.getWorld()).isLiquid()) {
+      if (origin.toBlock(user.world()).isLiquid()) {
         return UpdateResult.REMOVE;
       }
       long time = System.currentTimeMillis();
-      if (user.isSneaking() && time > startTime + 100) {
+      if (user.sneaking() && time > startTime + 100) {
         double timeFactor = FastMath.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
         Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
         VectorMethods.circle(direction.scalarMultiply(r), rotateAxis, 20).forEach(v ->
-          ParticleUtil.createAir(origin.add(v).toLocation(user.getWorld())).spawn()
+          ParticleUtil.createAir(origin.add(v).toLocation(user.world())).spawn()
         );
-      } else if (!user.isSneaking()) {
+      } else if (!user.sneaking()) {
         launch();
       }
       return UpdateResult.CONTINUE;
@@ -152,30 +152,30 @@ public class AirBlade extends AbilityInstance implements Ability {
     charging = false;
     blade = new Blade(new Ray(origin, direction));
     removalPolicy = Policies.builder()
-      .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.getLocation())).build();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+      .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (blade == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(blade.getCollider());
+    return Collections.singletonList(blade.collider());
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
+    Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof AirBlade) {
       double collidedFactor = ((AirBlade) collidedAbility).factor;
       if (collidedFactor - factor > 0.1) {
-        collision.setRemoveCollided(false);
+        collision.removeOther(false);
       }
     }
   }
@@ -194,20 +194,20 @@ public class AirBlade extends AbilityInstance implements Ability {
     public void render() {
       Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
       VectorMethods.circle(this.ray.direction.scalarMultiply(this.radius), rotateAxis, 40).forEach(v ->
-        ParticleUtil.createAir(location.add(v).toLocation(user.getWorld())).spawn()
+        ParticleUtil.createAir(location.add(v).toLocation(user.world())).spawn()
       );
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR_SOUND.play(location.toLocation(user.getWorld()));
+        SoundUtil.AIR_SOUND.play(location.toLocation(user.world()));
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3 velocity = direction.setY(userConfig.knockup).normalize().scalarMultiply(userConfig.knockback);
       entity.setVelocity(velocity.clampVelocity());
       return true;

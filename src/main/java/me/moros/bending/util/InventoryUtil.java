@@ -46,7 +46,7 @@ public final class InventoryUtil {
   }
 
   public static boolean hasItem(@NonNull User user, @NonNull ItemStack itemStack) {
-    return user.getInventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
+    return user.inventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
   }
 
   public static boolean hasFullBottle(@NonNull User user) {
@@ -61,15 +61,15 @@ public final class InventoryUtil {
     if (!hasItem(user, itemStack)) {
       return false;
     }
-    return user.getInventory().map(i -> i.removeItem(itemStack).isEmpty()).orElse(false);
+    return user.inventory().map(i -> i.removeItem(itemStack).isEmpty()).orElse(false);
   }
 
   public static boolean fillBottle(@NonNull User user) {
     if (!hasEmptyBottle(user)) {
       return false;
     }
-    if (user.getInventory().isPresent()) {
-      Inventory inventory = user.getInventory().get();
+    if (user.inventory().isPresent()) {
+      Inventory inventory = user.inventory().get();
       return inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
     }
     return false;
@@ -79,8 +79,8 @@ public final class InventoryUtil {
     if (!hasFullBottle(user)) {
       return false;
     }
-    if (user.getInventory().isPresent()) {
-      Inventory inventory = user.getInventory().get();
+    if (user.inventory().isPresent()) {
+      Inventory inventory = user.inventory().get();
       return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
     }
     return false;

@@ -37,10 +37,12 @@ public class EarthMaterials {
   public static final MaterialSetTag ALL;
 
   static {
-    NamespacedKey key = Bending.getLayer().getMaterialKey();
+    NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     EARTH_BENDABLE = new MaterialSetTag(key)
       .add(Tag.STONE_BRICKS.getValues())
-      .add(MaterialTags.TERRACOTTA, MaterialTags.CONCRETES, MaterialTags.CONCRETE_POWDER)
+      .add(MaterialTags.TERRACOTTA.getValues())
+      .add(MaterialTags.CONCRETES.getValues())
+      .add(MaterialTags.CONCRETE_POWDER.getValues())
       .add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.GRASS_PATH,
         Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
         Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
@@ -52,13 +54,19 @@ public class EarthMaterials {
 
     SAND_BENDABLE = new MaterialSetTag(key)
       .add(Material.SAND, Material.RED_SAND, Material.SOUL_SAND, Material.SOUL_SOIL)
-      .add(MaterialTags.SANDSTONES, MaterialTags.RED_SANDSTONES).ensureSize("Sand", 12);
+      .add(MaterialTags.SANDSTONES.getValues())
+      .add(MaterialTags.RED_SANDSTONES.getValues()).ensureSize("Sand", 12);
 
     METAL_BENDABLE = new MaterialSetTag(key).add(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.QUARTZ_BLOCK).ensureSize("Metal", 3);
 
     LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).ensureSize("Lava", 2);
 
-    ALL = new MaterialSetTag(key).add(EARTH_BENDABLE, SAND_BENDABLE, METAL_BENDABLE, LAVA_BENDABLE).ensureSize("All", 113);
+    ALL = new MaterialSetTag(key)
+      .add(EARTH_BENDABLE.getValues())
+      .add(SAND_BENDABLE.getValues())
+      .add(METAL_BENDABLE.getValues())
+      .add(LAVA_BENDABLE.getValues())
+      .ensureSize("All", 113);
   }
 
   public static boolean isEarthbendable(@NonNull User user, @NonNull Block block) {

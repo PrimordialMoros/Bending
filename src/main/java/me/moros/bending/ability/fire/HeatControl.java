@@ -78,22 +78,22 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription()) || !user.canBend(getDescription())) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       solidify.clear();
       melt.clear();
       return UpdateResult.CONTINUE;
     }
     melt.processQueue(1);
-    if (getDescription().equals(user.getSelectedAbility().orElse(null))) {
+    if (description().equals(user.selectedAbility().orElse(null))) {
       long time = System.currentTimeMillis();
-      if (user.isSneaking()) {
+      if (user.sneaking()) {
         if (isHoldingFood()) {
-          ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
+          ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
           if (time > startTime + userConfig.cookInterval && cook()) {
             startTime = System.currentTimeMillis();
           }
@@ -110,7 +110,7 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 
   private boolean isHoldingFood() {
     if (user instanceof BendingPlayer) {
-      PlayerInventory inventory = ((BendingPlayer) user).getEntity().getInventory();
+      PlayerInventory inventory = ((BendingPlayer) user).entity().getInventory();
       return MaterialUtil.COOKABLE.containsKey(inventory.getItemInMainHand().getType());
     }
     return false;
@@ -118,11 +118,11 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
 
   private boolean cook() {
     if (user instanceof BendingPlayer) {
-      PlayerInventory inventory = ((BendingPlayer) user).getEntity().getInventory();
+      PlayerInventory inventory = ((BendingPlayer) user).entity().getInventory();
       Material heldItem = inventory.getItemInMainHand().getType();
       if (MaterialUtil.COOKABLE.containsKey(heldItem)) {
         ItemStack cooked = new ItemStack(MaterialUtil.COOKABLE.get(heldItem));
-        inventory.addItem(cooked).values().forEach(item -> user.getWorld().dropItem(user.getHeadBlock().getLocation(), item));
+        inventory.addItem(cooked).values().forEach(item -> user.world().dropItem(user.headBlock().getLocation(), item));
         int amount = inventory.getItemInMainHand().getAmount();
         if (amount == 1) {
           inventory.clear(inventory.getHeldItemSlot());
@@ -136,15 +136,15 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
   }
 
   private void act() {
-    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+    if (!user.canBend(description()) || user.isOnCooldown(description())) {
       return;
     }
     boolean acted = false;
-    Location center = user.getTarget(userConfig.range).toLocation(user.getWorld());
+    Location center = user.rayTrace(userConfig.range).toLocation(user.world());
     Predicate<Block> predicate = b -> TempBlock.isBendable(b) && MaterialUtil.isFire(b) || MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
-    Predicate<Block> safe = b -> Bending.getGame().getProtectionSystem().canBuild(user, b);
+    Predicate<Block> safe = b -> Bending.game().protectionSystem().canBuild(user, b);
     List<Block> toMelt = new ArrayList<>();
-    for (Block block : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
+    for (Block block : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
       if (MaterialUtil.isFire(block)) {
         BlockMethods.tryExtinguishFire(user, block);
@@ -157,45 +157,45 @@ public class HeatControl extends AbilityInstance implements PassiveAbility {
       melt.fillQueue(toMelt);
     }
     if (acted) {
-      user.setCooldown(getDescription(), userConfig.cooldown);
+      user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
   private void onSneak() {
-    if (!user.canBend(getDescription()) || user.isOnCooldown(getDescription())) {
+    if (!user.canBend(description()) || user.isOnCooldown(description())) {
       return;
     }
-    Location center = user.getTarget(userConfig.solidifyRange, false).toLocation(user.getWorld());
-    Predicate<Block> safe = b -> Bending.getGame().getProtectionSystem().canBuild(user, b);
-    List<Block> newBlocks = WorldMethods.getNearbyBlocks(center, userConfig.solidifyRadius, safe.and(MaterialUtil::isLava));
+    Location center = user.rayTrace(userConfig.solidifyRange, false).toLocation(user.world());
+    Predicate<Block> safe = b -> Bending.game().protectionSystem().canBuild(user, b);
+    List<Block> newBlocks = WorldMethods.nearbyBlocks(center, userConfig.solidifyRadius, safe.and(MaterialUtil::isLava));
     if (newBlocks.isEmpty()) {
       return;
     }
     Collections.shuffle(newBlocks);
     solidify.fillQueue(newBlocks);
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   public static void act(User user) {
-    if (user.getSelectedAbilityName().equals("HeatControl")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+    if (user.selectedAbilityName().equals("HeatControl")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
     }
   }
 
   public static void onSneak(User user) {
-    if (user.getSelectedAbilityName().equals("HeatControl")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
+    if (user.selectedAbilityName().equals("HeatControl")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
     }
   }
 
   public static boolean canBurn(User user) {
-    return user.getSelectedAbility()
-      .filter(desc -> desc.getName().equals("HeatControl") && user.canBend(desc))
+    return user.selectedAbility()
+      .filter(desc -> desc.name().equals("HeatControl") && user.canBend(desc))
       .isEmpty();
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

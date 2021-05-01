@@ -39,11 +39,11 @@ public class OutOfRangeRemovalPolicy implements RemovalPolicy {
   }
 
   @Override
-  public boolean test(User user, AbilityDescription desc) {
+  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
     if (rangeSq == 0) {
       return false;
     }
-    return fromSupplier.get().distanceSq(origin == null ? user.getEyeLocation() : origin) > rangeSq;
+    return fromSupplier.get().distanceSq(origin == null ? user.eyeLocation() : origin) > rangeSq;
   }
 
   public static @NonNull RemovalPolicy of(double range, @NonNull Supplier<Vector3> from) {

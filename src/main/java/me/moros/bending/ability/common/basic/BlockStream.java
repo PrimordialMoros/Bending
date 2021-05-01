@@ -88,7 +88,7 @@ public abstract class BlockStream implements State {
     }
     this.chain = chain;
     stream = new ArrayDeque<>();
-    chain.getChainStore().stream().filter(this::isValid).forEach(stream::addLast);
+    chain.chainStore().stream().filter(this::isValid).forEach(stream::addLast);
     started = !stream.isEmpty();
   }
 
@@ -114,11 +114,11 @@ public abstract class BlockStream implements State {
     Block head = stream.getFirst();
     Vector3 current = new Vector3(head).add(Vector3.HALF);
     if (controllable || direction == null) {
-      Vector3 targetLoc = user.getTargetEntity(range).map(EntityMethods::getEntityCenter)
-        .orElseGet(() -> user.getTarget(range, Collections.singleton(material)));
+      Vector3 targetLoc = user.rayTraceEntity(range).map(EntityMethods::entityCenter)
+        .orElseGet(() -> user.rayTrace(range, Collections.singleton(material)));
       // Improve targeting when near
       if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
-        targetLoc = targetLoc.add(user.getDirection());
+        targetLoc = targetLoc.add(user.direction());
       }
       direction = targetLoc.subtract(current).normalize();
     }
@@ -126,16 +126,16 @@ public abstract class BlockStream implements State {
     buffer -= 100; // Reduce buffer by one since we moved
 
     Vector3 originalVector = new Vector3(current.toArray());
-    Block originBlock = originalVector.toBlock(user.getWorld());
+    Block originBlock = originalVector.toBlock(user.world());
 
     current = current.add(direction);
-    head = current.toBlock(user.getWorld());
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, head)) {
+    head = current.toBlock(user.world());
+    if (!Bending.game().protectionSystem().canBuild(user, head)) {
       return UpdateResult.REMOVE;
     }
 
     clean(stream.removeLast());
-    if (current.distanceSq(user.getEyeLocation()) <= range * range) {
+    if (current.distanceSq(user.eyeLocation()) <= range * range) {
       boolean canRender = true;
       for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
         int x = NumberConversions.floor(v.getX());
@@ -175,7 +175,7 @@ public abstract class BlockStream implements State {
   public void onBlockHit(@NonNull Block block) {
   }
 
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     return colliders;
   }
 

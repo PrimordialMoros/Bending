@@ -89,7 +89,7 @@ public class WaterManipulation extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+      Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
         .collect(Collectors.toList());
       redirectAny(user);
       for (WaterManipulation manip : manips) {
@@ -105,15 +105,15 @@ public class WaterManipulation extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    Block source = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
+    Block source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
     if (source == null) {
       return false;
     }
 
-    Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, WaterManipulation.class)
+    Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
       .filter(m -> m.manip == null).collect(Collectors.toList());
     for (WaterManipulation manip : manips) {
-      State state = manip.states.getCurrent();
+      State state = manip.states.current();
       if (state instanceof SelectedSource) {
         ((SelectedSource) state).reselect(source);
         return false;
@@ -123,18 +123,18 @@ public class WaterManipulation extends AbilityInstance implements Ability {
     states = new StateChain()
       .addState(new SelectedSource(user, source, userConfig.selectRange))
       .start();
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (manip != null) {
@@ -142,17 +142,17 @@ public class WaterManipulation extends AbilityInstance implements Ability {
       if (result == UpdateResult.CONTINUE) {
         SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
-          effect.play(manip.getCenter().toLocation(user.getWorld()));
+          effect.play(manip.center().toLocation(user.world()));
         }
 
         if (isIce) {
-          Location center = manip.getCenter().toLocation(user.getWorld());
+          Location center = manip.center().toLocation(user.world());
           ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
             .offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
           ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
             .offset(0.5, 0.5, 0.5).spawn();
         } else {
-          Block trail1 = manip.getPreviousBlock();
+          Block trail1 = manip.previousBlock();
           if (trail1 != null) {
             if (!trail.isEmpty()) {
               manip.clean(trail.peekFirst());
@@ -179,19 +179,19 @@ public class WaterManipulation extends AbilityInstance implements Ability {
     if (MaterialUtil.isTransparentOrWater(block)) {
       BlockMethods.tryBreakPlant(block);
       if (!MaterialUtil.isWater(block)) {
-        TempBlock.create(block, MaterialUtil.getWaterData(level));
+        TempBlock.create(block, MaterialUtil.waterData(level));
       }
     }
   }
 
   private void launch() {
-    if (user.isOnCooldown(getDescription())) {
+    if (user.isOnCooldown(description())) {
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       state.complete();
-      Block source = states.getChainStore().stream().findAny().orElse(null);
+      Block source = states.chainStore().stream().findAny().orElse(null);
       if (source == null || !TempBlock.isBendable(source)) {
         return;
       }
@@ -199,27 +199,27 @@ public class WaterManipulation extends AbilityInstance implements Ability {
         isIce = WaterMaterials.isIceBendable(source);
         manip = new Manip(user, source);
         removalPolicy = Policies.builder().build();
-        user.setCooldown(getDescription(), userConfig.cooldown);
+        user.addCooldown(description(), userConfig.cooldown);
         TempBlock.createAir(source);
       }
     }
   }
 
   private static void redirectAny(User user) {
-    Collection<WaterManipulation> manips = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(WaterManipulation.class)
+    Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
     for (WaterManipulation manip : manips) {
-      Vector3 center = manip.manip.getCenter();
-      double dist = center.distanceSq(manip.getUser().getEyeLocation());
-      double dist2 = center.distanceSq(user.getEyeLocation());
+      Vector3 center = manip.manip.center();
+      double dist = center.distanceSq(manip.user().eyeLocation());
+      double dist2 = center.distanceSq(user.eyeLocation());
       if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) {
         continue;
       }
       Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
-      if (selectSphere.intersects(user.getRay(dist))) {
-        Vector3 dir = center.subtract(user.getEyeLocation());
-        if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.rMax + 2).isPresent()) {
-          Bending.getGame().getAbilityManager(user.getWorld()).changeOwner(manip, user);
+      if (selectSphere.intersects(user.ray(dist))) {
+        Vector3 dir = center.subtract(user.eyeLocation());
+        if (WorldMethods.blockCast(user.world(), new Ray(user.eyeLocation(), dir), config.rMax + 2).isPresent()) {
+          Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }
       }
@@ -235,26 +235,26 @@ public class WaterManipulation extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public boolean setUser(@NonNull User user) {
+  public boolean user(@NonNull User user) {
     if (manip == null) {
       return false;
     }
     this.user = user;
-    manip.setUser(user);
+    manip.user(user);
     return true;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (manip == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(manip.getCollider());
+    return Collections.singletonList(manip.collider());
   }
 
   private class Manip extends AbstractBlockShot {
@@ -266,19 +266,20 @@ public class WaterManipulation extends AbilityInstance implements Ability {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3 origin = getCenter();
+      Vector3 origin = center();
       Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
       Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
       entity.setVelocity(push.clampVelocity());
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
       PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
       return true;
     }
 
     @Override
-    public void onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(@NonNull Block block) {
       FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
+      return true;
     }
   }
 

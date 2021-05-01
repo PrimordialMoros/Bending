@@ -69,10 +69,10 @@ public class TempBlock implements Temporary {
     cleanStates();
     if (!snapshots.isEmpty()) {
       TempBlockState tbs = snapshots.peekLast();
-      if (!tbs.overwrite) {
+      if (!tbs.weak) {
         snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
       } else {
-        tbs.overwrite = false;
+        tbs.weak = false;
       }
       this.bendable = bendable;
       block.setBlockData(data);
@@ -102,7 +102,7 @@ public class TempBlock implements Temporary {
     TempBlock tb = MANAGER.get(block).orElse(null);
     if (tb != null) {
       TempBlockState tbs = tb.snapshots.peekLast();
-      if (tbs != null && tbs.overwrite) {
+      if (tbs != null && tbs.weak) {
         return tbs.state.getBlockData();
       }
     }
@@ -184,10 +184,10 @@ public class TempBlock implements Temporary {
     }
   }
 
-  public void setOverwrite() {
+  public void forceWeak() {
     TempBlockState tbs = snapshots.peekLast();
     if (tbs != null) {
-      tbs.overwrite = true;
+      tbs.weak = true;
     }
   }
 
@@ -247,13 +247,14 @@ public class TempBlock implements Temporary {
     revertTask.cancel();
   }
 
-  public @NonNull Block getBlock() {
+  public @NonNull Block block() {
     return block;
   }
 
   public void removeWithoutReverting() {
-    revertTask.cancel();
+    GRAVITY_CACHE.remove(block);
     MANAGER.removeEntry(block);
+    revertTask.cancel();
   }
 
   public boolean isBendable() {
@@ -275,7 +276,7 @@ public class TempBlock implements Temporary {
   private static class TempBlockManager extends TemporalManager<Block, TempBlock> {
     @Override
     public void removeAll() {
-      new ArrayList<>(getInstances().values()).forEach(TempBlock::revertFully);
+      new ArrayList<>(instances().values()).forEach(TempBlock::revertFully);
       clear();
     }
   }
@@ -284,7 +285,7 @@ public class TempBlock implements Temporary {
     private final BlockState state;
     private final int expirationTicks;
     private final boolean bendable;
-    private boolean overwrite = false;
+    private boolean weak = false;
 
     private TempBlockState(BlockState state, long expirationTime, boolean bendable) {
       this.state = state;

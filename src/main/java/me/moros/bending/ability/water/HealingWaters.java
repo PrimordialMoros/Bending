@@ -60,25 +60,25 @@ public class HealingWaters extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, HealingWaters.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, HealingWaters.class)) {
       return false;
     }
     this.user = user;
     recalculateConfig();
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
     nextTime = System.currentTimeMillis();
-    target = user.getEntity();
+    target = user.entity();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     long time = System.currentTimeMillis();
@@ -88,7 +88,7 @@ public class HealingWaters extends AbilityInstance implements Ability {
         return UpdateResult.REMOVE;
       }
     } else {
-      ParticleUtil.createRGB(user.getMainHandSide().toLocation(user.getWorld()), "00ffff").spawn();
+      ParticleUtil.createRGB(user.mainHandSide().toLocation(user.world()), "00ffff").spawn();
     }
     return UpdateResult.CONTINUE;
   }
@@ -97,24 +97,24 @@ public class HealingWaters extends AbilityInstance implements Ability {
     if (entity == null || !entity.isValid()) {
       return false;
     }
-    if (!entity.getWorld().equals(user.getWorld())) {
+    if (!entity.getWorld().equals(user.world())) {
       return false;
     }
-    if (EntityMethods.getEntityCenter(entity).distanceSq(user.getEyeLocation()) > userConfig.range * userConfig.range) {
+    if (EntityMethods.entityCenter(entity).distanceSq(user.eyeLocation()) > userConfig.range * userConfig.range) {
       return false;
     }
-    return user.getEntity().hasLineOfSight(entity);
+    return user.entity().hasLineOfSight(entity);
   }
 
   private boolean tryHeal() {
-    if (!user.getEntity().equals(target) && !isValidEntity(target)) {
-      target = user.getEntity();
+    if (!user.entity().equals(target) && !isValidEntity(target)) {
+      target = user.entity();
     }
     if (!MaterialUtil.isWater(target.getLocation().getBlock()) && !InventoryUtil.hasFullBottle(user)) {
       return false;
     }
 
-    ParticleUtil.createRGB(EntityMethods.getEntityCenter(target).toLocation(user.getWorld()), "00ffff")
+    ParticleUtil.createRGB(EntityMethods.entityCenter(target).toLocation(user.world()), "00ffff")
       .count(6).offset(0.35, 0.35, 0.35).spawn();
     target.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
       .forEach(target::removePotionEffect);
@@ -126,26 +126,26 @@ public class HealingWaters extends AbilityInstance implements Ability {
     return false;
   }
 
-  public static void setTarget(User user, LivingEntity entity) {
-    if (user.getSelectedAbilityName().equals("HealingWaters")) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, HealingWaters.class)
-        .ifPresent(hw -> hw.setTarget(entity));
+  public static void healTarget(User user, LivingEntity entity) {
+    if (user.selectedAbilityName().equals("HealingWaters")) {
+      Bending.game().abilityManager(user.world()).firstInstance(user, HealingWaters.class)
+        .ifPresent(hw -> hw.healTarget(entity));
     }
   }
 
-  private void setTarget(LivingEntity entity) {
-    if (!target.equals(entity) && !user.getEntity().equals(entity) && isValidEntity(entity)) {
+  private void healTarget(LivingEntity entity) {
+    if (!target.equals(entity) && !user.entity().equals(entity) && isValidEntity(entity)) {
       target = entity;
     }
   }
 
   @Override
   public void onDestroy() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

@@ -28,9 +28,9 @@ import me.moros.atlas.cf.checker.nullness.qual.NonNull;
  * Holds data from the database that are needed to construct the BendingPlayer object
  */
 public final class BenderData {
-  public final String[] slots;
-  public final Set<String> elements;
-  public final Set<String> presets;
+  private final String[] slots;
+  private final Set<String> elements;
+  private final Set<String> presets;
 
   public BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements, @NonNull Set<@NonNull String> presets) {
     this.slots = slots;
@@ -40,5 +40,17 @@ public final class BenderData {
 
   public BenderData() {
     this(new String[9], Collections.emptySet(), Collections.emptySet());
+  }
+
+  public @NonNull String[] slots() {
+    return slots;
+  }
+
+  public @NonNull Set<@NonNull String> elements() {
+    return elements;
+  }
+
+  public @NonNull Set<@NonNull String> presets() {
+    return presets;
   }
 }

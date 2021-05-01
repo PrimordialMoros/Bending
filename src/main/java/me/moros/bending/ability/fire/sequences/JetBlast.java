@@ -49,45 +49,47 @@ public class JetBlast extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, JetBlast.class)) {
+      return false;
+    }
     if (jetDesc == null) {
-      jetDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("FireJet").orElseThrow(RuntimeException::new);
+      jetDesc = Bending.game().abilityRegistry().abilityDescription("FireJet").orElseThrow(RuntimeException::new);
     }
     jet = new FireJet(jetDesc);
-    if (user.isOnCooldown(jet.getDescription()) || !jet.activate(user, ActivationMethod.ATTACK)) {
+    if (user.isOnCooldown(jetDesc) || !jet.activate(user, ActivationMethod.SEQUENCE)) {
       return false;
     }
 
     recalculateConfig();
 
-    jet.setDuration(userConfig.duration);
-    jet.setSpeed(userConfig.speed);
+    jet.duration(userConfig.duration);
+    jet.speed(userConfig.speed);
 
-    user.getWorld().playSound(user.getEntity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 4, 0);
-
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.world().playSound(user.entity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 4, 0);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    ParticleUtil.create(Particle.SMOKE_NORMAL, jet.getUser().getEntity().getLocation()).count(5)
+    ParticleUtil.create(Particle.SMOKE_NORMAL, jet.user().entity().getLocation()).count(5)
       .offset(0.3, 0.3, 0.3).spawn();
     return jet.update();
   }
 
   @Override
   public void onDestroy() {
+    user().addCooldown(description(), userConfig.cooldown);
     jet.onDestroy();
   }
 
   @Override
-  public @NonNull User getUser() {
-    return jet.getUser();
+  public @NonNull User user() {
+    return jet.user();
   }
 
   private static class Config extends Configurable {

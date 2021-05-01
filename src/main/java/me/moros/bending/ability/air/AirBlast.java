@@ -77,7 +77,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     this.user = user;
     recalculateConfig();
 
-    if (Policies.IN_LIQUID.test(user, getDescription())) {
+    if (Policies.IN_LIQUID.test(user, description())) {
       return false;
     }
 
@@ -86,11 +86,11 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
       .add(Policies.IN_LIQUID)
       .build();
 
-    for (AirBlast blast : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, AirBlast.class).collect(Collectors.toList())) {
+    for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).collect(Collectors.toList())) {
       if (!blast.launched) {
         if (method == ActivationMethod.SNEAK_RELEASE) {
           if (!blast.selectOrigin()) {
-            Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(blast);
+            Bending.game().abilityManager(user.world()).destroyInstance(blast);
           }
         } else {
           blast.launch();
@@ -102,7 +102,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     if (method == ActivationMethod.SNEAK_RELEASE) {
       return selectOrigin();
     } else {
-      origin = user.getEyeLocation();
+      origin = user.eyeLocation();
       launch();
     }
     return true;
@@ -110,55 +110,55 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
     if (!launched) {
-      if (!getDescription().equals(user.getSelectedAbility().orElse(null))) {
+      if (!description().equals(user.selectedAbility().orElse(null))) {
         return UpdateResult.REMOVE;
       }
-      ParticleUtil.createAir(origin.toLocation(user.getWorld())).count(4).offset(0.5, 0.5, 0.5).spawn();
+      ParticleUtil.createAir(origin.toLocation(user.world())).count(4).offset(0.5, 0.5, 0.5).spawn();
     }
 
     return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
   private boolean selectOrigin() {
-    origin = user.getTarget(userConfig.selectRange)
-      .subtract(user.getDirection().scalarMultiply(0.5));
+    origin = user.rayTrace(userConfig.selectRange)
+      .subtract(user.direction().scalarMultiply(0.5));
     selectedOrigin = true;
-    return Bending.getGame().getProtectionSystem().canBuild(user, origin.toBlock(user.getWorld()));
+    return Bending.game().protectionSystem().canBuild(user, origin.toBlock(user.world()));
   }
 
   private void launch() {
     launched = true;
-    Vector3 target = user.getTarget(userConfig.range);
-    if (user.isSneaking()) {
+    Vector3 target = user.rayTrace(userConfig.range);
+    if (user.sneaking()) {
       Vector3 temp = new Vector3(origin.toArray());
       origin = new Vector3(target.toArray());
       target = temp;
     }
     direction = target.subtract(origin).normalize();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     stream = new AirStream(new Ray(origin, direction.scalarMultiply(userConfig.range)));
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (stream == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(stream.getCollider());
+    return Collections.singletonList(stream.collider());
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -190,7 +190,7 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     public void render() {
       long time = System.currentTimeMillis();
       if (renderInterval == 0 || time >= nextRenderTime) {
-        ParticleUtil.createAir(getBukkitLocation()).count(particleCount)
+        ParticleUtil.createAir(bukkitLocation()).count(particleCount)
           .offset(0.275, 0.275, 0.275)
           .spawn();
         nextRenderTime = time + renderInterval;
@@ -200,20 +200,20 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR_SOUND.play(getBukkitLocation());
+        SoundUtil.AIR_SOUND.play(bukkitLocation());
       }
 
       // Handle user separately from the general entity collision.
       if (selectedOrigin) {
-        if (AABBUtils.getEntityBounds(user.getEntity()).intersects(collider)) {
-          onEntityHit(user.getEntity());
+        if (AABBUtils.entityBounds(user.entity()).intersects(collider)) {
+          onEntityHit(user.entity());
         }
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      boolean isUser = entity.equals(user.getEntity());
+      boolean isUser = entity.equals(user.entity());
       double factor = isUser ? userConfig.selfPush : userConfig.otherPush;
       FireTick.extinguish(entity);
       if (factor == 0) {

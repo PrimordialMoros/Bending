@@ -71,10 +71,10 @@ public class FireWheel extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    Vector3 direction = user.getDirection().setY(0).normalize();
-    Vector3 location = user.getLocation().add(direction);
+    Vector3 direction = user.direction().setY(0).normalize();
+    Vector3 location = user.location().add(direction);
     location = location.add(new Vector3(0, userConfig.radius, 0));
-    if (location.toBlock(user.getWorld()).isLiquid()) {
+    if (location.toBlock(user.world()).isLiquid()) {
       return false;
     }
 
@@ -84,33 +84,33 @@ public class FireWheel extends AbilityInstance implements Ability {
     }
 
     removalPolicy = Policies.builder()
-      .add(OutOfRangeRemovalPolicy.of(userConfig.range, location, () -> wheel.getLocation())).build();
+      .add(OutOfRangeRemovalPolicy.of(userConfig.range, location, () -> wheel.location())).build();
 
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     return wheel.update();
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(wheel.getCollider());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(wheel.collider());
   }
 
   private class Wheel extends AbstractWheel {
@@ -122,27 +122,27 @@ public class FireWheel extends AbilityInstance implements Ability {
     public void render() {
       Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
       VectorMethods.circle(this.ray.direction.scalarMultiply(this.radius), rotateAxis, 36).forEach(v ->
-        ParticleUtil.createFire(user, location.add(v).toLocation(user.getWorld())).extra(0.01).spawn()
+        ParticleUtil.createFire(user, location.add(v).toLocation(user.world())).extra(0.01).spawn()
       );
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE_SOUND.play(location.toLocation(user.getWorld()));
+        SoundUtil.FIRE_SOUND.play(location.toLocation(user.world()));
       }
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
-      FireTick.LARGER.apply(user, entity, 20);
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
       return true;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      if (MaterialUtil.isIgnitable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      if (MaterialUtil.isIgnitable(block) && Bending.game().protectionSystem().canBuild(user, block)) {
         TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
       }
       return true;
@@ -156,6 +156,8 @@ public class FireWheel extends AbilityInstance implements Ability {
     public double radius;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.SPEED)
@@ -168,6 +170,7 @@ public class FireWheel extends AbilityInstance implements Ability {
       cooldown = abilityNode.node("cooldown").getLong(8000);
       radius = abilityNode.node("radius").getDouble(1.0);
       damage = abilityNode.node("damage").getDouble(3.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(20.0);
       speed = abilityNode.node("speed").getDouble(0.75);
 

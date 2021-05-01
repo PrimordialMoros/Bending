@@ -30,7 +30,7 @@ public class BindChangeEvent extends BendingUserEvent {
     this.result = result;
   }
 
-  public @NonNull Result getResult() {
+  public @NonNull Result result() {
     return result;
   }
 

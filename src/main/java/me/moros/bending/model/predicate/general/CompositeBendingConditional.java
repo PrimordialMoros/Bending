@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.predicate.general;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -31,19 +32,16 @@ public class CompositeBendingConditional implements BendingConditional {
   private final Set<BendingConditional> conditionals;
 
   CompositeBendingConditional(@NonNull ConditionBuilder builder) {
-    this.conditionals = builder.getConditionals();
+    this.conditionals = new HashSet<>(builder.conditionals());
   }
 
   @Override
-  public boolean test(User user, AbilityDescription desc) {
-    if (user == null || desc == null) {
-      return false;
-    }
-    Predicate<BendingConditional> filter = desc.canBypassCooldown() ? c -> !c.equals(BendingConditions.COOLDOWN) : c -> true;
+  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
+    Predicate<BendingConditional> filter = desc.bypassCooldown() ? c -> !c.equals(BendingConditions.COOLDOWN) : c -> true;
     return conditionals.stream().filter(filter).allMatch(cond -> cond.test(user, desc));
   }
 
-  public boolean hasConditional(@NonNull BendingConditional conditional) {
+  public boolean contains(@NonNull BendingConditional conditional) {
     return conditionals.contains(conditional);
   }
 

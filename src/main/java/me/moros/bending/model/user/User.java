@@ -33,78 +33,78 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 
 public interface User extends BukkitUser {
-  @NonNull ElementHolder getElementHolder();
+  @NonNull ElementHolder elementHolder();
 
   default boolean hasElement(@NonNull Element element) {
-    return getElementHolder().hasElement(element);
+    return elementHolder().hasElement(element);
   }
 
   default boolean addElement(@NonNull Element element) {
-    if (getElementHolder().addElement(element)) {
-      Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
+    if (elementHolder().addElement(element)) {
+      Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
       return true;
     }
     return false;
   }
 
   default boolean removeElement(@NonNull Element element) {
-    if (getElementHolder().removeElement(element)) {
+    if (elementHolder().removeElement(element)) {
       validateSlots();
-      Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
+      Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
       return true;
     }
     return false;
   }
 
-  default @NonNull Set<@NonNull Element> getElements() {
-    return getElementHolder().getElements();
+  default @NonNull Set<@NonNull Element> elements() {
+    return elementHolder().elements();
   }
 
-  default boolean setElement(@NonNull Element element) {
-    getElementHolder().clear();
-    getElementHolder().addElement(element);
+  default boolean element(@NonNull Element element) {
+    elementHolder().clear();
+    elementHolder().addElement(element);
     validateSlots();
-    Bending.getGame().getAbilityManager(getWorld()).clearPassives(this);
-    Bending.getGame().getAbilityManager(getWorld()).createPassives(this);
-    Bending.getEventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
+    Bending.game().abilityManager(world()).clearPassives(this);
+    Bending.game().abilityManager(world()).createPassives(this);
+    Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
     return true;
   }
 
   boolean isOnCooldown(@NonNull AbilityDescription desc);
 
-  void setCooldown(@NonNull AbilityDescription desc, long duration);
+  void addCooldown(@NonNull AbilityDescription desc, long duration);
 
   /**
    * Like setSlotAbility but won't call any events
    */
-  void setSlotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  void slotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
   /**
    * This is to be used when setting individual slots.
    * If you want to bind or change multiple slots then use dummy presets
    */
-  void setSlotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  void slotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
 
-  Optional<AbilityDescription> getSlotAbility(@IntRange(from = 1, to = 9) int slot);
+  Optional<AbilityDescription> slotAbility(@IntRange(from = 1, to = 9) int slot);
 
-  Optional<AbilityDescription> getSelectedAbility();
+  Optional<AbilityDescription> selectedAbility();
 
 
   /**
    * @return the ability's name or an empty string if no ability is bound to the currently selected slot
    */
-  default @NonNull String getSelectedAbilityName() {
-    return getSelectedAbility().map(AbilityDescription::getName).orElse("");
+  default @NonNull String selectedAbilityName() {
+    return selectedAbility().map(AbilityDescription::name).orElse("");
   }
 
   default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
-    setSlotAbility(slot, null);
+    slotAbility(slot, null);
   }
 
-  @NonNull CompositeBendingConditional getBendingConditional();
+  @NonNull CompositeBendingConditional bendingConditional();
 
   default boolean canBend(@NonNull AbilityDescription desc) {
-    return getBendingConditional().test(this, desc);
+    return bendingConditional().test(this, desc);
   }
 
   /**
@@ -112,9 +112,9 @@ public interface User extends BukkitUser {
    * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
    */
   default void validateSlots() {
-    IntStream.rangeClosed(1, 9).forEach(i -> getSlotAbility(i).ifPresent(desc -> {
-      if (!hasElement(desc.getElement()) || !hasPermission(desc) || !desc.canBind()) {
-        setSlotAbilityInternal(i, null);
+    IntStream.rangeClosed(1, 9).forEach(i -> slotAbility(i).ifPresent(desc -> {
+      if (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind()) {
+        slotAbilityInternal(i, null);
       }
     }));
   }
@@ -124,6 +124,6 @@ public interface User extends BukkitUser {
   }
 
   default boolean hasPermission(@NonNull AbilityDescription desc) {
-    return hasPermission(desc.getPermission());
+    return hasPermission(desc.permission());
   }
 }

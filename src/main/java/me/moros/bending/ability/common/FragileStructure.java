@@ -50,14 +50,14 @@ public class FragileStructure {
     this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.customMetadata(this)));
   }
 
-  public int getHealth() {
+  public int health() {
     return health;
   }
 
   /**
    * @return unmodifiable collection of blocks belonging to the same fragile structure
    */
-  public Collection<Block> getFragileBlocks() {
+  public Collection<Block> fragileBlocks() {
     return fragileBlocks;
   }
 
@@ -105,7 +105,7 @@ public class FragileStructure {
       }
       Material mat = block.getType();
       TempBlock.createAir(block);
-      block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.getPlugin());
+      block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
       Location center = block.getLocation().add(0.5, 0.5, 0.5);
       ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)
         .offset(0.3, 0.3, 0.3).data(mat.createBlockData()).spawn();

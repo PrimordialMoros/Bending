@@ -62,16 +62,16 @@ public class WaterBubble extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, WaterBubble.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterBubble.class)) {
       return false;
     }
     this.user = user;
     recalculateConfig();
 
-    center = user.getLocBlock();
+    center = user.locBlock();
     removalPolicy = Policies.builder()
       .add(Policies.NOT_SNEAKING)
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
 
@@ -80,12 +80,12 @@ public class WaterBubble extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -101,7 +101,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
       updateBubble = true;
     }
 
-    Block currentBlock = user.getLocBlock();
+    Block currentBlock = user.locBlock();
     if (!currentBlock.equals(center)) {
       center = currentBlock;
       updateBubble = true;
@@ -115,7 +115,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
   }
 
   private boolean checkBlockOutOfRange(Block block) {
-    if (block.getLocation().distanceSquared(user.getEntity().getLocation()) > radius * radius) {
+    if (block.getLocation().distanceSquared(user.entity().getLocation()) > radius * radius) {
       fastClean(block);
       return true;
     }
@@ -124,8 +124,8 @@ public class WaterBubble extends AbilityInstance implements Ability {
 
   private void pushWater() {
     bubble.removeIf(this::checkBlockOutOfRange);
-    for (Block block : WorldMethods.getNearbyBlocks(user.getEntity().getLocation(), radius, MaterialUtil::isWater)) {
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    for (Block block : WorldMethods.nearbyBlocks(user.entity().getLocation(), radius, MaterialUtil::isWater)) {
+      if (!Bending.game().protectionSystem().canBuild(user, block)) {
         continue;
       }
       if (TempBlock.MANAGER.isTemp(block)) {
@@ -136,7 +136,7 @@ public class WaterBubble extends AbilityInstance implements Ability {
   }
 
   private void fastClean(Block block) {
-    TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.getBlock())).ifPresent(TempBlock::revert);
+    TempBlock.MANAGER.get(block).filter(tb -> MaterialUtil.isAir(tb.block())).ifPresent(TempBlock::revert);
   }
 
   @Override
@@ -156,11 +156,11 @@ public class WaterBubble extends AbilityInstance implements Ability {
       tb.revert();
       TempBlock.createAir(block, delay);
     }
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

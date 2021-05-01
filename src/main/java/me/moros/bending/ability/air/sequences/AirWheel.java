@@ -72,11 +72,11 @@ public class AirWheel extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).hasAbility(user, AirWheel.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
       return false;
     }
     if (scooterDesc == null) {
-      scooterDesc = Bending.getGame().getAbilityRegistry().getAbilityDescription("AirScooter").orElseThrow(RuntimeException::new);
+      scooterDesc = Bending.game().abilityRegistry().abilityDescription("AirScooter").orElseThrow(RuntimeException::new);
     }
     scooter = new AirScooter(scooterDesc);
     if (user.isOnCooldown(scooterDesc) || !scooter.activate(user, ActivationMethod.ATTACK)) {
@@ -87,27 +87,28 @@ public class AirWheel extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
+    center = user.location().add(new Vector3(0, 0.8, 0));
     nextRenderTime = 0;
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
     long time = System.currentTimeMillis();
-    center = user.getLocation().add(new Vector3(0, 0.8, 0)).add(user.getDirection().setY(0).scalarMultiply(1.2));
-    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, FastMath.toRadians(user.getYaw())), new Sphere(center, 2));
+    center = user.location().add(new Vector3(0, 0.8, 0)).add(user.direction().setY(0).scalarMultiply(1.2));
+    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, FastMath.toRadians(user.yaw())), new Sphere(center, 2));
 
     if (time >= nextRenderTime) {
       render();
       nextRenderTime = time + 100;
     }
 
-    Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.getWorld());
+    Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.world());
     BlockMethods.tryCoolLava(user, base);
     BlockMethods.tryExtinguishFire(user, base);
 
@@ -120,34 +121,34 @@ public class AirWheel extends AbilityInstance implements Ability {
       return false;
     }
     affectedEntities.add(entity);
-    DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+    DamageUtil.damageEntity(entity, user, userConfig.damage, description());
     return true;
   }
 
   @Override
   public void onDestroy() {
     scooter.onDestroy();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   private void render() {
-    Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.getDirection().setY(0));
-    VectorMethods.circle(user.getDirection().scalarMultiply(1.6), rotateAxis, 40).forEach(v ->
-      ParticleUtil.createAir(center.add(v).toLocation(user.getWorld())).spawn()
+    Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.direction().setY(0));
+    VectorMethods.circle(user.direction().scalarMultiply(1.6), rotateAxis, 40).forEach(v ->
+      ParticleUtil.createAir(center.add(v).toLocation(user.world())).spawn()
     );
   }
 
-  public Vector3 getCenter() {
+  public @NonNull Vector3 center() {
     return center;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     return Collections.singletonList(collider);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

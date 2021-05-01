@@ -29,7 +29,7 @@ public abstract class AbilityInstance {
     this.desc = desc;
   }
 
-  public AbilityDescription getDescription() {
+  public AbilityDescription description() {
     return desc;
   }
 }

@@ -34,15 +34,15 @@ public interface Ability extends Updatable {
 
   void recalculateConfig();
 
-  @NonNull AbilityDescription getDescription();
+  @NonNull AbilityDescription description();
 
-  @NonNull User getUser();
+  @NonNull User user();
 
-  default boolean setUser(@NonNull User newUser) {
+  default boolean user(@NonNull User newUser) {
     return false;
   }
 
-  default @NonNull Collection<@NonNull Collider> getColliders() {
+  default @NonNull Collection<@NonNull Collider> colliders() {
     return Collections.emptyList();
   }
 

@@ -70,7 +70,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (Bending.getGame().getAbilityManager(user.getWorld()).destroyInstanceType(user, WaterSpout.class)) {
+    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, WaterSpout.class)) {
       return false;
     }
 
@@ -78,11 +78,11 @@ public class WaterSpout extends AbilityInstance implements Ability {
     recalculateConfig();
 
     double h = userConfig.height + 2;
-    if (EntityMethods.distanceAboveGround(user.getEntity()) > h) {
+    if (EntityMethods.distanceAboveGround(user.entity()) > h) {
       return false;
     }
 
-    Block block = WorldMethods.blockCast(user.getWorld(), new Ray(user.getLocation(), Vector3.MINUS_J), h).orElse(null);
+    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), h).orElse(null);
     if (block == null || !predicate.test(block)) {
       return false;
     }
@@ -95,12 +95,12 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -110,19 +110,19 @@ public class WaterSpout extends AbilityInstance implements Ability {
   @Override
   public void onDestroy() {
     column.forEach(spout::clean);
-    spout.getFlight().setFlying(false);
-    spout.getFlight().release();
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    spout.flight().flying(false);
+    spout.flight().release();
+    user.addCooldown(description(), userConfig.cooldown);
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
-    return Collections.singletonList(spout.getCollider());
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return Collections.singletonList(spout.collider());
   }
 
   public void handleMovement(@NonNull Vector3 velocity) {
@@ -140,7 +140,7 @@ public class WaterSpout extends AbilityInstance implements Ability {
 
     @Override
     public void render() {
-      BlockVector userBlockVector = new BlockVector(user.getLocation().toVector());
+      BlockVector userBlockVector = new BlockVector(user.location().toVector());
       if (userBlockVector.equals(blockVector)) {
         return;
       }
@@ -149,20 +149,20 @@ public class WaterSpout extends AbilityInstance implements Ability {
       column.clear();
       ignore.clear();
 
-      Block block = user.getLocBlock();
+      Block block = user.locBlock();
       for (int i = 0; i < distance - 1; i++) {
-        TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.getBlock()));
+        TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.block()));
       }
       ignore.addAll(column);
     }
 
     @Override
     public void postRender() {
-      if (!user.isFlying()) {
-        user.getEntity().setVelocity(user.getVelocity().add(g).clampVelocity());
+      if (!user.flying()) {
+        user.entity().setVelocity(user.velocity().add(g).clampVelocity());
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundUtil.WATER_SOUND.play(user.getEntity().getLocation());
+        SoundUtil.WATER_SOUND.play(user.entity().getLocation());
       }
     }
 

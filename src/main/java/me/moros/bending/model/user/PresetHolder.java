@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.user;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
@@ -36,10 +37,10 @@ public final class PresetHolder {
 
   PresetHolder(int id, Set<String> presets) {
     this.id = id;
-    this.presets = presets;
+    this.presets = new HashSet<>(presets);
   }
 
-  Set<String> getPresets() {
+  Set<String> presets() {
     return Set.copyOf(presets);
   }
 
@@ -47,7 +48,7 @@ public final class PresetHolder {
     return presets.contains(name);
   }
 
-  Preset getPresetByName(String name) {
+  Preset presetByName(String name) {
     if (!hasPreset(name)) {
       return null;
     }
@@ -66,6 +67,6 @@ public final class PresetHolder {
     if (!hasPreset(name)) {
       return null;
     }
-    return Bending.getGame().getStorage().loadPreset(id, name);
+    return Bending.game().storage().loadPreset(id, name);
   }
 }

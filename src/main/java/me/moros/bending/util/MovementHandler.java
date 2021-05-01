@@ -20,10 +20,10 @@
 package me.moros.bending.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +82,7 @@ public class MovementHandler {
       entity.setAI(hadAI);
     }
     if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
-      entity.removeMetadata(Metadata.NO_MOVEMENT, Bending.getPlugin());
+      entity.removeMetadata(Metadata.NO_MOVEMENT, Bending.plugin());
     }
   }
 
@@ -95,20 +95,20 @@ public class MovementHandler {
     Collection<ActionType> c = new ArrayList<>();
     c.add(method);
     if (methods != null) {
-      c.addAll(Arrays.asList(methods));
+      c.addAll(List.of(methods));
     }
     return disableActions(c);
   }
 
   public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
-    BendingRestrictEvent event = Bending.getEventBus().postRestrictEvent(user, entity, duration);
+    BendingRestrictEvent event = Bending.eventBus().postRestrictEvent(user, entity, duration);
     if (event.isCancelled()) {
       if (DUMMY == null) {
         DUMMY = new DummyMovementHandler();
       }
       return DUMMY;
     }
-    long finalDuration = FastMath.abs(event.getDuration());
+    long finalDuration = FastMath.abs(event.duration());
     return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
   }
 
@@ -166,7 +166,9 @@ public class MovementHandler {
 
     private void remove() {
       player.hideBossBar(bar);
-      barTask.cancel();
+      if (barTask != null) {
+        barTask.cancel();
+      }
     }
   }
 

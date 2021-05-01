@@ -59,14 +59,14 @@ public final class SourceUtil {
    * @param predicate the predicate to check
    * @return an Optional source block
    */
-  public static Optional<Block> getSource(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
-    BlockIterator it = new BlockIterator(user.getEntity(), FastMath.min(100, NumberConversions.ceil(range)));
+  public static Optional<Block> find(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
+    BlockIterator it = new BlockIterator(user.entity(), FastMath.min(100, NumberConversions.ceil(range)));
     while (it.hasNext()) {
       Block block = it.next();
       if (block.getType().isAir()) {
         continue;
       }
-      if (predicate.test(block) && TempBlock.isBendable(block) && Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+      if (predicate.test(block) && TempBlock.isBendable(block) && Bending.game().protectionSystem().canBuild(user, block)) {
         return Optional.of(block);
       }
       if (!block.isPassable()) {

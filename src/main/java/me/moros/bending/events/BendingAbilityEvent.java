@@ -31,7 +31,7 @@ public abstract class BendingAbilityEvent extends BendingUserEvent {
     this.desc = desc;
   }
 
-  public @NonNull AbilityDescription getAbility() {
+  public @NonNull AbilityDescription ability() {
     return desc;
   }
 }

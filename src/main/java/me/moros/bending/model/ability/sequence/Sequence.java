@@ -20,7 +20,6 @@
 package me.moros.bending.model.ability.sequence;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
@@ -38,17 +37,17 @@ public final class Sequence {
 
   public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction @NonNull ... actions) {
     this.sequence.add(action);
-    this.sequence.addAll(Arrays.asList(actions));
+    this.sequence.addAll(List.of(actions));
   }
 
   /**
    * @return Unmodifiable view of this sequence's actions
    */
-  public @NonNull List<@NonNull AbilityAction> getActions() {
+  public @NonNull List<@NonNull AbilityAction> actions() {
     return List.copyOf(sequence);
   }
 
-  public @NonNull Component getInstructions() {
+  public @NonNull Component instructions() {
     if (instructions == null) {
       instructions = generateInstructions(sequence);
     }
@@ -62,18 +61,18 @@ public final class Sequence {
       if (i != 0) {
         builder.append(Component.text(" > "));
       }
-      AbilityDescription desc = abilityAction.getAbilityDescription();
-      ActivationMethod action = abilityAction.getAction();
-      String actionKey = action.getKey();
+      AbilityDescription desc = abilityAction.abilityDescription();
+      ActivationMethod action = abilityAction.action();
+      String actionKey = action.key();
       if (action == ActivationMethod.SNEAK && i + 1 < actions.size()) {
         // Check if the next instruction is to release sneak.
         AbilityAction next = actions.get(i + 1);
-        if (desc.equals(next.getAbilityDescription()) && next.getAction() == ActivationMethod.SNEAK_RELEASE) {
+        if (desc.equals(next.abilityDescription()) && next.action() == ActivationMethod.SNEAK_RELEASE) {
           actionKey = "bending.activation.sneak-tap";
           i++;
         }
       }
-      builder.append(Component.text(desc.getName())).append(Component.text(" ("))
+      builder.append(Component.text(desc.name())).append(Component.text(" ("))
         .append(Component.translatable(actionKey)).append(Component.text(")"));
     }
     return builder.build();

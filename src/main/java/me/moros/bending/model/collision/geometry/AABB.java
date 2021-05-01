@@ -45,7 +45,7 @@ public class AABB implements Collider {
   }
 
   public @NonNull AABB scale(@NonNull Vector3 diff) {
-    Vector3 extents = getHalfExtents();
+    Vector3 extents = halfExtents();
     Vector3 newExtents = extents.multiply(diff);
     return grow(newExtents.subtract(extents));
   }
@@ -108,12 +108,12 @@ public class AABB implements Collider {
   }
 
   @Override
-  public @NonNull Vector3 getPosition() {
+  public @NonNull Vector3 position() {
     return mid();
   }
 
   @Override
-  public @NonNull Vector3 getHalfExtents() {
+  public @NonNull Vector3 halfExtents() {
     Vector3 half = max.subtract(min).scalarMultiply(0.5);
     return new Vector3(FastMath.abs(half.getX()), FastMath.abs(half.getY()), FastMath.abs(half.getZ()));
   }

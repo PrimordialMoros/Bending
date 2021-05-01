@@ -41,7 +41,7 @@ public class GriefPreventionProtection implements Protection {
   @Override
   public boolean canBuild(@NonNull User user, @NonNull Block block) {
     if (user instanceof BendingPlayer) {
-      String reason = griefPrevention.allowBuild(((BendingPlayer) user).getEntity(), block.getLocation());
+      String reason = griefPrevention.allowBuild(((BendingPlayer) user).entity(), block.getLocation());
       Claim claim = griefPrevention.dataStore.getClaimAt(block.getLocation(), true, null);
       return reason == null || claim == null || claim.siegeData != null;
     }

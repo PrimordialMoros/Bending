@@ -43,8 +43,8 @@ public final class CollisionManager {
   }
 
   public void update() {
-    Collection<Ability> instances = manager.getInstances()
-      .filter(ability -> !ability.getColliders().isEmpty())
+    Collection<Ability> instances = manager.instances()
+      .filter(ability -> !ability.colliders().isEmpty())
       .collect(Collectors.toList());
     if (instances.size() < 2) {
       return;
@@ -52,22 +52,22 @@ public final class CollisionManager {
     Map<Ability, Collection<Collider>> colliderCache = new HashMap<>(instances.size());
     for (RegisteredCollision registeredCollision : collisions) {
       Collection<Ability> firstAbilities = instances.stream()
-        .filter(ability -> ability.getDescription().equals(registeredCollision.getFirst()))
+        .filter(ability -> ability.description().equals(registeredCollision.first()))
         .collect(Collectors.toList());
       Collection<Ability> secondAbilities = instances.stream()
-        .filter(ability -> ability.getDescription().equals(registeredCollision.getSecond()))
+        .filter(ability -> ability.description().equals(registeredCollision.second()))
         .collect(Collectors.toList());
 
       for (Ability first : firstAbilities) {
-        Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::getColliders);
+        Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::colliders);
         if (firstColliders.isEmpty()) {
           continue;
         }
         for (Ability second : secondAbilities) {
-          if (first.getUser().equals(second.getUser())) {
+          if (first.user().equals(second.user())) {
             continue;
           }
-          Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::getColliders);
+          Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::colliders);
           if (secondColliders.isEmpty()) {
             continue;
           }
@@ -92,13 +92,13 @@ public final class CollisionManager {
   }
 
   private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, RegisteredCollision rc) {
-    Collision.CollisionData data = new Collision.CollisionData(first, second, c1, c2, rc.shouldRemoveFirst(), rc.shouldRemoveSecond());
+    Collision.CollisionData data = new Collision.CollisionData(first, second, c1, c2, rc.removeFirst(), rc.removeSecond());
     first.onCollision(data.asCollision());
     second.onCollision(data.asInverseCollision());
-    if (data.shouldRemoveFirst()) {
+    if (data.removeFirst()) {
       manager.destroyInstance(first);
     }
-    if (data.shouldRemoveSecond()) {
+    if (data.removeSecond()) {
       manager.destroyInstance(second);
     }
   }

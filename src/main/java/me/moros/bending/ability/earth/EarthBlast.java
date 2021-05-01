@@ -77,7 +77,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
     if (method == ActivationMethod.SNEAK && tryDestroy(user)) {
       return false;
     } else if (method == ActivationMethod.ATTACK) {
-      Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+      Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
         .collect(Collectors.toList());
       for (EarthBlast eblast : eblasts) {
         if (eblast.blast == null) {
@@ -93,16 +93,16 @@ public class EarthBlast extends AbilityInstance implements Ability {
     recalculateConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-    Block source = SourceUtil.getSource(user, userConfig.selectRange, predicate).orElse(null);
+    Block source = SourceUtil.find(user, userConfig.selectRange, predicate).orElse(null);
     if (source == null) {
       return false;
     }
     BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
 
-    Collection<EarthBlast> eblasts = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthBlast.class)
+    Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
       .filter(eb -> eb.blast == null).collect(Collectors.toList());
     for (EarthBlast eblast : eblasts) {
-      State state = eblast.states.getCurrent();
+      State state = eblast.states.current();
       if (state instanceof SelectedSource) {
         ((SelectedSource) state).reselect(source, fakeData);
         return false;
@@ -112,18 +112,18 @@ public class EarthBlast extends AbilityInstance implements Ability {
     states = new StateChain()
       .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
       .start();
-    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(getDescription())).build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (blast != null) {
@@ -134,13 +134,13 @@ public class EarthBlast extends AbilityInstance implements Ability {
   }
 
   private void launch() {
-    if (user.isOnCooldown(getDescription())) {
+    if (user.isOnCooldown(description())) {
       return;
     }
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       state.complete();
-      Block source = states.getChainStore().stream().findAny().orElse(null);
+      Block source = states.chainStore().stream().findAny().orElse(null);
       if (source == null) {
         return;
       }
@@ -148,25 +148,25 @@ public class EarthBlast extends AbilityInstance implements Ability {
         blast = new Blast(user, source);
         SoundUtil.EARTH_SOUND.play(source.getLocation());
         removalPolicy = Policies.builder().build();
-        user.setCooldown(getDescription(), userConfig.cooldown);
+        user.addCooldown(description(), userConfig.cooldown);
         TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
       }
     }
   }
 
   private static boolean tryDestroy(User user) {
-    Collection<EarthBlast> blasts = Bending.getGame().getAbilityManager(user.getWorld()).getInstances(EarthBlast.class)
+    Collection<EarthBlast> blasts = Bending.game().abilityManager(user.world()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
     for (EarthBlast eb : blasts) {
-      Vector3 center = eb.blast.getCenter();
-      double dist = center.distanceSq(user.getEyeLocation());
+      Vector3 center = eb.blast.center();
+      double dist = center.distanceSq(user.eyeLocation());
       if (dist > config.shatterRange * config.shatterRange) {
         continue;
       }
-      if (eb.blast.getCollider().intersects(user.getRay(dist))) {
-        Vector3 dir = center.subtract(user.getEyeLocation());
-        if (WorldMethods.blockCast(user.getWorld(), new Ray(user.getEyeLocation(), dir), config.shatterRange + 2).isPresent()) {
-          Bending.getGame().getAbilityManager(user.getWorld()).destroyInstance(eb);
+      if (eb.blast.collider().intersects(user.ray(dist))) {
+        Vector3 dir = center.subtract(user.eyeLocation());
+        if (WorldMethods.blockCast(user.world(), new Ray(user.eyeLocation(), dir), config.shatterRange + 2).isPresent()) {
+          Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }
       }
@@ -176,7 +176,7 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
   @Override
   public void onDestroy() {
-    State state = states.getCurrent();
+    State state = states.current();
     if (state instanceof SelectedSource) {
       ((SelectedSource) state).onDestroy();
     }
@@ -186,26 +186,26 @@ public class EarthBlast extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public boolean setUser(@NonNull User user) {
+  public boolean user(@NonNull User user) {
     if (blast == null) {
       return false;
     }
     this.user = user;
-    blast.setUser(user);
+    blast.user(user);
     return true;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (blast == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(blast.getCollider());
+    return Collections.singletonList(blast.collider());
   }
 
   private class Blast extends AbstractBlockShot {
@@ -225,17 +225,18 @@ public class EarthBlast extends AbilityInstance implements Ability {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3 origin = getCenter();
+      Vector3 origin = center();
       Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
       Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
       entity.setVelocity(push.clampVelocity());
-      DamageUtil.damageEntity(entity, user, damage, getDescription());
+      DamageUtil.damageEntity(entity, user, damage, description());
       return true;
     }
 
     @Override
-    public void onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(@NonNull Block block) {
       FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
+      return true;
     }
   }
 

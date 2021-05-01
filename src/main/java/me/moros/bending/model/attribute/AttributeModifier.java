@@ -19,26 +19,28 @@
 
 package me.moros.bending.model.attribute;
 
+import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+
 public class AttributeModifier {
   private final String attribute;
   private final ModifierOperation type;
-  private final double amount;
+  private final double value;
 
-  public AttributeModifier(String attribute, ModifierOperation type, double amount) {
+  public AttributeModifier(@NonNull String attribute, @NonNull ModifierOperation type, double value) {
     this.attribute = attribute;
     this.type = type;
-    this.amount = amount;
+    this.value = value;
   }
 
-  public String getAttribute() {
+  public @NonNull String attribute() {
     return attribute;
   }
 
-  public ModifierOperation getType() {
+  public @NonNull ModifierOperation type() {
     return type;
   }
 
-  public double getAmount() {
-    return amount;
+  public double value() {
+    return value;
   }
 }

@@ -68,10 +68,10 @@ public final class EntityMethods {
     if (!(entity instanceof Player)) {
       return entity.isOnGround();
     }
-    AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, 0.05, 0));
+    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, 0.05, 0));
     AABB floorBounds = new AABB(new Vector3(-1, -0.1, -1), new Vector3(1, 0.1, 1)).at(new Vector3(entity.getLocation()));
-    for (Block block : WorldMethods.getNearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
-      if (entityBounds.intersects(AABBUtils.getBlockBounds(block))) {
+    for (Block block : WorldMethods.nearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
+      if (entityBounds.intersects(AABBUtils.blockBounds(block))) {
         return true;
       }
     }
@@ -88,13 +88,13 @@ public final class EntityMethods {
   public static double distanceAboveGround(@NonNull Entity entity) {
     int maxHeight = entity.getWorld().getMaxHeight();
     BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
-    AABB entityBounds = AABBUtils.getEntityBounds(entity).grow(new Vector3(0, maxHeight, 0));
+    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, maxHeight, 0));
     while (it.hasNext()) {
       Block block = it.next();
       if (block.getY() <= 0) {
         break;
       }
-      AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
+      AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.blockBounds(block);
       if (checkBounds.intersects(entityBounds)) {
         return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
       }
@@ -107,7 +107,7 @@ public final class EntityMethods {
    * @param entity the entity to get the vector for
    * @return the resulting vector
    */
-  public static @NonNull Vector3 getEntityCenter(@NonNull Entity entity) {
+  public static @NonNull Vector3 entityCenter(@NonNull Entity entity) {
     return new Vector3(entity.getLocation()).add(new Vector3(0, entity.getHeight() / 2, 0));
   }
 }

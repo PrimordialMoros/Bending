@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.Bending;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
@@ -48,163 +47,162 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 public interface BukkitUser {
-  @NonNull LivingEntity getEntity();
+  @NonNull LivingEntity entity();
 
-  default @NonNull Block getHeadBlock() {
-    return getEntity().getEyeLocation().getBlock();
+  default @NonNull Block headBlock() {
+    return entity().getEyeLocation().getBlock();
   }
 
-  default @NonNull Block getLocBlock() {
-    return getEntity().getLocation().getBlock();
+  default @NonNull Block locBlock() {
+    return entity().getLocation().getBlock();
   }
 
-  default @NonNull Vector3 getLocation() {
-    return new Vector3(getEntity().getLocation());
+  default @NonNull Vector3 location() {
+    return new Vector3(entity().getLocation());
   }
 
-  default @NonNull Vector3 getEyeLocation() {
-    return new Vector3(getEntity().getEyeLocation());
+  default @NonNull Vector3 eyeLocation() {
+    return new Vector3(entity().getEyeLocation());
   }
 
-  default @NonNull Vector3 getDirection() {
-    return new Vector3(getEntity().getLocation().getDirection());
+  default @NonNull Vector3 direction() {
+    return new Vector3(entity().getLocation().getDirection());
   }
 
-  default @NonNull Vector3 getVelocity() {
-    return new Vector3(getEntity().getVelocity());
+  default @NonNull Vector3 velocity() {
+    return new Vector3(entity().getVelocity());
   }
 
-  default int getYaw() {
-    return (int) getEntity().getLocation().getYaw();
+  default int yaw() {
+    return (int) entity().getLocation().getYaw();
   }
 
-  default int getPitch() {
-    return (int) getEntity().getLocation().getPitch();
+  default int pitch() {
+    return (int) entity().getLocation().getPitch();
   }
 
-  default @NonNull World getWorld() {
-    return getEntity().getWorld();
+  default @NonNull World world() {
+    return entity().getWorld();
   }
 
-  default @NonNull Ray getRay() {
-    return new Ray(getEyeLocation(), getDirection());
+  default @NonNull Ray ray() {
+    return new Ray(eyeLocation(), direction());
   }
 
-  default @NonNull Ray getRay(double range) {
-    return new Ray(getEyeLocation(), getDirection().scalarMultiply(range));
+  default @NonNull Ray ray(double range) {
+    return new Ray(eyeLocation(), direction().scalarMultiply(range));
   }
 
   /**
    * @return {@link Entity#isValid}
    */
-  default boolean isValid() {
-    return getEntity().isValid();
+  default boolean valid() {
+    return entity().isValid();
   }
 
   /**
    * @return {@link Entity#isDead()}
    */
-  default boolean isDead() {
-    return getEntity().isDead();
+  default boolean dead() {
+    return entity().isDead();
   }
 
-  default boolean isSpectator() {
+  default boolean spectator() {
     return false;
   }
 
-  default boolean isSneaking() {
+  default boolean sneaking() {
     return true; // Non-players are always considered sneaking so they can charge abilities.
   }
 
-  default boolean getAllowFlight() {
+  default boolean allowFlight() {
     return true;
   }
 
-  default boolean isFlying() {
+  default void allowFlight(boolean allow) {
+  }
+
+  default boolean flying() {
     return false;
   }
 
-  default void setAllowFlight(boolean allow) {
+  default void flying(boolean flying) {
   }
 
-  default void setFlying(boolean flying) {
-  }
-
-  default Optional<Inventory> getInventory() {
-    if (getEntity() instanceof InventoryHolder) {
-      return Optional.of(((InventoryHolder) getEntity()).getInventory());
+  default Optional<Inventory> inventory() {
+    if (entity() instanceof InventoryHolder) {
+      return Optional.of(((InventoryHolder) entity()).getInventory());
     }
     return Optional.empty();
   }
 
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity).
-   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
-   */
-  default Optional<LivingEntity> getTargetEntity(double range) {
-    return getTargetEntity(range, LivingEntity.class);
-  }
-
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity).
-   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-   */
-  default Optional<LivingEntity> getTargetEntity(double range, int raySize) {
-    return getTargetEntity(range, raySize, LivingEntity.class);
-  }
-
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
-   */
-  default <T extends Entity> Optional<T> getTargetEntity(double range, @NonNull Class<T> type) {
-    RayTraceResult result = getWorld().rayTraceEntities(getEntity().getEyeLocation(), getEntity().getLocation().getDirection(), range, e -> !e.equals(getEntity()));
-    if (result == null) {
-      return Optional.empty();
-    }
-    Entity entity = result.getHitEntity();
-    if (getEntity().equals(entity)) {
-      Bending.getLog().info("Targetted same entity, this shouldn't happen: " + entity.getName());
-    }
-    return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
-  }
-
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-   */
-  default <T extends Entity> Optional<T> getTargetEntity(double range, int raySize, @NonNull Class<T> type) {
-    RayTraceResult result = getWorld().rayTraceEntities(getEntity().getEyeLocation(), getEntity().getLocation().getDirection(), range, raySize, e -> !e.equals(getEntity()));
-    if (result == null) {
-      return Optional.empty();
-    }
-    Entity entity = result.getHitEntity();
-    return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
-  }
-
   default boolean isOnGround() {
-    return EntityMethods.isOnGround(getEntity());
+    return EntityMethods.isOnGround(entity());
   }
 
   /**
-   * @return {@link #getTarget(double, Set)} with an empty material set and ignoreLiquids = true
+   * Gets the targeted entity (predicate is used to ignore the user's entity).
+   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
    */
-  default @NonNull Vector3 getTarget(double range) {
-    return getTarget(range, Collections.emptySet(), true);
+  default Optional<LivingEntity> rayTraceEntity(double range) {
+    return rayTraceEntity(range, LivingEntity.class);
   }
 
   /**
-   * @return {@link #getTarget(double, Set, boolean)} with an empty material set
+   * Gets the targeted entity (predicate is used to ignore the user's entity).
+   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
    */
-  default @NonNull Vector3 getTarget(double range, boolean ignoreLiquids) {
-    return getTarget(range, Collections.emptySet(), ignoreLiquids);
+  default Optional<LivingEntity> rayTraceEntity(double range, int raySize) {
+    return rayTraceEntity(range, raySize, LivingEntity.class);
   }
 
   /**
-   * @return {@link #getTarget(double, Set, boolean)} with ignoreLiquids = true
+   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
+   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
    */
-  default @NonNull Vector3 getTarget(double range, @NonNull Set<@NonNull Material> ignored) {
-    return getTarget(range, ignored, true);
+  default <T extends Entity> Optional<T> rayTraceEntity(double range, @NonNull Class<T> type) {
+    Predicate<Entity> predicate = e -> type.isInstance(e) && !e.equals(entity());
+    RayTraceResult result = world().rayTraceEntities(entity().getEyeLocation(), entity().getLocation().getDirection(), range, predicate);
+    if (result == null) {
+      return Optional.empty();
+    }
+    Entity entity = result.getHitEntity();
+    return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
+  }
+
+  /**
+   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
+   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
+   */
+  default <T extends Entity> Optional<T> rayTraceEntity(double range, int raySize, @NonNull Class<T> type) {
+    Predicate<Entity> predicate = e -> type.isInstance(e) && !e.equals(entity());
+    RayTraceResult result = world().rayTraceEntities(entity().getEyeLocation(), entity().getLocation().getDirection(), range, raySize, predicate);
+    if (result == null) {
+      return Optional.empty();
+    }
+    Entity entity = result.getHitEntity();
+    return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
+  }
+
+  /**
+   * @return {@link #rayTrace(double, Set)} with an empty material set and ignoreLiquids = true
+   */
+  default @NonNull Vector3 rayTrace(double range) {
+    return rayTrace(range, Collections.emptySet(), true);
+  }
+
+  /**
+   * @return {@link #rayTrace(double, Set, boolean)} with an empty material set
+   */
+  default @NonNull Vector3 rayTrace(double range, boolean ignoreLiquids) {
+    return rayTrace(range, Collections.emptySet(), ignoreLiquids);
+  }
+
+  /**
+   * @return {@link #rayTrace(double, Set, boolean)} with ignoreLiquids = true
+   */
+  default @NonNull Vector3 rayTrace(double range, @NonNull Set<@NonNull Material> ignored) {
+    return rayTrace(range, ignored, true);
   }
 
   /**
@@ -215,16 +213,16 @@ public interface BukkitUser {
    * @param ignoreLiquids whether liquids should be ignored for collisions
    * @return the target location
    */
-  default @NonNull Vector3 getTarget(double range, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
-    Ray ray = getRay(range);
-    Vector3 dir = getDirection();
+  default @NonNull Vector3 rayTrace(double range, @NonNull Set<@NonNull Material> ignored, boolean ignoreLiquids) {
+    Ray ray = ray(range);
+    Vector3 dir = direction();
     for (int i = 1; i <= range; i++) {
       Vector3 current = ray.origin.add(dir.scalarMultiply(i));
-      for (Block block : BlockMethods.combineFaces(current.toBlock(getWorld()))) {
+      for (Block block : BlockMethods.combineFaces(current.toBlock(world()))) {
         if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) {
           continue;
         }
-        AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.getBlockBounds(block);
+        AABB blockBounds = (block.isLiquid() && !ignoreLiquids) ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.blockBounds(block);
         if (blockBounds.intersects(ray)) {
           return current;
         }
@@ -236,15 +234,15 @@ public interface BukkitUser {
   /**
    * Note: The returned value includes an offset and is ideal for showing charging particles.
    * @return a vector which represents the user's main hand location
-   * @see #getRightSide()
-   * @see #getLeftSide()
+   * @see #rightSide()
+   * @see #leftSide()
    */
-  default @NonNull Vector3 getMainHandSide() {
-    Vector3 dir = getDirection().scalarMultiply(0.4);
-    if (getEntity() instanceof Player) {
-      return getHandSide(((Player) getEntity()).getMainHand() == MainHand.RIGHT);
+  default @NonNull Vector3 mainHandSide() {
+    Vector3 dir = direction().scalarMultiply(0.4);
+    if (entity() instanceof Player) {
+      return handSide(((Player) entity()).getMainHand() == MainHand.RIGHT);
     }
-    return getEyeLocation().add(dir);
+    return eyeLocation().add(dir);
   }
 
   /**
@@ -252,26 +250,26 @@ public interface BukkitUser {
    * @param right whether to get the right hand
    * @return a vector which represents the user's specified hand location
    */
-  default @NonNull Vector3 getHandSide(boolean right) {
-    Vector3 offset = getDirection().scalarMultiply(0.4).add(new Vector3(0, 1.2, 0));
-    return right ? getRightSide().add(offset) : getLeftSide().add(offset);
+  default @NonNull Vector3 handSide(boolean right) {
+    Vector3 offset = direction().scalarMultiply(0.4).add(new Vector3(0, 1.2, 0));
+    return right ? rightSide().add(offset) : leftSide().add(offset);
   }
 
   /**
    * Gets the user's right side.
    * @return a vector which represents the user's right side
    */
-  default @NonNull Vector3 getRightSide() {
-    double angle = FastMath.toRadians(getYaw());
-    return getLocation().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
+  default @NonNull Vector3 rightSide() {
+    double angle = FastMath.toRadians(yaw());
+    return location().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
   }
 
   /**
    * Gets the user's left side.
    * @return a vector which represents the user's left side
    */
-  default @NonNull Vector3 getLeftSide() {
-    double angle = FastMath.toRadians(getYaw());
-    return getLocation().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
+  default @NonNull Vector3 leftSide() {
+    double angle = FastMath.toRadians(yaw());
+    return location().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
   }
 }

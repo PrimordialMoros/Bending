@@ -34,5 +34,5 @@ public interface SimpleAbility {
 
   boolean onBlockHit(@NonNull Block block);
 
-  @NonNull Collider getCollider();
+  @NonNull Collider collider();
 }

@@ -65,7 +65,7 @@ public class TemporalManager<K, V extends Temporary> {
     clear();
   }
 
-  protected @NonNull Map<K, V> getInstances() {
+  protected @NonNull Map<K, V> instances() {
     return Map.copyOf(instances);
   }
 

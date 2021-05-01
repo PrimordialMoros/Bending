@@ -78,7 +78,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
   private Collider ignoreCollider;
 
   private boolean charging;
-  private boolean hasExploded = false;
+  private boolean exploded = false;
   private double factor = 1.0;
   private int particleCount = 6;
   private long renderInterval = 0;
@@ -95,13 +95,13 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     startTime = System.currentTimeMillis();
     charging = true;
 
-    if (user.getHeadBlock().isLiquid()) {
+    if (user.headBlock().isLiquid()) {
       return false;
     }
 
     removalPolicy = Policies.builder().build();
 
-    for (FireBlast blast : Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, FireBlast.class).collect(Collectors.toList())) {
+    for (FireBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, FireBlast.class).collect(Collectors.toList())) {
       if (blast.charging) {
         blast.launch();
         return false;
@@ -115,21 +115,21 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (hasExploded || removalPolicy.test(user, getDescription())) {
+    if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (charging) {
-      if (!getDescription().equals(user.getSelectedAbility().orElse(null))) {
+      if (!description().equals(user.selectedAbility().orElse(null))) {
         return UpdateResult.REMOVE;
       }
-      if (user.isSneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-        ParticleUtil.createFire(user, user.getMainHandSide().toLocation(user.getWorld())).spawn();
-      } else if (!user.isSneaking()) {
+      if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
+        ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+      } else if (!user.sneaking()) {
         launch();
       }
     }
@@ -146,52 +146,52 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
       factor += deltaFactor;
     }
     charging = false;
-    user.setCooldown(getDescription(), userConfig.cooldown);
-    Vector3 origin = user.getMainHandSide();
-    Vector3 lookingDir = user.getDirection().scalarMultiply(userConfig.range * factor);
+    user.addCooldown(description(), userConfig.cooldown);
+    Vector3 origin = user.mainHandSide();
+    Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range * factor);
     stream = new FireStream(new Ray(origin, lookingDir), 1 * factor);
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (stream == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(stream.getCollider());
+    return Collections.singletonList(stream.collider());
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    Ability collidedAbility = collision.getCollidedAbility();
+    Ability collidedAbility = collision.collidedAbility();
     boolean fullyCharged = factor == userConfig.chargeFactor;
-    if (fullyCharged && collision.shouldRemoveSelf()) {
-      String name = collidedAbility.getDescription().getName();
+    if (fullyCharged && collision.removeSelf()) {
+      String name = collidedAbility.description().name();
       if (AbilityInitializer.layer2.contains(name)) {
-        collision.setRemoveCollided(true);
+        collision.removeOther(true);
       } else {
-        collision.setRemoveSelf(false);
+        collision.removeSelf(false);
       }
     }
     if (fullyCharged && collidedAbility instanceof FireShield) {
-      collision.setRemoveCollided(true);
+      collision.removeOther(true);
       boolean sphere = ((FireShield) collidedAbility).isSphere();
       if (sphere) {
-        ignoreCollider = collision.getColliders().getValue();
+        ignoreCollider = collision.colliders().getValue();
       }
       explode();
     } else if (collidedAbility instanceof FireBlast) {
       FireBlast other = (FireBlast) collidedAbility;
       double collidedFactor = other.factor;
       if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
-        Vector3 first = collision.getColliders().getKey().getPosition();
-        Vector3 second = collision.getColliders().getValue().getPosition();
+        Vector3 first = collision.colliders().getKey().position();
+        Vector3 second = collision.colliders().getValue().position();
         Vector3 center = first.add(second).scalarMultiply(0.5);
         double radius = userConfig.explosionRadius + other.userConfig.explosionRadius;
         double dmg = userConfig.damage + other.userConfig.damage;
         createExplosion(center, radius, dmg * (factor + other.factor - 1));
-        other.hasExploded = true;
+        other.exploded = true;
       } else if (factor > collidedFactor + 0.1) {
-        collision.setRemoveSelf(false);
+        collision.removeSelf(false);
       }
     } else if (fullyCharged && collidedAbility instanceof Explosive) {
       explode();
@@ -199,7 +199,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -218,30 +218,30 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
 
   @Override
   public void explode() {
-    createExplosion(stream.getLocation(), userConfig.explosionRadius, userConfig.damage * factor);
+    createExplosion(stream.location(), userConfig.explosionRadius, userConfig.damage * factor);
   }
 
   private void createExplosion(Vector3 center, double size, double damage) {
-    if (hasExploded || factor < userConfig.chargeFactor) {
+    if (exploded || factor < userConfig.chargeFactor) {
       return;
     }
-    hasExploded = true;
-    Location loc = center.toLocation(user.getWorld());
+    exploded = true;
+    Location loc = center.toLocation(user.world());
     ParticleUtil.create(Particle.EXPLOSION_HUGE, loc).spawn();
     SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 5, 1);
 
     double halfSize = size / 2;
     Sphere collider = new Sphere(center, size);
     CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-      Vector3 entityCenter = EntityMethods.getEntityCenter(entity);
+      Vector3 entityCenter = EntityMethods.entityCenter(entity);
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize) / size);
       if (ignoreCollider == null || !ignoreCollider.contains(entityCenter)) {
-        DamageUtil.damageEntity(entity, user, damage * distanceFactor, getDescription());
-        FireTick.LARGER.apply(user, entity, userConfig.fireTick);
+        DamageUtil.damageEntity(entity, user, damage * distanceFactor, description());
+        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
       }
       double knockback = factor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
-      if (entity.equals(user.getEntity())) {
+      if (entity.equals(user.entity())) {
         knockback *= 0.5;
       }
       Vector3 dir = entityCenter.subtract(center).normalize().scalarMultiply(knockback);
@@ -275,7 +275,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     public void render() {
       long time = System.currentTimeMillis();
       if (renderInterval == 0 || time >= nextRenderTime) {
-        Location loc = getBukkitLocation();
+        Location loc = bukkitLocation();
         ParticleUtil.createFire(user, loc)
           .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
         nextRenderTime = time + renderInterval;
@@ -285,7 +285,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE_SOUND.play(getBukkitLocation());
+        SoundUtil.FIRE_SOUND.play(bukkitLocation());
       }
     }
 
@@ -295,8 +295,8 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
         explode();
         return true;
       }
-      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, getDescription());
-      FireTick.LARGER.apply(user, entity, userConfig.fireTick);
+      DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
+      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
       entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
       return true;
     }
@@ -304,13 +304,13 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       Vector3 reverse = ray.direction.scalarMultiply(-1);
-      Location center = getBukkitLocation();
-      if (user.getLocation().distanceSq(new Vector3(block)) > 4) {
-        for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.igniteRadius * factor)) {
-          if (!Bending.getGame().getProtectionSystem().canBuild(user, b)) {
+      Location center = bukkitLocation();
+      if (user.location().distanceSq(new Vector3(block)) > 4) {
+        for (Block b : WorldMethods.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
+          if (!Bending.game().protectionSystem().canBuild(user, b)) {
             continue;
           }
-          if (WorldMethods.blockCast(user.getWorld(), new Ray(new Vector3(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
+          if (WorldMethods.blockCast(user.world(), new Ray(new Vector3(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
             continue;
           }
           BlockMethods.tryLightBlock(b);
@@ -325,7 +325,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
       return true;
     }
 
-    private @NonNull Vector3 getLocation() {
+    private @NonNull Vector3 location() {
       return location;
     }
   }
@@ -335,12 +335,12 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     public long cooldown;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.DURATION)
-    public int fireTick;
     @Attribute(Attribute.RADIUS)
     public double igniteRadius;
     @Attribute(Attribute.RADIUS)
@@ -356,9 +356,9 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
 
       cooldown = abilityNode.node("cooldown").getLong(1500);
       damage = abilityNode.node("damage").getDouble(2.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(18.0);
       speed = abilityNode.node("speed").getDouble(0.8);
-      fireTick = abilityNode.node("fire-tick").getInt(20);
       igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
       explosionRadius = abilityNode.node("explosion-radius").getDouble(2.0);
 

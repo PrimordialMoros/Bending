@@ -55,14 +55,6 @@ public class AbilityManager {
       this.user = user;
       this.ability = ability;
     }
-
-    private User getUser() {
-      return user;
-    }
-
-    private Ability getAbility() {
-      return ability;
-    }
   }
 
   public void addAbility(@NonNull User user, @NonNull Ability instance) {
@@ -70,18 +62,18 @@ public class AbilityManager {
   }
 
   public void changeOwner(@NonNull Ability ability, @NonNull User user) {
-    if (ability.getUser().equals(user) || !ability.getUser().getWorld().equals(user.getWorld())) {
+    if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
       return;
     }
-    if (ability.setUser(user) && globalInstances.remove(ability.getUser(), ability)) {
+    if (ability.user(user) && globalInstances.remove(ability.user(), ability)) {
       ability.recalculateConfig();
       globalInstances.put(user, ability);
     }
   }
 
   public void createPassives(@NonNull User user) {
-    Collection<AbilityDescription> userPassives = user.getElements().stream()
-      .flatMap(Bending.getGame().getAbilityRegistry()::getPassives).collect(Collectors.toList());
+    Collection<AbilityDescription> userPassives = user.elements().stream()
+      .flatMap(Bending.game().abilityRegistry()::passives).collect(Collectors.toList());
     for (AbilityDescription passive : userPassives) {
       destroyInstanceType(user, passive);
       if (user.hasPermission(passive)) {
@@ -94,15 +86,15 @@ public class AbilityManager {
   }
 
   public void clearPassives(@NonNull User user) {
-    getUserInstances(user).filter(a -> a.getDescription().isActivatedBy(ActivationMethod.PASSIVE)).forEach(this::destroyAbility);
+    userInstances(user).filter(a -> a.description().isActivatedBy(ActivationMethod.PASSIVE)).forEach(this::destroyAbility);
   }
 
-  public int getInstancesCount() {
+  public int size() {
     return globalInstances.size();
   }
 
   public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
-    return getUserInstances(user, type).findAny().isPresent();
+    return userInstances(user, type).findAny().isPresent();
   }
 
   public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
@@ -110,7 +102,7 @@ public class AbilityManager {
   }
 
   public void destroyInstance(@NonNull Ability ability) {
-    if (globalInstances.remove(ability.getUser(), ability)) {
+    if (globalInstances.remove(ability.user(), ability)) {
       destroyAbility(ability);
     }
   }
@@ -133,24 +125,24 @@ public class AbilityManager {
     return destroyed;
   }
 
-  public @NonNull Stream<Ability> getUserInstances(@NonNull User user) {
+  public @NonNull Stream<Ability> userInstances(@NonNull User user) {
     return globalInstances.get(user).stream();
   }
 
-  public <T extends Ability> @NonNull Stream<T> getUserInstances(@NonNull User user, @NonNull Class<T> type) {
-    return getUserInstances(user).filter(type::isInstance).map(type::cast);
+  public <T extends Ability> @NonNull Stream<T> userInstances(@NonNull User user, @NonNull Class<T> type) {
+    return userInstances(user).filter(type::isInstance).map(type::cast);
   }
 
-  public <T extends Ability> Optional<T> getFirstInstance(@NonNull User user, @NonNull Class<T> type) {
-    return getUserInstances(user, type).findFirst();
+  public <T extends Ability> Optional<T> firstInstance(@NonNull User user, @NonNull Class<T> type) {
+    return userInstances(user, type).findFirst();
   }
 
-  public @NonNull Stream<Ability> getInstances() {
+  public @NonNull Stream<Ability> instances() {
     return globalInstances.values().stream();
   }
 
-  public <T extends Ability> @NonNull Stream<T> getInstances(@NonNull Class<T> type) {
-    return getInstances().filter(type::isInstance).map(type::cast);
+  public <T extends Ability> @NonNull Stream<T> instances(@NonNull Class<T> type) {
+    return instances().filter(type::isInstance).map(type::cast);
   }
 
   public void destroyUserInstances(@NonNull User user) {
@@ -165,14 +157,14 @@ public class AbilityManager {
   // Updates each ability every tick. Destroys the ability if ability.update() returns UpdateResult.Remove.
   public void update() {
     for (UserInstance i : addQueue) {
-      globalInstances.put(i.getUser(), i.getAbility());
+      globalInstances.put(i.user, i.ability);
     }
     addQueue.clear();
     Iterator<Ability> globalIterator = globalInstances.values().iterator();
     while (globalIterator.hasNext()) {
       Ability ability = globalIterator.next();
       UpdateResult result = UpdateResult.REMOVE;
-      try (MCTiming timing = Bending.getTimingManager().of(ability.getDescription().getName()).startTiming()) {
+      try (MCTiming timing = Bending.timingManager().of(ability.description().name()).startTiming()) {
         result = ability.update();
       } catch (Exception e) {
         e.printStackTrace();

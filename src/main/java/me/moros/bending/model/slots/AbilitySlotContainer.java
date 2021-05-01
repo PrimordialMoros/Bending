@@ -33,7 +33,7 @@ public class AbilitySlotContainer {
     this.abilities = new AbilityDescription[9];
   }
 
-  public AbilityDescription getAbility(@IntRange(from = 1, to = 9) int slot) {
+  public AbilityDescription slot(@IntRange(from = 1, to = 9) int slot) {
     return abilities[slot - 1];
   }
 
@@ -42,7 +42,7 @@ public class AbilitySlotContainer {
    * @param slot the slot to put the ability in
    * @param desc the ability description to put
    */
-  public void setAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
+  public void slot(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc) {
     abilities[slot - 1] = desc;
   }
 
@@ -55,15 +55,15 @@ public class AbilitySlotContainer {
     String[] copy = new String[9];
     for (int slot = 0; slot < 9; slot++) {
       AbilityDescription desc = abilities[slot];
-      copy[slot] = desc == null ? null : desc.getName();
+      copy[slot] = desc == null ? null : desc.name();
     }
     return new Preset(0, name, copy);
   }
 
   public void fromPreset(@NonNull Preset preset) {
-    String[] presetAbilities = preset.getAbilities();
+    String[] presetAbilities = preset.abilities();
     for (int slot = 0; slot < 9; slot++) {
-      abilities[slot] = Bending.getGame().getAbilityRegistry().getAbilityDescription(presetAbilities[slot]).orElse(null);
+      abilities[slot] = Bending.game().abilityRegistry().abilityDescription(presetAbilities[slot]).orElse(null);
     }
   }
 }

@@ -77,7 +77,7 @@ public class Catapult extends AbilityInstance implements Ability {
     recalculateConfig();
 
     base = getBase();
-    if (!TempBlock.isBendable(base) || !Bending.getGame().getProtectionSystem().canBuild(user, base)) {
+    if (!TempBlock.isBendable(base) || !Bending.game().protectionSystem().canBuild(user, base)) {
       return false;
     }
 
@@ -90,7 +90,7 @@ public class Catapult extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -102,28 +102,28 @@ public class Catapult extends AbilityInstance implements Ability {
   }
 
   private Block getBase() {
-    AABB entityBounds = AABBUtils.getEntityBounds(user.getEntity()).grow(new Vector3(0, 0.1, 0));
-    AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.getLocation());
-    Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.getBlockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
-    return WorldMethods.getNearbyBlocks(user.getWorld(), floorBounds, predicate).stream()
-      .min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.getLocation())))
-      .orElse(user.getLocBlock().getRelative(BlockFace.DOWN));
+    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3(0, 0.1, 0));
+    AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.location());
+    Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.blockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
+    return WorldMethods.nearbyBlocks(user.world(), floorBounds, predicate).stream()
+      .min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.location())))
+      .orElse(user.locBlock().getRelative(BlockFace.DOWN));
   }
 
   private boolean launch() {
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
     double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    pillar = Pillar.builder(user, base, EarthPillar::new).setPredicate(predicate).build(3, 1).orElse(null);
+    pillar = Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(3, 1).orElse(null);
     SoundUtil.EARTH_SOUND.play(base.getLocation());
 
-    double angle = Vector3.angle(Vector3.PLUS_J, user.getDirection());
-    Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.getDirection();
+    double angle = Vector3.angle(Vector3.PLUS_J, user.direction());
+    Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.direction();
 
-    Vector3 origin = user.getLocation().add(new Vector3(0, 0.5, 0));
+    Vector3 origin = user.location().add(new Vector3(0, 0.5, 0));
 
-    ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.getWorld()))
+    ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
       .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
 
     Collider collider = new Sphere(origin, 1.5);
@@ -134,7 +134,7 @@ public class Catapult extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 

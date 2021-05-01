@@ -100,7 +100,7 @@ public class EarthShot extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
-      Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthShot.class)
+      Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class)
         .filter(e -> !e.launched).forEach(EarthShot::launch);
       return false;
     }
@@ -108,7 +108,7 @@ public class EarthShot extends AbilityInstance implements Ability {
     this.user = user;
     recalculateConfig();
 
-    long count = Bending.getGame().getAbilityManager(user.getWorld()).getUserInstances(user, EarthShot.class).filter(e -> !e.launched).count();
+    long count = Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
     if (count >= userConfig.maxAmount) {
       return false;
     }
@@ -120,20 +120,20 @@ public class EarthShot extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   private boolean prepare() {
-    source = SourceUtil.getSource(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
+    source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
     if (source == null) {
       return false;
     }
     mode = getType(source);
     int deltaY = 3;
-    if (source.getY() >= user.getHeadBlock().getY()) {
+    if (source.getY() >= user.headBlock().getY()) {
       targetY = source.getY() + 2;
     } else {
-      targetY = user.getLocBlock().getY() + 2;
+      targetY = user.locBlock().getY() + 2;
       deltaY = 1 + targetY - source.getY();
     }
 
@@ -164,9 +164,9 @@ public class EarthShot extends AbilityInstance implements Ability {
     if (!MaterialUtil.isLava(source)) {
       TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
-    location = projectile.getCenter();
+    location = projectile.center();
     removalPolicy = Policies.builder()
-      .add(SwappedSlotsRemovalPolicy.of(getDescription()))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(OutOfRangeRemovalPolicy.of(userConfig.selectRange + 10, () -> location))
       .build();
 
@@ -175,26 +175,26 @@ public class EarthShot extends AbilityInstance implements Ability {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
     if (launched) {
-      if (projectile == null || !projectile.getFallingBlock().isValid()) {
+      if (projectile == null || !projectile.fallingBlock().isValid()) {
         return UpdateResult.REMOVE;
       }
 
-      Vector3 velocity = new Vector3(projectile.getFallingBlock().getVelocity());
+      Vector3 velocity = new Vector3(projectile.fallingBlock().getVelocity());
       if (Vector3.angle(lastVelocity, velocity) > FastMath.PI / 4 || velocity.getNormSq() < 2.25) {
         return UpdateResult.REMOVE;
       }
-      if (user.isSneaking()) {
-        Vector3 dir = user.getDirection().scalarMultiply(0.2);
+      if (user.sneaking()) {
+        Vector3 dir = user.direction().scalarMultiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
-      projectile.getFallingBlock().setVelocity(velocity.normalize().scalarMultiply(1.8).clampVelocity());
-      lastVelocity = new Vector3(projectile.getFallingBlock().getVelocity());
-      if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.getCenter()), this::onEntityHit, true)) {
+      projectile.fallingBlock().setVelocity(velocity.normalize().scalarMultiply(1.8).clampVelocity());
+      lastVelocity = new Vector3(projectile.fallingBlock().getVelocity());
+      if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.center()), this::onEntityHit, true)) {
         return UpdateResult.REMOVE;
       }
     } else {
@@ -209,23 +209,23 @@ public class EarthShot extends AbilityInstance implements Ability {
   }
 
   private boolean onEntityHit(Entity entity) {
-    DamageUtil.damageEntity(entity, user, damage, getDescription());
     if (entity instanceof LivingEntity && userConfig.maxAmount > 1) {
       ((LivingEntity) entity).setNoDamageTicks(0);
     }
+    DamageUtil.damageEntity(entity, user, damage, description());
     return true;
   }
 
   private void handleSource() {
-    Block block = projectile.getFallingBlock().getLocation().getBlock();
+    Block block = projectile.fallingBlock().getLocation().getBlock();
     if (block.getY() >= targetY) {
-      TempBlock.create(block, projectile.getFallingBlock().getBlockData());
+      TempBlock.create(block, projectile.fallingBlock().getBlockData());
       projectile.revert();
       location = new Vector3(block);
       readySource = block;
       ready = true;
     } else {
-      location = projectile.getCenter();
+      location = projectile.center();
     }
   }
 
@@ -233,8 +233,8 @@ public class EarthShot extends AbilityInstance implements Ability {
     if (!canConvert) {
       return;
     }
-    Block check = WorldMethods.blockCast(user.getWorld(), user.getRay(), userConfig.selectRange * 2).orElse(null);
-    if (user.isSneaking() && readySource.equals(check)) {
+    Block check = WorldMethods.blockCast(user.world(), user.ray(), userConfig.selectRange * 2).orElse(null);
+    if (user.sneaking() && readySource.equals(check)) {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
         if (userConfig.chargeTime > 0) {
@@ -287,24 +287,24 @@ public class EarthShot extends AbilityInstance implements Ability {
 
     Vector3 origin;
     if (prematureLaunch) {
-      origin = projectile.getCenter();
+      origin = projectile.center();
       Vector3 dir = getTarget(null).subtract(origin).normalize().scalarMultiply(userConfig.speed);
-      projectile.getFallingBlock().setGravity(true);
-      projectile.getFallingBlock().setVelocity(dir.add(new Vector3(0, 0.2, 0)).clampVelocity());
+      projectile.fallingBlock().setGravity(true);
+      projectile.fallingBlock().setVelocity(dir.add(new Vector3(0, 0.2, 0)).clampVelocity());
     } else {
       origin = new Vector3(readySource).add(Vector3.HALF);
       Vector3 dir = getTarget(readySource).subtract(origin).normalize().scalarMultiply(userConfig.speed);
       projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
       TempBlock.createAir(readySource);
     }
-    location = projectile.getCenter();
-    lastVelocity = new Vector3(projectile.getFallingBlock().getVelocity());
+    location = projectile.center();
+    lastVelocity = new Vector3(projectile.fallingBlock().getVelocity());
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
       .build();
 
-    user.setCooldown(getDescription(), userConfig.cooldown);
+    user.addCooldown(description(), userConfig.cooldown);
 
     switch (mode) {
       case METAL:
@@ -322,17 +322,17 @@ public class EarthShot extends AbilityInstance implements Ability {
 
   private Vector3 getTarget(Block source) {
     Set<Material> ignored = source == null ? Collections.emptySet() : Collections.singleton(source.getType());
-    return user.getTargetEntity(userConfig.range)
-      .map(EntityMethods::getEntityCenter)
-      .orElseGet(() -> user.getTarget(userConfig.range, ignored));
+    return user.rayTraceEntity(userConfig.range)
+      .map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(userConfig.range, ignored));
   }
 
   @Override
   public void onDestroy() {
-    if (projectile.getFallingBlock() != null) {
+    if (projectile.fallingBlock() != null) {
       if (launched) {
-        Location spawnLoc = projectile.getCenter().toLocation(user.getWorld());
-        BlockData data = projectile.getFallingBlock().getBlockData();
+        Location spawnLoc = projectile.center().toLocation(user.world());
+        BlockData data = projectile.fallingBlock().getBlockData();
         ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(6).offset(1, 1, 1).data(data).spawn();
         ParticleUtil.create(Particle.BLOCK_DUST, spawnLoc).count(4).offset(1, 1, 1).data(data).spawn();
         if (mode == Mode.MAGMA) {
@@ -340,7 +340,7 @@ public class EarthShot extends AbilityInstance implements Ability {
           ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
           SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
         }
-        Block projected = spawnLoc.add(projectile.getFallingBlock().getVelocity().normalize().multiply(0.75)).getBlock();
+        Block projected = spawnLoc.add(projectile.fallingBlock().getVelocity().normalize().multiply(0.75)).getBlock();
         FragileStructure.tryDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
       }
       projectile.revert();
@@ -354,16 +354,16 @@ public class EarthShot extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> getColliders() {
+  public @NonNull Collection<@NonNull Collider> colliders() {
     if (!launched || projectile == null) {
       return Collections.emptyList();
     }
-    return Collections.singletonList(BOX.at(projectile.getCenter()));
+    return Collections.singletonList(BOX.at(projectile.center()));
   }
 
   private static class Config extends Configurable {

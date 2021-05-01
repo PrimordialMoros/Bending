@@ -81,19 +81,19 @@ public class IceSpike extends AbilityInstance implements Ability {
 
     boolean field = method == ActivationMethod.SNEAK;
     if (field) {
-      Collider collider = new Sphere(user.getLocation(), userConfig.radius);
+      Collider collider = new Sphere(user.location(), userConfig.radius);
       CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
     } else {
       Block source = null;
-      Optional<LivingEntity> entity = user.getTargetEntity(userConfig.selectRange);
+      Optional<LivingEntity> entity = user.rayTraceEntity(userConfig.selectRange);
       if (entity.isPresent()) {
         Block base = entity.get().getLocation().getBlock().getRelative(BlockFace.DOWN);
-        if (Bending.getGame().getProtectionSystem().canBuild(user, base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
+        if (Bending.game().protectionSystem().canBuild(user, base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
           source = base;
         }
       }
       if (source == null) {
-        Optional<Block> targetBlock = SourceUtil.getSource(user, userConfig.selectRange, WaterMaterials::isIceBendable);
+        Optional<Block> targetBlock = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isIceBendable);
         if (targetBlock.isEmpty()) {
           return false;
         }
@@ -102,7 +102,7 @@ public class IceSpike extends AbilityInstance implements Ability {
       buildPillar(source);
     }
     if (!pillars.isEmpty()) {
-      user.setCooldown(getDescription(), field ? userConfig.fieldCooldown : userConfig.columnCooldown);
+      user.addCooldown(description(), field ? userConfig.fieldCooldown : userConfig.columnCooldown);
       removalPolicy = Policies.builder().build();
       return true;
     }
@@ -111,12 +111,12 @@ public class IceSpike extends AbilityInstance implements Ability {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, getDescription())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -151,12 +151,12 @@ public class IceSpike extends AbilityInstance implements Ability {
     if (!WaterMaterials.isIceBendable(block) || !TempBlock.isBendable(block)) {
       return 0;
     }
-    if (!Bending.getGame().getProtectionSystem().canBuild(user, block)) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return 0;
     }
     for (int i = 0; i < height; i++) {
       Block forwardBlock = block.getRelative(BlockFace.UP, i + 1);
-      if (!Bending.getGame().getProtectionSystem().canBuild(user, forwardBlock)) {
+      if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
         return i;
       }
       if (!MaterialUtil.isTransparent(forwardBlock) && forwardBlock.getType() != Material.WATER) {
@@ -180,7 +180,7 @@ public class IceSpike extends AbilityInstance implements Ability {
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
@@ -254,12 +254,12 @@ public class IceSpike extends AbilityInstance implements Ability {
     }
 
     private boolean onEntityHit(@NonNull Entity entity) {
-      if (affectedEntities.contains(entity) || entity.equals(user.getEntity())) {
+      if (affectedEntities.contains(entity) || entity.equals(user.entity())) {
         return false;
       }
       affectedEntities.add(entity);
       entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup).clampVelocity());
-      DamageUtil.damageEntity(entity, user, userConfig.damage, getDescription());
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       return true;
     }
   }

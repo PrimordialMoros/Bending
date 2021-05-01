@@ -59,7 +59,7 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.getGame().getAttributeSystem().calculate(this, config);
+    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -68,10 +68,10 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
   }
 
   private boolean isSoftened() {
-    if (!user.canBend(getDescription())) {
+    if (!user.canBend(description())) {
       return false;
     }
-    Block block = user.getLocBlock().getRelative(BlockFace.DOWN);
+    Block block = user.locBlock().getRelative(BlockFace.DOWN);
     if (EarthMaterials.isEarthbendable(user, block)) {
       softenArea();
       return true;
@@ -80,23 +80,23 @@ public class DensityShift extends AbilityInstance implements PassiveAbility {
   }
 
   public static boolean isSoftened(User user) {
-    return Bending.getGame().getAbilityManager(user.getWorld()).getFirstInstance(user, DensityShift.class)
+    return Bending.game().abilityManager(user.world()).firstInstance(user, DensityShift.class)
       .map(DensityShift::isSoftened).orElse(false);
   }
 
   private void softenArea() {
-    Location center = user.getLocBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
+    Location center = user.locBlock().getRelative(BlockFace.DOWN).getLocation().add(0.5, 0.5, 0.5);
     Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
-    for (Block b : WorldMethods.getNearbyBlocks(center, userConfig.radius, predicate)) {
+    for (Block b : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate)) {
       if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) {
         continue;
       }
-      TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::setOverwrite);
+      TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::forceWeak);
     }
   }
 
   @Override
-  public @NonNull User getUser() {
+  public @NonNull User user() {
     return user;
   }
 
