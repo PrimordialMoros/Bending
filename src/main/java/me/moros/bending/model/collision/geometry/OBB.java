@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -27,6 +26,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 // Oriented bounding box
 public class OBB implements Collider {

@@ -24,8 +24,6 @@ import java.util.UUID;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -37,6 +35,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to handle bending damage and death messages.

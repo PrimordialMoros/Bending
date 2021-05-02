@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.ability.state;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.util.UpdateResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class DummyState implements State {
   public static final State INSTANCE = new DummyState();

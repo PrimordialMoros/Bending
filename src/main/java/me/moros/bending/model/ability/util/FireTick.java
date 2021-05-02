@@ -22,7 +22,6 @@ package me.moros.bending.model.ability.util;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Tasker;
 import org.apache.commons.math3.util.FastMath;
@@ -31,6 +30,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum FireTick implements FireTickMethod {
   OVERWRITE(FireTick::igniteEntity),

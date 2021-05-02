@@ -32,8 +32,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.hikari.HikariDataSource;
 import me.moros.atlas.jdbi.v3.core.Jdbi;
 import me.moros.atlas.jdbi.v3.core.statement.Batch;
@@ -52,6 +50,8 @@ import me.moros.bending.util.Tasker;
 import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageType;
 import me.moros.storage.logging.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class StorageImpl implements BendingStorage {
   private final HikariDataSource source;

@@ -20,11 +20,11 @@
 package me.moros.bending.util;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to provide create and render {@link Particle}.

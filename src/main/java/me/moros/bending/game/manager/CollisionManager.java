@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 // TODO implement BVH and profile
 public final class CollisionManager {

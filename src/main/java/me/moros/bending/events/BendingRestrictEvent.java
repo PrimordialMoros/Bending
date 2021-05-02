@@ -19,10 +19,10 @@
 
 package me.moros.bending.events;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingRestrictEvent extends BendingUserEvent implements Cancellable {
   private final LivingEntity target;

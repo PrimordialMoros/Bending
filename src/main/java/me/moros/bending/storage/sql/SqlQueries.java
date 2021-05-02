@@ -19,8 +19,8 @@
 
 package me.moros.bending.storage.sql;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.storage.StorageType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum SqlQueries {
   PLAYER_INSERT("INSERT INTO bending_players (uuid) VALUES(?)"),

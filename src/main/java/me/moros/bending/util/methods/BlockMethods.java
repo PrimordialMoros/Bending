@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.math.Vector3;
@@ -49,6 +48,7 @@ import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class with useful {@link Block} related methods. Note: This is not thread-safe.

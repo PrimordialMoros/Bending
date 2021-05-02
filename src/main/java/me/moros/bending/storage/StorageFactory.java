@@ -21,11 +21,11 @@ package me.moros.bending.storage;
 
 import java.io.File;
 
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.storage.ConnectionBuilder;
 import me.moros.storage.StorageType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Factory class that constructs and returns a Hikari-based database storage.

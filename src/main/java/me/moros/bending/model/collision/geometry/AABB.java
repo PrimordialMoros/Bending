@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AABB implements Collider {
   public static final AABB PLAYER_BOUNDS = new AABB(new Vector3(-0.3, 0.0, -0.3), new Vector3(0.3, 1.8, 0.3));

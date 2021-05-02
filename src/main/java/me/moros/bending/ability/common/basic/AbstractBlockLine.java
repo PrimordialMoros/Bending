@@ -21,7 +21,6 @@ package me.moros.bending.ability.common.basic;
 
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -33,6 +32,7 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractBlockLine implements Updatable {
   private final User user;

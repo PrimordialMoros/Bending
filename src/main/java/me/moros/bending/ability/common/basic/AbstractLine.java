@@ -22,7 +22,6 @@ package me.moros.bending.ability.common.basic;
 import java.util.Collections;
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
@@ -41,6 +40,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractLine implements Updatable, SimpleAbility {
   private final User user;

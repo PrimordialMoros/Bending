@@ -22,8 +22,8 @@ package me.moros.bending.model.user.profile;
 import java.util.Arrays;
 import java.util.UUID;
 
-import me.moros.atlas.cf.checker.index.qual.Positive;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.index.qual.Positive;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Contains info from the database regarding a bending profile
@@ -78,8 +78,8 @@ public final class BendingProfile {
     return "ID: " + id + "\n" +
       "UUID: " + uuid + "\n" +
       "Board: " + board + "\n" +
-      "Elements: " + data.elements().toString() + "\n" +
+      "Elements: " + data.elements() + "\n" +
       "Slots: " + Arrays.toString(data.slots()) + "\n" +
-      "Presets: " + data.presets().toString();
+      "Presets: " + data.presets();
   }
 }

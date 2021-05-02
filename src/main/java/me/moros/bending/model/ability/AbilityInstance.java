@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.ability;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbilityInstance implements Ability {
   private final AbilityDescription desc;

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.water.passives;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -33,6 +32,7 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HydroSink extends AbilityInstance implements Ability {
   private User user;

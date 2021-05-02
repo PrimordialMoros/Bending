@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingRestrictEvent;
 import me.moros.bending.model.ability.util.ActionType;
@@ -41,6 +39,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MovementHandler {
   public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
@@ -91,7 +91,7 @@ public class MovementHandler {
     return this;
   }
 
-  public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
+  public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType... methods) {
     Collection<ActionType> c = new ArrayList<>();
     c.add(method);
     if (methods != null) {

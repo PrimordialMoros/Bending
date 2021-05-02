@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth;
 
 import java.util.Optional;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -56,6 +55,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthArmor extends AbilityInstance {
   private enum Mode {ROCK, IRON, GOLD}

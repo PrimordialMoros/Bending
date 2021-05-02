@@ -26,7 +26,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Optional;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -58,6 +57,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class IceSpike extends AbilityInstance {
   private static final Config config = new Config();

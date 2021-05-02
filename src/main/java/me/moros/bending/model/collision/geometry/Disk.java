@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 // Combines an OBB and Sphere to create a disc-like collider.
 public class Disk implements Collider {

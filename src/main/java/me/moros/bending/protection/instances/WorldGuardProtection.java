@@ -29,12 +29,12 @@ import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WorldGuardProtection implements Protection {
   private final WorldGuard worldGuard;

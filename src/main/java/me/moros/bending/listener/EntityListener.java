@@ -19,7 +19,6 @@
 
 package me.moros.bending.listener;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
@@ -48,6 +47,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntityListener implements Listener {
   private final Game game;

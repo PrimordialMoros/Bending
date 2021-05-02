@@ -21,9 +21,9 @@ package me.moros.bending.ability.fire;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -41,7 +41,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Expiring;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -56,6 +56,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireWall extends AbilityInstance {
   private static final Config config = new Config();
@@ -64,7 +65,7 @@ public class FireWall extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Expiring<Entity> affectedEntities = new Expiring<>(125);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(125);
 
   private Collection<Block> blocks;
   private OBB collider;

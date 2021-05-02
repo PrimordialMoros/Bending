@@ -19,14 +19,14 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.atlas.taskchain.BukkitTaskChainFactory;
 import me.moros.atlas.taskchain.TaskChain;
 import me.moros.atlas.taskchain.TaskChainFactory;
 import me.moros.bending.Bending;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to provide task chains and create repeating tasks.

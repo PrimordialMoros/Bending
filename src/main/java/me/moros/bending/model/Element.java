@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An immutable and thread-safe object that represents a bending element

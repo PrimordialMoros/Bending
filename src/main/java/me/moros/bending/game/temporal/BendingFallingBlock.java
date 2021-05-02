@@ -19,7 +19,6 @@
 
 package me.moros.bending.game.temporal;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
@@ -30,6 +29,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingFallingBlock implements Temporary {
   public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();

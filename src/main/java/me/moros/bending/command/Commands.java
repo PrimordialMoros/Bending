@@ -32,7 +32,6 @@ import me.moros.atlas.acf.CommandCompletions;
 import me.moros.atlas.acf.CommandContexts;
 import me.moros.atlas.acf.InvalidCommandArgument;
 import me.moros.atlas.acf.PaperCommandManager;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AttributeSystem;
 import me.moros.bending.game.Game;
@@ -46,6 +45,7 @@ import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Commands {
   private final PaperCommandManager commandManager;

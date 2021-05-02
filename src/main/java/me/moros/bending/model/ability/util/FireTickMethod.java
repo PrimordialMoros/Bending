@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.ability.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface FireTickMethod {

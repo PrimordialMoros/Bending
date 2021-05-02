@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.passives.GracefulDescent;
@@ -57,6 +55,8 @@ import me.moros.bending.util.Flight;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles ability activation.

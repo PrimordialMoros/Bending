@@ -22,10 +22,10 @@ package me.moros.bending.model.predicate.general;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum BendingConditions implements BendingConditional {
   COOLDOWN((u, d) -> (!u.isOnCooldown(d))),

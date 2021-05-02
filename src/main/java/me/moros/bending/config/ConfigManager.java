@@ -26,10 +26,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ConfigManager {
   private final Collection<Configurable> instances = new ArrayList<>();

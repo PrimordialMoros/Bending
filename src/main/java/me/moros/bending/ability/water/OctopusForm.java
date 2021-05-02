@@ -22,9 +22,9 @@ package me.moros.bending.ability.water;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -42,7 +42,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.Expiring;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -54,6 +54,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 // TODO make tentacle extension animation
 public class OctopusForm extends AbilityInstance {
@@ -70,7 +71,7 @@ public class OctopusForm extends AbilityInstance {
   private final Collection<Block> base = new ArrayList<>();
   private final List<Tentacle> tentacles = new ArrayList<>();
 
-  private final Expiring<Entity> affectedEntities = new Expiring<>(250);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
 
   private WaterRing ring;
   private Block lastBlock;

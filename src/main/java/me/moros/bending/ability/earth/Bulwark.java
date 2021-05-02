@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
@@ -42,6 +41,7 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Bulwark extends AbilityInstance {
   private static final Config config = new Config();

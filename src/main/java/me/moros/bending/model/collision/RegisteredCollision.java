@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.collision;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a possible collision between 2 abilities.

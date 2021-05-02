@@ -23,8 +23,8 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class PhaseTransformer {
   private final Deque<Block> queue;

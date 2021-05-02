@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -33,6 +32,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractBurst extends AbilityInstance {
   protected double angleStep = FastMath.toRadians(10);

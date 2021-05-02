@@ -25,8 +25,9 @@ repositories {
 
 dependencies {
     api("me.moros", "atlas-core", "1.2.0-SNAPSHOT")
-    implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("org.apache.commons", "commons-math3", "3.6.1")
+    implementation("org.bstats", "bstats-bukkit", "2.2.1")
+    compileOnly("org.checkerframework", "checker-qual", "3.12.0")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
         exclude(module = "worldguard")
@@ -50,7 +51,6 @@ tasks {
             relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
             relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
             relocate("org.bstats", "me.moros.bending.bstats")
-            relocate("org.checkerframework", "me.moros.atlas.cf")
             relocate("org.h2", "me.moros.atlas.h2")
             relocate("org.jdbi", "me.moros.atlas.jdbi")
             relocate("org.postgresql", "me.moros.atlas.postgresql")

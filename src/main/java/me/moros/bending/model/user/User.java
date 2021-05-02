@@ -23,14 +23,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.cf.common.value.qual.IntRange;
 import me.moros.bending.Bending;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.value.qual.IntRange;
 
 public interface User extends BukkitUser {
   @NonNull ElementHolder elementHolder();

@@ -19,8 +19,8 @@
 
 package me.moros.bending.events;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BendingUserEvent extends BendingEvent {
   protected final User user;

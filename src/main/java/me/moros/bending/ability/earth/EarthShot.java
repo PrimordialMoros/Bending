@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
@@ -65,6 +64,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthShot extends AbilityInstance {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
@@ -328,7 +328,7 @@ public class EarthShot extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    if (projectile.fallingBlock() != null) {
+    if (projectile.fallingBlock().isValid()) {
       if (launched) {
         Location spawnLoc = projectile.center().toLocation(user.world());
         BlockData data = projectile.fallingBlock().getBlockData();

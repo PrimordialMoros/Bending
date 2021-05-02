@@ -19,9 +19,9 @@
 
 package me.moros.bending.protection.instances;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface Protection {

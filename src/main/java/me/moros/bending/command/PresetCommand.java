@@ -49,14 +49,14 @@ public class PresetCommand extends BaseCommand {
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(player);
     } else {
-      player.entity().sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+      player.sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
     }
   }
 
   @HelpCommand
   @CommandPermission("bending.command.help")
   public static void doHelp(CommandSender user, CommandHelp help) {
-    user.sendMessage(Message.HELP_HEADER.build());
+    Message.HELP_HEADER.send(user);
     help.showHelp();
   }
 
@@ -69,7 +69,7 @@ public class PresetCommand extends BaseCommand {
       Message.EMPTY_PRESET.send(player);
       return;
     }
-    player.addPreset(preset, result -> player.entity().sendMessage(result.message(input)));
+    player.addPreset(preset, result -> result.message().send(player, input));
   }
 
   @Subcommand("remove|rm|r|delete|del|d")

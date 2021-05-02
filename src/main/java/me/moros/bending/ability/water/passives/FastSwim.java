@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.water.passives;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -35,6 +34,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastSwim extends AbilityInstance implements Ability {
   private static final Config config = new Config();

@@ -19,10 +19,10 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to provide and construct metadata for the {@link Bending} plugin.

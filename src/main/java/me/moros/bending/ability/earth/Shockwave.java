@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBlockLine;
@@ -45,7 +44,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.Expiring;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
@@ -61,6 +60,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Shockwave extends AbilityInstance {
   private static final Config config = new Config();
@@ -72,7 +72,7 @@ public class Shockwave extends AbilityInstance {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
-  private final Expiring<Block> recentAffectedBlocks = new Expiring<>(500);
+  private final Set<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Vector3 origin;
 
   private boolean released;
@@ -84,7 +84,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(User user, ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, Shockwave.class)
         .ifPresent(s -> s.release(true));
@@ -117,7 +117,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public UpdateResult update() {
+  public @NonNull UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -137,7 +137,7 @@ public class Shockwave extends AbilityInstance {
     }
 
     if (!recentAffectedBlocks.isEmpty()) {
-      Set<Block> positions = recentAffectedBlocks.all();
+      Set<Block> positions = Set.copyOf(recentAffectedBlocks);
       CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
     }
 
@@ -215,7 +215,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public User user() {
+  public @NonNull User user() {
     return user;
   }
 

@@ -23,20 +23,21 @@ import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.caffeine.cache.Expiry;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CooldownExpiry implements Expiry<AbilityDescription, Long> {
   @Override
-  public long expireAfterCreate(AbilityDescription key, Long cooldown, long currentTime) {
+  public long expireAfterCreate(@NonNull AbilityDescription key, @NonNull Long cooldown, long currentTime) {
     return TimeUnit.MILLISECONDS.toNanos(cooldown);
   }
 
   @Override
-  public long expireAfterUpdate(AbilityDescription key, Long cooldown, long currentTime, long currentDuration) {
+  public long expireAfterUpdate(@NonNull AbilityDescription key, @NonNull Long cooldown, long currentTime, long currentDuration) {
     return FastMath.max(currentDuration, TimeUnit.MILLISECONDS.toNanos(cooldown));
   }
 
   @Override
-  public long expireAfterRead(AbilityDescription key, Long cooldown, long currentTime, long currentDuration) {
+  public long expireAfterRead(@NonNull AbilityDescription key, @NonNull Long cooldown, long currentTime, long currentDuration) {
     return currentDuration;
   }
 }

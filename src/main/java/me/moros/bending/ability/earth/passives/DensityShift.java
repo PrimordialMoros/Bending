@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth.passives;
 
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -39,6 +38,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class DensityShift extends AbilityInstance implements Ability {
   private static final Config config = new Config();

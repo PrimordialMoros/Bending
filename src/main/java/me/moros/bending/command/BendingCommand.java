@@ -19,9 +19,7 @@
 
 package me.moros.bending.command;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 import me.moros.atlas.acf.BaseCommand;
@@ -58,7 +56,7 @@ public class BendingCommand extends BaseCommand {
   @HelpCommand
   @CommandPermission("bending.command.help")
   public static void doHelp(CommandSender user, CommandHelp help) {
-    user.sendMessage(Message.HELP_HEADER.build());
+    Message.HELP_HEADER.send(user);
     help.showHelp();
   }
 
@@ -82,7 +80,7 @@ public class BendingCommand extends BaseCommand {
   @Description("Reloads the plugin and its config")
   public void onReload(CommandSender user) {
     Bending.game().reload();
-    user.sendMessage(Message.CONFIG_RELOAD.build());
+    Message.CONFIG_RELOAD.send(user);
   }
 
   @Subcommand("choose|ch")
@@ -179,15 +177,25 @@ public class BendingCommand extends BaseCommand {
   @CommandCompletion("@elements")
   @Description("List all available abilities for a specific element")
   public static void onDisplay(CommandSender user, Element element) {
-    Collection<Component> output = new ArrayList<>(16);
-    output.addAll(collectAbilities(user, element));
-    output.addAll(collectSequences(user, element));
-    output.addAll(collectPassives(user, element));
-    if (output.isEmpty()) {
-      user.sendMessage(Message.ELEMENT_ABILITIES_EMPTY.build(element.displayName()));
+    Collection<Component> abilities = collectAbilities(user, element);
+    Collection<Component> sequences = collectSequences(user, element);
+    Collection<Component> passives = collectPassives(user, element);
+    if (abilities.isEmpty() && sequences.isEmpty() && passives.isEmpty()) {
+      Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
-      user.sendMessage(Message.ELEMENT_ABILITIES_HEADER.build(element.displayName()));
-      output.forEach(user::sendMessage);
+      Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName());
+      if (!abilities.isEmpty()) {
+        Message.ABILITIES.send(user);
+        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), abilities));
+      }
+      if (!sequences.isEmpty()) {
+        Message.SEQUENCES.send(user);
+        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), sequences));
+      }
+      if (!passives.isEmpty()) {
+        Message.PASSIVES.send(user);
+        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), passives));
+      }
     }
   }
 
@@ -221,7 +229,7 @@ public class BendingCommand extends BaseCommand {
     for (int slot = 1; slot <= 9; slot++) {
       Component meta = bendingPlayer.slotAbility(slot).map(AbilityDescription::meta).orElse(null);
       if (meta != null) {
-        player.entity().sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(meta));
+        player.sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(meta));
       }
     }
   }
@@ -256,61 +264,40 @@ public class BendingCommand extends BaseCommand {
       }
     }
     if (description == null && instructions == null) {
-      user.sendMessage(Message.ABILITY_INFO_EMPTY.build(ability.displayName()));
+      Message.ABILITY_INFO_EMPTY.send(user, ability.displayName());
     } else {
       if (description != null) {
-        user.sendMessage(Message.ABILITY_INFO_DESCRIPTION.build(ability.displayName(), description));
+        Message.ABILITY_INFO_DESCRIPTION.send(user, ability.displayName(), description);
       }
       if (instructions != null) {
-        user.sendMessage(Message.ABILITY_INFO_INSTRUCTIONS.build(ability.displayName(), instructions));
+        Message.ABILITY_INFO_INSTRUCTIONS.send(user, ability.displayName(), instructions);
       }
     }
   }
 
   private static Collection<Component> collectAbilities(CommandSender user, Element element) {
-    Collection<Component> abilities = Bending.game().abilityRegistry().abilities()
+    return Bending.game().abilityRegistry().abilities()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.isActivatedBy(ActivationMethod.SEQUENCE))
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());
-    if (!abilities.isEmpty()) {
-      Collection<Component> output = new ArrayList<>();
-      output.add(Message.ABILITIES.build());
-      output.addAll(abilities);
-      return output;
-    }
-    return Collections.emptyList();
   }
 
   private static Collection<Component> collectSequences(CommandSender user, Element element) {
-    Collection<Component> sequences = Bending.game().sequenceManager().sequences()
+    return Bending.game().sequenceManager().sequences()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());
-    if (!sequences.isEmpty()) {
-      Collection<Component> output = new ArrayList<>();
-      output.add(Message.SEQUENCES.build());
-      output.addAll(sequences);
-      return output;
-    }
-    return Collections.emptyList();
   }
 
   private static Collection<Component> collectPassives(CommandSender user, Element element) {
-    Collection<Component> passives = Bending.game().abilityRegistry().passives(element)
+    return Bending.game().abilityRegistry().passives(element)
       .filter(desc -> !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());
-    if (!passives.isEmpty()) {
-      Collection<Component> output = new ArrayList<>();
-      output.add(Message.PASSIVES.build());
-      output.addAll(passives);
-      return output;
-    }
-    return Collections.emptyList();
   }
 }

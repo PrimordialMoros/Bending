@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth.passives;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.earth.EarthGlove;
@@ -41,6 +40,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthCling extends AbilityInstance implements Ability {
   private static final BlockData STONE = Material.STONE.createBlockData();

@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
@@ -80,6 +79,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON, MAGMA}
@@ -189,7 +189,7 @@ public class EarthLine extends AbilityInstance {
   private void prisonMode() {
     if (mode == Mode.NORMAL) {
       mode = Mode.PRISON;
-      user.entity().sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
+      user.sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
     }
   }
 

@@ -25,7 +25,6 @@ import java.util.Objects;
 
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.MaterialTags;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -37,6 +36,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class MaterialUtil {
   public static final Map<Material, Material> COOKABLE = new HashMap<>();

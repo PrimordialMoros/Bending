@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirBlade;
 import me.moros.bending.ability.air.AirBlast;
@@ -97,6 +96,7 @@ import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static me.moros.bending.model.Element.*;
 import static me.moros.bending.model.ability.util.ActivationMethod.*;

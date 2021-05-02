@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.apache.commons.math3.util.FastMath;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Sphere implements Collider {
   public final Vector3 center;

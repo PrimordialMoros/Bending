@@ -22,7 +22,7 @@ package me.moros.bending.model.user.profile;
 import java.util.Collections;
 import java.util.Set;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Holds data from the database that are needed to construct the BendingPlayer object

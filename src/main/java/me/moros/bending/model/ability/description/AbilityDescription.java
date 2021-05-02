@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -35,6 +33,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * AbilityDescription is immutable and thread-safe.
@@ -189,7 +189,7 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod @NonNull ... methods) {
+    public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod... methods) {
       Collection<ActivationMethod> c = new ArrayList<>();
       if (methods != null) {
         c.addAll(List.of(methods));

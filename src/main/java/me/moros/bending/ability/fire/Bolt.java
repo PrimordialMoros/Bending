@@ -22,7 +22,6 @@ package me.moros.bending.ability.fire;
 import java.util.Collections;
 import java.util.Optional;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
@@ -53,6 +52,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Bolt extends AbilityInstance {
   private static final Config config = new Config();

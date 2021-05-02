@@ -21,11 +21,11 @@ package me.moros.bending.model.predicate.removal;
 
 import java.util.function.Supplier;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class OutOfRangeRemovalPolicy implements RemovalPolicy {
   private final double rangeSq;

@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
@@ -38,6 +36,8 @@ import me.moros.bending.protection.instances.Protection;
 import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the protection system which hooks into other region protection plugins.
@@ -96,8 +96,7 @@ public class ProtectionSystem {
     if (isHarmless && allowHarmless) {
       return true;
     }
-    Boolean result = cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
-    return result != null && result;
+    return cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
   }
 
   /**

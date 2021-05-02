@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.ability.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum ActivationMethod {
   PASSIVE("bending.activation.passive"),

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.fire.sequences;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireJet;
@@ -33,6 +32,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class JetBlast extends AbilityInstance {
   private static final Config config = new Config();

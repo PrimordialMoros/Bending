@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import me.moros.atlas.acf.lib.timings.MCTiming;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
@@ -67,6 +66,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class UserListener implements Listener {
   private final Game game;

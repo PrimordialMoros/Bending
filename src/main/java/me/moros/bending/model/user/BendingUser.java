@@ -24,9 +24,6 @@ import java.util.Optional;
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.atlas.caffeine.cache.Scheduler;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
-import me.moros.atlas.cf.common.value.qual.IntRange;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -38,6 +35,9 @@ import me.moros.bending.model.slots.AbilitySlotContainer;
 import me.moros.bending.util.Tasker;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.value.qual.IntRange;
 
 public class BendingUser implements User {
   private final ElementHolder elementHolder = new ElementHolder();

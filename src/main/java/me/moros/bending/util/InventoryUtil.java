@@ -19,7 +19,6 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
@@ -30,6 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to handle inventory modification.

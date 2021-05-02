@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.fire;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.sequences.JetBlast;
@@ -41,6 +40,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireJet extends AbilityInstance {
   private static final Config config = new Config();

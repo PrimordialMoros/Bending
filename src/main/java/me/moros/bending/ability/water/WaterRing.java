@@ -24,11 +24,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
@@ -51,7 +51,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.Expiring;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -66,6 +66,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterRing extends AbilityInstance {
   public static final double RING_RADIUS = 2.8;
@@ -82,7 +83,7 @@ public class WaterRing extends AbilityInstance {
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
-  private final Expiring<Entity> affectedEntities = new Expiring<>(250);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
 
   private boolean ready = false;
   private boolean completed = false;

@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
@@ -32,6 +31,8 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -45,8 +46,9 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public interface BukkitUser {
+public interface BukkitUser extends ForwardingAudience.Single {
   @NonNull LivingEntity entity();
 
   default @NonNull Block headBlock() {
@@ -271,5 +273,10 @@ public interface BukkitUser {
   default @NonNull Vector3 leftSide() {
     double angle = FastMath.toRadians(yaw());
     return location().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
+  }
+
+  @Override
+  default @NonNull Audience audience() {
+    return entity();
   }
 }

@@ -22,8 +22,8 @@ package me.moros.bending.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * This is a reference counting object that's used to manage a user's flight.

@@ -19,9 +19,9 @@
 
 package me.moros.bending.model.preset;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.locale.Message;
-import net.kyori.adventure.text.Component;
+import me.moros.bending.locale.Message.Args1;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum PresetCreateResult {
   SUCCESS(Message.PRESET_SUCCESS),
@@ -30,11 +30,11 @@ public enum PresetCreateResult {
 
   private final Message.Args1<String> message;
 
-  PresetCreateResult(Message.Args1<String> message) {
+  PresetCreateResult(Args1<String> message) {
     this.message = message;
   }
 
-  public @NonNull Component message(@NonNull String name) {
-    return message.build(name);
+  public @NonNull Args1<String> message() {
+    return message;
   }
 }

@@ -35,8 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.atlas.cf.checker.nullness.qual.Nullable;
 import me.moros.bending.Bending;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -45,9 +43,11 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TranslationManager {
-  private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+  public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
   private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
   private final Path translationsDirectory;

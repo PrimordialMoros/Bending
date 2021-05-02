@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
@@ -50,6 +49,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HeatControl extends AbilityInstance implements Ability {
   private static final Config config = new Config();

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.air;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
@@ -30,6 +29,7 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirBurst extends AbstractBurst {
   private enum Mode {CONE, SPHERE, FALL}

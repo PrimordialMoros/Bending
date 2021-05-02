@@ -19,7 +19,6 @@
 
 package me.moros.bending.events;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
@@ -27,6 +26,7 @@ import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.PluginManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingEventBus {
   private final PluginManager manager;

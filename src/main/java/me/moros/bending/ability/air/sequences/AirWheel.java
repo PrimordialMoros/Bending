@@ -21,8 +21,8 @@ package me.moros.bending.ability.air.sequences;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
@@ -40,7 +40,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.Expiring;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -48,6 +48,7 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirWheel extends AbilityInstance {
   private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
@@ -57,7 +58,7 @@ public class AirWheel extends AbilityInstance {
   private User user;
   private Config userConfig;
 
-  private final Expiring<Entity> affectedEntities = new Expiring<>(250);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
 
   private AirScooter scooter;
   private Collider collider;

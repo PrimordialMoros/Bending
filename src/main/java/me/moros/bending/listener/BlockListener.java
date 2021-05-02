@@ -19,7 +19,6 @@
 
 package me.moros.bending.listener;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
@@ -47,6 +46,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BlockListener implements Listener {
   private final Game game;

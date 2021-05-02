@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import me.moros.atlas.acf.lib.timings.MCTiming;
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
@@ -37,6 +36,7 @@ import me.moros.bending.model.DummyAbilityManager;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class WorldManager {
   private final Map<World, WorldInstance> worlds;

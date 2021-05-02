@@ -21,11 +21,11 @@ package me.moros.bending.util;
 
 import java.util.Set;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to handle potion effects on entities.

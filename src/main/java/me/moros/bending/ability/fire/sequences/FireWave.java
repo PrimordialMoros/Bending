@@ -23,7 +23,6 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
 
-import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireWall;
@@ -41,6 +40,7 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireWave extends AbilityInstance {
   private static final Config config = new Config();
