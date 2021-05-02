@@ -33,7 +33,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -70,7 +69,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.NumberConversions;
 
-public class MetalCable extends AbilityInstance implements Ability {
+public class MetalCable extends AbilityInstance {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
 
   private static final Config config = new Config();

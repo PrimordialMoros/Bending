@@ -62,7 +62,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     this.ray = ray;
     this.speed = speed;
     this.location = ray.origin;
-    this.maxRange = ray.direction.getNormSq();
+    this.maxRange = ray.direction.getNorm();
     this.collisionRadius = collisionRadius;
     this.collider = new Sphere(location, collisionRadius);
     dir = ray.direction.normalize().scalarMultiply(speed);
@@ -75,7 +75,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     for (int i = 0; i < steps; i++) {
       Vector3 originalVector = new Vector3(location.toArray());
       location = location.add(vector);
-      if (location.distanceSq(ray.origin) > maxRange || !Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
+      if (location.distanceSq(ray.origin) > maxRange * maxRange || !Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
         return UpdateResult.REMOVE;
       }
       render();

@@ -33,7 +33,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -51,7 +50,7 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-public class FireSpin extends AbilityInstance implements Ability {
+public class FireSpin extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

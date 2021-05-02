@@ -24,8 +24,8 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.earth.EarthGlove;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -42,7 +42,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 
-public class EarthCling extends AbilityInstance implements PassiveAbility {
+public class EarthCling extends AbilityInstance implements Ability {
   private static final BlockData STONE = Material.STONE.createBlockData();
   private static final Config config = new Config();
 

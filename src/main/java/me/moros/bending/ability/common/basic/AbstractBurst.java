@@ -28,14 +28,15 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.UpdateResult;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 
 public abstract class AbstractBurst extends AbilityInstance {
-  private static final double ANGLE_STEP = FastMath.toRadians(10);
-  private static final double ANGLE = FastMath.toRadians(30);
+  protected double angleStep = FastMath.toRadians(10);
+  protected double angle = FastMath.toRadians(30);
 
   protected final Collection<Burstable> blasts = new ArrayList<>();
 
@@ -43,26 +44,34 @@ public abstract class AbstractBurst extends AbilityInstance {
     super(desc);
   }
 
-  protected <T extends Burstable> void createCone(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
-    createBurst(user, constructor, range, true);
+  protected <T extends Burstable> void cone(@NonNull Supplier<T> constructor, double range) {
+    createBurst(constructor, range, new Angles(), true);
   }
 
-  protected <T extends Burstable> void createSphere(@NonNull User user, @NonNull Supplier<T> constructor, double range) {
-    createBurst(user, constructor, range, false);
+  protected <T extends Burstable> void sphere(@NonNull Supplier<T> constructor, double range) {
+    createBurst(constructor, range, new Angles(), false);
   }
 
-  private <T extends Burstable> void createBurst(User user, Supplier<T> constructor, double range, boolean cone) {
-    for (double theta = 0; theta < FastMath.PI; theta += ANGLE_STEP) {
-      for (double phi = 0; phi < FastMath.PI * 2; phi += ANGLE_STEP) {
+  protected <T extends Burstable> void fall(@NonNull Supplier<T> constructor, double range) {
+    createBurst(constructor, range, new Angles(FastMath.toRadians(75), FastMath.toRadians(105)), false);
+  }
+
+  private <T extends Burstable> void createBurst(Supplier<T> constructor, double range, Angles angles, boolean cone) {
+    User user = user();
+    Vector3 center = EntityMethods.entityCenter(user.entity());
+    Vector3 userDIr = user.direction();
+    for (double theta = angles.minTheta; theta < angles.maxTheta; theta += angleStep) {
+      for (double phi = angles.minPhi; phi < angles.maxPhi; phi += angleStep) {
         double x = FastMath.cos(phi) * FastMath.sin(theta);
         double y = FastMath.cos(phi) * FastMath.cos(theta);
         double z = FastMath.sin(phi);
         Vector3 direction = new Vector3(x, y, z);
-        if (cone && Vector3.angle(direction, user.direction()) > ANGLE) {
+        if (cone && Vector3.angle(direction, userDIr) > angle) {
           continue;
         }
         T blast = constructor.get();
-        blast.initialize(user, EntityMethods.entityCenter(user.entity()).add(direction), direction.scalarMultiply(range));
+        Ray ray = new Ray(center, direction.scalarMultiply(range));
+        blast.burstInstance(user, ray);
         blasts.add(blast);
       }
     }
@@ -71,5 +80,27 @@ public abstract class AbstractBurst extends AbilityInstance {
   protected @NonNull UpdateResult updateBurst() {
     blasts.removeIf(b -> b.update() == UpdateResult.REMOVE);
     return blasts.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
+
+  private static class Angles {
+    private final double minTheta;
+    private final double maxTheta;
+    private final double minPhi;
+    private final double maxPhi;
+
+    private Angles() {
+      this(0, FastMath.PI, 0, FastMath.PI * 2);
+    }
+
+    private Angles(double minTheta, double maxTheta) {
+      this(minTheta, maxTheta, 0, FastMath.PI * 2);
+    }
+
+    private Angles(double minTheta, double maxTheta, double minPhi, double maxPhi) {
+      this.minTheta = minTheta;
+      this.maxTheta = maxTheta;
+      this.minPhi = minPhi;
+      this.maxPhi = maxPhi;
+    }
   }
 }

@@ -29,7 +29,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -49,10 +48,12 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-public class AirBlast extends AbilityInstance implements Ability, Burstable {
+public class AirBlast extends AbilityInstance implements Burstable {
   private static final Config config = new Config();
 
   private User user;
@@ -65,6 +66,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
   private boolean launched;
   private boolean selectedOrigin;
+  private double selfFactor;
+  private double otherFactor;
   private int particleCount = 6;
   private long renderInterval = 0;
 
@@ -99,12 +102,14 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
       }
     }
 
+    selfFactor = userConfig.self;
+    otherFactor = userConfig.other;
+
     if (method == ActivationMethod.SNEAK_RELEASE) {
       return selectOrigin();
-    } else {
-      origin = user.eyeLocation();
-      launch();
     }
+    origin = user.eyeLocation();
+    launch();
     return true;
   }
 
@@ -138,13 +143,15 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
 
   private void launch() {
     launched = true;
-    Vector3 target = user.rayTrace(userConfig.range);
+    Vector3 target = user.rayTraceEntity(userConfig.range).map(EntityMethods::entityCenter)
+      .orElseGet(() -> user.rayTrace(userConfig.range));
     if (user.sneaking()) {
       Vector3 temp = new Vector3(origin.toArray());
       origin = new Vector3(target.toArray());
       target = temp;
     }
     direction = target.subtract(origin).normalize();
+    removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     stream = new AirStream(new Ray(origin, direction.scalarMultiply(userConfig.range)));
   }
@@ -162,19 +169,20 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     return user;
   }
 
-  // Used to initialize the blast for bursts
   @Override
-  public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
+  public void burstInstance(@NonNull User user, @NonNull Ray ray) {
     this.user = user;
     recalculateConfig();
     selectedOrigin = false;
     launched = true;
-    origin = location;
-    this.direction = direction;
+    origin = ray.origin;
+    this.direction = ray.direction.normalize();
     removalPolicy = Policies.builder().build();
     particleCount = 1;
     renderInterval = 75;
-    stream = new AirStream(new Ray(location, direction));
+    selfFactor = 0;
+    otherFactor = 0.5 * userConfig.other;
+    stream = new AirStream(ray);
   }
 
   private class AirStream extends ParticleStream {
@@ -214,26 +222,36 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       boolean isUser = entity.equals(user.entity());
-      double factor = isUser ? userConfig.selfPush : userConfig.otherPush;
+      if (isUser && !selectedOrigin) {
+        return false;
+      }
+      double factor = isUser ? selfFactor : otherFactor;
       FireTick.extinguish(entity);
       if (factor == 0) {
         return false;
       }
-      factor *= 1 - (location.distance(origin) / (2 * userConfig.range));
+
+      Vector3 push = direction;
+      if (!isUser) {
+        // Cap vertical push
+        push = push.setY(FastMath.max(-0.3, FastMath.min(0.3, push.getY())));
+      }
+
+      factor *= 1 - (location.distance(origin) / (2 * maxRange));
       // Reduce the push if the player is on the ground.
       if (isUser && user.isOnGround()) {
         factor *= 0.5;
       }
       Vector3 velocity = new Vector3(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
-      double strength = velocity.dotProduct(direction);
+      double strength = velocity.dotProduct(push.normalize());
       if (strength > factor) {
-        double f = velocity.normalize().dotProduct(direction);
-        velocity = velocity.scalarMultiply(0.5).add(direction.scalarMultiply(f));
+        double f = velocity.normalize().dotProduct(push.normalize());
+        velocity = velocity.scalarMultiply(0.5).add(push.normalize().scalarMultiply(f));
       } else if (strength + factor * 0.5 > factor) {
-        velocity = velocity.add(direction.scalarMultiply(factor - strength));
+        velocity = velocity.add(push.scalarMultiply(factor - strength));
       } else {
-        velocity = velocity.add(direction.scalarMultiply(factor * 0.5));
+        velocity = velocity.add(push.scalarMultiply(factor * 0.5));
       }
       entity.setVelocity(velocity.clampVelocity());
       entity.setFallDistance(0);
@@ -258,9 +276,9 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
     @Attribute(Attribute.SPEED)
     public double speed;
     @Attribute(Attribute.STRENGTH)
-    public double selfPush;
+    public double self;
     @Attribute(Attribute.STRENGTH)
-    public double otherPush;
+    public double other;
     @Attribute(Attribute.SELECTION)
     public double selectRange;
 
@@ -271,10 +289,8 @@ public class AirBlast extends AbilityInstance implements Ability, Burstable {
       cooldown = abilityNode.node("cooldown").getLong(1250);
       range = abilityNode.node("range").getDouble(20.0);
       speed = abilityNode.node("speed").getDouble(1.2);
-
-      selfPush = abilityNode.node("push").node("self").getDouble(2.1);
-      otherPush = abilityNode.node("push").node("other").getDouble(2.1);
-
+      self = abilityNode.node("power-self").getDouble(2.1);
+      other = abilityNode.node("power-other").getDouble(2.1);
       selectRange = abilityNode.node("select-range").getDouble(8.0);
     }
   }

@@ -58,7 +58,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-public class AirSwipe extends AbilityInstance implements Ability {
+public class AirSwipe extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
@@ -142,7 +142,7 @@ public class AirSwipe extends AbilityInstance implements Ability {
     Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
     int steps = userConfig.arc / 5;
     VectorMethods.createArc(dir, rotateAxis, FastMath.PI / 36, steps).forEach(
-      v -> streams.add(new AirStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
+      v -> streams.add(new AirStream(new Ray(origin, v.scalarMultiply(userConfig.range * factor))))
     );
     removalPolicy = Policies.builder().build();
   }
@@ -237,13 +237,13 @@ public class AirSwipe extends AbilityInstance implements Ability {
       CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airswipe");
 
       cooldown = abilityNode.node("cooldown").getLong(1500);
-      damage = abilityNode.node("damage").getDouble(1.5);
-      range = abilityNode.node("range").getInt(14);
+      damage = abilityNode.node("damage").getDouble(2.0);
+      range = abilityNode.node("range").getInt(9);
       speed = abilityNode.node("speed").getDouble(0.8);
       arc = abilityNode.node("arc").getInt(35);
 
-      chargeFactor = abilityNode.node("charge").node("factor").getDouble(3.0);
-      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2500);
+      chargeFactor = abilityNode.node("charge").node("factor").getDouble(2.0);
+      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
 
       abilityNode.node("arc").comment("How large the entire arc is in degrees");
 

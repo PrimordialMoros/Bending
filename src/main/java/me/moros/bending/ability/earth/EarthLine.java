@@ -39,7 +39,6 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -82,7 +81,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
 
-public class EarthLine extends AbilityInstance implements Ability {
+public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON, MAGMA}
 
   private static final Config config = new Config();

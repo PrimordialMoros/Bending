@@ -79,7 +79,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.NumberConversions;
 
-public class EarthSmash extends AbilityInstance implements Ability {
+public class EarthSmash extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

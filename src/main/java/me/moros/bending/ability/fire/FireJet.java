@@ -25,7 +25,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.sequences.JetBlast;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -43,7 +42,7 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class FireJet extends AbilityInstance implements Ability {
+public class FireJet extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

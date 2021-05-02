@@ -34,7 +34,6 @@ import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -55,7 +54,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
-public class Torrent extends AbilityInstance implements Ability {
+public class Torrent extends AbilityInstance {
   private static final Config config = new Config();
   private static AbilityDescription ringDesc;
 

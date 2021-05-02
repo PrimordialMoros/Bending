@@ -33,7 +33,6 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -63,7 +62,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
-public class IceCrawl extends AbilityInstance implements Ability {
+public class IceCrawl extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
@@ -159,6 +158,7 @@ public class IceCrawl extends AbilityInstance implements Ability {
     public Line(Block source) {
       super(user, source, userConfig.range, 0.5, true);
       skipVertical = true;
+      diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
     }
 
     @Override

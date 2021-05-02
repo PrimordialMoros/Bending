@@ -53,7 +53,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-public class AirBlade extends AbilityInstance implements Ability {
+public class AirBlade extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
@@ -248,7 +248,7 @@ public class AirBlade extends AbilityInstance implements Ability {
 
       cooldown = abilityNode.node("cooldown").getLong(4000);
       radius = abilityNode.node("radius").getDouble(1.2);
-      damage = abilityNode.node("damage").getDouble(2.6);
+      damage = abilityNode.node("damage").getDouble(1.5);
       knockback = abilityNode.node("knockback").getDouble(0.8);
       knockup = abilityNode.node("knockup").getDouble(0.15);
       range = abilityNode.node("range").getDouble(12.0);

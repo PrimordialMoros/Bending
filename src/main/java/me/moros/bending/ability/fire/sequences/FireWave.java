@@ -28,7 +28,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireWall;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -43,7 +42,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 
-public class FireWave extends AbilityInstance implements Ability {
+public class FireWave extends AbilityInstance {
   private static final Config config = new Config();
   private static AbilityDescription wallDesc;
 

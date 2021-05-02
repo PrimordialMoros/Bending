@@ -24,7 +24,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -32,7 +31,9 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 
-public class AirBurst extends AbstractBurst implements Ability {
+public class AirBurst extends AbstractBurst {
+  private enum Mode {CONE, SPHERE, FALL}
+
   private static final Config config = new Config();
 
   private User user;
@@ -49,7 +50,7 @@ public class AirBurst extends AbstractBurst implements Ability {
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     if (method == ActivationMethod.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, AirBurst.class)
-        .ifPresent(b -> b.release(true));
+        .ifPresent(b -> b.release(Mode.CONE));
       return false;
     }
 
@@ -61,7 +62,7 @@ public class AirBurst extends AbstractBurst implements Ability {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
-      release(false);
+      release(Mode.FALL);
     }
     startTime = System.currentTimeMillis();
     return true;
@@ -79,7 +80,7 @@ public class AirBurst extends AbstractBurst implements Ability {
       if (charged) {
         ParticleUtil.createAir(user.mainHandSide().toLocation(user.world())).spawn();
         if (!user.sneaking()) {
-          release(false);
+          release(Mode.SPHERE);
         }
       } else {
         if (!user.sneaking()) {
@@ -100,15 +101,19 @@ public class AirBurst extends AbstractBurst implements Ability {
     return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
   }
 
-  private void release(boolean cone) {
+  private void release(Mode mode) {
     if (released || !isCharged()) {
       return;
     }
     released = true;
-    if (cone) {
-      createCone(user, () -> new AirBlast(description()), userConfig.coneRange);
-    } else {
-      createSphere(user, () -> new AirBlast(description()), userConfig.sphereRange);
+    switch (mode) {
+      case CONE:
+        cone(() -> new AirBlast(description()), userConfig.coneRange);
+      case FALL:
+        fall(() -> new AirBlast(description()), userConfig.sphereRange);
+      case SPHERE:
+      default:
+        sphere(() -> new AirBlast(description()), userConfig.sphereRange);
     }
     user.addCooldown(description(), userConfig.cooldown);
   }

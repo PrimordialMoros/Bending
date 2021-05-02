@@ -27,7 +27,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -51,7 +50,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
-public class WaterWave extends AbilityInstance implements Ability {
+public class WaterWave extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

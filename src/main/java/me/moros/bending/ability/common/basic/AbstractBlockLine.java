@@ -52,7 +52,7 @@ public abstract class AbstractBlockLine implements Updatable {
   public AbstractBlockLine(@NonNull User user, @NonNull Ray ray) {
     this.user = user;
     this.ray = ray;
-    this.maxRange = ray.direction.getNormSq();
+    this.maxRange = ray.direction.getNorm();
     dir = ray.direction.setY(0).normalize();
     this.location = ray.origin;
   }
@@ -74,16 +74,14 @@ public abstract class AbstractBlockLine implements Updatable {
     if (!isValidBlock(block)) {
       if (isValidBlock(block.getRelative(BlockFace.UP))) {
         location = location.add(Vector3.PLUS_J);
-        block = block.getRelative(BlockFace.UP);
       } else if (isValidBlock(block.getRelative(BlockFace.DOWN))) {
         location = location.add(Vector3.MINUS_J);
-        block = block.getRelative(BlockFace.DOWN);
       } else {
         return UpdateResult.REMOVE;
       }
     }
 
-    if (location.distanceSq(ray.origin) > maxRange) {
+    if (location.distanceSq(ray.origin) > maxRange * maxRange) {
       return UpdateResult.REMOVE;
     }
 
@@ -97,6 +95,7 @@ public abstract class AbstractBlockLine implements Updatable {
       }
     }
 
+    block = location.toBlock(user.world());
     if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return UpdateResult.REMOVE;
     }

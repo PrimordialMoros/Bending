@@ -20,9 +20,9 @@
 package me.moros.bending.model.ability;
 
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.user.User;
 
 public interface Burstable extends Ability {
-  void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction);
+  void burstInstance(@NonNull User user, @NonNull Ray ray);
 }

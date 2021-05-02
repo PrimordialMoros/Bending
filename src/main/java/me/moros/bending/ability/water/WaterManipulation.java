@@ -34,7 +34,6 @@ import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -69,7 +68,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
-public class WaterManipulation extends AbilityInstance implements Ability {
+public class WaterManipulation extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

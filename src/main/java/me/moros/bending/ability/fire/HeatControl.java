@@ -30,8 +30,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.PassiveAbility;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -51,7 +51,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class HeatControl extends AbilityInstance implements PassiveAbility {
+public class HeatControl extends AbilityInstance implements Ability {
   private static final Config config = new Config();
 
   private User user;

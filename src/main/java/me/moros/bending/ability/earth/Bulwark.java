@@ -28,7 +28,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -44,7 +43,7 @@ import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
-public class Bulwark extends AbilityInstance implements Ability {
+public class Bulwark extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

@@ -28,7 +28,6 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -58,7 +57,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
 
-public class EarthArmor extends AbilityInstance implements Ability {
+public class EarthArmor extends AbilityInstance {
   private enum Mode {ROCK, IRON, GOLD}
 
   private static final Config config = new Config();

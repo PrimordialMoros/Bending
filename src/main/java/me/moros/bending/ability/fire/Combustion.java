@@ -67,7 +67,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
-public class Combustion extends AbilityInstance implements Ability, Explosive {
+public class Combustion extends AbilityInstance implements Explosive {
   private static final Config config = new Config();
 
   private User user;

@@ -31,7 +31,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -60,7 +59,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
-public class IceSpike extends AbilityInstance implements Ability {
+public class IceSpike extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

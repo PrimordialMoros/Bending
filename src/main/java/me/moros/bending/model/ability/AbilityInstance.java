@@ -22,14 +22,15 @@ package me.moros.bending.model.ability;
 import me.moros.atlas.cf.checker.nullness.qual.NonNull;
 import me.moros.bending.model.ability.description.AbilityDescription;
 
-public abstract class AbilityInstance {
+public abstract class AbilityInstance implements Ability {
   private final AbilityDescription desc;
 
   protected AbilityInstance(@NonNull AbilityDescription desc) {
     this.desc = desc;
   }
 
-  public AbilityDescription description() {
+  @Override
+  public @NonNull AbilityDescription description() {
     return desc;
   }
 }

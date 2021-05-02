@@ -188,7 +188,7 @@ public final class AbilityInitializer {
       .element(AIR).activation(SNEAK).build());
 
     AbilityDescription airBlade = AbilityDescription.builder("AirBlade", AirBlade::new)
-      .element(AIR).activation(SNEAK, SNEAK_RELEASE).build();
+      .element(AIR).activation(SNEAK).build();
     abilities.add(airBlade);
 
     AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter::new)

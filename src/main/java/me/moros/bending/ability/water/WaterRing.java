@@ -36,7 +36,6 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.StateChain;
@@ -68,7 +67,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
-public class WaterRing extends AbilityInstance implements Ability {
+public class WaterRing extends AbilityInstance {
   public static final double RING_RADIUS = 2.8;
 
   private static final Config config = new Config();

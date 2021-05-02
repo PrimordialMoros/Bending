@@ -32,7 +32,6 @@ import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractBlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
@@ -58,7 +57,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 
-public class EarthBlast extends AbilityInstance implements Ability {
+public class EarthBlast extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

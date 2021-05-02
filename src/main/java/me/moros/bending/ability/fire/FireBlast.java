@@ -67,7 +67,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 
-public class FireBlast extends AbilityInstance implements Ability, Explosive, Burstable {
+public class FireBlast extends AbilityInstance implements Explosive, Burstable {
   private static final Config config = new Config();
 
   private User user;
@@ -149,7 +149,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.mainHandSide();
     Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range * factor);
-    stream = new FireStream(new Ray(origin, lookingDir), 1 * factor);
+    stream = new FireStream(new Ray(origin, lookingDir));
   }
 
   @Override
@@ -203,9 +203,8 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     return user;
   }
 
-  // Used to initialize the blast for bursts
   @Override
-  public void initialize(@NonNull User user, @NonNull Vector3 location, @NonNull Vector3 direction) {
+  public void burstInstance(@NonNull User user, @NonNull Ray ray) {
     this.user = user;
     recalculateConfig();
     factor = 1.0;
@@ -213,7 +212,7 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     removalPolicy = Policies.builder().build();
     particleCount = 1;
     renderInterval = 75;
-    stream = new FireStream(new Ray(location, direction), 1);
+    stream = new FireStream(ray);
   }
 
   @Override
@@ -257,8 +256,8 @@ public class FireBlast extends AbilityInstance implements Ability, Explosive, Bu
     private final boolean explosive;
     private long nextRenderTime;
 
-    public FireStream(Ray ray, double collisionRadius) {
-      super(user, ray, userConfig.speed * factor, collisionRadius);
+    public FireStream(Ray ray) {
+      super(user, ray, userConfig.speed * factor, factor);
       canCollide = Block::isLiquid;
       if (factor > 1) {
         offset += factor - 1;

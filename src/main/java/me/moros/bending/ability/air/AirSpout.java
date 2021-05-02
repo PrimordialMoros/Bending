@@ -28,7 +28,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -46,7 +45,7 @@ import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 
-public class AirSpout extends AbilityInstance implements Ability {
+public class AirSpout extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

@@ -24,7 +24,6 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBurst;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -32,7 +31,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 
-public class FireBurst extends AbstractBurst implements Ability {
+public class FireBurst extends AbstractBurst {
   private static final Config config = new Config();
 
   private User user;
@@ -100,9 +99,9 @@ public class FireBurst extends AbstractBurst implements Ability {
     }
     released = true;
     if (cone) {
-      createCone(user, () -> new FireBlast(description()), userConfig.coneRange);
+      cone(() -> new FireBlast(description()), userConfig.coneRange);
     } else {
-      createSphere(user, () -> new FireBlast(description()), userConfig.sphereRange);
+      sphere(() -> new FireBlast(description()), userConfig.sphereRange);
     }
     user.addCooldown(description(), userConfig.cooldown);
   }

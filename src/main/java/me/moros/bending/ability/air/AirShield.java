@@ -56,7 +56,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class AirShield extends AbilityInstance implements Ability {
+public class AirShield extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;

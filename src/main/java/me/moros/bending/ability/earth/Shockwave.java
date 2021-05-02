@@ -31,7 +31,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractBlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -63,7 +62,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
 
-public class Shockwave extends AbilityInstance implements Ability {
+public class Shockwave extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
