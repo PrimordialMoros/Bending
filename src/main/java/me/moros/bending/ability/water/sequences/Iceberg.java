@@ -149,7 +149,7 @@ public class Iceberg extends AbilityInstance {
     TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true);
   }
 
-  public static void launch(User user) {
+  public static void launch(@NonNull User user) {
     if (user.selectedAbilityName().equals("IceSpike")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
     }

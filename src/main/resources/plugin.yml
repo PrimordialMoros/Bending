@@ -55,12 +55,14 @@ permissions:
       bending.ability.AirWheel: true
       bending.ability.AirBlade: true
       bending.ability.AirBlast: true
+      bending.ability.AirBreath: true
       bending.ability.AirBurst: true
       bending.ability.AirPunch: true
       bending.ability.AirScooter: true
       bending.ability.AirShield: true
       bending.ability.AirSpout: true
       bending.ability.AirSwipe: true
+      bending.ability.Tornado: true
   bending.earth:
     children:
       bending.metal: true
@@ -69,10 +71,10 @@ permissions:
       bending.ability.DensityShift: true
       bending.ability.EarthCling: true
       bending.ability.FerroControl: true
+      bending.ability.Bulwark: true
       bending.ability.Catapult: true
       bending.ability.Collapse: true
       bending.ability.EarthArmor: true
-      bending.ability.EarthArmorWall: true
       bending.ability.EarthBlast: true
       bending.ability.EarthGlove: true
       bending.ability.EarthLine: true
@@ -90,11 +92,11 @@ permissions:
       bending.ability.FireSpin: true
       bending.ability.FireWave: true
       bending.ability.FireWheel: true
-      bending.ability.JetBlast: true
       bending.ability.Blaze: true
       bending.ability.Bolt: true
       bending.ability.Combustion: true
       bending.ability.FireBlast: true
+      bending.ability.FireBreath: true
       bending.ability.FireBurst: true
       bending.ability.FireJet: true
       bending.ability.FireShield: true
@@ -105,9 +107,9 @@ permissions:
       bending.command.choose.Water: true
       bending.ability.FastSwim: true
       bending.ability.Hydrosink: true
-      bending.ability.FrostBreath: true
       bending.ability.Iceberg: true
       bending.ability.WaterGimbal: true
+      bending.ability.FrostBreath: true
       bending.ability.HealingWaters: true
       bending.ability.IceCrawl: true
       bending.ability.IceWall: true

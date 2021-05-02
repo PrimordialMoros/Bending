@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.passives.GracefulDescent;
@@ -34,6 +35,7 @@ import me.moros.bending.ability.earth.EarthSmash;
 import me.moros.bending.ability.earth.passives.DensityShift;
 import me.moros.bending.ability.earth.passives.FerroControl;
 import me.moros.bending.ability.earth.sequences.EarthPillars;
+import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.water.HealingWaters;
 import me.moros.bending.ability.water.PhaseChange;
@@ -208,6 +210,9 @@ public final class ActivationController {
   }
 
   public boolean onFireTickDamage(@NonNull User user) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
+      return false;
+    }
     return HeatControl.canBurn(user);
   }
 

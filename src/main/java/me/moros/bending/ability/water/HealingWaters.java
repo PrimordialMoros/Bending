@@ -125,7 +125,7 @@ public class HealingWaters extends AbilityInstance {
     return false;
   }
 
-  public static void healTarget(User user, LivingEntity entity) {
+  public static void healTarget(@NonNull User user, @NonNull LivingEntity entity) {
     if (user.selectedAbilityName().equals("HealingWaters")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, HealingWaters.class)
         .ifPresent(hw -> hw.healTarget(entity));

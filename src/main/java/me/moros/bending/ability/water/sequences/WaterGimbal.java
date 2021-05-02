@@ -143,7 +143,7 @@ public class WaterGimbal extends AbilityInstance {
     return states.update();
   }
 
-  public static void launch(User user) {
+  public static void launch(@NonNull User user) {
     if (user.selectedAbilityName().equals("Torrent")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
     }

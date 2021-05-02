@@ -57,7 +57,7 @@ public class HydroSink extends AbilityInstance implements Ability {
     return UpdateResult.CONTINUE;
   }
 
-  public static boolean canHydroSink(User user) {
+  public static boolean canHydroSink(@NonNull User user) {
     if (!Bending.game().abilityRegistry().abilityDescription("HydroSink").map(user::canBend).orElse(false)) {
       return false;
     }

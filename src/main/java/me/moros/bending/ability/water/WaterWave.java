@@ -143,7 +143,7 @@ public class WaterWave extends AbilityInstance {
     ice = true;
   }
 
-  public static void freeze(User user) {
+  public static void freeze(@NonNull User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
     }

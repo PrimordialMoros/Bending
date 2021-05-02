@@ -247,7 +247,7 @@ public class AirSwipe extends AbilityInstance {
 
       abilityNode.node("arc").comment("How large the entire arc is in degrees");
 
-      abilityNode.node("charge").node("factor").comment("How much the damage and knockback are multiplied by at full charge");
+      abilityNode.node("charge").node("factor").comment("How much the damage, range and knockback are multiplied by at full charge");
       abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
     }
   }

@@ -180,7 +180,7 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
-  public static void prisonMode(User user) {
+  public static void prisonMode(@NonNull User user) {
     if (user.selectedAbilityName().equals("EarthLine")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::prisonMode);
     }

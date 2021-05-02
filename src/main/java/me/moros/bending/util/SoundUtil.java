@@ -43,7 +43,7 @@ public final class SoundUtil {
   public static final SoundEffect COMBUSTION_SOUND = new SoundEffect(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1, 0);
   public static final SoundEffect LIGHTNING_SOUND = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 0);
 
-  public static final SoundEffect FIRE_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_FIRE_EXTINGUISH, 1, 1);
+  public static final SoundEffect FIRE_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_FIRE_EXTINGUISH, 0.5F, 1);
   public static final SoundEffect LAVA_EXTINGUISH_SOUND = new SoundEffect(Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
 
   public static void playSound(@NonNull Location center, @NonNull SoundEffect effect, float volume, float pitch) {

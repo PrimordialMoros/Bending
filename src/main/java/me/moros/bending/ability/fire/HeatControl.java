@@ -176,19 +176,19 @@ public class HeatControl extends AbilityInstance implements Ability {
     user.addCooldown(description(), userConfig.cooldown);
   }
 
-  public static void act(User user) {
+  public static void act(@NonNull User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
     }
   }
 
-  public static void onSneak(User user) {
+  public static void onSneak(@NonNull User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
     }
   }
 
-  public static boolean canBurn(User user) {
+  public static boolean canBurn(@NonNull User user) {
     return user.selectedAbility()
       .filter(desc -> desc.name().equals("HeatControl") && user.canBend(desc))
       .isEmpty();

@@ -168,7 +168,7 @@ public class FireWheel extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(8000);
       radius = abilityNode.node("radius").getDouble(1.0);
-      damage = abilityNode.node("damage").getDouble(3.5);
+      damage = abilityNode.node("damage").getDouble(3.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(20.0);
       speed = abilityNode.node("speed").getDouble(0.75);

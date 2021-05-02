@@ -21,7 +21,6 @@ package me.moros.bending.ability.fire;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.fire.sequences.JetBlast;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -30,6 +29,7 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -37,8 +37,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -51,6 +56,7 @@ public class FireJet extends AbilityInstance {
 
   private Flight flight;
 
+  private boolean jetBlast;
   private double speed;
   private long duration;
   private long startTime;
@@ -61,13 +67,8 @@ public class FireJet extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
-      if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, FireJet.class)) {
-        return false;
-      }
-      if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, JetBlast.class)) {
-        return false;
-      }
+    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, FireJet.class)) {
+      return false;
     }
 
     this.user = user;
@@ -79,22 +80,33 @@ public class FireJet extends AbilityInstance {
       return false;
     }
 
-    speed = userConfig.speed;
-    duration = userConfig.duration;
-
     flight = Flight.get(user);
     if (ignitable) {
-      TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+      Tasker.newChain().delay(1).sync(() -> igniteBlock(block)).execute();
+    }
+
+    if (user.sneaking()) {
+      jetBlast = true;
+      speed = userConfig.jetBlastSpeed;
+      duration = userConfig.jetBlastDuration;
+      jetBlastAnimation();
+    } else {
+      jetBlast = false;
+      speed = userConfig.speed;
+      duration = userConfig.duration;
     }
 
     removalPolicy = Policies.builder()
       .add(Policies.IN_LIQUID)
-      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(ExpireRemovalPolicy.of(duration))
       .build();
 
-    FireTick.extinguish(user.entity());
     startTime = System.currentTimeMillis();
     return true;
+  }
+
+  private void igniteBlock(Block block) {
+    TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
   }
 
   @Override
@@ -102,11 +114,22 @@ public class FireJet extends AbilityInstance {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
+  private void jetBlastAnimation() {
+    Vector3 center = user.location().add(new Vector3(0, 0.2, 0));
+    VectorMethods.circle(Vector3.ONE, Vector3.PLUS_J, 36).forEach(v -> {
+      Vector3 velocity = v.scalarMultiply(0.6);
+      ParticleUtil.createFire(user, center.add(v.scalarMultiply(0.3)).toLocation(user.world()))
+        .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
+    });
+    SoundUtil.playSound(user.entity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10, 0);
+  }
+
   @Override
   public @NonNull UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
+    FireTick.extinguish(user.entity());
     // scale down to 0.5 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (2.0 * duration));
 
@@ -114,13 +137,16 @@ public class FireJet extends AbilityInstance {
     user.entity().setFallDistance(0);
     ParticleUtil.createFire(user, user.entity().getLocation()).count(10)
       .offset(0.3, 0.3, 0.3).extra(0.03).spawn();
-
+    if (jetBlast) {
+      ParticleUtil.create(Particle.SMOKE_LARGE, user.entity().getLocation()).count(3)
+        .offset(0.3, 0.3, 0.3).spawn();
+    }
     return UpdateResult.CONTINUE;
   }
 
   @Override
   public void onDestroy() {
-    user.addCooldown(description(), userConfig.cooldown);
+    user.addCooldown(description(), jetBlast ? userConfig.jetBlastCooldown : userConfig.cooldown);
     flight.release();
   }
 
@@ -129,30 +155,31 @@ public class FireJet extends AbilityInstance {
     return user;
   }
 
-  public void speed(double speed) {
-    this.speed = speed;
-  }
-
-  public void duration(long duration) {
-    this.duration = duration;
-    removalPolicy = Policies.builder().add(Policies.IN_LIQUID).add(ExpireRemovalPolicy.of(duration)).build();
-  }
-
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
-    public long cooldown;
     @Attribute(Attribute.SPEED)
     public double speed;
+    @Attribute(Attribute.COOLDOWN)
+    public long cooldown;
     @Attribute(Attribute.DURATION)
     private long duration;
+    @Attribute(Attribute.SPEED)
+    public double jetBlastSpeed;
+    @Attribute(Attribute.COOLDOWN)
+    public long jetBlastCooldown;
+    @Attribute(Attribute.DURATION)
+    public long jetBlastDuration;
 
     @Override
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firejet");
 
-      cooldown = abilityNode.node("cooldown").getLong(7000);
       speed = abilityNode.node("speed").getDouble(0.8);
+      cooldown = abilityNode.node("cooldown").getLong(7000);
       duration = abilityNode.node("duration").getLong(2000);
+
+      jetBlastSpeed = abilityNode.node("boost-speed").getDouble(1.6);
+      jetBlastCooldown = abilityNode.node("boost-cooldown").getLong(10000);
+      jetBlastDuration = abilityNode.node("boost-duration").getLong(2500);
     }
   }
 }

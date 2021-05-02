@@ -118,13 +118,13 @@ public class PhaseChange extends AbilityInstance implements Ability {
     return newBlocks;
   }
 
-  public static void freeze(User user) {
+  public static void freeze(@NonNull User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
     }
   }
 
-  public static void melt(User user) {
+  public static void melt(@NonNull User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
     }

@@ -72,7 +72,6 @@ import me.moros.bending.ability.fire.sequences.FireKick;
 import me.moros.bending.ability.fire.sequences.FireSpin;
 import me.moros.bending.ability.fire.sequences.FireWave;
 import me.moros.bending.ability.fire.sequences.FireWheel;
-import me.moros.bending.ability.fire.sequences.JetBlast;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.ability.water.HealingWaters;
 import me.moros.bending.ability.water.IceCrawl;
@@ -393,7 +392,7 @@ public final class AbilityInitializer {
     abilities.add(fireShield);
 
     AbilityDescription fireJet = AbilityDescription.builder("FireJet", FireJet::new)
-      .element(FIRE).activation(ATTACK).harmless(true).build();
+      .element(FIRE).activation(ATTACK).build();
     abilities.add(fireJet);
 
     AbilityDescription fireWall = AbilityDescription.builder("FireWall", FireWall::new)
@@ -403,10 +402,6 @@ public final class AbilityInitializer {
     AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave::new)
       .element(FIRE).activation(SEQUENCE).build();
     abilities.add(fireWave);
-
-    AbilityDescription jetBlast = AbilityDescription.builder("JetBlast", JetBlast::new)
-      .element(FIRE).activation(SEQUENCE).harmless(true).build();
-    abilities.add(jetBlast);
 
     AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
       .element(FIRE).activation(SEQUENCE).build();
@@ -432,16 +427,6 @@ public final class AbilityInitializer {
       new AbilityAction(heatControl, SNEAK),
       new AbilityAction(heatControl, SNEAK_RELEASE),
       new AbilityAction(fireWall, ATTACK)
-    ));
-
-    sequences.put(jetBlast, new Sequence(
-      new AbilityAction(fireJet, SNEAK),
-      new AbilityAction(fireJet, SNEAK_RELEASE),
-      new AbilityAction(fireJet, SNEAK),
-      new AbilityAction(fireJet, SNEAK_RELEASE),
-      new AbilityAction(fireShield, SNEAK),
-      new AbilityAction(fireShield, SNEAK_RELEASE),
-      new AbilityAction(fireJet, ATTACK)
     ));
 
     sequences.put(fireKick, new Sequence(

@@ -154,7 +154,7 @@ public class FireSpin extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firespin");
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
-      damage = abilityNode.node("damage").getDouble(2.5);
+      damage = abilityNode.node("damage").getDouble(2.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(6.0);
       speed = abilityNode.node("speed").getDouble(0.55);

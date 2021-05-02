@@ -79,7 +79,7 @@ public class DensityShift extends AbilityInstance implements Ability {
     return MaterialUtil.isTransparent(block);
   }
 
-  public static boolean isSoftened(User user) {
+  public static boolean isSoftened(@NonNull User user) {
     return Bending.game().abilityManager(user.world()).firstInstance(user, DensityShift.class)
       .map(DensityShift::isSoftened).orElse(false);
   }

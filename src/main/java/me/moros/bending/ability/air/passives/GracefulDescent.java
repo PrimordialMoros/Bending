@@ -51,7 +51,7 @@ public class GracefulDescent extends AbilityInstance implements Ability {
     return UpdateResult.CONTINUE;
   }
 
-  public static boolean isGraceful(User user) {
+  public static boolean isGraceful(@NonNull User user) {
     if (!Bending.game().abilityManager(user.world()).hasAbility(user, GracefulDescent.class)) {
       return false;
     }
