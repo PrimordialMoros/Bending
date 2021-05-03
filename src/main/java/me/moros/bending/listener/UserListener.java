@@ -24,11 +24,13 @@ import java.util.UUID;
 
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.bending.Bending;
+import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
@@ -36,10 +38,10 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
-import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -122,9 +124,18 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
-    Component msg = DamageUtil.bendingDeathMessage(event.getEntity());
-    if (msg != null) {
-      event.deathMessage(msg);
+    EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
+    if (lastDamageCause instanceof BendingDamageEvent) {
+      BendingDamageEvent cause = (BendingDamageEvent) lastDamageCause;
+      AbilityDescription ability = cause.ability();
+      String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
+      TranslatableComponent msg = Bending.translationManager().getTranslation(deathKey);
+      if (msg == null) {
+        msg = Component.translatable("bending.ability.generic.death");;
+      }
+      Component target = Component.text(event.getEntity().getName());
+      Component source = Component.text(cause.user().entity().getName());
+      event.deathMessage(msg.args(target, source, ability.displayName()));
     }
   }
 
@@ -150,13 +161,12 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDamageLow(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof LivingEntity)) {
+    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
       return;
     }
     if (event.getCause() == DamageCause.FALL) {
       Optional<User> user = game.benderRegistry().user((LivingEntity) event.getEntity());
       if (user.isPresent() && !game.activationController().onFallDamage(user.get())) {
-        event.setDamage(0);
         event.setCancelled(true);
       }
     } else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
@@ -170,7 +180,7 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onEntityDamage(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof LivingEntity)) {
+    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
       return;
     }
     game.benderRegistry().user((LivingEntity) event.getEntity())

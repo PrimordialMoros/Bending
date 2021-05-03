@@ -19,43 +19,31 @@
 
 package me.moros.bending.events;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.Cancellable;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingDamageEvent extends BendingAbilityEvent implements Cancellable {
-  private final Entity target;
-
-  private boolean cancelled = false;
-  private double damage;
+@SuppressWarnings("deprecation")
+public class BendingDamageEvent extends EntityDamageByEntityEvent {
+  private final User user;
+  private final AbilityDescription desc;
 
   BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
-    super(user, desc);
-    this.target = target;
-    this.damage = damage;
+    super(user.entity(), target, DamageCause.CUSTOM, new EnumMap<>(Map.of(DamageModifier.BASE, damage)), Map.of(DamageModifier.BASE, o -> -0.0));
+    this.user = user;
+    this.desc = desc;
   }
 
-  public @NonNull Entity target() {
-    return target;
+  public @NonNull User user() {
+    return user;
   }
 
-  public double damage() {
-    return damage;
-  }
-
-  public void damage(double damage) {
-    this.damage = damage;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
+  public @NonNull AbilityDescription ability() {
+    return desc;
   }
 }

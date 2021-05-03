@@ -19,76 +19,73 @@
 
 package me.moros.bending.util;
 
-import java.time.Duration;
-import java.util.UUID;
-
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
+import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to handle bending damage and death messages.
  */
 public final class DamageUtil {
-  private static final TranslatableComponent DEATH_MESSAGE = Component.translatable("bending.ability.generic.death");
-
-  private static final Cache<UUID, BendingDamage> cache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMillis(250)).build();
-
   public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
-    if (target instanceof LivingEntity && damage > 0) {
+    if (target instanceof LivingEntity && target.isValid() && damage > 0) {
       LivingEntity targetEntity = (LivingEntity) target;
-      LivingEntity sourceEntity = source.entity();
-      BendingDamageEvent event = Bending.eventBus().postAbilityDamageEvent(source, target, desc, damage);
-      if (event.isCancelled()) {
+
+      BendingDamageEvent event = Bending.eventBus().postAbilityDamageEvent(source, targetEntity, desc, damage);
+      double dmg = event.getFinalDamage();
+      if (event.isCancelled() || dmg <= 0) {
         return false;
       }
-      if (target instanceof Player) {
-        cache.put(target.getUniqueId(), new BendingDamage(source.entity(), desc));
+
+      // We only use base damage modifier so we have to manually calculate other modifiers
+      dmg = calculateDamageAfterResistance(targetEntity, dmg);
+      if (dmg > 0) {
+        dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
+        if (dmg > 0) {
+          double previousHealth = targetEntity.getHealth();
+          double newHealth = FastMath.max(0, previousHealth - dmg);
+          targetEntity.setHealth(newHealth);
+        }
       }
-      double finalDamage = event.damage();
-      targetEntity.setLastDamageCause(new EntityDamageByEntityEvent(target, sourceEntity, EntityDamageEvent.DamageCause.CUSTOM, finalDamage));
-      targetEntity.damage(finalDamage, sourceEntity);
+      targetEntity.damage(0, source.entity()); // For hurt animation, note: will call EntityDamageByEntityEvent again
+      targetEntity.setLastDamageCause(event);
       return true;
     }
     return false;
   }
 
-  public static @Nullable Component bendingDeathMessage(@NonNull Player player) {
-    BendingDamage cause = cache.getIfPresent(player.getUniqueId());
-    if (cause == null) {
-      return null;
+  private static double calculateDamageAfterResistance(LivingEntity entity, double damage) {
+    PotionEffect resistance = entity.getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+    if (resistance != null) {
+      int amplifier = resistance.getAmplifier() + 1;
+      if (amplifier >= 5) {
+        return 0;
+      } else if (amplifier > 0) {
+        return damage * (1 - (0.2 * amplifier));
+      }
     }
-    cache.invalidate(player.getUniqueId());
-    AbilityDescription ability = cause.desc;
-    String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
-    TranslatableComponent msg = Bending.translationManager().getTranslation(deathKey);
-    if (msg == null) {
-      msg = DEATH_MESSAGE;
-    }
-    Component target = Component.text(player.getName());
-    Component source = Component.text(cause.source.getName());
-    return msg.args(target, source, ability.displayName());
+    return damage;
   }
 
-  private static class BendingDamage {
-    private final Entity source;
-    private final AbilityDescription desc;
-
-    private BendingDamage(@NonNull Entity source, @NonNull AbilityDescription desc) {
-      this.source = source;
-      this.desc = desc;
+  private static double calculateDamageAfterAbsorption(LivingEntity entity, double damage) {
+    double absorption = entity.getAbsorptionAmount();
+    if (absorption > 0) {
+      if (absorption >= damage) {
+        entity.setAbsorptionAmount(absorption - damage);
+        return 0;
+      } else {
+        double delta = damage - absorption;
+        entity.setAbsorptionAmount(0);
+        return delta;
+      }
     }
+    return damage;
   }
 }
