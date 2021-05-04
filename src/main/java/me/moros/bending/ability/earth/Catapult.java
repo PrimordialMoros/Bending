@@ -126,8 +126,8 @@ public class Catapult extends AbilityInstance {
       .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
 
     Collider collider = new Sphere(origin, 1.5);
-    return CollisionUtil.handleEntityCollisions(user, collider, e -> {
-      e.setVelocity(direction.scalarMultiply(power).clampVelocity());
+    return CollisionUtil.handleEntityCollisions(user, collider, entity -> {
+      entity.setVelocity(direction.scalarMultiply(power).clampVelocity());
       return true;
     }, true, true);
   }

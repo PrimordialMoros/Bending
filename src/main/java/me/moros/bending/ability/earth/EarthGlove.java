@@ -298,9 +298,9 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private static void tryDestroy(@NonNull User user) {
-    CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), 8), e -> {
-      if (e instanceof Item && user.entity().hasLineOfSight(e) && e.hasMetadata(Metadata.GLOVE_KEY)) {
-        EarthGlove ability = (EarthGlove) e.getMetadata(Metadata.GLOVE_KEY).get(0).value();
+    CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), 8), entity -> {
+      if (entity instanceof Item && user.entity().hasLineOfSight(entity) && entity.hasMetadata(Metadata.GLOVE_KEY)) {
+        EarthGlove ability = (EarthGlove) entity.getMetadata(Metadata.GLOVE_KEY).get(0).value();
         if (ability != null && !user.equals(ability.user())) {
           ability.shatterGlove();
         }

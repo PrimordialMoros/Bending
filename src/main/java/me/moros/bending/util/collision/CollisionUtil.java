@@ -107,6 +107,6 @@ public final class CollisionUtil {
 
   @FunctionalInterface
   public interface CollisionCallback {
-    boolean onCollision(@NonNull Entity e);
+    boolean onCollision(@NonNull Entity entity);
   }
 }

@@ -129,7 +129,7 @@ public class AirSpout extends AbilityInstance {
     private long nextRenderTime;
 
     public Spout() {
-      super(user, userConfig.height, userConfig.maxSpeed);
+      super(user, userConfig.height);
       nextRenderTime = 0;
     }
 

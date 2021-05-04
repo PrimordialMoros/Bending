@@ -28,7 +28,7 @@ import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class BlockLine extends AbstractTerrainFollower implements Updatable {
+public abstract class BlockLine extends MovementResolver implements Updatable {
   private final User user;
   protected final Ray ray;
 
@@ -43,6 +43,7 @@ public abstract class BlockLine extends AbstractTerrainFollower implements Updat
   private long nextUpdate = 0;
 
   public BlockLine(@NonNull User user, @NonNull Ray ray) {
+    super(user.world());
     this.user = user;
     this.ray = ray;
     this.maxRange = ray.direction.getNorm();
@@ -60,7 +61,7 @@ public abstract class BlockLine extends AbstractTerrainFollower implements Updat
       nextUpdate = time + interval;
     }
 
-    Vector3 newLocation = resolveMovement(user.world(), location, dir);
+    Vector3 newLocation = resolve(location, dir);
     if (newLocation == null) {
       return UpdateResult.REMOVE;
     }

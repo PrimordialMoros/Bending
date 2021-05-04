@@ -31,13 +31,15 @@ import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class AbstractTerrainFollower {
+public abstract class MovementResolver {
+  private final World world;
   protected Predicate<Block> diagonalsPredicate = MaterialUtil::isTransparent;
 
-  protected AbstractTerrainFollower() {
+  protected MovementResolver(@NonNull World world) {
+    this.world = world;
   }
 
-  protected @Nullable Vector3 resolveMovement(@NonNull World world, @NonNull Vector3 origin, @NonNull Vector3 direction) {
+  protected @Nullable Vector3 resolve(@NonNull Vector3 origin, @NonNull Vector3 direction) {
     Block original = origin.toBlock(world);
     Block destination = origin.add(direction).toBlock(world);
     int offset = 0;

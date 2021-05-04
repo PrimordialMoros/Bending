@@ -62,7 +62,7 @@ public final class WorldManager {
     if (isDisabledWorld(world.getUID())) {
       return DUMMY_INSTANCE;
     }
-    return worlds.computeIfAbsent(world,w -> new ManagerPair()).abilities;
+    return worlds.computeIfAbsent(world, w -> new ManagerPair()).abilities;
   }
 
   public void update() {

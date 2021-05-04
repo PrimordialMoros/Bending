@@ -35,7 +35,6 @@ import me.moros.bending.util.Flight;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
@@ -46,26 +45,20 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   protected Predicate<Block> validBlock = x -> true;
   protected AABB collider;
 
-  protected final int height;
-  protected final double maxHeight;
-  protected final double speed;
+  private final double height;
 
   protected double distance;
 
-  public AbstractSpout(@NonNull User user, double height, double speed) {
+  public AbstractSpout(@NonNull User user, double height) {
     this.user = user;
-
-    this.height = NumberConversions.ceil(height);
-    this.speed = speed;
-
-    maxHeight = this.height + 2; // Add a buffer for safety
-
+    this.height = height;
     this.flight = Flight.get(user);
     this.flight.flying(true);
   }
 
   @Override
   public @NonNull UpdateResult update() {
+    double maxHeight = height + 2; // Buffer for safety
     Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;

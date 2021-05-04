@@ -133,7 +133,7 @@ public class WaterSpout extends AbilityInstance {
     private final Vector3 g = new Vector3(0, -0.1, 0); // Applied as extra gravity
 
     public Spout() {
-      super(user, userConfig.height, userConfig.maxSpeed);
+      super(user, userConfig.height);
       validBlock = predicate;
     }
 

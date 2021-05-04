@@ -43,19 +43,17 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
@@ -229,24 +227,12 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
     ParticleUtil.create(Particle.EXPLOSION_HUGE, loc).spawn();
     SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 5, 1);
 
-    double halfSize = size / 2;
-    Sphere collider = new Sphere(center, size);
-    CollisionUtil.handleEntityCollisions(user, collider, entity -> {
-      Vector3 entityCenter = EntityMethods.entityCenter(entity);
-      double distance = center.distance(entityCenter);
-      double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize) / size);
-      if (ignoreCollider == null || !ignoreCollider.contains(entityCenter)) {
-        DamageUtil.damageEntity(entity, user, damage * distanceFactor, description());
-        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
-      }
-      double knockback = factor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
-      if (entity.equals(user.entity())) {
-        knockback *= 0.5;
-      }
-      Vector3 dir = entityCenter.subtract(center).normalize().scalarMultiply(knockback);
-      entity.setVelocity(dir.clampVelocity());
-      return true;
-    }, true, true);
+    BendingExplosion.builder()
+      .size(size)
+      .damage(damage)
+      .fireTicks(userConfig.fireTicks)
+      .ignoreInsideCollider(ignoreCollider)
+      .buildAndExplode(user, description(), center);
   }
 
   private class FireStream extends ParticleStream {

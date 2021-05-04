@@ -48,19 +48,18 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
-import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -219,7 +218,7 @@ public class EarthLine extends AbilityInstance {
     private boolean imprisoned = false;
 
     public Line(Block source) {
-      super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.4 : 0.7, false);
+      super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.6 : 0.8, false);
     }
 
     @Override
@@ -285,16 +284,23 @@ public class EarthLine extends AbilityInstance {
 
     @Override
     protected void onCollision() {
-      FragileStructure.tryDamageStructure(Collections.singletonList(location.toBlock(user.world())), mode == Mode.MAGMA ? 0 : 5);
+      Location center = location.toLocation(user.world());
+      FragileStructure.tryDamageStructure(Collections.singletonList(center.getBlock()), mode == Mode.MAGMA ? 0 : 5);
       if (mode != Mode.MAGMA) {
         return;
       }
-      Location center = location.toLocation(user.world());
-      SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1, 0.5F);
-      ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2).offset(0.5, 0.5, 0.5).extra(0.5).spawn();
-      CollisionUtil.handleEntityCollisions(user, new Sphere(location, 2), this::onEntityHit);
-      Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
-      List<Block> wall = new ArrayList<>(WorldMethods.nearbyBlocks(center, 3, predicate));
+      SoundUtil.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 3, 0.5F);
+      ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(2)
+        .offset(0.5, 0.5, 0.5).extra(0.5).spawn();
+
+      BendingExplosion.builder()
+        .size(userConfig.explosionRadius)
+        .damage(userConfig.explosionDamage)
+        .fireTicks(40)
+        .buildAndExplode(user, description(), location);
+
+      Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
+      List<Block> wall = WorldMethods.nearbyBlocks(center, userConfig.explosionRadius, predicate);
       Collections.shuffle(wall);
       ThreadLocalRandom rnd = ThreadLocalRandom.current();
       for (Block block : wall) {
@@ -362,6 +368,10 @@ public class EarthLine extends AbilityInstance {
     public double selectRange;
     @Attribute(Attribute.DAMAGE)
     public double damage;
+    @Attribute(Attribute.RADIUS)
+    public double explosionRadius;
+    @Attribute(Attribute.DAMAGE)
+    public double explosionDamage;
     @Attribute(Attribute.DURATION)
     public long prisonDuration;
 
@@ -373,6 +383,8 @@ public class EarthLine extends AbilityInstance {
       range = abilityNode.node("range").getDouble(20.0);
       selectRange = abilityNode.node("select-range").getDouble(6.0);
       damage = abilityNode.node("damage").getDouble(3.0);
+      explosionRadius = abilityNode.node("explosion-radius").getDouble(3.5);
+      explosionDamage = abilityNode.node("explosion-damage").getDouble(2.5);
       prisonDuration = abilityNode.node("prison-duration").getLong(1500);
     }
   }

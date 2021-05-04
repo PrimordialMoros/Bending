@@ -156,7 +156,7 @@ public class IceCrawl extends AbilityInstance {
 
   private class Line extends AbstractLine {
     public Line(Block source) {
-      super(user, source, userConfig.range, 0.5, true);
+      super(user, source, userConfig.range, 0.7, true);
       skipVertical = true;
       diagonalsPredicate = MaterialUtil::isTransparentOrWater;
     }

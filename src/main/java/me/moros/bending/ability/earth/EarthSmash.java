@@ -511,9 +511,9 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private void updateData() {
-      data.entrySet().removeIf(e -> {
-        Material type = center.add(new Vector3(e.getKey())).toBlock(world).getType();
-        return type != e.getValue().getMaterial();
+      data.entrySet().removeIf(entry -> {
+        Material type = center.add(new Vector3(entry.getKey())).toBlock(world).getType();
+        return type != entry.getValue().getMaterial();
       });
     }
 

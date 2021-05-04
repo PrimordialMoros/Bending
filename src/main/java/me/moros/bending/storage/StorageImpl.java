@@ -207,7 +207,6 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private BendingProfile loadProfile(UUID uuid) {
-    BendingProfile profile = null;
     try {
       return DB.withHandle(handle -> {
         Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())

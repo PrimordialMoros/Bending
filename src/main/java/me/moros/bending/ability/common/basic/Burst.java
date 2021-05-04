@@ -34,13 +34,13 @@ import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class AbstractBurst extends AbilityInstance {
+public abstract class Burst extends AbilityInstance {
   protected double angleStep = FastMath.toRadians(10);
   protected double angle = FastMath.toRadians(30);
 
   protected final Collection<Burstable> blasts = new ArrayList<>();
 
-  protected AbstractBurst(@NonNull AbilityDescription desc) {
+  protected Burst(@NonNull AbilityDescription desc) {
     super(desc);
   }
 

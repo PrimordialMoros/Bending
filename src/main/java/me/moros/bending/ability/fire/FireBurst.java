@@ -21,7 +21,7 @@ package me.moros.bending.ability.fire;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.AbstractBurst;
+import me.moros.bending.ability.common.basic.Burst;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -31,7 +31,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class FireBurst extends AbstractBurst {
+public class FireBurst extends Burst {
   private static final Config config = new Config();
 
   private User user;

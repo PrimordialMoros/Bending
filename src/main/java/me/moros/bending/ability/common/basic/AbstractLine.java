@@ -39,7 +39,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class AbstractLine extends AbstractTerrainFollower implements Updatable, SimpleAbility {
+public abstract class AbstractLine extends MovementResolver implements Updatable, SimpleAbility {
   private final User user;
 
   protected final Vector3 origin;
@@ -58,6 +58,7 @@ public abstract class AbstractLine extends AbstractTerrainFollower implements Up
   protected boolean skipVertical = false;
 
   public AbstractLine(@NonNull User user, @NonNull Block source, double range, double speed, boolean followTarget) {
+    super(user.world());
     this.user = user;
     this.location = new Vector3(source.getLocation().add(0.5, 1.25, 0.5));
     this.origin = location;
@@ -99,16 +100,18 @@ public abstract class AbstractLine extends AbstractTerrainFollower implements Up
       return UpdateResult.REMOVE;
     }
 
-    render();
-    postRender();
-
-    Vector3 newLocation = resolveMovement(user.world(), location, direction);
+    Vector3 newLocation = resolve(location, direction);
     if (newLocation == null) {
       onCollision();
       return UpdateResult.REMOVE;
     }
 
+    render();
+    location = location.add(newLocation).scalarMultiply(0.5);
+    render(); // Render again at midpoint for a smoother line
+    postRender();
     location = newLocation;
+
     Block block = location.toBlock(user.world());
 
     if (skipVertical) { // Advance location vertically if possible to match target height
