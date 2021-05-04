@@ -20,7 +20,8 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Comparator;
-import java.util.function.Predicate;
+import java.util.HashSet;
+import java.util.Set;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -32,7 +33,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -48,18 +48,18 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Catapult extends AbilityInstance {
   private static final Config config = new Config();
+  private static final double ANGLE = FastMath.toRadians(60);
 
   private User user;
   private Config userConfig;
 
-  private Block base;
   private Pillar pillar;
 
-  private boolean sneak;
   private long startTime;
 
   public Catapult(@NonNull AbilityDescription desc) {
@@ -68,23 +68,10 @@ public class Catapult extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (!user.isOnGround()) {
-      return false;
-    }
-
     this.user = user;
     recalculateConfig();
 
-    base = getBase();
-    if (!TempBlock.isBendable(base) || !Bending.game().protectionSystem().canBuild(user, base)) {
-      return false;
-    }
-
-    sneak = method == ActivationMethod.SNEAK;
-
-    launch();
-    startTime = System.currentTimeMillis();
-    return true;
+    return launch( method == ActivationMethod.SNEAK);
   }
 
   @Override
@@ -101,35 +88,78 @@ public class Catapult extends AbilityInstance {
   }
 
   private Block getBase() {
-    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3(0, 0.1, 0));
+    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3(0, 0.2, 0));
     AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.location());
-    Predicate<Block> predicate = b -> entityBounds.intersects(AABBUtils.blockBounds(b)) && !b.isLiquid() && EarthMaterials.isEarthbendable(user, b);
-    return WorldMethods.nearbyBlocks(user.world(), floorBounds, predicate).stream()
+    return WorldMethods.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtils.blockBounds(b))).stream()
+      .filter(this::isValidBlock)
       .min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.location())))
-      .orElse(user.locBlock().getRelative(BlockFace.DOWN));
+      .orElse(null);
   }
 
-  private boolean launch() {
-    user.addCooldown(description(), userConfig.cooldown);
-    double power = sneak ? userConfig.sneakPower : userConfig.clickPower;
+  private boolean isValidBlock(Block block) {
+    if (block.isLiquid() || !TempBlock.isBendable(block) || !Bending.game().protectionSystem().canBuild(user, block)) {
+      return false;
+    }
+    return EarthMaterials.isEarthbendable(user, block);
+  }
 
-    Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    pillar = Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(3, 1).orElse(null);
-    SoundUtil.EARTH_SOUND.play(base.getLocation());
 
+  private boolean launch(boolean sneak) {
     double angle = Vector3.angle(Vector3.PLUS_J, user.direction());
-    Vector3 direction = angle > userConfig.angle ? Vector3.PLUS_J : user.direction();
+
+    int length = 0;
+    Block base = getBase();
+    boolean forceVertical = false;
+    if (base != null) {
+      length = getLength(new Vector3(base.getRelative(BlockFace.UP)), Vector3.MINUS_J);
+      if (angle > ANGLE) {
+        forceVertical = true;
+      }
+      pillar = Pillar.builder(user, base, EarthPillar::new)
+        .predicate(b -> !b.isLiquid() && EarthMaterials.isEarthbendable(user, b))
+        .build(3, 1).orElse(null);
+    } else {
+      if (angle >= ANGLE && angle <= 2 * ANGLE) {
+        Vector3 reverse = user.direction().scalarMultiply(-1);
+        length = getLength(user.location(), reverse);
+      }
+    }
+
+    if (length == 0) {
+      return false;
+    }
+
+    startTime = System.currentTimeMillis();
+    user.addCooldown(description(), userConfig.cooldown);
 
     Vector3 origin = user.location().add(new Vector3(0, 0.5, 0));
+    SoundUtil.EARTH_SOUND.play(origin.toLocation(user.world()));
+    if (base != null) {
+      ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
+        .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
+    }
 
-    ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
-      .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
-
-    Collider collider = new Sphere(origin, 1.5);
-    return CollisionUtil.handleEntityCollisions(user, collider, entity -> {
+    Vector3 direction = forceVertical ? Vector3.PLUS_J : user.direction();
+    double factor = length / (double) userConfig.length;
+    double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
+    return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
       entity.setVelocity(direction.scalarMultiply(power).clampVelocity());
       return true;
     }, true, true);
+  }
+
+  private int getLength(Vector3 origin, Vector3 direction) {
+    Set<Block> checked = new HashSet<>();
+    for (double i = 0.5; i <= userConfig.length; i += 0.5) {
+      Block block = origin.add(direction.scalarMultiply(i)).toBlock(user.world());
+      if (!checked.contains(block)) {
+        if (!isValidBlock(block)) {
+          return NumberConversions.ceil(i) - 1;
+        }
+        checked.add(block);
+      }
+    }
+    return userConfig.length;
   }
 
   @Override
@@ -159,7 +189,7 @@ public class Catapult extends AbilityInstance {
     public double sneakPower;
     @Attribute(Attribute.STRENGTH)
     public double clickPower;
-    public double angle;
+    public int length;
 
     @Override
     public void onConfigReload() {
@@ -168,7 +198,7 @@ public class Catapult extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(3000);
       sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
       clickPower = abilityNode.node("click-power").getDouble(1.8);
-      angle = FastMath.toRadians(abilityNode.node("angle").getInt(60));
+      length = FastMath.max(1, abilityNode.node("length").getInt(7));
     }
   }
 }
