@@ -136,7 +136,7 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   private void act() {
-    if (!user.canBend(description()) || user.isOnCooldown(description())) {
+    if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
     boolean acted = false;
@@ -162,7 +162,7 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   private void onSneak() {
-    if (!user.canBend(description()) || user.isOnCooldown(description())) {
+    if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
     Location center = user.rayTrace(userConfig.solidifyRange, false).toLocation(user.world());

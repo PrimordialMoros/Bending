@@ -70,7 +70,7 @@ public interface User extends BukkitUser {
     return true;
   }
 
-  boolean isOnCooldown(@NonNull AbilityDescription desc);
+  boolean onCooldown(@NonNull AbilityDescription desc);
 
   void addCooldown(@NonNull AbilityDescription desc, long duration);
 

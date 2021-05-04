@@ -32,14 +32,16 @@ import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
-import me.moros.bending.model.DummyAbilityManager;
+import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class WorldManager {
-  private final Map<World, WorldInstance> worlds;
+  public static final AbilityManager DUMMY_INSTANCE = new DummyAbilityManager();
+
+  private final Map<World, ManagerPair> worlds;
   private final Set<UUID> disabledWorlds;
 
   public WorldManager() {
@@ -53,25 +55,25 @@ public final class WorldManager {
     disabledWorlds = worldNames.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID)
       .collect(Collectors.toSet());
     worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
-      .collect(Collectors.toConcurrentMap(Function.identity(), WorldInstance::new));
+      .collect(Collectors.toConcurrentMap(Function.identity(), w -> new ManagerPair()));
   }
 
   public @NonNull AbilityManager instance(@NonNull World world) {
     if (isDisabledWorld(world.getUID())) {
-      return DummyAbilityManager.INSTANCE;
+      return DUMMY_INSTANCE;
     }
-    return worlds.computeIfAbsent(world, WorldInstance::new).abilities;
+    return worlds.computeIfAbsent(world,w -> new ManagerPair()).abilities;
   }
 
   public void update() {
-    for (Map.Entry<World, WorldInstance> entry : worlds.entrySet()) {
+    for (Map.Entry<World, ManagerPair> entry : worlds.entrySet()) {
       MCTiming timing = Bending.timingManager().ofStart(entry.getKey().getName() + ": Bending tick");
       entry.getValue().update();
       timing.stopTiming();
     }
   }
 
-  public void remove(@NonNull World world) {
+  public void onWorldUnload(@NonNull World world) {
     worlds.remove(world);
   }
 
@@ -91,18 +93,23 @@ public final class WorldManager {
     return disabledWorlds.contains(worldID);
   }
 
-  private static class WorldInstance {
-    private final AbilityManager abilities;
+  private static class ManagerPair {
+    private final AbilityManagerImpl abilities;
     private final CollisionManager collisions;
 
-    private WorldInstance(World world) {
-      abilities = new AbilityManager();
+    private ManagerPair() {
+      abilities = new AbilityManagerImpl();
       collisions = new CollisionManager(abilities);
     }
 
     private void update() {
       abilities.update();
       collisions.update();
+    }
+  }
+
+  private static class DummyAbilityManager implements AbilityManager {
+    private DummyAbilityManager() {
     }
   }
 }

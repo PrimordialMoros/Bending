@@ -22,6 +22,7 @@ package me.moros.bending.game.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,6 +31,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.bending.Bending;
+import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -37,30 +39,22 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class AbilityManager {
+public class AbilityManagerImpl implements AbilityManager {
   private final Multimap<User, Ability> globalInstances;
-  private final Collection<UserInstance> addQueue;
+  private final Collection<Map.Entry<User, Ability>> addQueue;
 
   @SuppressWarnings("UnstableApiUsage")
-  protected AbilityManager() {
+  protected AbilityManagerImpl() {
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
     addQueue = new ArrayList<>(32);
   }
 
-  private static class UserInstance {
-    private final User user;
-    private final Ability ability;
-
-    private UserInstance(User user, Ability ability) {
-      this.user = user;
-      this.ability = ability;
-    }
-  }
-
+  @Override
   public void addAbility(@NonNull User user, @NonNull Ability instance) {
-    addQueue.add(new UserInstance(user, instance));
+    addQueue.add(Map.entry(user, instance));
   }
 
+  @Override
   public void changeOwner(@NonNull Ability ability, @NonNull User user) {
     if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
       return;
@@ -71,6 +65,7 @@ public class AbilityManager {
     }
   }
 
+  @Override
   public void createPassives(@NonNull User user) {
     Collection<AbilityDescription> userPassives = user.elements().stream()
       .flatMap(Bending.game().abilityRegistry()::passives).collect(Collectors.toList());
@@ -85,32 +80,39 @@ public class AbilityManager {
     }
   }
 
+  @Override
   public void clearPassives(@NonNull User user) {
     userInstances(user).filter(a -> a.description().isActivatedBy(ActivationMethod.PASSIVE)).forEach(this::destroyAbility);
   }
 
+  @Override
   public int size() {
     return globalInstances.size();
   }
 
+  @Override
   public <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
     return userInstances(user, type).findAny().isPresent();
   }
 
+  @Override
   public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
     return hasAbility(user, desc.createAbility().getClass());
   }
 
+  @Override
   public void destroyInstance(@NonNull Ability ability) {
     if (globalInstances.remove(ability.user(), ability)) {
       destroyAbility(ability);
     }
   }
 
+  @Override
   public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
     return destroyInstanceType(user, desc.createAbility().getClass());
   }
 
+  @Override
   public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
     boolean destroyed = false;
     Iterator<Ability> iterator = globalInstances.get(user).iterator();
@@ -125,40 +127,46 @@ public class AbilityManager {
     return destroyed;
   }
 
+  @Override
   public @NonNull Stream<Ability> userInstances(@NonNull User user) {
     return globalInstances.get(user).stream();
   }
 
+  @Override
   public <T extends Ability> @NonNull Stream<T> userInstances(@NonNull User user, @NonNull Class<T> type) {
     return userInstances(user).filter(type::isInstance).map(type::cast);
   }
 
+  @Override
   public <T extends Ability> Optional<T> firstInstance(@NonNull User user, @NonNull Class<T> type) {
     return userInstances(user, type).findFirst();
   }
 
+  @Override
   public @NonNull Stream<Ability> instances() {
     return globalInstances.values().stream();
   }
 
+  @Override
   public <T extends Ability> @NonNull Stream<T> instances(@NonNull Class<T> type) {
     return instances().filter(type::isInstance).map(type::cast);
   }
 
+  @Override
   public void destroyUserInstances(@NonNull User user) {
     globalInstances.removeAll(user).forEach(this::destroyAbility);
   }
 
+  @Override
   public void destroyAllInstances() {
     globalInstances.values().forEach(this::destroyAbility);
     globalInstances.clear();
   }
 
+  @Override
   // Updates each ability every tick. Destroys the ability if ability.update() returns UpdateResult.Remove.
   public void update() {
-    for (UserInstance i : addQueue) {
-      globalInstances.put(i.user, i.ability);
-    }
+    addQueue.forEach(entry -> globalInstances.put(entry.getKey(), entry.getValue()));
     addQueue.clear();
     Iterator<Ability> globalIterator = globalInstances.values().iterator();
     while (globalIterator.hasNext()) {

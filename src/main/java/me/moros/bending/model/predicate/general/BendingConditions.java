@@ -28,7 +28,7 @@ import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum BendingConditions implements BendingConditional {
-  COOLDOWN((u, d) -> (!u.isOnCooldown(d))),
+  COOLDOWN((u, d) -> (!u.onCooldown(d))),
   ELEMENT((u, d) -> u.hasElement(d.element())),
   GAMEMODE((u, d) -> !u.spectator()),
   PERMISSION((u, d) -> u.hasPermission(d)),

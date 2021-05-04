@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.AbstractBlockLine;
+import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -126,7 +126,7 @@ public class Blaze extends AbilityInstance {
     return user;
   }
 
-  private class FireStream extends AbstractBlockLine {
+  private class FireStream extends BlockLine {
     public FireStream(Ray ray) {
       super(user, ray);
       this.interval = 70;

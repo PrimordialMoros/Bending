@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;

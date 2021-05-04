@@ -116,7 +116,7 @@ public class MetalCable extends AbilityInstance {
       }
     }
 
-    if (user.isOnCooldown(description())) {
+    if (user.onCooldown(description())) {
       return false;
     }
 

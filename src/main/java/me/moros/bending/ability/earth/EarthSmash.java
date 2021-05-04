@@ -108,7 +108,7 @@ public class EarthSmash extends AbilityInstance {
       return false;
     }
 
-    if (user.isOnCooldown(description())) {
+    if (user.onCooldown(description())) {
       return false;
     }
 

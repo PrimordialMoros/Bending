@@ -79,7 +79,7 @@ public class AirWheel extends AbilityInstance {
       scooterDesc = Bending.game().abilityRegistry().abilityDescription("AirScooter").orElseThrow(RuntimeException::new);
     }
     scooter = new AirScooter(scooterDesc);
-    if (user.isOnCooldown(scooterDesc) || !scooter.activate(user, ActivationMethod.ATTACK)) {
+    if (user.onCooldown(scooterDesc) || !scooter.activate(user, ActivationMethod.ATTACK)) {
       return false;
     }
     scooter.canRender = false;

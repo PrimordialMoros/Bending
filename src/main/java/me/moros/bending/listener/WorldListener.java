@@ -35,6 +35,6 @@ public class WorldListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onWorldUnload(WorldUnloadEvent event) {
-    game.clearWorld(event.getWorld());
+    game.worldManager().onWorldUnload(event.getWorld());
   }
 }

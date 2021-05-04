@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
-import me.moros.bending.game.manager.AbilityManager;
 import me.moros.bending.game.manager.PlayerManager;
 import me.moros.bending.game.manager.SequenceManager;
 import me.moros.bending.game.manager.WorldManager;
@@ -33,6 +32,7 @@ import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.BendingStorage;
@@ -151,8 +151,8 @@ public final class Game {
     return worldManager.instance(world);
   }
 
-  public void clearWorld(@NonNull World world) {
-    worldManager.remove(world);
+  public @NonNull WorldManager worldManager() {
+    return worldManager;
   }
 
   public @NonNull AttributeSystem attributeSystem() {

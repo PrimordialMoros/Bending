@@ -90,7 +90,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       return false;
     }
 
-    if (user.isOnCooldown(description())) {
+    if (user.onCooldown(description())) {
       return false;
     }
 

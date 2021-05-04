@@ -93,7 +93,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
   }
 
   public void freeze() {
-    if (!user.canBend(description()) || user.isOnCooldown(description())) {
+    if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
     Location center = user.rayTrace(userConfig.freezeRange, false).toLocation(user.world());
@@ -103,7 +103,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
   }
 
   public void melt() {
-    if (!user.canBend(description()) || user.isOnCooldown(description())) {
+    if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
     user.addCooldown(description(), 500);

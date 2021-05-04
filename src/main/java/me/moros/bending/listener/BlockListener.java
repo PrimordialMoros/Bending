@@ -100,7 +100,7 @@ public class BlockListener implements Listener {
     } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
       BendingPlayer player = game.playerManager().player(event.getPlayer());
       player.selectedAbility().ifPresent(desc -> {
-        if (desc.sourcePlant() && !player.isOnCooldown(desc)) {
+        if (desc.sourcePlant() && !player.onCooldown(desc)) {
           event.setCancelled(true);
         }
       });

@@ -28,7 +28,7 @@ import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class AbstractBlockLine extends AbstractTerrainFollower implements Updatable {
+public abstract class BlockLine extends AbstractTerrainFollower implements Updatable {
   private final User user;
   protected final Ray ray;
 
@@ -42,7 +42,7 @@ public abstract class AbstractBlockLine extends AbstractTerrainFollower implemen
   private double distanceTravelled = 0;
   private long nextUpdate = 0;
 
-  public AbstractBlockLine(@NonNull User user, @NonNull Ray ray) {
+  public BlockLine(@NonNull User user, @NonNull Ray ray) {
     this.user = user;
     this.ray = ray;
     this.maxRange = ray.direction.getNorm();

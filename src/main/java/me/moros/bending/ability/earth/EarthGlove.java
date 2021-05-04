@@ -99,7 +99,7 @@ public class EarthGlove extends AbilityInstance {
       return false;
     }
 
-    if (user.isOnCooldown(description()) || Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count() >= 2) {
+    if (user.onCooldown(description()) || Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count() >= 2) {
       return false;
     }
 

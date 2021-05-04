@@ -45,7 +45,7 @@ import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class AbstractBlockShot implements Updatable, SimpleAbility {
+public abstract class BlockShot implements Updatable, SimpleAbility {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
 
   private User user;
@@ -72,9 +72,9 @@ public abstract class AbstractBlockShot implements Updatable, SimpleAbility {
    * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  public AbstractBlockShot(@NonNull User user, @NonNull Block block, double range, int speed) {
+  public BlockShot(@NonNull User user, @NonNull Block block, double range, int speed) {
     this.user = user;
-    this.material = block.getType();
+    this.material = MaterialUtil.getSolidType(block.getBlockData()).getMaterial();
     this.current = block;
     this.range = range;
     this.speed = FastMath.min(100, speed);

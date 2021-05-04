@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.AbstractBlockLine;
+import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -219,7 +219,7 @@ public class Shockwave extends AbilityInstance {
     return user;
   }
 
-  private class Ripple extends AbstractBlockLine {
+  private class Ripple extends BlockLine {
     public Ripple(Ray ray, long interval) {
       super(user, ray);
       this.interval = interval;

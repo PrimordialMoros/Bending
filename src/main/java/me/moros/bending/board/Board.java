@@ -79,7 +79,7 @@ public class Board {
       component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
     } else {
       Component name = Component.text(desc.name(), desc.element().color());
-      if (bendingPlayer.isOnCooldown(desc)) {
+      if (bendingPlayer.onCooldown(desc)) {
         name = name.decorate(TextDecoration.STRIKETHROUGH);
       }
       component = Component.text(prefix).append(name);

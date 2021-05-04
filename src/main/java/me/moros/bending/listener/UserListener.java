@@ -131,7 +131,7 @@ public class UserListener implements Listener {
       String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
       TranslatableComponent msg = Bending.translationManager().getTranslation(deathKey);
       if (msg == null) {
-        msg = Component.translatable("bending.ability.generic.death");;
+        msg = Component.translatable("bending.ability.generic.death");
       }
       Component target = Component.text(event.getEntity().getName());
       Component source = Component.text(cause.user().entity().getName());

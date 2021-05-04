@@ -49,9 +49,11 @@ public class BendingUser implements User {
   protected BendingUser(@NonNull LivingEntity entity) {
     this.entity = entity;
     cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
-      .removalListener((key, value, cause) ->
-        Tasker.simpleTask(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0)
-      )
+      .removalListener((key, value, cause) -> {
+        if (key != null) {
+          Tasker.simpleTask(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0);
+        }
+      })
       .scheduler(Scheduler.systemScheduler())
       .build();
     slotContainer = new AbilitySlotContainer();
@@ -107,7 +109,7 @@ public class BendingUser implements User {
   }
 
   @Override
-  public boolean isOnCooldown(@NonNull AbilityDescription desc) {
+  public boolean onCooldown(@NonNull AbilityDescription desc) {
     return cooldowns.getIfPresent(desc) != null;
   }
 

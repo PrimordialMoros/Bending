@@ -28,7 +28,7 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.basic.AbstractBlockShot;
+import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -133,7 +133,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   private void launch() {
-    if (user.isOnCooldown(description())) {
+    if (user.onCooldown(description())) {
       return;
     }
     State state = states.current();
@@ -207,7 +207,7 @@ public class EarthBlast extends AbilityInstance {
     return Collections.singletonList(blast.collider());
   }
 
-  private class Blast extends AbstractBlockShot {
+  private class Blast extends BlockShot {
     private final double damage;
 
     public Blast(User user, Block block) {
