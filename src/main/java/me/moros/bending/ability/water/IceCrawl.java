@@ -158,7 +158,7 @@ public class IceCrawl extends AbilityInstance {
     public Line(Block source) {
       super(user, source, userConfig.range, 0.5, true);
       skipVertical = true;
-      diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
+      diagonalsPredicate = MaterialUtil::isTransparentOrWater;
     }
 
     @Override
@@ -197,11 +197,11 @@ public class IceCrawl extends AbilityInstance {
 
     @Override
     protected boolean isValidBlock(@NonNull Block block) {
-      Block above = block.getRelative(BlockFace.UP);
-      if (!MaterialUtil.isTransparentOrWater(above)) {
+      if (!MaterialUtil.isTransparentOrWater(block)) {
         return false;
       }
-      return MaterialUtil.isWater(block) || WaterMaterials.isIceBendable(block) || !block.isPassable();
+      Block below = block.getRelative(BlockFace.DOWN);
+      return MaterialUtil.isWater(below) || WaterMaterials.isIceBendable(below) || !below.isPassable();
     }
   }
 

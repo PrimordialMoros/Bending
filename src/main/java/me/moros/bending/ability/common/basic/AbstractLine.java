@@ -20,7 +20,6 @@
 package me.moros.bending.ability.common.basic;
 
 import java.util.Collections;
-import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
@@ -31,9 +30,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -42,12 +39,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class AbstractLine implements Updatable, SimpleAbility {
+public abstract class AbstractLine extends AbstractTerrainFollower implements Updatable, SimpleAbility {
   private final User user;
 
   protected final Vector3 origin;
 
-  protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparent(b);
   protected Vector3 location;
   protected Vector3 targetLocation;
   protected Vector3 direction;
@@ -106,43 +102,31 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
     render();
     postRender();
 
-    Vector3 originalVector = new Vector3(location.toArray());
-    location = location.add(direction.scalarMultiply(speed));
-    Block baseBlock = location.toBlock(user.world()).getRelative(BlockFace.DOWN);
-
-    if (!isValidBlock(baseBlock)) {
-      if (isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
-        location = location.add(Vector3.PLUS_J);
-      } else if (isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
-        location = location.add(Vector3.MINUS_J);
-      } else {
-        onCollision();
-        return UpdateResult.REMOVE;
-      }
-    } else if (skipVertical) { // Advance location vertically if possible to match target height
-      int y1 = NumberConversions.floor(targetLocation.getY());
-      int y2 = NumberConversions.floor(location.getY());
-      if (y1 > y2 && isValidBlock(baseBlock.getRelative(BlockFace.UP))) {
-        location = location.add(Vector3.PLUS_J);
-      } else if (y1 < y2 && isValidBlock(baseBlock.getRelative(BlockFace.DOWN))) {
-        location = location.add(Vector3.MINUS_J);
-      }
+    Vector3 newLocation = resolveMovement(user.world(), location, direction);
+    if (newLocation == null) {
+      onCollision();
+      return UpdateResult.REMOVE;
     }
 
-    Block originBlock = originalVector.toBlock(user.world());
-    for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction.scalarMultiply(speed))) {
-      int x = NumberConversions.floor(v.getX());
-      int y = NumberConversions.floor(v.getY());
-      int z = NumberConversions.floor(v.getZ());
-      if (diagonalsPredicate.test(originBlock.getRelative(x, y, z))) {
-        return UpdateResult.REMOVE;
+    location = newLocation;
+    Block block = location.toBlock(user.world());
+
+    if (skipVertical) { // Advance location vertically if possible to match target height
+      int y1 = NumberConversions.floor(targetLocation.getY());
+      int y2 = NumberConversions.floor(newLocation.getY());
+      if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
+        location = newLocation.add(Vector3.PLUS_J);
+        block = block.getRelative(BlockFace.UP);
+      } else if (y1 < y2 && isValidBlock(block.getRelative(BlockFace.DOWN))) {
+        location = newLocation.add(Vector3.MINUS_J);
+        block = block.getRelative(BlockFace.DOWN);
       }
     }
 
     if (location.distanceSq(origin) > range * range) {
       return UpdateResult.REMOVE;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
+    if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return UpdateResult.REMOVE;
     }
     return UpdateResult.CONTINUE;
@@ -155,8 +139,6 @@ public abstract class AbstractLine implements Updatable, SimpleAbility {
 
   protected void onCollision() {
   }
-
-  protected abstract boolean isValidBlock(@NonNull Block block);
 
   protected boolean isValidTarget() {
     if (target == null || !target.isValid()) {

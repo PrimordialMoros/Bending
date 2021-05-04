@@ -19,26 +19,19 @@
 
 package me.moros.bending.ability.common.basic;
 
-import java.util.function.Predicate;
-
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public abstract class AbstractBlockLine implements Updatable {
+public abstract class AbstractBlockLine extends AbstractTerrainFollower implements Updatable {
   private final User user;
   protected final Ray ray;
 
-  protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparent(b);
   protected Vector3 location;
   protected Vector3 dir;
 
@@ -67,35 +60,18 @@ public abstract class AbstractBlockLine implements Updatable {
       nextUpdate = time + interval;
     }
 
-    Vector3 originalVector = new Vector3(location.toArray());
-    location = location.add(dir);
-    Block block = location.toBlock(user.world());
-
-    if (!isValidBlock(block)) {
-      if (isValidBlock(block.getRelative(BlockFace.UP))) {
-        location = location.add(Vector3.PLUS_J);
-      } else if (isValidBlock(block.getRelative(BlockFace.DOWN))) {
-        location = location.add(Vector3.MINUS_J);
-      } else {
-        return UpdateResult.REMOVE;
-      }
+    Vector3 newLocation = resolveMovement(user.world(), location, dir);
+    if (newLocation == null) {
+      return UpdateResult.REMOVE;
     }
+
+    location = newLocation;
+    Block block = location.toBlock(user.world());
 
     if (location.distanceSq(ray.origin) > maxRange * maxRange) {
       return UpdateResult.REMOVE;
     }
 
-    Block originBlock = originalVector.toBlock(user.world());
-    for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, dir)) {
-      int x = NumberConversions.floor(v.getX());
-      int y = NumberConversions.floor(v.getY());
-      int z = NumberConversions.floor(v.getZ());
-      if (diagonalsPredicate.test(originBlock.getRelative(x, y, z))) {
-        return UpdateResult.REMOVE;
-      }
-    }
-
-    block = location.toBlock(user.world());
     if (!Bending.game().protectionSystem().canBuild(user, block)) {
       return UpdateResult.REMOVE;
     }
@@ -106,8 +82,6 @@ public abstract class AbstractBlockLine implements Updatable {
 
     return UpdateResult.CONTINUE;
   }
-
-  public abstract boolean isValidBlock(@NonNull Block block);
 
   public abstract void render(@NonNull Block block);
 }

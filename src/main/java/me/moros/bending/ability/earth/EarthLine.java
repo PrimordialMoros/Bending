@@ -270,16 +270,17 @@ public class EarthLine extends AbilityInstance {
 
     @Override
     protected boolean isValidBlock(@NonNull Block block) {
-      if (!MaterialUtil.isTransparent(block.getRelative(BlockFace.UP))) {
+      if (!MaterialUtil.isTransparent(block)) {
         return false;
       }
-      if (mode != Mode.MAGMA && MaterialUtil.isLava(block)) {
+      Block below = block.getRelative(BlockFace.DOWN);
+      if (mode != Mode.MAGMA && MaterialUtil.isLava(below)) {
         return false;
       }
-      if (mode == Mode.MAGMA && EarthMaterials.isMetalBendable(block)) {
+      if (mode == Mode.MAGMA && EarthMaterials.isMetalBendable(below)) {
         return false;
       }
-      return EarthMaterials.isEarthbendable(user, block);
+      return EarthMaterials.isEarthbendable(user, below);
     }
 
     @Override
