@@ -74,7 +74,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
    */
   public BlockShot(@NonNull User user, @NonNull Block block, double range, int speed) {
     this.user = user;
-    this.material = MaterialUtil.getSolidType(block.getBlockData()).getMaterial();
+    this.material = block.getType();
     this.current = block;
     this.range = range;
     this.speed = FastMath.min(100, speed);

@@ -24,6 +24,7 @@ import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
@@ -54,7 +55,7 @@ public final class DamageUtil {
           targetEntity.setHealth(newHealth);
         }
       }
-      targetEntity.damage(0, source.entity()); // For hurt animation, note: will call EntityDamageByEntityEvent again
+      targetEntity.playEffect(EntityEffect.HURT);
       targetEntity.setLastDamageCause(event);
       return true;
     }

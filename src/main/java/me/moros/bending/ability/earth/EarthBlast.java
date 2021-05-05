@@ -212,7 +212,7 @@ public class EarthBlast extends AbilityInstance {
 
     public Blast(User user, Block block) {
       super(user, block, userConfig.range, 100);
-      allowUnderWater = false;
+      material = MaterialUtil.getSolidType(block.getBlockData()).getMaterial();
       if (EarthMaterials.isMetalBendable(block)) {
         damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
       } else if (EarthMaterials.isLavaBendable(block)) {
