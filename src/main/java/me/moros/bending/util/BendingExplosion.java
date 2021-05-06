@@ -60,7 +60,7 @@ public final class BendingExplosion {
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, source, damage * distanceFactor, sourceDesc);
-        FireTick.LARGER.apply(source, entity, fireTicks);
+        FireTick.ignite(source, entity, fireTicks);
       }
       double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
       if (entity.equals(source.entity())) {

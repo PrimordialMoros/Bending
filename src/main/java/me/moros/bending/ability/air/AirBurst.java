@@ -19,25 +19,47 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.Burst;
+import me.moros.bending.ability.common.basic.BurstUtil;
+import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
+import org.apache.commons.math3.util.FastMath;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class AirBurst extends Burst {
+public class AirBurst extends AbilityInstance {
   private enum Mode {CONE, SPHERE, FALL}
 
   private static final Config config = new Config();
 
   private User user;
   private Config userConfig;
+  private RemovalPolicy removalPolicy;
+
+  private final Collection<AirStream> streams = new ArrayList<>();
 
   private boolean released;
   private long startTime;
@@ -57,6 +79,7 @@ public class AirBurst extends Burst {
     this.user = user;
     recalculateConfig();
 
+    removalPolicy = Policies.builder().build();
     released = false;
     if (method == ActivationMethod.FALL) {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
@@ -75,6 +98,10 @@ public class AirBurst extends Burst {
 
   @Override
   public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, description())) {
+      return UpdateResult.REMOVE;
+    }
+
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
@@ -89,12 +116,19 @@ public class AirBurst extends Burst {
       }
       return UpdateResult.CONTINUE;
     }
-    return updateBurst();
+
+    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
   @Override
   public @NonNull User user() {
     return user;
+  }
+
+  @Override
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   private boolean isCharged() {
@@ -106,16 +140,85 @@ public class AirBurst extends Burst {
       return;
     }
     released = true;
+    Collection<Ray> rays;
     switch (mode) {
       case CONE:
-        cone(() -> new AirBlast(description()), userConfig.coneRange);
+        rays = BurstUtil.cone(user, userConfig.coneRange);
+        break;
       case FALL:
-        fall(() -> new AirBlast(description()), userConfig.sphereRange);
+        rays = BurstUtil.fall(user, userConfig.sphereRange);
+        break;
       case SPHERE:
       default:
-        sphere(() -> new AirBlast(description()), userConfig.sphereRange);
+        rays = BurstUtil.sphere(user, userConfig.sphereRange);
+        break;
     }
+    rays.forEach(r -> streams.add(new AirStream(r)));
     user.addCooldown(description(), userConfig.cooldown);
+  }
+
+  private class AirStream extends ParticleStream {
+    private long nextRenderTime;
+
+    public AirStream(Ray ray) {
+      super(user, ray, userConfig.speed, 1.3);
+      canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
+      livingOnly = false;
+    }
+
+    @Override
+    public void render() {
+      long time = System.currentTimeMillis();
+      if (time >= nextRenderTime) {
+        ParticleUtil.createAir(bukkitLocation()).offset(0.275, 0.275, 0.275).spawn();
+        nextRenderTime = time + 75;
+      }
+    }
+
+    @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(12) == 0) {
+        SoundUtil.AIR_SOUND.play(bukkitLocation());
+      }
+    }
+
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      double factor = userConfig.power;
+      FireTick.extinguish(entity);
+      if (factor == 0) {
+        return false;
+      }
+
+      Vector3 push = ray.direction.normalize();
+      // Cap vertical push
+      push = push.setY(FastMath.max(-0.3, FastMath.min(0.3, push.getY())));
+
+      factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
+      Vector3 velocity = new Vector3(entity.getVelocity());
+      // The strength of the entity's velocity in the direction of the blast.
+      double strength = velocity.dotProduct(push.normalize());
+      if (strength > factor) {
+        double f = velocity.normalize().dotProduct(push.normalize());
+        velocity = velocity.scalarMultiply(0.5).add(push.normalize().scalarMultiply(f));
+      } else if (strength + factor * 0.5 > factor) {
+        velocity = velocity.add(push.scalarMultiply(factor - strength));
+      } else {
+        velocity = velocity.add(push.scalarMultiply(factor * 0.5));
+      }
+      entity.setVelocity(velocity.clampVelocity());
+      entity.setFallDistance(0);
+      return false;
+    }
+
+    @Override
+    public boolean onBlockHit(@NonNull Block block) {
+      if (BlockMethods.tryExtinguishFire(user, block)) {
+        return false;
+      }
+      BlockMethods.tryCoolLava(user, block);
+      return true;
+    }
   }
 
   private static class Config extends Configurable {
@@ -123,6 +226,10 @@ public class AirBurst extends Burst {
     public long cooldown;
     @Attribute(Attribute.CHARGE_TIME)
     public int chargeTime;
+    @Attribute(Attribute.SPEED)
+    public double speed;
+    @Attribute(Attribute.STRENGTH)
+    public double power;
     @Attribute(Attribute.RANGE)
     public double sphereRange;
     @Attribute(Attribute.RANGE)
@@ -135,6 +242,8 @@ public class AirBurst extends Burst {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       chargeTime = abilityNode.node("charge-time").getInt(3500);
+      speed = abilityNode.node("speed").getDouble(1.2);
+      power = abilityNode.node("knockback").getDouble(1.2);
       coneRange = abilityNode.node("cone-range").getDouble(16.0);
       sphereRange = abilityNode.node("sphere-range").getDouble(12.0);
       fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);

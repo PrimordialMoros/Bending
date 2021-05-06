@@ -57,6 +57,7 @@ public final class DamageUtil {
       }
       targetEntity.playEffect(EntityEffect.HURT);
       targetEntity.setLastDamageCause(event);
+      targetEntity.setLastDamage(dmg);
       return true;
     }
     return false;

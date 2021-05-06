@@ -135,7 +135,7 @@ public class FireWheel extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
+      FireTick.ignite(user, entity, userConfig.fireTicks);
       return true;
     }
 

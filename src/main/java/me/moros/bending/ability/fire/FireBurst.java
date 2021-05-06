@@ -19,23 +19,55 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.Burst;
+import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.ability.common.basic.BurstUtil;
+import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.predicate.removal.Policies;
+import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingProperties;
+import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class FireBurst extends Burst {
+public class FireBurst extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
   private Config userConfig;
+  private RemovalPolicy removalPolicy;
+
+  private final Collection<FireStream> streams = new ArrayList<>();
+  private final Set<Entity> affectedEntities = new HashSet<>();
 
   private boolean released;
   private long startTime;
@@ -55,6 +87,7 @@ public class FireBurst extends Burst {
     this.user = user;
     recalculateConfig();
 
+    removalPolicy = Policies.builder().build();
     released = false;
     startTime = System.currentTimeMillis();
     return true;
@@ -67,6 +100,10 @@ public class FireBurst extends Burst {
 
   @Override
   public @NonNull UpdateResult update() {
+    if (removalPolicy.test(user, description())) {
+      return UpdateResult.REMOVE;
+    }
+
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
@@ -81,12 +118,19 @@ public class FireBurst extends Burst {
       }
       return UpdateResult.CONTINUE;
     }
-    return updateBurst();
+
+    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
   @Override
   public @NonNull User user() {
     return user;
+  }
+
+  @Override
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
   private boolean isCharged() {
@@ -98,12 +142,76 @@ public class FireBurst extends Burst {
       return;
     }
     released = true;
+    Collection<Ray> rays;
     if (cone) {
-      cone(() -> new FireBlast(description()), userConfig.coneRange);
+      rays = BurstUtil.cone(user, userConfig.coneRange);
     } else {
-      sphere(() -> new FireBlast(description()), userConfig.sphereRange);
+      rays = BurstUtil.sphere(user, userConfig.sphereRange);
     }
+    rays.forEach(r -> streams.add(new FireStream(r)));
     user.addCooldown(description(), userConfig.cooldown);
+  }
+
+  private class FireStream extends ParticleStream {
+    private long nextRenderTime;
+
+    public FireStream(Ray ray) {
+      super(user, ray, userConfig.speed, 1);
+      canCollide = Block::isLiquid;
+    }
+
+    @Override
+    public void render() {
+      long time = System.currentTimeMillis();
+      if (time >= nextRenderTime) {
+        Location loc = bukkitLocation();
+        ParticleUtil.createFire(user, loc).offset(0.25, 0.25, 0.25).extra(0.03).spawn();
+        nextRenderTime = time + 75;
+      }
+    }
+
+    @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(12) == 0) {
+        SoundUtil.FIRE_SOUND.play(bukkitLocation());
+      }
+    }
+
+    @Override
+    public boolean onEntityHit(@NonNull Entity entity) {
+      if (affectedEntities.contains(entity)) {
+        return true;
+      }
+      affectedEntities.add(entity);
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      FireTick.ignite(user, entity, userConfig.fireTicks);
+      entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
+      return true;
+    }
+
+    @Override
+    public boolean onBlockHit(@NonNull Block block) {
+      Vector3 reverse = ray.direction.scalarMultiply(-1);
+      Location center = bukkitLocation();
+      double igniteRadius = 1.5;
+      if (user.location().distanceSq(new Vector3(block)) > 4) {
+        for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
+          if (!Bending.game().protectionSystem().canBuild(user, b)) {
+            continue;
+          }
+          if (WorldMethods.blockCast(user.world(), new Ray(new Vector3(b), reverse), igniteRadius + 2).isPresent()) {
+            continue;
+          }
+          BlockMethods.tryLightBlock(b);
+          if (MaterialUtil.isIgnitable(b)) {
+            long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
+            TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);
+          }
+        }
+      }
+      FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
+      return true;
+    }
   }
 
   private static class Config extends Configurable {
@@ -111,6 +219,12 @@ public class FireBurst extends Burst {
     public long cooldown;
     @Attribute(Attribute.CHARGE_TIME)
     public int chargeTime;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
+    @Attribute(Attribute.FIRE_TICKS)
+    public int fireTicks;
+    @Attribute(Attribute.SPEED)
+    public double speed;
 
     @Attribute(Attribute.RANGE)
     public double sphereRange;
@@ -123,8 +237,12 @@ public class FireBurst extends Burst {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       chargeTime = abilityNode.node("charge-time").getInt(3500);
+      damage = abilityNode.node("damage").getDouble(4.0);
+      fireTicks = abilityNode.node("fire-ticks").getInt(45);
+      speed = abilityNode.node("speed").getDouble(0.8);
       coneRange = abilityNode.node("cone-range").getDouble(11.0);
       sphereRange = abilityNode.node("sphere-range").getDouble(7.0);
+
     }
   }
 }

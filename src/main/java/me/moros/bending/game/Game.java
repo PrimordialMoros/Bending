@@ -34,6 +34,7 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.Flight;
@@ -87,6 +88,7 @@ public final class Game {
     playerManager.onlinePlayers().forEach(worldManager::createPassives);
 
     Tasker.repeatingTask(this::update, 1);
+    Tasker.repeatingTask(FireTick::cleanup, 5);
   }
 
   private void update() {

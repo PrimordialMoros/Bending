@@ -90,7 +90,6 @@ permissions:
       bending.command.choose.Fire: true
       bending.ability.FireKick: true
       bending.ability.FireSpin: true
-      bending.ability.FireWave: true
       bending.ability.FireWheel: true
       bending.ability.Blaze: true
       bending.ability.Bolt: true

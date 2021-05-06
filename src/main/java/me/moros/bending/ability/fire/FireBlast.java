@@ -33,7 +33,6 @@ import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -65,7 +64,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class FireBlast extends AbilityInstance implements Explosive, Burstable {
+public class FireBlast extends AbilityInstance implements Explosive {
   private static final Config config = new Config();
 
   private User user;
@@ -78,8 +77,6 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
   private boolean charging;
   private boolean exploded = false;
   private double factor = 1.0;
-  private int particleCount = 6;
-  private long renderInterval = 0;
   private long startTime;
 
   public FireBlast(@NonNull AbilityDescription desc) {
@@ -97,7 +94,7 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
       return false;
     }
 
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().add(Policies.IN_LIQUID).build();
 
     for (FireBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, FireBlast.class).collect(Collectors.toList())) {
       if (blast.charging) {
@@ -144,6 +141,7 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
       factor += deltaFactor;
     }
     charging = false;
+    removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.mainHandSide();
     Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range * factor);
@@ -202,18 +200,6 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
   }
 
   @Override
-  public void burstInstance(@NonNull User user, @NonNull Ray ray) {
-    this.user = user;
-    recalculateConfig();
-    factor = 1.0;
-    charging = false;
-    removalPolicy = Policies.builder().build();
-    particleCount = 1;
-    renderInterval = 75;
-    stream = new FireStream(ray);
-  }
-
-  @Override
   public void explode() {
     createExplosion(stream.location(), userConfig.explosionRadius, userConfig.damage * factor);
   }
@@ -236,35 +222,26 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
   }
 
   private class FireStream extends ParticleStream {
-    private double offset = 0.25;
-    private double particleSpeed = 0.03;
+    private final double offset;
+    private final double particleSpeed;
     private final int amount;
     private final boolean explosive;
-    private long nextRenderTime;
 
     public FireStream(Ray ray) {
       super(user, ray, userConfig.speed * factor, factor);
       canCollide = Block::isLiquid;
-      if (factor > 1) {
-        offset += factor - 1;
-        particleSpeed *= factor;
-        amount = NumberConversions.ceil(particleCount * 3 * factor);
-      } else {
-        amount = particleCount;
-      }
+      offset = 0.25 + (factor - 1);
+      particleSpeed = 0.03 * factor;
+      amount = NumberConversions.ceil(6 * FastMath.pow(factor, 3));
       explosive = factor == userConfig.chargeFactor;
       singleCollision = explosive;
     }
 
     @Override
     public void render() {
-      long time = System.currentTimeMillis();
-      if (renderInterval == 0 || time >= nextRenderTime) {
-        Location loc = bukkitLocation();
-        ParticleUtil.createFire(user, loc)
-          .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
-        nextRenderTime = time + renderInterval;
-      }
+      Location loc = bukkitLocation();
+      ParticleUtil.createFire(user, loc)
+        .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
     }
 
     @Override
@@ -281,7 +258,7 @@ public class FireBlast extends AbilityInstance implements Explosive, Burstable {
         return true;
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
+      FireTick.ignite(user, entity, userConfig.fireTicks);
       entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
       return true;
     }

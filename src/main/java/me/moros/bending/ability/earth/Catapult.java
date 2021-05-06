@@ -71,7 +71,7 @@ public class Catapult extends AbilityInstance {
     this.user = user;
     recalculateConfig();
 
-    return launch( method == ActivationMethod.SNEAK);
+    return launch(method == ActivationMethod.SNEAK);
   }
 
   @Override

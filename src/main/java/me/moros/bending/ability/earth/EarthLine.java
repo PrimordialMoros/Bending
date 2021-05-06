@@ -249,7 +249,7 @@ public class EarthLine extends AbilityInstance {
           return true;
         case MAGMA:
           damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
-          FireTick.LARGER.apply(user, entity, 40);
+          FireTick.ignite(user, entity, 40);
           break;
       }
       DamageUtil.damageEntity(entity, user, damage, description());

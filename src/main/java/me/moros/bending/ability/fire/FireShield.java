@@ -21,6 +21,7 @@ package me.moros.bending.ability.fire;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -43,6 +44,8 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -51,6 +54,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -61,6 +65,7 @@ public class FireShield extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
   private Shield shield;
   private ThreadLocalRandom rand;
 
@@ -113,17 +118,23 @@ public class FireShield extends AbilityInstance {
     }
 
     shield.render();
-    CollisionUtil.handleEntityCollisions(user, shield.collider(), entity -> {
-      if (sphere && entity instanceof Projectile) {
-        entity.remove();
-        return true;
-      }
-      FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
-      return true;
-    }, false);
+    CollisionUtil.handleEntityCollisions(user, shield.collider(), this::onEntityHit, false);
 
     shield.update();
     return UpdateResult.CONTINUE;
+  }
+
+  private boolean onEntityHit(Entity entity) {
+    if (sphere && entity instanceof Projectile) {
+      entity.remove();
+      return true;
+    }
+    FireTick.ignite(user, entity, userConfig.fireTicks);
+    if (!affectedEntities.contains(entity)) {
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      affectedEntities.add(entity);
+    }
+    return false;
   }
 
   public boolean isSphere() {
@@ -249,6 +260,8 @@ public class FireShield extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
     @Attribute(Attribute.FIRE_TICKS)
     public int fireTicks;
     @Attribute(Attribute.COOLDOWN)
@@ -270,7 +283,8 @@ public class FireShield extends AbilityInstance {
     @Override
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
-      fireTicks = abilityNode.node("fire-ticks").getInt(45);
+      damage = abilityNode.node("damage").getDouble(0.5);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
 
       diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
       diskDuration = abilityNode.node("disk", "duration").getLong(1000);

@@ -70,7 +70,6 @@ import me.moros.bending.ability.fire.FireWall;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.fire.sequences.FireKick;
 import me.moros.bending.ability.fire.sequences.FireSpin;
-import me.moros.bending.ability.fire.sequences.FireWave;
 import me.moros.bending.ability.fire.sequences.FireWheel;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.ability.water.HealingWaters;
@@ -399,10 +398,6 @@ public final class AbilityInitializer {
       .element(FIRE).activation(ATTACK).build();
     abilities.add(fireWall);
 
-    AbilityDescription fireWave = AbilityDescription.builder("FireWave", FireWave::new)
-      .element(FIRE).activation(SEQUENCE).build();
-    abilities.add(fireWave);
-
     AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
       .element(FIRE).activation(SEQUENCE).build();
     abilities.add(fireKick);
@@ -420,14 +415,6 @@ public final class AbilityInitializer {
 
     abilities.add(AbilityDescription.builder("Combustion", Combustion::new)
       .element(FIRE).activation(ATTACK, SNEAK).bypassCooldown(true).build());
-
-    sequences.put(fireWave, new Sequence(
-      new AbilityAction(heatControl, SNEAK),
-      new AbilityAction(heatControl, SNEAK_RELEASE),
-      new AbilityAction(heatControl, SNEAK),
-      new AbilityAction(heatControl, SNEAK_RELEASE),
-      new AbilityAction(fireWall, ATTACK)
-    ));
 
     sequences.put(fireKick, new Sequence(
       new AbilityAction(fireBlast, ATTACK),

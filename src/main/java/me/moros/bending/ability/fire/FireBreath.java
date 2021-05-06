@@ -21,6 +21,7 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -46,11 +47,11 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -66,6 +67,7 @@ public class FireBreath extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
   private final Collection<FireStream> streams = new ArrayList<>();
 
   public FireBreath(@NonNull AbilityDescription desc) {
@@ -154,9 +156,11 @@ public class FireBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      double factor = 1 - FastMath.min(0.9, distanceTravelled / maxRange);
-      DamageUtil.damageEntity(entity, user, factor * userConfig.damage, description());
-      FireTick.LARGER.apply(user, entity, NumberConversions.ceil(factor * userConfig.fireTicks));
+      FireTick.ignite(user, entity, userConfig.fireTicks);
+      if (!affectedEntities.contains(entity)) {
+        affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      }
       return false;
     }
 
@@ -192,8 +196,8 @@ public class FireBreath extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(12000);
       range = abilityNode.node("range").getDouble(9.0);
       duration = abilityNode.node("duration").getLong(2000);
-      damage = abilityNode.node("damage").getDouble(0.5);
-      fireTicks = abilityNode.node("fire-ticks").getInt(40);
+      damage = abilityNode.node("damage").getDouble(0.75);
+      fireTicks = abilityNode.node("fire-ticks").getInt(25);
     }
   }
 }

@@ -122,7 +122,7 @@ public class FireSpin extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        FireTick.LARGER.apply(user, entity, userConfig.fireTicks);
+        FireTick.ignite(user, entity, userConfig.fireTicks);
         entity.setVelocity(ray.direction.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
       }
       return true;

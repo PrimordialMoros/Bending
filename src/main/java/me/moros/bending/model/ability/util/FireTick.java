@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Tasker;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -32,34 +31,11 @@ import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public enum FireTick implements FireTickMethod {
-  OVERWRITE(FireTick::igniteEntity),
-  LARGER((u, e, t) -> {
-    if (e.getFireTicks() < t) {
-      igniteEntity(u, e, t);
-    }
-  }),
-  ACCUMULATE((u, e, t) -> igniteEntity(u, e, FastMath.max(0, e.getFireTicks()) + t));
-
-  private final FireTickMethod method;
-
-  FireTick(FireTickMethod method) {
-    this.method = method;
-  }
-
-  @Override
-  public void apply(@NonNull User source, @NonNull Entity target, int ticks) {
-    method.apply(source, target, ticks);
-  }
-
-  public static final int MAX_TICKS = 90;
+public class FireTick {
+  public static final int MAX_TICKS = 100;
   private static final Map<LivingEntity, User> INSTANCES = new ConcurrentHashMap<>();
 
-  static {
-    Tasker.repeatingTask(FireTick::cleanup, 5);
-  }
-
-  private static void cleanup() {
+  public static void cleanup() {
     INSTANCES.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);
   }
 
@@ -70,14 +46,15 @@ public enum FireTick implements FireTickMethod {
     }
   }
 
-  private static void igniteEntity(@NonNull User source, @NonNull Entity entity, int ticks) {
-    if (ticks <= 0) {
+  public static void ignite(@NonNull User source, @NonNull Entity entity, int ticks) {
+    int currentTicks = entity.getFireTicks();
+    if (ticks <= 0 || currentTicks >= ticks) {
       return;
     }
     if (ticks > MAX_TICKS) {
       ticks = MAX_TICKS;
     }
-    if (entity instanceof LivingEntity) {
+    if (currentTicks <= 0) {
       int duration = NumberConversions.ceil(ticks / 20.0);
       EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(source.entity(), entity, duration);
       Bukkit.getPluginManager().callEvent(event);
@@ -87,6 +64,7 @@ public enum FireTick implements FireTickMethod {
       }
     } else {
       entity.setFireTicks(ticks);
+      INSTANCES.put((LivingEntity) entity, source);
     }
   }
 }

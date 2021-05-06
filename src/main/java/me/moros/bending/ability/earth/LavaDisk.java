@@ -214,7 +214,7 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     affectedEntities.add(entity);
-    FireTick.ACCUMULATE.apply(user, entity, 20);
+    FireTick.ignite(user, entity, 30);
     DamageUtil.damageEntity(entity, user, damage, description());
     currentPower -= userConfig.powerDiminishPerEntity;
     ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)

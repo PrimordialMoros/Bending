@@ -29,7 +29,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.Burstable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.FireTick;
@@ -53,7 +52,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class AirBlast extends AbilityInstance implements Burstable {
+public class AirBlast extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
@@ -62,14 +61,9 @@ public class AirBlast extends AbilityInstance implements Burstable {
 
   private AirStream stream;
   private Vector3 origin;
-  private Vector3 direction;
 
   private boolean launched;
   private boolean selectedOrigin;
-  private double selfFactor;
-  private double otherFactor;
-  private int particleCount = 6;
-  private long renderInterval = 0;
 
   public AirBlast(@NonNull AbilityDescription desc) {
     super(desc);
@@ -101,9 +95,6 @@ public class AirBlast extends AbilityInstance implements Burstable {
         return false;
       }
     }
-
-    selfFactor = userConfig.self;
-    otherFactor = userConfig.other;
 
     if (method == ActivationMethod.SNEAK_RELEASE) {
       return selectOrigin();
@@ -150,7 +141,7 @@ public class AirBlast extends AbilityInstance implements Burstable {
       origin = new Vector3(target.toArray());
       target = temp;
     }
-    direction = target.subtract(origin).normalize();
+    Vector3 direction = target.subtract(origin).normalize();
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     stream = new AirStream(new Ray(origin, direction.scalarMultiply(userConfig.range)));
@@ -169,25 +160,7 @@ public class AirBlast extends AbilityInstance implements Burstable {
     return user;
   }
 
-  @Override
-  public void burstInstance(@NonNull User user, @NonNull Ray ray) {
-    this.user = user;
-    recalculateConfig();
-    selectedOrigin = false;
-    launched = true;
-    origin = ray.origin;
-    this.direction = ray.direction.normalize();
-    removalPolicy = Policies.builder().build();
-    particleCount = 1;
-    renderInterval = 75;
-    selfFactor = 0;
-    otherFactor = 0.5 * userConfig.other;
-    stream = new AirStream(ray);
-  }
-
   private class AirStream extends ParticleStream {
-    private long nextRenderTime;
-
     public AirStream(Ray ray) {
       super(user, ray, userConfig.speed, 1.3);
       canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
@@ -196,13 +169,9 @@ public class AirBlast extends AbilityInstance implements Burstable {
 
     @Override
     public void render() {
-      long time = System.currentTimeMillis();
-      if (renderInterval == 0 || time >= nextRenderTime) {
-        ParticleUtil.createAir(bukkitLocation()).count(particleCount)
-          .offset(0.275, 0.275, 0.275)
-          .spawn();
-        nextRenderTime = time + renderInterval;
-      }
+      ParticleUtil.createAir(bukkitLocation()).count(6)
+        .offset(0.275, 0.275, 0.275)
+        .spawn();
     }
 
     @Override
@@ -222,22 +191,19 @@ public class AirBlast extends AbilityInstance implements Burstable {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       boolean isUser = entity.equals(user.entity());
-      if (isUser && !selectedOrigin) {
-        return false;
-      }
-      double factor = isUser ? selfFactor : otherFactor;
+      double factor = isUser ? userConfig.self : userConfig.other;
       FireTick.extinguish(entity);
       if (factor == 0) {
         return false;
       }
 
-      Vector3 push = direction;
+      Vector3 push = ray.direction.normalize();
       if (!isUser) {
         // Cap vertical push
         push = push.setY(FastMath.max(-0.3, FastMath.min(0.3, push.getY())));
       }
 
-      factor *= 1 - (location.distance(origin) / (2 * maxRange));
+      factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
       // Reduce the push if the player is on the ground.
       if (isUser && user.isOnGround()) {
         factor *= 0.5;
