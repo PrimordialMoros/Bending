@@ -29,17 +29,7 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull AABB at(@NonNull Vector3 pos) {
-    return this;
-  }
-
-  @Override
   public @NonNull AABB grow(@NonNull Vector3 diff) {
-    return this;
-  }
-
-  @Override
-  public @NonNull AABB scale(@NonNull Vector3 diff) {
     return this;
   }
 
@@ -54,22 +44,7 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull Vector3 mid() {
-    return Vector3.ZERO;
-  }
-
-  @Override
-  public boolean contains(@NonNull Vector3 test) {
-    return false;
-  }
-
-  @Override
-  public boolean intersects(@NonNull AABB other) {
-    return false;
-  }
-
-  @Override
-  public boolean intersects(@NonNull Sphere sphere) {
+  public boolean intersects(@NonNull Collider collider) {
     return false;
   }
 
@@ -79,18 +54,23 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public boolean intersects(@NonNull Collider collider) {
-    return false;
-  }
-
-  @Override
   public @NonNull Vector3 position() {
     return Vector3.ZERO;
   }
 
   @Override
+  public @NonNull AABB at(@NonNull Vector3 pos) {
+    return this;
+  }
+
+  @Override
   public @NonNull Vector3 halfExtents() {
     return Vector3.ZERO;
+  }
+
+  @Override
+  public boolean contains(@NonNull Vector3 point) {
+    return false;
   }
 
   @Override

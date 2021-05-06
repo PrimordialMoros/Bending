@@ -181,8 +181,7 @@ public class FireShield extends AbilityInstance {
       Vector3 right = user.rightSide();
       Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.yaw()), RotationConvention.VECTOR_OPERATOR);
       rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.pitch()), RotationConvention.VECTOR_OPERATOR));
-      OBB obb = new OBB(aabb, rotation).addPosition(location);
-      disk = new Disk(obb, new Sphere(location, userConfig.diskRadius));
+      disk = new Disk(new OBB(aabb, rotation), new Sphere(userConfig.diskRadius)).at(location);
     }
 
     @Override

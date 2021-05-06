@@ -262,7 +262,7 @@ public class WaterRing extends AbilityInstance {
       if (affectedEntities.contains(entity)) {
         return false;
       }
-      AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block.getLocation()));
+      AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
       AABB entityBounds = AABBUtils.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());

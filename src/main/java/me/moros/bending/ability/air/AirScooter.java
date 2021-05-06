@@ -175,7 +175,7 @@ public class AirScooter extends AbilityInstance {
     double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
     Vector3 offset = user.direction().setY(0).normalize().scalarMultiply(speed);
     Vector3 location = user.location().add(offset);
-    AABB userBounds = AABBUtils.entityBounds(user.entity()).at(offset);
+    AABB userBounds = AABBUtils.entityBounds(user.entity()).at(location);
     for (Block block : BlockMethods.combineFaces(location.toBlock(user.world()))) {
       if (AABBUtils.blockBounds(block).intersects(userBounds)) {
         return 2.25;

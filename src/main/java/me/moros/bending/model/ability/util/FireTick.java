@@ -60,10 +60,16 @@ public class FireTick {
       Bukkit.getPluginManager().callEvent(event);
       if (!event.isCancelled() && event.getDuration() > 0) {
         entity.setFireTicks(FastMath.min(ticks, event.getDuration() * 20));
-        INSTANCES.put((LivingEntity) entity, source);
+        trackEntity(entity, source);
       }
     } else {
       entity.setFireTicks(ticks);
+      trackEntity(entity, source);
+    }
+  }
+
+  private static void trackEntity(Entity entity, User source) {
+    if (entity instanceof LivingEntity) {
       INSTANCES.put((LivingEntity) entity, source);
     }
   }

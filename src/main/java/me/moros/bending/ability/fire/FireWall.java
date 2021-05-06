@@ -42,6 +42,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -69,6 +70,7 @@ public class FireWall extends AbilityInstance {
 
   private Collection<Vector3> bases;
   private final Set<Entity> cachedEntities = new ExpiringSet<>(500);
+  private final Set<Entity> damagedEntities = new ExpiringSet<>(500);
   private OBB collider;
   private Vector3 center;
   private Vector3 direction;
@@ -106,7 +108,7 @@ public class FireWall extends AbilityInstance {
 
     Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.yaw()), RotationConvention.VECTOR_OPERATOR);
     AABB aabb = new AABB(new Vector3(-hw, -0.5, -0.6), new Vector3(hw, userConfig.maxHeight, 0.6));
-    collider = new OBB(aabb, rotation).addPosition(center);
+    collider = new OBB(aabb, rotation).at(center);
 
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
@@ -245,7 +247,11 @@ public class FireWall extends AbilityInstance {
 
     if (!cachedEntities.contains(entity)) {
       if (Bending.game().benderRegistry().user((LivingEntity) entity).map(HeatControl::canBurn).orElse(true)) {
-        FireTick.ignite(user, entity, FastMath.max(0, entity.getFireTicks()) + 10);
+        FireTick.ignite(user, entity, 15);
+        if (!damagedEntities.contains(entity)) {
+          damagedEntities.add(entity);
+          DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        }
         Vector3 pos = EntityMethods.entityCenter(entity);
         Vector3 velocity = pos.subtract(collider.closestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
         entity.setVelocity(velocity.clampVelocity());
@@ -276,8 +282,8 @@ public class FireWall extends AbilityInstance {
     public double width;
     @Attribute(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.FIRE_TICKS)
-    public double fireTicks;
+    @Attribute(Attribute.DAMAGE)
+    public double damage;
     @Attribute(Attribute.STRENGTH)
     public double knockback;
     @Attribute(Attribute.DURATION)
@@ -296,7 +302,7 @@ public class FireWall extends AbilityInstance {
       height = abilityNode.node("height").getDouble(4);
       width = abilityNode.node("width").getDouble(6.0);
       range = abilityNode.node("range").getDouble(3.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(10);
+      damage = abilityNode.node("damage").getDouble(0.5);
       knockback = abilityNode.node("knockback").getDouble(0.33);
       duration = abilityNode.node("duration").getLong(8000);
 

@@ -52,7 +52,7 @@ public class ModifyCommand extends BaseCommand {
   }
 
   @Subcommand("add|a")
-  @CommandCompletion("@elements|@abilities @attributes * * @players")
+  @CommandCompletion("@elements|@allabilities @attributes * * @players")
   @Description("Add a new modifier to the specified player")
   public static void onAdd(BendingPlayer player, ModifyPolicy policy, String type, ModifierOperation operation, double amount, @Optional OnlinePlayer target) {
     String validType = Arrays.stream(Attribute.TYPES)

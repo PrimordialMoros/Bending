@@ -23,7 +23,7 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// Combines an OBB and Sphere to create a disc-like collider.
+// Combines an OBB and Sphere to create a disk collider.
 public class Disk implements Collider {
   private final Sphere sphere;
   private final OBB obb;
@@ -31,14 +31,6 @@ public class Disk implements Collider {
   public Disk(@NonNull OBB obb, @NonNull Sphere sphere) {
     this.obb = obb;
     this.sphere = sphere;
-  }
-
-  public @NonNull Disk addPosition(@NonNull Vector3 position) {
-    return new Disk(this.obb.addPosition(position), this.sphere.at(position));
-  }
-
-  public @NonNull Disk at(@NonNull Vector3 position) {
-    return new Disk(this.obb.at(position), this.sphere.at(position));
   }
 
   @Override
@@ -49,6 +41,11 @@ public class Disk implements Collider {
   @Override
   public @NonNull Vector3 position() {
     return sphere.center;
+  }
+
+  @Override
+  public @NonNull Disk at(@NonNull Vector3 position) {
+    return new Disk(obb.at(position), sphere.at(position));
   }
 
   @Override

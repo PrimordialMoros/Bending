@@ -62,7 +62,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     AABB bounds = new AABB(new Vector3(-0.15, -radius, -radius), new Vector3(0.15, radius, radius));
     double angle = FastMath.toRadians(user.yaw());
     OBB obb = new OBB(bounds, Vector3.PLUS_J, angle);
-    collider = new Disk(obb, new Sphere(location, radius));
+    collider = new Disk(obb, new Sphere(radius));
   }
 
   @Override
@@ -81,7 +81,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     render();
     postRender();
     onBlockHit(base.getRelative(BlockFace.UP));
-    boolean hit = CollisionUtil.handleEntityCollisions(user, collider.addPosition(location), this::onEntityHit);
+    boolean hit = CollisionUtil.handleEntityCollisions(user, collider.at(location), this::onEntityHit);
     return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
@@ -92,7 +92,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 
   @Override
   public @NonNull Collider collider() {
-    return collider.addPosition(location);
+    return collider.at(location);
   }
 
   public @NonNull Vector3 location() {
@@ -123,7 +123,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     }
     // Try to fall if the block below doesn't have a bounding box.
     if (location.setY(bottomY).toBlock(user.world()).isPassable()) {
-      Disk tempCollider = collider.addPosition(location.subtract(Vector3.PLUS_J));
+      Disk tempCollider = collider.at(location.subtract(Vector3.PLUS_J));
       if (nearbyBlocks.stream().map(AABBUtils::blockBounds).noneMatch(tempCollider::intersects)) {
         location = location.add(Vector3.MINUS_J);
         return true;

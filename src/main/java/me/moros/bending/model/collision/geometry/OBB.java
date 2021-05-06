@@ -59,18 +59,12 @@ public class OBB implements Collider {
     this(aabb, new Rotation(axis, angle, RotationConvention.VECTOR_OPERATOR));
   }
 
-  public @NonNull OBB addPosition(@NonNull Vector3 position) {
-    return new OBB(center.add(position), basis, e);
-  }
-
-  public @NonNull OBB at(@NonNull Vector3 position) {
-    return new OBB(position, basis, e);
-  }
-
   @Override
   public boolean intersects(@NonNull Collider collider) {
-    if (collider instanceof Sphere) {
-      return ((Sphere) collider).intersects(this);
+    if (collider instanceof DummyCollider) {
+      return false;
+    } else if (collider instanceof Sphere) {
+      return collider.intersects(this);
     } else if (collider instanceof AABB) {
       return intersects(new OBB((AABB) collider));
     } else if (collider instanceof OBB) {
@@ -81,7 +75,7 @@ public class OBB implements Collider {
     return false;
   }
 
-  public boolean intersects(@NonNull OBB other) {
+  private boolean intersects(OBB other) {
     double ra, rb;
     RealMatrix R = getRotationMatrix(other);
     // translation
@@ -209,6 +203,11 @@ public class OBB implements Collider {
   @Override
   public @NonNull Vector3 position() {
     return center;
+  }
+
+  @Override
+  public @NonNull OBB at(@NonNull Vector3 point) {
+    return new OBB(point, basis, e);
   }
 
   @Override

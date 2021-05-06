@@ -36,18 +36,8 @@ public class AABB implements Collider {
     this.max = max;
   }
 
-  public @NonNull AABB at(@NonNull Vector3 pos) {
-    return new AABB(min.add(pos), max.add(pos));
-  }
-
   public @NonNull AABB grow(@NonNull Vector3 diff) {
     return new AABB(min.subtract(diff), max.add(diff));
-  }
-
-  public @NonNull AABB scale(@NonNull Vector3 diff) {
-    Vector3 extents = halfExtents();
-    Vector3 newExtents = extents.multiply(diff);
-    return grow(newExtents.subtract(extents));
   }
 
   public @NonNull Vector3 min() {
@@ -58,20 +48,23 @@ public class AABB implements Collider {
     return max;
   }
 
-  public @NonNull Vector3 mid() {
-    return min.add(max().subtract(min()).scalarMultiply(0.5));
-  }
-
-  public boolean contains(@NonNull Vector3 test) {
-    return (test.getX() >= min.getX() && test.getX() <= max.getX()) &&
-      (test.getY() >= min.getY() && test.getY() <= max.getY()) &&
-      (test.getZ() >= min.getZ() && test.getZ() <= max.getZ());
-  }
-
-  public boolean intersects(@NonNull AABB other) {
-    if (other instanceof DummyCollider) {
+  @Override
+  public boolean intersects(@NonNull Collider collider) {
+    if (collider instanceof DummyCollider) {
       return false;
+    } else if (collider instanceof Sphere) {
+      return intersects((Sphere) collider);
+    } else if (collider instanceof AABB) {
+      return intersects((AABB) collider);
+    } else if (collider instanceof OBB) {
+      return collider.intersects(this);
+    } else if (collider instanceof Disk) {
+      return collider.intersects(this);
     }
+    return false;
+  }
+
+  private boolean intersects(@NonNull AABB other) {
     return (max.getX() > other.min.getX() &&
       min.getX() < other.max.getX() &&
       max.getY() > other.min.getY() &&
@@ -80,7 +73,7 @@ public class AABB implements Collider {
       min.getZ() < other.max.getZ());
   }
 
-  public boolean intersects(@NonNull Sphere sphere) {
+  private boolean intersects(@NonNull Sphere sphere) {
     return sphere.intersects(this);
   }
 
@@ -93,23 +86,14 @@ public class AABB implements Collider {
   }
 
   @Override
-  public boolean intersects(@NonNull Collider collider) {
-    if (collider instanceof Sphere) {
-      return intersects((Sphere) collider);
-    } else if (collider instanceof AABB) {
-      return intersects((AABB) collider);
-    } else if (collider instanceof OBB) {
-      return collider.intersects(this);
-    } else if (collider instanceof Disk) {
-      return collider.intersects(this);
-    }
-
-    return false;
+  public @NonNull Vector3 position() {
+    return min.add(max.subtract(min).scalarMultiply(0.5));
   }
 
   @Override
-  public @NonNull Vector3 position() {
-    return mid();
+  public @NonNull AABB at(@NonNull Vector3 point) {
+    Vector3 halfExtends = halfExtents();
+    return new AABB(point.add(halfExtends.scalarMultiply(-1)), point.add(halfExtends));
   }
 
   @Override
@@ -119,7 +103,9 @@ public class AABB implements Collider {
   }
 
   @Override
-  public String toString() {
-    return "[AABB min: " + min + ", max: " + max + "]";
+  public boolean contains(@NonNull Vector3 point) {
+    return (point.getX() >= min.getX() && point.getX() <= max.getX()) &&
+      (point.getY() >= min.getY() && point.getY() <= max.getY()) &&
+      (point.getZ() >= min.getZ() && point.getZ() <= max.getZ());
   }
 }
