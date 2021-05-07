@@ -19,6 +19,8 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
@@ -81,7 +83,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       render();
       postRender();
 
-      if (i % NumberConversions.ceil(speed * steps) != 0) {
+      if (steps > 1 && i % NumberConversions.ceil(speed * steps) != 0) {
         continue; // Avoid unnecessary collision checks
       }
       // Use previous collider for entity checks for visual reasons
@@ -92,24 +94,35 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       collider = collider.at(location);
 
       Block originBlock = originalVector.toBlock(user.world());
+      Set<Block> toCheck = new HashSet<>();
+      if (speed > 1) {
+        toCheck.add(originalVector.add(vector.scalarMultiply(0.5)).toBlock(user.world()));
+      }
+
       for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
         int x = NumberConversions.floor(v.getX());
         int y = NumberConversions.floor(v.getY());
         int z = NumberConversions.floor(v.getZ());
-        Block block = originBlock.getRelative(x, y, z);
-        if (canCollide.test(block) && onBlockHit(block)) {
-          return UpdateResult.REMOVE;
-        }
-        if (!MaterialUtil.isTransparent(block)) {
-          if (AABBUtils.blockBounds(block).intersects(collider)) {
-            if (onBlockHit(block)) {
-              return UpdateResult.REMOVE;
-            }
-          }
-        }
+        toCheck.add(originBlock.getRelative(x, y, z));
+      }
+
+      if (toCheck.stream().anyMatch(this::testCollision)) {
+        return UpdateResult.REMOVE;
       }
     }
     return UpdateResult.CONTINUE;
+  }
+
+  private boolean testCollision(Block block) {
+    if (canCollide.test(block) && onBlockHit(block)) {
+      return true;
+    }
+    if (!MaterialUtil.isTransparent(block)) {
+      if (AABBUtils.blockBounds(block).intersects(collider)) {
+        return onBlockHit(block);
+      }
+    }
+    return false;
   }
 
   public @NonNull Location bukkitLocation() {

@@ -50,6 +50,7 @@ import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -57,7 +58,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -209,15 +209,12 @@ public class FireBlast extends AbilityInstance implements Explosive {
       return;
     }
     exploded = true;
-    Location loc = center.toLocation(user.world());
-    ParticleUtil.create(Particle.EXPLOSION_HUGE, loc).spawn();
-    SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 5, 1);
-
     BendingExplosion.builder()
       .size(size)
       .damage(damage)
       .fireTicks(userConfig.fireTicks)
       .ignoreInsideCollider(ignoreCollider)
+      .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 5, 1))
       .buildAndExplode(user, description(), center);
   }
 
@@ -232,7 +229,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       canCollide = Block::isLiquid;
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.03 * factor;
-      amount = NumberConversions.ceil(6 * FastMath.pow(factor, 3));
+      amount = NumberConversions.ceil(6 * FastMath.pow(factor, 4));
       explosive = factor == userConfig.chargeFactor;
       singleCollision = explosive;
     }

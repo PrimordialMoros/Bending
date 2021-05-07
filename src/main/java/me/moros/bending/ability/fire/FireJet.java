@@ -117,10 +117,9 @@ public class FireJet extends AbilityInstance {
 
   private void jetBlastAnimation() {
     Vector3 center = user.location().add(new Vector3(0, 0.2, 0));
-    VectorMethods.circle(Vector3.ONE, Vector3.PLUS_J, 36).forEach(v -> {
-      Vector3 velocity = v.scalarMultiply(0.6);
-      ParticleUtil.createFire(user, center.add(v.scalarMultiply(0.3)).toLocation(user.world()))
-        .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
+    VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 36).forEach(v -> {
+      ParticleUtil.createFire(user, center.add(v.scalarMultiply(0.5)).toLocation(user.world()))
+        .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(0.09).spawn();
     });
     SoundUtil.playSound(user.entity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10, 0);
   }
@@ -139,7 +138,7 @@ public class FireJet extends AbilityInstance {
 
     Vector3 target = user.location().add(user.velocity().scalarMultiply(-1));
     int amount = jetBlast ? 16 : 10;
-    double offset = jetBlast ? 0.6 : 0.3;
+    double offset = jetBlast ? 0.7 : 0.4;
     for (int i = 0; i < amount; i++) {
       Vector3 center = VectorMethods.gaussianOffset(user.location(), offset);
       Vector3 v = target.subtract(center).normalize();

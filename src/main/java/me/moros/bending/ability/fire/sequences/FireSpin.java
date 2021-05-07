@@ -100,14 +100,14 @@ public class FireSpin extends AbilityInstance {
 
   private class FireStream extends ParticleStream {
     public FireStream(Ray ray) {
-      super(user, ray, userConfig.speed, 0.5);
+      super(user, ray, userConfig.speed / 2, 0.5);
       canCollide = Block::isLiquid;
+      steps = 2;
     }
 
     @Override
     public void render() {
-      ParticleUtil.createFire(user, bukkitLocation())
-        .offset(0.1, 0.1, 0.1).extra(0.01).spawn();
+      ParticleUtil.createFire(user, bukkitLocation()).extra(0.01).spawn();
     }
 
     @Override
@@ -157,7 +157,7 @@ public class FireSpin extends AbilityInstance {
       damage = abilityNode.node("damage").getDouble(2.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(6.0);
-      speed = abilityNode.node("speed").getDouble(0.55);
+      speed = abilityNode.node("speed").getDouble(0.5);
       knockback = abilityNode.node("knockback").getDouble(1.8);
 
       abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");

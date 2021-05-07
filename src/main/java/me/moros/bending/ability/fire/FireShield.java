@@ -197,7 +197,7 @@ public class FireShield extends AbilityInstance {
         for (double j = 0.2; j <= 1; j += 0.2) {
           Location spawnLoc = location.add(new Vector3(array).scalarMultiply(j * userConfig.diskRadius)).toLocation(user.world());
           ParticleUtil.createFire(user, spawnLoc)
-            .offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+            .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
           if (rand.nextInt(12) == 0) {
             SoundUtil.FIRE_SOUND.play(spawnLoc);
           }
@@ -235,8 +235,8 @@ public class FireShield extends AbilityInstance {
       Vector3 center = center();
       double radius = userConfig.shieldRadius;
       currentPoint++;
-      double spacing = radius / 8;
-      for (int i = 1; i < 16; i++) {
+      double spacing = radius / 16;
+      for (int i = 1; i < 32; i++) {
         double y = (i * spacing) - radius;
         double factor = 1 - (y * y) / (radius * radius);
         if (factor <= 0.2) {
@@ -246,7 +246,7 @@ public class FireShield extends AbilityInstance {
         double z = radius * factor * FastMath.sin(i * currentPoint);
         Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.world());
         ParticleUtil.createFire(user, spawnLoc)
-          .offset(0.2, 0.1, 0.2).extra(0.01).spawn();
+          .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
         if (rand.nextInt(12) == 0) {
           SoundUtil.FIRE_SOUND.play(spawnLoc);
         }

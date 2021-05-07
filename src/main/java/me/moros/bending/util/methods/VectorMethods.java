@@ -192,11 +192,8 @@ public final class VectorMethods {
   }
 
   public static @NonNull Vector3 gaussianOffset(Vector3 target, double offset) {
-    ThreadLocalRandom rand = ThreadLocalRandom.current();
-    double[] v = new double[3];
-    for (int i = 0; i < 3; i++) {
-      v[i] = (rand.nextGaussian() - 0.5) * offset;
-    }
+    ThreadLocalRandom r = ThreadLocalRandom.current();
+    double[] v = {r.nextGaussian() * offset, r.nextGaussian() * offset, r.nextGaussian() * offset};
     return target.add(new Vector3(v));
   }
 }

@@ -111,8 +111,8 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.createFire(user, bukkitLocation()).count(2)
-        .offset(0.25, 0.25, 0.25).extra(0.01).spawn();
+      ParticleUtil.createFire(user, bukkitLocation()).count(4)
+        .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
     }
 
     @Override

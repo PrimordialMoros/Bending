@@ -28,6 +28,9 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import org.apache.commons.math3.util.FastMath;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -39,7 +42,9 @@ public final class BendingExplosion {
   private final double sizeFactor;
   private final int fireTicks;
   private final boolean livingOnly;
+  private final boolean particles;
   private final Collider ignoreInside;
+  private final SoundEffect soundEffect;
 
   private BendingExplosion(ExplosionBuilder builder) {
     this.size = builder.size;
@@ -47,13 +52,36 @@ public final class BendingExplosion {
     this.selfKnockbackFactor = builder.selfKnockbackFactor;
     this.fireTicks = builder.fireTicks;
     this.livingOnly = builder.livingOnly;
+    this.particles = builder.particles;
     this.ignoreInside = builder.ignoreInside;
+    this.soundEffect = builder.soundEffect;
 
     halfSize = size / 2;
     sizeFactor = FastMath.sqrt(size);
   }
 
+  private void playParticles(Location center) {
+    if (size <= 1.5) {
+      ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(NumberConversions.ceil(10 * size))
+        .offset(0.75, 0.75, 0.75).spawn();
+    } else if (size <= 3) {
+      ParticleUtil.create(Particle.EXPLOSION_LARGE, center).count(NumberConversions.ceil(3 * size))
+        .offset(1.5, 1.5, 1.5).spawn();
+    } else if (size <= 5) {
+      ParticleUtil.create(Particle.EXPLOSION_HUGE, center).spawn();
+    } else {
+      ParticleUtil.create(Particle.EXPLOSION_HUGE, center).count(NumberConversions.ceil(size / 5))
+        .offset(2.5, 2.5, 2.5).spawn();
+    }
+  }
+
   public boolean explode(@NonNull User source, @NonNull AbilityDescription sourceDesc, @NonNull Vector3 center) {
+    if (particles) {
+      playParticles(center.toLocation(source.world()));
+    }
+    if (soundEffect != null) {
+      soundEffect.play(center.toLocation(source.world()));
+    }
     return CollisionUtil.handleEntityCollisions(source, new Sphere(center, size), entity -> {
       Vector3 entityCenter = EntityMethods.entityCenter(entity);
       double distance = center.distance(entityCenter);
@@ -82,7 +110,9 @@ public final class BendingExplosion {
     private double selfKnockbackFactor = 0.5;
     private int fireTicks = 40;
     private boolean livingOnly = true;
+    private boolean particles = true;
     private Collider ignoreInside = null;
+    private SoundEffect soundEffect = null;
 
     private ExplosionBuilder() {
     }
@@ -112,8 +142,18 @@ public final class BendingExplosion {
       return this;
     }
 
+    public @NonNull ExplosionBuilder particles(boolean particles) {
+      this.particles = particles;
+      return this;
+    }
+
     public @NonNull ExplosionBuilder ignoreInsideCollider(@Nullable Collider ignoreInside) {
       this.ignoreInside = ignoreInside;
+      return this;
+    }
+
+    public @NonNull ExplosionBuilder soundEffect(@Nullable SoundEffect soundEffect) {
+      this.soundEffect = soundEffect;
       return this;
     }
 

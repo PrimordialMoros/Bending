@@ -48,6 +48,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -162,21 +163,19 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
     exploded = true;
     Location loc = center.toLocation(user.world());
-    ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.5).count(20)
+    ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.5).count(20)
+    ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.FIREWORKS_SPARK, loc, userConfig.particleRange).extra(0.5).count(20)
+    ParticleUtil.create(Particle.FIREWORKS_SPARK, loc, userConfig.particleRange).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.EXPLOSION_HUGE, loc, userConfig.particleRange).extra(0.5).count(5)
-      .offset(1, 1, 1).spawn();
-    SoundUtil.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F);
 
     BendingExplosion.builder()
       .size(size)
       .damage(damage)
       .fireTicks(userConfig.fireTicks)
       .ignoreInsideCollider(ignoreCollider)
+      .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F))
       .buildAndExplode(user, description(), center);
 
     FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
@@ -280,7 +279,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       cooldown = abilityNode.node("cooldown").getLong(12000);
       damage = abilityNode.node("damage").getDouble(5.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(50);
-      power = abilityNode.node("power").getDouble(2.4);
+      power = abilityNode.node("power").getDouble(3.4);
       range = abilityNode.node("range").getDouble(56.0);
 
       particleRange = NumberConversions.ceil(range);

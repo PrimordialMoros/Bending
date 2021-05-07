@@ -339,7 +339,7 @@ public class EarthShot extends AbilityInstance {
           ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
           SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
         }
-        Block projected = spawnLoc.add(projectile.fallingBlock().getVelocity().normalize().multiply(0.75)).getBlock();
+        Block projected = projectile.center().add(lastVelocity.normalize().scalarMultiply(0.75)).toBlock(user.world());
         FragileStructure.tryDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
       }
       projectile.revert();
