@@ -23,7 +23,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -51,7 +50,7 @@ public final class DamageUtil {
         dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
         if (dmg > 0) {
           double previousHealth = targetEntity.getHealth();
-          double newHealth = FastMath.max(0, previousHealth - dmg);
+          double newHealth = Math.max(0, previousHealth - dmg);
           targetEntity.setHealth(newHealth);
         }
       }

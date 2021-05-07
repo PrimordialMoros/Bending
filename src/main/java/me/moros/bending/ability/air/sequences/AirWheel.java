@@ -45,7 +45,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -100,8 +99,8 @@ public class AirWheel extends AbilityInstance {
   @Override
   public @NonNull UpdateResult update() {
     long time = System.currentTimeMillis();
-    center = user.location().add(new Vector3(0, 0.8, 0)).add(user.direction().setY(0).scalarMultiply(1.2));
-    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, FastMath.toRadians(user.yaw())), new Sphere(center, 2));
+    center = user.location().add(new Vector3(0, 0.8, 0)).add(user.direction().setY(0).multiply(1.2));
+    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
 
     if (time >= nextRenderTime) {
       render();
@@ -133,7 +132,7 @@ public class AirWheel extends AbilityInstance {
 
   private void render() {
     Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.direction().setY(0));
-    VectorMethods.circle(user.direction().scalarMultiply(1.6), rotateAxis, 40).forEach(v ->
+    VectorMethods.circle(user.direction().multiply(1.6), rotateAxis, 40).forEach(v ->
       ParticleUtil.createAir(center.add(v).toLocation(user.world())).spawn()
     );
   }

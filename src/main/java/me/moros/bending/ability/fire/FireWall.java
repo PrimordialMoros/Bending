@@ -50,9 +50,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -106,9 +103,8 @@ public class FireWall extends AbilityInstance {
     height = userConfig.height;
     currentHeight = 1;
 
-    Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.yaw()), RotationConvention.VECTOR_OPERATOR);
     AABB aabb = new AABB(new Vector3(-hw, -0.5, -0.6), new Vector3(hw, userConfig.maxHeight, 0.6));
-    collider = new OBB(aabb, rotation).at(center);
+    collider = new OBB(aabb, Vector3.PLUS_J, Math.toRadians(user.yaw())).at(center);
 
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
@@ -198,10 +194,10 @@ public class FireWall extends AbilityInstance {
     Vector3 side = direction.crossProduct(Vector3.PLUS_J).normalize();
     Collection<Vector3> possibleBases = new ArrayList<>();
     for (double i = -hw; i < hw; i += 0.9) {
-      Vector3 check = center.add(side.scalarMultiply(i));
+      Vector3 check = center.add(side.multiply(i));
       Block block = check.toBlock(user.world());
       if (MaterialUtil.isTransparent(block) && Bending.game().protectionSystem().canBuild(user, block)) {
-        double baseY = NumberConversions.floor(check.getY()) + 0.25;
+        double baseY = NumberConversions.floor(check.y) + 0.25;
         possibleBases.add(check.setY(baseY));
       }
     }
@@ -230,7 +226,7 @@ public class FireWall extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    double requiredY = center.getY() + currentHeight;
+    double requiredY = center.y + currentHeight;
     if (entity.getLocation().getY() > requiredY) {
       return false;
     }
@@ -241,19 +237,19 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!(entity instanceof LivingEntity)) {
-      entity.setVelocity(Vector3.ZERO.toVector());
+      entity.setVelocity(Vector3.ZERO.toBukkitVector());
       return true;
     }
 
     if (!cachedEntities.contains(entity)) {
       if (Bending.game().benderRegistry().user((LivingEntity) entity).map(HeatControl::canBurn).orElse(true)) {
-        FireTick.ignite(user, entity, 15);
+        FireTick.ignite(user, entity);
         if (!damagedEntities.contains(entity)) {
           damagedEntities.add(entity);
           DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         }
         Vector3 pos = EntityMethods.entityCenter(entity);
-        Vector3 velocity = pos.subtract(collider.closestPosition(pos)).normalize().scalarMultiply(userConfig.knockback);
+        Vector3 velocity = pos.subtract(collider.closestPosition(pos)).normalize().multiply(userConfig.knockback);
         entity.setVelocity(velocity.clampVelocity());
         return true;
       } else {

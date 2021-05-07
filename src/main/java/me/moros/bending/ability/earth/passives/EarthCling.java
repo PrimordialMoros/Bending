@@ -36,7 +36,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
@@ -78,13 +77,13 @@ public class EarthCling extends AbilityInstance implements Ability {
     long counter = Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count();
     if (counter > 0 && EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
       if (counter == 2) {
-        user.entity().setVelocity(Vector3.ZERO.toVector());
+        user.entity().setVelocity(Vector3.ZERO.toBukkitVector());
         user.entity().setFallDistance(0);
       } else {
-        if (user.velocity().getY() < 0) {
-          double fallDistance = FastMath.max(0, user.entity().getFallDistance() - userConfig.speed);
+        if (user.velocity().y < 0) {
+          double fallDistance = Math.max(0, user.entity().getFallDistance() - userConfig.speed);
           user.entity().setFallDistance((float) fallDistance);
-          user.entity().setVelocity(user.velocity().scalarMultiply(userConfig.speed).clampVelocity());
+          user.entity().setVelocity(user.velocity().multiply(userConfig.speed).clampVelocity());
           ParticleUtil.create(Particle.CRIT, user.entity().getEyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05);
           ParticleUtil.create(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)

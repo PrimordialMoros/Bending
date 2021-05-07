@@ -45,7 +45,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -77,10 +76,10 @@ public class AirPunch extends AbilityInstance {
 
     user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.mainHandSide();
-    Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range);
+    Vector3 lookingDir = user.direction().multiply(userConfig.range);
 
     double length = user.velocity().subtract(user.direction()).getNorm();
-    double factor = (length == 0) ? 1 : FastMath.max(0.5, FastMath.min(1.5, 1 / length));
+    double factor = (length == 0) ? 1 : Math.max(0.5, Math.min(1.5, 1 / length));
     stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
     return true;
   }
@@ -119,9 +118,9 @@ public class AirPunch extends AbilityInstance {
 
     @Override
     public void render() {
-      VectorMethods.circle(Vector3.ONE.scalarMultiply(0.75), user.direction(), 10).forEach(v ->
-        ParticleUtil.create(Particle.CLOUD, bukkitLocation().add(v.toVector()))
-          .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
+      VectorMethods.circle(Vector3.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
+        ParticleUtil.create(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
+          .count(0).offset(v.x, v.y, v.z).extra(-0.04).spawn()
       );
     }
 
@@ -135,7 +134,7 @@ public class AirPunch extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
       entity.setVelocity(velocity.clampVelocity());
       return true;
     }

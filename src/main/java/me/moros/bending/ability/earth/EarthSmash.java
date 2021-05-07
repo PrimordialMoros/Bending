@@ -50,6 +50,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -66,7 +67,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -74,10 +74,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.BlockVector;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EarthSmash extends AbilityInstance {
   private static final Config config = new Config();
@@ -157,7 +155,7 @@ public class EarthSmash extends AbilityInstance {
 
     boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
 
-    int minRequired = NumberConversions.ceil(FastMath.pow(userConfig.radius, 3) * 0.43);
+    int minRequired = NumberConversions.ceil(Math.pow(userConfig.radius, 3) * 0.43);
     if (boulder.data().size() < minRequired) {
       boulder = null;
       return false;
@@ -196,7 +194,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private static @Nullable EarthSmash getInstance(User user, Block block, Predicate<EarthSmash> filter) {
+  private static EarthSmash getInstance(User user, Block block, Predicate<EarthSmash> filter) {
     if (block == null) {
       return null;
     }
@@ -344,7 +342,7 @@ public class EarthSmash extends AbilityInstance {
         for (int z = -half; z <= half; z++) {
           for (int x = -half; x <= half; x++) {
             // Remove bottom layer
-            if ((FastMath.abs(x) + FastMath.abs(z)) % 2 != 0) {
+            if ((Math.abs(x) + Math.abs(z)) % 2 != 0) {
               Block block = origin.add(new Vector3(x, -1, z)).toBlock(boulder.world);
               if (EarthMaterials.isEarthNotLava(user, block)) {
                 TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
@@ -370,13 +368,13 @@ public class EarthSmash extends AbilityInstance {
     private final double grabbedDistance;
 
     private GrabState() {
-      this.grabbedDistance = FastMath.min(boulder.center.distance(user.eyeLocation()), userConfig.grabRange);
+      this.grabbedDistance = Math.min(boulder.center.distance(user.eyeLocation()), userConfig.grabRange);
     }
 
     @Override
     public @NonNull UpdateResult update() {
       if (user.sneaking()) {
-        Vector3 dir = user.direction().normalize().scalarMultiply(grabbedDistance);
+        Vector3 dir = user.direction().normalize().multiply(grabbedDistance);
         Block newCenter = user.eyeLocation().add(dir).toBlock(boulder.world);
         if (newCenter.equals(boulder.center.toBlock(boulder.world))) {
           return UpdateResult.CONTINUE;
@@ -432,7 +430,7 @@ public class EarthSmash extends AbilityInstance {
       affectedEntities.add(entity);
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       Vector3 velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
-      entity.setVelocity(velocity.scalarMultiply(userConfig.knockback).clampVelocity());
+      entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
       return false;
     }
 
@@ -465,7 +463,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static class Boulder {
-    private final Map<BlockVector, BlockData> data;
+    private final Map<IntVector, BlockData> data;
     private final AABB bounds;
     private final AABB preciseBounds;
     private final World world;
@@ -481,21 +479,21 @@ public class EarthSmash extends AbilityInstance {
       this.size = size;
       expireTime = System.currentTimeMillis() + duration;
       data = new HashMap<>();
-      center = new Vector3(centerBlock).add(Vector3.HALF);
+      center = Vector3.center(centerBlock);
       double hr = size / 2.0;
       preciseBounds = new AABB(new Vector3(-hr, -hr, -hr), new Vector3(hr, hr, hr));
       bounds = preciseBounds.grow(Vector3.ONE);
       int half = (size - 1) / 2;
-      Vector3 tempVector = center.add(Vector3.MINUS_J.scalarMultiply(half)); // When mapping blocks use the real center block
+      IntVector tempVector = new IntVector(centerBlock.getRelative(BlockFace.DOWN, half)); // When mapping blocks use the real center block
       for (int dy = -half; dy <= half; dy++) {
         for (int dz = -half; dz <= half; dz++) {
           for (int dx = -half; dx <= half; dx++) {
-            BlockVector point = new BlockVector(dx, dy, dz);
-            Block block = tempVector.add(new Vector3(point)).toBlock(world);
+            IntVector point = new IntVector(dx, dy, dz);
+            Block block = tempVector.add(point).toBlock(world);
             if (!EarthMaterials.isEarthNotLava(user, block) || !Bending.game().protectionSystem().canBuild(user, block)) {
               continue;
             }
-            if ((FastMath.abs(dx) + FastMath.abs(dy) + FastMath.abs(dz)) % 2 == 0) {
+            if ((Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) % 2 == 0) {
               data.put(point, MaterialUtil.getSolidType(block.getBlockData()));
             }
           }
@@ -520,7 +518,7 @@ public class EarthSmash extends AbilityInstance {
     private boolean blendSmash() {
       int originalSize = data.size();
       Collection<Block> removed = new ArrayList<>();
-      Iterator<BlockVector> iterator = data.keySet().iterator();
+      Iterator<IntVector> iterator = data.keySet().iterator();
       while (iterator.hasNext()) {
         Block block = center.add(new Vector3(iterator.next())).toBlock(world);
         if (!isValidBlock(block)) {
@@ -533,12 +531,12 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private boolean isValidCenter(Block check) {
-      Vector3 temp = new Vector3(check).add(Vector3.HALF);
+      Vector3 temp = Vector3.center(check);
       return data.keySet().stream().map(bv -> temp.add(new Vector3(bv)).toBlock(world)).allMatch(this::isValidBlock);
     }
 
     private void center(Block block) {
-      this.center = new Vector3(block).add(Vector3.HALF);
+      this.center = Vector3.center(block);
     }
 
     private Collider collider() {
@@ -597,7 +595,7 @@ public class EarthSmash extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsmash");
 
       cooldown = abilityNode.node("cooldown").getLong(7000);
-      radius = FastMath.max(3, abilityNode.node("radius").getInt(3));
+      radius = Math.max(3, abilityNode.node("radius").getInt(3));
       chargeTime = abilityNode.node("charge-time").getLong(1250);
       selectRange = abilityNode.node("select-range").getDouble(10.0);
       maxDuration = abilityNode.node("max-duration").getLong(45000);

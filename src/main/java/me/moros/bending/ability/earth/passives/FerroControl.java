@@ -84,12 +84,12 @@ public class FerroControl extends AbilityInstance implements Ability {
         controlledEntity = null;
         return UpdateResult.CONTINUE;
       }
-      Vector3 targetLocation = user.eyeLocation().add(user.direction().scalarMultiply(userConfig.entityRange));
+      Vector3 targetLocation = user.eyeLocation().add(user.direction().multiply(userConfig.entityRange));
       Vector3 entityLocation = new Vector3(controlledEntity.getLocation());
       if (entityLocation.distanceSq(targetLocation) < 1) {
-        controlledEntity.setVelocity(Vector3.ZERO.toVector());
+        controlledEntity.setVelocity(Vector3.ZERO.toBukkitVector());
       } else {
-        Vector3 dir = targetLocation.subtract(entityLocation).normalize().scalarMultiply(userConfig.controlSpeed);
+        Vector3 dir = targetLocation.subtract(entityLocation).normalize().multiply(userConfig.controlSpeed);
         controlledEntity.setVelocity(dir.clampVelocity());
       }
     }

@@ -125,7 +125,7 @@ public class BlockListener implements Listener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockPhysics(BlockPhysicsEvent event) {
     Block block = event.getBlock();
-    if (block.getType().hasGravity() && TempBlock.isGravityCached(block)) {
+    if (!TempBlock.canBeAffectedByGravity(block)) {
       event.setCancelled(true);
     }
   }

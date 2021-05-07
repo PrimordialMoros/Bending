@@ -33,7 +33,6 @@ import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -92,7 +91,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
   }
 
   default @NonNull Ray ray(double range) {
-    return new Ray(eyeLocation(), direction().scalarMultiply(range));
+    return new Ray(eyeLocation(), direction().multiply(range));
   }
 
   /**
@@ -219,7 +218,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
     Ray ray = ray(range);
     Vector3 dir = direction();
     for (int i = 1; i <= range; i++) {
-      Vector3 current = ray.origin.add(dir.scalarMultiply(i));
+      Vector3 current = ray.origin.add(dir.multiply(i));
       for (Block block : BlockMethods.combineFaces(current.toBlock(world()))) {
         if (MaterialUtil.isTransparent(block) || ignored.contains(block.getType())) {
           continue;
@@ -240,7 +239,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @see #leftSide()
    */
   default @NonNull Vector3 mainHandSide() {
-    Vector3 dir = direction().scalarMultiply(0.4);
+    Vector3 dir = direction().multiply(0.4);
     if (entity() instanceof Player) {
       return handSide(((Player) entity()).getMainHand() == MainHand.RIGHT);
     }
@@ -253,7 +252,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @return a vector which represents the user's specified hand location
    */
   default @NonNull Vector3 handSide(boolean right) {
-    Vector3 offset = direction().scalarMultiply(0.4).add(new Vector3(0, 1.2, 0));
+    Vector3 offset = direction().multiply(0.4).add(new Vector3(0, 1.2, 0));
     return right ? rightSide().add(offset) : leftSide().add(offset);
   }
 
@@ -262,8 +261,8 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @return a vector which represents the user's right side
    */
   default @NonNull Vector3 rightSide() {
-    double angle = FastMath.toRadians(yaw());
-    return location().subtract(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
+    double angle = Math.toRadians(yaw());
+    return location().subtract(new Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   /**
@@ -271,8 +270,8 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @return a vector which represents the user's left side
    */
   default @NonNull Vector3 leftSide() {
-    double angle = FastMath.toRadians(yaw());
-    return location().add(new Vector3(FastMath.cos(angle), 0, FastMath.sin(angle)).normalize().scalarMultiply(0.3));
+    double angle = Math.toRadians(yaw());
+    return location().add(new Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   @Override

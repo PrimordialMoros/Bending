@@ -98,7 +98,7 @@ public class WaterWave extends AbilityInstance {
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
 
-    user.entity().setVelocity(user.direction().scalarMultiply(userConfig.speed * factor).toVector());
+    user.entity().setVelocity(user.direction().multiply(userConfig.speed * factor).clampVelocity());
     user.entity().setFallDistance(0);
 
     Vector3 center = user.location().add(Vector3.MINUS_J);

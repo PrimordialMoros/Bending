@@ -70,7 +70,7 @@ public class FireSpin extends AbilityInstance {
 
     Vector3 origin = user.location().add(Vector3.PLUS_J);
     VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 40).forEach(
-      v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
+      v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
     );
 
     user.addCooldown(description(), userConfig.cooldown);
@@ -123,7 +123,7 @@ public class FireSpin extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         FireTick.ignite(user, entity, userConfig.fireTicks);
-        entity.setVelocity(ray.direction.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
+        entity.setVelocity(ray.direction.normalize().multiply(userConfig.knockback).clampVelocity());
       }
       return true;
     }
@@ -154,7 +154,7 @@ public class FireSpin extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firespin");
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
-      damage = abilityNode.node("damage").getDouble(2.0);
+      damage = abilityNode.node("damage").getDouble(1.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(6.0);
       speed = abilityNode.node("speed").getDouble(0.5);

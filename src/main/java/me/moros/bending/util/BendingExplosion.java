@@ -27,7 +27,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.util.NumberConversions;
@@ -57,7 +56,7 @@ public final class BendingExplosion {
     this.soundEffect = builder.soundEffect;
 
     halfSize = size / 2;
-    sizeFactor = FastMath.sqrt(size);
+    sizeFactor = Math.sqrt(size);
   }
 
   private void playParticles(Location center) {
@@ -89,12 +88,14 @@ public final class BendingExplosion {
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, source, damage * distanceFactor, sourceDesc);
         FireTick.ignite(source, entity, fireTicks);
+      } else {
+        distanceFactor *= 0.75; // Reduce impact for those inside the collider
       }
       double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
       if (entity.equals(source.entity())) {
         knockback *= selfKnockbackFactor;
       }
-      Vector3 dir = entityCenter.subtract(center).normalize().scalarMultiply(knockback);
+      Vector3 dir = entityCenter.subtract(center).normalize().multiply(knockback);
       entity.setVelocity(dir.clampVelocity());
       return true;
     }, livingOnly, true);
@@ -118,22 +119,22 @@ public final class BendingExplosion {
     }
 
     public @NonNull ExplosionBuilder size(double size) {
-      this.size = FastMath.abs(size);
+      this.size = Math.abs(size);
       return this;
     }
 
     public @NonNull ExplosionBuilder damage(double damage) {
-      this.damage = FastMath.abs(damage);
+      this.damage = Math.abs(damage);
       return this;
     }
 
     public @NonNull ExplosionBuilder selfKnockbackFactor(double selfKnockbackFactor) {
-      this.selfKnockbackFactor = FastMath.abs(selfKnockbackFactor);
+      this.selfKnockbackFactor = Math.abs(selfKnockbackFactor);
       return this;
     }
 
     public @NonNull ExplosionBuilder fireTicks(int fireTicks) {
-      this.fireTicks = FastMath.abs(fireTicks);
+      this.fireTicks = Math.abs(fireTicks);
       return this;
     }
 

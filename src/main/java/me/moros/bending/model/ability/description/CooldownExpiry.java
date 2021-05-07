@@ -22,7 +22,6 @@ package me.moros.bending.model.ability.description;
 import java.util.concurrent.TimeUnit;
 
 import me.moros.atlas.caffeine.cache.Expiry;
-import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CooldownExpiry implements Expiry<AbilityDescription, Long> {
@@ -33,7 +32,7 @@ public class CooldownExpiry implements Expiry<AbilityDescription, Long> {
 
   @Override
   public long expireAfterUpdate(@NonNull AbilityDescription key, @NonNull Long cooldown, long currentTime, long currentDuration) {
-    return FastMath.max(currentDuration, TimeUnit.MILLISECONDS.toNanos(cooldown));
+    return Math.max(currentDuration, TimeUnit.MILLISECONDS.toNanos(cooldown));
   }
 
   @Override

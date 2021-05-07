@@ -182,7 +182,7 @@ public class EarthArmor extends AbilityInstance {
       return true;
     }
 
-    Vector3 dir = user.eyeLocation().subtract(center).normalize().scalarMultiply(speedFactor);
+    Vector3 dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
     fallingBlock.fallingBlock().setVelocity(dir.clampVelocity());
     return true;
   }

@@ -41,7 +41,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -98,16 +97,16 @@ public class Tornado extends AbilityInstance {
     }
 
     long time = System.currentTimeMillis();
-    double factor = FastMath.min(1, time - startTime / userConfig.growthTime);
+    double factor = Math.min(1, time - startTime / userConfig.growthTime);
     double height = 2 + factor * (userConfig.height - 2);
     double radius = 2 + factor * (userConfig.radius - 2);
 
     AABB box = new AABB(new Vector3(-radius, 0, -radius), new Vector3(radius, height, radius)).at(base);
     CollisionUtil.handleEntityCollisions(user, box, entity -> {
-      double dy = entity.getLocation().getY() - base.getY();
+      double dy = entity.getLocation().getY() - base.y;
       double r = 2 + (radius - 2) * dy;
       Vector3 delta = EntityMethods.entityCenter(entity).subtract(base);
-      double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
+      double distSq = delta.x * delta.x + delta.z * delta.z;
       if (distSq > r * r) {
         return false;
       }
@@ -121,12 +120,12 @@ public class Tornado extends AbilityInstance {
         } else {
           velY = 0.6;
         }
-        Vector3 velocity = user.direction().setY(velY).scalarMultiply(factor);
+        Vector3 velocity = user.direction().setY(velY).multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
       } else {
         Vector3 normal = delta.setY(0).normalize();
         Vector3 ortho = normal.crossProduct(Vector3.PLUS_J).normalize();
-        Vector3 velocity = ortho.add(normal).normalize().scalarMultiply(factor);
+        Vector3 velocity = ortho.add(normal).normalize().multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
       }
       return false;
@@ -137,17 +136,17 @@ public class Tornado extends AbilityInstance {
   }
 
   private void render(Vector3 base, double factor, double height, double radius) {
-    double amount = FastMath.min(30, FastMath.max(4, factor * 30));
+    double amount = Math.min(30, Math.max(4, factor * 30));
     yOffset += 0.1;
     if (yOffset >= 1) {
       yOffset = 0;
     }
     for (int i = 0; i < 3; i++) {
-      double offset = i * 2 * FastMath.PI / 3.0;
+      double offset = i * 2 * Math.PI / 3.0;
       for (double y = yOffset; y < height; y += (height / amount)) {
         double r = 2 + (radius - 2) * y / height;
-        double x = r * FastMath.cos(y + offset);
-        double z = r * FastMath.sin(y + offset);
+        double x = r * Math.cos(y + offset);
+        double z = r * Math.sin(y + offset);
         Location loc = base.add(new Vector3(x, y, z)).toLocation(user.world());
         ParticleUtil.createAir(loc).spawn();
         if (ThreadLocalRandom.current().nextInt(20) == 0) {

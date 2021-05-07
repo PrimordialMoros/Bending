@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.model.user.User;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -46,6 +45,14 @@ public class FireTick {
     }
   }
 
+
+  /**
+   * Visual only
+   */
+  public static void ignite(@NonNull User source, @NonNull Entity entity) {
+    ignite(source, entity, 15);
+  }
+
   public static void ignite(@NonNull User source, @NonNull Entity entity, int ticks) {
     int currentTicks = entity.getFireTicks();
     if (ticks <= 0 || currentTicks >= ticks) {
@@ -59,7 +66,7 @@ public class FireTick {
       EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(source.entity(), entity, duration);
       Bukkit.getPluginManager().callEvent(event);
       if (!event.isCancelled() && event.getDuration() > 0) {
-        entity.setFireTicks(FastMath.min(ticks, event.getDuration() * 20));
+        entity.setFireTicks(Math.min(ticks, event.getDuration() * 20));
         trackEntity(entity, source);
       }
     } else {

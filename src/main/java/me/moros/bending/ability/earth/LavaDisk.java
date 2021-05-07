@@ -56,7 +56,6 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -124,7 +123,7 @@ public class LavaDisk extends AbilityInstance {
     if (!MaterialUtil.isLava(block)) {
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
-    location = new Vector3(block).add(Vector3.HALF);
+    location = Vector3.center(block);
     distance = location.distance(user.eyeLocation());
 
     removalPolicy = Policies.builder()
@@ -158,8 +157,8 @@ public class LavaDisk extends AbilityInstance {
     }
 
     distance = location.distance(user.eyeLocation());
-    Vector3 targetLocation = user.eyeLocation().add(user.direction().scalarMultiply(launched ? userConfig.range + 5 : 3));
-    Vector3 direction = targetLocation.subtract(location).normalize().scalarMultiply(0.35);
+    Vector3 targetLocation = user.eyeLocation().add(user.direction().multiply(launched ? userConfig.range + 5 : 3));
+    Vector3 direction = targetLocation.subtract(location).normalize().multiply(0.35);
 
     int times = user.sneaking() ? 1 : 3;
     for (int i = 0; i < times; i++) {
@@ -174,14 +173,14 @@ public class LavaDisk extends AbilityInstance {
 
     double deltaDistance = distance - userConfig.selectRange;
     double distanceModifier = (deltaDistance <= 0) ? 1 : ((distance >= userConfig.range) ? 0 : 1 - (deltaDistance / userConfig.range));
-    int deltaSpeed = FastMath.max(5, NumberConversions.ceil(15 * distanceModifier));
+    int deltaSpeed = Math.max(5, NumberConversions.ceil(15 * distanceModifier));
     rotationAngle += (deltaSpeed % 2 == 0) ? ++deltaSpeed : deltaSpeed;
     if (rotationAngle >= 360) {
       rotationAngle = 0;
     }
     displayLavaDisk();
     if (++ticks % 3 == 0) {
-      double damage = FastMath.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
+      double damage = Math.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
       CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage));
     }
     return UpdateResult.CONTINUE;
@@ -214,7 +213,7 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     affectedEntities.add(entity);
-    FireTick.ignite(user, entity, 30);
+    FireTick.ignite(user, entity);
     DamageUtil.damageEntity(entity, user, damage, description());
     currentPower -= userConfig.powerDiminishPerEntity;
     ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
@@ -252,8 +251,8 @@ public class LavaDisk extends AbilityInstance {
   private void displayLavaDisk() {
     damageBlock(location.toBlock(user.world()));
     int angle = user.yaw() + 90;
-    double cos = FastMath.cos(-angle);
-    double sin = FastMath.sin(-angle);
+    double cos = Math.cos(-angle);
+    double sin = Math.sin(-angle);
     int offset = 0;
     int index = 0;
     float size = 0.8f;
@@ -261,7 +260,7 @@ public class LavaDisk extends AbilityInstance {
       for (int j = 0; j <= 288; j += 72) {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
-        Vector3 temp = new Vector3(length * FastMath.cos(rotAngle), 0, length * FastMath.sin(rotAngle));
+        Vector3 temp = new Vector3(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
         Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
         ParticleUtil.createRGB(loc, colors[index], size).spawn();
         if (length > 0.5) {
@@ -269,13 +268,13 @@ public class LavaDisk extends AbilityInstance {
         }
       }
       offset += 4;
-      index = FastMath.min(colors.length - 1, ++index);
+      index = Math.min(colors.length - 1, ++index);
       size -= 0.05;
     }
   }
 
   private boolean isLocationSafe() {
-    if (location.getY() <= 2 || location.getY() >= user.world().getMaxHeight() - 1) {
+    if (location.y <= 2 || location.y >= user.world().getMaxHeight() - 1) {
       return false;
     }
     Block block = location.toBlock(user.world());

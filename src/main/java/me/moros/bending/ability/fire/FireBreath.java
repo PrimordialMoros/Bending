@@ -108,7 +108,7 @@ public class FireBreath extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FireStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
@@ -156,7 +156,7 @@ public class FireBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      FireTick.ignite(user, entity, userConfig.fireTicks);
+      FireTick.ignite(user, entity, 15);
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
@@ -186,8 +186,6 @@ public class FireBreath extends AbilityInstance {
     public long duration;
     @Attribute(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.DURATION)
-    public int fireTicks;
 
     @Override
     public void onConfigReload() {
@@ -197,7 +195,6 @@ public class FireBreath extends AbilityInstance {
       range = abilityNode.node("range").getDouble(9.0);
       duration = abilityNode.node("duration").getLong(2000);
       damage = abilityNode.node("damage").getDouble(0.75);
-      fireTicks = abilityNode.node("fire-ticks").getInt(25);
     }
   }
 }

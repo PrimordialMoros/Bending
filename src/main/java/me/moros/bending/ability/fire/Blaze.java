@@ -43,7 +43,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
@@ -82,16 +81,16 @@ public class Blaze extends AbilityInstance {
   private boolean release(boolean cone) {
     double range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    Vector3 origin = user.location().floor().add(Vector3.HALF);
+    Vector3 origin = user.location().snapToBlockCenter();
     Vector3 dir = user.direction().setY(0).normalize();
     if (cone) {
-      double deltaAngle = FastMath.PI / (3 * range);
+      double deltaAngle = Math.PI / (3 * range);
       VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 2)).forEach(v ->
-        streams.add(new FireStream(new Ray(origin, v.scalarMultiply(range))))
+        streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     } else {
       VectorMethods.circle(dir, Vector3.PLUS_J, NumberConversions.ceil(6 * range)).forEach(v ->
-        streams.add(new FireStream(new Ray(origin, v.scalarMultiply(range))))
+        streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     }
 

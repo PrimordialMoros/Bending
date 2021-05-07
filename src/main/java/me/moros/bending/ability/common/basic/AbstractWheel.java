@@ -36,7 +36,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -57,10 +56,10 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     this.ray = ray;
     this.location = ray.origin;
     this.radius = radius;
-    this.dir = ray.direction.normalize().scalarMultiply(speed);
-    box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius)).grow(Vector3.HALF);
+    this.dir = ray.direction.normalize().multiply(speed);
+    box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius));
     AABB bounds = new AABB(new Vector3(-0.15, -radius, -radius), new Vector3(0.15, radius, radius));
-    double angle = FastMath.toRadians(user.yaw());
+    double angle = Math.toRadians(user.yaw());
     OBB obb = new OBB(bounds, Vector3.PLUS_J, angle);
     collider = new Disk(obb, new Sphere(radius));
   }
@@ -104,15 +103,15 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     Collection<Block> nearbyBlocks = WorldMethods.nearbyBlocks(user.world(), box.at(location));
     Collider checkCollider = collider();
     // Calculate top and bottom positions and add a small buffer
-    double topY = location.getY() + radius + 0.05;
-    double bottomY = location.getY() - radius - 0.05;
+    double topY = location.y + radius + 0.05;
+    double bottomY = location.y - radius - 0.05;
     for (Block block : nearbyBlocks) {
       AABB blockBounds = AABBUtils.blockBounds(block);
       if (blockBounds.intersects(checkCollider)) {
-        if (blockBounds.min().getY() > topY) { // Collision on the top part
+        if (blockBounds.min.y > topY) { // Collision on the top part
           return false;
         }
-        double resolution = blockBounds.max().getY() - bottomY;
+        double resolution = blockBounds.max.y - bottomY;
         if (resolution > maxResolution) {
           return false;
         } else {

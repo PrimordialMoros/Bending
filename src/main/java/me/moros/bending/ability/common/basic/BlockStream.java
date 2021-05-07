@@ -33,6 +33,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
@@ -40,12 +41,10 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BlockStream implements State {
@@ -77,7 +76,7 @@ public abstract class BlockStream implements State {
     this.user = user;
     this.material = material;
     this.range = range;
-    this.speed = FastMath.min(100, speed);
+    this.speed = Math.min(100, speed);
     buffer = speed;
   }
 
@@ -112,7 +111,7 @@ public abstract class BlockStream implements State {
     }
 
     Block head = stream.getFirst();
-    Vector3 current = new Vector3(head).add(Vector3.HALF);
+    Vector3 current = Vector3.center(head);
     if (controllable || direction == null) {
       Vector3 targetLoc = user.rayTraceEntity(range).map(EntityMethods::entityCenter)
         .orElseGet(() -> user.rayTrace(range, Collections.singleton(material)));
@@ -137,11 +136,8 @@ public abstract class BlockStream implements State {
     clean(stream.removeLast());
     if (current.distanceSq(user.eyeLocation()) <= range * range) {
       boolean canRender = true;
-      for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
-        int x = NumberConversions.floor(v.getX());
-        int y = NumberConversions.floor(v.getY());
-        int z = NumberConversions.floor(v.getZ());
-        Block b = originBlock.getRelative(x, y, z);
+      for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
+        Block b = originBlock.getRelative(v.x, v.y, v.z);
         if (diagonalsPredicate.test(b)) {
           canRender = false;
           onBlockHit(b);

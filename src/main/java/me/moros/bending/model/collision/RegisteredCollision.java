@@ -20,7 +20,6 @@
 package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -69,8 +68,8 @@ public final class RegisteredCollision {
 
   @Override
   public int hashCode() {
-    int maxHash = FastMath.max(first.hashCode(), second.hashCode());
-    int minHash = FastMath.min(first.hashCode(), second.hashCode());
+    int maxHash = Math.max(first.hashCode(), second.hashCode());
+    int minHash = Math.min(first.hashCode(), second.hashCode());
     return minHash * 31 + maxHash;
   }
 

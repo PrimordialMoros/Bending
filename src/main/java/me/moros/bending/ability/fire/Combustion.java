@@ -142,7 +142,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       Combustion other = (Combustion) collidedAbility;
       Vector3 first = collision.colliders().getKey().position();
       Vector3 second = collision.colliders().getValue().position();
-      Vector3 center = first.add(second).scalarMultiply(0.5);
+      Vector3 center = first.add(second).multiply(0.5);
       createExplosion(center, userConfig.power + other.userConfig.power, userConfig.damage + other.userConfig.damage);
       other.exploded = true;
     } else if (collidedAbility instanceof Explosive) {
@@ -227,9 +227,9 @@ public class Combustion extends AbilityInstance implements Explosive {
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorMethods.circle(Vector3.ONE, user.direction(), 20).forEach(v -> {
-          Vector3 velocity = v.scalarMultiply(radius);
-          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.scalarMultiply(0.2)).toLocation(user.world()), userConfig.particleRange)
-            .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
+          Vector3 velocity = v.multiply(radius);
+          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()), userConfig.particleRange)
+            .count(0).offset(velocity.x, velocity.y, velocity.z).extra(0.09).spawn();
         });
       }
     }

@@ -20,9 +20,9 @@
 package me.moros.bending.game.temporal;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,50 +63,6 @@ public class TempBlock implements Temporary {
     refreshGravityCache(block);
     MANAGER.addEntry(block, this);
     revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
-  }
-
-  private void addState(BlockData data, long duration, boolean bendable) {
-    cleanStates();
-    if (!snapshots.isEmpty()) {
-      TempBlockState tbs = snapshots.peekLast();
-      if (!tbs.weak) {
-        snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
-      } else {
-        tbs.weak = false;
-      }
-      this.bendable = bendable;
-      block.setBlockData(data);
-      refreshGravityCache(block);
-      revertTask.cancel();
-      revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
-    }
-  }
-
-  // Cleans up previous states that have already expired
-  private void cleanStates() {
-    if (snapshots.size() <= 1) {
-      return;
-    }
-    int currentTick = Bukkit.getCurrentTick();
-    Iterator<TempBlockState> it = snapshots.iterator();
-    it.next(); // ignore original snapshot
-    while (it.hasNext()) {
-      TempBlockState tbs = it.next();
-      if (currentTick > tbs.expirationTicks) {
-        it.remove();
-      }
-    }
-  }
-
-  public static @NonNull BlockData getLastValidData(@NonNull Block block) {
-    TempBlock tb = MANAGER.get(block).orElse(null);
-    if (tb != null) {
-      TempBlockState tbs = tb.snapshots.peekLast();
-      if (tbs != null && tbs.weak) {
-        return tbs.state.getBlockData();
-      }
-    }
-    return block.getBlockData();
   }
 
   public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
@@ -176,18 +132,34 @@ public class TempBlock implements Temporary {
     return create(block, Material.AIR.createBlockData(), 0, true);
   }
 
-  private static void refreshGravityCache(Block block) {
-    if (block.getType().hasGravity()) {
-      GRAVITY_CACHE.add(block);
-    } else {
-      GRAVITY_CACHE.remove(block);
+  private void addState(BlockData data, long duration, boolean bendable) {
+    cleanStates();
+    if (!snapshots.isEmpty()) {
+      TempBlockState tbs = snapshots.peekLast();
+      if (!tbs.weak) {
+        snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
+      } else {
+        tbs.weak = false;
+      }
+      this.bendable = bendable;
+      block.setBlockData(data);
+      refreshGravityCache(block);
+      revertTask.cancel();
+      revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
     }
   }
 
-  public void forceWeak() {
-    TempBlockState tbs = snapshots.peekLast();
-    if (tbs != null) {
-      tbs.weak = true;
+  // Cleans up previous states that have already expired
+  private void cleanStates() {
+    if (snapshots.size() > 1) {
+      int currentTick = Bukkit.getCurrentTick();
+      Iterator<TempBlockState> it = snapshots.iterator();
+      it.next(); // ignore original snapshot
+      while (it.hasNext()) {
+        if (currentTick > it.next().expirationTicks) {
+          it.remove();
+        }
+      }
     }
   }
 
@@ -229,11 +201,19 @@ public class TempBlock implements Temporary {
     }
   }
 
-  private void revertToSnapshot(final TempBlockState tempBlockState) {
-    bendable = tempBlockState.bendable;
-    BlockState state = tempBlockState.state;
-    block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
-    refreshGravityCache(block);
+  public @NonNull Block block() {
+    return block;
+  }
+
+  public void forceWeak() {
+    TempBlockState tbs = snapshots.peekLast();
+    if (tbs != null) {
+      tbs.weak = true;
+    }
+  }
+
+  public void removeWithoutReverting() {
+    cleanup();
   }
 
   private void revertFully() {
@@ -241,17 +221,18 @@ public class TempBlock implements Temporary {
       return;
     }
     revertToSnapshot(snapshots.pollFirst());
+    cleanup();
+  }
+
+  private void revertToSnapshot(final TempBlockState tempBlockState) {
+    bendable = tempBlockState.bendable;
+    BlockState state = tempBlockState.state;
+    block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+    refreshGravityCache(block);
+  }
+
+  private void cleanup() {
     snapshots.clear();
-    GRAVITY_CACHE.remove(block);
-    MANAGER.removeEntry(block);
-    revertTask.cancel();
-  }
-
-  public @NonNull Block block() {
-    return block;
-  }
-
-  public void removeWithoutReverting() {
     GRAVITY_CACHE.remove(block);
     MANAGER.removeEntry(block);
     revertTask.cancel();
@@ -261,22 +242,37 @@ public class TempBlock implements Temporary {
     return bendable;
   }
 
-  public static boolean isTouchingTempBlock(@NonNull Block block) {
-    return BlockMethods.MAIN_FACES.stream().map(block::getRelative).anyMatch(MANAGER::isTemp);
-  }
-
   public static boolean isBendable(@NonNull Block block) {
     return MANAGER.get(block).map(TempBlock::isBendable).orElse(true);
   }
 
-  public static boolean isGravityCached(@NonNull Block block) {
-    return GRAVITY_CACHE.contains(block);
+  public static boolean canBeAffectedByGravity(@NonNull Block block) {
+    return block.getType().hasGravity() && !GRAVITY_CACHE.contains(block);
+  }
+
+  public static @NonNull BlockData getLastValidData(@NonNull Block block) {
+    TempBlock tb = MANAGER.get(block).orElse(null);
+    if (tb != null) {
+      TempBlockState tbs = tb.snapshots.peekLast();
+      if (tbs != null && tbs.weak) {
+        return tbs.state.getBlockData();
+      }
+    }
+    return block.getBlockData();
+  }
+
+  private static void refreshGravityCache(Block block) {
+    if (block.getType().hasGravity()) {
+      GRAVITY_CACHE.add(block);
+    } else {
+      GRAVITY_CACHE.remove(block);
+    }
   }
 
   private static class TempBlockManager extends TemporalManager<Block, TempBlock> {
     @Override
     public void removeAll() {
-      new ArrayList<>(instances().values()).forEach(TempBlock::revertFully);
+      List.copyOf(instances().values()).forEach(TempBlock::revertFully);
       clear();
     }
   }

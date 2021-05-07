@@ -23,7 +23,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// Combines an OBB and Sphere to create a disk collider.
+/**
+ * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider
+ */
 public class Disk implements Collider {
   private final Sphere sphere;
   private final OBB obb;

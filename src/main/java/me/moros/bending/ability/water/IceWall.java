@@ -45,7 +45,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -137,10 +136,10 @@ public class IceWall extends AbilityInstance {
   private void raiseWall(int height, int width) {
     double w = (width - 1) / 2.0;
     Vector3 side = user.direction().crossProduct(Vector3.PLUS_J).normalize();
-    Vector3 center = new Vector3(origin).add(Vector3.HALF);
+    Vector3 center = Vector3.center(origin);
     for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
-      Block check = center.add(side.scalarMultiply(i)).toBlock(user.world());
-      int h = height - FastMath.min(NumberConversions.ceil(height / 3.0), FastMath.abs(i));
+      Block check = center.add(side.multiply(i)).toBlock(user.world());
+      int h = height - Math.min(NumberConversions.ceil(height / 3.0), Math.abs(i));
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < h; j++) {
           Block block = check.getRelative(BlockFace.DOWN, j);

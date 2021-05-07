@@ -54,7 +54,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -184,14 +183,14 @@ public class EarthShot extends AbilityInstance {
       }
 
       Vector3 velocity = new Vector3(projectile.fallingBlock().getVelocity());
-      if (Vector3.angle(lastVelocity, velocity) > FastMath.PI / 4 || velocity.getNormSq() < 2.25) {
+      if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.getNormSq() < 2.25) {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking()) {
-        Vector3 dir = user.direction().scalarMultiply(0.2);
+        Vector3 dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
-      projectile.fallingBlock().setVelocity(velocity.normalize().scalarMultiply(1.8).clampVelocity());
+      projectile.fallingBlock().setVelocity(velocity.normalize().multiply(1.8).clampVelocity());
       lastVelocity = new Vector3(projectile.fallingBlock().getVelocity());
       if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.center()), this::onEntityHit, true)) {
         return UpdateResult.REMOVE;
@@ -287,12 +286,12 @@ public class EarthShot extends AbilityInstance {
     Vector3 origin;
     if (prematureLaunch) {
       origin = projectile.center();
-      Vector3 dir = getTarget(null).subtract(origin).normalize().scalarMultiply(userConfig.speed);
+      Vector3 dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
       projectile.fallingBlock().setGravity(true);
       projectile.fallingBlock().setVelocity(dir.add(new Vector3(0, 0.2, 0)).clampVelocity());
     } else {
-      origin = new Vector3(readySource).add(Vector3.HALF);
-      Vector3 dir = getTarget(readySource).subtract(origin).normalize().scalarMultiply(userConfig.speed);
+      origin = Vector3.center(readySource);
+      Vector3 dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
       projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
       TempBlock.createAir(readySource);
     }
@@ -339,7 +338,7 @@ public class EarthShot extends AbilityInstance {
           ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
           SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
         }
-        Block projected = projectile.center().add(lastVelocity.normalize().scalarMultiply(0.75)).toBlock(user.world());
+        Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
         FragileStructure.tryDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
       }
       projectile.revert();

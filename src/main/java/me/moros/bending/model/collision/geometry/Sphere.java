@@ -21,9 +21,11 @@ package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
-import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Simple sphere collider
+ */
 public class Sphere implements Collider {
   public final Vector3 center;
   public final double radius;
@@ -60,12 +62,12 @@ public class Sphere implements Collider {
   }
 
   private boolean intersects(AABB aabb) {
-    Vector3 min = aabb.min();
-    Vector3 max = aabb.max();
+    Vector3 min = aabb.min;
+    Vector3 max = aabb.max;
     // Get the point closest to sphere center on the aabb.
-    double x = FastMath.max(min.getX(), FastMath.min(center.getX(), max.getX()));
-    double y = FastMath.max(min.getY(), FastMath.min(center.getY(), max.getY()));
-    double z = FastMath.max(min.getZ(), FastMath.min(center.getZ(), max.getZ()));
+    double x = Math.max(min.x, Math.min(center.x, max.x));
+    double y = Math.max(min.y, Math.min(center.y, max.y));
+    double z = Math.max(min.z, Math.min(center.z, max.z));
     // Check if that point is inside of the sphere.
     return contains(new Vector3(x, y, z));
   }
@@ -77,7 +79,7 @@ public class Sphere implements Collider {
 
   private boolean intersects(Sphere other) {
     // Spheres will be colliding if their distance apart is less than the sum of the radii.
-    return other.center.distanceSq(center) <= FastMath.pow(radius + other.radius, 2);
+    return other.center.distanceSq(center) <= Math.pow(radius + other.radius, 2);
   }
 
   @Override

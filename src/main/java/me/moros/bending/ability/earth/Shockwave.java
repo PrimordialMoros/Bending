@@ -52,7 +52,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -171,8 +170,8 @@ public class Shockwave extends AbilityInstance {
 
       if (inRange) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        double deltaY = FastMath.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
-        Vector3 push = loc.subtract(origin).normalize().setY(deltaY).scalarMultiply(userConfig.knockback);
+        double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
+        Vector3 push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
         entity.setVelocity(push.clampVelocity());
         affectedEntities.add(entity);
       }
@@ -191,16 +190,16 @@ public class Shockwave extends AbilityInstance {
     released = true;
     range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    origin = user.location().floor().add(Vector3.HALF);
+    origin = user.location().snapToBlockCenter();
     Vector3 dir = user.direction().setY(0).normalize();
     if (cone) {
-      double deltaAngle = FastMath.PI / (3 * range);
+      double deltaAngle = Math.PI / (3 * range);
       VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 1.5)).forEach(v ->
-        streams.add(new Ripple(new Ray(origin, v.scalarMultiply(range)), 0))
+        streams.add(new Ripple(new Ray(origin, v.multiply(range)), 0))
       );
     } else {
       VectorMethods.circle(dir, Vector3.PLUS_J, NumberConversions.ceil(6 * range)).forEach(v ->
-        streams.add(new Ripple(new Ray(origin, v.scalarMultiply(range)), 75))
+        streams.add(new Ripple(new Ray(origin, v.multiply(range)), 75))
       );
     }
 
@@ -240,7 +239,7 @@ public class Shockwave extends AbilityInstance {
       }
       affectedBlocks.add(block);
       recentAffectedBlocks.add(block);
-      double deltaY = FastMath.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
+      double deltaY = Math.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
       Vector3 velocity = new Vector3(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
       new BendingFallingBlock(block, data, velocity, true, 450);

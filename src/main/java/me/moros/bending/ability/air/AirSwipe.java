@@ -53,7 +53,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -141,8 +140,8 @@ public class AirSwipe extends AbilityInstance {
     Vector3 dir = user.direction();
     Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
     int steps = userConfig.arc / 5;
-    VectorMethods.createArc(dir, rotateAxis, FastMath.PI / 36, steps).forEach(
-      v -> streams.add(new AirStream(new Ray(origin, v.scalarMultiply(userConfig.range * factor))))
+    VectorMethods.createArc(dir, rotateAxis, Math.PI / 36, steps).forEach(
+      v -> streams.add(new AirStream(new Ray(origin, v.multiply(userConfig.range * factor))))
     );
     removalPolicy = Policies.builder().build();
   }
@@ -199,7 +198,7 @@ public class AirSwipe extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       if (!affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-        Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().scalarMultiply(factor);
+        Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
         affectedEntities.add(entity);
         return true;

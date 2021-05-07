@@ -175,6 +175,8 @@ public class UserListener implements Listener {
         FireTick.extinguish(event.getEntity());
         event.setCancelled(true);
       }
+    } else if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
+      // TODO make bending reduce explosions
     }
   }
 

@@ -22,7 +22,6 @@ package me.moros.bending.game;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.board.BoardManager;
 import me.moros.bending.game.manager.PlayerManager;
@@ -92,11 +91,9 @@ public final class Game {
   }
 
   private void update() {
-    MCTiming timing = Bending.timingManager().ofStart("Bending Update");
     activationController.clearCache();
     worldManager.update();
     Flight.updateAll();
-    timing.stopTiming();
   }
 
   public boolean isDisabledWorld(@NonNull UUID worldID) {

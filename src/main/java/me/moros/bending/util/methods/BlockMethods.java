@@ -216,9 +216,9 @@ public final class BlockMethods {
    * @return a collection of blocks representing the ring
    */
   public static @NonNull Collection<Block> createBlockRing(@NonNull Block center, double radius) {
-    Vector3 centerVector = new Vector3(center).add(Vector3.HALF);
+    Vector3 centerVector = Vector3.center(center);
     int steps = NumberConversions.ceil(10 * radius);
-    return VectorMethods.circle(Vector3.PLUS_I.scalarMultiply(radius), Vector3.PLUS_J, steps)
+    return VectorMethods.circle(Vector3.PLUS_I.multiply(radius), Vector3.PLUS_J, steps)
       .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
   }
 

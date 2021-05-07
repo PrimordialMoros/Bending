@@ -55,7 +55,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -144,7 +143,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.mainHandSide();
-    Vector3 lookingDir = user.direction().scalarMultiply(userConfig.range * factor);
+    Vector3 lookingDir = user.direction().multiply(userConfig.range * factor);
     stream = new FireStream(new Ray(origin, lookingDir));
   }
 
@@ -181,7 +180,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
         Vector3 first = collision.colliders().getKey().position();
         Vector3 second = collision.colliders().getValue().position();
-        Vector3 center = first.add(second).scalarMultiply(0.5);
+        Vector3 center = first.add(second).multiply(0.5);
         double radius = userConfig.explosionRadius + other.userConfig.explosionRadius;
         double dmg = userConfig.damage + other.userConfig.damage;
         createExplosion(center, radius, dmg * (factor + other.factor - 1));
@@ -229,7 +228,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       canCollide = Block::isLiquid;
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.03 * factor;
-      amount = NumberConversions.ceil(6 * FastMath.pow(factor, 4));
+      amount = NumberConversions.ceil(6 * Math.pow(factor, 4));
       explosive = factor == userConfig.chargeFactor;
       singleCollision = explosive;
     }
@@ -256,20 +255,20 @@ public class FireBlast extends AbilityInstance implements Explosive {
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       FireTick.ignite(user, entity, userConfig.fireTicks);
-      entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
+      entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
       return true;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      Vector3 reverse = ray.direction.scalarMultiply(-1);
+      Vector3 reverse = ray.direction.negate();
       Location center = bukkitLocation();
-      if (user.location().distanceSq(new Vector3(block)) > 4) {
+      if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
           if (!Bending.game().protectionSystem().canBuild(user, b)) {
             continue;
           }
-          if (WorldMethods.blockCast(user.world(), new Ray(new Vector3(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
+          if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
             continue;
           }
           BlockMethods.tryLightBlock(b);
@@ -314,14 +313,14 @@ public class FireBlast extends AbilityInstance implements Explosive {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireblast");
 
       cooldown = abilityNode.node("cooldown").getLong(1500);
-      damage = abilityNode.node("damage").getDouble(2.5);
+      damage = abilityNode.node("damage").getDouble(2.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(18.0);
       speed = abilityNode.node("speed").getDouble(0.8);
       igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
       explosionRadius = abilityNode.node("explosion-radius").getDouble(2.0);
 
-      chargeFactor = FastMath.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
+      chargeFactor = Math.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
       maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);
 
       abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");

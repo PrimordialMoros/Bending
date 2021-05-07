@@ -41,7 +41,6 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -80,7 +79,7 @@ public class EarthTunnel extends AbilityInstance {
       return false;
     }
 
-    center = new Vector3(block.get()).add(Vector3.HALF);
+    center = Vector3.center(block.get());
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 
     return true;
@@ -100,7 +99,7 @@ public class EarthTunnel extends AbilityInstance {
       if (distance > userConfig.range) {
         return UpdateResult.REMOVE;
       }
-      Vector3 offset = VectorMethods.orthogonal(user.direction(), FastMath.toRadians(angle), radius);
+      Vector3 offset = VectorMethods.orthogonal(user.direction(), Math.toRadians(angle), radius);
       Block current = center.add(offset).toBlock(user.world());
       if (!Bending.game().protectionSystem().canBuild(user, current)) {
         return UpdateResult.REMOVE;
@@ -117,7 +116,7 @@ public class EarthTunnel extends AbilityInstance {
         if (block.isEmpty()) {
           return UpdateResult.REMOVE;
         }
-        center = new Vector3(block.get()).add(Vector3.HALF);
+        center = Vector3.center(block.get());
 
         if (++radius > userConfig.radius) {
           radius = 0;

@@ -25,7 +25,6 @@ import java.util.function.Predicate;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -60,7 +59,7 @@ public final class SourceUtil {
    * @return an Optional source block
    */
   public static Optional<Block> find(@NonNull User user, double range, @NonNull Predicate<Block> predicate) {
-    BlockIterator it = new BlockIterator(user.entity(), FastMath.min(100, NumberConversions.ceil(range)));
+    BlockIterator it = new BlockIterator(user.entity(), Math.min(100, NumberConversions.ceil(range)));
     while (it.hasNext()) {
       Block block = it.next();
       if (block.getType().isAir()) {

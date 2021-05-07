@@ -49,7 +49,6 @@ import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
@@ -166,17 +165,17 @@ public class Iceberg extends AbilityInstance {
       if (src.isEmpty()) {
         return;
       }
-      Vector3 origin = new Vector3(src.get()).add(Vector3.HALF);
+      Vector3 origin = Vector3.center(src.get());
       Vector3 target = user.rayTrace(userConfig.selectRange + userConfig.length);
       Vector3 direction = target.subtract(origin).normalize();
-      tip = origin.add(direction.scalarMultiply(userConfig.length));
-      Vector3 targetLocation = origin.add(direction.scalarMultiply(userConfig.length - 1)).floor().add(Vector3.HALF);
-      double radius = FastMath.ceil(0.2 * userConfig.length);
+      tip = origin.add(direction.multiply(userConfig.length));
+      Vector3 targetLocation = origin.add(direction.multiply(userConfig.length - 1)).snapToBlockCenter();
+      double radius = Math.ceil(0.2 * userConfig.length);
       for (Block block : WorldMethods.nearbyBlocks(origin.toLocation(user.world()), radius, WaterMaterials::isWaterOrIceBendable)) {
         if (!Bending.game().protectionSystem().canBuild(user, block)) {
           continue;
         }
-        lines.add(line(new Vector3(block).add(Vector3.HALF), targetLocation));
+        lines.add(line(Vector3.center(block), targetLocation));
       }
       if (lines.size() < 5) {
         lines.clear();
@@ -189,7 +188,7 @@ public class Iceberg extends AbilityInstance {
   private BlockIterator line(Vector3 origin, Vector3 target) {
     Vector3 direction = target.subtract(origin);
     final double length = target.distance(origin);
-    return new BlockIterator(user.world(), origin.toVector(), direction.toVector(), 0, NumberConversions.round(length));
+    return new BlockIterator(user.world(), origin.toBukkitVector(), direction.toBukkitVector(), 0, NumberConversions.round(length));
   }
 
   @Override

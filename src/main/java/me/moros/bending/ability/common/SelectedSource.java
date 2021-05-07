@@ -73,7 +73,7 @@ public class SelectedSource implements State {
     if (block.equals(this.block)) {
       return false;
     }
-    Vector3 newOrigin = new Vector3(block).add(Vector3.HALF);
+    Vector3 newOrigin = Vector3.center(block);
     if (user.eyeLocation().distanceSq(newOrigin) > distanceSq) {
       return false;
     }

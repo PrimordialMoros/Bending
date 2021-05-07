@@ -226,7 +226,7 @@ public class EarthBlast extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       Vector3 origin = center();
       Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
-      Vector3 push = entityLoc.subtract(origin).normalize().scalarMultiply(0.8);
+      Vector3 push = entityLoc.subtract(origin).normalize().multiply(0.8);
       entity.setVelocity(push.clampVelocity());
       DamageUtil.damageEntity(entity, user, damage, description());
       return true;

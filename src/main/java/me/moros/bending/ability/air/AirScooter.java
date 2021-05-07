@@ -43,7 +43,6 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -127,12 +126,12 @@ public class AirScooter extends AbilityInstance {
   }
 
   private void render() {
-    verticalPosition += 0.25 * FastMath.PI;
-    for (double theta = 0; theta < 2 * FastMath.PI * 2; theta += FastMath.PI / 5) {
-      double sin = FastMath.sin(verticalPosition);
-      double x = 0.6 * FastMath.cos(theta) * sin;
-      double y = 0.6 * FastMath.cos(verticalPosition);
-      double z = 0.6 * FastMath.sin(theta) * sin;
+    verticalPosition += 0.25 * Math.PI;
+    for (double theta = 0; theta < 2 * Math.PI * 2; theta += Math.PI / 5) {
+      double sin = Math.sin(verticalPosition);
+      double x = 0.6 * Math.cos(theta) * sin;
+      double y = 0.6 * Math.cos(verticalPosition);
+      double z = 0.6 * Math.sin(theta) * sin;
       ParticleUtil.createAir(user.entity().getLocation().add(x, y - 0.25, z)).spawn();
     }
   }
@@ -154,8 +153,8 @@ public class AirScooter extends AbilityInstance {
       return false;
     }
     double delta = getPrediction() - height;
-    double force = FastMath.max(-0.5, FastMath.min(0.5, 0.3 * delta));
-    Vector3 velocity = user.direction().setY(0).normalize().scalarMultiply(userConfig.speed).setY(force);
+    double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
+    Vector3 velocity = user.direction().setY(0).normalize().multiply(userConfig.speed).setY(force);
     user.entity().setVelocity(velocity.clampVelocity());
     user.entity().setFallDistance(0);
     return true;
@@ -165,15 +164,15 @@ public class AirScooter extends AbilityInstance {
     double speed = user.velocity().setY(0).getNorm();
     Vector3 direction = user.direction().setY(0).normalize(Vector3.ZERO);
     Vector3 front = user.eyeLocation().subtract(new Vector3(0, 0.5, 0))
-      .add(direction.scalarMultiply(FastMath.max(userConfig.speed, speed)));
+      .add(direction.multiply(Math.max(userConfig.speed, speed)));
     Block block = front.toBlock(user.world());
     return !MaterialUtil.isTransparentOrWater(block) || !block.isPassable();
   }
 
   private double getPrediction() {
     double playerSpeed = user.velocity().setY(0).getNorm();
-    double speed = FastMath.max(userConfig.speed, playerSpeed) * 3;
-    Vector3 offset = user.direction().setY(0).normalize().scalarMultiply(speed);
+    double speed = Math.max(userConfig.speed, playerSpeed) * 3;
+    Vector3 offset = user.direction().setY(0).normalize().multiply(speed);
     Vector3 location = user.location().add(offset);
     AABB userBounds = AABBUtils.entityBounds(user.entity()).at(location);
     for (Block block : BlockMethods.combineFaces(location.toBlock(user.world()))) {

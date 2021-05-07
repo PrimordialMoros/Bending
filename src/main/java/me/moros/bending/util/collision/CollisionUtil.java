@@ -70,7 +70,7 @@ public final class CollisionUtil {
     Vector3 extent = collider.halfExtents().add(new Vector3(buffer, buffer, buffer));
     Vector3 pos = collider.position();
     boolean hit = false;
-    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ())) {
+    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.x, extent.y, extent.z)) {
       if (livingOnly && !(entity instanceof LivingEntity)) {
         continue;
       }

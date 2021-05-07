@@ -20,43 +20,45 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// Oriented bounding box
+import static java.lang.Math.abs;
+
+/**
+ * Oriented bounding box
+ */
 public class OBB implements Collider {
-  private static final double epsilon = 0.001;
   private final Vector3 center;
-  private final RealMatrix basis;
+  private final Vector3[] axes;
   private final Vector3 e; // Half extents in local space.
 
-  private OBB(Vector3 center, RealMatrix basis, Vector3 halfExtents) {
+  private OBB(Vector3 center, Vector3[] axes, Vector3 halfExtents) {
     this.center = center;
-    this.basis = basis;
+    this.axes = new Vector3[3];
+    System.arraycopy(axes, 0, this.axes, 0, 3);
     this.e = halfExtents;
   }
 
   private OBB(AABB aabb) {
     this.center = aabb.position();
-    this.basis = MatrixUtils.createRealIdentityMatrix(3);
+    this.axes = new Vector3[]{Vector3.PLUS_I, Vector3.PLUS_J, Vector3.PLUS_K};
     this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
-    double[] arr = new double[3];
-    rotation.applyTo(aabb.position().toArray(), arr);
-    this.center = new Vector3(arr);
-    this.basis = MatrixUtils.createRealMatrix(rotation.getMatrix());
+    this.center = rotation.applyTo(aabb.position());
+    double[][] m = rotation.getMatrix();
+    this.axes = new Vector3[3];
+    for (int i = 0; i < 3; i++) {
+      this.axes[i] = new Vector3(m[i]);
+    }
     this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Vector3 axis, double angle) {
-    this(aabb, new Rotation(axis, angle, RotationConvention.VECTOR_OPERATOR));
+    this(aabb, new Rotation(axis, angle));
   }
 
   @Override
@@ -76,126 +78,44 @@ public class OBB implements Collider {
   }
 
   private boolean intersects(OBB other) {
-    double ra, rb;
-    RealMatrix R = getRotationMatrix(other);
-    // translation
-    Vector3 t = other.center.subtract(center);
-    // Bring into coordinate frame
-    t = new Vector3(basis.operate(t.toArray()));
-    RealMatrix absR = MatrixUtils.createRealMatrix(3, 3);
-
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        absR.setEntry(i, j, FastMath.abs(R.getEntry(i, j)) + epsilon);
-      }
-    }
-
-    // test this box's axes
-    for (int i = 0; i < 3; ++i) {
-      Vector3 row = new Vector3(absR.getRow(i));
-      ra = e.component(i);
-      rb = other.e.dotProduct(row);
-      if (FastMath.abs(t.component(i)) > ra + rb) {
+    final Vector3 pos = other.center.subtract(center);
+    for (int i = 0; i < 3; i++) {
+      if (getSeparatingPlane(pos, axes[i], other) || getSeparatingPlane(pos, other.axes[i], other)) {
         return false;
       }
     }
-
-    // test other box's axes
-    for (int i = 0; i < 3; ++i) {
-      Vector3 col = new Vector3(absR.getColumn(i));
-      ra = e.dotProduct(col);
-      rb = other.e.component(i);
-      Vector3 rotCol = new Vector3(R.getColumn(i));
-      if (FastMath.abs(t.dotProduct(rotCol)) > ra + rb) {
-        return false;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (getSeparatingPlane(pos, axes[i].crossProduct(other.axes[j]), other)) {
+          return false;
+        }
       }
     }
-
-    // A0 x B0
-    ra = e.component(1) * absR.getEntry(2, 0) + e.component(2) * absR.getEntry(1, 0);
-    rb = other.e.component(1) * absR.getEntry(0, 2) + other.e.component(2) * absR.getEntry(0, 1);
-    if (FastMath.abs(t.component(2) * R.getEntry(1, 0) - t.component(1) * R.getEntry(2, 0)) > ra + rb) {
-      return false;
-    }
-
-    // A0 x B1
-    ra = e.component(1) * absR.getEntry(2, 1) + e.component(2) * absR.getEntry(1, 1);
-    rb = other.e.component(0) * absR.getEntry(0, 2) + other.e.component(2) * absR.getEntry(0, 0);
-    if (FastMath.abs(t.component(2) * R.getEntry(1, 1) - t.component(1) * R.getEntry(2, 1)) > ra + rb) {
-      return false;
-    }
-
-    // A0 x B2
-    ra = e.component(1) * absR.getEntry(2, 2) + e.component(2) * absR.getEntry(1, 2);
-    rb = other.e.component(0) * absR.getEntry(0, 1) + other.e.component(1) * absR.getEntry(0, 0);
-    if (FastMath.abs(t.component(2) * R.getEntry(1, 2) - t.component(1) * R.getEntry(2, 2)) > ra + rb) {
-      return false;
-    }
-
-    // A1 x B0
-    ra = e.component(0) * absR.getEntry(2, 0) + e.component(2) * absR.getEntry(0, 0);
-    rb = other.e.component(1) * absR.getEntry(1, 2) + other.e.component(2) * absR.getEntry(1, 1);
-    if (FastMath.abs(t.component(0) * R.getEntry(2, 0) - t.component(2) * R.getEntry(0, 0)) > ra + rb) {
-      return false;
-    }
-
-    // A1 x B1
-    ra = e.component(0) * absR.getEntry(2, 1) + e.component(2) * absR.getEntry(0, 1);
-    rb = other.e.component(0) * absR.getEntry(1, 2) + other.e.component(2) * absR.getEntry(1, 0);
-    if (FastMath.abs(t.component(0) * R.getEntry(2, 1) - t.component(2) * R.getEntry(0, 1)) > ra + rb) {
-      return false;
-    }
-
-    // A1 x B2
-    ra = e.component(0) * absR.getEntry(2, 2) + e.component(2) * absR.getEntry(0, 2);
-    rb = other.e.component(0) * absR.getEntry(1, 1) + other.e.component(1) * absR.getEntry(1, 0);
-    if (FastMath.abs(t.component(0) * R.getEntry(2, 2) - t.component(2) * R.getEntry(0, 2)) > ra + rb) {
-      return false;
-    }
-
-    // A2 x B0
-    ra = e.component(0) * absR.getEntry(1, 0) + e.component(1) * absR.getEntry(0, 0);
-    rb = other.e.component(1) * absR.getEntry(2, 2) + other.e.component(2) * absR.getEntry(2, 1);
-    if (FastMath.abs(t.component(1) * R.getEntry(0, 0) - t.component(0) * R.getEntry(1, 0)) > ra + rb) {
-      return false;
-    }
-
-    // A2 x B1
-    ra = e.component(0) * absR.getEntry(1, 1) + e.component(1) * absR.getEntry(0, 1);
-    rb = other.e.component(0) * absR.getEntry(2, 2) + other.e.component(2) * absR.getEntry(2, 0);
-    if (FastMath.abs(t.component(1) * R.getEntry(0, 1) - t.component(0) * R.getEntry(1, 1)) > ra + rb) {
-      return false;
-    }
-
-    // A2 x B2
-    ra = e.component(0) * absR.getEntry(1, 2) + e.component(1) * absR.getEntry(0, 2);
-    rb = other.e.component(0) * absR.getEntry(2, 1) + other.e.component(1) * absR.getEntry(2, 0);
-    return !(FastMath.abs(t.component(1) * R.getEntry(0, 2) - t.component(0) * R.getEntry(1, 2)) > ra + rb);
+    return true;
   }
 
-  // Express the other box's basis in this box's coordinate frame.
-  private RealMatrix getRotationMatrix(OBB other) {
-    RealMatrix r = MatrixUtils.createRealMatrix(3, 3);
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        Vector3 a = new Vector3(basis.getRow(i));
-        Vector3 b = new Vector3(other.basis.getRow(j));
-        r.setEntry(i, j, a.dotProduct(b));
-      }
-    }
-    return r;
+  // check if there's a separating plane in between the selected axes
+  private boolean getSeparatingPlane(Vector3 pos, Vector3 plane, OBB other) {
+    final double dot = abs(pos.dotProduct(plane));
+    final double x1 = abs((axes[0].multiply(e.x)).dotProduct(plane));
+    final double y1 = abs((axes[1].multiply(e.y)).dotProduct(plane));
+    final double z1 = abs((axes[2].multiply(e.z)).dotProduct(plane));
+    final double x2 = abs((other.axes[0].multiply(other.e.x)).dotProduct(plane));
+    final double y2 = abs((other.axes[1].multiply(other.e.y)).dotProduct(plane));
+    final double z2 = abs((other.axes[2].multiply(other.e.z)).dotProduct(plane));
+    return dot > x1 + y1 + z1 + x2 + y2 + z2;
   }
 
   // Returns the position closest to the target that lies on/in the OBB.
   public @NonNull Vector3 closestPosition(@NonNull Vector3 target) {
     Vector3 t = target.subtract(center);
     Vector3 closest = center;
-    // Project target onto basis axes and move toward it.
-    for (int i = 0; i < 3; ++i) {
-      Vector3 axis = new Vector3(basis.getRow(i));
-      double r = e.component(i);
-      double dist = FastMath.max(-r, FastMath.min(t.dotProduct(axis), r));
-      closest = closest.add(axis.scalarMultiply(dist));
+    double[] extentArray = e.toArray();
+    for (int i = 0; i < 3; i++) {
+      Vector3 axis = axes[i];
+      double r = extentArray[i];
+      double dist = Math.max(-r, Math.min(t.dotProduct(axis), r));
+      closest = closest.add(axis.multiply(dist));
     }
     return closest;
   }
@@ -207,7 +127,7 @@ public class OBB implements Collider {
 
   @Override
   public @NonNull OBB at(@NonNull Vector3 point) {
-    return new OBB(point, basis, e);
+    return new OBB(point, axes, e);
   }
 
   @Override
@@ -220,6 +140,6 @@ public class OBB implements Collider {
 
   @Override
   public boolean contains(@NonNull Vector3 point) {
-    return closestPosition(point).distanceSq(point) <= epsilon;
+    return closestPosition(point).distanceSq(point) <= 0.01;
   }
 }

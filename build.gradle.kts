@@ -25,7 +25,6 @@ repositories {
 
 dependencies {
     api("me.moros", "atlas-core", "1.2.0-SNAPSHOT")
-    implementation("org.apache.commons", "commons-math3", "3.6.1")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     compileOnly("org.checkerframework", "checker-qual", "3.13.0")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
@@ -49,7 +48,6 @@ tasks {
             relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
             relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
             relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
-            relocate("org.apache.commons.math3", "me.moros.bending.internal.apachemath")
             relocate("org.bstats", "me.moros.bending.bstats")
             relocate("org.h2", "me.moros.atlas.h2")
             relocate("org.jdbi", "me.moros.atlas.jdbi")

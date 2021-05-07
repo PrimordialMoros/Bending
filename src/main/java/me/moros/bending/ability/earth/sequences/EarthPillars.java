@@ -160,7 +160,7 @@ public class EarthPillars extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       }
-      entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup * factor).clampVelocity());
+      entity.setVelocity(Vector3.PLUS_J.multiply(userConfig.knockup * factor).clampVelocity());
       return true;
     }
   }

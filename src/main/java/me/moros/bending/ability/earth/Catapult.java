@@ -43,7 +43,6 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -53,7 +52,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Catapult extends AbilityInstance {
   private static final Config config = new Config();
-  private static final double ANGLE = FastMath.toRadians(60);
+  private static final double ANGLE = Math.toRadians(60);
 
   private User user;
   private Config userConfig;
@@ -92,7 +91,7 @@ public class Catapult extends AbilityInstance {
     AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.location());
     return WorldMethods.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtils.blockBounds(b))).stream()
       .filter(this::isValidBlock)
-      .min(Comparator.comparingDouble(b -> new Vector3(b).add(Vector3.HALF).distanceSq(user.location())))
+      .min(Comparator.comparingDouble(b -> Vector3.center(b).distanceSq(user.location())))
       .orElse(null);
   }
 
@@ -105,7 +104,7 @@ public class Catapult extends AbilityInstance {
 
 
   private boolean launch(boolean sneak) {
-    double angle = Vector3.angle(Vector3.PLUS_J, user.direction());
+    double angle = Vector3.PLUS_J.angle(user.direction());
 
     int length = 0;
     Block base = getBase();
@@ -120,7 +119,7 @@ public class Catapult extends AbilityInstance {
         .build(3, 1).orElse(null);
     } else {
       if (angle >= ANGLE && angle <= 2 * ANGLE) {
-        Vector3 reverse = user.direction().scalarMultiply(-1);
+        Vector3 reverse = user.direction().negate();
         length = getLength(user.location(), reverse);
       }
     }
@@ -143,7 +142,7 @@ public class Catapult extends AbilityInstance {
     double factor = length / (double) userConfig.length;
     double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
     return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
-      entity.setVelocity(direction.scalarMultiply(power).clampVelocity());
+      entity.setVelocity(direction.multiply(power).clampVelocity());
       return true;
     }, true, true);
   }
@@ -151,7 +150,7 @@ public class Catapult extends AbilityInstance {
   private int getLength(Vector3 origin, Vector3 direction) {
     Set<Block> checked = new HashSet<>();
     for (double i = 0.5; i <= userConfig.length; i += 0.5) {
-      Block block = origin.add(direction.scalarMultiply(i)).toBlock(user.world());
+      Block block = origin.add(direction.multiply(i)).toBlock(user.world());
       if (!checked.contains(block)) {
         if (!isValidBlock(block)) {
           return NumberConversions.ceil(i) - 1;
@@ -198,7 +197,7 @@ public class Catapult extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(3000);
       sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
       clickPower = abilityNode.node("click-power").getDouble(1.8);
-      length = FastMath.max(1, abilityNode.node("length").getInt(7));
+      length = Math.max(1, abilityNode.node("length").getInt(7));
     }
   }
 }

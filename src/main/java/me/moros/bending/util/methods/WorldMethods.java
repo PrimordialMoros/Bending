@@ -118,12 +118,10 @@ public final class WorldMethods {
     if (box == AABBUtils.DUMMY_COLLIDER) {
       return Collections.emptyList();
     }
-    Vector3 min = box.min();
-    Vector3 max = box.max();
     List<Block> blocks = new ArrayList<>();
-    for (double x = min.getX(); x <= max.getX(); x++) {
-      for (double y = min.getY(); y <= max.getY(); y++) {
-        for (double z = min.getZ(); z <= max.getZ(); z++) {
+    for (double x = box.min.x; x <= box.max.x; x++) {
+      for (double y = box.min.y; y <= box.max.y; y++) {
+        for (double z = box.min.z; z <= box.max.z; z++) {
           Vector3 loc = new Vector3(x, y, z);
           Block block = loc.toBlock(world);
           if (predicate.test(block)) {
@@ -154,7 +152,7 @@ public final class WorldMethods {
    * @return Optional of the result block
    */
   public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range, @NonNull Set<@NonNull Block> ignore) {
-    BlockIterator it = new BlockIterator(world, ray.origin.toVector(), ray.direction.toVector(), 0, NumberConversions.floor(range));
+    BlockIterator it = new BlockIterator(world, ray.origin.toBukkitVector(), ray.direction.toBukkitVector(), 0, NumberConversions.floor(range));
     while (it.hasNext()) {
       Block closestBlock = it.next();
       if (closestBlock.isPassable() && !closestBlock.isLiquid()) {

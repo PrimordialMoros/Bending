@@ -151,9 +151,9 @@ public class RaiseEarth extends AbilityInstance {
   private void raiseWall(int height, int width) {
     double w = (width - 1) / 2.0;
     Vector3 side = user.direction().crossProduct(Vector3.PLUS_J).normalize();
-    Vector3 center = new Vector3(origin).add(Vector3.HALF);
+    Vector3 center = Vector3.center(origin);
     for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
-      Block check = center.add(side.scalarMultiply(i)).toBlock(user.world());
+      Block check = center.add(side.multiply(i)).toBlock(user.world());
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < height; j++) {
           Block block = check.getRelative(BlockFace.DOWN, j);

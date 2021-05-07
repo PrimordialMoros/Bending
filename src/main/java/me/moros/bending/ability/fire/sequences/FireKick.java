@@ -46,7 +46,6 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -70,12 +69,12 @@ public class FireKick extends AbilityInstance {
     recalculateConfig();
 
     double height = user.entity().getEyeHeight();
-    Vector3 direction = user.direction().scalarMultiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
+    Vector3 direction = user.direction().multiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
     Vector3 origin = user.location();
     Vector3 dir = user.direction();
     Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
-    VectorMethods.createArc(direction, rotateAxis, FastMath.PI / 30, 11).forEach(
-      v -> streams.add(new FireStream(new Ray(origin, v.scalarMultiply(userConfig.range))))
+    VectorMethods.createArc(direction, rotateAxis, Math.PI / 30, 11).forEach(
+      v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
     );
 
     user.addCooldown(description(), userConfig.cooldown);
@@ -156,7 +155,7 @@ public class FireKick extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firekick");
 
       cooldown = abilityNode.node("cooldown").getLong(4000);
-      damage = abilityNode.node("damage").getDouble(2.5);
+      damage = abilityNode.node("damage").getDouble(2.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(7.0);
       speed = abilityNode.node("speed").getDouble(1.0);

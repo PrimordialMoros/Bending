@@ -185,21 +185,21 @@ public class FireBurst extends AbilityInstance {
       affectedEntities.add(entity);
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       FireTick.ignite(user, entity, userConfig.fireTicks);
-      entity.setVelocity(ray.direction.normalize().scalarMultiply(0.5).clampVelocity());
+      entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
       return true;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      Vector3 reverse = ray.direction.scalarMultiply(-1);
+      Vector3 reverse = ray.direction.negate();
       Location center = bukkitLocation();
       double igniteRadius = 1.5;
-      if (user.location().distanceSq(new Vector3(block)) > 4) {
+      if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
           if (!Bending.game().protectionSystem().canBuild(user, b)) {
             continue;
           }
-          if (WorldMethods.blockCast(user.world(), new Ray(new Vector3(b), reverse), igniteRadius + 2).isPresent()) {
+          if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {
             continue;
           }
           BlockMethods.tryLightBlock(b);

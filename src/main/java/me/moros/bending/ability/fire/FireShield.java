@@ -38,6 +38,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -50,9 +51,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
@@ -129,7 +127,7 @@ public class FireShield extends AbilityInstance {
       entity.remove();
       return true;
     }
-    FireTick.ignite(user, entity, userConfig.fireTicks);
+    FireTick.ignite(user, entity);
     if (!affectedEntities.contains(entity)) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       affectedEntities.add(entity);
@@ -175,12 +173,12 @@ public class FireShield extends AbilityInstance {
 
     @Override
     public void update() {
-      location = user.eyeLocation().add(user.direction().scalarMultiply(userConfig.diskRange));
+      location = user.eyeLocation().add(user.direction().multiply(userConfig.diskRange));
       double r = userConfig.diskRadius;
       AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
       Vector3 right = user.rightSide();
-      Rotation rotation = new Rotation(Vector3.PLUS_J, FastMath.toRadians(user.yaw()), RotationConvention.VECTOR_OPERATOR);
-      rotation = rotation.applyTo(new Rotation(right, FastMath.toRadians(user.pitch()), RotationConvention.VECTOR_OPERATOR));
+      Rotation rotation = new Rotation(Vector3.PLUS_J, Math.toRadians(user.yaw()));
+      rotation = rotation.applyTo(new Rotation(right, Math.toRadians(user.pitch())));
       disk = new Disk(new OBB(aabb, rotation), new Sphere(userConfig.diskRadius)).at(location);
     }
 
@@ -191,11 +189,11 @@ public class FireShield extends AbilityInstance {
         return;
       }
       nextRenderTime = time + 200;
-      Rotation rotation = new Rotation(user.direction(), FastMath.toRadians(20), RotationConvention.VECTOR_OPERATOR);
+      Rotation rotation = new Rotation(user.direction(), Math.toRadians(20));
       double[] array = Vector3.PLUS_J.crossProduct(user.direction()).normalize().toArray();
       for (int i = 0; i < 18; i++) {
         for (double j = 0.2; j <= 1; j += 0.2) {
-          Location spawnLoc = location.add(new Vector3(array).scalarMultiply(j * userConfig.diskRadius)).toLocation(user.world());
+          Location spawnLoc = location.add(new Vector3(array).multiply(j * userConfig.diskRadius)).toLocation(user.world());
           ParticleUtil.createFire(user, spawnLoc)
             .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
           if (rand.nextInt(12) == 0) {
@@ -242,8 +240,8 @@ public class FireShield extends AbilityInstance {
         if (factor <= 0.2) {
           continue;
         }
-        double x = radius * factor * FastMath.cos(i * currentPoint);
-        double z = radius * factor * FastMath.sin(i * currentPoint);
+        double x = radius * factor * Math.cos(i * currentPoint);
+        double z = radius * factor * Math.sin(i * currentPoint);
         Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.world());
         ParticleUtil.createFire(user, spawnLoc)
           .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
@@ -261,8 +259,6 @@ public class FireShield extends AbilityInstance {
   private static class Config extends Configurable {
     @Attribute(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.FIRE_TICKS)
-    public int fireTicks;
     @Attribute(Attribute.COOLDOWN)
     public long diskCooldown;
     @Attribute(Attribute.DURATION)
@@ -283,7 +279,6 @@ public class FireShield extends AbilityInstance {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
       damage = abilityNode.node("damage").getDouble(0.5);
-      fireTicks = abilityNode.node("fire-ticks").getInt(25);
 
       diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
       diskDuration = abilityNode.node("disk", "duration").getLong(1000);

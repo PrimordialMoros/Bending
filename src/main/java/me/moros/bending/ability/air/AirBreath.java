@@ -98,7 +98,7 @@ public class AirBreath extends AbilityInstance {
     }
     user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
@@ -150,7 +150,7 @@ public class AirBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      entity.setVelocity(ray.direction.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
+      entity.setVelocity(ray.direction.normalize().multiply(userConfig.knockback).clampVelocity());
       FireTick.extinguish(entity);
       if (entity instanceof LivingEntity) {
         LivingEntity livingEntity = (LivingEntity) entity;
@@ -166,7 +166,7 @@ public class AirBreath extends AbilityInstance {
       }
       BlockMethods.tryCoolLava(user, block);
       if (!MaterialUtil.isTransparentOrWater(block) && user.pitch() > 30) {
-        user.entity().setVelocity(user.direction().scalarMultiply(-userConfig.knockback).clampVelocity());
+        user.entity().setVelocity(user.direction().multiply(-userConfig.knockback).clampVelocity());
         FireTick.extinguish(user.entity());
       }
       return !MaterialUtil.isWater(block);

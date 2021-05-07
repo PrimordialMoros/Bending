@@ -120,7 +120,7 @@ public class FireWheel extends AbilityInstance {
     @Override
     public void render() {
       Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
-      VectorMethods.circle(this.ray.direction.scalarMultiply(this.radius), rotateAxis, 36).forEach(v ->
+      VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 36).forEach(v ->
         ParticleUtil.createFire(user, location.add(v).toLocation(user.world())).extra(0.01).spawn()
       );
     }

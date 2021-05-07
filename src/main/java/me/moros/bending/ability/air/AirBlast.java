@@ -47,7 +47,6 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -127,7 +126,7 @@ public class AirBlast extends AbilityInstance {
 
   private boolean selectOrigin() {
     origin = user.rayTrace(userConfig.selectRange)
-      .subtract(user.direction().scalarMultiply(0.5));
+      .subtract(user.direction().multiply(0.5));
     selectedOrigin = true;
     return Bending.game().protectionSystem().canBuild(user, origin.toBlock(user.world()));
   }
@@ -144,7 +143,7 @@ public class AirBlast extends AbilityInstance {
     Vector3 direction = target.subtract(origin).normalize();
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
-    stream = new AirStream(new Ray(origin, direction.scalarMultiply(userConfig.range)));
+    stream = new AirStream(new Ray(origin, direction.multiply(userConfig.range)));
   }
 
   @Override
@@ -200,7 +199,7 @@ public class AirBlast extends AbilityInstance {
       Vector3 push = ray.direction.normalize();
       if (!isUser) {
         // Cap vertical push
-        push = push.setY(FastMath.max(-0.3, FastMath.min(0.3, push.getY())));
+        push = push.setY(Math.max(-0.3, Math.min(0.3, push.y)));
       }
 
       factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
@@ -213,11 +212,11 @@ public class AirBlast extends AbilityInstance {
       double strength = velocity.dotProduct(push.normalize());
       if (strength > factor) {
         double f = velocity.normalize().dotProduct(push.normalize());
-        velocity = velocity.scalarMultiply(0.5).add(push.normalize().scalarMultiply(f));
+        velocity = velocity.multiply(0.5).add(push.normalize().multiply(f));
       } else if (strength + factor * 0.5 > factor) {
-        velocity = velocity.add(push.scalarMultiply(factor - strength));
+        velocity = velocity.add(push.multiply(factor - strength));
       } else {
-        velocity = velocity.add(push.scalarMultiply(factor * 0.5));
+        velocity = velocity.add(push.multiply(factor * 0.5));
       }
       entity.setVelocity(velocity.clampVelocity());
       entity.setFallDistance(0);

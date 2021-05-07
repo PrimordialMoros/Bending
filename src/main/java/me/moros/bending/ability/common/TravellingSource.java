@@ -78,8 +78,8 @@ public class TravellingSource implements State {
       return UpdateResult.REMOVE;
     }
     clean();
-    Vector3 target = user.eyeLocation().floor();
-    Vector3 location = new Vector3(source);
+    Vector3 target = Vector3.center(user.locBlock());
+    Vector3 location = Vector3.center(source);
 
     double distSq = target.distanceSq(location);
     if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {

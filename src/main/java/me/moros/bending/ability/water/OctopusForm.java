@@ -48,7 +48,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -180,7 +179,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private void renderTentacles(boolean forceUpdate) {
-    Vector3 center = user.location().floor().add(Vector3.HALF);
+    Vector3 center = user.location().snapToBlockCenter();
     long time = System.currentTimeMillis();
     for (Tentacle tentacle : tentacles) {
       if (forceUpdate || time > tentacle.nextUpdateTime) {
@@ -208,8 +207,8 @@ public class OctopusForm extends AbilityInstance {
     }
     Vector3 center = user.location().floor().add(new Vector3(0.5, 0, 0.5));
     double r = RADIUS + 0.5;
-    for (double phi = 0; phi < FastMath.PI * 2; phi += FastMath.PI / 4) {
-      Vector3 tentacleBase = center.add(new Vector3(FastMath.cos(phi) * r, 0, FastMath.sin(phi) * r));
+    for (double phi = 0; phi < Math.PI * 2; phi += Math.PI / 4) {
+      Vector3 tentacleBase = center.add(new Vector3(Math.cos(phi) * r, 0, Math.sin(phi) * r));
       CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
     }
   }
@@ -220,7 +219,7 @@ public class OctopusForm extends AbilityInstance {
     }
     DamageUtil.damageEntity(entity, user, userConfig.damage, description());
     Vector3 dir = EntityMethods.entityCenter(entity).subtract(user.location());
-    entity.setVelocity(dir.normalize().scalarMultiply(userConfig.knockback).clampVelocity());
+    entity.setVelocity(dir.normalize().multiply(userConfig.knockback).clampVelocity());
     affectedEntities.add(entity);
     return true;
   }
@@ -260,11 +259,11 @@ public class OctopusForm extends AbilityInstance {
 
     private Tentacle(int index) {
       blocks = new ArrayList<>();
-      double phi = index * FastMath.PI / 4;
-      cos = FastMath.cos(phi);
-      sin = FastMath.sin(phi);
+      double phi = index * Math.PI / 4;
+      cos = Math.cos(phi);
+      sin = Math.sin(phi);
       topFormTime = System.currentTimeMillis() + 150;
-      updateBlocks(user.location().floor().add(Vector3.HALF));
+      updateBlocks(user.location().snapToBlockCenter());
     }
 
     private void updateBlocks(Vector3 center) {

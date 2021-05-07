@@ -30,6 +30,7 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
@@ -67,13 +68,13 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     this.maxRange = ray.direction.getNorm();
     this.collisionRadius = collisionRadius;
     this.collider = new Sphere(location, collisionRadius);
-    dir = ray.direction.normalize().scalarMultiply(speed);
+    dir = ray.direction.normalize().multiply(speed);
     render();
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    Vector3 vector = controllable ? user.direction().scalarMultiply(speed) : dir;
+    Vector3 vector = controllable ? user.direction().multiply(speed) : dir;
     for (int i = 0; i < steps; i++) {
       Vector3 originalVector = new Vector3(location.toArray());
       location = location.add(vector);
@@ -96,14 +97,11 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       Block originBlock = originalVector.toBlock(user.world());
       Set<Block> toCheck = new HashSet<>();
       if (speed > 1) {
-        toCheck.add(originalVector.add(vector.scalarMultiply(0.5)).toBlock(user.world()));
+        toCheck.add(originalVector.add(vector.multiply(0.5)).toBlock(user.world()));
       }
 
-      for (Vector3 v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
-        int x = NumberConversions.floor(v.getX());
-        int y = NumberConversions.floor(v.getY());
-        int z = NumberConversions.floor(v.getZ());
-        toCheck.add(originBlock.getRelative(x, y, z));
+      for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
+        toCheck.add(originBlock.getRelative(v.x, v.y, v.z));
       }
 
       if (toCheck.stream().anyMatch(this::testCollision)) {

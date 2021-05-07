@@ -64,7 +64,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     // Remove if player gets too far away from ground.
-    distance = user.location().getY() - block.getY();
+    distance = user.location().y - block.getY();
     if (distance > maxHeight) {
       return UpdateResult.REMOVE;
     }
@@ -97,7 +97,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   public static void limitVelocity(@NonNull User user, @NonNull Vector3 velocity, double speed) {
     if (velocity.getNormSq() > speed * speed) {
-      user.entity().setVelocity(velocity.normalize().toVector().multiply(speed));
+      user.entity().setVelocity(velocity.normalize().multiply(speed).clampVelocity());
     }
   }
 }

@@ -21,13 +21,13 @@ package me.moros.bending.ability.common.basic;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -54,11 +54,8 @@ public abstract class MovementResolver {
     }
 
     int diagonalCollisions = 0;
-    for (Vector3 v : VectorMethods.decomposeDiagonals(origin, direction)) {
-      int x = NumberConversions.floor(v.getX());
-      int y = NumberConversions.floor(v.getY()) + offset;
-      int z = NumberConversions.floor(v.getZ());
-      Block block = original.getRelative(x, y, z);
+    for (IntVector v : VectorMethods.decomposeDiagonals(origin, direction)) {
+      Block block = original.getRelative(v.x, v.y + offset, v.z);
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
           return null;

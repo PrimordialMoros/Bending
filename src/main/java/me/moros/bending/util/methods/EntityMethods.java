@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.util.collision.AABBUtils;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -87,7 +86,7 @@ public final class EntityMethods {
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
     int maxHeight = entity.getWorld().getMaxHeight();
-    BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toVector(), 0, 256);
+    BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toBukkitVector(), 0, 256);
     AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, maxHeight, 0));
     while (it.hasNext()) {
       Block block = it.next();
@@ -96,7 +95,7 @@ public final class EntityMethods {
       }
       AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.blockBounds(block);
       if (checkBounds.intersects(entityBounds)) {
-        return FastMath.max(0, entity.getBoundingBox().getMinY() - checkBounds.max().getY());
+        return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.y);
       }
     }
     return maxHeight;

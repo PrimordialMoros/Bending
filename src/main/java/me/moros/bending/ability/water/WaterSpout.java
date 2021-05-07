@@ -37,6 +37,7 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -49,7 +50,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.util.BlockVector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterSpout extends AbilityInstance {
@@ -129,7 +129,7 @@ public class WaterSpout extends AbilityInstance {
   }
 
   private class Spout extends AbstractSpout {
-    private BlockVector blockVector;
+    private IntVector lastPosition;
     private final Vector3 g = new Vector3(0, -0.1, 0); // Applied as extra gravity
 
     public Spout() {
@@ -139,11 +139,11 @@ public class WaterSpout extends AbilityInstance {
 
     @Override
     public void render() {
-      BlockVector userBlockVector = new BlockVector(user.location().toVector());
-      if (userBlockVector.equals(blockVector)) {
+      IntVector newPosition = user.location().toIntVector();
+      if (newPosition.equals(lastPosition)) {
         return;
       }
-      blockVector = userBlockVector;
+      lastPosition = newPosition;
       column.forEach(this::clean);
       column.clear();
       ignore.clear();

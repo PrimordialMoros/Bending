@@ -51,7 +51,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -102,8 +101,8 @@ public class AirShield extends AbilityInstance {
       if (factor <= 0.2) {
         continue;
       }
-      double x = userConfig.radius * factor * FastMath.cos(i * currentPoint);
-      double z = userConfig.radius * factor * FastMath.sin(i * currentPoint);
+      double x = userConfig.radius * factor * Math.cos(i * currentPoint);
+      double z = userConfig.radius * factor * Math.sin(i * currentPoint);
       Vector3 loc = center.add(new Vector3(x, y, z));
       ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
         .offset(0.2, 0.2, 0.2).extra(0.01).spawn();
@@ -121,8 +120,8 @@ public class AirShield extends AbilityInstance {
       Vector3 toEntity = new Vector3(entity.getLocation()).subtract(center);
       Vector3 normal = toEntity.setY(0).normalize();
       double strength = ((userConfig.radius - toEntity.getNorm()) / userConfig.radius) * userConfig.maxPush;
-      strength = FastMath.max(0, FastMath.min(1, strength));
-      entity.setVelocity(entity.getVelocity().add(normal.scalarMultiply(strength).toVector()));
+      strength = Math.max(0, Math.min(1, strength));
+      entity.setVelocity(entity.getVelocity().add(normal.multiply(strength).clampVelocity()));
       return false;
     }, false);
 
@@ -136,7 +135,7 @@ public class AirShield extends AbilityInstance {
   @Override
   public void onDestroy() {
     double factor = userConfig.duration == 0 ? 1 : System.currentTimeMillis() - startTime / (double) userConfig.duration;
-    long cooldown = FastMath.min(1000, (long) (factor * userConfig.cooldown));
+    long cooldown = Math.min(1000, (long) (factor * userConfig.cooldown));
     user.addCooldown(description(), cooldown);
   }
 

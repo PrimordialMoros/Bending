@@ -107,7 +107,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     render();
-    location = location.add(newLocation).scalarMultiply(0.5);
+    location = location.add(newLocation).multiply(0.5);
     render(); // Render again at midpoint for a smoother line
     postRender();
     location = newLocation;
@@ -115,8 +115,8 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     Block block = location.toBlock(user.world());
 
     if (skipVertical) { // Advance location vertically if possible to match target height
-      int y1 = NumberConversions.floor(targetLocation.getY());
-      int y2 = NumberConversions.floor(newLocation.getY());
+      int y1 = NumberConversions.floor(targetLocation.y);
+      int y2 = NumberConversions.floor(newLocation.y);
       if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
         location = newLocation.add(Vector3.PLUS_J);
         block = block.getRelative(BlockFace.UP);

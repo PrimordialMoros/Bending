@@ -109,7 +109,7 @@ public class FrostBreath extends AbilityInstance {
 
     user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
     Vector3 offset = new Vector3(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().scalarMultiply(userConfig.range));
+    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FrostStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;

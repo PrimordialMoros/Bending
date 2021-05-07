@@ -34,7 +34,6 @@ import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -108,7 +107,7 @@ public class MovementHandler {
       }
       return DUMMY;
     }
-    long finalDuration = FastMath.abs(event.duration());
+    long finalDuration = Math.abs(event.duration());
     return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
   }
 
@@ -159,7 +158,7 @@ public class MovementHandler {
       if (time > endTime) {
         remove();
       } else {
-        float factor = FastMath.max(0, FastMath.min(1, (endTime - time) / (float) duration));
+        float factor = Math.max(0, Math.min(1, (endTime - time) / (float) duration));
         player.showBossBar(bar.progress(factor));
       }
     }

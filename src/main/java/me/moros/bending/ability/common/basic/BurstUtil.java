@@ -26,14 +26,13 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.EntityMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class BurstUtil {
-  public static final double ANGLE_STEP = FastMath.toRadians(10);
-  public static final double ANGLE = FastMath.toRadians(30);
-  public static final double FALL_MIN_ANGLE = FastMath.toRadians(60);
-  public static final double FALL_MAX_ANGLE = FastMath.toRadians(105);
+  public static final double ANGLE_STEP = Math.toRadians(10);
+  public static final double ANGLE = Math.toRadians(30);
+  public static final double FALL_MIN_ANGLE = Math.toRadians(60);
+  public static final double FALL_MAX_ANGLE = Math.toRadians(105);
 
   public static @NonNull Collection<@NonNull Ray> cone(@NonNull User user, double range) {
     return createBurst(user, range, ANGLE_STEP, ANGLE);
@@ -52,23 +51,23 @@ public final class BurstUtil {
     Vector3 center = EntityMethods.entityCenter(user.entity());
     Vector3 userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();
-    for (double theta = 0; theta < FastMath.PI; theta += angleStep) {
-      double z = FastMath.cos(theta);
-      double sinTheta = FastMath.sin(theta);
-      for (double phi = 0; phi < 2 * FastMath.PI; phi += angleStep) {
-        double x = FastMath.cos(phi) * sinTheta;
-        double y = FastMath.sin(phi) * sinTheta;
+    for (double theta = 0; theta < Math.PI; theta += angleStep) {
+      double z = Math.cos(theta);
+      double sinTheta = Math.sin(theta);
+      for (double phi = 0; phi < 2 * Math.PI; phi += angleStep) {
+        double x = Math.cos(phi) * sinTheta;
+        double y = Math.sin(phi) * sinTheta;
         Vector3 direction = new Vector3(x, y, z);
-        if (angle > 0 && Vector3.angle(direction, userDIr) > angle) {
+        if (angle > 0 && direction.angle(userDIr) > angle) {
           continue;
         }
         if (angle < 0) {
-          double vectorAngle = Vector3.angle(direction, Vector3.PLUS_J);
+          double vectorAngle = direction.angle(Vector3.PLUS_J);
           if (vectorAngle < FALL_MIN_ANGLE || vectorAngle > FALL_MAX_ANGLE) {
             continue;
           }
         }
-        rays.add(new Ray(center, direction.scalarMultiply(range)));
+        rays.add(new Ray(center, direction.multiply(range)));
       }
     }
     return rays;

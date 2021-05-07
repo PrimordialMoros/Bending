@@ -22,15 +22,20 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Ray with origin and direction
+ */
 public class Ray {
-  public final Vector3 origin, direction, invDir;
+  public final Vector3 origin;
+  public final Vector3 direction;
+  public final Vector3 invDir;
 
   public Ray(@NonNull Vector3 origin, @NonNull Vector3 direction) {
     this.origin = origin;
     this.direction = direction;
-    double invX = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getX();
-    double invY = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getY();
-    double invZ = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getZ();
+    double invX = direction.x == 0 ? Double.MAX_VALUE : 1 / direction.x;
+    double invY = direction.y == 0 ? Double.MAX_VALUE : 1 / direction.y;
+    double invZ = direction.z == 0 ? Double.MAX_VALUE : 1 / direction.z;
     invDir = new Vector3(invX, invY, invZ);
   }
 }

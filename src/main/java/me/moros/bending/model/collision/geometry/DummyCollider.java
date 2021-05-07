@@ -23,6 +23,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Dummy {@link AABB} collider for passable blocks
+ */
 public final class DummyCollider extends AABB {
   public DummyCollider() {
     super(Vector3.ZERO, Vector3.ZERO);
@@ -31,16 +34,6 @@ public final class DummyCollider extends AABB {
   @Override
   public @NonNull AABB grow(@NonNull Vector3 diff) {
     return this;
-  }
-
-  @Override
-  public @NonNull Vector3 min() {
-    return Vector3.ZERO;
-  }
-
-  @Override
-  public @NonNull Vector3 max() {
-    return Vector3.ZERO;
   }
 
   @Override
@@ -71,10 +64,5 @@ public final class DummyCollider extends AABB {
   @Override
   public boolean contains(@NonNull Vector3 point) {
     return false;
-  }
-
-  @Override
-  public String toString() {
-    return "DummyCollider";
   }
 }

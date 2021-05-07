@@ -48,7 +48,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -125,10 +124,10 @@ public class AirBlade extends AbilityInstance {
       }
       long time = System.currentTimeMillis();
       if (user.sneaking() && time > startTime + 100) {
-        double timeFactor = FastMath.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
+        double timeFactor = Math.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
         Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
-        VectorMethods.circle(direction.scalarMultiply(r), rotateAxis, 20).forEach(v ->
+        VectorMethods.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
           ParticleUtil.createAir(origin.add(v).toLocation(user.world())).spawn()
         );
       } else if (!user.sneaking()) {
@@ -193,7 +192,7 @@ public class AirBlade extends AbilityInstance {
     @Override
     public void render() {
       Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
-      VectorMethods.circle(this.ray.direction.scalarMultiply(this.radius), rotateAxis, 40).forEach(v ->
+      VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
         ParticleUtil.createAir(location.add(v).toLocation(user.world())).spawn()
       );
     }
@@ -208,7 +207,7 @@ public class AirBlade extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3 velocity = direction.setY(userConfig.knockup).normalize().scalarMultiply(userConfig.knockback);
+      Vector3 velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       entity.setVelocity(velocity.clampVelocity());
       return true;
     }

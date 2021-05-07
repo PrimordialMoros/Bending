@@ -67,7 +67,7 @@ public final class WorldManager {
 
   public void update() {
     for (Map.Entry<World, ManagerPair> entry : worlds.entrySet()) {
-      MCTiming timing = Bending.timingManager().ofStart(entry.getKey().getName() + ": Bending tick");
+      MCTiming timing = Bending.timingManager().ofStart(entry.getKey().getName() + " - tick");
       entry.getValue().update();
       timing.stopTiming();
     }

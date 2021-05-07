@@ -257,7 +257,7 @@ public class IceSpike extends AbilityInstance {
         return false;
       }
       affectedEntities.add(entity);
-      entity.setVelocity(Vector3.PLUS_J.scalarMultiply(userConfig.knockup).clampVelocity());
+      entity.setVelocity(Vector3.PLUS_J.multiply(userConfig.knockup).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       return true;
     }

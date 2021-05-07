@@ -38,7 +38,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import org.apache.commons.math3.util.FastMath;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -221,7 +220,7 @@ public class Pillar implements Updatable {
         return Optional.empty();
       }
       this.length = maxLength;
-      this.distance = FastMath.min(maxLength, maxDistance);
+      this.distance = Math.min(maxLength, maxDistance);
       return Optional.of(constructor.apply(this));
     }
 
