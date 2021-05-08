@@ -38,12 +38,10 @@ import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.block.BlastFurnace;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Campfire;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Furnace;
-import org.bukkit.block.Smoker;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
@@ -62,20 +60,20 @@ public final class BlockMethods {
    * @param block the block to light
    */
   public static void tryLightBlock(@NonNull Block block) {
-    if (block.getType() == Material.FURNACE) {
-      Furnace furnace = (Furnace) block.getState();
-      furnace.setBurnTime((short) 800);
-      furnace.update();
-    } else if (block.getType() == Material.SMOKER) {
-      Smoker smoker = (Smoker) block.getState();
-      smoker.setBurnTime((short) 800);
-      smoker.update();
-    } else if (block.getType() == Material.BLAST_FURNACE) {
-      BlastFurnace blastF = (BlastFurnace) block.getState();
-      blastF.setBurnTime((short) 800);
-      blastF.update();
-    } else if (block instanceof Campfire && block instanceof Lightable) {
-      ((Lightable) block.getBlockData()).setLit(true);
+    BlockState state = block.getState(false);
+    boolean light = false;
+    if (state instanceof Furnace) {
+      if (((Furnace) state).getBurnTime() < 800) {
+        ((Furnace) state).setBurnTime((short) 800);
+        light = true;
+      }
+    }
+    if (light || MaterialUtil.isCampfire(block)) {
+      Lightable data = (Lightable) block.getBlockData();
+      if (!data.isLit()) {
+        data.setLit(true);
+        block.setBlockData(data);
+      }
     }
   }
 
@@ -126,6 +124,12 @@ public final class BlockMethods {
         SoundUtil.FIRE_EXTINGUISH_SOUND.play(block.getLocation());
       }
       return true;
+    } else if (MaterialUtil.isCampfire(block)) {
+      Lightable data = (Lightable) block.getBlockData();
+      if (data.isLit()) {
+        data.setLit(false);
+        block.setBlockData(data);
+      }
     }
     return false;
   }

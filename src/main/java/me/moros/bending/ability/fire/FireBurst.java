@@ -193,6 +193,7 @@ public class FireBurst extends AbilityInstance {
     public boolean onBlockHit(@NonNull Block block) {
       Vector3 reverse = ray.direction.negate();
       Location center = bukkitLocation();
+      BlockMethods.tryLightBlock(block);
       double igniteRadius = 1.5;
       if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
@@ -202,7 +203,6 @@ public class FireBurst extends AbilityInstance {
           if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {
             continue;
           }
-          BlockMethods.tryLightBlock(b);
           if (MaterialUtil.isIgnitable(b)) {
             long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
             TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);

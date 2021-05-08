@@ -31,6 +31,7 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -142,6 +143,7 @@ public class Catapult extends AbilityInstance {
     double factor = length / (double) userConfig.length;
     double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
     return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
+      FireTick.extinguish(entity);
       entity.setVelocity(direction.multiply(power).clampVelocity());
       return true;
     }, true, true);

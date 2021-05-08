@@ -30,6 +30,7 @@ import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.passives.GracefulDescent;
 import me.moros.bending.ability.air.sequences.AirWheel;
+import me.moros.bending.ability.earth.EarthArmor;
 import me.moros.bending.ability.earth.EarthLine;
 import me.moros.bending.ability.earth.EarthSmash;
 import me.moros.bending.ability.earth.passives.DensityShift;
@@ -72,23 +73,23 @@ public final class ActivationController {
     this.cache = new ControllerCache();
   }
 
-  public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
-    return user.selectedAbility().map(desc -> activateAbility(user, method, desc)).orElse(false);
+  public @Nullable Ability activateAbility(@NonNull User user, @NonNull ActivationMethod method) {
+    return user.selectedAbility().map(desc -> activateAbility(user, method, desc)).orElse(null);
   }
 
-  public boolean activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
+  public @Nullable Ability activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
     if (!desc.isActivatedBy(method) || !user.canBend(desc)) {
-      return false;
+      return null;
     }
     if (!game.protectionSystem().canBuild(user, user.locBlock())) {
-      return false;
+      return null;
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
       game.abilityManager(user.world()).addAbility(user, ability);
-      return true;
+      return ability;
     }
-    return false;
+    return null;
   }
 
   public void onPlayerLogout(@NonNull BendingPlayer player) {
@@ -211,6 +212,9 @@ public final class ActivationController {
 
   public boolean onFireTickDamage(@NonNull User user) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
+      return false;
+    }
+    if (EarthArmor.hasArmor(user)) {
       return false;
     }
     return HeatControl.canBurn(user);

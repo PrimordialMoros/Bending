@@ -274,9 +274,6 @@ public class LavaDisk extends AbilityInstance {
   }
 
   private boolean isLocationSafe() {
-    if (location.y <= 2 || location.y >= user.world().getMaxHeight() - 1) {
-      return false;
-    }
     Block block = location.toBlock(user.world());
     if (MaterialUtil.isWater(block)) {
       BlockMethods.playLavaExtinguishEffect(block);

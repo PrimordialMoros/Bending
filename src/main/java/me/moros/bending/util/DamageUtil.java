@@ -24,8 +24,10 @@ import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.EntityEffect;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,31 +37,30 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public final class DamageUtil {
   public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
-    if (target instanceof LivingEntity && target.isValid() && damage > 0) {
-      LivingEntity targetEntity = (LivingEntity) target;
-
-      BendingDamageEvent event = Bending.eventBus().postAbilityDamageEvent(source, targetEntity, desc, damage);
-      double dmg = event.getFinalDamage();
-      if (event.isCancelled() || dmg <= 0) {
-        return false;
-      }
-
-      // We only use base damage modifier so we have to manually calculate other modifiers
-      dmg = calculateDamageAfterResistance(targetEntity, dmg);
-      if (dmg > 0) {
-        dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
-        if (dmg > 0) {
-          double previousHealth = targetEntity.getHealth();
-          double newHealth = Math.max(0, previousHealth - dmg);
-          targetEntity.setHealth(newHealth);
-        }
-      }
-      targetEntity.playEffect(EntityEffect.HURT);
-      targetEntity.setLastDamageCause(event);
-      targetEntity.setLastDamage(dmg);
-      return true;
+    if (damage <= 0 || !canDamage(target)) {
+      return false;
     }
-    return false;
+    LivingEntity targetEntity = (LivingEntity) target;
+    BendingDamageEvent event = Bending.eventBus().postAbilityDamageEvent(source, targetEntity, desc, damage);
+    double dmg = event.getFinalDamage();
+    if (event.isCancelled() || dmg <= 0) {
+      return false;
+    }
+
+    // We only use base damage modifier so we have to manually calculate other modifiers
+    dmg = calculateDamageAfterResistance(targetEntity, dmg);
+    if (dmg > 0) {
+      dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
+      if (dmg > 0) {
+        double previousHealth = targetEntity.getHealth();
+        double newHealth = Math.max(0, previousHealth - dmg);
+        targetEntity.setHealth(newHealth);
+      }
+    }
+    targetEntity.playEffect(EntityEffect.HURT);
+    targetEntity.setLastDamageCause(event);
+    targetEntity.setLastDamage(dmg);
+    return true;
   }
 
   private static double calculateDamageAfterResistance(LivingEntity entity, double damage) {
@@ -88,5 +89,16 @@ public final class DamageUtil {
       }
     }
     return damage;
+  }
+
+  private static boolean canDamage(Entity entity) {
+    if (entity.isInvulnerable() || !entity.isValid()) {
+      return false;
+    }
+    if (entity instanceof Player) {
+      GameMode mode = ((Player) entity).getGameMode();
+      return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
+    }
+    return entity instanceof LivingEntity;
   }
 }

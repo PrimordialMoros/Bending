@@ -61,7 +61,6 @@ public class OctopusForm extends AbilityInstance {
   private static final double RADIUS = 3.0;
   private static final AABB TENTACLE_BOX = new AABB(new Vector3(-1, 0.0, -1), new Vector3(1, 2.5, 1));
 
-  private static AbilityDescription ringDesc;
 
   private User user;
   private Config userConfig;
@@ -92,24 +91,9 @@ public class OctopusForm extends AbilityInstance {
 
     this.user = user;
     recalculateConfig();
-
     removalPolicy = Policies.builder().build();
-
-    if (ringDesc == null) {
-      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing").orElseThrow(RuntimeException::new);
-    }
-
-    ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
-    if (ring == null) {
-      ring = new WaterRing(ringDesc);
-      if (ring.activate(user, method)) {
-        Bending.game().abilityManager(user.world()).addAbility(user, ring);
-        return true;
-      } else {
-        return false;
-      }
-    }
-    return true;
+    ring = WaterRing.getOrCreateInstance(user);
+    return ring != null;
   }
 
   @Override
@@ -145,7 +129,7 @@ public class OctopusForm extends AbilityInstance {
       }
       renderTentacles(forceUpdate);
     } else {
-      if (!Bending.game().abilityManager(user.world()).hasAbility(user, WaterRing.class)) {
+      if (ring.isDestroyed()) {
         return UpdateResult.REMOVE;
       }
       if (ring.isReady() && user.sneaking()) {

@@ -55,7 +55,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Torrent extends AbilityInstance {
   private static final Config config = new Config();
-  private static AbilityDescription ringDesc;
 
   private User user;
   private Config userConfig;
@@ -83,19 +82,11 @@ public class Torrent extends AbilityInstance {
     this.user = user;
     recalculateConfig();
 
-    if (ringDesc == null) {
-      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing").orElseThrow(RuntimeException::new);
+    ring = WaterRing.getOrCreateInstance(user);
+    if (ring == null) {
+      return false;
     }
 
-    ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
-    if (ring == null) {
-      ring = new WaterRing(ringDesc);
-      if (ring.activate(user, method)) {
-        Bending.game().abilityManager(user.world()).addAbility(user, ring);
-      } else {
-        return false;
-      }
-    }
     if (ring.isReady()) {
       List<Block> sources = ring.complete();
       if (sources.isEmpty()) {
@@ -135,7 +126,7 @@ public class Torrent extends AbilityInstance {
     if (states != null) {
       return states.update();
     } else {
-      if (!Bending.game().abilityManager(user.world()).hasAbility(user, WaterRing.class)) {
+      if (ring.isDestroyed()) {
         return UpdateResult.REMOVE;
       }
     }

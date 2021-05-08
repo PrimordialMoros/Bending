@@ -141,6 +141,10 @@ public final class MaterialUtil {
     return MaterialSetTag.FIRE.isTagged(block.getType());
   }
 
+  public static boolean isCampfire(@NonNull Block block) {
+    return block.getType() == Material.CAMPFIRE || block.getType() == Material.SOUL_CAMPFIRE;
+  }
+
   public static boolean isLava(@NonNull Block block) {
     return block.getType() == Material.LAVA;
   }

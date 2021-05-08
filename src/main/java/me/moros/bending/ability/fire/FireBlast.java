@@ -263,6 +263,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     public boolean onBlockHit(@NonNull Block block) {
       Vector3 reverse = ray.direction.negate();
       Location center = bukkitLocation();
+      BlockMethods.tryLightBlock(block);
       if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
           if (!Bending.game().protectionSystem().canBuild(user, b)) {
@@ -271,7 +272,6 @@ public class FireBlast extends AbilityInstance implements Explosive {
           if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
             continue;
           }
-          BlockMethods.tryLightBlock(b);
           if (MaterialUtil.isIgnitable(b)) {
             long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
             TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);

@@ -36,6 +36,7 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.StateChain;
@@ -67,12 +68,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class WaterRing extends AbilityInstance {
   public static final double RING_RADIUS = 2.8;
 
   private static final Config config = new Config();
-
+  private static AbilityDescription ringDesc;
   private static AbilityDescription waveDesc;
 
   private User user;
@@ -87,6 +89,7 @@ public class WaterRing extends AbilityInstance {
 
   private boolean ready = false;
   private boolean completed = false;
+  private boolean destroyed = false;
   private double radius = RING_RADIUS;
   private int index = 0;
   private int sources = 0;
@@ -278,6 +281,10 @@ public class WaterRing extends AbilityInstance {
     return ready;
   }
 
+  public boolean isDestroyed() {
+    return destroyed;
+  }
+
   public double radius() {
     return radius;
   }
@@ -298,6 +305,7 @@ public class WaterRing extends AbilityInstance {
 
   @Override
   public void onDestroy() {
+    destroyed = true;
     if (!completed) {
       cleanAll();
     }
@@ -306,6 +314,22 @@ public class WaterRing extends AbilityInstance {
   @Override
   public @NonNull User user() {
     return user;
+  }
+
+  public static @Nullable WaterRing getOrCreateInstance(@NonNull User user) {
+    if (ringDesc == null) {
+      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing")
+        .orElseThrow(RuntimeException::new);
+    }
+    WaterRing oldRing = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class)
+      .orElse(null);
+    if (oldRing == null) {
+      Ability newRing = Bending.game().activationController().activateAbility(user, ActivationMethod.ATTACK, ringDesc);
+      if (newRing != null) {
+        return (WaterRing) newRing;
+      }
+    }
+    return oldRing;
   }
 
   private void launchShard() {

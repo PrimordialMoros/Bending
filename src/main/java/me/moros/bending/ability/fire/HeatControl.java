@@ -141,12 +141,13 @@ public class HeatControl extends AbilityInstance implements Ability {
     }
     boolean acted = false;
     Location center = user.rayTrace(userConfig.range).toLocation(user.world());
-    Predicate<Block> predicate = b -> TempBlock.isBendable(b) && MaterialUtil.isFire(b) || MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
-    Predicate<Block> safe = b -> Bending.game().protectionSystem().canBuild(user, b);
+    Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) ||
+      MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
+    Predicate<Block> safe = b -> TempBlock.isBendable(b) && Bending.game().protectionSystem().canBuild(user, b);
     List<Block> toMelt = new ArrayList<>();
     for (Block block : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
-      if (MaterialUtil.isFire(block)) {
+      if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block)) {
         BlockMethods.tryExtinguishFire(user, block);
       } else if (MaterialUtil.isSnow(block) || WaterMaterials.isIceBendable(block)) {
         toMelt.add(block);
