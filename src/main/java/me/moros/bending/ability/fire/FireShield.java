@@ -256,6 +256,21 @@ public class FireShield extends AbilityInstance {
     }
   }
 
+  public static double shieldFromExplosion(@NonNull User user, @NonNull Entity source, double damage) {
+    FireShield shield = Bending.game().abilityManager(user.world()).userInstances(user, FireShield.class)
+      .filter(FireShield::isSphere).findAny().orElse(null);
+    if (shield == null) {
+      return damage;
+    }
+    double distSq = EntityMethods.entityCenter(source).distanceSq(EntityMethods.entityCenter(user.entity()));
+    double r = shield.userConfig.shieldRadius;
+    if (distSq >= r * r ) {
+      return 0;
+    } else {
+      return 0.25 * damage;
+    }
+  }
+
   private static class Config extends Configurable {
     @Attribute(Attribute.DAMAGE)
     public double damage;

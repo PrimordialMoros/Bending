@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import me.moros.atlas.acf.lib.timings.MCTiming;
 import me.moros.bending.Bending;
+import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.events.BendingDamageEvent;
 import me.moros.bending.events.CooldownAddEvent;
 import me.moros.bending.events.CooldownRemoveEvent;
@@ -48,6 +49,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -175,8 +177,6 @@ public class UserListener implements Listener {
         FireTick.extinguish(event.getEntity());
         event.setCancelled(true);
       }
-    } else if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
-      // TODO make bending reduce explosions
     }
   }
 
@@ -187,6 +187,23 @@ public class UserListener implements Listener {
     }
     game.benderRegistry().user((LivingEntity) event.getEntity())
       .ifPresent(game.activationController()::onUserDamage);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamageByExplosion(EntityDamageByEntityEvent event) {
+    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
+      return;
+    }
+    if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
+      Optional<User> user = game.benderRegistry().user((LivingEntity) event.getEntity());
+      if (user.isPresent()) {
+        double dmg = FireShield.shieldFromExplosion(user.get(), event.getDamager(), event.getDamage());
+        event.setDamage(dmg);
+        if (dmg <= 0) {
+          event.setCancelled(true);
+        }
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

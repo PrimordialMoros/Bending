@@ -144,8 +144,7 @@ public class EntityListener implements Listener {
   public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
     if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
       event.setCancelled(true);
-    }
-    if (MovementHandler.isRestricted(event.getDamager(), ActionType.DAMAGE)) {
+    } else if (MovementHandler.isRestricted(event.getDamager(), ActionType.DAMAGE)) {
       event.setCancelled(true);
     }
   }
