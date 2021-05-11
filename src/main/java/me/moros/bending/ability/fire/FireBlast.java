@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -149,10 +149,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (stream == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(stream.collider());
+    return stream == null ? List.of() : List.of(stream.collider());
   }
 
   @Override
@@ -278,7 +275,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
           }
         }
       }
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), NumberConversions.round(4 * factor));
+      FragileStructure.tryDamageStructure(List.of(block), NumberConversions.round(4 * factor));
       explode();
       return true;
     }

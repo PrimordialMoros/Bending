@@ -103,9 +103,7 @@ import static me.moros.bending.model.ability.util.ActivationMethod.*;
  * Used to initialize all ability descriptions, sequences and collisions
  */
 public final class AbilityInitializer {
-  public static final List<String> spoutLayer = List.of("AirSpout", "WaterSpout");
-  public static final List<String> shieldLayer = List.of("AirShield", "FireShield", "WallOfFire");
-  public static final List<String> breathCollisions = List.of("EarthBlast", "FireBlast", "WaterManipulation");
+  public static final List<String> blasts = List.of("EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
   public static final List<String> layer1 = List.of("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer2 = List.of("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
@@ -136,13 +134,14 @@ public final class AbilityInitializer {
   private Collection<RegisteredCollision> buildCollisions() {
     return new CollisionBuilder(registry)
       .addLayer(layer0)
-      .addSpecialLayer(spoutLayer)
+      .addSpecialLayer(List.of("AirSpout", "WaterSpout"))
       .addLayer(layer1)
+      .addSpecialLayer(List.of("FireShield"))
       .addLayer(layer2)
-      .addSpecialLayer(shieldLayer)
+      .addSpecialLayer(List.of("AirShield", "WallOfFire"))
       .addLayer(layer3)
-      .addSimpleCollision("FrostBreath", breathCollisions, false, true)
-      .addSimpleCollision("FireBreath", breathCollisions, false, true)
+      .addSimpleCollision("FrostBreath", blasts, false, true)
+      .addSimpleCollision("FireBreath", blasts, false, true)
       .addSimpleCollision("FireBreath", "EarthSmash", false, false)
       .addSimpleCollision("FrostBreath", "EarthSmash", false, false)
       .addSimpleCollision("FrostBreath", "FireBreath", true, true)

@@ -21,8 +21,8 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -209,7 +209,7 @@ public class FireBurst extends AbilityInstance {
           }
         }
       }
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
+      FragileStructure.tryDamageStructure(List.of(block), 4);
       return true;
     }
   }

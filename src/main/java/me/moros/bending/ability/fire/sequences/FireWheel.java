@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire.sequences;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -109,7 +109,7 @@ public class FireWheel extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(wheel.collider());
+    return List.of(wheel.collider());
   }
 
   private class Wheel extends AbstractWheel {

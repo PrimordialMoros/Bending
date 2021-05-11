@@ -20,7 +20,6 @@
 package me.moros.bending.game;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,7 +84,7 @@ public final class AbilityRegistry {
    * @return a stream of all the passives in this registry
    */
   public @NonNull Stream<AbilityDescription> passives(@NonNull Element element) {
-    return passives.getOrDefault(element, Collections.emptySet()).stream();
+    return passives.getOrDefault(element, Set.of()).stream();
   }
 
   /**

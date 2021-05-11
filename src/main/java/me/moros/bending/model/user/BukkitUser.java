@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -189,14 +188,14 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @return {@link #rayTrace(double, Set)} with an empty material set and ignoreLiquids = true
    */
   default @NonNull Vector3 rayTrace(double range) {
-    return rayTrace(range, Collections.emptySet(), true);
+    return rayTrace(range, Set.of(), true);
   }
 
   /**
    * @return {@link #rayTrace(double, Set, boolean)} with an empty material set
    */
   default @NonNull Vector3 rayTrace(double range, boolean ignoreLiquids) {
-    return rayTrace(range, Collections.emptySet(), ignoreLiquids);
+    return rayTrace(range, Set.of(), ignoreLiquids);
   }
 
   /**

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -34,6 +34,7 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
@@ -151,7 +152,16 @@ public class FireShield extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(shield.collider());
+    return List.of(shield.collider());
+  }
+
+  @Override
+  public void onCollision(@NonNull Collision collision) {
+    List<String> ignore = sphere ? List.of("AirSwipe") : List.of("AirSwipe", "EarthBlast", "WaterManipulation");
+    String collidedName = collision.collidedAbility().description().name();
+    if (collision.removeOther() && ignore.contains(collidedName)) {
+      collision.removeOther(false);
+    }
   }
 
   private interface Shield {
@@ -264,7 +274,7 @@ public class FireShield extends AbilityInstance {
     }
     double distSq = EntityMethods.entityCenter(source).distanceSq(EntityMethods.entityCenter(user.entity()));
     double r = shield.userConfig.shieldRadius;
-    if (distSq >= r * r ) {
+    if (distSq >= r * r) {
       return 0;
     } else {
       return 0.25 * damage;

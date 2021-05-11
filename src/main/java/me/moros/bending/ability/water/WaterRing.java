@@ -147,7 +147,7 @@ public class WaterRing extends AbilityInstance {
 
   public @NonNull List<Block> complete() {
     if (!ready) {
-      return Collections.emptyList();
+      return List.of();
     }
     completed = true;
     sources = 0;

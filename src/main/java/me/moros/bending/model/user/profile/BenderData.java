@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user.profile;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,7 +38,7 @@ public final class BenderData {
   }
 
   public BenderData() {
-    this(new String[9], Collections.emptySet(), Collections.emptySet());
+    this(new String[9], Set.of(), Set.of());
   }
 
   public @NonNull String[] slots() {

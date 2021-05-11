@@ -21,7 +21,7 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -125,7 +125,7 @@ public class Combustion extends AbilityInstance implements Explosive {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(beam.collider());
+    return List.of(beam.collider());
   }
 
   @Override

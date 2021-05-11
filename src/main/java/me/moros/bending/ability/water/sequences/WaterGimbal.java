@@ -180,7 +180,7 @@ public class WaterGimbal extends AbilityInstance {
     if (current instanceof GimbalStream) {
       return ((GimbalStream) current).colliders();
     }
-    return Collections.emptyList();
+    return List.of();
   }
 
   private static class Gimbal implements State {
@@ -312,7 +312,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public void onBlockHit(@NonNull Block block) {
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
+      FragileStructure.tryDamageStructure(List.of(block), 3);
     }
   }
 

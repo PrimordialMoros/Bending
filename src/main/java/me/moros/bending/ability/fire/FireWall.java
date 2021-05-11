@@ -21,7 +21,7 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -266,7 +266,7 @@ public class FireWall extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(collider);
+    return List.of(collider);
   }
 
   private static class Config extends Configurable {

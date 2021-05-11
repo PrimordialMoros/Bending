@@ -21,7 +21,6 @@ package me.moros.bending.model.collision;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +61,7 @@ public class CollisionBuilder {
   }
 
   public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull String second, boolean removeFirst, boolean removeSecond) {
-    return addSimpleCollision(first, Collections.singletonList(second), removeFirst, removeSecond);
+    return addSimpleCollision(first, List.of(second), removeFirst, removeSecond);
   }
 
   public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull Collection<@NonNull String> seconds, boolean removeFirst, boolean removeSecond) {

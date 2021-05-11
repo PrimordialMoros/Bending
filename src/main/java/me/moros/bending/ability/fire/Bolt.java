@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -138,7 +138,7 @@ public class Bolt extends AbilityInstance {
   private void dealDamage() {
     Collider collider = new Sphere(targetLocation, userConfig.radius);
     CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
-    FragileStructure.tryDamageStructure(Collections.singletonList(targetLocation.toBlock(user.world())), 8);
+    FragileStructure.tryDamageStructure(List.of(targetLocation.toBlock(user.world())), 8);
   }
 
   private void strike() {

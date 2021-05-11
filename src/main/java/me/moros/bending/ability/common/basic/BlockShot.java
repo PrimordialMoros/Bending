@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import java.util.Collections;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
@@ -152,7 +152,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   public void redirect() {
     target = user.rayTraceEntity(range)
       .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(range, Collections.singleton(material)))
+      .orElseGet(() -> user.rayTrace(range, Set.of(material)))
       .snapToBlockCenter();
     settingUp = false;
   }

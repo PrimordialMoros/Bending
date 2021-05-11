@@ -21,7 +21,7 @@ package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -368,9 +368,9 @@ public class MetalCable extends AbilityInstance {
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
     if (launched && projectile != null) {
-      return Collections.singletonList(BOX.at(projectile.center()));
+      return List.of(BOX.at(projectile.center()));
     }
-    return Collections.singletonList(new Sphere(location, 0.8));
+    return List.of(new Sphere(location, 0.8));
   }
 
   private static class CableTarget {

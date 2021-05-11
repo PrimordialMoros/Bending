@@ -20,7 +20,7 @@
 package me.moros.bending.ability.water;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -148,10 +148,7 @@ public class IceCrawl extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (iceLine == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(iceLine.collider());
+    return iceLine == null ? List.of() : List.of(iceLine.collider());
   }
 
   private class Line extends AbstractLine {

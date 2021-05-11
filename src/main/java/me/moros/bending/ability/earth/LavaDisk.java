@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -205,7 +205,7 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return launched ? Collections.singletonList(new Sphere(location, 1.4)) : Collections.emptyList();
+    return !launched ? List.of() : List.of(new Sphere(location, 1.4));
   }
 
   private boolean damageEntity(Entity entity, double damage) {
@@ -225,7 +225,7 @@ public class LavaDisk extends AbilityInstance {
     if (currentPower <= 0) {
       return false;
     }
-    FragileStructure.tryDamageStructure(Collections.singletonList(block), 0);
+    FragileStructure.tryDamageStructure(List.of(block), 0);
     if (block.isLiquid() || !TempBlock.isBendable(block)) {
       return false;
     }

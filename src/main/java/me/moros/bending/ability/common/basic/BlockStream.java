@@ -22,8 +22,8 @@ package me.moros.bending.ability.common.basic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
@@ -114,7 +114,7 @@ public abstract class BlockStream implements State {
     Vector3 current = Vector3.center(head);
     if (controllable || direction == null) {
       Vector3 targetLoc = user.rayTraceEntity(range).map(EntityMethods::entityCenter)
-        .orElseGet(() -> user.rayTrace(range, Collections.singleton(material)));
+        .orElseGet(() -> user.rayTrace(range, Set.of(material)));
       // Improve targeting when near
       if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());

@@ -21,8 +21,8 @@ package me.moros.bending.ability.fire.sequences;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -130,7 +130,7 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
+      FragileStructure.tryDamageStructure(List.of(block), 3);
       return true;
     }
   }

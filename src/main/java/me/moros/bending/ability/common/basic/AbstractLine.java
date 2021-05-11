@@ -19,7 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
-import java.util.Collections;
+import java.util.Set;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
@@ -70,7 +70,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
       locked = true;
     } else {
       target = null;
-      targetLocation = user.rayTrace(range, Collections.singleton(Material.WATER));
+      targetLocation = user.rayTrace(range, Set.of(Material.WATER));
     }
     direction = targetLocation.subtract(location).setY(0).normalize();
   }

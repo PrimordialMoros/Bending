@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -201,10 +201,7 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (blast == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(blast.collider());
+    return blast == null ? List.of() : List.of(blast.collider());
   }
 
   private class Blast extends BlockShot {
@@ -234,7 +231,7 @@ public class EarthBlast extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 4);
+      FragileStructure.tryDamageStructure(List.of(block), 4);
       return true;
     }
   }

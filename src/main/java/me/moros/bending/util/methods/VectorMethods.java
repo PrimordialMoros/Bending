@@ -21,7 +21,7 @@ package me.moros.bending.util.methods;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.model.math.IntVector;
@@ -176,7 +176,7 @@ public final class VectorMethods {
       }
     }
     if (possibleCollisions.isEmpty()) {
-      return Collections.singletonList(IntVector.ZERO);
+      return List.of(IntVector.ZERO);
     }
     return possibleCollisions;
   }

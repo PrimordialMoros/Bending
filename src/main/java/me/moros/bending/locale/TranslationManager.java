@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -78,7 +78,7 @@ public class TranslationManager {
     try (Stream<Path> stream = Files.list(translationsDirectory)) {
       files = stream.filter(this::isValidPropertyFile).collect(Collectors.toList());
     } catch (IOException e) {
-      files = Collections.emptyList();
+      files = List.of();
     }
     files.forEach(this::loadTranslationFile);
     int amount = installed.size();

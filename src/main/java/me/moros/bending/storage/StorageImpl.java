@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -370,7 +369,7 @@ public final class StorageImpl implements BendingStorage {
     } catch (Exception e) {
       logger.warn(e.getMessage());
     }
-    return Collections.emptySet();
+    return Set.of();
   }
 
   private Set<String> getPresets(int playerId) {
@@ -382,7 +381,7 @@ public final class StorageImpl implements BendingStorage {
     } catch (Exception e) {
       logger.warn(e.getMessage());
     }
-    return Collections.emptySet();
+    return Set.of();
   }
 
   private boolean deletePreset(int playerId, String presetName) {

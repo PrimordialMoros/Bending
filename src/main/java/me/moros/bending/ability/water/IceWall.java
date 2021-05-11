@@ -21,7 +21,7 @@ package me.moros.bending.ability.water;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -73,7 +73,7 @@ public class IceWall extends AbilityInstance {
     recalculateConfig();
 
     Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), userConfig.selectRange).orElse(null);
-    if (targetBlock != null && FragileStructure.tryDamageStructure(Collections.singletonList(targetBlock), 0)) {
+    if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
     }
 

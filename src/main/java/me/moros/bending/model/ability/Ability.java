@@ -20,7 +20,7 @@
 package me.moros.bending.model.ability;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -43,7 +43,7 @@ public interface Ability extends Updatable {
   }
 
   default @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.emptyList();
+    return List.of();
   }
 
   default void onCollision(@NonNull Collision collision) {

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -148,10 +148,7 @@ public class AirBlast extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (stream == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(stream.collider());
+    return stream == null ? List.of() : List.of(stream.collider());
   }
 
   @Override

@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -162,10 +162,7 @@ public class AirBlade extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (blade == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(blade.collider());
+    return blade == null ? List.of() : List.of(blade.collider());
   }
 
   @Override

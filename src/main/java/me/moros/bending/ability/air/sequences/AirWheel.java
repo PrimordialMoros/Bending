@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air.sequences;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -143,7 +143,7 @@ public class AirWheel extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(collider);
+    return List.of(collider);
   }
 
   @Override

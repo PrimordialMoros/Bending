@@ -21,8 +21,8 @@ package me.moros.bending.ability.water;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -250,10 +250,7 @@ public class WaterManipulation extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (manip == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(manip.collider());
+    return manip == null ? List.of() : List.of(manip.collider());
   }
 
   private class Manip extends BlockShot {
@@ -277,7 +274,7 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 3);
+      FragileStructure.tryDamageStructure(List.of(block), 3);
       return true;
     }
   }

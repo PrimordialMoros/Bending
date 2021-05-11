@@ -20,7 +20,7 @@
 package me.moros.bending.ability.air;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -118,7 +118,7 @@ public class AirSpout extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return Collections.singletonList(spout.collider());
+    return List.of(spout.collider());
   }
 
   public void handleMovement(@NonNull Vector3 velocity) {

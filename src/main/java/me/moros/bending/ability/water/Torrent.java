@@ -20,7 +20,6 @@
 package me.moros.bending.ability.water;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -156,7 +155,7 @@ public class Torrent extends AbilityInstance {
         return ((TorrentStream) current).colliders();
       }
     }
-    return Collections.emptyList();
+    return List.of();
   }
 
   private class TorrentStream extends BlockStream {
@@ -204,7 +203,7 @@ public class Torrent extends AbilityInstance {
       for (Block block : stream) {
         TempBlock.create(block, Material.ICE.createBlockData(), userConfig.freezeDuration, true);
       }
-      FragileStructure.tryDamageStructure(Collections.singletonList(head), 8);
+      FragileStructure.tryDamageStructure(List.of(head), 8);
       stream.clear();
     }
 
@@ -214,7 +213,7 @@ public class Torrent extends AbilityInstance {
         freeze();
         return;
       }
-      FragileStructure.tryDamageStructure(Collections.singletonList(block), 1);
+      FragileStructure.tryDamageStructure(List.of(block), 1);
     }
   }
 

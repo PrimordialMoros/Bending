@@ -19,7 +19,6 @@
 
 package me.moros.bending.game.manager;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,11 +45,11 @@ public final class WorldManager {
 
   public WorldManager() {
     ConfigurationNode node = Bending.configManager().config().node("properties", "disabled-worlds");
-    List<String> worldNames = Collections.emptyList();
+    List<String> worldNames;
     try {
-      worldNames = node.getList(String.class, Collections.emptyList());
+      worldNames = node.getList(String.class, List.of());
     } catch (SerializationException e) {
-      // ignore
+      worldNames = List.of();
     }
     disabledWorlds = worldNames.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID)
       .collect(Collectors.toSet());

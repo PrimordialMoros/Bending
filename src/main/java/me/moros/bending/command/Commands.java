@@ -20,7 +20,6 @@
 package me.moros.bending.command;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -90,10 +89,7 @@ public class Commands {
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
-      if (player == null) {
-        return Collections.emptyList();
-      }
-      return game.playerManager().player(player).presets();
+      return player == null ? List.of() : game.playerManager().player(player).presets();
     });
 
     commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.elementNames()));

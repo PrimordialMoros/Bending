@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -319,7 +319,7 @@ public class EarthShot extends AbilityInstance {
   }
 
   private Vector3 getTarget(Block source) {
-    Set<Material> ignored = source == null ? Collections.emptySet() : Collections.singleton(source.getType());
+    Set<Material> ignored = source == null ? Set.of() : Set.of(source.getType());
     return user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.range, ignored));
@@ -339,7 +339,7 @@ public class EarthShot extends AbilityInstance {
           SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
         }
         Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
-        FragileStructure.tryDamageStructure(Collections.singletonList(projected), mode == Mode.MAGMA ? 6 : 4);
+        FragileStructure.tryDamageStructure(List.of(projected), mode == Mode.MAGMA ? 6 : 4);
       }
       projectile.revert();
     }
@@ -358,10 +358,7 @@ public class EarthShot extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (!launched || projectile == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(BOX.at(projectile.center()));
+    return (!launched || projectile == null) ? List.of() : List.of(BOX.at(projectile.center()));
   }
 
   private static class Config extends Configurable {

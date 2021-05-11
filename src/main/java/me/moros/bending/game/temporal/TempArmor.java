@@ -20,7 +20,6 @@
 package me.moros.bending.game.temporal;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,7 +88,7 @@ public class TempArmor implements Temporary {
     for (ItemStack item : armorItems) {
       ItemMeta meta = item.getItemMeta();
       meta.displayName(Component.text("Bending Armor"));
-      meta.lore(Collections.singletonList(Component.text("Temporary")));
+      meta.lore(List.of(Component.text("Temporary")));
       meta.setUnbreakable(true);
       Bending.dataLayer().addArmorKey(meta);
       item.setItemMeta(meta);

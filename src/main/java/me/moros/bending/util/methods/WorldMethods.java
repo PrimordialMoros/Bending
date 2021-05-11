@@ -20,7 +20,6 @@
 package me.moros.bending.util.methods;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -116,7 +115,7 @@ public final class WorldMethods {
    */
   public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
     if (box == AABBUtils.DUMMY_COLLIDER) {
-      return Collections.emptyList();
+      return List.of();
     }
     List<Block> blocks = new ArrayList<>();
     for (double x = box.min.x; x <= box.max.x; x++) {
@@ -140,7 +139,7 @@ public final class WorldMethods {
    * @see #blockCast(World, Ray, double, Set)
    */
   public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range) {
-    return blockCast(world, ray, range, Collections.emptySet());
+    return blockCast(world, ray, range, Set.of());
   }
 
   /**

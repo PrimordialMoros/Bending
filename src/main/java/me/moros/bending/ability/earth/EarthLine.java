@@ -206,10 +206,7 @@ public class EarthLine extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (earthLine == null) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(earthLine.collider());
+    return earthLine == null ? List.of() : List.of(earthLine.collider());
   }
 
   private class Line extends AbstractLine {
@@ -284,7 +281,7 @@ public class EarthLine extends AbilityInstance {
     @Override
     protected void onCollision() {
       Location center = location.toLocation(user.world());
-      FragileStructure.tryDamageStructure(Collections.singletonList(center.getBlock()), mode == Mode.MAGMA ? 0 : 5);
+      FragileStructure.tryDamageStructure(List.of(center.getBlock()), mode == Mode.MAGMA ? 0 : 5);
       if (mode != Mode.MAGMA) {
         return;
       }

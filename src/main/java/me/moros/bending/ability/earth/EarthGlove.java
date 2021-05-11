@@ -20,7 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -278,10 +278,7 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (glove == null || returning) {
-      return Collections.emptyList();
-    }
-    return Collections.singletonList(new Sphere(location, 0.8));
+    return (glove == null || returning) ? List.of() : List.of(new Sphere(location, 0.8));
   }
 
   public void shatterGlove() {
