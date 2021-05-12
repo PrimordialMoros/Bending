@@ -30,12 +30,11 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FragileStructure {
@@ -97,24 +96,20 @@ public class FragileStructure {
     return false;
   }
 
-  // TODO match sounds to actual materials
   public static void destroyStructure(@NonNull FragileStructure data) {
     for (Block block : data.fragileBlocks) {
       if (!data.predicate.test(block)) {
         continue;
       }
-      Material mat = block.getType();
+      BlockData blockData = block.getType().createBlockData();
       TempBlock.createAir(block);
       block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
       Location center = block.getLocation().add(0.5, 0.5, 0.5);
       ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)
-        .offset(0.3, 0.3, 0.3).data(mat.createBlockData()).spawn();
+        .offset(0.3, 0.3, 0.3).data(blockData).spawn();
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        if (WaterMaterials.ICE_BENDABLE.isTagged(mat)) {
-          SoundUtil.playSound(center, Sound.BLOCK_GLASS_BREAK, 2F, 2F);
-        } else {
-          SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 2F, 2F);
-        }
+        Sound sound = blockData.getSoundGroup().getBreakSound();
+        SoundUtil.playSound(center, sound, 2, 1);
       }
     }
   }

@@ -58,6 +58,11 @@ public final class VectorMethods {
     return arc;
   }
 
+  public static @NonNull Collection<@NonNull Vector3> circle(@NonNull Vector3 start, @NonNull Vector3 axis, int times) {
+    double angle = 2 * Math.PI / times;
+    return rotate(start, axis, angle, times);
+  }
+
   /**
    * Repeat a rotation on a specific vector.
    * @param start the starting point
@@ -68,13 +73,7 @@ public final class VectorMethods {
    * @see #rotateInverse(Vector3, Rotation, int)
    */
   public static @NonNull Collection<@NonNull Vector3> rotate(@NonNull Vector3 start, @NonNull Vector3 axis, double angle, int times) {
-    Rotation rotation = new Rotation(axis, angle);
-    return rotate(start, rotation, times);
-  }
-
-  public static @NonNull Collection<@NonNull Vector3> circle(@NonNull Vector3 start, @NonNull Vector3 axis, int times) {
-    double angle = 2 * Math.PI / times;
-    return rotate(start, axis, angle, times);
+    return rotate(start, new Rotation(axis, angle), times);
   }
 
   private static @NonNull Collection<@NonNull Vector3> rotate(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
@@ -92,8 +91,7 @@ public final class VectorMethods {
    * @see #rotate(Vector3, Rotation, int)
    */
   public static @NonNull Collection<@NonNull Vector3> rotateInverse(@NonNull Vector3 start, @NonNull Vector3 axis, double angle, int times) {
-    Rotation rotation = new Rotation(axis, angle);
-    return rotateInverse(start, rotation, times);
+    return rotateInverse(start, new Rotation(axis, angle), times);
   }
 
   private static @NonNull Collection<@NonNull Vector3> rotateInverse(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
@@ -181,17 +179,13 @@ public final class VectorMethods {
     return possibleCollisions;
   }
 
-  public static @NonNull Vector3 randomOffset(Vector3 target, double offset) {
-    ThreadLocalRandom rand = ThreadLocalRandom.current();
-    double x = rand.nextDouble(-offset, offset);
-    double y = rand.nextDouble(-offset, offset);
-    double z = rand.nextDouble(-offset, offset);
-    return target.add(new Vector3(x, y, z));
+  public static @NonNull Vector3 gaussianOffset(Vector3 target, double offset) {
+    return gaussianOffset(target, offset, offset, offset);
   }
 
-  public static @NonNull Vector3 gaussianOffset(Vector3 target, double offset) {
+  public static @NonNull Vector3 gaussianOffset(Vector3 target, double offsetX, double offsetY, double offsetZ) {
     ThreadLocalRandom r = ThreadLocalRandom.current();
-    double[] v = {r.nextGaussian() * offset, r.nextGaussian() * offset, r.nextGaussian() * offset};
+    double[] v = {r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ};
     return target.add(new Vector3(v));
   }
 }

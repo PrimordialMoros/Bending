@@ -50,24 +50,22 @@ public class CollisionBuilder {
     simpleCollisions = new ArrayList<>();
   }
 
-  public @NonNull CollisionBuilder addSpecialLayer(@NonNull Collection<@NonNull String> abilities) {
-    layers.add(new CollisionLayer(mapAbilities(abilities), false));
+  public @NonNull CollisionBuilder layer(@NonNull Collection<@NonNull String> abilities) {
+    layers.add(new CollisionLayer(mapAbilities(abilities), true));
     return this;
   }
 
-  public @NonNull CollisionBuilder addLayer(@NonNull Collection<@NonNull String> abilities) {
-    layers.add(new CollisionLayer(mapAbilities(abilities)));
-    return this;
+  public @NonNull CollisionBuilder add(@NonNull String first, @NonNull String second, boolean removeFirst, boolean removeSecond) {
+    return add(List.of(first), List.of(second), removeFirst, removeSecond);
   }
 
-  public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull String second, boolean removeFirst, boolean removeSecond) {
-    return addSimpleCollision(first, List.of(second), removeFirst, removeSecond);
+  public @NonNull CollisionBuilder add(@NonNull String first, @NonNull Collection<@NonNull String> second, boolean removeFirst, boolean removeSecond) {
+    return add(List.of(first), second, removeFirst, removeSecond);
   }
 
-  public @NonNull CollisionBuilder addSimpleCollision(@NonNull String first, @NonNull Collection<@NonNull String> seconds, boolean removeFirst, boolean removeSecond) {
-    AbilityDescription desc1 = registry.abilityDescription(first).orElse(null);
-    if (desc1 != null) {
-      for (AbilityDescription desc2 : mapAbilities(seconds)) {
+  public @NonNull CollisionBuilder add(@NonNull Collection<@NonNull String> first, @NonNull Collection<@NonNull String> second, boolean removeFirst, boolean removeSecond) {
+    for (AbilityDescription desc1 : mapAbilities(first)) {
+      for (AbilityDescription desc2 : mapAbilities(second)) {
         simpleCollisions.add(new RegisteredCollision(desc1, desc2, removeFirst, removeSecond));
       }
     }
@@ -112,10 +110,6 @@ public class CollisionBuilder {
   private static class CollisionLayer {
     private final List<AbilityDescription> layerAbilities;
     private final boolean interCollisions;
-
-    private CollisionLayer(List<AbilityDescription> layerAbilities) {
-      this(layerAbilities, true);
-    }
 
     private CollisionLayer(List<AbilityDescription> layerAbilities, boolean interCollisions) {
       this.layerAbilities = layerAbilities;

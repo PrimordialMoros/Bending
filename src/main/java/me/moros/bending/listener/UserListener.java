@@ -34,7 +34,6 @@ import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActionType;
 import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -166,17 +165,13 @@ public class UserListener implements Listener {
     if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
       return;
     }
-    if (event.getCause() == DamageCause.FALL) {
-      Optional<User> user = game.benderRegistry().user((LivingEntity) event.getEntity());
-      if (user.isPresent() && !game.activationController().onFallDamage(user.get())) {
-        event.setCancelled(true);
-      }
-    } else if (event.getCause() == DamageCause.FIRE || event.getCause() == DamageCause.FIRE_TICK) {
-      Optional<User> user = game.benderRegistry().user((LivingEntity) event.getEntity());
-      if (user.isPresent() && !game.activationController().onFireTickDamage(user.get())) {
-        FireTick.extinguish(event.getEntity());
-        event.setCancelled(true);
-      }
+    LivingEntity entity = (LivingEntity) event.getEntity();
+    double oldDamage = event.getDamage();
+    double newDamage = game.activationController().onEntityDamage(entity, event.getCause(), oldDamage);
+    if (newDamage <= 0) {
+      event.setCancelled(true);
+    } else if (oldDamage != newDamage) {
+      event.setDamage(newDamage);
     }
   }
 
@@ -197,10 +192,12 @@ public class UserListener implements Listener {
     if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
       Optional<User> user = game.benderRegistry().user((LivingEntity) event.getEntity());
       if (user.isPresent()) {
-        double dmg = FireShield.shieldFromExplosion(user.get(), event.getDamager(), event.getDamage());
-        event.setDamage(dmg);
-        if (dmg <= 0) {
+        double oldDmg = event.getDamage();
+        double newDmg = FireShield.shieldFromExplosion(user.get(), event.getDamager(), oldDmg);
+        if (newDmg <= 0) {
           event.setCancelled(true);
+        } else if (oldDmg != newDmg) {
+          event.setDamage(newDmg);
         }
       }
     }

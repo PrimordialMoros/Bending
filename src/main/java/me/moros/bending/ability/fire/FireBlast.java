@@ -169,8 +169,8 @@ public class FireBlast extends AbilityInstance implements Explosive {
       boolean sphere = ((FireShield) collidedAbility).isSphere();
       if (sphere) {
         ignoreCollider = collision.colliders().getValue();
+        explode();
       }
-      explode();
     } else if (collidedAbility instanceof FireBlast) {
       FireBlast other = (FireBlast) collidedAbility;
       double collidedFactor = other.factor;

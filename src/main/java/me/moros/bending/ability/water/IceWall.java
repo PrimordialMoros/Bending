@@ -69,13 +69,15 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    this.user = user;
-    recalculateConfig();
-
-    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), userConfig.selectRange).orElse(null);
+    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), config.selectRange).orElse(null);
     if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
     }
+    if (user.onCooldown(description())) {
+      return false;
+    }
+    this.user = user;
+    recalculateConfig();
 
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
     if (source.isEmpty()) {
@@ -115,7 +117,7 @@ public class IceWall extends AbilityInstance {
   }
 
   private int validate(Block block, int height) {
-    if (!WaterMaterials.isIceBendable(block) || !TempBlock.isBendable(block)) {
+    if (!WaterMaterials.isWaterOrIceBendable(block) || !TempBlock.isBendable(block)) {
       return 0;
     }
     if (!Bending.game().protectionSystem().canBuild(user, block)) {
@@ -143,7 +145,7 @@ public class IceWall extends AbilityInstance {
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < h; j++) {
           Block block = check.getRelative(BlockFace.DOWN, j);
-          if (WaterMaterials.isIceBendable(block)) {
+          if (WaterMaterials.isWaterOrIceBendable(block)) {
             createPillar(block, h);
             break;
           } else if (!MaterialUtil.isTransparentOrWater(block)) {
@@ -151,7 +153,7 @@ public class IceWall extends AbilityInstance {
           }
         }
       } else {
-        BlockMethods.getTopValid(check, h, WaterMaterials::isIceBendable).ifPresent(b -> createPillar(b, h));
+        BlockMethods.getTopValid(check, h, WaterMaterials::isWaterOrIceBendable).ifPresent(b -> createPillar(b, h));
       }
     }
   }

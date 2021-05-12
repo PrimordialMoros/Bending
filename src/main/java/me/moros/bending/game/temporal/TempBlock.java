@@ -246,8 +246,8 @@ public class TempBlock implements Temporary {
     return MANAGER.get(block).map(TempBlock::isBendable).orElse(true);
   }
 
-  public static boolean canBeAffectedByGravity(@NonNull Block block) {
-    return block.getType().hasGravity() && !GRAVITY_CACHE.contains(block);
+  public static boolean shouldIgnorePhysics(@NonNull Block block) {
+    return GRAVITY_CACHE.contains(block);
   }
 
   public static @NonNull BlockData getLastValidData(@NonNull Block block) {

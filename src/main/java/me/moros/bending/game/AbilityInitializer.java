@@ -103,6 +103,7 @@ import static me.moros.bending.model.ability.util.ActivationMethod.*;
  * Used to initialize all ability descriptions, sequences and collisions
  */
 public final class AbilityInitializer {
+  public static final List<String> spouts = List.of("AirSpout", "WaterSpout");
   public static final List<String> blasts = List.of("EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
   public static final List<String> layer1 = List.of("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
@@ -132,22 +133,26 @@ public final class AbilityInitializer {
   }
 
   private Collection<RegisteredCollision> buildCollisions() {
+    List<String> shieldCollisions = new ArrayList<>();
+    shieldCollisions.addAll(layer0);
+    shieldCollisions.addAll(layer1);
+    shieldCollisions.add("EarthShot");
     return new CollisionBuilder(registry)
-      .addLayer(layer0)
-      .addSpecialLayer(List.of("AirSpout", "WaterSpout"))
-      .addLayer(layer1)
-      .addSpecialLayer(List.of("FireShield"))
-      .addLayer(layer2)
-      .addSpecialLayer(List.of("AirShield", "WallOfFire"))
-      .addLayer(layer3)
-      .addSimpleCollision("FrostBreath", blasts, false, true)
-      .addSimpleCollision("FireBreath", blasts, false, true)
-      .addSimpleCollision("FireBreath", "EarthSmash", false, false)
-      .addSimpleCollision("FrostBreath", "EarthSmash", false, false)
-      .addSimpleCollision("FrostBreath", "FireBreath", true, true)
-      .addSimpleCollision("FrostBreath", "AirShield", true, true)
-      .addSimpleCollision("EarthShot", "AirShield", true, false)
-      .addSimpleCollision("IceCrawl", "EarthLine", true, false)
+      .layer(layer0)
+      .layer(layer1)
+      .layer(layer2)
+      .layer(layer3)
+      .add(spouts, layer1, true, false)
+      .add(spouts, List.of("LavaDisk", "EarthSmash"), true, false)
+      .add(shieldCollisions, List.of("AirShield", "WallOfFire"), true, false)
+      .add("FireShield", blasts, false, true)
+      .add("FrostBreath", blasts, false, true)
+      .add("FireBreath", blasts, false, true)
+      .add("FireBreath", "EarthSmash", false, false)
+      .add("FrostBreath", "EarthSmash", false, false)
+      .add("FrostBreath", "FireBreath", true, true)
+      .add("FrostBreath", "AirShield", true, true)
+      .add("IceCrawl", "EarthLine", true, false)
       .build();
   }
 
@@ -253,7 +258,7 @@ public final class AbilityInitializer {
     abilities.add(iceSpike);
 
     abilities.add(AbilityDescription.builder("IceWall", IceWall::new)
-      .element(WATER).activation(SNEAK).build());
+      .element(WATER).activation(SNEAK).bypassCooldown(true).build());
 
     AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
       .element(WATER).activation(SEQUENCE).build();

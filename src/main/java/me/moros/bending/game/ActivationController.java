@@ -46,6 +46,7 @@ import me.moros.bending.ability.water.passives.HydroSink;
 import me.moros.bending.ability.water.sequences.Iceberg;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.game.temporal.TempArmor;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -55,9 +56,12 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
+import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -160,7 +164,37 @@ public final class ActivationController {
     game.abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
   }
 
-  public boolean onFallDamage(@NonNull User user) {
+  public double onEntityDamage(@NonNull LivingEntity entity, @NonNull DamageCause cause, double damage) {
+    User user = game.benderRegistry().user(entity).orElse(null);
+    if (user != null) {
+      if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK) {
+        if (!onBurn(user)) {
+          return 0;
+        }
+      } else if (cause == DamageCause.FALL) {
+        if (!onFall(user)) {
+          return 0;
+        }
+      } else if (cause == DamageCause.SUFFOCATION) {
+        if (!onSuffocation(user)) {
+          return 0;
+        }
+      }
+    }
+    return damage;
+  }
+
+  private boolean onBurn(@NonNull User user) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
+      return false;
+    }
+    if (EarthArmor.hasArmor(user)) {
+      return false;
+    }
+    return HeatControl.canBurn(user);
+  }
+
+  private boolean onFall(@NonNull User user) {
     EarthPillars.onFall(user);
     activateAbility(user, ActivationMethod.FALL);
     if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
@@ -173,6 +207,17 @@ public final class ActivationController {
       return false;
     }
     return !Flight.hasFlight(user);
+  }
+
+  private boolean onSuffocation(@NonNull User user) {
+    Block block = user.headBlock();
+    if (EarthMaterials.isEarthbendable(user, block) && user.hasElement(Element.EARTH)) {
+      return false;
+    }
+    if (WaterMaterials.isWaterBendable(block) && user.hasElement(Element.WATER)) {
+      return false;
+    }
+    return !TempBlock.MANAGER.isTemp(block);
   }
 
   public void onUserInteract(@NonNull User user, @NonNull ActivationMethod method) {
@@ -208,16 +253,6 @@ public final class ActivationController {
 
   public void ignoreNextSwing(@NonNull User user) {
     cache.ignoreSwing.add(user);
-  }
-
-  public boolean onFireTickDamage(@NonNull User user) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
-      return false;
-    }
-    if (EarthArmor.hasArmor(user)) {
-      return false;
-    }
-    return HeatControl.canBurn(user);
   }
 
   // Optimize player move events by caching instances every tick

@@ -157,10 +157,12 @@ public class FireShield extends AbilityInstance {
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    List<String> ignore = sphere ? List.of("AirSwipe") : List.of("AirSwipe", "EarthBlast", "WaterManipulation");
-    String collidedName = collision.collidedAbility().description().name();
-    if (collision.removeOther() && ignore.contains(collidedName)) {
-      collision.removeOther(false);
+    if (!sphere) {
+      List<String> ignore = List.of("EarthBlast", "WaterManipulation");
+      String collidedName = collision.collidedAbility().description().name();
+      if (collision.removeOther() && ignore.contains(collidedName)) {
+        collision.removeOther(false);
+      }
     }
   }
 

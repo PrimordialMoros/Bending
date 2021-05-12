@@ -100,7 +100,7 @@ public class EarthShards extends AbilityInstance {
           }
           firedShots++;
           Vector3 origin = (i == 0) ? rightOrigin : leftOrigin;
-          Vector3 dir = VectorMethods.randomOffset(target, distance * userConfig.spread).subtract(origin);
+          Vector3 dir = VectorMethods.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
           streams.add(new ShardStream(new Ray(origin, dir)));
         }
       }

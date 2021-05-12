@@ -32,9 +32,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -127,15 +125,6 @@ public class EntityListener implements Listener {
       int ticks = event.getDuration() * 20;
       if (ticks > FireTick.MAX_TICKS) {
         event.setDuration(NumberConversions.ceil(FireTick.MAX_TICKS / 20.0));
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onEntityDamageByBlock(EntityDamageByBlockEvent event) {
-    if (event.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION) {
-      if (TempBlock.MANAGER.isTemp(event.getDamager())) {
-        event.setCancelled(true);
       }
     }
   }

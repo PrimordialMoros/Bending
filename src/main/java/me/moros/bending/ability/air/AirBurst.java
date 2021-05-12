@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.common.basic.BurstUtil;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -41,6 +40,7 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BurstUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;

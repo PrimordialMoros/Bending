@@ -66,7 +66,9 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -155,8 +157,8 @@ public class EarthSmash extends AbilityInstance {
 
     boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
 
-    int minRequired = NumberConversions.ceil(Math.pow(userConfig.radius, 3) * 0.43);
-    if (boulder.data().size() < minRequired) {
+    int minRequired = NumberConversions.ceil(Math.pow(userConfig.radius, 3) * 0.375);
+    if (boulder.data.size() < minRequired) {
       boulder = null;
       return false;
     }
@@ -482,16 +484,28 @@ public class EarthSmash extends AbilityInstance {
       bounds = preciseBounds.grow(Vector3.ONE);
       int half = (size - 1) / 2;
       IntVector tempVector = new IntVector(centerBlock.getRelative(BlockFace.DOWN, half)); // When mapping blocks use the real center block
+      List<Material> earthData = new ArrayList<>();
       for (int dy = -half; dy <= half; dy++) {
         for (int dz = -half; dz <= half; dz++) {
           for (int dx = -half; dx <= half; dx++) {
             IntVector point = new IntVector(dx, dy, dz);
             Block block = tempVector.add(point).toBlock(world);
-            if (!EarthMaterials.isEarthNotLava(user, block) || !Bending.game().protectionSystem().canBuild(user, block)) {
+            if (!Bending.game().protectionSystem().canBuild(user, block)) {
               continue;
             }
-            if ((Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) % 2 == 0) {
-              data.put(point, MaterialUtil.getSolidType(block.getBlockData()));
+            BlockData bd = null;
+            if (EarthMaterials.isEarthNotLava(user, block)) {
+              bd = MaterialUtil.getSolidType(block.getBlockData());
+              earthData.add(bd.getMaterial());
+            } else if (MaterialUtil.isTransparent(block)) {
+              if (earthData.isEmpty()) {
+                bd = Material.DIRT.createBlockData();
+              } else {
+                bd = earthData.get(ThreadLocalRandom.current().nextInt(earthData.size())).createBlockData();
+              }
+            }
+            if (bd != null && (Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) % 2 == 0) {
+              data.put(point, bd);
             }
           }
         }
@@ -546,18 +560,21 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private void shatter() {
-      ThreadLocalRandom rnd = ThreadLocalRandom.current();
+      if (data.isEmpty()) {
+        return;
+      }
       for (Map.Entry<Block, BlockData> entry : data().entrySet()) {
-        Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
+        Vector3 velocity = VectorMethods.gaussianOffset(Vector3.ZERO, 0.2, 0.1, 0.2);
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
-        if (block.getType() != blockData.getMaterial()) {
-          continue;
-        }
         TempBlock.createAir(block);
         new BendingFallingBlock(block, blockData, velocity, true, 5000);
-        ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 0.5, 0.5)).count(4)
+        Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
+        ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
           .offset(0.5, 0.5, 0.5).data(blockData).spawn();
+        if (ThreadLocalRandom.current().nextBoolean()) {
+          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound());
+        }
       }
       data.clear();
     }

@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.common.basic;
+package me.moros.bending.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
