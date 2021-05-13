@@ -222,7 +222,7 @@ public class WaterRing extends AbilityInstance {
           radius(radius - 0.3);
           ringNextShrinkTime = time + 250;
         }
-        if (time > sneakStartTime + userConfig.chargeTime) {
+        if (time > sneakStartTime + userConfig.chargeTime && !user.onCooldown(waveDesc)) {
           if (!complete().isEmpty()) {
             Bending.game().activationController().activateAbility(user, ActivationMethod.SNEAK, waveDesc);
           }
@@ -418,7 +418,7 @@ public class WaterRing extends AbilityInstance {
       shardAmount = shardsNode.node("amount").getInt(20);
 
       CommentedConfigurationNode waveNode = abilityNode.node("waterwave");
-      chargeTime = waveNode.node("charge-time").getLong(1250);
+      chargeTime = waveNode.node("charge-time").getLong(750);
     }
   }
 }

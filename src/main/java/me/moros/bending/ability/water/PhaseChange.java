@@ -106,9 +106,10 @@ public class PhaseChange extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    user.addCooldown(description(), 500);
     Location center = user.rayTrace(userConfig.meltRange).toLocation(user.world());
-    melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)));
+    if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)))) {
+      user.addCooldown(description(), 500);
+    }
   }
 
   private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {

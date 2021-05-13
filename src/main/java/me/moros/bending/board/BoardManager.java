@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -100,7 +99,7 @@ public final class BoardManager {
 
   public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
     if (canUseScoreboard(player)) {
-      if (desc != null && desc.isActivatedBy(ActivationMethod.SEQUENCE)) {
+      if (desc != null && !desc.canBind()) {
         scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
       } else {
         scoreboardPlayers.get(player.getUniqueId()).updateAll();

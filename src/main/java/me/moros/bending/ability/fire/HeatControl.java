@@ -20,6 +20,7 @@
 package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -167,14 +168,9 @@ public class HeatControl extends AbilityInstance implements Ability {
       return;
     }
     Location center = user.rayTrace(userConfig.solidifyRange, false).toLocation(user.world());
-    Predicate<Block> safe = b -> Bending.game().protectionSystem().canBuild(user, b);
-    List<Block> newBlocks = WorldMethods.nearbyBlocks(center, userConfig.solidifyRadius, safe.and(MaterialUtil::isLava));
-    if (newBlocks.isEmpty()) {
-      return;
+    if (solidify.fillQueue(getShuffledBlocks(center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
+      user.addCooldown(description(), userConfig.cooldown);
     }
-    Collections.shuffle(newBlocks);
-    solidify.fillQueue(newBlocks);
-    user.addCooldown(description(), userConfig.cooldown);
   }
 
   public static void act(@NonNull User user) {
@@ -187,6 +183,13 @@ public class HeatControl extends AbilityInstance implements Ability {
     if (user.selectedAbilityName().equals("HeatControl")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
     }
+  }
+
+  private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
+    List<Block> newBlocks = WorldMethods.nearbyBlocks(center, radius, predicate);
+    newBlocks.removeIf(b -> !Bending.game().protectionSystem().canBuild(user, b));
+    Collections.shuffle(newBlocks);
+    return newBlocks;
   }
 
   public static boolean canBurn(@NonNull User user) {

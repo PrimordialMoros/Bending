@@ -294,10 +294,11 @@ public class EarthLine extends AbilityInstance {
 
       Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.y) && EarthMaterials.isEarthOrSand(b);
       List<Block> wall = WorldMethods.nearbyBlocks(center, userConfig.explosionRadius, predicate);
+      wall.removeIf(b -> !Bending.game().protectionSystem().canBuild(user, b));
       Collections.shuffle(wall);
       ThreadLocalRandom rnd = ThreadLocalRandom.current();
       for (Block block : wall) {
-        Vector3 velocity = new Vector3(rnd.nextDouble(-0.2, 0.2), rnd.nextDouble(0.1), rnd.nextDouble(-0.2, 0.2));
+        Vector3 velocity = VectorMethods.gaussianOffset(Vector3.ZERO, 0.2, 0.1, 0.2);
         TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
         new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
       }
