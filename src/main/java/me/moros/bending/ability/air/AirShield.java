@@ -89,7 +89,7 @@ public class AirShield extends AbilityInstance {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, description()) || !Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
+    if (removalPolicy.test(user, description()) || !user.canBuild(user.headBlock())) {
       return UpdateResult.REMOVE;
     }
     currentPoint++;
@@ -154,7 +154,7 @@ public class AirShield extends AbilityInstance {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
       for (Block block : WorldMethods.nearbyBlocks(center().toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
-        if (!Bending.game().protectionSystem().canBuild(user, block)) {
+        if (!user.canBuild(block)) {
           continue;
         }
         BlockMethods.tryBreakPlant(block);

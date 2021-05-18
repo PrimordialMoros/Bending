@@ -28,6 +28,7 @@ import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
+import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.value.qual.IntRange;
@@ -125,5 +126,9 @@ public interface User extends BukkitUser {
 
   default boolean hasPermission(@NonNull AbilityDescription desc) {
     return hasPermission(desc.permission());
+  }
+
+  default boolean canBuild(@NonNull Block block) {
+    return Bending.game().protectionSystem().canBuild(this, block);
   }
 }

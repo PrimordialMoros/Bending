@@ -144,7 +144,7 @@ public class HeatControl extends AbilityInstance implements Ability {
     Location center = user.rayTrace(userConfig.range).toLocation(user.world());
     Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) ||
       MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
-    Predicate<Block> safe = b -> TempBlock.isBendable(b) && Bending.game().protectionSystem().canBuild(user, b);
+    Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
     for (Block block : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
@@ -187,7 +187,7 @@ public class HeatControl extends AbilityInstance implements Ability {
 
   private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
     List<Block> newBlocks = WorldMethods.nearbyBlocks(center, radius, predicate);
-    newBlocks.removeIf(b -> !Bending.game().protectionSystem().canBuild(user, b));
+    newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;
   }

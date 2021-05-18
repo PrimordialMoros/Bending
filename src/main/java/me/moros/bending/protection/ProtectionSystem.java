@@ -23,12 +23,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
 import me.moros.bending.protection.instances.GriefPreventionProtection;
@@ -37,7 +37,6 @@ import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the protection system which hooks into other region protection plugins.
@@ -48,12 +47,10 @@ public class ProtectionSystem {
    * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
    * might not be thread-safe themselves and we load data from them when results aren't cached.
    */
-  private final Map<User, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
+  private final Map<UUID, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
   private final Collection<Protection> protections = new ArrayList<>();
-  private final boolean allowHarmless;
 
   public ProtectionSystem() {
-    allowHarmless = Bending.configManager().config().node("protection").node("allow-harmless").getBoolean(true);
     registerProtectMethod("WorldGuard", WorldGuardProtection::new);
     registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
     registerProtectMethod("Towny", TownyProtection::new);
@@ -61,25 +58,10 @@ public class ProtectionSystem {
 
   /**
    * Remove the block protection cache for the specified user.
-   * @param user the user to invalidate
+   * @param uuid the unique id of the user to invalidate
    */
-  public void invalidate(@NonNull User user) {
-    cache.remove(user);
-  }
-
-  /**
-   * @see #canBuild(User, Block, boolean)
-   */
-  public boolean canBuild(@NonNull User user, @NonNull Block block) {
-    return canBuild(user, block, false);
-  }
-
-  /**
-   * Uses {@link AbilityDescription#harmless}
-   * @see #canBuild(User, Block, boolean)
-   */
-  public boolean canBuild(@NonNull User user, @NonNull Block block, @Nullable AbilityDescription desc) {
-    return canBuild(user, block, desc != null && desc.harmless());
+  public void invalidate(@NonNull UUID uuid) {
+    cache.remove(uuid);
   }
 
   /**
@@ -88,15 +70,12 @@ public class ProtectionSystem {
    * Harmless actions are automatically allowed if allowHarmless is configured
    * @param user the user to check
    * @param block the block to check
-   * @param isHarmless whether the action the user is peforming is harmless
    * @return the result.
    * @see #canBuildPostCache(User, Block)
    */
-  public boolean canBuild(@NonNull User user, @NonNull Block block, boolean isHarmless) {
-    if (isHarmless && allowHarmless) {
-      return true;
-    }
-    return cache.computeIfAbsent(user, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
+  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+    UUID uuid = user.entity().getUniqueId();
+    return cache.computeIfAbsent(uuid, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
   }
 
   /**
@@ -106,7 +85,7 @@ public class ProtectionSystem {
    * @return true if all enabled protections allow it, false otherwise
    */
   private boolean canBuildPostCache(User user, Block block) {
-    return protections.stream().allMatch(m -> m.canBuild(user, block));
+    return protections.stream().allMatch(m -> m.canBuild(user.entity(), block));
   }
 
   /**

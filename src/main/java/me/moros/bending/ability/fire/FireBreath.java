@@ -156,7 +156,7 @@ public class FireBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      FireTick.ignite(user, entity, 15);
+      FireTick.ignite(user, entity);
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
@@ -170,7 +170,7 @@ public class FireBreath extends AbilityInstance {
         return true;
       }
       Block above = block.getRelative(BlockFace.UP);
-      if (MaterialUtil.isIgnitable(above) && Bending.game().protectionSystem().canBuild(user, above)) {
+      if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {
         TempBlock.create(above, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
       }
       return true;

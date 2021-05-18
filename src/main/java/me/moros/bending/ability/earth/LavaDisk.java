@@ -229,7 +229,7 @@ public class LavaDisk extends AbilityInstance {
     if (block.isLiquid() || !TempBlock.isBendable(block)) {
       return false;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return false;
     }
     // TODO add fire ignition to specific blocks, add extra material types to destroy

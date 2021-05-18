@@ -128,7 +128,7 @@ public class AirBlast extends AbilityInstance {
     origin = user.rayTrace(userConfig.selectRange)
       .subtract(user.direction().multiply(0.5));
     selectedOrigin = true;
-    return Bending.game().protectionSystem().canBuild(user, origin.toBlock(user.world()));
+    return user.canBuild(origin.toBlock(user.world()));
   }
 
   private void launch() {

@@ -239,7 +239,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(6) == 0) {
+      if (explosive || ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.FIRE_SOUND.play(bukkitLocation());
       }
     }
@@ -263,7 +263,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       BlockMethods.tryLightBlock(block);
       if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
-          if (!Bending.game().protectionSystem().canBuild(user, b)) {
+          if (!user.canBuild(b)) {
             continue;
           }
           if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {

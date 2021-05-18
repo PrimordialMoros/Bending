@@ -141,7 +141,7 @@ public class FireJet extends AbilityInstance {
     double offset = jetBlast ? 0.7 : 0.4;
     for (int i = 0; i < amount; i++) {
       Vector3 center = VectorMethods.gaussianOffset(user.location(), offset);
-      Vector3 v = target.subtract(center).normalize();
+      Vector3 v = target.subtract(center);
       ParticleUtil.createFire(user, center.toLocation(user.world()))
         .count(0).offset(v.x, v.y, v.z).extra(0.05 * speed * factor).spawn();
     }

@@ -31,11 +31,10 @@ import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import com.palmergames.bukkit.towny.war.eventwar.WarUtil;
 import com.palmergames.bukkit.towny.war.flagwar.FlagWar;
 import me.moros.bending.model.exception.PluginNotFoundException;
-import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -52,9 +51,9 @@ public class TownyProtection implements Protection {
   }
 
   @Override
-  public boolean canBuild(@NonNull User user, @NonNull Block block) {
-    if (user instanceof BendingPlayer) {
-      Player player = ((BendingPlayer) user).entity();
+  public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
+    if (entity instanceof Player) {
+      Player player = (Player) entity;
       boolean canBuild = PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.DIRT, TownyPermission.ActionType.BUILD);
       if (!canBuild && api.isWarTime()) {
         PlayerCache cache = towny.getCache(player);

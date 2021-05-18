@@ -136,7 +136,7 @@ public class Iceberg extends AbilityInstance {
     if (blocks.contains(block) || TempBlock.MANAGER.isTemp(block) || MaterialUtil.isUnbreakable(block)) {
       return;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return;
     }
     blocks.add(block);
@@ -172,7 +172,7 @@ public class Iceberg extends AbilityInstance {
       Vector3 targetLocation = origin.add(direction.multiply(userConfig.length - 1)).snapToBlockCenter();
       double radius = Math.ceil(0.2 * userConfig.length);
       for (Block block : WorldMethods.nearbyBlocks(origin.toLocation(user.world()), radius, WaterMaterials::isWaterOrIceBendable)) {
-        if (!Bending.game().protectionSystem().canBuild(user, block)) {
+        if (!user.canBuild(block)) {
           continue;
         }
         lines.add(line(Vector3.center(block), targetLocation));

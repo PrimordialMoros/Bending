@@ -154,7 +154,7 @@ public class Bolt extends AbilityInstance {
       }
     }
 
-    if (!Bending.game().protectionSystem().canBuild(user, targetLocation.toBlock(user.world()))) {
+    if (!user.canBuild(targetLocation.toBlock(user.world()))) {
       return;
     }
     user.world().spigot().strikeLightningEffect(targetLocation.toLocation(user.world()), true);

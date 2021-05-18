@@ -103,7 +103,7 @@ public class TravellingSource implements State {
         source = nextBlock;
       }
     }
-    if (source == null || !isValid(source) || !Bending.game().protectionSystem().canBuild(user, source)) {
+    if (source == null || !isValid(source) || !user.canBuild(source)) {
       return UpdateResult.REMOVE;
     }
     TempBlock.create(source, data, 200);

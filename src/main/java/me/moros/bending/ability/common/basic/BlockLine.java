@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.common.basic;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -73,7 +72,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
       return UpdateResult.REMOVE;
     }
 
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return UpdateResult.REMOVE;
     }
 

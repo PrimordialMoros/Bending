@@ -197,7 +197,7 @@ public class FireBurst extends AbilityInstance {
       double igniteRadius = 1.5;
       if (user.location().distanceSq(Vector3.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
-          if (!Bending.game().protectionSystem().canBuild(user, b)) {
+          if (!user.canBuild(b)) {
             continue;
           }
           if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {

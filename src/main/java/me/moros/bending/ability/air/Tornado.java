@@ -84,7 +84,7 @@ public class Tornado extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
 
-    if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
+    if (!user.canBuild(user.locBlock())) {
       return UpdateResult.REMOVE;
     }
     Vector3 base = user.rayTrace(userConfig.range, false);
@@ -92,7 +92,7 @@ public class Tornado extends AbilityInstance {
     if (MaterialUtil.isTransparent(baseBlock.getRelative(BlockFace.DOWN))) {
       return UpdateResult.CONTINUE;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, baseBlock)) {
+    if (!user.canBuild(baseBlock)) {
       return UpdateResult.REMOVE;
     }
 

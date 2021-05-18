@@ -150,7 +150,7 @@ public class EarthSmash extends AbilityInstance {
     // Check blocks above center
     for (int i = 0; i <= userConfig.radius; i++) {
       Block b = center.getRelative(BlockFace.UP, i + 1);
-      if (!MaterialUtil.isTransparent(b) || !TempBlock.isBendable(b) || !Bending.game().protectionSystem().canBuild(user, b)) {
+      if (!MaterialUtil.isTransparent(b) || !TempBlock.isBendable(b) || !user.canBuild(b)) {
         return false;
       }
     }
@@ -490,7 +490,7 @@ public class EarthSmash extends AbilityInstance {
           for (int dx = -half; dx <= half; dx++) {
             IntVector point = new IntVector(dx, dy, dz);
             Block block = tempVector.add(point).toBlock(world);
-            if (!Bending.game().protectionSystem().canBuild(user, block)) {
+            if (!user.canBuild(block)) {
               continue;
             }
             BlockData bd = null;
@@ -516,7 +516,7 @@ public class EarthSmash extends AbilityInstance {
       if (!MaterialUtil.isTransparent(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      return Bending.game().protectionSystem().canBuild(user, block);
+      return user.canBuild(block);
     }
 
     private void updateData() {

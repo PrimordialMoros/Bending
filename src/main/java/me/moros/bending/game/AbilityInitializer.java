@@ -67,6 +67,7 @@ import me.moros.bending.ability.fire.FireBurst;
 import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.ability.fire.FireWall;
+import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.fire.sequences.FireKick;
 import me.moros.bending.ability.fire.sequences.FireSpin;
@@ -108,7 +109,7 @@ public final class AbilityInitializer {
   public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
   public static final List<String> layer1 = List.of("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer2 = List.of("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
-  public static final List<String> layer3 = List.of("LavaDisk", "Combustion", "EarthSmash");
+  public static final List<String> layer3 = List.of("LavaDisk", "EarthSmash", "Combustion", "FlameRush");
 
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
   private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
@@ -143,7 +144,7 @@ public final class AbilityInitializer {
       .layer(layer2)
       .layer(layer3)
       .add(spouts, layer1, true, false)
-      .add(spouts, List.of("LavaDisk", "EarthSmash"), true, false)
+      .add(spouts, List.of("LavaDisk", "EarthSmash", "FlameRush"), true, false)
       .add(shieldCollisions, List.of("AirShield", "WallOfFire"), true, false)
       .add("FireShield", blasts, false, true)
       .add("FrostBreath", blasts, false, true)
@@ -158,12 +159,10 @@ public final class AbilityInitializer {
 
   private void initAir() {
     abilities.add(AbilityDescription.builder("AirAgility", AirAgility::new)
-      .element(AIR).activation(PASSIVE)
-      .canBind(false).harmless(true).build());
+      .element(AIR).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("GracefulDescent", GracefulDescent::new)
-      .element(AIR).activation(PASSIVE)
-      .canBind(false).harmless(true).build());
+      .element(AIR).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("AirSwipe", AirSwipe::new)
       .element(AIR).activation(ATTACK, SNEAK).build());
@@ -178,7 +177,7 @@ public final class AbilityInitializer {
       .element(AIR).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("AirSpout", AirSpout::new)
-      .element(AIR).activation(ATTACK).harmless(true).build());
+      .element(AIR).activation(ATTACK).build());
 
     abilities.add(AbilityDescription.builder("AirPunch", AirPunch::new)
       .element(AIR).activation(ATTACK).build());
@@ -194,7 +193,7 @@ public final class AbilityInitializer {
     abilities.add(airBlade);
 
     AbilityDescription airScooter = AbilityDescription.builder("AirScooter", AirScooter::new)
-      .element(AIR).activation(ATTACK).harmless(true).build();
+      .element(AIR).activation(ATTACK).build();
     abilities.add(airScooter);
 
     AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel::new)
@@ -212,20 +211,20 @@ public final class AbilityInitializer {
 
   private void initWater() {
     abilities.add(AbilityDescription.builder("FastSwim", FastSwim::new)
-      .element(WATER).activation(PASSIVE).canBind(false).harmless(true).build());
+      .element(WATER).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("HydroSink", HydroSink::new)
-      .element(WATER).activation(PASSIVE).canBind(false).harmless(true).build());
+      .element(WATER).activation(PASSIVE).canBind(false).build());
 
     AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
       .element(WATER).activation(SNEAK, ATTACK).sourcePlant(true).bypassCooldown(true).build();
     abilities.add(waterManipulation);
 
     abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
-      .element(WATER).activation(ATTACK).harmless(true).build());
+      .element(WATER).activation(ATTACK).build());
 
     abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
-      .element(WATER).activation(SNEAK).harmless(true).build());
+      .element(WATER).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("WaterBubble", WaterBubble::new)
       .element(WATER).activation(SNEAK).build());
@@ -290,13 +289,13 @@ public final class AbilityInitializer {
 
   private void initEarth() {
     abilities.add(AbilityDescription.builder("DensityShift", DensityShift::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
+      .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("EarthCling", EarthCling::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
+      .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).harmless(true).build());
+      .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
       .element(EARTH).activation(SNEAK, ATTACK).bypassCooldown(true).build());
@@ -333,7 +332,7 @@ public final class AbilityInitializer {
     abilities.add(collapse);
 
     AbilityDescription catapult = AbilityDescription.builder("Catapult", Catapult::new)
-      .element(EARTH).activation(ATTACK, SNEAK).harmless(true).build();
+      .element(EARTH).activation(ATTACK, SNEAK).build();
     abilities.add(catapult);
 
     AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
@@ -379,6 +378,9 @@ public final class AbilityInitializer {
 
     abilities.add(AbilityDescription.builder("FireBurst", FireBurst::new)
       .element(FIRE).activation(ATTACK, SNEAK).build());
+
+    abilities.add(AbilityDescription.builder("FlameRush", FlameRush::new)
+      .element(FIRE).activation(SNEAK).build());
 
     AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl::new)
       .element(FIRE).activation(PASSIVE).bypassCooldown(true).build();

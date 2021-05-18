@@ -19,7 +19,6 @@
 
 package me.moros.bending.util.collision;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
@@ -81,7 +80,7 @@ public final class CollisionUtil {
         continue;
       }
       if (collider.intersects(AABBUtils.entityBounds(entity))) {
-        if (!Bending.game().protectionSystem().canBuild(user, entity.getLocation().getBlock())) {
+        if (!user.canBuild(entity.getLocation().getBlock())) {
           continue;
         }
         boolean result = callback.onCollision(entity);

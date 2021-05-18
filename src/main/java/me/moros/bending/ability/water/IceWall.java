@@ -120,12 +120,12 @@ public class IceWall extends AbilityInstance {
     if (!WaterMaterials.isWaterOrIceBendable(block) || !TempBlock.isBendable(block)) {
       return 0;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return 0;
     }
     for (int i = 0; i < height; i++) {
       Block forwardBlock = block.getRelative(BlockFace.UP, i + 1);
-      if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
+      if (!user.canBuild(forwardBlock)) {
         return i;
       }
       if (!MaterialUtil.isTransparent(forwardBlock) && forwardBlock.getType() != Material.WATER) {
@@ -206,7 +206,7 @@ public class IceWall extends AbilityInstance {
       if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      if (!Bending.game().protectionSystem().canBuild(user, block)) {
+      if (!user.canBuild(block)) {
         return false;
       }
       if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER) {

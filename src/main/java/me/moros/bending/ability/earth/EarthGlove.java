@@ -138,7 +138,7 @@ public class EarthGlove extends AbilityInstance {
       returning = true;
     }
 
-    if (!Bending.game().protectionSystem().canBuild(user, glove.getLocation().getBlock())) {
+    if (!user.canBuild(glove.getLocation().getBlock())) {
       shatterGlove();
       return UpdateResult.REMOVE;
     }

@@ -230,7 +230,7 @@ public class Pillar implements Updatable {
     private int validateLength(int max) {
       for (int i = 0; i < max; i++) {
         Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
-        if (!TempBlock.isBendable(backwardBlock) || !Bending.game().protectionSystem().canBuild(user, backwardBlock)) {
+        if (!TempBlock.isBendable(backwardBlock) || !user.canBuild(backwardBlock)) {
           return i;
         }
       }
@@ -240,7 +240,7 @@ public class Pillar implements Updatable {
     private int validateDistance(int max) {
       for (int i = 0; i < max; i++) {
         Block forwardBlock = origin.getRelative(direction, i + 1);
-        if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
+        if (!user.canBuild(forwardBlock)) {
           return i;
         }
       }

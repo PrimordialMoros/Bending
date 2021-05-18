@@ -21,7 +21,6 @@ package me.moros.bending.ability.common.basic;
 
 import java.util.Set;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -129,7 +128,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (location.distanceSq(origin) > range * range) {
       return UpdateResult.REMOVE;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return UpdateResult.REMOVE;
     }
     return UpdateResult.CONTINUE;

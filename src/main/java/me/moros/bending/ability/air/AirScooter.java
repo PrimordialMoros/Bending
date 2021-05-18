@@ -102,7 +102,7 @@ public class AirScooter extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, user.locBlock(), description())) {
+    if (!user.canBuild(user.locBlock())) {
       return UpdateResult.REMOVE;
     }
 

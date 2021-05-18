@@ -22,11 +22,11 @@ package me.moros.bending.model.ability.util;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.moros.bending.Bending;
+import me.moros.bending.events.BendingCombustEvent;
 import me.moros.bending.model.user.User;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -45,7 +45,6 @@ public class FireTick {
     }
   }
 
-
   /**
    * Visual only
    */
@@ -54,24 +53,17 @@ public class FireTick {
   }
 
   public static void ignite(@NonNull User source, @NonNull Entity entity, int ticks) {
-    int currentTicks = entity.getFireTicks();
-    if (ticks <= 0 || currentTicks >= ticks) {
+    if (ticks <= 0) {
       return;
     }
-    if (ticks > MAX_TICKS) {
-      ticks = MAX_TICKS;
-    }
-    if (currentTicks <= 0) {
-      int duration = NumberConversions.ceil(ticks / 20.0);
-      EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(source.entity(), entity, duration);
-      Bukkit.getPluginManager().callEvent(event);
-      if (!event.isCancelled() && event.getDuration() > 0) {
-        entity.setFireTicks(Math.min(ticks, event.getDuration() * 20));
+    int duration = NumberConversions.ceil(Math.min(ticks, MAX_TICKS) / 20.0);
+    BendingCombustEvent event = Bending.eventBus().postBendingCombustEvent(source, entity, duration);
+    if (!event.isCancelled() && event.getDuration() > 0) {
+      int ticksToApply = event.getDuration() * 20;
+      if (entity.getFireTicks() < ticksToApply) {
+        entity.setFireTicks(ticksToApply);
         trackEntity(entity, source);
       }
-    } else {
-      entity.setFireTicks(ticks);
-      trackEntity(entity, source);
     }
   }
 

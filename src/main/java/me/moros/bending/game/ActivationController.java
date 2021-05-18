@@ -82,10 +82,7 @@ public final class ActivationController {
   }
 
   public @Nullable Ability activateAbility(@NonNull User user, @NonNull ActivationMethod method, @NonNull AbilityDescription desc) {
-    if (!desc.isActivatedBy(method) || !user.canBend(desc)) {
-      return null;
-    }
-    if (!game.protectionSystem().canBuild(user, user.locBlock())) {
+    if (!desc.isActivatedBy(method) || !user.canBend(desc) || !user.canBuild(user.locBlock())) {
       return null;
     }
     Ability ability = desc.createAbility();
@@ -105,7 +102,7 @@ public final class ActivationController {
     UUID uuid = player.entity().getUniqueId();
     game.boardManager().invalidate(uuid);
     game.playerManager().invalidatePlayer(uuid);
-    game.protectionSystem().invalidate(player);
+    game.protectionSystem().invalidate(uuid);
     game.abilityManager(player.world()).clearPassives(player);
   }
 

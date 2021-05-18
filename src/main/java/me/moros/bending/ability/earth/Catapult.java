@@ -97,7 +97,7 @@ public class Catapult extends AbilityInstance {
   }
 
   private boolean isValidBlock(Block block) {
-    if (block.isLiquid() || !TempBlock.isBendable(block) || !Bending.game().protectionSystem().canBuild(user, block)) {
+    if (block.isLiquid() || !TempBlock.isBendable(block) || !user.canBuild(block)) {
       return false;
     }
     return EarthMaterials.isEarthbendable(user, block);

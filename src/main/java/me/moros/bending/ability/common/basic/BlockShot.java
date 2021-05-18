@@ -22,7 +22,6 @@ package me.moros.bending.ability.common.basic;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
@@ -125,7 +124,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     previousBlock = current;
     current = currentVector.toBlock(user.world());
 
-    if (!Bending.game().protectionSystem().canBuild(user, current)) {
+    if (!user.canBuild(current)) {
       return UpdateResult.REMOVE;
     }
     collider = BOX.at(center().floor());

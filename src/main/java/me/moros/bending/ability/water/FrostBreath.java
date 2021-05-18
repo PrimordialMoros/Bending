@@ -153,7 +153,7 @@ public class FrostBreath extends AbilityInstance {
     @Override
     public void postRender() {
       for (Block block : WorldMethods.nearbyBlocks(bukkitLocation(), collider.radius)) {
-        if (!Bending.game().protectionSystem().canBuild(user, block)) {
+        if (!user.canBuild(block)) {
           continue;
         }
         onBlockHit(block);

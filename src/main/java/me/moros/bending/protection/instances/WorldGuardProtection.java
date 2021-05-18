@@ -30,10 +30,10 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.moros.bending.model.exception.PluginNotFoundException;
-import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WorldGuardProtection implements Protection {
@@ -49,11 +49,11 @@ public class WorldGuardProtection implements Protection {
   }
 
   @Override
-  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+  public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
     RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
     Location location = BukkitAdapter.adapt(block.getLocation());
-    if (user instanceof BendingPlayer) {
-      LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(((BendingPlayer) user).entity());
+    if (entity instanceof Player) {
+      LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer((Player) entity);
       World world = BukkitAdapter.adapt(block.getWorld());
       if (worldGuard.getPlatform().getSessionManager().hasBypass(player, world)) {
         return true;

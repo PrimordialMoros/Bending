@@ -87,7 +87,7 @@ public class IceSpike extends AbilityInstance {
       Optional<LivingEntity> entity = user.rayTraceEntity(userConfig.selectRange);
       if (entity.isPresent()) {
         Block base = entity.get().getLocation().getBlock().getRelative(BlockFace.DOWN);
-        if (Bending.game().protectionSystem().canBuild(user, base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
+        if (user.canBuild(base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
           source = base;
         }
       }
@@ -150,12 +150,12 @@ public class IceSpike extends AbilityInstance {
     if (!WaterMaterials.isIceBendable(block) || !TempBlock.isBendable(block)) {
       return 0;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return 0;
     }
     for (int i = 0; i < height; i++) {
       Block forwardBlock = block.getRelative(BlockFace.UP, i + 1);
-      if (!Bending.game().protectionSystem().canBuild(user, forwardBlock)) {
+      if (!user.canBuild(forwardBlock)) {
         return i;
       }
       if (!MaterialUtil.isTransparent(forwardBlock) && forwardBlock.getType() != Material.WATER) {

@@ -91,7 +91,7 @@ public class WaterWave extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
 
-    if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
+    if (!user.canBuild(user.locBlock())) {
       return UpdateResult.REMOVE;
     }
 
@@ -106,7 +106,7 @@ public class WaterWave extends AbilityInstance {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
       }
-      if (!Bending.game().protectionSystem().canBuild(user, block)) {
+      if (!user.canBuild(block)) {
         continue;
       }
       TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);

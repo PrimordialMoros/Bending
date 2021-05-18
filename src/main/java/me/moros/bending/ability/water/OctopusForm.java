@@ -108,7 +108,7 @@ public class OctopusForm extends AbilityInstance {
     }
     if (formed) {
       cleanAll();
-      if (!Bending.game().protectionSystem().canBuild(user, user.locBlock())) {
+      if (!user.canBuild(user.locBlock())) {
         return UpdateResult.REMOVE;
       }
       boolean forceUpdate = false;
@@ -119,7 +119,7 @@ public class OctopusForm extends AbilityInstance {
         lastBlock = current;
         forceUpdate = true;
       }
-      if (base.stream().noneMatch(b -> Bending.game().protectionSystem().canBuild(user, b))) {
+      if (base.stream().noneMatch(b -> user.canBuild(b))) {
         return UpdateResult.REMOVE;
       }
       renderBase();

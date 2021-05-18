@@ -67,6 +67,7 @@ public class EarthArmor extends AbilityInstance {
 
   private Mode mode;
   private BendingFallingBlock fallingBlock;
+  private Sound sound;
 
   private boolean formed = false;
   private int resistance;
@@ -101,6 +102,7 @@ public class EarthArmor extends AbilityInstance {
       SoundUtil.EARTH_SOUND.play(block.getLocation());
     }
     BlockData data = block.getBlockData().clone();
+    sound = data.getSoundGroup().getBreakSound();
     TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
     fallingBlock = new BendingFallingBlock(block, data, new Vector3(0, 0.2, 0), false, 10000);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
@@ -195,7 +197,7 @@ public class EarthArmor extends AbilityInstance {
       center = user.entity().getEyeLocation();
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-    SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 2, 1);
+    SoundUtil.playSound(center, sound, 2, 1);
     ParticleUtil.create(Particle.BLOCK_CRACK, center)
       .count(8).offset(0.5, 0.5, 0.5)
       .data(fallingBlock.fallingBlock().getBlockData()).spawn();

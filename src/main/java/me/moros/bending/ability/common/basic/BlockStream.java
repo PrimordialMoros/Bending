@@ -129,7 +129,7 @@ public abstract class BlockStream implements State {
 
     current = current.add(direction);
     head = current.toBlock(user.world());
-    if (!Bending.game().protectionSystem().canBuild(user, head)) {
+    if (!user.canBuild(head)) {
       return UpdateResult.REMOVE;
     }
 

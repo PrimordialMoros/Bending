@@ -80,7 +80,7 @@ public class FerroControl extends AbilityInstance implements Ability {
     }
 
     if (controlledEntity != null) {
-      if (!Bending.game().protectionSystem().canBuild(user, controlledEntity.getLocation().getBlock())) {
+      if (!user.canBuild(controlledEntity.getLocation().getBlock())) {
         controlledEntity = null;
         return UpdateResult.CONTINUE;
       }
@@ -106,7 +106,7 @@ public class FerroControl extends AbilityInstance implements Ability {
       return;
     }
     nextInteractTime = time + userConfig.cooldown;
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return;
     }
     Openable openable = (Openable) block.getBlockData();

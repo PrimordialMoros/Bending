@@ -179,7 +179,7 @@ public class FireWall extends AbilityInstance {
     for (double i = 0; i <= searchHeight; i += 0.5) {
       Vector3 check = center.subtract(new Vector3(0, i, 0));
       Block block = check.toBlock(user.world());
-      if (!Bending.game().protectionSystem().canBuild(user, block)) {
+      if (!user.canBuild(block)) {
         continue;
       }
       if (MaterialUtil.isTransparent(block) && block.getRelative(BlockFace.DOWN).isSolid()) {
@@ -196,7 +196,7 @@ public class FireWall extends AbilityInstance {
     for (double i = -hw; i < hw; i += 0.9) {
       Vector3 check = center.add(side.multiply(i));
       Block block = check.toBlock(user.world());
-      if (MaterialUtil.isTransparent(block) && Bending.game().protectionSystem().canBuild(user, block)) {
+      if (MaterialUtil.isTransparent(block) && user.canBuild(block)) {
         double baseY = NumberConversions.floor(check.y) + 0.25;
         possibleBases.add(check.setY(baseY));
       }
@@ -211,7 +211,7 @@ public class FireWall extends AbilityInstance {
 
     Vector3 currentPosition = center.add(direction);
     Block check = currentPosition.toBlock(user.world());
-    if (!MaterialUtil.isTransparent(check) || !Bending.game().protectionSystem().canBuild(user, check)) {
+    if (!MaterialUtil.isTransparent(check) || !user.canBuild(check)) {
       return;
     }
     center = currentPosition;

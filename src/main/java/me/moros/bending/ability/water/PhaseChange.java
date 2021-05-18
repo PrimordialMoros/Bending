@@ -114,7 +114,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
 
   private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
     List<Block> newBlocks = WorldMethods.nearbyBlocks(center, radius, predicate);
-    newBlocks.removeIf(b -> !Bending.game().protectionSystem().canBuild(user, b));
+    newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;
   }
@@ -142,7 +142,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
         return false;
       }
-      if (!Bending.game().protectionSystem().canBuild(user, block)) {
+      if (!user.canBuild(block)) {
         return false;
       }
 

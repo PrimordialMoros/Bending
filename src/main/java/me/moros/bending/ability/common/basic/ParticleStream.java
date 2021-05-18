@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -53,7 +52,6 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
   protected boolean livingOnly = true;
   protected boolean singleCollision = false;
-  protected boolean controllable = false;
   protected int steps = 1;
 
   protected final double speed;
@@ -69,46 +67,44 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     this.collisionRadius = collisionRadius;
     this.collider = new Sphere(location, collisionRadius);
     dir = ray.direction.normalize().multiply(speed);
-    render();
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    Vector3 vector = controllable ? user.direction().multiply(speed) : dir;
+    Vector3 vector = controlDirection();
     for (int i = 0; i < steps; i++) {
-      Vector3 originalVector = new Vector3(location.toArray());
-      location = location.add(vector);
-      if (location.distanceSq(ray.origin) > maxRange * maxRange || !Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
-        return UpdateResult.REMOVE;
-      }
       render();
       postRender();
-
-      if (steps > 1 && i % NumberConversions.ceil(speed * steps) != 0) {
-        continue; // Avoid unnecessary collision checks
+      if (steps <= 1 || i % NumberConversions.ceil(speed * steps) == 0) {
+        boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
+        if (hitEntity) {
+          return UpdateResult.REMOVE;
+        }
       }
-      // Use previous collider for entity checks for visual reasons
-      boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
-      if (hitEntity) {
+
+      Vector3 originalVector = new Vector3(location.toArray());
+      location = location.add(vector);
+      if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location.toBlock(user.world()))) {
+        return UpdateResult.REMOVE;
+      }
+      if (!validDiagonals(originalVector, vector)) {
         return UpdateResult.REMOVE;
       }
       collider = collider.at(location);
-
-      Block originBlock = originalVector.toBlock(user.world());
-      Set<Block> toCheck = new HashSet<>();
-      if (speed > 1) {
-        toCheck.add(originalVector.add(vector.multiply(0.5)).toBlock(user.world()));
-      }
-
-      for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, vector)) {
-        toCheck.add(originBlock.getRelative(v.x, v.y, v.z));
-      }
-
-      if (toCheck.stream().anyMatch(this::testCollision)) {
-        return UpdateResult.REMOVE;
-      }
     }
     return UpdateResult.CONTINUE;
+  }
+
+  private boolean validDiagonals(Vector3 originalVector, Vector3 directionVector) {
+    Block originBlock = originalVector.toBlock(user.world());
+    Set<Block> toCheck = new HashSet<>();
+    if (speed > 1) {
+      toCheck.add(originalVector.add(directionVector.multiply(0.5)).toBlock(user.world()));
+    }
+    for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, directionVector)) {
+      toCheck.add(originBlock.getRelative(v.x, v.y, v.z));
+    }
+    return toCheck.stream().noneMatch(this::testCollision);
   }
 
   private boolean testCollision(Block block) {
@@ -121,6 +117,10 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       }
     }
     return false;
+  }
+
+  public @NonNull Vector3 controlDirection() {
+    return dir;
   }
 
   public @NonNull Location bukkitLocation() {

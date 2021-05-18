@@ -47,7 +47,6 @@ public class AbilityDescription {
   private final EnumSet<ActivationMethod> activationMethods;
   private final boolean hidden;
   private final boolean canBind;
-  private final boolean harmless;
   private final boolean sourcePlant;
   private final boolean bypassCooldown;
   private final int hashcode;
@@ -59,10 +58,9 @@ public class AbilityDescription {
     activationMethods = builder.activationMethods;
     canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
     hidden = builder.hidden;
-    harmless = builder.harmless;
     sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
-    hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, harmless, sourcePlant, bypassCooldown);
+    hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, sourcePlant, bypassCooldown);
     createAbility(); // Init config values
   }
 
@@ -84,10 +82,6 @@ public class AbilityDescription {
 
   public boolean hidden() {
     return hidden;
-  }
-
-  public boolean harmless() {
-    return harmless;
   }
 
   public boolean sourcePlant() {
@@ -148,17 +142,6 @@ public class AbilityDescription {
     return hashcode;
   }
 
-  /**
-   * Create a {@link AbilityDescriptionBuilder} with values matching that of this object
-   * @return a preconfigured builder
-   */
-  public @NonNull AbilityDescriptionBuilder builder() {
-    return new AbilityDescriptionBuilder(name, constructor)
-      .element(element).activation(activationMethods)
-      .hidden(hidden).harmless(harmless)
-      .sourcePlant(sourcePlant).bypassCooldown(bypassCooldown);
-  }
-
   public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
     return new AbilityDescriptionBuilder(name, constructor);
   }
@@ -170,7 +153,6 @@ public class AbilityDescription {
     private EnumSet<ActivationMethod> activationMethods;
     private boolean canBind = true;
     private boolean hidden = false;
-    private boolean harmless = false;
     private boolean sourcePlant = false;
     private boolean bypassCooldown = false;
 
@@ -205,11 +187,6 @@ public class AbilityDescription {
 
     public @NonNull AbilityDescriptionBuilder hidden(boolean hidden) {
       this.hidden = hidden;
-      return this;
-    }
-
-    public @NonNull AbilityDescriptionBuilder harmless(boolean harmless) {
-      this.harmless = harmless;
       return this;
     }
 

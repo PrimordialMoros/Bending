@@ -224,7 +224,7 @@ public class WaterGimbal extends AbilityInstance {
       if (!started) {
         return UpdateResult.REMOVE;
       }
-      if (!Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
+      if (!user.canBuild(user.headBlock())) {
         return UpdateResult.REMOVE;
       }
 

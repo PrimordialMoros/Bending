@@ -22,7 +22,6 @@ package me.moros.bending.util;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.user.User;
 import org.bukkit.Material;
@@ -65,7 +64,7 @@ public final class SourceUtil {
       if (block.getType().isAir()) {
         continue;
       }
-      if (predicate.test(block) && TempBlock.isBendable(block) && Bending.game().protectionSystem().canBuild(user, block)) {
+      if (predicate.test(block) && TempBlock.isBendable(block) && user.canBuild(block)) {
         return Optional.of(block);
       }
       if (!block.isPassable()) {

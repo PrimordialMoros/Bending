@@ -101,7 +101,7 @@ public class EarthTunnel extends AbilityInstance {
       }
       Vector3 offset = VectorMethods.orthogonal(user.direction(), Math.toRadians(angle), radius);
       Block current = center.add(offset).toBlock(user.world());
-      if (!Bending.game().protectionSystem().canBuild(user, current)) {
+      if (!user.canBuild(current)) {
         return UpdateResult.REMOVE;
       }
       if (predicate.test(current)) {

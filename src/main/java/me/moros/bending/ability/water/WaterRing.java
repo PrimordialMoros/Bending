@@ -201,7 +201,7 @@ public class WaterRing extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
     cleanAll();
-    if (sources <= 0 || !Bending.game().protectionSystem().canBuild(user, user.headBlock())) {
+    if (sources <= 0 || !user.canBuild(user.headBlock())) {
       return UpdateResult.REMOVE;
     }
     IntVector newPosition = user.location().toIntVector();
@@ -236,7 +236,7 @@ public class WaterRing extends AbilityInstance {
       }
     }
 
-    if (ring.stream().noneMatch(b -> Bending.game().protectionSystem().canBuild(user, b))) {
+    if (ring.stream().noneMatch(b -> user.canBuild(b))) {
       return UpdateResult.REMOVE;
     }
     Collections.rotate(ring, 1);

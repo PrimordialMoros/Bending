@@ -290,7 +290,7 @@ public class MetalCable extends AbilityInstance {
     if (target != null) {
       return;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       remove();
       return;
     }
@@ -310,7 +310,7 @@ public class MetalCable extends AbilityInstance {
     if (target != null) {
       return;
     }
-    if (!Bending.game().protectionSystem().canBuild(user, entity.getLocation().getBlock())) {
+    if (!user.canBuild(entity.getLocation().getBlock())) {
       remove();
       return;
     }

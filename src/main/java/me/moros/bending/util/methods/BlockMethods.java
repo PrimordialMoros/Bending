@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -95,7 +94,7 @@ public final class BlockMethods {
    * @return true if lava was cooled down, false otherwise
    */
   public static boolean tryCoolLava(@NonNull User user, @NonNull Block block) {
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return false;
     }
     if (MaterialUtil.isLava(block)) {
@@ -115,7 +114,7 @@ public final class BlockMethods {
    * @return true if fire was extinguished, false otherwise
    */
   public static boolean tryExtinguishFire(@NonNull User user, @NonNull Block block) {
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return false;
     }
     if (MaterialUtil.isFire(block)) {
@@ -141,7 +140,7 @@ public final class BlockMethods {
    * @return true if snow was melted, false otherwise
    */
   public static boolean tryMeltSnow(@NonNull User user, @NonNull Block block) {
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return false;
     }
     if (MaterialUtil.isSnow(block) && block.getBlockData() instanceof Snow) {
@@ -164,7 +163,7 @@ public final class BlockMethods {
    * @return true if ice was melted, false otherwise
    */
   public static boolean tryMeltIce(@NonNull User user, @NonNull Block block) {
-    if (!Bending.game().protectionSystem().canBuild(user, block)) {
+    if (!user.canBuild(block)) {
       return false;
     }
     if (WaterMaterials.isIceBendable(block)) {

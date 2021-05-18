@@ -59,6 +59,12 @@ public class BendingEventBus {
     manager.callEvent(new BindChangeEvent(user, result));
   }
 
+  public @NonNull BendingCombustEvent postBendingCombustEvent(@NonNull User source, @NonNull Entity target, int duration) {
+    BendingCombustEvent event = new BendingCombustEvent(source, target, duration);
+    manager.callEvent(event);
+    return event;
+  }
+
   public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
     BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
     manager.callEvent(event);

@@ -21,7 +21,6 @@ package me.moros.bending.ability.common.basic;
 
 import java.util.Collection;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -67,7 +66,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   @Override
   public @NonNull UpdateResult update() {
     location = location.add(dir);
-    if (!Bending.game().protectionSystem().canBuild(user, location.toBlock(user.world()))) {
+    if (!user.canBuild(location.toBlock(user.world()))) {
       return UpdateResult.REMOVE;
     }
     if (!resolveMovement(radius)) {

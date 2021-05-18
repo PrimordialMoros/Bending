@@ -186,7 +186,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
     Collection<Block> blocks = new ArrayList<>();
     for (Block block : WorldMethods.nearbyBlocks(loc, size, predicate)) {
-      if (Bending.game().protectionSystem().canBuild(user, block)) {
+      if (user.canBuild(block)) {
         blocks.add(block);
         long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
         TempBlock.createAir(block, delay);
@@ -208,7 +208,6 @@ public class Combustion extends AbilityInstance implements Explosive {
       super(user, user.ray(userConfig.range), 0.35, 1);
       canCollide = Block::isLiquid;
       singleCollision = true;
-      controllable = true;
       steps = 3;
     }
 
@@ -219,6 +218,11 @@ public class Combustion extends AbilityInstance implements Explosive {
       Location bukkitLocation = bukkitLocation();
       ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
       ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
+    }
+
+    @Override
+    public @NonNull Vector3 controlDirection() {
+      return user.direction().multiply(speed);
     }
 
     private void renderRing() {

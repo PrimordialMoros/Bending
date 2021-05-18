@@ -17,13 +17,22 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection.instances;
+package me.moros.bending.events;
 
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
+import me.moros.bending.model.user.User;
+import org.bukkit.entity.Entity;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-@FunctionalInterface
-public interface Protection {
-  boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block);
+public class BendingCombustEvent extends EntityCombustByEntityEvent {
+  private final User user;
+
+  BendingCombustEvent(User user, Entity target, int duration) {
+    super(user.entity(), target, duration);
+    this.user = user;
+  }
+
+  public @NonNull User user() {
+    return user;
+  }
 }
