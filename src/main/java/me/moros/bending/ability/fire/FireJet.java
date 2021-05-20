@@ -28,7 +28,6 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
@@ -58,7 +57,6 @@ public class FireJet extends AbilityInstance {
   private Flight flight;
 
   private boolean jetBlast;
-  private double speed;
   private long duration;
   private long startTime;
 
@@ -88,12 +86,10 @@ public class FireJet extends AbilityInstance {
 
     if (user.sneaking()) {
       jetBlast = true;
-      speed = userConfig.jetBlastSpeed;
       duration = userConfig.jetBlastDuration;
       jetBlastAnimation();
     } else {
       jetBlast = false;
-      speed = userConfig.speed;
       duration = userConfig.duration;
     }
 
@@ -129,21 +125,22 @@ public class FireJet extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    FireTick.extinguish(user.entity());
-    // scale down to 0.5 speed near the end
-    double factor = 1 - ((System.currentTimeMillis() - startTime) / (2.0 * duration));
+    double halfSpeed = 0.5 * (jetBlast ? userConfig.jetBlastSpeed : userConfig.speed);
+    double timeFactor = (System.currentTimeMillis() - startTime) / (double) duration;
+    double speed = halfSpeed + halfSpeed * Math.sin(Math.PI * timeFactor);
 
-    user.entity().setVelocity(user.direction().multiply(speed * factor).clampVelocity());
+    user.entity().setVelocity(user.direction().multiply(speed).clampVelocity());
     user.entity().setFallDistance(0);
 
     Vector3 target = user.location().add(user.velocity().negate());
     int amount = jetBlast ? 16 : 10;
     double offset = jetBlast ? 0.7 : 0.4;
+    double particleSpeed = 0.05 * Math.min(1, speed);
     for (int i = 0; i < amount; i++) {
       Vector3 center = VectorMethods.gaussianOffset(user.location(), offset);
       Vector3 v = target.subtract(center);
       ParticleUtil.createFire(user, center.toLocation(user.world()))
-        .count(0).offset(v.x, v.y, v.z).extra(0.05 * speed * factor).spawn();
+        .count(0).offset(v.x, v.y, v.z).extra(particleSpeed).spawn();
     }
 
     if (ThreadLocalRandom.current().nextBoolean()) {
@@ -181,13 +178,15 @@ public class FireJet extends AbilityInstance {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firejet");
 
-      speed = abilityNode.node("speed").getDouble(0.8);
+      speed = abilityNode.node("speed").getDouble(0.85);
       cooldown = abilityNode.node("cooldown").getLong(7000);
       duration = abilityNode.node("duration").getLong(2000);
 
-      jetBlastSpeed = abilityNode.node("boost-speed").getDouble(1.6);
-      jetBlastCooldown = abilityNode.node("boost-cooldown").getLong(10000);
-      jetBlastDuration = abilityNode.node("boost-duration").getLong(2500);
+      CommentedConfigurationNode boostedNode = abilityNode.node("boosted");
+
+      jetBlastSpeed = boostedNode.node("speed").getDouble(1.5);
+      jetBlastCooldown = boostedNode.node("cooldown").getLong(10000);
+      jetBlastDuration = boostedNode.node("duration").getLong(2000);
     }
   }
 }

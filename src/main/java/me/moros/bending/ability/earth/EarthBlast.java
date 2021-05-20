@@ -21,6 +21,7 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -163,8 +164,10 @@ public class EarthBlast extends AbilityInstance {
         continue;
       }
       if (eb.blast.collider().intersects(user.ray(dist))) {
-        Vector3 dir = center.subtract(user.eyeLocation());
-        if (WorldMethods.blockCast(user.world(), new Ray(user.eyeLocation(), dir), config.shatterRange + 2).isPresent()) {
+        Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
+        double range = Math.min(1, inverse.direction.getNorm());
+        Block block = center.toBlock(user.world());
+        if (WorldMethods.blockCast(user.world(), inverse, range, Set.of(block)).isEmpty()) {
           Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }
@@ -221,10 +224,7 @@ public class EarthBlast extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3 origin = center();
-      Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
-      Vector3 push = entityLoc.subtract(origin).normalize().multiply(0.8);
-      entity.setVelocity(push.clampVelocity());
+      entity.setVelocity(direction.multiply(0.6).clampVelocity());
       DamageUtil.damageEntity(entity, user, damage, description());
       return true;
     }

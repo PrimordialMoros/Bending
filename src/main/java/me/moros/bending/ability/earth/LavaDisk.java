@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
+import com.destroystokyo.paper.MaterialSetTag;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
@@ -38,6 +39,9 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Disk;
+import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -56,6 +60,7 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -75,14 +80,14 @@ public class LavaDisk extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Vector3 location;
+  private Collider collider;
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(1000);
 
   private boolean launched = false;
   private double distance;
   private double distanceTravelled = 0;
   private double currentPower;
-  private int ticks = 0;
   private int rotationAngle = 0;
 
   public LavaDisk(@NonNull AbilityDescription desc) {
@@ -102,34 +107,28 @@ public class LavaDisk extends AbilityInstance {
     this.user = user;
     recalculateConfig();
 
-    currentPower = userConfig.power;
-
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
-
     if (source.isEmpty()) {
       return false;
     }
-
-    Block block = source.get();
-    for (int i = 1; i < 3; i++) {
-      Block temp = block.getRelative(BlockFace.UP, i);
-      BlockMethods.tryBreakPlant(temp);
-      if (temp.isLiquid() || !MaterialUtil.isTransparent(temp)) {
+    double r = 1.3;
+    location = Vector3.center(source.get());
+    AABB aabb = new AABB(new Vector3(-r, -0.3, -r), new Vector3(r, 0.3, r));
+    collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
+    for (Block block : WorldMethods.nearbyBlocks(user.world(), aabb.at(location))) {
+      if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.getRelative(BlockFace.UP))) {
         return false;
       }
+      if (!MaterialUtil.isLava(block)) {
+        TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+      }
     }
-
-    if (!MaterialUtil.isLava(block)) {
-      TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-    }
-    location = Vector3.center(block);
     distance = location.distance(user.eyeLocation());
-
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, () -> location))
       .add(SwappedSlotsRemovalPolicy.of(description())).build();
-
+    currentPower = userConfig.power;
     return true;
   }
 
@@ -158,16 +157,13 @@ public class LavaDisk extends AbilityInstance {
 
     distance = location.distance(user.eyeLocation());
     Vector3 targetLocation = user.eyeLocation().add(user.direction().multiply(launched ? userConfig.range + 5 : 3));
-    Vector3 direction = targetLocation.subtract(location).normalize().multiply(0.35);
-
-    int times = user.sneaking() ? 1 : 3;
-    for (int i = 0; i < times; i++) {
-      if (location.distanceSq(targetLocation) < 0.5 * 0.5) {
-        break;
-      }
-      location = location.add(direction);
+    if (location.distanceSq(targetLocation) > 0.5 * 0.5) {
+      double speed = launched ? userConfig.speed : 0.66 * userConfig.speed;
+      Vector3 direction = targetLocation.subtract(location).normalize();
+      location = location.add(direction.multiply(speed));
+      collider = collider.at(location);
       if (launched) {
-        distanceTravelled += 0.35;
+        distanceTravelled += speed;
       }
     }
 
@@ -179,10 +175,8 @@ public class LavaDisk extends AbilityInstance {
       rotationAngle = 0;
     }
     displayLavaDisk();
-    if (++ticks % 3 == 0) {
-      double damage = Math.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
-      CollisionUtil.handleEntityCollisions(user, new Sphere(location, 1.4), e -> damageEntity(e, damage));
-    }
+    double damage = Math.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
+    CollisionUtil.handleEntityCollisions(user, collider, e -> damageEntity(e, damage));
     return UpdateResult.CONTINUE;
   }
 
@@ -205,20 +199,20 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return !launched ? List.of() : List.of(new Sphere(location, 1.4));
+    return List.of(collider);
   }
 
   private boolean damageEntity(Entity entity, double damage) {
-    if (affectedEntities.contains(entity)) {
-      return false;
+    if (!affectedEntities.contains(entity)) {
+      affectedEntities.add(entity);
+      FireTick.ignite(user, entity);
+      DamageUtil.damageEntity(entity, user, damage, description());
+      currentPower -= userConfig.powerDiminishPerEntity;
+      ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
+        .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
+      return true;
     }
-    affectedEntities.add(entity);
-    FireTick.ignite(user, entity);
-    DamageUtil.damageEntity(entity, user, damage, description());
-    currentPower -= userConfig.powerDiminishPerEntity;
-    ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
-      .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
-    return true;
+    return false;
   }
 
   private boolean damageBlock(Block block) {
@@ -226,14 +220,15 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     FragileStructure.tryDamageStructure(List.of(block), 0);
-    if (block.isLiquid() || !TempBlock.isBendable(block)) {
+    if (!TempBlock.isBendable(block) || !user.canBuild(block)) {
       return false;
     }
-    if (!user.canBuild(block)) {
-      return false;
+    if (MaterialUtil.isLava(block)) {
+      return true;
     }
-    // TODO add fire ignition to specific blocks, add extra material types to destroy
-    if (EarthMaterials.isEarthOrSand(block)) {
+    Material mat = block.getType();
+    boolean tree = MaterialSetTag.LEAVES.isTagged(mat) || MaterialSetTag.LOGS_THAT_BURN.isTagged(mat);
+    if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
       ParticleUtil.create(Particle.LAVA, block.getLocation())
@@ -308,7 +303,7 @@ public class LavaDisk extends AbilityInstance {
       maxDamage = abilityNode.node("max-damage").getDouble(4.0);
       range = abilityNode.node("range").getDouble(18.0);
       selectRange = abilityNode.node("select-range").getDouble(6.0);
-      speed = abilityNode.node("speed").getDouble(0.8);
+      speed = abilityNode.node("speed").getDouble(0.75);
       power = abilityNode.node("power").getDouble(20.0);
       powerDiminishPerEntity = abilityNode.node("damage-entity-power-cost").getDouble(7.5);
     }

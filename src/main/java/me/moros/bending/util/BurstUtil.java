@@ -51,10 +51,11 @@ public final class BurstUtil {
     Vector3 center = EntityMethods.entityCenter(user.entity());
     Vector3 userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();
-    for (double theta = 0; theta < Math.PI; theta += angleStep) {
+    double epsilon = 0.001; // Needed for accuracy
+    for (double theta = 0; theta < Math.PI - epsilon; theta += angleStep) {
       double z = Math.cos(theta);
       double sinTheta = Math.sin(theta);
-      for (double phi = 0; phi < 2 * Math.PI; phi += angleStep) {
+      for (double phi = 0; phi < 2 * Math.PI - epsilon; phi += angleStep) {
         double x = Math.cos(phi) * sinTheta;
         double y = Math.sin(phi) * sinTheta;
         Vector3 direction = new Vector3(x, y, z);

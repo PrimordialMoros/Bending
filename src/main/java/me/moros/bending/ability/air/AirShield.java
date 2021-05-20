@@ -105,7 +105,7 @@ public class AirShield extends AbilityInstance {
       double z = userConfig.radius * factor * Math.sin(i * currentPoint);
       Vector3 loc = center.add(new Vector3(x, y, z));
       ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
-        .offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+        .offset(0.2, 0.2, 0.2).spawn();
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundUtil.AIR_SOUND.play(loc.toLocation(user.world()));
       }

@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class AABB implements Collider {
   public static final AABB PLAYER_BOUNDS = new AABB(new Vector3(-0.3, 0.0, -0.3), new Vector3(0.3, 1.8, 0.3));
   public static final AABB BLOCK_BOUNDS = new AABB(Vector3.ZERO, Vector3.ONE);
+  public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
 
   public final Vector3 min;
   public final Vector3 max;

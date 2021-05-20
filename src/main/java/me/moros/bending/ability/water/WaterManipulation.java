@@ -23,6 +23,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -216,8 +217,10 @@ public class WaterManipulation extends AbilityInstance {
       }
       Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
       if (selectSphere.intersects(user.ray(dist))) {
-        Vector3 dir = center.subtract(user.eyeLocation());
-        if (WorldMethods.blockCast(user.world(), new Ray(user.eyeLocation(), dir), config.rMax + 2).isPresent()) {
+        Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
+        double range = Math.min(1, inverse.direction.getNorm());
+        Block block = center.toBlock(user.world());
+        if (WorldMethods.blockCast(user.world(), inverse, range, Set.of(block)).isEmpty()) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }
@@ -262,10 +265,7 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3 origin = center();
-      Vector3 entityLoc = new Vector3(entity.getLocation().add(0, entity.getHeight() / 2, 0));
-      Vector3 push = entityLoc.subtract(origin).normalize().multiply(0.8);
-      entity.setVelocity(push.clampVelocity());
+      entity.setVelocity(direction.multiply(0.5).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
       PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
@@ -302,18 +302,20 @@ public class WaterManipulation extends AbilityInstance {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
 
-      cooldown = abilityNode.node("cooldown").getLong(750);
-      range = abilityNode.node("range").getDouble(28.0);
+      cooldown = abilityNode.node("cooldown").getLong(1000);
+      range = abilityNode.node("range").getDouble(24.0);
       selectRange = abilityNode.node("select-range").getDouble(12.0);
       damage = abilityNode.node("damage").getDouble(2.0);
       redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
-      rMin = abilityNode.node("min-redirect-range").getDouble(5.0);
+      rMin = abilityNode.node("no-redirect-range").getDouble(5.0);
       rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
 
       CommentedConfigurationNode iceNode = abilityNode.node("iceblast");
 
       power = iceNode.node("slow-power").getInt(2) - 1;
       slowDuration = iceNode.node("slow-duration").getLong(1500);
+
+      abilityNode.node("no-redirect-range").comment("Manips within that distance from the bender who controls them cannot be redirected.");
     }
   }
 }

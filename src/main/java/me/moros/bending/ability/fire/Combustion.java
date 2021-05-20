@@ -71,9 +71,9 @@ public class Combustion extends AbilityInstance implements Explosive {
   private RemovalPolicy removalPolicy;
 
   private CombustBeam beam;
+  private Collider ignoreCollider;
 
   private boolean exploded;
-  private Collider ignoreCollider;
 
   public Combustion(@NonNull AbilityDescription desc) {
     super(desc);
@@ -135,13 +135,13 @@ public class Combustion extends AbilityInstance implements Explosive {
       collision.removeOther(true);
       boolean sphere = ((FireShield) collidedAbility).isSphere();
       if (sphere) {
-        ignoreCollider = collision.colliders().getValue();
+        ignoreCollider = collision.colliderOther();
       }
       explode();
     } else if (collidedAbility instanceof Combustion) {
       Combustion other = (Combustion) collidedAbility;
-      Vector3 first = collision.colliders().getKey().position();
-      Vector3 second = collision.colliders().getValue().position();
+      Vector3 first = collision.colliderSelf().position();
+      Vector3 second = collision.colliderOther().position();
       Vector3 center = first.add(second).multiply(0.5);
       createExplosion(center, userConfig.power + other.userConfig.power, userConfig.damage + other.userConfig.damage);
       other.exploded = true;
@@ -281,10 +281,10 @@ public class Combustion extends AbilityInstance implements Explosive {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "combustion");
 
       cooldown = abilityNode.node("cooldown").getLong(12000);
-      damage = abilityNode.node("damage").getDouble(5.0);
+      damage = abilityNode.node("damage").getDouble(4.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(50);
       power = abilityNode.node("power").getDouble(3.4);
-      range = abilityNode.node("range").getDouble(56.0);
+      range = abilityNode.node("range").getDouble(48.0);
 
       particleRange = NumberConversions.ceil(range);
     }

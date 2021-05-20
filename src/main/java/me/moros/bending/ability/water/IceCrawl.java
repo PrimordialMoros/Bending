@@ -218,11 +218,11 @@ public class IceCrawl extends AbilityInstance {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
 
-      cooldown = abilityNode.node("cooldown").getLong(5000);
-      freezeDuration = abilityNode.node("freeze-duration").getLong(2000);
-      range = abilityNode.node("range").getDouble(24.0);
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      freezeDuration = abilityNode.node("freeze-duration").getLong(1500);
+      range = abilityNode.node("range").getDouble(22.0);
       selectRange = abilityNode.node("select-range").getDouble(8.0);
-      damage = abilityNode.node("damage").getDouble(4.0);
+      damage = abilityNode.node("damage").getDouble(2.0);
     }
   }
 }

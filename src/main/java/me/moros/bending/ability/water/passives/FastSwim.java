@@ -19,15 +19,11 @@
 
 package me.moros.bending.ability.water.passives;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.bending.Bending;
-import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
-import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -37,10 +33,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastSwim extends AbilityInstance implements Ability {
-  private static final Config config = new Config();
 
   private User user;
-  private Config userConfig;
   private RemovalPolicy removalPolicy;
 
   public FastSwim(@NonNull AbilityDescription desc) {
@@ -50,14 +44,13 @@ public class FastSwim extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    //recalculateConfig();
     removalPolicy = Policies.builder().build();
     return true;
   }
 
   @Override
   public void recalculateConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
   @Override
@@ -67,7 +60,7 @@ public class FastSwim extends AbilityInstance implements Ability {
     }
 
     if (MaterialUtil.isWater(user.locBlock())) {
-      PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, userConfig.speedAmplifier);
+      PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
     }
     return UpdateResult.CONTINUE;
   }
@@ -75,17 +68,5 @@ public class FastSwim extends AbilityInstance implements Ability {
   @Override
   public @NonNull User user() {
     return user;
-  }
-
-  private static class Config extends Configurable {
-    @Attribute(Attribute.STRENGTH)
-    public int speedAmplifier;
-
-    @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "passives", "fastswim");
-
-      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
-    }
   }
 }

@@ -41,7 +41,7 @@ public class OBB implements Collider {
     this.e = halfExtents;
   }
 
-  private OBB(AABB aabb) {
+  public OBB(@NonNull AABB aabb) {
     this.center = aabb.position();
     this.axes = new Vector3[]{Vector3.PLUS_I, Vector3.PLUS_J, Vector3.PLUS_K};
     this.e = aabb.halfExtents();

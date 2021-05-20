@@ -39,6 +39,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HealingWaters extends AbilityInstance {
@@ -119,7 +120,8 @@ public class HealingWaters extends AbilityInstance {
       .forEach(target::removePotionEffect);
     AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
     if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
-      PotionUtil.tryAddPotion(target, PotionEffectType.REGENERATION, 60, userConfig.power);
+      int ticks = NumberConversions.floor(userConfig.duration / 50.0);
+      PotionUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power);
       return true;
     }
     return false;
@@ -151,6 +153,8 @@ public class HealingWaters extends AbilityInstance {
   private static class Config extends Configurable {
     @Attribute(Attribute.COOLDOWN)
     public long cooldown;
+    @Attribute(Attribute.DURATION)
+    public long duration;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.STRENGTH)
@@ -161,6 +165,7 @@ public class HealingWaters extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "water", "healingwaters");
 
       cooldown = abilityNode.node("cooldown").getLong(3000);
+      duration = abilityNode.node("duration").getLong(3000);
       range = abilityNode.node("range").getDouble(5.0);
       power = abilityNode.node("power").getInt(2) - 1;
     }

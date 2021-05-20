@@ -93,7 +93,6 @@ public class WaterRing extends AbilityInstance {
   private double radius = RING_RADIUS;
   private int index = 0;
   private int sources = 0;
-  private int launchedShards = 0;
   private long nextShardTime = 0;
   private long ringNextShrinkTime = 0;
   private long sneakStartTime = 0;
@@ -333,12 +332,11 @@ public class WaterRing extends AbilityInstance {
   }
 
   private void launchShard() {
-    if (!user.canBend(description()) || ring.isEmpty() || launchedShards >= userConfig.shardAmount) {
+    if (!user.canBend(description()) || ring.isEmpty()) {
       return;
     }
     long time = System.currentTimeMillis();
     if (time >= nextShardTime) {
-      launchedShards++;
       nextShardTime = time + userConfig.cooldown;
       Vector3 origin = new Vector3(getClosestRingBlock());
       Vector3 lookingDir = user.direction().multiply(userConfig.shardRange + radius);
@@ -395,8 +393,6 @@ public class WaterRing extends AbilityInstance {
     public double shardRange;
     @Attribute(Attribute.DAMAGE)
     public double shardDamage;
-    @Attribute(Attribute.AMOUNT)
-    public double shardAmount;
     // Wave
     @Attribute(Attribute.CHARGE_TIME)
     public long chargeTime;
@@ -412,10 +408,9 @@ public class WaterRing extends AbilityInstance {
       knockback = abilityNode.node("knockback").getDouble(1.0);
 
       CommentedConfigurationNode shardsNode = abilityNode.node("shards");
-      cooldown = shardsNode.node("cooldown").getLong(500);
+      cooldown = shardsNode.node("cooldown").getLong(1000);
       shardRange = shardsNode.node("range").getDouble(16.0);
       shardDamage = shardsNode.node("damage").getDouble(0.25);
-      shardAmount = shardsNode.node("amount").getInt(20);
 
       CommentedConfigurationNode waveNode = abilityNode.node("waterwave");
       chargeTime = waveNode.node("charge-time").getLong(750);

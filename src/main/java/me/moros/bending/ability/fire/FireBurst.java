@@ -40,10 +40,12 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.BurstUtil;
@@ -87,7 +89,7 @@ public class FireBurst extends AbilityInstance {
     this.user = user;
     recalculateConfig();
 
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
     startTime = System.currentTimeMillis();
     return true;
@@ -133,6 +135,15 @@ public class FireBurst extends AbilityInstance {
     return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
+  @Override
+  public void onCollision(@NonNull Collision collision) {
+    Collider collider = collision.colliderSelf();
+    streams.removeIf(stream -> stream.collider().equals(collider));
+    if (collision.removeSelf() && !streams.isEmpty()) {
+      collision.removeSelf(false);
+    }
+  }
+
   private boolean isCharged() {
     return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
   }
@@ -149,6 +160,7 @@ public class FireBurst extends AbilityInstance {
       rays = BurstUtil.sphere(user, userConfig.sphereRange);
     }
     rays.forEach(r -> streams.add(new FireStream(r)));
+    removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
   }
 
@@ -165,7 +177,7 @@ public class FireBurst extends AbilityInstance {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
         Location loc = bukkitLocation();
-        ParticleUtil.createFire(user, loc).offset(0.25, 0.25, 0.25).extra(0.03).spawn();
+        ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
         nextRenderTime = time + 75;
       }
     }
@@ -179,13 +191,12 @@ public class FireBurst extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (affectedEntities.contains(entity)) {
-        return true;
+      if (!affectedEntities.contains(entity)) {
+        affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        FireTick.ignite(user, entity, userConfig.fireTicks);
+        entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
       }
-      affectedEntities.add(entity);
-      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      FireTick.ignite(user, entity, userConfig.fireTicks);
-      entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
       return true;
     }
 
@@ -237,8 +248,8 @@ public class FireBurst extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       chargeTime = abilityNode.node("charge-time").getInt(3500);
-      damage = abilityNode.node("damage").getDouble(4.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(45);
+      damage = abilityNode.node("damage").getDouble(3.0);
+      fireTicks = abilityNode.node("fire-ticks").getInt(35);
       speed = abilityNode.node("speed").getDouble(0.8);
       coneRange = abilityNode.node("cone-range").getDouble(11.0);
       sphereRange = abilityNode.node("sphere-range").getDouble(7.0);

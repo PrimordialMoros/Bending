@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;

@@ -168,15 +168,15 @@ public class FireBlast extends AbilityInstance implements Explosive {
       collision.removeOther(true);
       boolean sphere = ((FireShield) collidedAbility).isSphere();
       if (sphere) {
-        ignoreCollider = collision.colliders().getValue();
+        ignoreCollider = collision.colliderOther();
         explode();
       }
     } else if (collidedAbility instanceof FireBlast) {
       FireBlast other = (FireBlast) collidedAbility;
       double collidedFactor = other.factor;
       if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
-        Vector3 first = collision.colliders().getKey().position();
-        Vector3 second = collision.colliders().getValue().position();
+        Vector3 first = collision.colliderSelf().position();
+        Vector3 second = collision.colliderOther().position();
         Vector3 center = first.add(second).multiply(0.5);
         double radius = userConfig.explosionRadius + other.userConfig.explosionRadius;
         double dmg = userConfig.damage + other.userConfig.damage;
@@ -224,7 +224,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       super(user, ray, userConfig.speed * factor, factor);
       canCollide = Block::isLiquid;
       offset = 0.25 + (factor - 1);
-      particleSpeed = 0.03 * factor;
+      particleSpeed = 0.02 * factor;
       amount = NumberConversions.ceil(6 * Math.pow(factor, 4));
       explosive = factor == userConfig.chargeFactor;
       singleCollision = explosive;

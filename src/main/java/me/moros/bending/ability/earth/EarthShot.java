@@ -66,7 +66,7 @@ import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthShot extends AbilityInstance {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
 
   private enum Mode {ROCK, METAL, MAGMA}
 

@@ -19,9 +19,6 @@
 
 package me.moros.bending.model.collision;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import me.moros.bending.model.ability.Ability;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -41,12 +38,12 @@ public final class Collision {
     return inverse ? collisionData.first : collisionData.second;
   }
 
-  public @NonNull Entry<Collider, Collider> colliders() {
-    if (inverse) {
-      return Map.entry(collisionData.c2, collisionData.c1);
-    } else {
-      return Map.entry(collisionData.c1, collisionData.c2);
-    }
+  public @NonNull Collider colliderSelf() {
+    return inverse ? collisionData.c2 : collisionData.c1;
+  }
+
+  public @NonNull Collider colliderOther() {
+    return inverse ? collisionData.c1 : collisionData.c2;
   }
 
   public boolean removeSelf() {

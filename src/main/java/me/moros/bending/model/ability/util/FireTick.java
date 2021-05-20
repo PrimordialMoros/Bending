@@ -58,12 +58,9 @@ public class FireTick {
     }
     int duration = NumberConversions.ceil(Math.min(ticks, MAX_TICKS) / 20.0);
     BendingCombustEvent event = Bending.eventBus().postBendingCombustEvent(source, entity, duration);
-    if (!event.isCancelled() && event.getDuration() > 0) {
-      int ticksToApply = event.getDuration() * 20;
-      if (entity.getFireTicks() < ticksToApply) {
-        entity.setFireTicks(ticksToApply);
-        trackEntity(entity, source);
-      }
+    if (!event.isCancelled() && entity.getFireTicks() < ticks) {
+      entity.setFireTicks(ticks);
+      trackEntity(entity, source);
     }
   }
 

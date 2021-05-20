@@ -35,10 +35,12 @@ import me.moros.bending.model.ability.util.FireTick;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BurstUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -78,7 +80,7 @@ public class AirBurst extends AbilityInstance {
     this.user = user;
     recalculateConfig();
 
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
     if (method == ActivationMethod.FALL) {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
@@ -130,6 +132,15 @@ public class AirBurst extends AbilityInstance {
     return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
   }
 
+  @Override
+  public void onCollision(@NonNull Collision collision) {
+    Collider collider = collision.colliderSelf();
+    streams.removeIf(stream -> stream.collider().equals(collider));
+    if (collision.removeSelf() && !streams.isEmpty()) {
+      collision.removeSelf(false);
+    }
+  }
+
   private boolean isCharged() {
     return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
   }
@@ -153,6 +164,7 @@ public class AirBurst extends AbilityInstance {
         break;
     }
     rays.forEach(r -> streams.add(new AirStream(r)));
+    removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
   }
 
@@ -169,7 +181,7 @@ public class AirBurst extends AbilityInstance {
     public void render() {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
-        ParticleUtil.createAir(bukkitLocation()).offset(0.275, 0.275, 0.275).spawn();
+        ParticleUtil.createAir(bukkitLocation()).offset(0.2, 0.2, 0.2).spawn();
         nextRenderTime = time + 75;
       }
     }

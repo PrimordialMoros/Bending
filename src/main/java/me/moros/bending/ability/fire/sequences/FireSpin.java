@@ -122,7 +122,7 @@ public class FireSpin extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        FireTick.ignite(user, entity, userConfig.fireTicks);
+        FireTick.ignite(user, entity);
         entity.setVelocity(ray.direction.normalize().multiply(userConfig.knockback).clampVelocity());
       }
       return true;
@@ -140,8 +140,6 @@ public class FireSpin extends AbilityInstance {
     public long cooldown;
     @Attribute(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.FIRE_TICKS)
-    public int fireTicks;
     @Attribute(Attribute.RANGE)
     public double range;
     @Attribute(Attribute.SPEED)
@@ -155,7 +153,6 @@ public class FireSpin extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       damage = abilityNode.node("damage").getDouble(1.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(6.0);
       speed = abilityNode.node("speed").getDouble(0.5);
       knockback = abilityNode.node("knockback").getDouble(1.8);

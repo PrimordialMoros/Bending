@@ -34,7 +34,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -45,14 +44,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class BlockShot implements Updatable, SimpleAbility {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.3, 0.3, 0.3));
-
   private User user;
 
-  private Block current;
+  private Vector3 location;
   private Block previousBlock;
+  private Block tempBlock;
   private AABB collider;
-  private Vector3 firstDestination;
+  private final Vector3 firstDestination;
 
   protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
   protected Vector3 target;
@@ -74,22 +72,33 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   public BlockShot(@NonNull User user, @NonNull Block block, double range, int speed) {
     this.user = user;
     this.material = block.getType();
-    this.current = block;
+    this.location = Vector3.center(block);
     this.range = range;
     this.speed = Math.min(100, speed);
     buffer = speed;
 
     redirect();
     settingUp = true;
-    firstDestination = center();
     int targetY = NumberConversions.floor(target.y);
-    int currentY = current.getY();
-    Vector3 dir = target.subtract(firstDestination).normalize().setY(0);
-    if ((targetY < currentY && !current.getRelative(BlockFace.DOWN).isPassable()) || (targetY > currentY && !current.getRelative(BlockFace.UP).isPassable())) {
-      firstDestination = firstDestination.add(dir).snapToBlockCenter();
+    int currentY = block.getY();
+    Vector3 dir = target.subtract(location).normalize().setY(0);
+    boolean validAbove = block.getRelative(BlockFace.UP).isPassable();
+    boolean validBelow = block.getRelative(BlockFace.DOWN).isPassable();
+    Vector3 fixedY = location.setY(targetY + 0.5);
+    if ((targetY > currentY && validAbove) || (targetY < currentY && validBelow)) {
+      firstDestination = fixedY;
+    } else if (location.add(dir).toBlock(user.world()).isPassable()) {
+      firstDestination = location.add(dir).snapToBlockCenter();
     } else {
-      firstDestination = firstDestination.setY(targetY + 0.5);
+      if (validAbove) {
+        firstDestination = location.add(new Vector3(0, 2, 0));
+      } else if (validBelow) {
+        firstDestination = location.add(new Vector3(0, -2, 0));
+      } else {
+        firstDestination = fixedY;
+      }
     }
+    direction = firstDestination.subtract(location).normalize();
   }
 
   @Override
@@ -101,33 +110,31 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     buffer -= 100; // Reduce buffer by one since we moved
 
     clean();
-    if (current.getY() == NumberConversions.floor(firstDestination.y)) {
+    if (Math.abs(location.y - firstDestination.y) < 0.5) {
       settingUp = false;
     }
+    previousBlock = location.toBlock(user.world());
     Vector3 dest = settingUp ? firstDestination : target;
-    Vector3 currentVector = center();
-    direction = dest.subtract(currentVector).normalize();
-    Vector3 originalVector = new Vector3(currentVector.toArray());
-    currentVector = currentVector.add(direction).snapToBlockCenter();
-
+    direction = dest.subtract(location.subtract(direction)).normalize();
+    Vector3 originalVector = new Vector3(location.toArray());
     Block originBlock = originalVector.toBlock(user.world());
+    if (location.add(direction).toBlock(user.world()).equals(previousBlock)) {
+      direction = direction.multiply(2);
+    }
     for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
       if (diagonalsPredicate.test(originBlock.getRelative(v.x, v.y, v.z))) {
         return UpdateResult.REMOVE;
       }
     }
-
-    if (currentVector.distanceSq(user.eyeLocation()) > range * range) {
+    if (originalVector.add(direction).distanceSq(user.eyeLocation()) > range * range) {
       return UpdateResult.REMOVE;
     }
-
-    previousBlock = current;
-    current = currentVector.toBlock(user.world());
-
+    location = location.add(direction);
+    Block current = location.toBlock(user.world());
     if (!user.canBuild(current)) {
       return UpdateResult.REMOVE;
     }
-    collider = BOX.at(center().floor());
+    collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
     if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
       return UpdateResult.REMOVE;
     }
@@ -139,18 +146,20 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       if (material == Material.WATER && MaterialUtil.isWater(current)) {
         ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
           .count(5).offset(0.25, 0.25, 0.25).spawn();
+        tempBlock = null;
       } else {
+        tempBlock = current;
         TempBlock.create(current, material.createBlockData(), false);
       }
     } else {
       return UpdateResult.REMOVE;
     }
-    return currentVector.distanceSq(target) < 0.8 ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return location.distanceSq(target) < 0.8 ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
   public void redirect() {
     target = user.rayTraceEntity(range)
-      .map(EntityMethods::entityCenter)
+      .map(e -> new Vector3(e.getEyeLocation()))
       .orElseGet(() -> user.rayTrace(range, Set.of(material)))
       .snapToBlockCenter();
     settingUp = false;
@@ -161,7 +170,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public @NonNull Vector3 center() {
-    return Vector3.center(current);
+    return location.floor().add(new Vector3(0.5, 0.5, 0.5));
   }
 
   @Override
@@ -181,7 +190,9 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void clean() {
-    clean(current);
+    if (tempBlock != null) {
+      clean(tempBlock);
+    }
   }
 
   public void clean(@NonNull Block block) {

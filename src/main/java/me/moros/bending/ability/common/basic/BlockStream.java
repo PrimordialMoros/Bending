@@ -26,7 +26,6 @@ import java.util.Deque;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
@@ -39,7 +38,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -48,8 +46,6 @@ import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BlockStream implements State {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.4, 0.4, 0.4));
-
   private StateChain chain;
   private final User user;
   private final Collection<Collider> colliders = new ArrayList<>();
@@ -113,7 +109,8 @@ public abstract class BlockStream implements State {
     Block head = stream.getFirst();
     Vector3 current = Vector3.center(head);
     if (controllable || direction == null) {
-      Vector3 targetLoc = user.rayTraceEntity(range).map(EntityMethods::entityCenter)
+      Vector3 targetLoc = user.rayTraceEntity(range)
+        .map(e -> new Vector3(e.getEyeLocation()))
         .orElseGet(() -> user.rayTrace(range, Set.of(material)));
       // Improve targeting when near
       if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
@@ -155,7 +152,7 @@ public abstract class BlockStream implements State {
     colliders.clear();
     boolean hit = false;
     for (Block block : stream) {
-      Collider collider = BOX.at(new Vector3(block));
+      Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(new Vector3(block));
       colliders.add(collider);
       hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false);
     }

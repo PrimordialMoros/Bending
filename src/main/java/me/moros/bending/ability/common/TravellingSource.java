@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.common;
 
-import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
