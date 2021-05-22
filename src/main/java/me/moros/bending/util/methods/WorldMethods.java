@@ -22,7 +22,6 @@ package me.moros.bending.util.methods;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
@@ -136,10 +135,10 @@ public final class WorldMethods {
   }
 
   /**
-   * @see #blockCast(World, Ray, double, Set)
+   * @see #blockCast(World, Ray, double, Predicate)
    */
   public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range) {
-    return blockCast(world, ray, range, Set.of());
+    return blockCast(world, ray, range, b -> false);
   }
 
   /**
@@ -147,19 +146,17 @@ public final class WorldMethods {
    * <p> Note: Passable blocks except liquids are automatically ignored.
    * @param world the world to check in
    * @param ray the ray which holds the origin and direction
-   * @param ignore the set of blocks that will be ignored, passable block types are also ignored.
+   * @param ignore a predicate to ignore certain blocks, passable block types except liquids are also ignored by default
    * @return Optional of the result block
    */
-  public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range, @NonNull Set<@NonNull Block> ignore) {
+  public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range, @NonNull Predicate<Block> ignore) {
     BlockIterator it = new BlockIterator(world, ray.origin.toBukkitVector(), ray.direction.toBukkitVector(), 0, NumberConversions.floor(range));
     while (it.hasNext()) {
       Block closestBlock = it.next();
-      if (closestBlock.isPassable() && !closestBlock.isLiquid()) {
+      if ((closestBlock.isPassable() && !closestBlock.isLiquid()) || ignore.test(closestBlock)) {
         continue;
       }
-      if (!ignore.contains(closestBlock)) {
-        return Optional.of(closestBlock);
-      }
+      return Optional.of(closestBlock);
     }
     return Optional.empty();
   }

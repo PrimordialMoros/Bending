@@ -59,7 +59,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   @Override
   public @NonNull UpdateResult update() {
     double maxHeight = height + 2; // Buffer for safety
-    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), maxHeight, ignore).orElse(null);
+    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), maxHeight, ignore::contains).orElse(null);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
     }

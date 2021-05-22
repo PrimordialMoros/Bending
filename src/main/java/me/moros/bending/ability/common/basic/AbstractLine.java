@@ -19,8 +19,6 @@
 
 package me.moros.bending.ability.common.basic;
 
-import java.util.Set;
-
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
@@ -30,7 +28,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
@@ -69,7 +66,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
       locked = true;
     } else {
       target = null;
-      targetLocation = user.rayTrace(range, Set.of(Material.WATER));
+      targetLocation = user.rayTrace(range);
     }
     direction = targetLocation.subtract(location).setY(0).normalize();
   }

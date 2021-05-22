@@ -122,7 +122,7 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    if (user.rayTraceEntity(4).isPresent()) {
+    if (user.rayTraceEntity(3).isPresent()) {
       game.sequenceManager().registerAction(user, ActivationMethod.ATTACK_ENTITY);
     } else {
       game.sequenceManager().registerAction(user, ActivationMethod.ATTACK);

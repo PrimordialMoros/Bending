@@ -30,6 +30,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.AbilityInitializer;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.util.ActivationMethod;
@@ -68,6 +70,7 @@ public class FlameRush extends AbilityInstance {
   private final Set<Entity> affectedEntities = new HashSet<>();
 
   private boolean charging;
+  private boolean fullyCharged = false;
   private long startTime;
 
   public FlameRush(@NonNull AbilityDescription desc) {
@@ -122,12 +125,17 @@ public class FlameRush extends AbilityInstance {
     return (charging || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
+  public boolean isFullyCharged() {
+    return fullyCharged;
+  }
+
   private void launch() {
     long time = System.currentTimeMillis();
     double deltaTime = time - startTime;
     double factor = 1;
     if (deltaTime >= userConfig.maxChargeTime) {
       factor = userConfig.chargeFactor;
+      fullyCharged = true;
     } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
       double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
       factor += deltaFactor;
@@ -146,7 +154,21 @@ public class FlameRush extends AbilityInstance {
 
   @Override
   public void onCollision(@NonNull Collision collision) {
-    // TODO add collisions
+    Ability collidedAbility = collision.collidedAbility();
+    if (fullyCharged && collision.removeSelf()) {
+      String name = collidedAbility.description().name();
+      if (AbilityInitializer.layer3.contains(name)) {
+        collision.removeOther(true);
+      } else {
+        collision.removeSelf(false);
+      }
+    } else if (collidedAbility instanceof FlameRush) {
+      FlameRush other = (FlameRush) collidedAbility;
+      double collidedFactor = other.stream.factor;
+      if (stream.factor > collidedFactor + 0.1) {
+        collision.removeSelf(false);
+      }
+    }
   }
 
   @Override

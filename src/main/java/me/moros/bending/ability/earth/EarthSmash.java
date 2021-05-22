@@ -35,11 +35,12 @@ import java.util.stream.Collectors;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.fire.FireBreath;
+import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Updatable;
@@ -258,13 +259,18 @@ public class EarthSmash extends AbilityInstance {
   @Override
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
-    if (collidedAbility instanceof FrostBreath) {
-      ThreadLocalRandom rand = ThreadLocalRandom.current();
-      boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
-      boulder.shatter();
-    } else if (collidedAbility instanceof FireBreath) {
-      boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
-      boulder.shatter();
+    if (collidedAbility instanceof FlameRush && ((FlameRush) collidedAbility).isFullyCharged()) {
+      collision.removeSelf(true);
+    }
+    if (collision.removeSelf()) {
+      if (collidedAbility instanceof FrostBreath) {
+        ThreadLocalRandom rand = ThreadLocalRandom.current();
+        boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
+        boulder.shatter();
+      } else if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
+        boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
+        boulder.shatter();
+      }
     }
   }
 

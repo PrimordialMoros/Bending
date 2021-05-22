@@ -23,7 +23,6 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -220,7 +219,7 @@ public class WaterManipulation extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        if (WorldMethods.blockCast(user.world(), inverse, range, Set.of(block)).isEmpty()) {
+        if (WorldMethods.blockCast(user.world(), inverse, range, b -> b.equals(block)).isEmpty()) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }

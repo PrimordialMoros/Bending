@@ -23,7 +23,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
@@ -111,7 +110,7 @@ public abstract class BlockStream implements State {
     if (controllable || direction == null) {
       Vector3 targetLoc = user.rayTraceEntity(range)
         .map(e -> new Vector3(e.getEyeLocation()))
-        .orElseGet(() -> user.rayTrace(range, Set.of(material)));
+        .orElseGet(() -> user.rayTrace(range));
       // Improve targeting when near
       if (new Vector3(head).distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());

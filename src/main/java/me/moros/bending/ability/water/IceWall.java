@@ -69,7 +69,7 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), config.selectRange).orElse(null);
+    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), config.selectRange, Block::isLiquid).orElse(null);
     if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
     }
@@ -142,16 +142,8 @@ public class IceWall extends AbilityInstance {
     for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
       Block check = center.add(side.multiply(i)).toBlock(user.world());
       int h = height - Math.min(NumberConversions.ceil(height / 3.0), Math.abs(i));
-      if (MaterialUtil.isTransparentOrWater(check)) {
-        for (int j = 1; j < h; j++) {
-          Block block = check.getRelative(BlockFace.DOWN, j);
-          if (WaterMaterials.isWaterOrIceBendable(block)) {
-            createPillar(block, h);
-            break;
-          } else if (!MaterialUtil.isTransparentOrWater(block)) {
-            break;
-          }
-        }
+      if (WaterMaterials.isWaterOrIceBendable(check)) {
+        createPillar(check, h);
       } else {
         BlockMethods.getTopValid(check, h, WaterMaterials::isWaterOrIceBendable).ifPresent(b -> createPillar(b, h));
       }
@@ -186,34 +178,28 @@ public class IceWall extends AbilityInstance {
       if (currentLength >= length) {
         return UpdateResult.REMOVE;
       }
-
       long time = System.currentTimeMillis();
       if (time < nextUpdateTime) {
         return UpdateResult.CONTINUE;
       }
       nextUpdateTime = time + 70;
-
-      Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
-      if (canMove(currentIndex)) {
+      Block currentIndex = origin.getRelative(BlockFace.UP, currentLength);
+      currentLength++;
+      if (isValidBlock(currentIndex)) {
         wallBlocks.add(currentIndex);
         SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
         TempBlock.create(currentIndex, Material.ICE.createBlockData());
+        return UpdateResult.CONTINUE;
       }
-      return UpdateResult.CONTINUE;
+      return UpdateResult.REMOVE;
     }
 
-    private boolean canMove(Block block) {
-      if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block)) {
-        return false;
-      }
-      if (!user.canBuild(block)) {
-        return false;
-      }
-      if (!MaterialUtil.isTransparent(block) && block.getType() != Material.WATER) {
+    private boolean isValidBlock(Block block) {
+      if (MaterialUtil.isLava(block) || !TempBlock.isBendable(block) || !user.canBuild(block)) {
         return false;
       }
       BlockMethods.tryBreakPlant(block);
-      return true;
+      return MaterialUtil.isTransparentOrWater(block);
     }
   }
 
@@ -235,8 +221,8 @@ public class IceWall extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
       selectRange = abilityNode.node("select-range").getDouble(6.0);
-      maxHeight = abilityNode.node("max-height").getInt(5);
-      width = abilityNode.node("width").getInt(4);
+      maxHeight = abilityNode.node("max-height").getInt(6);
+      width = abilityNode.node("width").getInt(5);
       wallHealth = abilityNode.node("wall-durability").getInt(12);
     }
   }

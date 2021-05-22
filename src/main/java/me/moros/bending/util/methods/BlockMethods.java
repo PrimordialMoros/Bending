@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.math.Vector3;
@@ -171,25 +170,6 @@ public final class BlockMethods {
       return true;
     }
     return false;
-  }
-
-  /**
-   * @return {@link #combineFaces(Block, Set)} with {@link #MAIN_FACES} as the provided set
-   */
-  public static @NonNull Collection<@NonNull Block> combineFaces(@NonNull Block center) {
-    return combineFaces(center, MAIN_FACES);
-  }
-
-  /**
-   * Creates a list of the center block and all surrounding blocks that share a {@link BlockFace}.
-   * @param center the center block
-   * @param faces a set containing various block faces to check
-   * @return the combined list of blocks
-   * @see #MAIN_FACES
-   * @see #CARDINAL_FACES
-   */
-  public static @NonNull Collection<@NonNull Block> combineFaces(@NonNull Block center, @NonNull Set<@NonNull BlockFace> faces) {
-    return Stream.concat(Stream.of(center), faces.stream().map(center::getRelative)).collect(Collectors.toList());
   }
 
   /**

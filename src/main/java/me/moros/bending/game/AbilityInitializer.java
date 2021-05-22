@@ -107,9 +107,9 @@ public final class AbilityInitializer {
   public static final List<String> spouts = List.of("AirSpout", "WaterSpout");
   public static final List<String> blasts = List.of("EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
-  public static final List<String> layer1 = List.of("AirSwipe", "EarthBlast", "FireBlast", "WaterManipulation");
-  public static final List<String> layer2 = List.of("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel");
-  public static final List<String> layer3 = List.of("LavaDisk", "EarthSmash", "Combustion", "FlameRush");
+  public static final List<String> layer1 = List.of("AirSwipe", "AirBurst", "EarthBlast", "FireBlast", "FireBurst", "WaterManipulation");
+  public static final List<String> layer2 = List.of("AirWheel", "AirPunch", "AirBlade", "FireKick", "FireSpin", "FireWheel", "FlameRush");
+  public static final List<String> layer3 = List.of("LavaDisk", "EarthSmash", "Combustion");
 
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
   private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
@@ -147,6 +147,7 @@ public final class AbilityInitializer {
       .add(spouts, List.of("LavaDisk", "EarthSmash", "FlameRush"), true, false)
       .add(shieldCollisions, List.of("AirShield", "WallOfFire"), true, false)
       .add("FireShield", blasts, false, true)
+      .add("FireShield", "Combustion", true, true)
       .add("FrostBreath", blasts, false, true)
       .add("FireBreath", blasts, false, true)
       .add("FireBreath", "EarthSmash", false, false)

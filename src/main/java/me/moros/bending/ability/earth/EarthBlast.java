@@ -167,7 +167,7 @@ public class EarthBlast extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        if (WorldMethods.blockCast(user.world(), inverse, range, Set.of(block)).isEmpty()) {
+        if (WorldMethods.blockCast(user.world(), inverse, range, b -> b.equals(block)).isEmpty()) {
           Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }

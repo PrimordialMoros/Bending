@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.common.basic;
 
-import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
@@ -158,9 +157,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void redirect() {
+    IntVector v = location.toIntVector();
     target = user.rayTraceEntity(range)
       .map(e -> new Vector3(e.getEyeLocation()))
-      .orElseGet(() -> user.rayTrace(range, Set.of(material)))
+      .orElseGet(() -> user.rayTrace(range, b -> b.isLiquid() || new IntVector(b).equals(v)))
       .snapToBlockCenter();
     settingUp = false;
   }

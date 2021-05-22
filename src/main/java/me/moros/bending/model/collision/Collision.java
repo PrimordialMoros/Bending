@@ -75,7 +75,6 @@ public final class Collision {
     private final Collider c1, c2;
     private boolean removeFirst, removeSecond;
 
-
     public CollisionData(@NonNull Ability first, @NonNull Ability second, @NonNull Collider c1, @NonNull Collider c2, boolean removeFirst, boolean removeSecond) {
       this.first = first;
       this.second = second;

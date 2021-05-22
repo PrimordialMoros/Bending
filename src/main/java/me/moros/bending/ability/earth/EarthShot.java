@@ -21,8 +21,8 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -37,6 +37,7 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -319,10 +320,16 @@ public class EarthShot extends AbilityInstance {
   }
 
   private Vector3 getTarget(Block source) {
-    Set<Material> ignored = source == null ? Set.of() : Set.of(source.getType());
+    Predicate<Block> predicate;
+    if (source != null) {
+      IntVector v = new IntVector(source);
+      predicate = b -> b.isLiquid() || new IntVector(b).equals(v);
+    } else {
+      predicate = Block::isLiquid;
+    }
     return user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.range, ignored));
+      .orElseGet(() -> user.rayTrace(userConfig.range, predicate));
   }
 
   @Override

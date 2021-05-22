@@ -41,8 +41,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -175,10 +175,8 @@ public class AirScooter extends AbilityInstance {
     Vector3 offset = user.direction().setY(0).normalize().multiply(speed);
     Vector3 location = user.location().add(offset);
     AABB userBounds = AABBUtils.entityBounds(user.entity()).at(location);
-    for (Block block : BlockMethods.combineFaces(location.toBlock(user.world()))) {
-      if (AABBUtils.blockBounds(block).intersects(userBounds)) {
-        return 2.25;
-      }
+    if (!WorldMethods.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
+      return 2.25;
     }
     return 1.25;
   }
