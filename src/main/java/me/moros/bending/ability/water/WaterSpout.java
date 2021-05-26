@@ -36,7 +36,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -46,7 +45,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -60,7 +58,7 @@ public class WaterSpout extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final Collection<Block> column = new ArrayList<>();
-  private final Predicate<Block> predicate = b -> MaterialUtil.isWater(b) || WaterMaterials.isIceBendable(b);
+  private final Predicate<Block> predicate = WaterMaterials::isWaterNotPlant;
   private Spout spout;
 
   public WaterSpout(@NonNull AbilityDescription desc) {
@@ -81,7 +79,7 @@ public class WaterSpout extends AbilityInstance {
       return false;
     }
 
-    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), h).orElse(null);
+    Block block = AbstractSpout.blockCast(user.locBlock(), h).orElse(null);
     if (block == null || !predicate.test(block)) {
       return false;
     }

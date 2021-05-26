@@ -157,16 +157,12 @@ public class AirWheel extends AbilityInstance {
     @Attribute(Attribute.DAMAGE)
     public double damage;
 
-    public Config() {
-      super();
-    }
-
     @Override
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
 
       cooldown = abilityNode.node("cooldown").getLong(8000);
-      damage = abilityNode.node("damage").getDouble(2.0);
+      damage = abilityNode.node("damage").getDouble(1.0);
     }
   }
 }

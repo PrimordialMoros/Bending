@@ -134,7 +134,7 @@ public class WaterWave extends AbilityInstance {
     }
     affectedEntities.add(entity);
     DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-    int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+    int potionDuration = NumberConversions.round(userConfig.slowDuration / 50.0);
     PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
     return true;
   }

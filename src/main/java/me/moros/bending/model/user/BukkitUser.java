@@ -33,6 +33,7 @@ import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -180,17 +181,29 @@ public interface BukkitUser extends ForwardingAudience.Single {
   }
 
   /**
-   * @return {@link #rayTrace(double, Predicate)} ignoring liquids and passable blocks
+   * @return {@link #rayTrace(double, boolean)} ignoring liquids and passable blocks
    */
   default @NonNull Vector3 rayTrace(double range) {
-    return rayTrace(range, Block::isLiquid);
+    return rayTrace(range, true);
   }
 
   /**
-   * @return {@link #rayTrace(double, Predicate)} ignoring passable blocks
+   * Gets the targeted location.
+   * <p> Note: Passable blocks are ignored by default.
+   * @param range the range for the check
+   * @param ignoreLiquids whether liquids should be ignored
+   * @return the target location
    */
   default @NonNull Vector3 rayTrace(double range, boolean ignoreLiquids) {
-    return rayTrace(range, ignoreLiquids ? Block::isLiquid : b -> false);
+    Location origin = entity().getEyeLocation();
+    Vector dir = entity().getLocation().getDirection();
+    FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
+    RayTraceResult result = world().rayTraceBlocks(origin, dir, range, fluid, true);
+    if (result == null) {
+      Ray ray = ray(range);
+      return ray.origin.add(ray.direction);
+    }
+    return new Vector3(result.getHitPosition());
   }
 
   /**

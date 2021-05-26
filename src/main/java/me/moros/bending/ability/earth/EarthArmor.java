@@ -155,7 +155,7 @@ public class EarthArmor extends AbilityInstance {
     }
 
     TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
-    int duration = NumberConversions.round(userConfig.duration / 50F);
+    int duration = NumberConversions.round(userConfig.duration / 50.0);
     PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     user.addCooldown(description(), userConfig.cooldown);

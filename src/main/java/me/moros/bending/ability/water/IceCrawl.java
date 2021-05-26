@@ -198,7 +198,7 @@ public class IceCrawl extends AbilityInstance {
         return false;
       }
       Block below = block.getRelative(BlockFace.DOWN);
-      return MaterialUtil.isWater(below) || WaterMaterials.isIceBendable(below) || !below.isPassable();
+      return WaterMaterials.isWaterOrIceBendable(below) || !below.isPassable();
     }
   }
 

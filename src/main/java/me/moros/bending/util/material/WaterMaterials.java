@@ -31,6 +31,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class WaterMaterials {
   public static final MaterialSetTag PLANT_BENDABLE;
   public static final MaterialSetTag ICE_BENDABLE;
+  public static final MaterialSetTag SNOW_BENDABLE;
+  public static final MaterialSetTag FULL_SOURCES;
   public static final MaterialSetTag ALL;
 
   static {
@@ -48,25 +50,48 @@ public class WaterMaterials {
 
     ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4);
 
+    SNOW_BENDABLE = new MaterialSetTag(key).add(Material.SNOW, Material.SNOW_BLOCK).ensureSize("Snow", 2);
+
+    FULL_SOURCES = new MaterialSetTag(key)
+      .add(Material.WATER, Material.CACTUS, Material.MELON, Material.SNOW_BLOCK)
+      .add(ICE_BENDABLE.getValues())
+      .add(Tag.LEAVES.getValues())
+      .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
+      .add(MaterialTags.PUMPKINS.getValues())
+      .ensureSize("Full Water Sources", 20);
+
     ALL = new MaterialSetTag(key)
       .add(PLANT_BENDABLE.getValues())
       .add(ICE_BENDABLE.getValues())
-      .add(Material.WATER, Material.SNOW, Material.SNOW_BLOCK).ensureSize("Waterbendable", 54);
+      .add(SNOW_BENDABLE.getValues())
+      .add(Material.WATER).ensureSize("Waterbendable", 54);
   }
 
   public static boolean isWaterBendable(@NonNull Block block) {
-    return ALL.isTagged(block);
+    return MaterialUtil.isWater(block) || ALL.isTagged(block);
+  }
+
+  public static boolean isWaterNotPlant(@NonNull Block block) {
+    return isWaterBendable(block) && !PLANT_BENDABLE.isTagged(block);
   }
 
   public static boolean isIceBendable(@NonNull Block block) {
     return ICE_BENDABLE.isTagged(block);
   }
 
+  public static boolean isSnowBendable(@NonNull Block block) {
+    return SNOW_BENDABLE.isTagged(block);
+  }
+
   public static boolean isWaterOrIceBendable(@NonNull Block block) {
-    return block.getType() == Material.WATER || ICE_BENDABLE.isTagged(block);
+    return MaterialUtil.isWater(block) || ICE_BENDABLE.isTagged(block);
   }
 
   public static boolean isPlantBendable(@NonNull Block block) {
     return PLANT_BENDABLE.isTagged(block);
+  }
+
+  public static boolean isFullWaterSource(@NonNull Block block) {
+    return FULL_SOURCES.isTagged(block) || MaterialUtil.isWaterPlant(block);
   }
 }

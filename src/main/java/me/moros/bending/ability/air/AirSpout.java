@@ -33,7 +33,6 @@ import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -41,8 +40,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
-import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirSpout extends AbilityInstance {
@@ -74,14 +71,10 @@ public class AirSpout extends AbilityInstance {
     if (EntityMethods.distanceAboveGround(user.entity()) > h) {
       return false;
     }
-
-    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), h).orElse(null);
-    if (block == null) {
+    if (AbstractSpout.blockCast(user.locBlock(), h).isEmpty()) {
       return false;
     }
-
     removalPolicy = Policies.builder().build();
-
     spout = new Spout();
     return true;
   }

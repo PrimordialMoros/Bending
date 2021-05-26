@@ -81,8 +81,8 @@ public class EarthCling extends AbilityInstance implements Ability {
         user.entity().setFallDistance(0);
       } else {
         if (user.velocity().y < 0) {
-          double fallDistance = Math.max(0, user.entity().getFallDistance() - userConfig.speed);
-          user.entity().setFallDistance((float) fallDistance);
+          float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
+          user.entity().setFallDistance(fallDistance);
           user.entity().setVelocity(user.velocity().multiply(userConfig.speed).clampVelocity());
           ParticleUtil.create(Particle.CRIT, user.entity().getEyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05);

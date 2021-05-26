@@ -120,7 +120,7 @@ public class WaterRing extends AbilityInstance {
 
     this.user = user;
     recalculateConfig();
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterBendable);
+    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isFullWaterSource);
     if (source.isEmpty()) {
       return false;
     }

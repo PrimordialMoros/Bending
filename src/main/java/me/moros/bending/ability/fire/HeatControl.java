@@ -42,7 +42,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
@@ -142,15 +141,14 @@ public class HeatControl extends AbilityInstance implements Ability {
     }
     boolean acted = false;
     Location center = user.rayTrace(userConfig.range).toLocation(user.world());
-    Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) ||
-      MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b);
+    Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
     for (Block block : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
       if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block)) {
         BlockMethods.tryExtinguishFire(user, block);
-      } else if (MaterialUtil.isSnow(block) || WaterMaterials.isIceBendable(block)) {
+      } else if (MaterialUtil.isMeltable(block)) {
         toMelt.add(block);
       }
     }
@@ -219,7 +217,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       if (!TempBlock.isBendable(block)) {
         return false;
       }
-      return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
+      return BlockMethods.tryMelt(user, block);
     }
   }
 

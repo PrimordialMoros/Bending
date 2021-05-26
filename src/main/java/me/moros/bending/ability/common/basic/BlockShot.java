@@ -157,10 +157,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void redirect() {
-    IntVector v = location.toIntVector();
+    Block ignore = location.toBlock(user.world());
     target = user.rayTraceEntity(range)
       .map(e -> new Vector3(e.getEyeLocation()))
-      .orElseGet(() -> user.rayTrace(range, b -> b.isLiquid() || new IntVector(b).equals(v)))
+      .orElseGet(() -> user.rayTrace(range, b -> b.equals(ignore)))
       .snapToBlockCenter();
     settingUp = false;
   }

@@ -42,6 +42,7 @@ public final class MaterialUtil {
   public static final Map<Material, Material> COOKABLE = new HashMap<>();
   public static final Map<Material, Material> ORES = new HashMap<>();
   public static final MaterialSetTag BREAKABLE_PLANTS;
+  public static final MaterialSetTag WATER_PLANTS;
   public static final MaterialSetTag TRANSPARENT;
   public static final MaterialSetTag CONTAINERS;
   public static final MaterialSetTag UNBREAKABLES;
@@ -71,6 +72,9 @@ public final class MaterialUtil {
     ORES.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
 
     NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
+    WATER_PLANTS = new MaterialSetTag(key)
+      .add(Material.SEAGRASS, Material.TALL_SEAGRASS, Material.KELP, Material.KELP_PLANT).ensureSize("Water plants", 4);
+
     BREAKABLE_PLANTS = new MaterialSetTag(key)
       .add(Tag.SAPLINGS.getValues())
       .add(Tag.FLOWERS.getValues())
@@ -149,16 +153,20 @@ public final class MaterialUtil {
     return block.getType() == Material.LAVA;
   }
 
+  public static boolean isWaterPlant(@NonNull Block block) {
+    return WATER_PLANTS.isTagged(block.getType());
+  }
+
   public static boolean isWater(@NonNull Block block) {
-    return block.getType() == Material.WATER || isWaterLogged(block.getBlockData());
+    return block.getType() == Material.WATER || isWaterLogged(block.getBlockData()) || isWaterPlant(block);
   }
 
   public static boolean isWaterLogged(@NonNull BlockData data) {
     return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
   }
 
-  public static boolean isSnow(@NonNull Block block) {
-    return block.getType() == Material.SNOW;
+  public static boolean isMeltable(@NonNull Block block) {
+    return WaterMaterials.isSnowBendable(block) || WaterMaterials.isIceBendable(block);
   }
 
   // Finds a suitable solid block type to replace a falling-type block with.

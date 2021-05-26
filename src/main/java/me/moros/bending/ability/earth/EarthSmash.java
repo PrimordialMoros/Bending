@@ -178,7 +178,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static boolean tryGrab(@NonNull User user) {
-    Block target = WorldMethods.blockCast(user.world(), user.ray(), config.grabRange).orElse(null);
+    Block target = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.grabRange).orElse(null);
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;

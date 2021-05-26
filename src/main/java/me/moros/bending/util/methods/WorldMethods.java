@@ -28,11 +28,13 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.util.collision.AABBUtils;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.util.BlockIterator;
 import org.bukkit.util.NumberConversions;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -135,30 +137,27 @@ public final class WorldMethods {
   }
 
   /**
-   * @see #blockCast(World, Ray, double, Predicate)
+   * @return {@link #rayTraceBlocks(World, Ray, double, boolean, boolean)} ignoring liquids and passable blocks
    */
-  public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range) {
-    return blockCast(world, ray, range, b -> false);
+  public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range) {
+    return rayTraceBlocks(world, ray, range, true, true);
   }
 
   /**
-   * Ray trace blocks using a {@link BlockIterator}.
-   * <p> Note: Passable blocks except liquids are automatically ignored.
+   * Ray trace blocks using their precise colliders.
    * @param world the world to check in
    * @param ray the ray which holds the origin and direction
-   * @param ignore a predicate to ignore certain blocks, passable block types except liquids are also ignored by default
+   * @param range the maximum range to check
+   * @param ignoreLiquids whether liquids should be ignored
+   * @param ignorePassable whether passable blocks should be ignored
    * @return Optional of the result block
    */
-  public static Optional<Block> blockCast(@NonNull World world, @NonNull Ray ray, double range, @NonNull Predicate<Block> ignore) {
-    BlockIterator it = new BlockIterator(world, ray.origin.toBukkitVector(), ray.direction.toBukkitVector(), 0, NumberConversions.floor(range));
-    while (it.hasNext()) {
-      Block closestBlock = it.next();
-      if ((closestBlock.isPassable() && !closestBlock.isLiquid()) || ignore.test(closestBlock)) {
-        continue;
-      }
-      return Optional.of(closestBlock);
-    }
-    return Optional.empty();
+  public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range, boolean ignoreLiquids, boolean ignorePassable) {
+    Location origin = ray.origin.toLocation(world);
+    Vector dir = ray.direction.toBukkitVector();
+    FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
+    RayTraceResult result = world.rayTraceBlocks(origin, dir, range, fluid, ignorePassable);
+    return result == null ? Optional.empty() : Optional.ofNullable(result.getHitBlock());
   }
 
   public static boolean isDay(@NonNull World world) {

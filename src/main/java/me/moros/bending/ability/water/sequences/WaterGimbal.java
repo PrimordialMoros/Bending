@@ -97,7 +97,7 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     if (sources.isEmpty()) {
-      Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+      Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isFullWaterSource);
       if (source.isEmpty()) {
         return false;
       }

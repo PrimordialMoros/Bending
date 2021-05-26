@@ -211,7 +211,7 @@ public class FireBurst extends AbilityInstance {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {

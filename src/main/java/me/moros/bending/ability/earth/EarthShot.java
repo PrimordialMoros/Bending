@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -37,7 +36,6 @@ import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.IntVector;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -232,7 +230,7 @@ public class EarthShot extends AbilityInstance {
     if (!canConvert) {
       return;
     }
-    Block check = WorldMethods.blockCast(user.world(), user.ray(), userConfig.selectRange * 2).orElse(null);
+    Block check = WorldMethods.rayTraceBlocks(user.world(), user.ray(), userConfig.selectRange * 2, false, true).orElse(null);
     if (user.sneaking() && readySource.equals(check)) {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
@@ -240,13 +238,11 @@ public class EarthShot extends AbilityInstance {
           SoundUtil.LAVA_SOUND.play(readySource.getLocation());
         }
       }
-
       Location spawnLoc = readySource.getLocation().add(0.5, 0.5, 0.5);
       ParticleUtil.create(Particle.LAVA, spawnLoc).count(2).offset(0.5, 0.5, 0.5).spawn();
       ParticleUtil.create(Particle.SMOKE_NORMAL, spawnLoc).count(2).offset(0.5, 0.5, 0.5).spawn();
       ParticleUtil.createRGB(spawnLoc, "FFA400").count(2).offset(0.5, 0.5, 0.5).spawn();
       ParticleUtil.createRGB(spawnLoc, "FF8C00").count(4).offset(0.5, 0.5, 0.5).spawn();
-
       if (userConfig.chargeTime <= 0 || System.currentTimeMillis() > magmaStartTime + userConfig.chargeTime) {
         mode = Mode.MAGMA;
         TempBlock.create(readySource, Material.MAGMA_BLOCK.createBlockData());
@@ -320,16 +316,9 @@ public class EarthShot extends AbilityInstance {
   }
 
   private Vector3 getTarget(Block source) {
-    Predicate<Block> predicate;
-    if (source != null) {
-      IntVector v = new IntVector(source);
-      predicate = b -> b.isLiquid() || new IntVector(b).equals(v);
-    } else {
-      predicate = Block::isLiquid;
-    }
     return user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.range, predicate));
+      .orElseGet(() -> user.rayTrace(userConfig.range, b -> b.equals(source)));
   }
 
   @Override

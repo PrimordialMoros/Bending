@@ -69,7 +69,7 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    Block targetBlock = WorldMethods.blockCast(user.world(), user.ray(), config.selectRange, Block::isLiquid).orElse(null);
+    Block targetBlock = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.selectRange).orElse(null);
     if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
     }

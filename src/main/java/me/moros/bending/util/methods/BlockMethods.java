@@ -133,17 +133,23 @@ public final class BlockMethods {
   }
 
   /**
-   * Try to melt the given block if it's Snow.
-   * @param user the user trying to melt the snow
+   * Try to melt the given block if it's Snow or Ice.
+   * @param user the user trying to melt
    * @param block the block to check
-   * @return true if snow was melted, false otherwise
+   * @return true if snow or ice was melted, false otherwise
    */
-  public static boolean tryMeltSnow(@NonNull User user, @NonNull Block block) {
+  public static boolean tryMelt(@NonNull User user, @NonNull Block block) {
     if (!user.canBuild(block)) {
       return false;
     }
-    if (MaterialUtil.isSnow(block) && block.getBlockData() instanceof Snow) {
-      Snow snow = (Snow) block.getBlockData();
+    if (WaterMaterials.isSnowBendable(block)) {
+      Snow snow;
+      if (block.getBlockData() instanceof Snow) {
+        snow = (Snow) block.getBlockData();
+      } else {
+        snow = (Snow) Material.SNOW.createBlockData();
+        snow.setLayers(snow.getMaximumLayers());
+      }
       if (snow.getLayers() == snow.getMinimumLayers()) {
         block.setType(Material.AIR);
       } else {
@@ -151,21 +157,7 @@ public final class BlockMethods {
         block.setBlockData(snow);
       }
       return true;
-    }
-    return false;
-  }
-
-  /**
-   * Try to melt the given block if it's Ice.
-   * @param user the user trying to melt the ice
-   * @param block the block to check
-   * @return true if ice was melted, false otherwise
-   */
-  public static boolean tryMeltIce(@NonNull User user, @NonNull Block block) {
-    if (!user.canBuild(block)) {
-      return false;
-    }
-    if (WaterMaterials.isIceBendable(block)) {
+    } else if (WaterMaterials.isIceBendable(block)) {
       TempBlock.MANAGER.get(block).ifPresentOrElse(TempBlock::revert, () -> TempBlock.createAir(block));
       return true;
     }

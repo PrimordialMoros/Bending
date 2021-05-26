@@ -166,7 +166,7 @@ public class FireBreath extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      if (BlockMethods.tryMeltIce(user, block) || BlockMethods.tryMeltSnow(user, block)) {
+      if (BlockMethods.tryMelt(user, block)) {
         return true;
       }
       Block above = block.getRelative(BlockFace.UP);

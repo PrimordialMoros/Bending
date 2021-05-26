@@ -23,6 +23,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -219,7 +220,8 @@ public class WaterManipulation extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        if (WorldMethods.blockCast(user.world(), inverse, range, b -> b.equals(block)).isEmpty()) {
+        Optional<Block> rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
+        if (rayTraced.isEmpty() || block.equals(rayTraced.get())) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }
@@ -266,7 +268,7 @@ public class WaterManipulation extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       entity.setVelocity(direction.multiply(0.5).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      int potionDuration = NumberConversions.round(userConfig.slowDuration / 50F);
+      int potionDuration = NumberConversions.round(userConfig.slowDuration / 50.0);
       PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
       return true;
     }

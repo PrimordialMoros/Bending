@@ -41,7 +41,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
@@ -107,7 +106,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       return;
     }
     Location center = user.rayTrace(userConfig.meltRange).toLocation(user.world());
-    if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, b -> MaterialUtil.isSnow(b) || WaterMaterials.isIceBendable(b)))) {
+    if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
       user.addCooldown(description(), 500);
     }
   }
@@ -160,7 +159,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       if (!TempBlock.isBendable(block)) {
         return false;
       }
-      return BlockMethods.tryMeltSnow(user, block) || BlockMethods.tryMeltIce(user, block);
+      return BlockMethods.tryMelt(user, block);
     }
   }
 

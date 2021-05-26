@@ -266,7 +266,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.blockCast(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {

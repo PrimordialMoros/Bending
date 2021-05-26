@@ -29,7 +29,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -78,22 +77,21 @@ public final class EntityMethods {
   }
 
   /**
-   * Calculates the distance between an entity and the ground using {@link AABB}.
-   * Uses a {@link BlockIterator} with the max world height as the range.
+   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
    * By default it ignores all passable materials except liquids.
    * @param entity the entity to check
    * @return the distance in blocks between the entity and ground or the max world height.
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
     int maxHeight = entity.getWorld().getMaxHeight();
-    BlockIterator it = new BlockIterator(entity.getWorld(), entity.getLocation().toVector(), Vector3.MINUS_J.toBukkitVector(), 0, 256);
     AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, maxHeight, 0));
-    while (it.hasNext()) {
-      Block block = it.next();
-      if (block.getY() <= 0) {
+    Block origin = entity.getLocation().getBlock();
+    for (int i = 0; i < maxHeight; i++) {
+      Block check = origin.getRelative(BlockFace.DOWN, i);
+      if (check.getY() <= 0) {
         break;
       }
-      AABB checkBounds = block.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(block)) : AABBUtils.blockBounds(block);
+      AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(check)) : AABBUtils.blockBounds(check);
       if (checkBounds.intersects(entityBounds)) {
         return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.y);
       }

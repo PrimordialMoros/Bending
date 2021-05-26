@@ -21,7 +21,7 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -167,7 +167,8 @@ public class EarthBlast extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        if (WorldMethods.blockCast(user.world(), inverse, range, b -> b.equals(block)).isEmpty()) {
+        Optional<Block> rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
+        if (rayTraced.isEmpty() || block.equals(rayTraced.get())) {
           Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }

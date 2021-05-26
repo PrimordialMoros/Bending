@@ -69,7 +69,7 @@ public class OctopusForm extends AbilityInstance {
   private final Collection<Block> base = new ArrayList<>();
   private final List<Tentacle> tentacles = new ArrayList<>();
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
+  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
 
   private WaterRing ring;
   private Block lastBlock;
@@ -198,14 +198,13 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (affectedEntities.contains(entity)) {
-      return false;
+    if (!affectedEntities.contains(entity)) {
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      Vector3 dir = EntityMethods.entityCenter(entity).subtract(user.location());
+      entity.setVelocity(dir.normalize().multiply(userConfig.knockback).clampVelocity());
+      affectedEntities.add(entity);
     }
-    DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-    Vector3 dir = EntityMethods.entityCenter(entity).subtract(user.location());
-    entity.setVelocity(dir.normalize().multiply(userConfig.knockback).clampVelocity());
-    affectedEntities.add(entity);
-    return true;
+    return false;
   }
 
   private void clean(Block block) {

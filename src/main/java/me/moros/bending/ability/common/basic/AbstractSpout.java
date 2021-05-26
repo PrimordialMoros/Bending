@@ -20,6 +20,7 @@
 package me.moros.bending.ability.common.basic;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -28,12 +29,12 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -58,8 +59,9 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   @Override
   public @NonNull UpdateResult update() {
+    user.entity().setFallDistance(0);
     double maxHeight = height + 2; // Buffer for safety
-    Block block = WorldMethods.blockCast(user.world(), new Ray(user.location(), Vector3.MINUS_J), maxHeight, ignore::contains).orElse(null);
+    Block block = blockCast(user.locBlock(), maxHeight, ignore::contains).orElse(null);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
     }
@@ -99,6 +101,22 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     if (velocity.getNormSq() > speed * speed) {
       user.entity().setVelocity(velocity.normalize().multiply(speed).clampVelocity());
     }
+  }
+
+  public static Optional<Block> blockCast(@NonNull Block origin, double distance) {
+    return blockCast(origin, distance, b -> false);
+  }
+
+  public static Optional<Block> blockCast(@NonNull Block origin, double distance, @NonNull Predicate<Block> ignore) {
+    for (int i = 0; i < distance; i++) {
+      Block check = origin.getRelative(BlockFace.DOWN, i);
+      boolean isLiquid = check.isLiquid() || MaterialUtil.isWaterPlant(check);
+      if ((check.isPassable() && !isLiquid) || ignore.test(check)) {
+        continue;
+      }
+      return Optional.of(check);
+    }
+    return Optional.empty();
   }
 }
 
