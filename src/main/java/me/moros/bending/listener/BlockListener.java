@@ -98,7 +98,7 @@ public class BlockListener implements Listener {
     if (TempBlock.MANAGER.isTemp(event.getBlock())) {
       event.setDropItems(false);
     } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
-      BendingPlayer player = game.benderRegistry().player(event.getPlayer());
+      BendingPlayer player = game.benderRegistry().user(event.getPlayer());
       player.selectedAbility().ifPresent(desc -> {
         if (desc.sourcePlant() && !player.onCooldown(desc)) {
           event.setCancelled(true);

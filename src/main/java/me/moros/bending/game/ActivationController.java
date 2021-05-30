@@ -54,7 +54,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.material.EarthMaterials;
@@ -94,7 +93,7 @@ public final class ActivationController {
     return null;
   }
 
-  public void onUserDeconstruct(@NonNull BendingUser user) {
+  public void onUserDeconstruct(@NonNull User user) {
     TempArmor.MANAGER.get(user.entity()).ifPresent(TempArmor::revert);
     game.attributeSystem().clearModifiers(user);
     game.abilityManager(user.world()).destroyUserInstances(user);
@@ -164,7 +163,7 @@ public final class ActivationController {
   }
 
   public double onEntityDamage(@NonNull LivingEntity entity, @NonNull DamageCause cause, double damage) {
-    User user = game.benderRegistry().user(entity).orElse(null);
+    User user = game.benderRegistry().user(entity);
     if (user != null) {
       if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK) {
         if (!onBurn(user)) {

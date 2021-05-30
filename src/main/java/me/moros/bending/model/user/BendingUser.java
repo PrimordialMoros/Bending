@@ -206,14 +206,11 @@ public class BendingUser implements User {
   }
 
   /**
-   * Use {@link BenderRegistry#createUser(LivingEntity, BenderData)}
+   * Use {@link BenderRegistry#register(LivingEntity, BenderData)}
    */
   public static Optional<BendingUser> createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
-    if (entity instanceof Player) {
+    if (Bending.game().benderRegistry().isRegistered(entity.getUniqueId()) || entity instanceof Player) {
       return Optional.empty();
-    }
-    if (Bending.game().benderRegistry().isRegistered(entity.getUniqueId())) {
-      return Bending.game().benderRegistry().user(entity);
     }
     return Optional.of(new BendingUser(entity, data));
   }

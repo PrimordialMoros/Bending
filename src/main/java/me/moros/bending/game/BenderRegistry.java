@@ -23,8 +23,8 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -63,15 +63,15 @@ public final class BenderRegistry {
    * @param player the bukkit player object
    * @return the BendingPlayer instance associated with the specified player
    */
-  public @NonNull BendingPlayer player(@NonNull Player player) {
+  public @NonNull BendingPlayer user(@NonNull Player player) {
     return Objects.requireNonNull(players.get(player.getUniqueId()));
   }
 
-  public Optional<BendingUser> user(@NonNull LivingEntity entity) {
+  public @Nullable BendingUser user(@NonNull LivingEntity entity) {
     if (entity instanceof Player) {
-      return Optional.of(player((Player) entity));
+      return user((Player) entity);
     }
-    return Optional.ofNullable(entities.get(entity.getUniqueId()));
+    return entities.get(entity.getUniqueId());
   }
 
   public @NonNull Collection<@NonNull BendingPlayer> onlinePlayers() {
@@ -84,8 +84,23 @@ public final class BenderRegistry {
     cache.synchronous().invalidate(uuid);
   }
 
-  public void createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
-    BendingPlayer.createPlayer(player, profile).ifPresent(user -> {
+  public void register(@NonNull LivingEntity entity, @NonNull BenderData data) {
+    if (isRegistered(entity.getUniqueId())) {
+      return;
+    }
+    if (entity instanceof Player) {
+      BendingUser.createUser(entity, data).ifPresent(user -> {
+        entities.put(entity.getUniqueId(), user);
+        Bending.game().abilityManager(user.world()).createPassives(user);
+      });
+    }
+  }
+
+  public void register(@NonNull Player player, @NonNull BendingProfile profile) {
+    if (isRegistered(player.getUniqueId())) {
+      return;
+    }
+    BendingPlayer.createUser(player, profile).ifPresent(user -> {
       players.put(player.getUniqueId(), user);
       Bending.game().abilityManager(user.world()).createPassives(user);
       Bending.game().boardManager().canUseScoreboard(player);
@@ -93,14 +108,11 @@ public final class BenderRegistry {
     });
   }
 
-  public void createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
-    BendingUser.createUser(entity, data).ifPresent(user -> {
-      entities.put(entity.getUniqueId(), user);
-      Bending.game().abilityManager(user.world()).createPassives(user);
-    });
+  public @Nullable BendingProfile profileSync(@NonNull UUID uuid) {
+    return cache.synchronous().get(uuid);
   }
 
-  public @Nullable BendingProfile profile(@NonNull UUID uuid) {
-    return cache.synchronous().get(uuid);
+  public @NonNull CompletableFuture<@Nullable BendingProfile> profile(@NonNull UUID uuid) {
+    return cache.get(uuid);
   }
 }

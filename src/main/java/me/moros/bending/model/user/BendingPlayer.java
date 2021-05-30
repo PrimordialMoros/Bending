@@ -158,9 +158,9 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   /**
-   * Use {@link BenderRegistry#createPlayer(Player, BendingProfile)}
+   * Use {@link BenderRegistry#register(Player, BendingProfile)}
    */
-  public static Optional<BendingPlayer> createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
+  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull BendingProfile profile) {
     if (Bending.game().benderRegistry().isRegistered(player.getUniqueId())) {
       return Optional.empty();
     }

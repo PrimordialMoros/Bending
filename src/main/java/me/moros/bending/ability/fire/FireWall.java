@@ -241,7 +241,8 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!cachedEntities.contains(entity)) {
-      if (Bending.game().benderRegistry().user((LivingEntity) entity).map(HeatControl::canBurn).orElse(true)) {
+      User entityUser = Bending.game().benderRegistry().user((LivingEntity) entity);
+      if (entityUser == null || HeatControl.canBurn(entityUser)) {
         FireTick.ignite(user, entity);
         if (!damagedEntities.contains(entity)) {
           damagedEntities.add(entity);

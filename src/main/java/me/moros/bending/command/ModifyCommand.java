@@ -57,7 +57,7 @@ public class ModifyCommand extends BaseCommand {
     String validType = Arrays.stream(Attribute.TYPES)
       .filter(attr -> attr.equalsIgnoreCase(type))
       .findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
     Bending.game().attributeSystem().addModifier(bendingPlayer, operation.toAttributeModifier(validType, amount), policy);
     Bending.game().attributeSystem().recalculate(bendingPlayer);
     Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.entity().getName());
@@ -67,7 +67,7 @@ public class ModifyCommand extends BaseCommand {
   @CommandCompletion("@players")
   @Description("Clear all existing modifiers for a player")
   public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
     Bending.game().attributeSystem().clearModifiers(bendingPlayer);
     Bending.game().attributeSystem().recalculate(bendingPlayer);
     Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.entity().getName());

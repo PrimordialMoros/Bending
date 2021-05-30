@@ -71,7 +71,7 @@ public class Commands {
   private Collection<String> abilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
     Predicate<AbilityDescription> permissionPredicate = x -> true;
     if (player != null) {
-      BendingPlayer bendingPlayer = game.benderRegistry().player(player);
+      BendingPlayer bendingPlayer = game.benderRegistry().user(player);
       permissionPredicate = bendingPlayer::hasPermission;
     }
     return game.abilityRegistry().abilities().filter(predicate)
@@ -87,7 +87,7 @@ public class Commands {
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
-      return player == null ? List.of() : game.benderRegistry().player(player).presets();
+      return player == null ? List.of() : game.benderRegistry().user(player).presets();
     });
 
     commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.elementNames()));
@@ -102,7 +102,7 @@ public class Commands {
       if (player == null) {
         throw new UserException();
       }
-      return game.benderRegistry().player(player);
+      return game.benderRegistry().user(player);
     });
 
     commandContexts.registerContext(Element.class, c -> {
@@ -119,7 +119,7 @@ public class Commands {
       Player player = c.getPlayer();
       Predicate<AbilityDescription> permissionPredicate = x -> true;
       if (player != null) {
-        BendingPlayer bendingPlayer = game.benderRegistry().player(player);
+        BendingPlayer bendingPlayer = game.benderRegistry().user(player);
         permissionPredicate = bendingPlayer::hasPermission;
       }
       return game.abilityRegistry().abilities()
@@ -135,7 +135,7 @@ public class Commands {
         throw new UserException();
       }
       String name = c.popFirstArg().toLowerCase();
-      return game.benderRegistry().player(player).presetByName(name)
+      return game.benderRegistry().user(player).presetByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
     });
 

@@ -65,7 +65,7 @@ public class BendingCommand extends BaseCommand {
   @CommandPermission("bending.command.toggle")
   @Description("Toggles bending")
   public void onToggle(BendingPlayer player, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
     if (bendingPlayer.bendingConditional().contains(BendingConditions.TOGGLED)) {
       bendingPlayer.bendingConditional().remove(BendingConditions.TOGGLED);
       Message.TOGGLE_ON.send(bendingPlayer);
@@ -91,7 +91,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().player(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
     if (target == null && !player.hasPermission("bending.command.choose." + element)) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(player, element.displayName());
       return;
@@ -111,7 +111,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().player(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
     if (target == null && !player.hasPermission("bending.command.add." + element)) {
       Message.ELEMENT_ADD_NO_PERMISSION.send(player, element.displayName());
       return;
@@ -132,7 +132,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().player(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
     if (player.removeElement(element)) {
       Bending.game().abilityManager(player.world()).createPassives(player);
       Message.ELEMENT_REMOVE_SUCCESS.send(player, element.displayName());
@@ -222,7 +222,7 @@ public class BendingCommand extends BaseCommand {
   @CommandCompletion("@players")
   @Description("Show all bound abilities")
   public static void onBindList(BendingPlayer player, @Optional OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
     Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName());
     for (int slot = 1; slot <= 9; slot++) {
       Component meta = bendingPlayer.boundAbility(slot).map(AbilityDescription::meta).orElse(null);

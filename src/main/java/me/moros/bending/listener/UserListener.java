@@ -22,8 +22,11 @@ package me.moros.bending.listener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
@@ -41,7 +44,6 @@ import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.util.Metadata;
@@ -87,16 +89,21 @@ public class UserListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPrePlayerJoin(AsyncPlayerPreLoginEvent event) {
-    MCTiming timing = Bending.timingManager().ofStart("BendingProfile on pre-login");
+  public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
     UUID uuid = event.getUniqueId();
     long startTime = System.currentTimeMillis();
-    game.benderRegistry().profile(uuid);
-    long time = System.currentTimeMillis() - startTime;
-    if (time >= 1000) {
-      Bending.logger().warn("Processing login for " + uuid + " took " + time + "ms.");
+    try {
+      // Timeout after 1000ms so as to not block the login thread excessively
+      BendingProfile profile = game.benderRegistry().profile(uuid).get(1000, TimeUnit.MILLISECONDS);
+      long deltaTime = System.currentTimeMillis() - startTime;
+      if (profile != null && deltaTime > 500) {
+        Bending.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
+      }
+    } catch (TimeoutException e) {
+      Bending.logger().warn("Timed out while retrieving data for " + uuid);
+    } catch (CancellationException | ExecutionException | InterruptedException e) {
+      Bending.logger().warn(e.getMessage());
     }
-    timing.stopTiming();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -105,9 +112,9 @@ public class UserListener implements Listener {
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
     String name = player.getName();
-    BendingProfile profile = game.benderRegistry().profile(uuid);
+    BendingProfile profile = game.benderRegistry().profileSync(uuid);
     if (profile != null) {
-      game.benderRegistry().createPlayer(player, profile);
+      game.benderRegistry().register(player, profile);
     } else {
       Bending.logger().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
     }
@@ -116,7 +123,7 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerLogout(PlayerQuitEvent event) {
-    game.activationController().onUserDeconstruct(game.benderRegistry().player(event.getPlayer()));
+    game.activationController().onUserDeconstruct(game.benderRegistry().user(event.getPlayer()));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -161,7 +168,10 @@ public class UserListener implements Listener {
     if (entity instanceof Player) {
       return;
     }
-    game.benderRegistry().user(entity).ifPresent(game.activationController()::onUserDeconstruct);
+    User user = game.benderRegistry().user(entity);
+    if (user != null) {
+      game.activationController().onUserDeconstruct(user);
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -221,8 +231,10 @@ public class UserListener implements Listener {
     if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
       return;
     }
-    game.benderRegistry().user((LivingEntity) event.getEntity())
-      .ifPresent(game.activationController()::onUserDamage);
+    User user = game.benderRegistry().user((LivingEntity) event.getEntity());
+    if (user != null) {
+      game.activationController().onUserDamage(user);
+    }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -231,10 +243,10 @@ public class UserListener implements Listener {
       return;
     }
     if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
-      Optional<BendingUser> user = game.benderRegistry().user((LivingEntity) event.getEntity());
-      if (user.isPresent()) {
+      User user = game.benderRegistry().user((LivingEntity) event.getEntity());
+      if (user != null) {
         double oldDmg = event.getDamage();
-        double newDmg = FireShield.shieldFromExplosion(user.get(), event.getDamager(), oldDmg);
+        double newDmg = FireShield.shieldFromExplosion(user, event.getDamager(), oldDmg);
         if (newDmg <= 0) {
           event.setCancelled(true);
         } else if (oldDmg != newDmg) {
@@ -257,7 +269,7 @@ public class UserListener implements Listener {
     }
 
     final Vector3 velocity = new Vector3(to).subtract(new Vector3(from));
-    game.activationController().onUserMove(game.benderRegistry().player(event.getPlayer()), velocity);
+    game.activationController().onUserMove(game.benderRegistry().user(event.getPlayer()), velocity);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -279,7 +291,7 @@ public class UserListener implements Listener {
     if (event.getHand() != EquipmentSlot.HAND) {
       return;
     }
-    BendingPlayer player = game.benderRegistry().player(event.getPlayer());
+    BendingPlayer player = game.benderRegistry().user(event.getPlayer());
     switch (event.getAction()) {
       case RIGHT_CLICK_AIR:
         game.activationController().onUserInteract(player, ActivationMethod.INTERACT);
@@ -296,7 +308,7 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayDropItem(PlayerDropItemEvent event) {
-    game.activationController().ignoreNextSwing(game.benderRegistry().player(event.getPlayer()));
+    game.activationController().ignoreNextSwing(game.benderRegistry().user(event.getPlayer()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -304,19 +316,19 @@ public class UserListener implements Listener {
     if (event.getHand() != EquipmentSlot.HAND) {
       return;
     }
-    User user = game.benderRegistry().player(event.getPlayer());
+    User user = game.benderRegistry().user(event.getPlayer());
     game.activationController().onUserInteract(user, ActivationMethod.INTERACT_ENTITY, event.getRightClicked());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
-    game.activationController().onUserSneak(game.benderRegistry().player(event.getPlayer()), event.isSneaking());
+    game.activationController().onUserSneak(game.benderRegistry().user(event.getPlayer()), event.isSneaking());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
     game.boardManager().forceToggleScoreboard(event.getPlayer());
-    BendingPlayer bendingPlayer = game.benderRegistry().player(event.getPlayer());
+    BendingPlayer bendingPlayer = game.benderRegistry().user(event.getPlayer());
     game.abilityManager(event.getFrom()).destroyUserInstances(bendingPlayer);
     game.abilityManager(event.getPlayer().getWorld()).createPassives(bendingPlayer);
   }

@@ -163,7 +163,7 @@ public final class BoardManager {
       if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
         return;
       }
-      BendingPlayer bendingPlayer = Bending.game().benderRegistry().player(player);
+      BendingPlayer bendingPlayer = Bending.game().benderRegistry().user(player);
       String prefix = slot == selectedSlot ? ">" : "  ";
 
       AbilityDescription desc = bendingPlayer.boundAbility(slot).orElse(null);
