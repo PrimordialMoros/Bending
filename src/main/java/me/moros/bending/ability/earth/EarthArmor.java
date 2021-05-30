@@ -28,9 +28,8 @@ import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
@@ -48,12 +47,12 @@ import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthArmor extends AbilityInstance {
@@ -67,7 +66,6 @@ public class EarthArmor extends AbilityInstance {
 
   private Mode mode;
   private BendingFallingBlock fallingBlock;
-  private Sound sound;
 
   private boolean formed = false;
   private int resistance;
@@ -83,7 +81,7 @@ public class EarthArmor extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
 
@@ -95,14 +93,13 @@ public class EarthArmor extends AbilityInstance {
     if (EarthMaterials.isMetalBendable(block)) {
       mode = block.getType() == Material.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
       resistance = userConfig.metalPower;
-      SoundUtil.METAL_SOUND.play(block.getLocation());
+      SoundUtil.METAL.play(block.getLocation());
     } else {
       mode = Mode.ROCK;
       resistance = userConfig.power;
-      SoundUtil.EARTH_SOUND.play(block.getLocation());
+      SoundUtil.EARTH.play(block.getLocation());
     }
     BlockData data = block.getBlockData().clone();
-    sound = data.getSoundGroup().getBreakSound();
     TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
     fallingBlock = new BendingFallingBlock(block, data, new Vector3(0, 0.2, 0), false, 10000);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
@@ -110,7 +107,7 @@ public class EarthArmor extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -197,14 +194,14 @@ public class EarthArmor extends AbilityInstance {
       center = user.entity().getEyeLocation();
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-    SoundUtil.playSound(center, sound, 2, 1);
+    SoundUtil.playSound(center, fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1);
     ParticleUtil.create(Particle.BLOCK_CRACK, center)
       .count(8).offset(0.5, 0.5, 0.5)
       .data(fallingBlock.fallingBlock().getBlockData()).spawn();
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

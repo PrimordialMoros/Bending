@@ -32,7 +32,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -108,8 +107,7 @@ public class FragileStructure {
       ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)
         .offset(0.3, 0.3, 0.3).data(blockData).spawn();
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        Sound sound = blockData.getSoundGroup().getBreakSound();
-        SoundUtil.playSound(center, sound, 2, 1);
+        SoundUtil.playSound(center, blockData.getSoundGroup().getBreakSound(), 2, 1);
       }
     }
   }

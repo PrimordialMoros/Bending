@@ -26,11 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingRestrictEvent;
-import me.moros.bending.model.ability.util.ActionType;
+import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -38,6 +37,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -65,7 +65,7 @@ public class MovementHandler {
       entity.setAI(false);
     }
     entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.customMetadata(this));
-    Tasker.newChain().delay((int) duration, TimeUnit.MILLISECONDS).sync(this::reset).execute();
+    Tasker.sync(this::reset, NumberConversions.ceil(duration / 50.0));
   }
 
   private void reset() {
@@ -101,14 +101,13 @@ public class MovementHandler {
 
   public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
     BendingRestrictEvent event = Bending.eventBus().postRestrictEvent(user, entity, duration);
-    if (event.isCancelled()) {
+    if (event.isCancelled() || event.duration() <= 0) {
       if (DUMMY == null) {
         DUMMY = new DummyMovementHandler();
       }
       return DUMMY;
     }
-    long finalDuration = Math.abs(event.duration());
-    return instances.computeIfAbsent(entity, e -> new MovementHandler(e, finalDuration));
+    return instances.computeIfAbsent(entity, e -> new MovementHandler(e, event.duration()));
   }
 
   public static boolean isRestricted(@NonNull Entity entity) {
@@ -182,7 +181,7 @@ public class MovementHandler {
     }
 
     @Override
-    public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType @NonNull ... methods) {
+    public @NonNull MovementHandler disableActions(@NonNull ActionType method, @Nullable ActionType... methods) {
       return this;
     }
   }

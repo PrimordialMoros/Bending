@@ -22,17 +22,14 @@ package me.moros.bending.ability.fire;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -44,6 +41,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -56,6 +54,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireWall extends AbilityInstance {
@@ -66,8 +65,8 @@ public class FireWall extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Collection<Vector3> bases;
-  private final Set<Entity> cachedEntities = new ExpiringSet<>(500);
-  private final Set<Entity> damagedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<Entity> cachedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<Entity> damagedEntities = new ExpiringSet<>(500);
   private OBB collider;
   private Vector3 center;
   private Vector3 direction;
@@ -85,7 +84,7 @@ public class FireWall extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     double hw = userConfig.width / 2.0;
 
@@ -114,7 +113,7 @@ public class FireWall extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -167,7 +166,7 @@ public class FireWall extends AbilityInstance {
             }
           }
           if (ThreadLocalRandom.current().nextInt(15) == 0) {
-            SoundUtil.FIRE_SOUND.play(pos.toLocation(user.world()));
+            SoundUtil.FIRE.play(pos.toLocation(user.world()));
           }
         }
       }
@@ -260,7 +259,7 @@ public class FireWall extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

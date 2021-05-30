@@ -47,8 +47,9 @@ public enum BendingConditions implements BendingConditional {
   }
 
   /**
-   * Constructs a new builder that includes {@link BendingConditions#ELEMENT}, {@link BendingConditions#WORLD},
-   * {@link BendingConditions#PERMISSION} and {@link BendingConditions#GAMEMODE}.
+   * Constructs a new builder that includes {@link BendingConditions#COOLDOWN},
+   * {@link BendingConditions#ELEMENT}, {@link BendingConditions#GAMEMODE},
+   * {@link BendingConditions#WORLD} and {@link BendingConditions#PERMISSION}.
    */
   public static @NonNull ConditionBuilder builder() {
     return new ConditionBuilder()

@@ -33,21 +33,21 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireSpin extends AbilityInstance {
@@ -66,7 +66,7 @@ public class FireSpin extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Vector3 origin = user.location().add(Vector3.PLUS_J);
     VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 40).forEach(
@@ -78,7 +78,7 @@ public class FireSpin extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -94,7 +94,7 @@ public class FireSpin extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -113,7 +113,7 @@ public class FireSpin extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.FIRE_SOUND.play(bukkitLocation());
+        SoundUtil.FIRE.play(bukkitLocation());
       }
     }
 

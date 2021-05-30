@@ -32,6 +32,9 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class CollisionUtil {
+  private CollisionUtil() {
+  }
+
   /**
    * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision. earlyEscape disabled
    */

@@ -37,9 +37,6 @@ public interface AbilityManager {
   default void createPassives(@NonNull User user) {
   }
 
-  default void clearPassives(@NonNull User user) {
-  }
-
   default int size() {
     return 0;
   }

@@ -26,6 +26,7 @@ repositories {
 dependencies {
     api("me.moros", "atlas-core", "1.2.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
+    implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     compileOnly("org.checkerframework", "checker-qual", "3.13.0")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
@@ -42,7 +43,6 @@ tasks {
         dependencies {
             relocate("co.aikar.commands", "me.moros.atlas.acf")
             relocate("co.aikar.locales", "me.moros.atlas.locales")
-            relocate("co.aikar.taskchain", "me.moros.atlas.taskchain")
             relocate("com.github.benmanes.caffeine", "me.moros.atlas.caffeine")
             relocate("com.typesafe", "me.moros.atlas.typesafe")
             relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")

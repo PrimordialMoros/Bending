@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability.util;
+package me.moros.bending.model.ability;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

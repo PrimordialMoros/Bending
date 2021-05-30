@@ -27,9 +27,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
@@ -48,6 +47,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterWave extends AbilityInstance {
@@ -73,7 +73,7 @@ public class WaterWave extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     startTime = System.currentTimeMillis();
@@ -81,7 +81,7 @@ public class WaterWave extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -119,13 +119,13 @@ public class WaterWave extends AbilityInstance {
 
   private void scheduleRevert(TempBlock tb) {
     final Block block = tb.block();
-    Tasker.newChain().delay(20).sync(() -> {
+    Tasker.sync(() -> {
       if (ice) {
         TempBlock.create(block, Material.ICE.createBlockData(), 1000);
       } else {
         tb.revert();
       }
-    }).execute();
+    }, 20);
   }
 
   private boolean onEntityHit(Entity entity) {
@@ -155,7 +155,7 @@ public class WaterWave extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

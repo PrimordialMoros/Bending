@@ -17,12 +17,12 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.exception.command;
+package me.moros.bending.protection;
 
-import me.moros.atlas.acf.InvalidCommandArgument;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class UserException extends InvalidCommandArgument {
-  public UserException(String message) {
-    super(message);
+public class PluginNotFoundException extends Exception {
+  public PluginNotFoundException(@NonNull String pluginName) {
+    super(pluginName + " not found in plugin manager.");
   }
 }

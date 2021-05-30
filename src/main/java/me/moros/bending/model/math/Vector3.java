@@ -49,7 +49,7 @@ public class Vector3 {
   public final double z;
 
   /**
-   * Build a vector from its coordinates
+   * Build a vector from its coordinates.
    * @param x the x coordinate
    * @param y the y coordinate
    * @param z the z coordinate
@@ -61,7 +61,7 @@ public class Vector3 {
   }
 
   /**
-   * Build a vector from its coordinates
+   * Build a vector from its coordinates.
    * @param v coordinates array
    * @throws IllegalArgumentException if array does not have 3 elements
    * @see #toArray()
@@ -104,7 +104,6 @@ public class Vector3 {
    * @return Euclidean norm for the vector
    */
   public double getNorm() {
-    // there are no cancellation problems here, so we use the straightforward formula
     return Math.sqrt(x * x + y * y + z * z);
   }
 
@@ -112,7 +111,6 @@ public class Vector3 {
    * @return square of the Euclidean norm for the vector
    */
   public double getNormSq() {
-    // there are no cancellation problems here, so we use the straightforward formula
     return x * x + y * y + z * z;
   }
 
@@ -176,14 +174,14 @@ public class Vector3 {
   }
 
   /**
-   * @return true if any coordinate of this point is NaN; false otherwise
+   * @return true if any coordinate of this point is NaN, false otherwise
    */
   public boolean isNaN() {
     return Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z);
   }
 
   /**
-   * @return true if any coordinate of this vector is infinite and none are NaN false otherwise
+   * @return true if any coordinate of this vector is infinite and none are NaN, false otherwise
    */
   public boolean isInfinite() {
     return !isNaN() && (Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z));
@@ -320,7 +318,7 @@ public class Vector3 {
   }
 
   /**
-   * Create a vector at the center of a block position
+   * Create a vector at the center of a block position.
    */
   public static @NonNull Vector3 center(@NonNull Block b) {
     return new Vector3(b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5);

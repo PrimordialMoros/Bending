@@ -28,7 +28,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class WaterMaterials {
+public final class WaterMaterials {
   public static final MaterialSetTag PLANT_BENDABLE;
   public static final MaterialSetTag ICE_BENDABLE;
   public static final MaterialSetTag SNOW_BENDABLE;
@@ -65,6 +65,9 @@ public class WaterMaterials {
       .add(ICE_BENDABLE.getValues())
       .add(SNOW_BENDABLE.getValues())
       .add(Material.WATER).ensureSize("Waterbendable", 54);
+  }
+
+  private WaterMaterials() {
   }
 
   public static boolean isWaterBendable(@NonNull Block block) {

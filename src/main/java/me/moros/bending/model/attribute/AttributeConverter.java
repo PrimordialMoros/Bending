@@ -21,6 +21,8 @@ package me.moros.bending.model.attribute;
 
 import java.util.function.DoubleFunction;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public enum AttributeConverter {
   DOUBLE(x -> x),
   INT(x -> (int) x),
@@ -32,12 +34,12 @@ public enum AttributeConverter {
     this.converter = converter;
   }
 
-  public Number apply(double input) {
+  public @NonNull Number apply(double input) {
     return converter.apply(input);
   }
 
   @FunctionalInterface
   private interface Converter extends DoubleFunction<Number> {
-    Number apply(double input);
+    @NonNull Number apply(double input);
   }
 }

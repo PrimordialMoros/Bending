@@ -50,7 +50,7 @@ public class TempArmor implements Temporary {
     this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
     entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
     MANAGER.addEntry(entity, this);
-    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {

@@ -30,9 +30,8 @@ import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -44,6 +43,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Collapse extends AbilityInstance {
@@ -65,7 +65,7 @@ public class Collapse extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
@@ -110,7 +110,7 @@ public class Collapse extends AbilityInstance {
 
   public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     this.height = height;
     for (Block block : sources) {
@@ -124,7 +124,7 @@ public class Collapse extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -148,7 +148,7 @@ public class Collapse extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

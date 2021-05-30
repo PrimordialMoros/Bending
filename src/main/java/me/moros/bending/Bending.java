@@ -21,7 +21,7 @@ package me.moros.bending;
 
 import java.util.Objects;
 
-import me.moros.atlas.acf.lib.timings.TimingManager;
+import co.aikar.commands.lib.timings.TimingManager;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
@@ -40,6 +40,7 @@ import me.moros.storage.logging.Logger;
 import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.LoggerFactory;
 
 public class Bending extends JavaPlugin {
@@ -66,8 +67,6 @@ public class Bending extends JavaPlugin {
     author = getDescription().getAuthors().get(0);
     version = getDescription().getVersion();
 
-    Tasker.init(this);
-
     String dir = configFolder();
 
     configManager = new ConfigManager(dir);
@@ -85,7 +84,7 @@ public class Bending extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
     getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
-    new Commands(this, game);
+    new Commands(this);
   }
 
   @Override
@@ -94,6 +93,7 @@ public class Bending extends JavaPlugin {
       game.cleanup();
     }
     getServer().getScheduler().cancelTasks(this);
+    Tasker.INSTANCE.shutdown();
   }
 
   @Override
@@ -103,47 +103,47 @@ public class Bending extends JavaPlugin {
     }
   }
 
-  public static BendingEventBus eventBus() {
+  public static @MonotonicNonNull BendingEventBus eventBus() {
     return plugin.eventBus;
   }
 
-  public static TimingManager timingManager() {
+  public static @MonotonicNonNull TimingManager timingManager() {
     return plugin.timingManager;
   }
 
-  public static Bending plugin() {
+  public static @MonotonicNonNull Bending plugin() {
     return plugin;
   }
 
-  public static ConfigManager configManager() {
+  public static @MonotonicNonNull ConfigManager configManager() {
     return plugin.configManager;
   }
 
-  public static TranslationManager translationManager() {
+  public static @MonotonicNonNull TranslationManager translationManager() {
     return plugin.translationManager;
   }
 
-  public static String author() {
+  public static @MonotonicNonNull String author() {
     return plugin.author;
   }
 
-  public static String version() {
+  public static @MonotonicNonNull String version() {
     return plugin.version;
   }
 
-  public static Logger logger() {
+  public static @MonotonicNonNull Logger logger() {
     return plugin.logger;
   }
 
-  public static PersistentDataLayer dataLayer() {
+  public static @MonotonicNonNull PersistentDataLayer dataLayer() {
     return plugin.dataLayer;
   }
 
-  public static Game game() {
+  public static @MonotonicNonNull Game game() {
     return plugin.game;
   }
 
-  public static String configFolder() {
+  public static @MonotonicNonNull String configFolder() {
     return plugin.getDataFolder().toString();
   }
 }

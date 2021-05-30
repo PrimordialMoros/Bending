@@ -20,8 +20,9 @@
 package me.moros.bending.model.attribute;
 
 import me.moros.bending.model.ability.Ability;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface ModifyPolicy {
-  boolean shouldModify(Ability ability);
+  boolean shouldModify(@NonNull Ability ability);
 }

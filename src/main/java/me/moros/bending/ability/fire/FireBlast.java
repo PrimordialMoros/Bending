@@ -33,11 +33,9 @@ import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -49,6 +47,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
@@ -61,6 +60,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireBlast extends AbilityInstance implements Explosive {
@@ -85,7 +85,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     startTime = System.currentTimeMillis();
     charging = true;
 
@@ -108,7 +108,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -191,7 +191,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -240,7 +240,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     @Override
     public void postRender() {
       if (explosive || ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE_SOUND.play(bukkitLocation());
+        SoundUtil.FIRE.play(bukkitLocation());
       }
     }
 

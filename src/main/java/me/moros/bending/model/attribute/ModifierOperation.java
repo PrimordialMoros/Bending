@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.attribute;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public enum ModifierOperation {
   /**
    * Directly adds to the base value
@@ -31,5 +33,9 @@ public enum ModifierOperation {
   /**
    * The base is multiplied by every MULTIPLICATIVE modifier after doing ADDITIVE and SUMMED_MULTIPLICATIVE.
    */
-  MULTIPLICATIVE
+  MULTIPLICATIVE;
+
+  public @NonNull AttributeModifier toAttributeModifier(@NonNull String attribute, double value) {
+    return new AttributeModifier(attribute, this, value);
+  }
 }

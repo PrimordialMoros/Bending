@@ -29,15 +29,14 @@ import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
@@ -49,6 +48,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Catapult extends AbilityInstance {
@@ -69,13 +69,13 @@ public class Catapult extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     return launch(method == ActivationMethod.SNEAK);
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -133,7 +133,7 @@ public class Catapult extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
 
     Vector3 origin = user.location().add(new Vector3(0, 0.5, 0));
-    SoundUtil.EARTH_SOUND.play(origin.toLocation(user.world()));
+    SoundUtil.EARTH.play(origin.toLocation(user.world()));
     if (base != null) {
       ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
         .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
@@ -164,7 +164,7 @@ public class Catapult extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

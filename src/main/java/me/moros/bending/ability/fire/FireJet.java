@@ -26,9 +26,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
@@ -43,8 +42,8 @@ import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireJet extends AbilityInstance {
@@ -71,7 +70,7 @@ public class FireJet extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Block block = user.locBlock();
     boolean ignitable = MaterialUtil.isIgnitable(block);
@@ -81,7 +80,7 @@ public class FireJet extends AbilityInstance {
 
     flight = Flight.get(user);
     if (ignitable) {
-      Tasker.newChain().delay(1).sync(() -> igniteBlock(block)).execute();
+      Tasker.sync(() -> igniteBlock(block), 1);
     }
 
     if (user.sneaking()) {
@@ -107,7 +106,7 @@ public class FireJet extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -117,7 +116,7 @@ public class FireJet extends AbilityInstance {
       ParticleUtil.createFire(user, center.add(v.multiply(0.5)).toLocation(user.world()))
         .count(0).offset(v.x, v.y, v.z).extra(0.09).spawn()
     );
-    SoundUtil.playSound(user.entity().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10, 0);
+    SoundUtil.EXPLOSION.play(user.entity().getLocation(), 10, 0);
   }
 
   @Override
@@ -144,7 +143,7 @@ public class FireJet extends AbilityInstance {
     }
 
     if (ThreadLocalRandom.current().nextBoolean()) {
-      SoundUtil.FIRE_SOUND.play(user.entity().getLocation());
+      SoundUtil.FIRE.play(user.entity().getLocation());
     }
     return UpdateResult.CONTINUE;
   }
@@ -156,7 +155,7 @@ public class FireJet extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

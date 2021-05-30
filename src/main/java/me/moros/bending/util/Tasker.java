@@ -19,9 +19,12 @@
 
 package me.moros.bending.util;
 
-import me.moros.atlas.taskchain.BukkitTaskChainFactory;
-import me.moros.atlas.taskchain.TaskChain;
-import me.moros.atlas.taskchain.TaskChainFactory;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 import me.moros.bending.Bending;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -29,38 +32,46 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Utility class to provide task chains and create repeating tasks.
- * @see TaskChain
+ * Utility class to easily schedule sync, async tasks.
  */
-public final class Tasker {
-  private static TaskChainFactory taskChainFactory;
-  private static Bending bendingPlugin;
+public enum Tasker {
+  INSTANCE;
 
-  public static void init(@NonNull Bending plugin) {
-    if (taskChainFactory == null) {
-      bendingPlugin = plugin;
-      taskChainFactory = BukkitTaskChainFactory.create(plugin);
+  private final ExecutorService executor;
+
+  Tasker() {
+    executor = Executors.newCachedThreadPool();
+  }
+
+  public void shutdown() {
+    executor.shutdown();
+    try {
+      executor.awaitTermination(60, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Bending.logger().warn(e.getMessage());
     }
   }
 
-  public static <T> @NonNull TaskChain<T> newChain() {
-    return taskChainFactory.newChain();
+  public static @NonNull CompletableFuture<Void> async(@NonNull Runnable runnable) {
+    return CompletableFuture.runAsync(runnable, INSTANCE.executor);
   }
 
-  public static <T> @NonNull TaskChain<T> newSharedChain(@NonNull String name) {
-    return taskChainFactory.newSharedChain(name);
+  public static <T> @NonNull CompletableFuture<@Nullable T> async(@NonNull Supplier<@Nullable T> supplier) {
+    return CompletableFuture.supplyAsync(supplier, INSTANCE.executor);
   }
 
-  public static @Nullable BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
-    if (bendingPlugin.isEnabled()) {
-      return Bukkit.getScheduler().runTaskTimer(Bending.plugin(), runnable, 1, interval);
+  public static @Nullable BukkitTask sync(@NonNull Runnable runnable, long delay) {
+    if (Bending.plugin().isEnabled()) {
+      return Bukkit.getScheduler().runTaskLater(Bending.plugin(), runnable, delay);
+    } else {
+      runnable.run();
     }
     return null;
   }
 
-  public static @Nullable BukkitTask simpleTask(@NonNull Runnable runnable, long delay) {
-    if (bendingPlugin.isEnabled()) {
-      return Bukkit.getScheduler().runTaskLater(Bending.plugin(), runnable, delay);
+  public static @Nullable BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
+    if (Bending.plugin().isEnabled()) {
+      return Bukkit.getScheduler().runTaskTimer(Bending.plugin(), runnable, 1, interval);
     }
     return null;
   }

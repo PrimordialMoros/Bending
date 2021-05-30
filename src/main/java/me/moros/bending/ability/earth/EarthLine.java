@@ -39,13 +39,11 @@ import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActionType;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.ability.util.ActionType;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
@@ -56,6 +54,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
@@ -77,6 +76,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthLine extends AbilityInstance {
@@ -106,7 +106,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Block source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
     if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) {
@@ -131,7 +131,7 @@ public class EarthLine extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -200,7 +200,7 @@ public class EarthLine extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -229,7 +229,7 @@ public class EarthLine extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.EARTH_SOUND.play(location.toLocation(user.world()));
+        SoundUtil.EARTH.play(location.toLocation(user.world()));
       }
     }
 

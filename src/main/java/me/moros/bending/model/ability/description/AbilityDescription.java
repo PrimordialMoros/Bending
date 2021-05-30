@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.util.ActivationMethod;
+import me.moros.bending.model.ability.ActivationMethod;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -166,18 +166,14 @@ public class AbilityDescription {
       return this;
     }
 
-    private AbilityDescriptionBuilder activation(@NonNull Collection<@NonNull ActivationMethod> methods) {
-      activationMethods = EnumSet.copyOf(methods);
-      return this;
-    }
-
     public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod... methods) {
       Collection<ActivationMethod> c = new ArrayList<>();
       if (methods != null) {
         c.addAll(List.of(methods));
       }
       c.add(method);
-      return activation(c);
+      activationMethods = EnumSet.copyOf(c);
+      return this;
     }
 
     public @NonNull AbilityDescriptionBuilder canBind(boolean canBind) {

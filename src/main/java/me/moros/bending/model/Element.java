@@ -60,7 +60,7 @@ public enum Element {
     return color;
   }
 
-  public static Optional<Element> elementByName(@NonNull String value) {
+  public static Optional<Element> fromName(@NonNull String value) {
     if (value.isEmpty()) {
       return Optional.empty();
     }

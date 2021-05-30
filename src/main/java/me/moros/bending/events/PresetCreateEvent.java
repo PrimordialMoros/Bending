@@ -17,13 +17,33 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability.util;
+package me.moros.bending.events;
 
-public enum ActionType {
-  ABILITY_ACTIVATION,
-  DAMAGE,
-  SHOOT,
-  INTERACT_BLOCK,
-  INTERACT,
-  MOVE
+import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.user.User;
+import org.bukkit.event.Cancellable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+public class PresetCreateEvent extends BendingUserEvent implements Cancellable {
+  private final Preset preset;
+  private boolean cancelled = false;
+
+  PresetCreateEvent(User user, Preset preset) {
+    super(user);
+    this.preset = preset;
+  }
+
+  public @NonNull Preset preset() {
+    return preset;
+  }
+
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
+  }
 }

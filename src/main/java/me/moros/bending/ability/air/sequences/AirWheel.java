@@ -21,16 +21,14 @@ package me.moros.bending.ability.air.sequences;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -47,6 +45,7 @@ import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirWheel extends AbilityInstance {
@@ -57,7 +56,7 @@ public class AirWheel extends AbilityInstance {
   private User user;
   private Config userConfig;
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
+  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
 
   private AirScooter scooter;
   private Collider collider;
@@ -84,7 +83,7 @@ public class AirWheel extends AbilityInstance {
     scooter.canRender = false;
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     center = user.location().add(new Vector3(0, 0.8, 0));
     nextRenderTime = 0;
@@ -92,7 +91,7 @@ public class AirWheel extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -147,7 +146,7 @@ public class AirWheel extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

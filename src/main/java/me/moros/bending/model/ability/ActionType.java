@@ -17,10 +17,13 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.exception;
+package me.moros.bending.model.ability;
 
-public class PluginNotFoundException extends BendingException {
-  public PluginNotFoundException(String pluginName) {
-    super(pluginName + " not found in plugin manager.");
-  }
+public enum ActionType {
+  ABILITY_ACTIVATION,
+  DAMAGE,
+  SHOOT,
+  INTERACT_BLOCK,
+  INTERACT,
+  MOVE
 }

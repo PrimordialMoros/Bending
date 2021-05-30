@@ -53,6 +53,9 @@ public final class AttributeSystem {
     converters.put(long.class, AttributeConverter.LONG);
   }
 
+  AttributeSystem() {
+  }
+
   // Add a modifier that's only active according to some policy.
   public @NonNull UserModifier addModifier(@NonNull User user, @NonNull AttributeModifier modifier, @NonNull ModifyPolicy policy) {
     Collection<UserModifier> modifiers = modifierMap.computeIfAbsent(user, key -> new ArrayList<>());
@@ -83,7 +86,7 @@ public final class AttributeSystem {
 
   // Recalculates all of the config values for the user's instances.
   public void recalculate(@NonNull User user) {
-    Bending.game().abilityManager(user.world()).userInstances(user).forEach(Ability::recalculateConfig);
+    Bending.game().abilityManager(user.world()).userInstances(user).forEach(Ability::loadConfig);
   }
 
   @SuppressWarnings({"unchecked", "deprecation"})
@@ -100,7 +103,7 @@ public final class AttributeSystem {
     try {
       newConfig = (T) config.clone();
     } catch (CloneNotSupportedException e) {
-      e.printStackTrace();
+      Bending.logger().warn(e.getMessage());
       return config;
     }
 
@@ -164,8 +167,8 @@ public final class AttributeSystem {
   }
 
   private static class UserModifier {
-    final AttributeModifier modifier;
-    final ModifyPolicy policy;
+    private final AttributeModifier modifier;
+    private final ModifyPolicy policy;
 
     UserModifier(AttributeModifier modifier, ModifyPolicy policy) {
       this.modifier = modifier;

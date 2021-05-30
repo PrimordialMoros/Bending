@@ -21,17 +21,14 @@ package me.moros.bending.ability.fire;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -48,6 +45,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -55,6 +53,7 @@ import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FireShield extends AbilityInstance {
@@ -64,7 +63,7 @@ public class FireShield extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
   private Shield shield;
   private ThreadLocalRandom rand;
 
@@ -81,7 +80,7 @@ public class FireShield extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     if (user.headBlock().isLiquid()) {
       return false;
@@ -106,7 +105,7 @@ public class FireShield extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -146,7 +145,7 @@ public class FireShield extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -209,7 +208,7 @@ public class FireShield extends AbilityInstance {
           ParticleUtil.createFire(user, spawnLoc)
             .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
           if (rand.nextInt(12) == 0) {
-            SoundUtil.FIRE_SOUND.play(spawnLoc);
+            SoundUtil.FIRE.play(spawnLoc);
           }
         }
         rotation.applyTo(array, array);
@@ -258,7 +257,7 @@ public class FireShield extends AbilityInstance {
         ParticleUtil.createFire(user, spawnLoc)
           .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
         if (rand.nextInt(12) == 0) {
-          SoundUtil.FIRE_SOUND.play(spawnLoc);
+          SoundUtil.FIRE.play(spawnLoc);
         }
       }
     }

@@ -29,7 +29,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class EarthMaterials {
+public final class EarthMaterials {
   public static final MaterialSetTag EARTH_BENDABLE;
   public static final MaterialSetTag SAND_BENDABLE;
   public static final MaterialSetTag METAL_BENDABLE;
@@ -67,6 +67,9 @@ public class EarthMaterials {
       .add(METAL_BENDABLE.getValues())
       .add(LAVA_BENDABLE.getValues())
       .ensureSize("All", 113);
+  }
+
+  private EarthMaterials() {
   }
 
   public static boolean isEarthbendable(@NonNull User user, @NonNull Block block) {

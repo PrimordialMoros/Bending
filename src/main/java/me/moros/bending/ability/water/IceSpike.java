@@ -31,10 +31,9 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -57,6 +56,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class IceSpike extends AbilityInstance {
@@ -76,7 +76,7 @@ public class IceSpike extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     boolean field = method == ActivationMethod.SNEAK;
     if (field) {
@@ -109,7 +109,7 @@ public class IceSpike extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -179,7 +179,7 @@ public class IceSpike extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -222,7 +222,7 @@ public class IceSpike extends AbilityInstance {
         }
         Block block = pillarBlocks.pollFirst();
         clean(block);
-        SoundUtil.ICE_SOUND.play(block.getLocation());
+        SoundUtil.ICE.play(block.getLocation());
         return UpdateResult.CONTINUE;
       }
 
@@ -233,7 +233,7 @@ public class IceSpike extends AbilityInstance {
       if (canMove(currentIndex)) {
         pillarBlocks.offerFirst(currentIndex);
         TempBlock.create(currentIndex, material.createBlockData());
-        SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
+        SoundUtil.ICE.play(currentIndex.getLocation());
       } else {
         reverting = true;
       }

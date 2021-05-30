@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public enum PresetCreateResult {
   SUCCESS(Message.PRESET_SUCCESS),
   EXISTS(Message.PRESET_EXISTS),
+  CANCELLED(Message.PRESET_CANCELLED),
   FAIL(Message.PRESET_FAIL);
 
   private final Message.Args1<String> message;

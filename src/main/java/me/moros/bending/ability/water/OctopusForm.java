@@ -22,7 +22,6 @@ package me.moros.bending.ability.water;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -30,9 +29,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -53,6 +51,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 // TODO make tentacle extension animation
@@ -69,7 +68,7 @@ public class OctopusForm extends AbilityInstance {
   private final Collection<Block> base = new ArrayList<>();
   private final List<Tentacle> tentacles = new ArrayList<>();
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
 
   private WaterRing ring;
   private Block lastBlock;
@@ -90,14 +89,14 @@ public class OctopusForm extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     removalPolicy = Policies.builder().build();
     ring = WaterRing.getOrCreateInstance(user);
     return ring != null;
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -229,7 +228,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

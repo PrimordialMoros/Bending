@@ -19,11 +19,15 @@
 
 package me.moros.bending.model.user;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
+import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
+import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
+import me.moros.bending.game.BenderRegistry;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
@@ -32,14 +36,18 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class BendingPlayer extends BendingUser {
+public final class BendingPlayer extends BendingUser implements PresetUser {
   private final BendingProfile profile;
-  private final PresetHolder presetHolder;
+  private final Set<String> presets;
+  private final AsyncLoadingCache<String, Preset> presetCache;
 
   private BendingPlayer(Player player, BendingProfile profile) {
-    super(player);
+    super(player, profile.data());
     this.profile = profile;
-    presetHolder = new PresetHolder(profile.id(), profile.data().presets());
+    presets = new HashSet<>(profile.data().presets());
+    presetCache = Caffeine.newBuilder()
+      .maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
+      .buildAsync(this::loadPreset);
   }
 
   public @NonNull BendingProfile profile() {
@@ -60,7 +68,12 @@ public final class BendingPlayer extends BendingUser {
 
   @Override
   public Optional<AbilityDescription> selectedAbility() {
-    return slotAbility(currentSlot());
+    return boundAbility(currentSlot());
+  }
+
+  @Override
+  public boolean hasPermission(@NonNull String permission) {
+    return entity().hasPermission(permission);
   }
 
   @Override
@@ -99,42 +112,56 @@ public final class BendingPlayer extends BendingUser {
   }
 
   // Presets
+  @Override
   public @NonNull Set<@NonNull String> presets() {
-    return presetHolder.presets();
-  }
-
-  public Optional<Preset> presetByName(@NonNull String name) {
-    return Optional.ofNullable(presetHolder.presetByName(name.toLowerCase()));
-  }
-
-  public void addPreset(@NonNull Preset preset, @NonNull Consumer<PresetCreateResult> consumer) {
-    String name = preset.name().toLowerCase();
-    if (preset.id() > 0 || presetHolder.hasPreset(name)) {
-      consumer.accept(PresetCreateResult.EXISTS);
-      return;
-    }
-    presetHolder.addPreset(name);
-    Bending.game().storage().savePresetAsync(profile.id(), preset, result ->
-      consumer.accept(result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL)
-    );
-  }
-
-  public boolean removePreset(@NonNull Preset preset) {
-    String name = preset.name().toLowerCase();
-    if (preset.id() <= 0 || !presetHolder.hasPreset(name)) {
-      return false;
-    }
-    Bending.game().storage().deletePresetAsync(preset.id());
-    return presetHolder.removePreset(name);
+    return Set.copyOf(presets);
   }
 
   @Override
-  public boolean hasPermission(@NonNull String permission) {
-    return entity().hasPermission(permission);
+  public Optional<Preset> presetByName(@NonNull String name) {
+    if (!presets.contains(name.toLowerCase())) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(presetCache.synchronous().get(name.toLowerCase()));
   }
 
+  @Override
+  public @NonNull CompletableFuture<@NonNull PresetCreateResult> addPreset(@NonNull Preset preset) {
+    String name = preset.name().toLowerCase();
+    if (preset.id() > 0 || presets.contains(name)) {
+      return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
+    }
+    if (!Bending.eventBus().postPresetCreateEvent(this, preset)) {
+      return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
+    }
+    presets.add(name);
+    return Bending.game().storage().savePresetAsync(profile.id(), preset).thenApply(result ->
+      result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL
+    );
+  }
+
+  @Override
+  public boolean removePreset(@NonNull Preset preset) {
+    String name = preset.name().toLowerCase();
+    if (preset.id() <= 0 || !presets.contains(name)) {
+      return false;
+    }
+    Bending.game().storage().deletePresetAsync(preset.id());
+    return presets.remove(name);
+  }
+
+  private Preset loadPreset(String name) {
+    if (!presets.contains(name.toLowerCase())) {
+      return null;
+    }
+    return Bending.game().storage().loadPreset(profile().id(), name);
+  }
+
+  /**
+   * Use {@link BenderRegistry#createPlayer(Player, BendingProfile)}
+   */
   public static Optional<BendingPlayer> createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
-    if (Bending.game().playerManager().playerExists(player.getUniqueId())) {
+    if (Bending.game().benderRegistry().isRegistered(player.getUniqueId())) {
       return Optional.empty();
     }
     BendingPlayer bendingPlayer = new BendingPlayer(player, profile);

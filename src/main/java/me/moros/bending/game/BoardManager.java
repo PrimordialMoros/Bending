@@ -17,15 +17,30 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.board;
+package me.moros.bending.game;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import me.moros.bending.Bending;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
+import org.bukkit.scoreboard.Scoreboard;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,7 +51,7 @@ public final class BoardManager {
   private final Map<UUID, Board> scoreboardPlayers;
   private final boolean enabled;
 
-  public BoardManager() {
+  BoardManager() {
     scoreboardPlayers = new HashMap<>();
     enabled = Bending.configManager().config().node("properties", "bending-board").getBoolean(true);
   }
@@ -115,5 +130,90 @@ public final class BoardManager {
 
   public void invalidate(@NonNull UUID uuid) {
     scoreboardPlayers.remove(uuid);
+  }
+
+  private static class Board {
+    private final String[] cachedSlots = new String[10];
+    private final Set<String> misc = new HashSet<>(); // Stores scoreboard scores for combos and misc abilities
+
+    private final Player player;
+
+    private final Scoreboard bendingBoard;
+    private final Objective bendingSlots;
+    private int selectedSlot;
+
+    private Board(Player player) {
+      this.player = player;
+      selectedSlot = player.getInventory().getHeldItemSlot() + 1;
+      bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
+      bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
+      bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
+      player.setScoreboard(bendingBoard);
+      Arrays.fill(cachedSlots, "");
+      updateAll();
+    }
+
+    private void disableScoreboard() {
+      bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
+      bendingSlots.unregister();
+      player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+    }
+
+    private void updateSlot(int slot) {
+      if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
+        return;
+      }
+      BendingPlayer bendingPlayer = Bending.game().benderRegistry().player(player);
+      String prefix = slot == selectedSlot ? ">" : "  ";
+
+      AbilityDescription desc = bendingPlayer.boundAbility(slot).orElse(null);
+      Component component;
+      if (desc == null) {
+        component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
+      } else {
+        Component name = Component.text(desc.name(), desc.element().color());
+        if (bendingPlayer.onCooldown(desc)) {
+          name = name.decorate(TextDecoration.STRIKETHROUGH);
+        }
+        component = Component.text(prefix).append(name);
+      }
+      String legacy = LegacyComponentSerializer.legacySection().serialize(component) + ChatColor.values()[slot].toString();
+      if (!cachedSlots[slot].equals(legacy)) {
+        bendingBoard.resetScores(cachedSlots[slot]);
+      }
+      cachedSlots[slot] = legacy;
+      bendingSlots.getScore(legacy).setScore(-slot);
+    }
+
+    private void updateAll() {
+      IntStream.rangeClosed(1, 9).forEach(this::updateSlot);
+    }
+
+    private void activeSlot(int oldSlot, int newSlot) {
+      if (selectedSlot != oldSlot) {
+        oldSlot = selectedSlot; // Fixes bug when slot is set using setHeldItemSlot
+      }
+      selectedSlot = newSlot;
+      updateSlot(oldSlot);
+      updateSlot(newSlot);
+    }
+
+    private void updateMisc(AbilityDescription desc, boolean show) {
+      Component component = Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH));
+      String legacy = LegacyComponentSerializer.legacySection().serialize(component);
+      if (show) {
+        if (misc.isEmpty()) {
+          bendingSlots.getScore("  ------------  ").setScore(-10);
+        }
+        misc.add(legacy);
+        bendingSlots.getScore(legacy).setScore(-11);
+      } else {
+        misc.remove(legacy);
+        bendingBoard.resetScores(legacy);
+        if (misc.isEmpty()) {
+          bendingBoard.resetScores("  ------------  ");
+        }
+      }
+    }
   }
 }

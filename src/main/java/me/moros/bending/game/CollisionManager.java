@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.game.manager;
+package me.moros.bending.game;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +39,7 @@ public final class CollisionManager {
   private static final Collection<RegisteredCollision> collisions = new ArrayList<>();
   private final AbilityManager manager;
 
-  protected CollisionManager(@NonNull AbilityManager manager) {
+  CollisionManager(@NonNull AbilityManager manager) {
     this.manager = manager;
   }
 

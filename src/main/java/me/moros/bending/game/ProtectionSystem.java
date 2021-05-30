@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection;
+package me.moros.bending.game;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.model.exception.PluginNotFoundException;
 import me.moros.bending.model.user.User;
+import me.moros.bending.protection.PluginNotFoundException;
 import me.moros.bending.protection.instances.GriefPreventionProtection;
 import me.moros.bending.protection.instances.Protection;
 import me.moros.bending.protection.instances.TownyProtection;
@@ -41,16 +41,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Represents the protection system which hooks into other region protection plugins.
  */
-public class ProtectionSystem {
+public final class ProtectionSystem {
   /**
    * A multi-layered cache used to check if a User can build in a specific block location.
    * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
    * might not be thread-safe themselves and we load data from them when results aren't cached.
    */
-  private final Map<UUID, Cache<Block, Boolean>> cache = new ConcurrentHashMap<>();
-  private final Collection<Protection> protections = new ArrayList<>();
+  private final Map<UUID, Cache<Block, Boolean>> cache;
+  private final Collection<Protection> protections;
 
-  public ProtectionSystem() {
+  ProtectionSystem() {
+    cache = new ConcurrentHashMap<>();
+    protections = new ArrayList<>();
     registerProtectMethod("WorldGuard", WorldGuardProtection::new);
     registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
     registerProtectMethod("Towny", TownyProtection::new);

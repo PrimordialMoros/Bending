@@ -21,15 +21,15 @@ package me.moros.bending.command;
 
 import java.util.Collection;
 
-import me.moros.atlas.acf.BaseCommand;
-import me.moros.atlas.acf.CommandHelp;
-import me.moros.atlas.acf.annotation.CommandAlias;
-import me.moros.atlas.acf.annotation.CommandCompletion;
-import me.moros.atlas.acf.annotation.CommandPermission;
-import me.moros.atlas.acf.annotation.Default;
-import me.moros.atlas.acf.annotation.Description;
-import me.moros.atlas.acf.annotation.HelpCommand;
-import me.moros.atlas.acf.annotation.Subcommand;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.HelpCommand;
+import co.aikar.commands.annotation.Subcommand;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
@@ -69,7 +69,7 @@ public class PresetCommand extends BaseCommand {
       Message.EMPTY_PRESET.send(player);
       return;
     }
-    player.addPreset(preset, result -> result.message().send(player, input));
+    player.addPreset(preset).thenAccept(result -> result.message().send(player, input));
   }
 
   @Subcommand("remove|rm|r|delete|del|d")

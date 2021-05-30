@@ -53,6 +53,9 @@ public final class BlockMethods {
   public static final Set<BlockFace> MAIN_FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
   public static final Set<BlockFace> CARDINAL_FACES = Set.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
 
+  private BlockMethods() {
+  }
+
   /**
    * Try to light a block if it's a furnace, smoker, blast furnace or campfire.
    * @param block the block to light
@@ -81,7 +84,7 @@ public final class BlockMethods {
    */
   public static void playLavaExtinguishEffect(@NonNull Block block) {
     Location center = block.getLocation().add(0.5, 0.7, 0.5);
-    SoundUtil.LAVA_EXTINGUISH_SOUND.play(center);
+    SoundUtil.LAVA_EXTINGUISH.play(center);
     ParticleUtil.create(Particle.CLOUD, center).count(8)
       .offset(0.3, 0.3, 0.3).spawn();
   }
@@ -119,7 +122,7 @@ public final class BlockMethods {
     if (MaterialUtil.isFire(block)) {
       block.setType(Material.AIR);
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        SoundUtil.FIRE_EXTINGUISH_SOUND.play(block.getLocation());
+        SoundUtil.FIRE_EXTINGUISH.play(block.getLocation());
       }
       return true;
     } else if (MaterialUtil.isCampfire(block)) {

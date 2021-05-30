@@ -33,11 +33,10 @@ import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -56,6 +55,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthBlast extends AbilityInstance {
@@ -90,7 +90,7 @@ public class EarthBlast extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
     Block source = SourceUtil.find(user, userConfig.selectRange, predicate).orElse(null);
@@ -117,7 +117,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -146,7 +146,7 @@ public class EarthBlast extends AbilityInstance {
       }
       if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
         blast = new Blast(user, source);
-        SoundUtil.EARTH_SOUND.play(source.getLocation());
+        SoundUtil.EARTH.play(source.getLocation());
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
         TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
@@ -189,18 +189,8 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
-  }
-
-  @Override
-  public boolean user(@NonNull User user) {
-    if (blast == null) {
-      return false;
-    }
-    this.user = user;
-    blast.user(user);
-    return true;
   }
 
   @Override

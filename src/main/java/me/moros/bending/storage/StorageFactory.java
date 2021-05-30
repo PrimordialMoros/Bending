@@ -33,6 +33,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @see StorageImpl
  */
 public final class StorageFactory {
+  private StorageFactory() {
+  }
+
   public static @Nullable BendingStorage createInstance() {
     CommentedConfigurationNode storageNode = Bending.configManager().config().node("storage");
     String configValue = storageNode.node("engine").getString("h2");

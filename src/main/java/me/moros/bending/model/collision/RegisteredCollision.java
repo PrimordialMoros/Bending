@@ -31,7 +31,7 @@ public final class RegisteredCollision {
   private final boolean removeFirst;
   private final boolean removeSecond;
 
-  public RegisteredCollision(@NonNull AbilityDescription first, @NonNull AbilityDescription second, boolean removeFirst, boolean removeSecond) {
+  RegisteredCollision(@NonNull AbilityDescription first, @NonNull AbilityDescription second, boolean removeFirst, boolean removeSecond) {
     this.first = first;
     this.second = second;
     this.removeFirst = removeFirst;

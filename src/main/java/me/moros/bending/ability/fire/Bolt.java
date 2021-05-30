@@ -27,9 +27,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -46,12 +45,12 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Bolt extends AbilityInstance {
@@ -76,7 +75,7 @@ public class Bolt extends AbilityInstance {
       return false;
     }
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     removalPolicy = Policies.builder()
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .add(SwappedSlotsRemovalPolicy.of(description()))
@@ -87,7 +86,7 @@ public class Bolt extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -158,7 +157,7 @@ public class Bolt extends AbilityInstance {
       return;
     }
     user.world().spigot().strikeLightningEffect(targetLocation.toLocation(user.world()), true);
-    SoundUtil.playSound(targetLocation.toLocation(user.world()), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 5, 1.2F);
+    SoundUtil.LIGHTNING_BOLT.play(targetLocation.toLocation(user.world()), 5, 1.2F);
     user.addCooldown(description(), userConfig.cooldown);
     struck = true;
     if (!isNearbyChannel()) {
@@ -167,7 +166,7 @@ public class Bolt extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

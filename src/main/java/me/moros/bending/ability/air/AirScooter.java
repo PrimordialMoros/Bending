@@ -27,9 +27,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.AirWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -44,6 +43,7 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirScooter extends AbilityInstance {
@@ -72,7 +72,7 @@ public class AirScooter extends AbilityInstance {
       return false;
     }
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     if (Policies.IN_LIQUID.test(user, description())) {
       return false;
@@ -93,7 +93,7 @@ public class AirScooter extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -115,7 +115,7 @@ public class AirScooter extends AbilityInstance {
       render();
     }
     if (ThreadLocalRandom.current().nextInt(4) == 0) {
-      SoundUtil.AIR_SOUND.play(user.entity().getLocation());
+      SoundUtil.AIR.play(user.entity().getLocation());
     }
     return UpdateResult.CONTINUE;
   }
@@ -137,7 +137,7 @@ public class AirScooter extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

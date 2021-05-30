@@ -34,6 +34,9 @@ public final class BurstUtil {
   public static final double FALL_MIN_ANGLE = Math.toRadians(60);
   public static final double FALL_MAX_ANGLE = Math.toRadians(105);
 
+  private BurstUtil() {
+  }
+
   public static @NonNull Collection<@NonNull Ray> cone(@NonNull User user, double range) {
     return createBurst(user, range, ANGLE_STEP, ANGLE);
   }

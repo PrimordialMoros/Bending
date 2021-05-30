@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.game.manager;
+package me.moros.bending.game;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.acf.lib.timings.MCTiming;
+import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
@@ -43,7 +43,7 @@ public final class WorldManager {
   private final Map<World, ManagerPair> worlds;
   private final Set<UUID> disabledWorlds;
 
-  public WorldManager() {
+  WorldManager() {
     ConfigurationNode node = Bending.configManager().config().node("properties", "disabled-worlds");
     List<String> worldNames;
     try {

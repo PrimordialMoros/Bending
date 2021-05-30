@@ -46,7 +46,7 @@ public class BendingFallingBlock implements Temporary {
     fallingBlock.setDropItem(false);
     fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
     MANAGER.addEntry(fallingBlock, this);
-    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public BendingFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {

@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import me.moros.atlas.hikari.HikariDataSource;
@@ -41,7 +41,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.PresetHolder;
+import me.moros.bending.model.user.PresetUser;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.sql.SqlQueries;
@@ -58,7 +58,7 @@ public final class StorageImpl implements BendingStorage {
   private final Logger logger;
   private final Jdbi DB;
 
-  public StorageImpl(@NonNull StorageType type, @NonNull Logger logger, @NonNull HikariDataSource source) {
+  StorageImpl(@NonNull StorageType type, @NonNull Logger logger, @NonNull HikariDataSource source) {
     this.type = type;
     this.logger = logger;
     this.source = source;
@@ -105,13 +105,12 @@ public final class StorageImpl implements BendingStorage {
   }
 
   /**
-   * This method will attempt to load a profile from the database and execute the consumer if found.
+   * This method will attempt to load a profile from the database.
    * @param uuid the player's uuid
-   * @param consumer the consumer to executre if a profile was found
    * @see #createProfile(UUID)
    */
-  public void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer) {
-    Tasker.newChain().asyncFirst(() -> loadProfile(uuid)).abortIfNull().asyncLast(consumer::accept).execute();
+  public @NonNull CompletableFuture<@Nullable BendingProfile> loadProfileAsync(@NonNull UUID uuid) {
+    return Tasker.async(() -> loadProfile(uuid));
   }
 
   /**
@@ -120,11 +119,11 @@ public final class StorageImpl implements BendingStorage {
    * @param bendingPlayer the BendingPlayer to save
    */
   public void savePlayerAsync(@NonNull BendingPlayer bendingPlayer) {
-    Tasker.newChain().async(() -> {
+    Tasker.async(() -> {
       updateProfile(bendingPlayer.profile());
       saveElements(bendingPlayer);
       saveSlots(bendingPlayer);
-    }).execute();
+    });
   }
 
   /**
@@ -171,7 +170,7 @@ public final class StorageImpl implements BendingStorage {
 
   /**
    * This is currently loaded asynchronously using a LoadingCache
-   * @see PresetHolder
+   * @see PresetUser
    */
   @Override
   public @Nullable Preset loadPreset(int playerId, @NonNull String name) {
@@ -196,13 +195,12 @@ public final class StorageImpl implements BendingStorage {
     return null;
   }
 
-  public void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer) {
-    Tasker.newChain().asyncFirst(() -> savePreset(playerId, preset))
-      .abortIfNull().asyncLast(consumer::accept).execute();
+  public @NonNull CompletableFuture<Boolean> savePresetAsync(int playerId, @NonNull Preset preset) {
+    return Tasker.async(() -> savePreset(playerId, preset));
   }
 
   public void deletePresetAsync(int presetId) {
-    Tasker.newChain().asyncFirst(() -> deletePreset(presetId)).execute();
+    Tasker.async(() -> deletePreset(presetId));
   }
 
   private BendingProfile loadProfile(UUID uuid) {

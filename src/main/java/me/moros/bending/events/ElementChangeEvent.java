@@ -20,21 +20,33 @@
 package me.moros.bending.events;
 
 import me.moros.bending.model.user.User;
+import org.bukkit.event.Cancellable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ElementChangeEvent extends BendingUserEvent {
-  private final Result result;
+public class ElementChangeEvent extends BendingUserEvent implements Cancellable {
+  private final ElementAction action;
+  private boolean cancelled = false;
 
-  ElementChangeEvent(User user, Result result) {
+  ElementChangeEvent(User user, ElementAction action) {
     super(user);
-    this.result = result;
+    this.action = action;
   }
 
-  public @NonNull Result result() {
-    return result;
+  public @NonNull ElementAction type() {
+    return action;
   }
 
-  public enum Result {
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
+  }
+
+  public enum ElementAction {
     CHOOSE, ADD, REMOVE, CLEAR
   }
 }

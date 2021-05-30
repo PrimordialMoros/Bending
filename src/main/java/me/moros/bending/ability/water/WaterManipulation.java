@@ -35,11 +35,10 @@ import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -67,6 +66,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterManipulation extends AbilityInstance {
@@ -103,7 +103,7 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Block source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
     if (source == null) {
@@ -128,7 +128,7 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -140,7 +140,7 @@ public class WaterManipulation extends AbilityInstance {
     if (manip != null) {
       UpdateResult result = manip.update();
       if (result == UpdateResult.CONTINUE) {
-        SoundEffect effect = isIce ? SoundUtil.ICE_SOUND : SoundUtil.WATER_SOUND;
+        SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
           effect.play(manip.center().toLocation(user.world()));
         }
@@ -238,18 +238,14 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
   @Override
-  public boolean user(@NonNull User user) {
-    if (manip == null) {
-      return false;
-    }
-    this.user = user;
-    manip.user(user);
-    return true;
+  public void onUserChange(@NonNull User newUser) {
+    this.user = newUser;
+    manip.user(newUser);
   }
 
   @Override

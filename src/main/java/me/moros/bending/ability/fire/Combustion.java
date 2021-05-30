@@ -34,10 +34,9 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -61,6 +60,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Combustion extends AbilityInstance implements Explosive {
@@ -91,7 +91,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     if (Policies.IN_LIQUID.test(user, description()) || Bending.game().abilityManager(user.world()).hasAbility(user, Combustion.class)) {
       return false;
@@ -103,7 +103,7 @@ public class Combustion extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -119,7 +119,7 @@ public class Combustion extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -226,7 +226,7 @@ public class Combustion extends AbilityInstance implements Explosive {
 
     private void renderRing() {
       if (distanceTravelled >= randomBeamDistance) {
-        SoundUtil.playSound(bukkitLocation(), SoundUtil.COMBUSTION_SOUND.sound(), 1.5F, 0);
+        SoundUtil.COMBUSTION.play(bukkitLocation(), 1.5F, 0);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorMethods.circle(Vector3.ONE, user.direction(), 20).forEach(v -> {
@@ -240,7 +240,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.COMBUSTION_SOUND.play(bukkitLocation());
+        SoundUtil.COMBUSTION.play(bukkitLocation());
       }
     }
 

@@ -50,6 +50,8 @@ public interface Message {
     .args(text(preset));
   Args1<String> PRESET_EXISTS = preset -> translatable("bending.command.preset.create-exists", YELLOW)
     .args(text(preset));
+  Args1<String> PRESET_CANCELLED = preset -> translatable("bending.command.preset.create-cancelled", YELLOW)
+    .args(text(preset));
   Args1<String> PRESET_FAIL = preset -> translatable("bending.command.preset.create-fail", RED)
     .args(text(preset));
 

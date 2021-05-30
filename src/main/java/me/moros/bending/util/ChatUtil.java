@@ -29,6 +29,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class ChatUtil {
   private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
 
+  private ChatUtil() {
+  }
+
   /**
    * Strip input of all non alphabetical values and limit to 16 characters long.
    * This is used for preset names mainly.

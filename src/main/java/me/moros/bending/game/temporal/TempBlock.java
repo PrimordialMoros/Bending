@@ -62,7 +62,7 @@ public class TempBlock implements Temporary {
     block.setBlockData(data);
     refreshGravityCache(block);
     MANAGER.addEntry(block, this);
-    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
@@ -145,7 +145,7 @@ public class TempBlock implements Temporary {
       block.setBlockData(data);
       refreshGravityCache(block);
       revertTask.cancel();
-      revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+      revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
     }
   }
 
@@ -196,7 +196,7 @@ public class TempBlock implements Temporary {
     if (nextState != null) {
       int deltaTicks = nextState.expirationTicks - Bukkit.getCurrentTick();
       if (deltaTicks > 0) {
-        revertTask = Tasker.simpleTask(this::revert, deltaTicks);
+        revertTask = Tasker.sync(this::revert, deltaTicks);
       }
     }
   }

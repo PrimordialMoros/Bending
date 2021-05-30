@@ -30,10 +30,9 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -49,6 +48,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class IceWall extends AbilityInstance {
@@ -77,7 +77,7 @@ public class IceWall extends AbilityInstance {
       return false;
     }
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
     if (source.isEmpty()) {
@@ -95,7 +95,7 @@ public class IceWall extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -156,7 +156,7 @@ public class IceWall extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -187,7 +187,7 @@ public class IceWall extends AbilityInstance {
       currentLength++;
       if (isValidBlock(currentIndex)) {
         wallBlocks.add(currentIndex);
-        SoundUtil.ICE_SOUND.play(currentIndex.getLocation());
+        SoundUtil.ICE.play(currentIndex.getLocation());
         TempBlock.create(currentIndex, Material.ICE.createBlockData());
         return UpdateResult.CONTINUE;
       }

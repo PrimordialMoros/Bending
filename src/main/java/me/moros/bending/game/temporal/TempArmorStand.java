@@ -62,7 +62,7 @@ public class TempArmorStand implements Temporary {
     }
 
     MANAGER.addEntry(armorStand, this);
-    revertTask = Tasker.simpleTask(this::revert, Temporary.toTicks(duration));
+    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {

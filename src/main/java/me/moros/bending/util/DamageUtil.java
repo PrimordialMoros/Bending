@@ -36,6 +36,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class to handle bending damage and death messages.
  */
 public final class DamageUtil {
+  private DamageUtil() {
+  }
+
   public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
     if (damage <= 0 || !canDamage(target)) {
       return false;

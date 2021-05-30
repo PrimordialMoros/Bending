@@ -29,6 +29,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class AABBUtils {
   public static final DummyCollider DUMMY_COLLIDER = new DummyCollider();
 
+  private AABBUtils() {
+  }
+
   /**
    * @param block the block to check
    * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block is passable

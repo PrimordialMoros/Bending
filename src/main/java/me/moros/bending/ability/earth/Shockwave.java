@@ -31,9 +31,8 @@ import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -59,6 +58,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Shockwave extends AbilityInstance {
@@ -71,7 +71,7 @@ public class Shockwave extends AbilityInstance {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
-  private final Set<Block> recentAffectedBlocks = new ExpiringSet<>(500);
+  private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Vector3 origin;
 
   private boolean released;
@@ -95,7 +95,7 @@ public class Shockwave extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
@@ -111,7 +111,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -135,8 +135,8 @@ public class Shockwave extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
 
-    if (!recentAffectedBlocks.isEmpty()) {
-      Set<Block> positions = Set.copyOf(recentAffectedBlocks);
+    Set<Block> positions = recentAffectedBlocks.snapshot();
+    if (!positions.isEmpty()) {
       CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
     }
 
@@ -214,7 +214,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -246,7 +246,7 @@ public class Shockwave extends AbilityInstance {
       ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.EARTH_SOUND.play(block.getLocation());
+        SoundUtil.EARTH.play(block.getLocation());
       }
     }
   }

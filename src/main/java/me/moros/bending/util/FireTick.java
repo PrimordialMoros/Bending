@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability.util;
+package me.moros.bending.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,9 +30,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class FireTick {
+public final class FireTick {
   public static final int MAX_TICKS = 100;
   private static final Map<LivingEntity, User> INSTANCES = new ConcurrentHashMap<>();
+
+  private FireTick() {
+  }
 
   public static void cleanup() {
     INSTANCES.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);

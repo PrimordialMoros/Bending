@@ -30,9 +30,8 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -56,12 +55,12 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthShot extends AbilityInstance {
@@ -103,7 +102,7 @@ public class EarthShot extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     long count = Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
     if (count >= userConfig.maxAmount) {
@@ -116,7 +115,7 @@ public class EarthShot extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -151,10 +150,10 @@ public class EarthShot extends AbilityInstance {
       solidData = MaterialUtil.getSolidType(source.getBlockData());
     }
     if (mode == Mode.METAL) {
-      SoundUtil.METAL_SOUND.play(source.getLocation());
+      SoundUtil.METAL.play(source.getLocation());
       canConvert = false;
     } else {
-      SoundUtil.EARTH_SOUND.play(source.getLocation());
+      SoundUtil.EARTH.play(source.getLocation());
     }
 
     projectile = new BendingFallingBlock(source, solidData, new Vector3(0, 0.65, 0), false, 6000);
@@ -235,7 +234,7 @@ public class EarthShot extends AbilityInstance {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
         if (userConfig.chargeTime > 0) {
-          SoundUtil.LAVA_SOUND.play(readySource.getLocation());
+          SoundUtil.LAVA.play(readySource.getLocation());
         }
       }
       Location spawnLoc = readySource.getLocation().add(0.5, 0.5, 0.5);
@@ -332,7 +331,7 @@ public class EarthShot extends AbilityInstance {
         if (mode == Mode.MAGMA) {
           ParticleUtil.create(Particle.SMOKE_LARGE, spawnLoc).count(12).offset(1, 1, 1).extra(0.05).spawn();
           ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
-          SoundUtil.playSound(spawnLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.5F, 0);
+          SoundUtil.EXPLOSION.play(spawnLoc, 1.5F, 0);
         }
         Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
         FragileStructure.tryDamageStructure(List.of(projected), mode == Mode.MAGMA ? 6 : 4);
@@ -348,7 +347,7 @@ public class EarthShot extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

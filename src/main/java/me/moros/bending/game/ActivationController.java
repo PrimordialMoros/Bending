@@ -50,10 +50,11 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.material.EarthMaterials;
@@ -72,7 +73,7 @@ public final class ActivationController {
   private final Game game;
   private final ControllerCache cache;
 
-  public ActivationController(@NonNull Game game) {
+  ActivationController(@NonNull Game game) {
     this.game = game;
     this.cache = new ControllerCache();
   }
@@ -93,17 +94,18 @@ public final class ActivationController {
     return null;
   }
 
-  public void onPlayerLogout(@NonNull BendingPlayer player) {
-    TempArmor.MANAGER.get(player.entity()).ifPresent(TempArmor::revert);
-    game.attributeSystem().clearModifiers(player);
-    game.storage().savePlayerAsync(player);
-    Flight.remove(player);
-
-    UUID uuid = player.entity().getUniqueId();
+  public void onUserDeconstruct(@NonNull BendingUser user) {
+    TempArmor.MANAGER.get(user.entity()).ifPresent(TempArmor::revert);
+    game.attributeSystem().clearModifiers(user);
+    game.abilityManager(user.world()).destroyUserInstances(user);
+    if (user instanceof BendingPlayer) {
+      game.storage().savePlayerAsync((BendingPlayer) user);
+    }
+    Flight.remove(user);
+    UUID uuid = user.entity().getUniqueId();
     game.boardManager().invalidate(uuid);
-    game.playerManager().invalidatePlayer(uuid);
+    game.benderRegistry().invalidateUser(uuid);
     game.protectionSystem().invalidate(uuid);
-    game.abilityManager(player.world()).clearPassives(player);
   }
 
   public void onUserSwing(@NonNull User user) {

@@ -31,9 +31,8 @@ import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
@@ -46,6 +45,7 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Blaze extends AbilityInstance {
@@ -69,12 +69,12 @@ public class Blaze extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     return release(method == ActivationMethod.ATTACK);
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -121,7 +121,7 @@ public class Blaze extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -144,7 +144,7 @@ public class Blaze extends AbilityInstance {
       affectedBlocks.add(block);
       TempBlock.create(block, Material.FIRE.createBlockData(), 500, true);
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE_SOUND.play(block.getLocation());
+        SoundUtil.FIRE.play(block.getLocation());
       }
     }
   }

@@ -19,7 +19,7 @@
 
 package me.moros.bending.protection.instances;
 
-import me.moros.bending.model.exception.PluginNotFoundException;
+import me.moros.bending.protection.PluginNotFoundException;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;

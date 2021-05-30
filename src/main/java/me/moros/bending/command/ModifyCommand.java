@@ -21,21 +21,20 @@ package me.moros.bending.command;
 
 import java.util.Arrays;
 
-import me.moros.atlas.acf.BaseCommand;
-import me.moros.atlas.acf.CommandHelp;
-import me.moros.atlas.acf.InvalidCommandArgument;
-import me.moros.atlas.acf.annotation.CommandAlias;
-import me.moros.atlas.acf.annotation.CommandCompletion;
-import me.moros.atlas.acf.annotation.CommandPermission;
-import me.moros.atlas.acf.annotation.Description;
-import me.moros.atlas.acf.annotation.HelpCommand;
-import me.moros.atlas.acf.annotation.Optional;
-import me.moros.atlas.acf.annotation.Subcommand;
-import me.moros.atlas.acf.bukkit.contexts.OnlinePlayer;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
+import co.aikar.commands.InvalidCommandArgument;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.HelpCommand;
+import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.user.BendingPlayer;
@@ -58,9 +57,8 @@ public class ModifyCommand extends BaseCommand {
     String validType = Arrays.stream(Attribute.TYPES)
       .filter(attr -> attr.equalsIgnoreCase(type))
       .findAny().orElseThrow(() -> new InvalidCommandArgument("Invalid attribute type"));
-    AttributeModifier modifier = new AttributeModifier(validType, operation, amount);
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().playerManager().player(target.getPlayer());
-    Bending.game().attributeSystem().addModifier(bendingPlayer, modifier, policy);
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
+    Bending.game().attributeSystem().addModifier(bendingPlayer, operation.toAttributeModifier(validType, amount), policy);
     Bending.game().attributeSystem().recalculate(bendingPlayer);
     Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.entity().getName());
   }
@@ -69,7 +67,7 @@ public class ModifyCommand extends BaseCommand {
   @CommandCompletion("@players")
   @Description("Clear all existing modifiers for a player")
   public static void onClear(BendingPlayer player, @Optional OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().playerManager().player(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().player(target.getPlayer());
     Bending.game().attributeSystem().clearModifiers(bendingPlayer);
     Bending.game().attributeSystem().recalculate(bendingPlayer);
     Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.entity().getName());

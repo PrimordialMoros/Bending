@@ -41,6 +41,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
  */
 public final class WorldMethods {
+  private WorldMethods() {
+  }
+
   /**
    * @return {@link #nearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
    */

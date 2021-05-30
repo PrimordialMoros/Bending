@@ -17,7 +17,7 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.game.manager;
+package me.moros.bending.game;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
@@ -29,13 +29,11 @@ import java.util.stream.Stream;
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.game.AbilityRegistry;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,7 +45,7 @@ public final class SequenceManager {
     .build();
   private final Game game;
 
-  public SequenceManager(@NonNull Game game) {
+  SequenceManager(@NonNull Game game) {
     this.game = game;
   }
 

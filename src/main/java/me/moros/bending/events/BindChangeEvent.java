@@ -20,21 +20,33 @@
 package me.moros.bending.events;
 
 import me.moros.bending.model.user.User;
+import org.bukkit.event.Cancellable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BindChangeEvent extends BendingUserEvent {
-  private final Result result;
+public class BindChangeEvent extends BendingUserEvent implements Cancellable {
+  private final BindType type;
+  private boolean cancelled = false;
 
-  BindChangeEvent(User user, Result result) {
+  BindChangeEvent(User user, BindType type) {
     super(user);
-    this.result = result;
+    this.type = type;
   }
 
-  public @NonNull Result result() {
-    return result;
+  public @NonNull BindType result() {
+    return type;
   }
 
-  public enum Result {
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
+  }
+
+  public enum BindType {
     SINGLE, MULTIPLE
   }
 }

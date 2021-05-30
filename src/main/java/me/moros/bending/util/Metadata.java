@@ -37,7 +37,10 @@ public final class Metadata {
   public static final String DESTRUCTIBLE = "bending-destructible";
   public static final String NO_MOVEMENT = "bending-no-movement";
 
-  public static FixedMetadataValue emptyMetadata() {
+  private Metadata() {
+  }
+
+  public static @NonNull FixedMetadataValue emptyMetadata() {
     return new FixedMetadataValue(Bending.plugin(), "");
   }
 

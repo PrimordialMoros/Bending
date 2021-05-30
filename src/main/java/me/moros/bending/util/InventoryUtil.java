@@ -45,6 +45,9 @@ public final class InventoryUtil {
     waterBottle.setItemMeta(potionMeta);
   }
 
+  private InventoryUtil() {
+  }
+
   public static boolean hasItem(@NonNull User user, @NonNull ItemStack itemStack) {
     return user.inventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
   }

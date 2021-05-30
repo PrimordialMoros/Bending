@@ -38,11 +38,10 @@ import me.moros.bending.ability.water.WaterRing;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
@@ -64,6 +63,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class WaterGimbal extends AbilityInstance {
@@ -88,7 +88,7 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     WaterRing ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
     List<Block> sources = new ArrayList<>();
@@ -130,7 +130,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -170,7 +170,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -266,7 +266,7 @@ public class WaterGimbal extends AbilityInstance {
         TempBlock.create(block, Material.WATER.createBlockData(), 150);
       }
       if (ThreadLocalRandom.current().nextInt(10) == 0) {
-        SoundUtil.WATER_SOUND.play(block.getLocation());
+        SoundUtil.WATER.play(block.getLocation());
       }
     }
 

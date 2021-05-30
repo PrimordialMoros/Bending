@@ -19,24 +19,37 @@
 
 package me.moros.bending.util;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.ForwardingSet;
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
+import me.moros.atlas.caffeine.cache.Scheduler;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ExpiringSet<E> extends ForwardingSet<E> {
-  private final Set<E> setView;
+public class ExpiringSet<E> {
+  private final Cache<E, Boolean> cache;
 
   public ExpiringSet(long duration) {
-    Cache<E, Boolean> cache = Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(duration)).build();
-    this.setView = Collections.newSetFromMap(cache.asMap());
+    this(duration, TimeUnit.MILLISECONDS);
   }
 
-  @Override
-  protected Set<E> delegate() {
-    return this.setView;
+  public ExpiringSet(long duration, @NonNull TimeUnit unit) {
+    cache = Caffeine.newBuilder()
+      .expireAfterWrite(duration, unit)
+      .scheduler(Scheduler.systemScheduler())
+      .build();
+  }
+
+  public void add(@NonNull E item) {
+    cache.put(item, false);
+  }
+
+  public boolean contains(@NonNull E item) {
+    return cache.getIfPresent(item) != null;
+  }
+
+  public @NonNull Set<@NonNull E> snapshot() {
+    return Set.copyOf(cache.asMap().keySet());
   }
 }

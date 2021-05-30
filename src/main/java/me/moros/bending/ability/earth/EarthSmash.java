@@ -43,10 +43,9 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -78,6 +77,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthSmash extends AbilityInstance {
@@ -114,7 +114,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     state = new ChargeState();
     removalPolicy = Policies.builder().build();
@@ -124,7 +124,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -237,18 +237,14 @@ public class EarthSmash extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
   @Override
-  public boolean user(@NonNull User user) {
-    if (boulder == null) {
-      return false;
-    }
-    this.user = user;
-    boulder.user = user;
-    return true;
+  public void onUserChange(@NonNull User newUser) {
+    this.user = newUser;
+    boulder.user = newUser;
   }
 
   @Override
@@ -328,7 +324,7 @@ public class EarthSmash extends AbilityInstance {
     public @NonNull UpdateResult update() {
       cleanAll();
       boulder.center(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
-      SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
+      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
       CollisionUtil.handleEntityCollisions(user, boulder.collider(), entity -> {
         entity.setVelocity(new Vector3(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
         return true;
@@ -406,7 +402,7 @@ public class EarthSmash extends AbilityInstance {
       affectedEntities = new HashSet<>();
       origin = new Vector3(boulder.center.toArray());
       direction = user.direction();
-      SoundUtil.EARTH_SOUND.play(boulder.center.toLocation(boulder.world));
+      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
     }
 
     @Override
@@ -579,7 +575,7 @@ public class EarthSmash extends AbilityInstance {
         ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
           .offset(0.5, 0.5, 0.5).data(blockData).spawn();
         if (ThreadLocalRandom.current().nextBoolean()) {
-          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound());
+          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound(), 1, 1);
         }
       }
       data.clear();

@@ -47,6 +47,9 @@ public final class PotionUtil {
     PotionEffectType.SLOW_DIGGING, PotionEffectType.WEAKNESS, PotionEffectType.WITHER
   );
 
+  private PotionUtil() {
+  }
+
   public static boolean isPositive(@NonNull PotionEffectType type) {
     return POSITIVE.contains(type);
   }

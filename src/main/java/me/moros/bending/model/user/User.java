@@ -20,76 +20,60 @@
 package me.moros.bending.model.user;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.IntStream;
 
 import me.moros.bending.Bending;
-import me.moros.bending.events.ElementChangeEvent;
-import me.moros.bending.model.Element;
+import me.moros.bending.game.ProtectionSystem;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
+import me.moros.bending.model.preset.Preset;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.common.value.qual.IntRange;
 
-public interface User extends BukkitUser {
-  @NonNull ElementHolder elementHolder();
-
-  default boolean hasElement(@NonNull Element element) {
-    return elementHolder().hasElement(element);
-  }
-
-  default boolean addElement(@NonNull Element element) {
-    if (elementHolder().addElement(element)) {
-      Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.ADD);
-      return true;
-    }
-    return false;
-  }
-
-  default boolean removeElement(@NonNull Element element) {
-    if (elementHolder().removeElement(element)) {
-      validateSlots();
-      Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.REMOVE);
-      return true;
-    }
-    return false;
-  }
-
-  default @NonNull Set<@NonNull Element> elements() {
-    return elementHolder().elements();
-  }
-
-  default boolean element(@NonNull Element element) {
-    elementHolder().clear();
-    elementHolder().addElement(element);
-    validateSlots();
-    Bending.game().abilityManager(world()).clearPassives(this);
-    Bending.game().abilityManager(world()).createPassives(this);
-    Bending.eventBus().postElementChangeEvent(this, ElementChangeEvent.Result.CHOOSE);
-    return true;
-  }
-
+public interface User extends BukkitUser, ElementUser {
+  /**
+   * Check if the user has the specified ability on cooldown.
+   * @param desc the ability to check
+   * @return true if the ability is on cooldown for this user, false otherwise
+   */
   boolean onCooldown(@NonNull AbilityDescription desc);
 
-  void addCooldown(@NonNull AbilityDescription desc, long duration);
+  /**
+   * Attempts to put the specified ability on cooldown for the given duration.
+   * @param desc the ability to put on cooldown
+   * @param duration the duration of the cooldown
+   * @return true if cooldown was added successfully, false otherwise
+   */
+  boolean addCooldown(@NonNull AbilityDescription desc, long duration);
 
   /**
-   * Like setSlotAbility but won't call any events
+   * Makes a preset out of this user's current slots.
+   * @param name the name of the preset to be created
+   * @return the constructed preset
    */
-  void slotAbilityInternal(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  @NonNull Preset createPresetFromSlots(@NonNull String name);
+
+  int bindPreset(@NonNull Preset preset);
 
   /**
-   * This is to be used when setting individual slots.
-   * If you want to bind or change multiple slots then use dummy presets
+   * Assigns an ability to the specified slot.
+   * @param slot the slot number in the range [1, 9] (inclusive)
+   * @param desc the ability to bind
    */
-  void slotAbility(@IntRange(from = 1, to = 9) int slot, @Nullable AbilityDescription desc);
+  void bindAbility(int slot, @Nullable AbilityDescription desc);
 
-  Optional<AbilityDescription> slotAbility(@IntRange(from = 1, to = 9) int slot);
+  /**
+   * Retrieve the ability assigned to the specified slot.
+   * @param slot the slot number to check, slot must be in range [1, 9] (inclusive)
+   * @return the ability bound to given slot if found
+   */
+  Optional<AbilityDescription> boundAbility(int slot);
 
+  /**
+   * Retrives the currently selected ability for the user.
+   * @return the ability in the currently selected slot for the user if found
+   */
   Optional<AbilityDescription> selectedAbility();
-
 
   /**
    * @return the ability's name or an empty string if no ability is bound to the currently selected slot
@@ -98,12 +82,24 @@ public interface User extends BukkitUser {
     return selectedAbility().map(AbilityDescription::name).orElse("");
   }
 
-  default void clearSlot(@IntRange(from = 1, to = 9) int slot) {
-    slotAbility(slot, null);
+  /**
+   * Clears the specified slot.
+   * @param slot the slot number to clear, slot must be in range [1, 9] (inclusive)
+   */
+  default void clearSlot(int slot) {
+    bindAbility(slot, null);
   }
 
+  /**
+   * @return the bending conditional for this user
+   */
   @NonNull CompositeBendingConditional bendingConditional();
 
+  /**
+   * Check whether this user can bend the specified ability.
+   * @param desc the ability to check
+   * @return true if the user can bend the given ability, false otherwise
+   */
   default boolean canBend(@NonNull AbilityDescription desc) {
     return bendingConditional().test(this, desc);
   }
@@ -112,22 +108,28 @@ public interface User extends BukkitUser {
    * Checks bound abilities and clears any invalid ability slots.
    * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
    */
-  default void validateSlots() {
-    IntStream.rangeClosed(1, 9).forEach(i -> slotAbility(i).ifPresent(desc -> {
-      if (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind()) {
-        slotAbilityInternal(i, null);
-      }
-    }));
-  }
+  void validateSlots();
 
+  /**
+   * Check if the user has the specified permission.
+   * This will always return true if the user is a non-player.
+   * @param permission the permission to check
+   * @return true if the user has the given permission, false otherwise
+   */
   default boolean hasPermission(@NonNull String permission) {
     return true;
   }
 
+  /**
+   * @see #hasPermission(String)
+   */
   default boolean hasPermission(@NonNull AbilityDescription desc) {
     return hasPermission(desc.permission());
   }
 
+  /**
+   * @see ProtectionSystem#canBuild(User, Block)
+   */
   default boolean canBuild(@NonNull Block block) {
     return Bending.game().protectionSystem().canBuild(this, block);
   }

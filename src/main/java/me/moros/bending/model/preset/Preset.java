@@ -22,9 +22,15 @@ package me.moros.bending.model.preset;
 import java.util.Arrays;
 import java.util.Objects;
 
+import me.moros.bending.Bending;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class Preset {
+
+/**
+ * An immutable representation of slots.
+ */
+public final class Preset {
   public static final Preset EMPTY = new Preset(new String[9]);
 
   private final int id;
@@ -59,7 +65,7 @@ public class Preset {
 
   /**
    * Returns an array of the ability names that this preset holds, names can be null!
-   * @return a copy of the names of the abilities that this preset holds.
+   * @return a copy of the names of the abilities that this preset holds
    */
   public @NonNull String[] abilities() {
     return Arrays.copyOf(abilities, 9);
@@ -83,5 +89,13 @@ public class Preset {
       }
     }
     return count;
+  }
+
+  public @NonNull AbilityDescription[] toBinds() {
+    AbilityDescription[] mapped = new AbilityDescription[9];
+    for (int slot = 0; slot < 9; slot++) {
+      mapped[slot] = Bending.game().abilityRegistry().abilityDescription(abilities[slot]).orElse(null);
+    }
+    return mapped;
   }
 }

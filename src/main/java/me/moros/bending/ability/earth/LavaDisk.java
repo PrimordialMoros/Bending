@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -33,10 +32,8 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -52,6 +49,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SourceUtil;
@@ -69,6 +67,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class LavaDisk extends AbilityInstance {
@@ -82,7 +81,7 @@ public class LavaDisk extends AbilityInstance {
   private Vector3 location;
   private Collider collider;
 
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(1000);
+  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(1000);
 
   private boolean launched = false;
   private double distance;
@@ -105,7 +104,7 @@ public class LavaDisk extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
@@ -133,7 +132,7 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -193,7 +192,7 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -233,10 +232,9 @@ public class LavaDisk extends AbilityInstance {
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
       ParticleUtil.create(Particle.LAVA, block.getLocation())
         .offset(0.5, 0.5, 0.5).extra(0.05).spawn();
-      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+      if (ThreadLocalRandom.current().nextInt(4) == 0) {
         Location center = block.getLocation().add(0.5, 0.5, 0.5);
         SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
-        SoundUtil.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 0.3F, 0.3F);
       }
       return true;
     }

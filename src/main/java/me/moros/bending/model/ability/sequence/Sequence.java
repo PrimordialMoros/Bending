@@ -22,8 +22,8 @@ package me.moros.bending.model.ability.sequence;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,7 +35,7 @@ public final class Sequence {
   private final List<AbilityAction> sequence = new ArrayList<>();
   private Component instructions;
 
-  public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction @NonNull ... actions) {
+  public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction... actions) {
     this.sequence.add(action);
     this.sequence.addAll(List.of(actions));
   }
@@ -78,7 +78,7 @@ public final class Sequence {
     return builder.build();
   }
 
-  public boolean matches(@NonNull AbilityAction @NonNull [] actions) {
+  public boolean matches(@NonNull AbilityAction[] actions) {
     int actionsLength = actions.length - 1;
     int sequenceLength = sequence.size() - 1;
     if (actionsLength < sequenceLength) {

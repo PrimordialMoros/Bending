@@ -21,7 +21,7 @@ package me.moros.bending.storage;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -38,7 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface BendingStorage extends Storage {
   @NonNull BendingProfile createProfile(@NonNull UUID uuid);
 
-  void loadProfileAsync(@NonNull UUID uuid, @NonNull Consumer<BendingProfile> consumer);
+  @NonNull CompletableFuture<@Nullable BendingProfile> loadProfileAsync(@NonNull UUID uuid);
 
   void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
 
@@ -48,7 +48,7 @@ public interface BendingStorage extends Storage {
 
   @Nullable Preset loadPreset(int playerId, @NonNull String name);
 
-  void savePresetAsync(int playerId, @NonNull Preset preset, @NonNull Consumer<Boolean> consumer);
+  @NonNull CompletableFuture<@NonNull Boolean> savePresetAsync(int playerId, @NonNull Preset preset);
 
   void deletePresetAsync(int presetId);
 }

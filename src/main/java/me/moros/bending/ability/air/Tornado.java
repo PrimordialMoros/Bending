@@ -25,9 +25,8 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -44,6 +43,7 @@ import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Tornado extends AbilityInstance {
@@ -63,7 +63,7 @@ public class Tornado extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(Policies.NOT_SNEAKING)
@@ -74,7 +74,7 @@ public class Tornado extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -150,7 +150,7 @@ public class Tornado extends AbilityInstance {
         Location loc = base.add(new Vector3(x, y, z)).toLocation(user.world());
         ParticleUtil.createAir(loc).spawn();
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
-          SoundUtil.AIR_SOUND.play(loc);
+          SoundUtil.AIR.play(loc);
         }
       }
     }
@@ -162,7 +162,7 @@ public class Tornado extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

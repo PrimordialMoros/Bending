@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -148,7 +147,7 @@ public class Pillar implements Updatable {
   }
 
   public void playSound(@NonNull Block block) {
-    SoundUtil.EARTH_SOUND.play(block.getLocation());
+    SoundUtil.EARTH.play(block.getLocation());
   }
 
   public boolean onEntityHit(@NonNull Entity entity) {

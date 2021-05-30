@@ -21,8 +21,8 @@ package me.moros.bending.model.ability.sequence;
 
 import java.util.Objects;
 
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

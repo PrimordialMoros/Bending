@@ -50,6 +50,9 @@ public final class SourceUtil {
     waterBottle.setItemMeta(potionMeta);
   }
 
+  private SourceUtil() {
+  }
+
   /**
    * Attempts to find a possible source.
    * @param user the user checking for a source

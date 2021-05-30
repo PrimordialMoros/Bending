@@ -57,6 +57,10 @@ public class SoundEffect {
   }
 
   public void play(@NonNull Location center) {
-    SoundUtil.playSound(center, sound, volume, pitch);
+    play(center, volume, pitch);
+  }
+
+  public void play(@NonNull Location center, float v, float p) {
+    SoundUtil.playSound(center, sound, v, p);
   }
 }

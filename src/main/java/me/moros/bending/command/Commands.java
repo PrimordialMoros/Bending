@@ -25,12 +25,12 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.acf.BukkitCommandCompletionContext;
-import me.moros.atlas.acf.BukkitCommandExecutionContext;
-import me.moros.atlas.acf.CommandCompletions;
-import me.moros.atlas.acf.CommandContexts;
-import me.moros.atlas.acf.InvalidCommandArgument;
-import me.moros.atlas.acf.PaperCommandManager;
+import co.aikar.commands.BukkitCommandCompletionContext;
+import co.aikar.commands.BukkitCommandExecutionContext;
+import co.aikar.commands.CommandCompletions;
+import co.aikar.commands.CommandContexts;
+import co.aikar.commands.InvalidCommandArgument;
+import co.aikar.commands.PaperCommandManager;
 import me.moros.bending.Bending;
 import me.moros.bending.game.AttributeSystem;
 import me.moros.bending.game.Game;
@@ -39,8 +39,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
-import me.moros.bending.model.exception.command.InvalidSlotException;
-import me.moros.bending.model.exception.command.UserException;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.entity.Player;
@@ -53,8 +51,8 @@ public class Commands {
   private final Predicate<AbilityDescription> validBinds = desc -> desc.canBind() && !desc.hidden();
   private final Predicate<AbilityDescription> nonHidden = desc -> !desc.hidden();
 
-  public Commands(@NonNull Bending plugin, @NonNull Game game) {
-    this.game = game;
+  public Commands(@NonNull Bending plugin) {
+    this.game = Bending.game();
     commandManager = new PaperCommandManager(plugin);
     commandManager.enableUnstableAPI("help");
 
@@ -73,7 +71,7 @@ public class Commands {
   private Collection<String> abilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
     Predicate<AbilityDescription> permissionPredicate = x -> true;
     if (player != null) {
-      BendingPlayer bendingPlayer = game.playerManager().player(player);
+      BendingPlayer bendingPlayer = game.benderRegistry().player(player);
       permissionPredicate = bendingPlayer::hasPermission;
     }
     return game.abilityRegistry().abilities().filter(predicate)
@@ -89,7 +87,7 @@ public class Commands {
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
-      return player == null ? List.of() : game.playerManager().player(player).presets();
+      return player == null ? List.of() : game.benderRegistry().player(player).presets();
     });
 
     commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.elementNames()));
@@ -102,14 +100,14 @@ public class Commands {
     commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
       Player player = c.getPlayer();
       if (player == null) {
-        throw new UserException("You must be player!");
+        throw new UserException();
       }
-      return game.playerManager().player(player);
+      return game.benderRegistry().player(player);
     });
 
     commandContexts.registerContext(Element.class, c -> {
       String name = c.popFirstArg().toLowerCase();
-      return Element.elementByName(name)
+      return Element.fromName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
     });
 
@@ -121,7 +119,7 @@ public class Commands {
       Player player = c.getPlayer();
       Predicate<AbilityDescription> permissionPredicate = x -> true;
       if (player != null) {
-        BendingPlayer bendingPlayer = game.playerManager().player(player);
+        BendingPlayer bendingPlayer = game.benderRegistry().player(player);
         permissionPredicate = bendingPlayer::hasPermission;
       }
       return game.abilityRegistry().abilities()
@@ -134,16 +132,16 @@ public class Commands {
     commandContexts.registerIssuerAwareContext(Preset.class, c -> {
       Player player = c.getPlayer();
       if (player == null) {
-        throw new UserException("You must be player!");
+        throw new UserException();
       }
       String name = c.popFirstArg().toLowerCase();
-      return game.playerManager().player(player).presetByName(name)
+      return game.benderRegistry().player(player).presetByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
     });
 
     commandContexts.registerContext(ModifyPolicy.class, c -> {
       String name = c.popFirstArg().toLowerCase();
-      Optional<Element> element = Element.elementByName(name);
+      Optional<Element> element = Element.fromName(name);
       if (element.isPresent()) {
         return AttributeSystem.elementPolicy(element.get());
       }
@@ -169,8 +167,14 @@ public class Commands {
         return;
       }
       if (value < 0 || value > 9) { // 0 is reserved for current slot
-        throw new InvalidSlotException(value);
+        throw new InvalidCommandArgument("Invalid slot number " + value + " . Slots must be in the 1-9 range!");
       }
     });
+  }
+
+  static class UserException extends InvalidCommandArgument {
+    UserException() {
+      super("You must be a player!");
+    }
   }
 }

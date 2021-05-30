@@ -29,9 +29,8 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -59,6 +58,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 // TODO possible changes: add per glove cooldown
@@ -103,7 +103,7 @@ public class EarthGlove extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
 
     if (launchEarthGlove()) {
       removalPolicy = Policies.builder()
@@ -119,7 +119,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -232,7 +232,7 @@ public class EarthGlove extends AbilityInstance {
     glove = buildGlove(gloveSpawnLocation);
 
     if (isMetal) {
-      SoundUtil.METAL_SOUND.play(gloveSpawnLocation.toLocation(user.world()));
+      SoundUtil.METAL.play(gloveSpawnLocation.toLocation(user.world()));
     } else {
       SoundUtil.playSound(gloveSpawnLocation.toLocation(user.world()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
     }
@@ -265,7 +265,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

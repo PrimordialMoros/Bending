@@ -34,6 +34,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class with useful {@link Vector3} related methods.
  */
 public final class VectorMethods {
+  private VectorMethods() {
+  }
+
   /**
    * Create an arc by combining {@link #rotate(Vector3, Rotation, int)} and {@link #rotateInverse(Vector3, Rotation, int)}.
    * Amount of rays will be rounded up to the nearest odd number. Minimum value is 3.

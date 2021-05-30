@@ -30,9 +30,8 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
@@ -53,6 +52,7 @@ import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirShield extends AbilityInstance {
@@ -72,7 +72,7 @@ public class AirShield extends AbilityInstance {
   @Override
   public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(Policies.NOT_SNEAKING)
@@ -83,7 +83,7 @@ public class AirShield extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -107,7 +107,7 @@ public class AirShield extends AbilityInstance {
       ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
         .offset(0.2, 0.2, 0.2).spawn();
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.AIR_SOUND.play(loc.toLocation(user.world()));
+        SoundUtil.AIR.play(loc.toLocation(user.world()));
       }
     }
 
@@ -140,7 +140,7 @@ public class AirShield extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 

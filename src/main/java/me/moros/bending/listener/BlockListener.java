@@ -22,7 +22,7 @@ package me.moros.bending.listener;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.util.ActionType;
+import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
@@ -98,7 +98,7 @@ public class BlockListener implements Listener {
     if (TempBlock.MANAGER.isTemp(event.getBlock())) {
       event.setDropItems(false);
     } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
-      BendingPlayer player = game.playerManager().player(event.getPlayer());
+      BendingPlayer player = game.benderRegistry().player(event.getPlayer());
       player.selectedAbility().ifPresent(desc -> {
         if (desc.sourcePlant() && !player.onCooldown(desc)) {
           event.setCancelled(true);

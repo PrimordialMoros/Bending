@@ -35,6 +35,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class with useful {@link Entity} related methods. Note: This is not thread-safe.
  */
 public final class EntityMethods {
+  private EntityMethods() {
+  }
+
   /**
    * Check if a user is against a wall made of blocks matching the given predicate.
    * <p> Note: Passable blocks and barriers are ignored.

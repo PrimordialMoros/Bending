@@ -19,61 +19,88 @@
 
 package me.moros.bending.game;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
+import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.game.manager.PlayerManager;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
-import me.moros.bending.model.user.User;
-import org.bukkit.Bukkit;
+import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.storage.BendingStorage;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * API for checking if an entity is a BendingUser
- * If you only need BendingPlayers then use {@link PlayerManager}
+ * Registry for all valid benders
  */
 public final class BenderRegistry {
-  private Predicate<UUID> isBendingUser = (id -> false);
-  private Function<UUID, BendingUser> entityToUser = (id -> null);
-  private Function<String, BendingUser> nameToUser = (name -> null);
+  private final AsyncLoadingCache<UUID, BendingProfile> cache;
+  private final Map<UUID, BendingPlayer> players;
+  private final Map<UUID, BendingUser> entities;
 
-  public boolean isBender(@NonNull LivingEntity entity) {
+  BenderRegistry(@NonNull BendingStorage storage) {
+    cache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2)).buildAsync(storage::createProfile);
+    players = new ConcurrentHashMap<>();
+    entities = new ConcurrentHashMap<>();
+  }
+
+  public boolean isRegistered(@NonNull UUID uuid) {
+    return players.containsKey(uuid) || entities.containsKey(uuid);
+  }
+
+  /**
+   * @param player the bukkit player object
+   * @return the BendingPlayer instance associated with the specified player
+   */
+  public @NonNull BendingPlayer player(@NonNull Player player) {
+    return Objects.requireNonNull(players.get(player.getUniqueId()));
+  }
+
+  public Optional<BendingUser> user(@NonNull LivingEntity entity) {
     if (entity instanceof Player) {
-      return true;
+      return Optional.of(player((Player) entity));
     }
-    return isBendingUser.test(entity.getUniqueId());
+    return Optional.ofNullable(entities.get(entity.getUniqueId()));
   }
 
-  public Optional<User> user(@NonNull LivingEntity entity) {
-    if (entity instanceof Player) {
-      return Optional.of(Bending.game().playerManager().player((Player) entity));
-    }
-    return Optional.ofNullable(entityToUser.apply(entity.getUniqueId()));
+  public @NonNull Collection<@NonNull BendingPlayer> onlinePlayers() {
+    return players.values().stream().filter(BendingPlayer::valid).collect(Collectors.toList());
   }
 
-  public Optional<User> userByName(@NonNull String name) {
-    Player player = Bukkit.getPlayer(name);
-    if (player != null) {
-      return Optional.of(Bending.game().playerManager().player(player));
-    }
-    return Optional.ofNullable(nameToUser.apply(name));
+  public void invalidateUser(@NonNull UUID uuid) {
+    players.remove(uuid);
+    entities.remove(uuid);
+    cache.synchronous().invalidate(uuid);
   }
 
-  public void registerPredicate(@NonNull Predicate<@NonNull UUID> predicate) {
-    isBendingUser = predicate;
+  public void createPlayer(@NonNull Player player, @NonNull BendingProfile profile) {
+    BendingPlayer.createPlayer(player, profile).ifPresent(user -> {
+      players.put(player.getUniqueId(), user);
+      Bending.game().abilityManager(user.world()).createPassives(user);
+      Bending.game().boardManager().canUseScoreboard(player);
+      Bending.eventBus().postBendingPlayerLoadEvent(user);
+    });
   }
 
-  public void registerCache(@NonNull Function<@NonNull UUID, @Nullable BendingUser> function) {
-    entityToUser = function;
+  public void createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
+    BendingUser.createUser(entity, data).ifPresent(user -> {
+      entities.put(entity.getUniqueId(), user);
+      Bending.game().abilityManager(user.world()).createPassives(user);
+    });
   }
 
-  public void registerNameCache(@NonNull Function<@NonNull String, @Nullable BendingUser> function) {
-    nameToUser = function;
+  public @Nullable BendingProfile profile(@NonNull UUID uuid) {
+    return cache.synchronous().get(uuid);
   }
 }

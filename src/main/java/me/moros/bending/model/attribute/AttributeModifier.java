@@ -21,12 +21,12 @@ package me.moros.bending.model.attribute;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class AttributeModifier {
+public final class AttributeModifier {
   private final String attribute;
   private final ModifierOperation type;
   private final double value;
 
-  public AttributeModifier(@NonNull String attribute, @NonNull ModifierOperation type, double value) {
+  AttributeModifier(String attribute, ModifierOperation type, double value) {
     this.attribute = attribute;
     this.type = type;
     this.value = value;

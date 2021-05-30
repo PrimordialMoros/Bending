@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,10 +37,9 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.ActivationMethod;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.ability.util.ActivationMethod;
-import me.moros.bending.model.ability.util.UpdateResult;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -67,6 +65,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.NumberConversions;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -85,7 +84,7 @@ public class WaterRing extends AbilityInstance {
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
-  private final Set<Entity> affectedEntities = new ExpiringSet<>(250);
+  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
 
   private boolean ready = false;
   private boolean completed = false;
@@ -119,7 +118,7 @@ public class WaterRing extends AbilityInstance {
     }
 
     this.user = user;
-    recalculateConfig();
+    loadConfig();
     Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isFullWaterSource);
     if (source.isEmpty()) {
       return false;
@@ -140,7 +139,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   @Override
-  public void recalculateConfig() {
+  public void loadConfig() {
     userConfig = Bending.game().attributeSystem().calculate(this, config);
   }
 
@@ -311,7 +310,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   @Override
-  public @NonNull User user() {
+  public @MonotonicNonNull User user() {
     return user;
   }
 
@@ -360,7 +359,7 @@ public class WaterRing extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.ICE_SOUND.play(bukkitLocation());
+        SoundUtil.ICE.play(bukkitLocation());
       }
     }
 

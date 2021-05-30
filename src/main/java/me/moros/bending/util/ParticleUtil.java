@@ -35,28 +35,31 @@ public final class ParticleUtil {
   public static final int DEFAULT_DIST = 32;
   public static final Color AIR = fromHex("EEEEEE");
 
-  public static ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
+  private ParticleUtil() {
+  }
+
+  public static @NonNull ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
     Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
     return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
   }
 
-  public static ParticleBuilder createAir(@NonNull Location center) {
+  public static @NonNull ParticleBuilder createAir(@NonNull Location center) {
     return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8F).force(true);
   }
 
-  public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
+  public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
     return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
   }
 
-  public static ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
+  public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
     return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal), size).force(true);
   }
 
-  public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
+  public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
     return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
   }
 
-  public static ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
+  public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
     return effect.builder().location(center).receivers(range).extra(0).force(true);
   }
 
@@ -67,7 +70,7 @@ public final class ParticleUtil {
    */
   public static void displayAsync(@NonNull ParticleBuilder pb) {
     if (pb.hasReceivers()) {
-      Tasker.newChain().async(pb::spawn).execute();
+      Tasker.async(pb::spawn);
     }
   }
 
@@ -76,7 +79,7 @@ public final class ParticleUtil {
    * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
    * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
    */
-  public static Color fromHex(@NonNull String hexValue) {
+  public static @NonNull Color fromHex(@NonNull String hexValue) {
     if (hexValue.length() < 6) {
       return Color.BLACK;
     }

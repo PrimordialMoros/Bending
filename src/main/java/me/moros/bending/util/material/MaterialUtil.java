@@ -19,7 +19,6 @@
 
 package me.moros.bending.util.material;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,8 +38,8 @@ import org.bukkit.inventory.InventoryHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class MaterialUtil {
-  public static final Map<Material, Material> COOKABLE = new HashMap<>();
-  public static final Map<Material, Material> ORES = new HashMap<>();
+  public static final Map<Material, Material> COOKABLE;
+  public static final Map<Material, Material> ORES;
   public static final MaterialSetTag BREAKABLE_PLANTS;
   public static final MaterialSetTag WATER_PLANTS;
   public static final MaterialSetTag TRANSPARENT;
@@ -48,28 +47,36 @@ public final class MaterialUtil {
   public static final MaterialSetTag UNBREAKABLES;
   public static final MaterialSetTag METAL_ARMOR;
 
-  static {
-    COOKABLE.put(Material.PORKCHOP, Material.COOKED_PORKCHOP);
-    COOKABLE.put(Material.BEEF, Material.COOKED_BEEF);
-    COOKABLE.put(Material.CHICKEN, Material.COOKED_CHICKEN);
-    COOKABLE.put(Material.COD, Material.COOKED_COD);
-    COOKABLE.put(Material.SALMON, Material.COOKED_SALMON);
-    COOKABLE.put(Material.POTATO, Material.BAKED_POTATO);
-    COOKABLE.put(Material.MUTTON, Material.COOKED_MUTTON);
-    COOKABLE.put(Material.RABBIT, Material.COOKED_RABBIT);
-    COOKABLE.put(Material.WET_SPONGE, Material.SPONGE);
-    COOKABLE.put(Material.KELP, Material.DRIED_KELP);
-    COOKABLE.put(Material.STICK, Material.TORCH);
+  private static <K, V> Map.Entry<K, V> entry(K key, V value) {
+    return Map.entry(key, value);
+  }
 
-    ORES.put(Material.COAL_ORE, Material.COAL);
-    ORES.put(Material.LAPIS_ORE, Material.LAPIS_LAZULI);
-    ORES.put(Material.REDSTONE_ORE, Material.REDSTONE);
-    ORES.put(Material.DIAMOND_ORE, Material.DIAMOND);
-    ORES.put(Material.EMERALD_ORE, Material.EMERALD);
-    ORES.put(Material.NETHER_QUARTZ_ORE, Material.QUARTZ);
-    ORES.put(Material.IRON_ORE, Material.IRON_INGOT);
-    ORES.put(Material.GOLD_ORE, Material.GOLD_INGOT);
-    ORES.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
+  static {
+    COOKABLE = Map.ofEntries(
+      entry(Material.PORKCHOP, Material.COOKED_PORKCHOP),
+      entry(Material.BEEF, Material.COOKED_BEEF),
+      entry(Material.CHICKEN, Material.COOKED_CHICKEN),
+      entry(Material.COD, Material.COOKED_COD),
+      entry(Material.SALMON, Material.COOKED_SALMON),
+      entry(Material.POTATO, Material.BAKED_POTATO),
+      entry(Material.MUTTON, Material.COOKED_MUTTON),
+      entry(Material.RABBIT, Material.COOKED_RABBIT),
+      entry(Material.WET_SPONGE, Material.SPONGE),
+      entry(Material.KELP, Material.DRIED_KELP),
+      entry(Material.STICK, Material.TORCH)
+    );
+
+    ORES = Map.ofEntries(
+      entry(Material.COAL_ORE, Material.COAL),
+      entry(Material.LAPIS_ORE, Material.LAPIS_LAZULI),
+      entry(Material.REDSTONE_ORE, Material.REDSTONE),
+      entry(Material.DIAMOND_ORE, Material.DIAMOND),
+      entry(Material.EMERALD_ORE, Material.EMERALD),
+      entry(Material.NETHER_QUARTZ_ORE, Material.QUARTZ),
+      entry(Material.IRON_ORE, Material.IRON_INGOT),
+      entry(Material.GOLD_ORE, Material.GOLD_INGOT),
+      entry(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET)
+    );
 
     NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     WATER_PLANTS = new MaterialSetTag(key)
@@ -112,6 +119,9 @@ public final class MaterialUtil {
       Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
       Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS
     ).ensureSize("Metal Armor", 12);
+  }
+
+  private MaterialUtil() {
   }
 
   public static boolean isAir(@NonNull Block block) {

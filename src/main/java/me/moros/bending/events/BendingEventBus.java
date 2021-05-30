@@ -20,7 +20,10 @@
 package me.moros.bending.events;
 
 import me.moros.bending.Bending;
+import me.moros.bending.events.BindChangeEvent.BindType;
+import me.moros.bending.events.ElementChangeEvent.ElementAction;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
@@ -31,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class BendingEventBus {
   private final PluginManager manager;
 
-  public BendingEventBus(Bending plugin) {
+  public BendingEventBus(@NonNull Bending plugin) {
     manager = plugin.getServer().getPluginManager();
   }
 
@@ -39,9 +42,13 @@ public class BendingEventBus {
     manager.callEvent(new BendingPlayerLoadEvent(player));
   }
 
-  public void postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
+  public boolean postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
     if (user.valid()) { // User might not be valid when cooldown is added
-      manager.callEvent(new CooldownAddEvent(user, desc, duration));
+      CooldownAddEvent event = new CooldownAddEvent(user, desc, duration);
+      manager.callEvent(event);
+      return !event.isCancelled();
+    } else {
+      return true;
     }
   }
 
@@ -51,12 +58,25 @@ public class BendingEventBus {
     }
   }
 
-  public void postElementChangeEvent(@NonNull User user, ElementChangeEvent.Result result) {
-    manager.callEvent(new ElementChangeEvent(user, result));
+  public boolean postElementChangeEvent(@NonNull User user, @NonNull ElementAction type) {
+    ElementChangeEvent event = new ElementChangeEvent(user, type);
+    manager.callEvent(event);
+    return !event.isCancelled();
   }
 
-  public void postBindChangeEvent(@NonNull User user, BindChangeEvent.Result result) {
-    manager.callEvent(new BindChangeEvent(user, result));
+  public boolean postBindChangeEvent(@NonNull User user, @NonNull BindType type) {
+    BindChangeEvent event = new BindChangeEvent(user, type);
+    manager.callEvent(event);
+    return !event.isCancelled();
+  }
+
+  public boolean postPresetCreateEvent(@NonNull User user, @NonNull Preset preset) {
+    if (preset.isEmpty()) {
+      return false;
+    }
+    PresetCreateEvent event = new PresetCreateEvent(user, preset);
+    manager.callEvent(event);
+    return !event.isCancelled();
   }
 
   public @NonNull BendingCombustEvent postBendingCombustEvent(@NonNull User source, @NonNull Entity target, int duration) {

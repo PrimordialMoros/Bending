@@ -89,7 +89,6 @@ import me.moros.bending.ability.water.passives.FastSwim;
 import me.moros.bending.ability.water.passives.HydroSink;
 import me.moros.bending.ability.water.sequences.Iceberg;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
-import me.moros.bending.game.manager.CollisionManager;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
@@ -98,7 +97,7 @@ import me.moros.bending.model.collision.RegisteredCollision;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static me.moros.bending.model.Element.*;
-import static me.moros.bending.model.ability.util.ActivationMethod.*;
+import static me.moros.bending.model.ability.ActivationMethod.*;
 
 /**
  * Used to initialize all ability descriptions, sequences and collisions
@@ -115,7 +114,7 @@ public final class AbilityInitializer {
   private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
   private final AbilityRegistry registry;
 
-  protected AbilityInitializer(@NonNull Game game) {
+  AbilityInitializer(@NonNull Game game) {
     registry = game.abilityRegistry();
     initAir();
     initWater();

@@ -23,19 +23,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import me.moros.bending.Bending;
-import me.moros.bending.board.BoardManager;
-import me.moros.bending.game.manager.PlayerManager;
-import me.moros.bending.game.manager.SequenceManager;
-import me.moros.bending.game.manager.WorldManager;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.util.FireTick;
-import me.moros.bending.protection.ProtectionSystem;
 import me.moros.bending.storage.BendingStorage;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.Flight;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
@@ -59,7 +54,6 @@ public final class Game {
   private final BoardManager boardManager;
 
   private final BenderRegistry benderRegistry;
-  private final PlayerManager playerManager;
 
   public Game(@NonNull BendingStorage storage) {
     this.storage = storage;
@@ -81,10 +75,7 @@ public final class Game {
     TempArmorStand.init();
     BendingFallingBlock.init();
 
-    benderRegistry = new BenderRegistry();
-    playerManager = new PlayerManager(storage);
-
-    playerManager.onlinePlayers().forEach(worldManager::createPassives);
+    benderRegistry = new BenderRegistry(storage);
 
     Tasker.repeatingTask(this::update, 1);
     Tasker.repeatingTask(FireTick::cleanup, 5);
@@ -106,7 +97,7 @@ public final class Game {
     removeTemporary();
     Bending.configManager().reload();
     Bending.translationManager().reload();
-    playerManager.onlinePlayers().forEach(worldManager::createPassives);
+    benderRegistry.onlinePlayers().forEach(worldManager::createPassives);
   }
 
   public void cleanup() {
@@ -114,7 +105,7 @@ public final class Game {
     removeTemporary();
     Flight.removeAll();
     MovementHandler.resetAll();
-    playerManager.onlinePlayers().forEach(storage::savePlayerAsync);
+    benderRegistry.onlinePlayers().forEach(storage::savePlayerAsync);
     storage.close();
   }
 
@@ -168,9 +159,5 @@ public final class Game {
 
   public @NonNull BenderRegistry benderRegistry() {
     return benderRegistry;
-  }
-
-  public @NonNull PlayerManager playerManager() {
-    return playerManager;
   }
 }
