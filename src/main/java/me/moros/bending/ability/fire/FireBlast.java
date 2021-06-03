@@ -33,10 +33,11 @@ import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -83,7 +84,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     startTime = System.currentTimeMillis();
@@ -101,7 +102,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
         return false;
       }
     }
-    if (method == ActivationMethod.ATTACK) {
+    if (method == Activation.ATTACK) {
       launch();
     }
     return true;
@@ -109,7 +110,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -118,7 +119,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       return UpdateResult.REMOVE;
     }
     if (charging) {
-      if (!description().equals(user.selectedAbility().orElse(null))) {
+      if (!description().equals(user.selectedAbility())) {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
@@ -266,7 +267,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2).isPresent()) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2) == null) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {
@@ -286,23 +287,23 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.FIRE_TICKS)
+    @Modifiable(Attribute.FIRE_TICKS)
     public int fireTicks;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double igniteRadius;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double explosionRadius;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double chargeFactor;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long maxChargeTime;
 
     @Override

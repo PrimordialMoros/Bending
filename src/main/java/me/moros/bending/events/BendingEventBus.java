@@ -31,7 +31,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.PluginManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingEventBus {
+/**
+ * The event bus is responsible for posting bending events.
+ */
+public final class BendingEventBus {
   private final PluginManager manager;
 
   public BendingEventBus(@NonNull Bending plugin) {
@@ -42,13 +45,16 @@ public class BendingEventBus {
     manager.callEvent(new BendingPlayerLoadEvent(player));
   }
 
+  /**
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
   public boolean postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
     if (user.valid()) { // User might not be valid when cooldown is added
       CooldownAddEvent event = new CooldownAddEvent(user, desc, duration);
       manager.callEvent(event);
       return !event.isCancelled();
     } else {
-      return true;
+      return false;
     }
   }
 
@@ -58,18 +64,27 @@ public class BendingEventBus {
     }
   }
 
+  /**
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
   public boolean postElementChangeEvent(@NonNull User user, @NonNull ElementAction type) {
     ElementChangeEvent event = new ElementChangeEvent(user, type);
     manager.callEvent(event);
     return !event.isCancelled();
   }
 
+  /**
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
   public boolean postBindChangeEvent(@NonNull User user, @NonNull BindType type) {
     BindChangeEvent event = new BindChangeEvent(user, type);
     manager.callEvent(event);
     return !event.isCancelled();
   }
 
+  /**
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
   public boolean postPresetCreateEvent(@NonNull User user, @NonNull Preset preset) {
     if (preset.isEmpty()) {
       return false;

@@ -140,8 +140,8 @@ public interface Message {
   // Scoreboard items not translatable yet?
   Args2<String, String> BENDING_BOARD_EMPTY_SLOT = (prefix, slot) -> text(prefix).append(text("-- Slot " + slot + " --", DARK_GRAY));
 
-  static Component brand(ComponentLike message) {
-    return PREFIX.asComponent().append(message);
+  static @NonNull Component brand(@NonNull ComponentLike message) {
+    return text().append(PREFIX).append(message).build();
   }
 
   interface Args0 {

@@ -43,10 +43,11 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -60,7 +61,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -96,15 +96,15 @@ public class EarthSmash extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     Optional<EarthSmash> grabbed = Bending.game().abilityManager(user.world()).userInstances(user, EarthSmash.class)
       .filter(s -> s.state instanceof GrabState).findAny();
 
-    if (method == ActivationMethod.SNEAK) {
+    if (method == Activation.SNEAK) {
       if (grabbed.isPresent() || tryGrab(user)) {
         return false;
       }
-    } else if (method == ActivationMethod.ATTACK) {
+    } else if (method == Activation.ATTACK) {
       grabbed.ifPresent(EarthSmash::launchBoulder);
       return false;
     }
@@ -125,7 +125,7 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private boolean createBoulder() {
-    Block center = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b)).orElse(null);
+    Block center = user.find(userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
     if (center == null) {
       return false;
     }
@@ -178,7 +178,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static boolean tryGrab(@NonNull User user) {
-    Block target = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.grabRange).orElse(null);
+    Block target = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.grabRange);
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;
@@ -497,7 +497,7 @@ public class EarthSmash extends AbilityInstance {
             }
             BlockData bd = null;
             if (EarthMaterials.isEarthNotLava(user, block)) {
-              bd = MaterialUtil.getSolidType(block.getBlockData());
+              bd = MaterialUtil.solidType(block.getBlockData());
               earthData.add(bd.getMaterial());
             } else if (MaterialUtil.isTransparent(block)) {
               if (earthData.isEmpty()) {
@@ -583,27 +583,27 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public int radius;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long chargeTime;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long maxDuration;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double raiseEntityPush;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double grabRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double shootRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockback;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockup;
 
     @Override

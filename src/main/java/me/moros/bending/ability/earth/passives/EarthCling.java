@@ -25,9 +25,10 @@ import me.moros.bending.ability.earth.EarthGlove;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -54,7 +55,7 @@ public class EarthCling extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
@@ -63,7 +64,7 @@ public class EarthCling extends AbilityInstance implements Ability {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -100,7 +101,7 @@ public class EarthCling extends AbilityInstance implements Ability {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
 
     @Override

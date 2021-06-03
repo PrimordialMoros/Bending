@@ -90,14 +90,14 @@ import me.moros.bending.ability.water.passives.HydroSink;
 import me.moros.bending.ability.water.sequences.Iceberg;
 import me.moros.bending.ability.water.sequences.WaterGimbal;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.sequence.SequenceStep;
 import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.bending.registry.Registries;
 
 import static me.moros.bending.model.Element.*;
-import static me.moros.bending.model.ability.ActivationMethod.*;
+import static me.moros.bending.model.ability.Activation.*;
 
 /**
  * Used to initialize all ability descriptions, sequences and collisions
@@ -112,23 +112,19 @@ public final class AbilityInitializer {
 
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
   private final Map<AbilityDescription, Sequence> sequences = new HashMap<>();
-  private final AbilityRegistry registry;
 
-  AbilityInitializer(@NonNull Game game) {
-    registry = game.abilityRegistry();
+  AbilityInitializer() {
     initAir();
     initWater();
     initEarth();
     initFire();
 
-    int abilityAmount = registry.registerAbilities(abilities);
-    int addonAmount = registry.registerAbilities(AbilityRegistry.AddonRegistry.addonAbilities());
-    int sequenceAmount = game.sequenceManager().registerSequences(sequences);
-    int addonSequences = game.sequenceManager().registerSequences(AbilityRegistry.AddonRegistry.addonSequences());
-    int collisionAmount = CollisionManager.registerCollisions(buildCollisions());
+    int abilityAmount = Registries.ABILITIES.register(abilities);
+    int sequenceAmount = Registries.ABILITIES.register(sequences);
+    int collisionAmount = Registries.COLLISIONS.register(buildCollisions());
 
-    Bending.logger().info("Registered " + abilityAmount + " core abilities and " + addonAmount + " addon abilities!");
-    Bending.logger().info("Registered " + sequenceAmount + " core sequences and " + addonSequences + " addon sequences!");
+    Bending.logger().info("Registered " + abilityAmount + " core abilities!");
+    Bending.logger().info("Registered " + sequenceAmount + " core sequences!");
     Bending.logger().info("Registered " + collisionAmount + " collisions!");
   }
 
@@ -137,7 +133,7 @@ public final class AbilityInitializer {
     shieldCollisions.addAll(layer0);
     shieldCollisions.addAll(layer1);
     shieldCollisions.add("EarthShot");
-    return new CollisionBuilder(registry)
+    return new CollisionBuilder()
       .layer(layer0)
       .layer(layer1)
       .layer(layer2)
@@ -198,14 +194,13 @@ public final class AbilityInitializer {
 
     AbilityDescription airWheel = AbilityDescription.builder("AirWheel", AirWheel::new)
       .element(AIR).activation(SEQUENCE).build();
-    abilities.add(airWheel);
 
     sequences.put(airWheel, new Sequence(
-      new AbilityAction(airScooter, SNEAK),
-      new AbilityAction(airScooter, SNEAK_RELEASE),
-      new AbilityAction(airScooter, SNEAK),
-      new AbilityAction(airScooter, SNEAK_RELEASE),
-      new AbilityAction(airBlade, ATTACK)
+      new SequenceStep(airScooter, SNEAK),
+      new SequenceStep(airScooter, SNEAK_RELEASE),
+      new SequenceStep(airScooter, SNEAK),
+      new SequenceStep(airScooter, SNEAK_RELEASE),
+      new SequenceStep(airBlade, ATTACK)
     ));
   }
 
@@ -259,31 +254,29 @@ public final class AbilityInitializer {
     abilities.add(AbilityDescription.builder("IceWall", IceWall::new)
       .element(WATER).activation(SNEAK).bypassCooldown(true).build());
 
-    AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
-      .element(WATER).activation(SEQUENCE).build();
-    abilities.add(waterGimbal);
-
     abilities.add(AbilityDescription.builder("FrostBreath", FrostBreath::new)
       .element(WATER).activation(SNEAK).build());
 
+    AbilityDescription waterGimbal = AbilityDescription.builder("WaterGimbal", WaterGimbal::new)
+      .element(WATER).activation(SEQUENCE).build();
+
     AbilityDescription iceberg = AbilityDescription.builder("Iceberg", Iceberg::new)
       .element(WATER).activation(SEQUENCE).build();
-    abilities.add(iceberg);
 
     sequences.put(waterGimbal, new Sequence(
-      new AbilityAction(waterRing, SNEAK),
-      new AbilityAction(waterRing, SNEAK_RELEASE),
-      new AbilityAction(waterRing, SNEAK),
-      new AbilityAction(waterRing, SNEAK_RELEASE),
-      new AbilityAction(torrent, SNEAK)
+      new SequenceStep(waterRing, SNEAK),
+      new SequenceStep(waterRing, SNEAK_RELEASE),
+      new SequenceStep(waterRing, SNEAK),
+      new SequenceStep(waterRing, SNEAK_RELEASE),
+      new SequenceStep(torrent, SNEAK)
     ));
 
     sequences.put(iceberg, new Sequence(
-      new AbilityAction(phaseChange, SNEAK),
-      new AbilityAction(iceSpike, SNEAK_RELEASE),
-      new AbilityAction(phaseChange, SNEAK),
-      new AbilityAction(iceSpike, SNEAK_RELEASE),
-      new AbilityAction(iceSpike, SNEAK)
+      new SequenceStep(phaseChange, SNEAK),
+      new SequenceStep(iceSpike, SNEAK_RELEASE),
+      new SequenceStep(phaseChange, SNEAK),
+      new SequenceStep(iceSpike, SNEAK_RELEASE),
+      new SequenceStep(iceSpike, SNEAK)
     ));
   }
 
@@ -316,10 +309,6 @@ public final class AbilityInitializer {
       .element(EARTH).activation(ATTACK).build();
     abilities.add(earthArmor);
 
-    AbilityDescription bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
-      .element(EARTH).activation(SEQUENCE).hidden(true).build();
-    abilities.add(bulwark);
-
     AbilityDescription earthGlove = AbilityDescription.builder("EarthGlove", EarthGlove::new)
       .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build();
     abilities.add(earthGlove);
@@ -339,35 +328,37 @@ public final class AbilityInitializer {
       .element(EARTH).activation(ATTACK, SNEAK, FALL).build();
     abilities.add(shockwave);
 
-    AbilityDescription earthPillars = AbilityDescription.builder("EarthPillars", EarthPillars::new)
-      .element(EARTH).activation(SEQUENCE, FALL).build();
-    abilities.add(earthPillars);
-
-    AbilityDescription earthShards = AbilityDescription.builder("EarthShards", EarthShards::new)
-      .element(EARTH).activation(SEQUENCE).build();
-    abilities.add(earthShards);
-
     abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
       .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
     abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
       .element(EARTH).activation(SNEAK).build());
 
+
+    AbilityDescription bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
+      .element(EARTH).activation(SEQUENCE).hidden(true).build();
+
     sequences.put(bulwark, new Sequence(
-      new AbilityAction(earthArmor, SNEAK),
-      new AbilityAction(earthArmor, SNEAK_RELEASE)
+      new SequenceStep(earthArmor, SNEAK),
+      new SequenceStep(earthArmor, SNEAK_RELEASE)
     ));
+
+    AbilityDescription earthPillars = AbilityDescription.builder("EarthPillars", EarthPillars::new)
+      .element(EARTH).activation(SEQUENCE, FALL).build();
 
     sequences.put(earthPillars, new Sequence(
-      new AbilityAction(shockwave, SNEAK),
-      new AbilityAction(catapult, SNEAK_RELEASE)
+      new SequenceStep(shockwave, SNEAK),
+      new SequenceStep(catapult, SNEAK_RELEASE)
     ));
 
+    AbilityDescription earthShards = AbilityDescription.builder("EarthShards", EarthShards::new)
+      .element(EARTH).activation(SEQUENCE).build();
+
     sequences.put(earthShards, new Sequence(
-      new AbilityAction(earthGlove, SNEAK),
-      new AbilityAction(collapse, SNEAK_RELEASE),
-      new AbilityAction(collapse, SNEAK),
-      new AbilityAction(earthGlove, SNEAK_RELEASE)
+      new SequenceStep(earthGlove, SNEAK),
+      new SequenceStep(collapse, SNEAK_RELEASE),
+      new SequenceStep(collapse, SNEAK),
+      new SequenceStep(earthGlove, SNEAK_RELEASE)
     ));
   }
 
@@ -404,44 +395,41 @@ public final class AbilityInitializer {
       .element(FIRE).activation(ATTACK).build();
     abilities.add(fireWall);
 
-    AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
-      .element(FIRE).activation(SEQUENCE).build();
-    abilities.add(fireKick);
-
-    AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin::new)
-      .element(FIRE).activation(SEQUENCE).build();
-    abilities.add(fireSpin);
-
-    AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel::new)
-      .element(FIRE).activation(SEQUENCE).build();
-    abilities.add(fireWheel);
-
     abilities.add(AbilityDescription.builder("Bolt", Bolt::new)
       .element(FIRE).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("Combustion", Combustion::new)
       .element(FIRE).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
+    AbilityDescription fireKick = AbilityDescription.builder("FireKick", FireKick::new)
+      .element(FIRE).activation(SEQUENCE).build();
+
     sequences.put(fireKick, new Sequence(
-      new AbilityAction(fireBlast, ATTACK),
-      new AbilityAction(fireBlast, ATTACK),
-      new AbilityAction(fireBlast, SNEAK),
-      new AbilityAction(fireBlast, ATTACK)
+      new SequenceStep(fireBlast, ATTACK),
+      new SequenceStep(fireBlast, ATTACK),
+      new SequenceStep(fireBlast, SNEAK),
+      new SequenceStep(fireBlast, ATTACK)
     ));
+
+    AbilityDescription fireSpin = AbilityDescription.builder("FireSpin", FireSpin::new)
+      .element(FIRE).activation(SEQUENCE).build();
 
     sequences.put(fireSpin, new Sequence(
-      new AbilityAction(fireBlast, ATTACK),
-      new AbilityAction(fireBlast, ATTACK),
-      new AbilityAction(fireShield, ATTACK),
-      new AbilityAction(fireShield, SNEAK),
-      new AbilityAction(fireShield, SNEAK_RELEASE)
+      new SequenceStep(fireBlast, ATTACK),
+      new SequenceStep(fireBlast, ATTACK),
+      new SequenceStep(fireShield, ATTACK),
+      new SequenceStep(fireShield, SNEAK),
+      new SequenceStep(fireShield, SNEAK_RELEASE)
     ));
 
+    AbilityDescription fireWheel = AbilityDescription.builder("FireWheel", FireWheel::new)
+      .element(FIRE).activation(SEQUENCE).build();
+
     sequences.put(fireWheel, new Sequence(
-      new AbilityAction(fireShield, SNEAK),
-      new AbilityAction(fireShield, INTERACT_BLOCK),
-      new AbilityAction(fireShield, INTERACT_BLOCK),
-      new AbilityAction(fireShield, SNEAK_RELEASE)
+      new SequenceStep(fireShield, SNEAK),
+      new SequenceStep(fireShield, INTERACT_BLOCK),
+      new SequenceStep(fireShield, INTERACT_BLOCK),
+      new SequenceStep(fireShield, SNEAK_RELEASE)
     ));
   }
 }

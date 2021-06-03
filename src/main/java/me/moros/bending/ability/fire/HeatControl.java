@@ -32,9 +32,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
@@ -68,7 +69,7 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -78,7 +79,7 @@ public class HeatControl extends AbilityInstance implements Ability {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -89,7 +90,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       return UpdateResult.CONTINUE;
     }
     melt.processQueue(1);
-    if (description().equals(user.selectedAbility().orElse(null))) {
+    if (description().equals(user.selectedAbility())) {
       long time = System.currentTimeMillis();
       if (user.sneaking()) {
         if (isHoldingFood()) {
@@ -191,9 +192,11 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   public static boolean canBurn(@NonNull User user) {
-    return user.selectedAbility()
-      .filter(desc -> desc.name().equals("HeatControl") && user.canBend(desc))
-      .isEmpty();
+    AbilityDescription selected = user.selectedAbility();
+    if (selected == null) {
+      return true;
+    }
+    return !selected.name().equals("HeatControl") || !user.canBend(selected);
   }
 
   @Override
@@ -222,17 +225,17 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double radius;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double solidifyRange;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double solidifyRadius;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long cookInterval;
 
     @Override

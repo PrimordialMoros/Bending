@@ -48,7 +48,7 @@ public class TempArmor implements Temporary {
   private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
     this.entity = entity;
     this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
-    entity.getEquipment().setArmorContents(applyMetaToArmor(armor));
+    entity.getEquipment().setArmorContents(armor);
     MANAGER.addEntry(entity, this);
     revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
@@ -60,7 +60,7 @@ public class TempArmor implements Temporary {
     if (user.entity().getEquipment() == null) {
       return Optional.empty();
     }
-    return Optional.of(new TempArmor(user.entity(), armor, duration));
+    return Optional.of(new TempArmor(user.entity(), applyMetaToArmor(armor), duration));
   }
 
   public @NonNull LivingEntity entity() {
@@ -84,7 +84,7 @@ public class TempArmor implements Temporary {
     revertTask.cancel();
   }
 
-  private ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
+  private static ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
     for (ItemStack item : armorItems) {
       ItemMeta meta = item.getItemMeta();
       meta.displayName(Component.text("Bending Armor"));
@@ -96,7 +96,7 @@ public class TempArmor implements Temporary {
     return armorItems;
   }
 
-  private ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
+  private static ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
     ItemStack[] copy = new ItemStack[armorItems.length];
     for (int i = 0; i < armorItems.length; i++) {
       ItemStack item = armorItems[i];

@@ -19,10 +19,19 @@
 
 package me.moros.bending.model.attribute;
 
-import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface ModifyPolicy {
-  boolean shouldModify(@NonNull Ability ability);
+  boolean shouldModify(@NonNull AbilityDescription desc);
+
+  static @NonNull ModifyPolicy of(@NonNull Element element) {
+    return desc -> desc.element() == element;
+  }
+
+  static @NonNull ModifyPolicy of(@NonNull AbilityDescription desc) {
+    return desc::equals;
+  }
 }

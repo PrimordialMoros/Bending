@@ -31,10 +31,11 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -45,7 +46,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -74,11 +74,11 @@ public class IceSpike extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
-    boolean field = method == ActivationMethod.SNEAK;
+    boolean field = method == Activation.SNEAK;
     if (field) {
       Collider collider = new Sphere(user.location(), userConfig.radius);
       CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
@@ -92,11 +92,10 @@ public class IceSpike extends AbilityInstance {
         }
       }
       if (source == null) {
-        Optional<Block> targetBlock = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isIceBendable);
-        if (targetBlock.isEmpty()) {
+        source = user.find(userConfig.selectRange, WaterMaterials::isIceBendable);
+        if (source == null) {
           return false;
         }
-        source = targetBlock.get();
       }
       buildPillar(source);
     }
@@ -110,7 +109,7 @@ public class IceSpike extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -264,20 +263,20 @@ public class IceSpike extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockup;
 
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long columnCooldown;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public int columnMaxHeight;
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long fieldCooldown;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double radius;
 
     @Override

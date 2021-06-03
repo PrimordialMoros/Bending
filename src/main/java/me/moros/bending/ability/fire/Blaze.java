@@ -31,9 +31,10 @@ import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -63,19 +64,19 @@ public class Blaze extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, Blaze.class)) {
       return false;
     }
 
     this.user = user;
     loadConfig();
-    return release(method == ActivationMethod.ATTACK);
+    return release(method == Activation.ATTACK);
   }
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   private boolean release(boolean cone) {
@@ -150,11 +151,11 @@ public class Blaze extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double coneRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double ringRange;
 
     @Override

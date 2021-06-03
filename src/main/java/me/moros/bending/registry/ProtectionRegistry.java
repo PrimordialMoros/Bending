@@ -17,11 +17,11 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.game;
+package me.moros.bending.registry;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,21 +41,50 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Represents the protection system which hooks into other region protection plugins.
  */
-public final class ProtectionSystem {
+public final class ProtectionRegistry implements Registry<Protection> {
   /**
    * A multi-layered cache used to check if a User can build in a specific block location.
    * While this implementation is thread-safe it might be dangerous to use this async as the protection plugins
    * might not be thread-safe themselves and we load data from them when results aren't cached.
    */
   private final Map<UUID, Cache<Block, Boolean>> cache;
-  private final Collection<Protection> protections;
+  private final Map<String, Protection> protections;
 
-  ProtectionSystem() {
+  ProtectionRegistry() {
     cache = new ConcurrentHashMap<>();
-    protections = new ArrayList<>();
-    registerProtectMethod("WorldGuard", WorldGuardProtection::new);
-    registerProtectMethod("GriefPrevention", GriefPreventionProtection::new);
-    registerProtectMethod("Towny", TownyProtection::new);
+    protections = new ConcurrentHashMap<>();
+  }
+
+  public void init() {
+    register("WorldGuard", WorldGuardProtection::new);
+    register("GriefPrevention", GriefPreventionProtection::new);
+    register("Towny", TownyProtection::new);
+  }
+
+  /**
+   * Check if there is a proection method registered for the specified key.
+   * @param name the protection name
+   * @return true if that protection is registered, false otherwise
+   */
+  public boolean contains(@NonNull String name) {
+    return protections.containsKey(name);
+  }
+
+  /**
+   * Register a new {@link Protection}
+   * @param name the name of the protection to register
+   * @param creator the factory function that creates the protection instance
+   */
+  public void register(@NonNull String name, @NonNull ProtectionFactory creator) {
+    if (Bending.configManager().config().node("protection", name).getBoolean(true)) {
+      try {
+        Protection method = creator.create();
+        protections.put(name, method);
+        Bending.logger().info("Registered bending protection for " + name);
+      } catch (PluginNotFoundException e) {
+        Bending.logger().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+      }
+    }
   }
 
   /**
@@ -87,24 +116,7 @@ public final class ProtectionSystem {
    * @return true if all enabled protections allow it, false otherwise
    */
   private boolean canBuildPostCache(User user, Block block) {
-    return protections.stream().allMatch(m -> m.canBuild(user.entity(), block));
-  }
-
-  /**
-   * Register a new {@link Protection}
-   * @param name the name of the protection to register
-   * @param creator the factory function that creates the protection instance
-   */
-  public void registerProtectMethod(@NonNull String name, @NonNull ProtectionFactory creator) {
-    if (Bending.configManager().config().node("protection", name).getBoolean(true)) {
-      try {
-        Protection method = creator.create();
-        protections.add(method);
-        Bending.logger().info("Registered bending protection for " + name);
-      } catch (PluginNotFoundException e) {
-        Bending.logger().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
-      }
-    }
+    return protections.values().stream().allMatch(m -> m.canBuild(user.entity(), block));
   }
 
   /**
@@ -114,6 +126,11 @@ public final class ProtectionSystem {
    */
   private static Cache<Block, Boolean> buildCache() {
     return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
+  }
+
+  @Override
+  public @NonNull Iterator<Protection> iterator() {
+    return Collections.unmodifiableCollection(protections.values()).iterator();
   }
 
   @FunctionalInterface

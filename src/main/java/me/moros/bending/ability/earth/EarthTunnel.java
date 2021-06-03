@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -28,15 +27,15 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
@@ -65,7 +64,7 @@ public class EarthTunnel extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthTunnel.class)) {
       return false;
     }
@@ -74,12 +73,12 @@ public class EarthTunnel extends AbilityInstance {
     loadConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Optional<Block> block = SourceUtil.find(user, userConfig.range, predicate);
-    if (block.isEmpty()) {
+    Block block = user.find(userConfig.range, predicate);
+    if (block == null) {
       return false;
     }
 
-    center = Vector3.center(block.get());
+    center = Vector3.center(block);
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 
     return true;
@@ -87,7 +86,7 @@ public class EarthTunnel extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -112,11 +111,11 @@ public class EarthTunnel extends AbilityInstance {
       }
       if (angle >= 360) {
         angle = 0;
-        Optional<Block> block = SourceUtil.find(user, userConfig.range, predicate);
-        if (block.isEmpty()) {
+        Block block = user.find(userConfig.range, predicate);
+        if (block == null) {
           return UpdateResult.REMOVE;
         }
-        center = Vector3.center(block.get());
+        center = Vector3.center(block);
 
         if (++radius > userConfig.radius) {
           radius = 0;
@@ -188,11 +187,11 @@ public class EarthTunnel extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double radius;
     public boolean extractOres;
 

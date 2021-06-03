@@ -19,23 +19,17 @@
 
 package me.moros.bending.model.attribute;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public enum ModifierOperation {
   /**
-   * Directly adds to the base value
+   * Directly adds to the base value.
    */
   ADDITIVE,
   /**
-   * This is summed with the others of this operation and then multiplied by the ADDITIVE result.
+   * SUMMED_MULTIPLICATIVE modifiers are all summed together and are applied after ADDITIVE modifiers.
    */
   SUMMED_MULTIPLICATIVE,
   /**
-   * The base is multiplied by every MULTIPLICATIVE modifier after doing ADDITIVE and SUMMED_MULTIPLICATIVE.
+   * MULTIPLICATIVE modifiers are applied after ADDITIVE and SUMMED_MULTIPLICATIVE modifiers.
    */
-  MULTIPLICATIVE;
-
-  public @NonNull AttributeModifier toAttributeModifier(@NonNull String attribute, double value) {
-    return new AttributeModifier(attribute, this, value);
-  }
+  MULTIPLICATIVE
 }

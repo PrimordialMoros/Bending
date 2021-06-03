@@ -55,7 +55,7 @@ public class FragileStructure {
   /**
    * @return unmodifiable collection of blocks belonging to the same fragile structure
    */
-  public Collection<Block> fragileBlocks() {
+  public @NonNull Collection<@NonNull Block> fragileBlocks() {
     return fragileBlocks;
   }
 
@@ -75,14 +75,14 @@ public class FragileStructure {
     return 0;
   }
 
-  public static Optional<FragileStructure> create(@NonNull Collection<Block> blocks, int health, @NonNull Predicate<Block> predicate) {
+  public static Optional<FragileStructure> create(@NonNull Collection<@NonNull Block> blocks, int health, @NonNull Predicate<Block> predicate) {
     if (health < 0 || blocks.isEmpty()) {
       return Optional.empty();
     }
     return Optional.of(new FragileStructure(blocks, health, predicate));
   }
 
-  public static boolean tryDamageStructure(@NonNull Collection<Block> blocks, int damage) {
+  public static boolean tryDamageStructure(@NonNull Collection<@NonNull Block> blocks, int damage) {
     for (Block block : blocks) {
       if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
         FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();

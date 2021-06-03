@@ -22,9 +22,10 @@ package me.moros.bending.ability.air.passives;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -36,7 +37,7 @@ public class GracefulDescent extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     return true;
@@ -55,7 +56,8 @@ public class GracefulDescent extends AbilityInstance implements Ability {
     if (!Bending.game().abilityManager(user.world()).hasAbility(user, GracefulDescent.class)) {
       return false;
     }
-    return Bending.game().abilityRegistry().abilityDescription("GracefulDescent").map(user::canBend).orElse(false);
+    AbilityDescription desc = Registries.ABILITIES.ability("GracefulDescent");
+    return desc != null && user.canBend(desc);
   }
 
   @Override

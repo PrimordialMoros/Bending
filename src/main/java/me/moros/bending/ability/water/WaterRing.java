@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -37,10 +38,11 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -50,11 +52,11 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -101,13 +103,13 @@ public class WaterRing extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
     Optional<WaterRing> ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class);
     if (ring.isPresent()) {
-      if (method == ActivationMethod.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
+      if (method == Activation.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
         if (user.sneaking()) {
           Bending.game().abilityManager(user.world()).destroyInstance(ring.get());
         } else {
@@ -119,12 +121,12 @@ public class WaterRing extends AbilityInstance {
 
     this.user = user;
     loadConfig();
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isFullWaterSource);
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.selectRange, WaterMaterials::isFullWaterSource);
+    if (source == null) {
       return false;
     }
     List<Block> list = new ArrayList<>();
-    list.add(source.get());
+    list.add(source);
     states = new StateChain(list)
       .addState(new TravellingSource(user, Material.WATER.createBlockData(), RING_RADIUS - 0.5, userConfig.selectRange + 5))
       .start();
@@ -132,7 +134,7 @@ public class WaterRing extends AbilityInstance {
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
     if (waveDesc == null) {
-      waveDesc = Bending.game().abilityRegistry().abilityDescription("WaterWave").orElseThrow(RuntimeException::new);
+      waveDesc = Objects.requireNonNull(Registries.ABILITIES.ability("WaterWave"));
     }
 
     return true;
@@ -140,7 +142,7 @@ public class WaterRing extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   public @NonNull List<Block> complete() {
@@ -222,7 +224,7 @@ public class WaterRing extends AbilityInstance {
         }
         if (time > sneakStartTime + userConfig.chargeTime && !user.onCooldown(waveDesc)) {
           if (!complete().isEmpty()) {
-            Bending.game().activationController().activateAbility(user, ActivationMethod.SNEAK, waveDesc);
+            Bending.game().activationController().activateAbility(user, Activation.SNEAK, waveDesc);
           }
           return UpdateResult.REMOVE;
         }
@@ -316,13 +318,12 @@ public class WaterRing extends AbilityInstance {
 
   public static @Nullable WaterRing getOrCreateInstance(@NonNull User user) {
     if (ringDesc == null) {
-      ringDesc = Bending.game().abilityRegistry().abilityDescription("WaterRing")
-        .orElseThrow(RuntimeException::new);
+      ringDesc = Objects.requireNonNull(Registries.ABILITIES.ability("WaterRing"));
     }
     WaterRing oldRing = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class)
       .orElse(null);
     if (oldRing == null) {
-      Ability newRing = Bending.game().activationController().activateAbility(user, ActivationMethod.ATTACK, ringDesc);
+      Ability newRing = Bending.game().activationController().activateAbility(user, Activation.ATTACK, ringDesc);
       if (newRing != null) {
         return (WaterRing) newRing;
       }
@@ -376,24 +377,24 @@ public class WaterRing extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long duration;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
     public boolean affectEntities;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockback;
     // Shards
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double shardRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double shardDamage;
     // Wave
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long chargeTime;
 
     @Override

@@ -115,7 +115,7 @@ public class Pillar implements Updatable {
         return false;
       }
       BlockData data = TempBlock.getLastValidData(backwardBlock);
-      TempBlock.create(forwardBlock, MaterialUtil.getSolidType(data), duration, true);
+      TempBlock.create(forwardBlock, MaterialUtil.solidType(data), duration, true);
     }
     pillarBlocks.add(newBlock);
     TempBlock.createAir(newBlock.getRelative(opposite, length), duration);

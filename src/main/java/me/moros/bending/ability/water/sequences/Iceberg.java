@@ -34,17 +34,17 @@ import me.moros.bending.ability.water.IceCrawl;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -75,7 +75,7 @@ public class Iceberg extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
@@ -83,13 +83,13 @@ public class Iceberg extends AbilityInstance {
       return false;
     }
 
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    if (source == null) {
       return false;
     }
 
     states = new StateChain()
-      .addState(new SelectedSource(user, source.get(), userConfig.selectRange + 2))
+      .addState(new SelectedSource(user, source, userConfig.selectRange + 2))
       .start();
 
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
@@ -98,7 +98,7 @@ public class Iceberg extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -204,14 +204,14 @@ public class Iceberg extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
 
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long regenDelay;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public double length;
 
     @Override

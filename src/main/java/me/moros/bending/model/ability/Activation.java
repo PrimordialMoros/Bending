@@ -21,7 +21,7 @@ package me.moros.bending.model.ability;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public enum ActivationMethod {
+public enum Activation {
   PASSIVE("bending.activation.passive"),
   ATTACK("bending.activation.attack"),
   ATTACK_ENTITY("bending.activation.attack-entity"),
@@ -36,11 +36,11 @@ public enum ActivationMethod {
   private final String key;
   private final boolean interact;
 
-  ActivationMethod(String key) {
+  Activation(String key) {
     this(key, false);
   }
 
-  ActivationMethod(String key, boolean interact) {
+  Activation(String key, boolean interact) {
     this.key = key;
     this.interact = interact;
   }

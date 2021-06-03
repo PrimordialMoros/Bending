@@ -17,25 +17,15 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.attribute;
+package me.moros.bending.registry;
 
-import java.util.function.DoubleFunction;
+public final class Registries {
+  public static final AbilityRegistry ABILITIES = new AbilityRegistry();
+  public static final AttributeRegistry ATTRIBUTES = new AttributeRegistry();
+  public static final BenderRegistry BENDERS = new BenderRegistry();
+  public static final CollisionRegistry COLLISIONS = new CollisionRegistry();
+  public static final ProtectionRegistry PROTECTIONS = new ProtectionRegistry();
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-public enum AttributeConverter implements DoubleFunction<Number> {
-  DOUBLE(x -> x),
-  INT(x -> (int) x),
-  LONG(x -> (long) x);
-
-  private final DoubleFunction<Number> converter;
-
-  AttributeConverter(DoubleFunction<Number> converter) {
-    this.converter = converter;
-  }
-
-  @Override
-  public @NonNull Number apply(double input) {
-    return converter.apply(input);
+  private Registries() {
   }
 }

@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -33,11 +32,12 @@ import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
@@ -48,7 +48,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.WorldMethods;
@@ -73,10 +72,10 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.SNEAK && tryDestroy(user)) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.SNEAK && tryDestroy(user)) {
       return false;
-    } else if (method == ActivationMethod.ATTACK) {
+    } else if (method == Activation.ATTACK) {
       Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
         .collect(Collectors.toList());
       for (EarthBlast eblast : eblasts) {
@@ -93,11 +92,11 @@ public class EarthBlast extends AbilityInstance {
     loadConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid();
-    Block source = SourceUtil.find(user, userConfig.selectRange, predicate).orElse(null);
+    Block source = user.find(userConfig.selectRange, predicate);
     if (source == null) {
       return false;
     }
-    BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
+    BlockData fakeData = MaterialUtil.focusedType(source.getBlockData());
 
     Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
       .filter(eb -> eb.blast == null).collect(Collectors.toList());
@@ -118,7 +117,7 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -167,8 +166,8 @@ public class EarthBlast extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        Optional<Block> rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
-        if (rayTraced.isEmpty() || block.equals(rayTraced.get())) {
+        Block rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
+        if (block.equals(rayTraced)) {
           Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }
@@ -202,8 +201,7 @@ public class EarthBlast extends AbilityInstance {
     private final double damage;
 
     public Blast(User user, Block block) {
-      super(user, block, userConfig.range, 100);
-      material = MaterialUtil.getSolidType(block.getBlockData()).getMaterial();
+      super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 100);
       if (EarthMaterials.isMetalBendable(block)) {
         damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
       } else if (EarthMaterials.isLavaBendable(block)) {
@@ -228,13 +226,13 @@ public class EarthBlast extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
 
     public double shatterRange;

@@ -32,27 +32,23 @@ import co.aikar.commands.CommandContexts;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.PaperCommandManager;
 import me.moros.bending.Bending;
-import me.moros.bending.game.AttributeSystem;
-import me.moros.bending.game.Game;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.registry.Registries;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Commands {
   private final PaperCommandManager commandManager;
-  private final Game game;
 
   private final Predicate<AbilityDescription> validBinds = desc -> desc.canBind() && !desc.hidden();
   private final Predicate<AbilityDescription> nonHidden = desc -> !desc.hidden();
 
   public Commands(@NonNull Bending plugin) {
-    this.game = Bending.game();
     commandManager = new PaperCommandManager(plugin);
     commandManager.enableUnstableAPI("help");
 
@@ -71,10 +67,10 @@ public class Commands {
   private Collection<String> abilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
     Predicate<AbilityDescription> permissionPredicate = x -> true;
     if (player != null) {
-      BendingPlayer bendingPlayer = game.benderRegistry().user(player);
+      BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
       permissionPredicate = bendingPlayer::hasPermission;
     }
-    return game.abilityRegistry().abilities().filter(predicate)
+    return Registries.ABILITIES.abilities().filter(predicate)
       .filter(permissionPredicate).map(AbilityDescription::name).collect(Collectors.toList());
   }
 
@@ -87,11 +83,10 @@ public class Commands {
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
-      return player == null ? List.of() : game.benderRegistry().user(player).presets();
+      return player == null ? List.of() : Registries.BENDERS.user(player).presets();
     });
 
     commandCompletions.registerStaticCompletion("elements", List.copyOf(Element.elementNames()));
-    commandCompletions.registerStaticCompletion("attributes", List.of(Attribute.TYPES));
   }
 
   private void registerCommandContexts() {
@@ -102,7 +97,7 @@ public class Commands {
       if (player == null) {
         throw new UserException();
       }
-      return game.benderRegistry().user(player);
+      return Registries.BENDERS.user(player);
     });
 
     commandContexts.registerContext(Element.class, c -> {
@@ -119,10 +114,10 @@ public class Commands {
       Player player = c.getPlayer();
       Predicate<AbilityDescription> permissionPredicate = x -> true;
       if (player != null) {
-        BendingPlayer bendingPlayer = game.benderRegistry().user(player);
+        BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
         permissionPredicate = bendingPlayer::hasPermission;
       }
-      return game.abilityRegistry().abilities()
+      return Registries.ABILITIES.abilities()
         .filter(nonHidden)
         .filter(desc -> desc.name().equalsIgnoreCase(name))
         .filter(permissionPredicate)
@@ -135,7 +130,7 @@ public class Commands {
         throw new UserException();
       }
       String name = c.popFirstArg().toLowerCase();
-      return game.benderRegistry().user(player).presetByName(name)
+      return Registries.BENDERS.user(player).presetByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
     });
 
@@ -143,19 +138,19 @@ public class Commands {
       String name = c.popFirstArg().toLowerCase();
       Optional<Element> element = Element.fromName(name);
       if (element.isPresent()) {
-        return AttributeSystem.elementPolicy(element.get());
+        return ModifyPolicy.of(element.get());
       }
-      AbilityDescription desc = game.abilityRegistry().abilityDescription(name)
-        .orElseThrow(() -> new InvalidCommandArgument("Invalid policy. Policy must be an element or ability name"));
-      return AttributeSystem.abilityPolicy(desc);
+      AbilityDescription desc = Registries.ABILITIES.ability(name);
+      if (desc == null) {
+        throw new InvalidCommandArgument("Invalid policy. Policy must be an element or ability name");
+      }
+      return ModifyPolicy.of(desc);
     });
 
     commandContexts.registerContext(ModifierOperation.class, c -> {
       String name = c.popFirstArg().toLowerCase();
       if (name.startsWith("m")) {
         return ModifierOperation.MULTIPLICATIVE;
-      } else if (name.startsWith("s")) {
-        return ModifierOperation.SUMMED_MULTIPLICATIVE;
       }
       return ModifierOperation.ADDITIVE;
     });

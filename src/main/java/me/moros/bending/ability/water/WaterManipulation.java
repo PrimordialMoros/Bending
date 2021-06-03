@@ -23,7 +23,6 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -35,11 +34,12 @@ import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -53,7 +53,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
@@ -87,8 +86,8 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
         .collect(Collectors.toList());
       redirectAny(user);
@@ -105,7 +104,7 @@ public class WaterManipulation extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Block source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterBendable).orElse(null);
+    Block source = user.find(userConfig.selectRange, WaterMaterials::isWaterBendable);
     if (source == null) {
       return false;
     }
@@ -129,7 +128,7 @@ public class WaterManipulation extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -220,8 +219,8 @@ public class WaterManipulation extends AbilityInstance {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
         double range = Math.min(1, inverse.direction.getNorm());
         Block block = center.toBlock(user.world());
-        Optional<Block> rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
-        if (rayTraced.isEmpty() || block.equals(rayTraced.get())) {
+        Block rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
+        if (block.equals(rayTraced)) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }
@@ -255,8 +254,7 @@ public class WaterManipulation extends AbilityInstance {
 
   private class Manip extends BlockShot {
     public Manip(User user, Block block) {
-      super(user, block, userConfig.range, isIce ? 80 : 100);
-      material = isIce ? block.getType() : Material.WATER;
+      super(user, block, isIce ? block.getType() : Material.WATER, userConfig.range, isIce ? 80 : 100);
       allowUnderWater = true;
     }
 
@@ -277,18 +275,18 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
 
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public int power;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long slowDuration;
 
     public double redirectGrabRadius;

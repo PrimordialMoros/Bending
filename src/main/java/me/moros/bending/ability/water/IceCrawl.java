@@ -34,11 +34,12 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -49,7 +50,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
@@ -77,8 +77,8 @@ public class IceCrawl extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
       return false;
     }
@@ -86,22 +86,22 @@ public class IceCrawl extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.selectRange, WaterMaterials::isWaterOrIceBendable);
+    if (source == null) {
       return false;
     }
 
     Optional<IceCrawl> line = Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class);
-    if (method == ActivationMethod.SNEAK && line.isPresent()) {
+    if (method == Activation.SNEAK && line.isPresent()) {
       State state = line.get().states.current();
       if (state instanceof SelectedSource) {
-        ((SelectedSource) state).reselect(source.get());
+        ((SelectedSource) state).reselect(source);
       }
       return false;
     }
 
     states = new StateChain()
-      .addState(new SelectedSource(user, source.get(), userConfig.selectRange))
+      .addState(new SelectedSource(user, source, userConfig.selectRange))
       .start();
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
@@ -110,7 +110,7 @@ public class IceCrawl extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -203,15 +203,15 @@ public class IceCrawl extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long freezeDuration;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
 
     @Override

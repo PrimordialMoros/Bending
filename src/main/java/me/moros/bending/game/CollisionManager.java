@@ -19,24 +19,22 @@
 
 package me.moros.bending.game;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.RegisteredCollision;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 // TODO implement BVH and profile
 public final class CollisionManager {
-  private static final Collection<RegisteredCollision> collisions = new ArrayList<>();
   private final AbilityManager manager;
 
   CollisionManager(@NonNull AbilityManager manager) {
@@ -44,21 +42,20 @@ public final class CollisionManager {
   }
 
   public void update() {
-    Collection<Ability> instances = manager.instances()
-      .filter(ability -> !ability.colliders().isEmpty())
+    Collection<Ability> instances = manager.instances().filter(ability -> !ability.colliders().isEmpty())
       .collect(Collectors.toList());
     if (instances.size() < 2) {
       return;
     }
     Map<Ability, Collection<Collider>> colliderCache = new HashMap<>(instances.size());
-    for (RegisteredCollision registeredCollision : collisions) {
-      Collection<Ability> firstAbilities = instances.stream()
-        .filter(ability -> ability.description().equals(registeredCollision.first()))
-        .collect(Collectors.toList());
-      Collection<Ability> secondAbilities = instances.stream()
-        .filter(ability -> ability.description().equals(registeredCollision.second()))
-        .collect(Collectors.toList());
-
+    Map<AbilityDescription, Collection<Ability>> abilityCache = new HashMap<>(32);
+    for (RegisteredCollision registeredCollision : Registries.COLLISIONS) {
+      Collection<Ability> firstAbilities = abilityCache.computeIfAbsent(registeredCollision.first(), desc ->
+        instances.stream().filter(ability -> ability.description().equals(desc)).collect(Collectors.toList())
+      );
+      Collection<Ability> secondAbilities = abilityCache.computeIfAbsent(registeredCollision.second(), desc ->
+        instances.stream().filter(ability -> ability.description().equals(desc)).collect(Collectors.toList())
+      );
       for (Ability first : firstAbilities) {
         Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::colliders);
         if (firstColliders.isEmpty()) {
@@ -102,12 +99,5 @@ public final class CollisionManager {
     if (data.removeSecond()) {
       manager.destroyInstance(second);
     }
-  }
-
-  public static int registerCollisions(@NonNull Collection<RegisteredCollision> newCollisions) {
-    Set<RegisteredCollision> collisionSet = new HashSet<>(newCollisions);
-    collisions.clear();
-    collisions.addAll(collisionSet);
-    return collisions.size();
   }
 }

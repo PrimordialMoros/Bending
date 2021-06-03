@@ -19,28 +19,29 @@
 
 package me.moros.bending.model.attribute;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Attribute {
-  String value() default "";
+public enum Attribute {
+  RANGE("Range"),
+  SELECTION("Selection"),
+  COOLDOWN("Cooldown"),
+  SPEED("Speed"),
+  STRENGTH("Strength"),
+  DAMAGE("Damage"),
+  CHARGE_TIME("ChargeTime"),
+  DURATION("Duration"),
+  RADIUS("Radius"),
+  HEIGHT("Height"),
+  AMOUNT("Amount"),
+  FIRE_TICKS("FireTicks");
 
-  String RANGE = "Range";
-  String SELECTION = "Selection";
-  String COOLDOWN = "Cooldown";
-  String SPEED = "Speed";
-  String STRENGTH = "Strength";
-  String DAMAGE = "Damage";
-  String CHARGE_TIME = "ChargeTime";
-  String DURATION = "Duration";
-  String RADIUS = "Radius";
-  String HEIGHT = "Height";
-  String AMOUNT = "Amount";
-  String FIRE_TICKS = "FireTicks";
+  private final String value;
 
-  String[] TYPES = {RANGE, SELECTION, COOLDOWN, SPEED, STRENGTH, DAMAGE, CHARGE_TIME, DURATION, RADIUS, HEIGHT, AMOUNT, FIRE_TICKS};
+  Attribute(String value) {
+    this.value = value;
+  }
+
+  public @NonNull String value() {
+    return value;
+  }
 }

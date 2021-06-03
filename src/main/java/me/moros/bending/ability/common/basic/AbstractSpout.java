@@ -20,7 +20,6 @@
 package me.moros.bending.ability.common.basic;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -36,6 +35,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
   private final User user;
@@ -60,7 +60,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   public @NonNull UpdateResult update() {
     user.entity().setFallDistance(0);
     double maxHeight = height + 2; // Buffer for safety
-    Block block = blockCast(user.locBlock(), maxHeight, ignore::contains).orElse(null);
+    Block block = blockCast(user.locBlock(), maxHeight, ignore::contains);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
     }
@@ -102,20 +102,20 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     }
   }
 
-  public static Optional<Block> blockCast(@NonNull Block origin, double distance) {
+  public static @Nullable Block blockCast(@NonNull Block origin, double distance) {
     return blockCast(origin, distance, b -> false);
   }
 
-  public static Optional<Block> blockCast(@NonNull Block origin, double distance, @NonNull Predicate<Block> ignore) {
+  public static @Nullable Block blockCast(@NonNull Block origin, double distance, @NonNull Predicate<Block> ignore) {
     for (int i = 0; i < distance; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
       boolean isLiquid = check.isLiquid() || MaterialUtil.isWaterPlant(check);
       if ((check.isPassable() && !isLiquid) || ignore.test(check)) {
         continue;
       }
-      return Optional.of(check);
+      return check;
     }
-    return Optional.empty();
+    return null;
   }
 }
 

@@ -19,8 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-import java.util.Optional;
-
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -28,9 +26,10 @@ import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -40,7 +39,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -75,7 +73,7 @@ public class EarthArmor extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthArmor.class)) {
       return false;
     }
@@ -83,32 +81,30 @@ public class EarthArmor extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
-
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.selectRange, b -> EarthMaterials.isEarthNotLava(user, b));
+    if (source == null) {
       return false;
     }
 
-    Block block = source.get();
-    if (EarthMaterials.isMetalBendable(block)) {
-      mode = block.getType() == Material.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
+    if (EarthMaterials.isMetalBendable(source)) {
+      mode = source.getType() == Material.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
       resistance = userConfig.metalPower;
-      SoundUtil.METAL.play(block.getLocation());
+      SoundUtil.METAL.play(source.getLocation());
     } else {
       mode = Mode.ROCK;
       resistance = userConfig.power;
-      SoundUtil.EARTH.play(block.getLocation());
+      SoundUtil.EARTH.play(source.getLocation());
     }
-    BlockData data = block.getBlockData().clone();
-    TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-    fallingBlock = new BendingFallingBlock(block, data, new Vector3(0, 0.2, 0), false, 10000);
+    BlockData data = source.getBlockData().clone();
+    TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
+    fallingBlock = new BendingFallingBlock(source, data, new Vector3(0, 0.2, 0), false, 10000);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;
   }
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -128,30 +124,7 @@ public class EarthArmor extends AbilityInstance {
     if (formed) {
       return;
     }
-    ItemStack head, chest, leggings, boots;
-    switch (mode) {
-      case IRON:
-        head = new ItemStack(Material.IRON_HELMET, 1);
-        chest = new ItemStack(Material.IRON_CHESTPLATE, 1);
-        leggings = new ItemStack(Material.IRON_LEGGINGS, 1);
-        boots = new ItemStack(Material.IRON_BOOTS, 1);
-        break;
-      case GOLD:
-        head = new ItemStack(Material.GOLDEN_HELMET, 1);
-        chest = new ItemStack(Material.GOLDEN_CHESTPLATE, 1);
-        leggings = new ItemStack(Material.GOLDEN_LEGGINGS, 1);
-        boots = new ItemStack(Material.GOLDEN_BOOTS, 1);
-        break;
-      case ROCK:
-      default:
-        head = new ItemStack(Material.LEATHER_HELMET, 1);
-        chest = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-        leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-        boots = new ItemStack(Material.LEATHER_BOOTS, 1);
-        break;
-    }
-
-    TempArmor.create(user, new ItemStack[]{boots, leggings, chest, head}, userConfig.duration);
+    TempArmor.create(user, getArmorSet(mode), userConfig.duration);
     int duration = NumberConversions.round(userConfig.duration / 50.0);
     PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
@@ -210,16 +183,43 @@ public class EarthArmor extends AbilityInstance {
       .map(e -> e.formed).orElse(false);
   }
 
+  private static ItemStack[] getArmorSet(Mode mode) {
+    switch (mode) {
+      case IRON:
+        return new ItemStack[]{
+          new ItemStack(Material.IRON_BOOTS, 1),
+          new ItemStack(Material.IRON_LEGGINGS, 1),
+          new ItemStack(Material.IRON_CHESTPLATE, 1),
+          new ItemStack(Material.IRON_HELMET, 1)
+        };
+      case GOLD:
+        return new ItemStack[]{
+          new ItemStack(Material.GOLDEN_BOOTS, 1),
+          new ItemStack(Material.GOLDEN_LEGGINGS, 1),
+          new ItemStack(Material.GOLDEN_CHESTPLATE, 1),
+          new ItemStack(Material.GOLDEN_HELMET, 1)
+        };
+      case ROCK:
+      default:
+        return new ItemStack[]{
+          new ItemStack(Material.LEATHER_BOOTS, 1),
+          new ItemStack(Material.LEATHER_LEGGINGS, 1),
+          new ItemStack(Material.LEATHER_CHESTPLATE, 1),
+          new ItemStack(Material.LEATHER_HELMET, 1)
+        };
+    }
+  }
+
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long duration;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public int power;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public int metalPower;
 
     @Override

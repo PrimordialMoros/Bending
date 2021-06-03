@@ -216,7 +216,7 @@ public final class BlockMethods {
     return false;
   }
 
-  public static Optional<Block> getTopValid(@NonNull Block block, int height, @NonNull Predicate<Block> predicate) {
+  public static Optional<Block> findTopBlock(@NonNull Block block, int height, @NonNull Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.UP, i);
       if (!predicate.test(check)) {
@@ -226,7 +226,7 @@ public final class BlockMethods {
     return Optional.empty();
   }
 
-  public static Optional<Block> getBottomValid(Block block, int height, @NonNull Predicate<Block> predicate) {
+  public static Optional<Block> findBottomBlock(Block block, int height, @NonNull Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.DOWN, i);
       if (!predicate.test(check)) {

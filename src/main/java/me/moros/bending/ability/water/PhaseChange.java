@@ -32,9 +32,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -63,7 +64,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -72,7 +73,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -83,7 +84,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       return UpdateResult.CONTINUE;
     }
     freeze.processQueue(userConfig.freezeSpeed);
-    if (user.sneaking() && description().equals(user.selectedAbility().orElse(null))) {
+    if (user.sneaking() && description().equals(user.selectedAbility())) {
       melt.processQueue(userConfig.meltSpeed);
     } else {
       melt.clear();
@@ -164,20 +165,20 @@ public class PhaseChange extends AbilityInstance implements Ability {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double freezeRange;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double freezeRadius;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public int freezeSpeed;
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long freezeCooldown;
 
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double meltRange;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double meltRadius;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public int meltSpeed;
 
     @Override

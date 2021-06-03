@@ -119,7 +119,7 @@ public class TranslationManager {
     return fileName.substring(0, fileName.length() - ".properties".length());
   }
 
-  public @Nullable TranslatableComponent getTranslation(@NonNull String key) {
+  public @Nullable TranslatableComponent translate(@NonNull String key) {
     return registry.contains(key) ? Component.translatable(key) : null;
   }
 }

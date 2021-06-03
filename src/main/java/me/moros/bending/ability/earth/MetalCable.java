@@ -33,9 +33,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -65,6 +66,7 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -93,12 +95,12 @@ public class MetalCable extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (!user.hasPermission("bending.metal")) {
       return false;
     }
 
-    if (method == ActivationMethod.SNEAK) {
+    if (method == Activation.SNEAK) {
       Location center = user.entity().getEyeLocation();
       Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
       for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
@@ -108,7 +110,7 @@ public class MetalCable extends AbilityInstance {
         }
       }
       return false;
-    } else if (method == ActivationMethod.ATTACK) {
+    } else if (method == Activation.ATTACK) {
       Optional<MetalCable> cable = Bending.game().abilityManager(user.world()).firstInstance(user, MetalCable.class);
       if (cable.isPresent()) {
         cable.get().tryLaunchTarget();
@@ -128,7 +130,7 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -323,7 +325,7 @@ public class MetalCable extends AbilityInstance {
     if (InventoryUtil.hasMetalArmor(user.entity())) {
       return true;
     }
-    return user.inventory().map(itemStacks -> itemStacks.contains(Material.IRON_INGOT)).orElse(false);
+    return InventoryUtil.hasItem(user, new ItemStack(Material.IRON_INGOT, 1));
   }
 
   private void remove() {
@@ -405,17 +407,17 @@ public class MetalCable extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double projectileRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     private double damage;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     private double pullSpeed;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     private double launchSpeed;
 
     @Override

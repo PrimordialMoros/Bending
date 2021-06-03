@@ -21,101 +21,63 @@ package me.moros.bending.game;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.UUID;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.AbilityAction;
 import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.sequence.SequenceStep;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class SequenceManager {
-  private final Map<AbilityDescription, Sequence> registeredSequences = new HashMap<>();
-  private final Cache<User, Deque<AbilityAction>> cache = Caffeine.newBuilder()
-    .expireAfterAccess(Duration.ofSeconds(10))
-    .build();
-  private final Game game;
+  private final Cache<UUID, Deque<SequenceStep>> cache;
 
-  SequenceManager(@NonNull Game game) {
-    this.game = game;
+  SequenceManager() {
+    cache = Caffeine.newBuilder()
+      .expireAfterAccess(Duration.ofSeconds(10))
+      .build();
   }
 
   public void clear() {
     cache.invalidateAll();
   }
 
-  /**
-   * Register ability sequences. This must be called after all Abilities have been registered in {@link AbilityRegistry}
-   * Note: Some sequences may fail to register if they require a disabled or invalid ability.
-   * @param sequences the map containing all the sequences
-   * @return the amount of sequences that were registered.
-   */
-  public int registerSequences(@NonNull Map<@NonNull AbilityDescription, @NonNull Sequence> sequences) {
-    int i = 0;
-    for (Map.Entry<AbilityDescription, Sequence> entry : sequences.entrySet()) {
-      AbilityDescription desc = entry.getKey();
-      if (!game.abilityRegistry().registered(desc)) {
-        continue;
-      }
-      Sequence sequence = entry.getValue();
-      boolean valid = sequence.actions().stream()
-        .map(AbilityAction::abilityDescription)
-        .allMatch(game.abilityRegistry()::registered);
-      if (valid) {
-        registeredSequences.put(entry.getKey(), sequence);
-        i++;
-      } else {
-        Bending.logger().warn(desc.name() + " sequence will be disabled as it requires an invalid ability to activate.");
-      }
-    }
-    return i;
-  }
-
-  public @Nullable Sequence sequence(@NonNull AbilityDescription desc) {
-    return registeredSequences.get(desc);
-  }
-
-  public void registerAction(@NonNull User user, @NonNull ActivationMethod action) {
-    AbilityDescription desc = user.selectedAbility().orElse(null);
+  public void registerStep(@NonNull User user, @NonNull Activation action) {
+    AbilityDescription desc = user.selectedAbility();
     if (desc == null) {
       return;
     }
-    Deque<AbilityAction> buffer = cache.get(user, u -> new ArrayDeque<>(16));
+    Deque<SequenceStep> buffer = cache.get(user.entity().getUniqueId(), u -> new ArrayDeque<>(16));
     if (buffer.size() >= 16) {
       buffer.removeFirst();
     }
-    buffer.addLast(new AbilityAction(desc, action));
-    for (Map.Entry<AbilityDescription, Sequence> entry : registeredSequences.entrySet()) {
+    buffer.addLast(new SequenceStep(desc, action));
+    List<SequenceStep> bufferSteps = new ArrayList<>(buffer);
+    var it = Registries.ABILITIES.sequenceIterator();
+    while (it.hasNext()) {
+      var entry = it.next();
       AbilityDescription sequenceDesc = entry.getKey();
       Sequence sequence = entry.getValue();
-      if (sequence.matches(buffer.toArray(new AbilityAction[0]))) {
+      if (sequence.matches(bufferSteps)) {
         if (!user.canBend(sequenceDesc)) {
           continue;
         }
         Ability ability = sequenceDesc.createAbility();
-        if (ability.activate(user, ActivationMethod.SEQUENCE)) {
-          game.abilityManager(user.world()).addAbility(user, ability);
+        if (ability.activate(user, Activation.SEQUENCE)) {
+          Bending.game().abilityManager(user.world()).addAbility(user, ability);
         }
         buffer.clear(); // Consume all actions in the buffer
         return;
       }
     }
-  }
-
-  /**
-   * Note: this will include hidden abilities. You will need to filter them.
-   * @return a stream of all the registered sequences
-   */
-  public @NonNull Stream<AbilityDescription> sequences() {
-    return registeredSequences.keySet().stream();
   }
 }

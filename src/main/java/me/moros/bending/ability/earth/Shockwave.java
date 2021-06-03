@@ -31,9 +31,10 @@ import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -83,8 +84,8 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, Shockwave.class)
         .ifPresent(s -> s.release(true));
       return false;
@@ -99,7 +100,7 @@ public class Shockwave extends AbilityInstance {
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
-    if (method == ActivationMethod.FALL) {
+    if (method == Activation.FALL) {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
@@ -112,7 +113,7 @@ public class Shockwave extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -252,17 +253,17 @@ public class Shockwave extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long chargeTime;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockback;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double coneRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double ringRange;
     public double fallThreshold;
 

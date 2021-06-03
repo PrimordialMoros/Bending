@@ -17,10 +17,11 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.game;
+package me.moros.bending.registry;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,6 +34,7 @@ import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
+import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.BendingProfile;
 import me.moros.bending.storage.BendingStorage;
@@ -44,18 +46,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Registry for all valid benders
  */
-public final class BenderRegistry {
-  private final AsyncLoadingCache<UUID, BendingProfile> cache;
+public final class BenderRegistry implements Registry<User> {
+  private AsyncLoadingCache<UUID, BendingProfile> cache;
   private final Map<UUID, BendingPlayer> players;
   private final Map<UUID, BendingUser> entities;
 
-  BenderRegistry(@NonNull BendingStorage storage) {
-    cache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2)).buildAsync(storage::createProfile);
+  BenderRegistry() {
     players = new ConcurrentHashMap<>();
     entities = new ConcurrentHashMap<>();
   }
 
-  public boolean isRegistered(@NonNull UUID uuid) {
+  public void init(@NonNull BendingStorage storage) {
+    if (cache == null) {
+      Objects.requireNonNull(storage);
+      cache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2)).buildAsync(storage::createProfile);
+    }
+  }
+
+  public boolean contains(@NonNull UUID uuid) {
     return players.containsKey(uuid) || entities.containsKey(uuid);
   }
 
@@ -78,14 +86,16 @@ public final class BenderRegistry {
     return players.values().stream().filter(BendingPlayer::valid).collect(Collectors.toList());
   }
 
-  public void invalidateUser(@NonNull UUID uuid) {
+  public void invalidate(@NonNull UUID uuid) {
     players.remove(uuid);
     entities.remove(uuid);
-    cache.synchronous().invalidate(uuid);
+    if (cache != null) {
+      cache.synchronous().invalidate(uuid);
+    }
   }
 
   public void register(@NonNull LivingEntity entity, @NonNull BenderData data) {
-    if (isRegistered(entity.getUniqueId())) {
+    if (contains(entity.getUniqueId())) {
       return;
     }
     if (entity instanceof Player) {
@@ -97,7 +107,7 @@ public final class BenderRegistry {
   }
 
   public void register(@NonNull Player player, @NonNull BendingProfile profile) {
-    if (isRegistered(player.getUniqueId())) {
+    if (contains(player.getUniqueId())) {
       return;
     }
     BendingPlayer.createUser(player, profile).ifPresent(user -> {
@@ -109,10 +119,49 @@ public final class BenderRegistry {
   }
 
   public @Nullable BendingProfile profileSync(@NonNull UUID uuid) {
+    if (cache == null) {
+      return null;
+    }
     return cache.synchronous().get(uuid);
   }
 
   public @NonNull CompletableFuture<@Nullable BendingProfile> profile(@NonNull UUID uuid) {
+    if (cache == null) {
+      return CompletableFuture.completedFuture(null);
+    }
     return cache.get(uuid);
+  }
+
+  @Override
+  public @NonNull Iterator<User> iterator() {
+    return new UserIterator(players.values().iterator(), entities.values().iterator());
+  }
+
+  private static class UserIterator implements Iterator<User> {
+    private final Iterator<BendingPlayer> first;
+    private final Iterator<BendingUser> second;
+
+    private UserIterator(Iterator<BendingPlayer> first, Iterator<BendingUser> second) {
+      this.first = first;
+      this.second = second;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return first.hasNext() || second.hasNext();
+    }
+
+    @Override
+    public User next() {
+      if (first.hasNext()) {
+        return first.next();
+      }
+      return second.next();
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 }

@@ -29,9 +29,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3;
@@ -69,7 +70,7 @@ public class AirBlast extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
@@ -84,7 +85,7 @@ public class AirBlast extends AbilityInstance {
 
     for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).collect(Collectors.toList())) {
       if (!blast.launched) {
-        if (method == ActivationMethod.SNEAK_RELEASE) {
+        if (method == Activation.SNEAK_RELEASE) {
           if (!blast.selectOrigin()) {
             Bending.game().abilityManager(user.world()).destroyInstance(blast);
           }
@@ -95,7 +96,7 @@ public class AirBlast extends AbilityInstance {
       }
     }
 
-    if (method == ActivationMethod.SNEAK_RELEASE) {
+    if (method == Activation.SNEAK_RELEASE) {
       return selectOrigin();
     }
     origin = user.eyeLocation();
@@ -105,7 +106,7 @@ public class AirBlast extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -115,7 +116,7 @@ public class AirBlast extends AbilityInstance {
     }
 
     if (!launched) {
-      if (!description().equals(user.selectedAbility().orElse(null))) {
+      if (!description().equals(user.selectedAbility())) {
         return UpdateResult.REMOVE;
       }
       ParticleUtil.createAir(origin.toLocation(user.world())).count(4).offset(0.5, 0.5, 0.5).spawn();
@@ -231,17 +232,17 @@ public class AirBlast extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double self;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double other;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
 
     @Override

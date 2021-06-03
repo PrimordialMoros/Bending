@@ -22,7 +22,9 @@ package me.moros.bending.storage;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -152,7 +154,7 @@ public final class StorageImpl implements BendingStorage {
    * @param abilities the abilities to add
    */
   @Override
-  public boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities) {
+  public boolean createAbilities(@NonNull Iterable<AbilityDescription> abilities) {
     try {
       DB.useHandle(handle -> {
         PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
@@ -187,7 +189,7 @@ public final class StorageImpl implements BendingStorage {
           String abilityName = (String) map.get("ability_name");
           abilities[slot - 1] = abilityName;
         }
-        return new Preset(presetId, name, abilities);
+        return new Preset(presetId, name, Arrays.asList(abilities));
       });
     } catch (Exception e) {
       logger.severe(e.getMessage());
@@ -255,13 +257,13 @@ public final class StorageImpl implements BendingStorage {
 
   private boolean saveSlots(BendingPlayer player) {
     int id = player.profile().id();
-    Preset temp = player.createPresetFromSlots("");
+    List<String> abilities = player.createPresetFromSlots("").abilities();
     try {
       DB.useHandle(handle -> {
         handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE_FOR_ID.query()).bind(0, id).execute();
         PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT_NEW.query());
-        for (int slot = 0; slot < temp.abilities().length; slot++) {
-          int abilityId = getAbilityId(temp.abilities()[slot]);
+        for (int slot = 0; slot < abilities.size(); slot++) {
+          int abilityId = getAbilityId(abilities.get(slot));
           if (abilityId == 0) {
             continue;
           }
@@ -283,17 +285,18 @@ public final class StorageImpl implements BendingStorage {
     if (!deletePreset(playerId, preset.name())) {
       return false; // needed for overwriting
     }
+    List<String> abilities = preset.abilities();
     try {
       DB.useHandle(handle -> {
         int presetId = (int) handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
           .bind(0, playerId).bind(1, preset.name())
           .executeAndReturnGeneratedKeys()
           .mapToMap().one().get("preset_id");
-        String[] abilities = preset.abilities();
+
         PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT_NEW.query());
         batch.execute();
-        for (int i = 0; i < 9; i++) {
-          String abilityName = abilities[i];
+        for (int slot = 0; slot < abilities.size(); slot++) {
+          String abilityName = abilities.get(slot);
           if (abilityName == null) {
             continue;
           }
@@ -301,7 +304,7 @@ public final class StorageImpl implements BendingStorage {
           if (abilityId == 0) {
             continue;
           }
-          batch.bind(0, presetId).bind(1, i + 1).bind(2, abilityId).add();
+          batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
         }
         batch.execute();
       });

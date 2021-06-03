@@ -21,36 +21,36 @@ package me.moros.bending.model.ability.sequence;
 
 import java.util.Objects;
 
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link ActivationMethod}
+ * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link Activation}
  */
-public final class AbilityAction {
+public final class SequenceStep {
   private final AbilityDescription desc;
-  private final ActivationMethod action;
+  private final Activation action;
   private final int hashcode;
 
-  public AbilityAction(@NonNull AbilityDescription desc, @NonNull ActivationMethod action) {
+  public SequenceStep(@NonNull AbilityDescription desc, @NonNull Activation action) {
     this.desc = desc;
     this.action = action;
     hashcode = Objects.hash(desc, action);
   }
 
-  public @NonNull AbilityDescription abilityDescription() {
+  public @NonNull AbilityDescription ability() {
     return desc;
   }
 
-  public @NonNull ActivationMethod action() {
+  public @NonNull Activation activation() {
     return action;
   }
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof AbilityAction) {
-      AbilityAction otherAction = ((AbilityAction) other);
+    if (other instanceof SequenceStep) {
+      SequenceStep otherAction = ((SequenceStep) other);
       return action == otherAction.action && desc.equals(otherAction.desc);
     }
     return false;

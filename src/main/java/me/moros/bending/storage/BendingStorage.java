@@ -44,7 +44,7 @@ public interface BendingStorage extends Storage {
 
   boolean createElements(@NonNull Set<@NonNull Element> elements);
 
-  boolean createAbilities(@NonNull Set<@NonNull AbilityDescription> abilities);
+  boolean createAbilities(@NonNull Iterable<AbilityDescription> abilities);
 
   @Nullable Preset loadPreset(int playerId, @NonNull String name);
 

@@ -28,9 +28,10 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
@@ -39,6 +40,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.FireTick;
@@ -82,7 +84,7 @@ public class FireWall extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
@@ -114,7 +116,7 @@ public class FireWall extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -241,7 +243,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!cachedEntities.contains(entity)) {
-      User entityUser = Bending.game().benderRegistry().user((LivingEntity) entity);
+      User entityUser = Registries.BENDERS.user((LivingEntity) entity);
       if (entityUser == null || HeatControl.canBurn(entityUser)) {
         FireTick.ignite(user, entity);
         if (!damagedEntities.contains(entity)) {
@@ -270,24 +272,24 @@ public class FireWall extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public double height;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double width;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double knockback;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long duration;
 
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double maxRange;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public double maxHeight;
 
     @Override

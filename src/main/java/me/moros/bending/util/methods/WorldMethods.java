@@ -21,7 +21,6 @@ package me.moros.bending.util.methods;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
@@ -31,11 +30,13 @@ import me.moros.bending.util.collision.AABBUtils;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
@@ -142,7 +143,7 @@ public final class WorldMethods {
   /**
    * @return {@link #rayTraceBlocks(World, Ray, double, boolean, boolean)} ignoring liquids and passable blocks
    */
-  public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range) {
+  public static @Nullable Block rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range) {
     return rayTraceBlocks(world, ray, range, true, true);
   }
 
@@ -153,27 +154,21 @@ public final class WorldMethods {
    * @param range the maximum range to check
    * @param ignoreLiquids whether liquids should be ignored
    * @param ignorePassable whether passable blocks should be ignored
-   * @return Optional of the result block
+   * @return the first valid block in ray's path if found, null otherwise
    */
-  public static Optional<Block> rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range, boolean ignoreLiquids, boolean ignorePassable) {
+  public static @Nullable Block rayTraceBlocks(@NonNull World world, @NonNull Ray ray, double range, boolean ignoreLiquids, boolean ignorePassable) {
     Location origin = ray.origin.toLocation(world);
     Vector dir = ray.direction.toBukkitVector();
     FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
     RayTraceResult result = world.rayTraceBlocks(origin, dir, range, fluid, ignorePassable);
-    return result == null ? Optional.empty() : Optional.ofNullable(result.getHitBlock());
+    return result == null ? null : result.getHitBlock();
   }
 
   public static boolean isDay(@NonNull World world) {
-    if (world.getEnvironment() != World.Environment.NORMAL) {
-      return false;
-    }
-    return world.isDayTime();
+    return world.getEnvironment() == Environment.NORMAL && world.isDayTime();
   }
 
   public static boolean isNight(@NonNull World world) {
-    if (world.getEnvironment() != World.Environment.NORMAL) {
-      return false;
-    }
-    return !world.isDayTime();
+    return world.getEnvironment() == Environment.NORMAL && !world.isDayTime();
   }
 }

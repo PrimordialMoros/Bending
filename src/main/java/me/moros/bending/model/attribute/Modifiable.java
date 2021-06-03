@@ -19,23 +19,13 @@
 
 package me.moros.bending.model.attribute;
 
-import java.util.function.DoubleFunction;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-public enum AttributeConverter implements DoubleFunction<Number> {
-  DOUBLE(x -> x),
-  INT(x -> (int) x),
-  LONG(x -> (long) x);
-
-  private final DoubleFunction<Number> converter;
-
-  AttributeConverter(DoubleFunction<Number> converter) {
-    this.converter = converter;
-  }
-
-  @Override
-  public @NonNull Number apply(double input) {
-    return converter.apply(input);
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Modifiable {
+  Attribute value();
 }

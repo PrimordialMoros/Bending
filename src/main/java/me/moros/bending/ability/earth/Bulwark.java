@@ -21,22 +21,21 @@ package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -61,17 +60,17 @@ public class Bulwark extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
-    Optional<Block> source = SourceUtil.find(user, 4, b -> EarthMaterials.isEarthNotLava(user, b));
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.wallRange, b -> EarthMaterials.isEarthNotLava(user, b));
+    if (source == null) {
       return false;
     }
 
     RaiseEarth raiseWall = new RaiseEarth(description());
-    if (raiseWall.activate(user, source.get(), 2, 3, 75)) {
+    if (raiseWall.activate(user, source, 2, 3, 75)) {
       removalPolicy = Policies.builder()
         .add(ExpireRemovalPolicy.of(5000 + userConfig.wallDuration))
         .build();
@@ -86,7 +85,7 @@ public class Bulwark extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -120,10 +119,12 @@ public class Bulwark extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long wallCooldown;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long wallDuration;
+    @Modifiable(Attribute.RANGE)
+    public double wallRange;
 
     @Override
     public void onConfigReload() {
@@ -131,6 +132,7 @@ public class Bulwark extends AbilityInstance {
 
       wallCooldown = abilityNode.node("cooldown").getLong(3000);
       wallDuration = abilityNode.node("duration").getLong(2000);
+      wallRange = abilityNode.node("range").getDouble(4.5);
     }
   }
 }

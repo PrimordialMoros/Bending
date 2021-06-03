@@ -32,7 +32,7 @@ import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
 import me.moros.bending.model.AbilityManager;
-import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -84,8 +84,8 @@ public final class WorldManager {
     worlds.values().forEach(w -> w.abilities.destroyAllInstances());
   }
 
-  public void createPassives(@NonNull BendingPlayer player) {
-    instance(player.world()).createPassives(player);
+  public void createPassives(@NonNull User user) {
+    instance(user.world()).createPassives(user);
   }
 
   public boolean isDisabledWorld(@NonNull UUID worldID) {
@@ -93,7 +93,7 @@ public final class WorldManager {
   }
 
   private static class ManagerPair {
-    private final AbilityManagerImpl abilities;
+    private final AbilityManager abilities;
     private final CollisionManager collisions;
 
     private ManagerPair() {

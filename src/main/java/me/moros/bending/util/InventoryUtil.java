@@ -35,11 +35,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class to handle inventory modification.
  */
 public final class InventoryUtil {
-  private static final ItemStack emptyBottle = new ItemStack(Material.POTION);
-  private static final ItemStack waterBottle;
+  private static final ItemStack emptyBottle = new ItemStack(Material.POTION, 1);
+  private static final ItemStack waterBottle = new ItemStack(Material.POTION, 1);
 
   static {
-    waterBottle = new ItemStack(Material.POTION, 1);
     PotionMeta potionMeta = (PotionMeta) waterBottle.getItemMeta();
     potionMeta.setBasePotionData(new PotionData(PotionType.WATER, false, false));
     waterBottle.setItemMeta(potionMeta);
@@ -49,7 +48,8 @@ public final class InventoryUtil {
   }
 
   public static boolean hasItem(@NonNull User user, @NonNull ItemStack itemStack) {
-    return user.inventory().map(i -> i.containsAtLeast(itemStack, 1)).orElse(false);
+    Inventory inventory = user.inventory();
+    return inventory != null && inventory.containsAtLeast(itemStack, itemStack.getAmount());
   }
 
   public static boolean hasFullBottle(@NonNull User user) {
@@ -64,29 +64,24 @@ public final class InventoryUtil {
     if (!hasItem(user, itemStack)) {
       return false;
     }
-    return user.inventory().map(i -> i.removeItem(itemStack).isEmpty()).orElse(false);
+    Inventory inventory = user.inventory();
+    return inventory != null && inventory.removeItem(itemStack).isEmpty();
   }
 
   public static boolean fillBottle(@NonNull User user) {
     if (!hasEmptyBottle(user)) {
       return false;
     }
-    if (user.inventory().isPresent()) {
-      Inventory inventory = user.inventory().get();
-      return inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
-    }
-    return false;
+    Inventory inventory = user.inventory();
+    return inventory != null && inventory.removeItem(emptyBottle).isEmpty() && inventory.addItem(waterBottle).isEmpty();
   }
 
   public static boolean emptyBottle(@NonNull User user) {
     if (!hasFullBottle(user)) {
       return false;
     }
-    if (user.inventory().isPresent()) {
-      Inventory inventory = user.inventory().get();
-      return inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
-    }
-    return false;
+    Inventory inventory = user.inventory();
+    return inventory != null && inventory.removeItem(waterBottle).isEmpty() && inventory.addItem(emptyBottle).isEmpty();
   }
 
   public static boolean hasMetalArmor(@NonNull LivingEntity entity) {

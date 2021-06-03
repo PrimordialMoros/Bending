@@ -180,11 +180,11 @@ public final class MaterialUtil {
   }
 
   // Finds a suitable solid block type to replace a falling-type block with.
-  public static @NonNull BlockData getSolidType(@NonNull BlockData data) {
-    return getSolidType(data, data);
+  public static @NonNull BlockData solidType(@NonNull BlockData data) {
+    return solidType(data, data);
   }
 
-  public static @NonNull BlockData getSolidType(@NonNull BlockData data, BlockData def) {
+  public static @NonNull BlockData solidType(@NonNull BlockData data, @NonNull BlockData def) {
     if (MaterialTags.CONCRETE_POWDER.isTagged(data)) {
       Material material = Material.getMaterial(data.getMaterial().name().replace("_POWDER", ""));
       return material == null ? def : material.createBlockData();
@@ -201,12 +201,12 @@ public final class MaterialUtil {
     }
   }
 
-  public static @NonNull BlockData getFocusedType(@NonNull BlockData data) {
-    return data.getMaterial() == Material.STONE ? Material.COBBLESTONE.createBlockData() : getSolidType(data, Material.STONE.createBlockData());
+  public static @NonNull BlockData focusedType(@NonNull BlockData data) {
+    return data.getMaterial() == Material.STONE ? Material.COBBLESTONE.createBlockData() : solidType(data, Material.STONE.createBlockData());
   }
 
   // Finds a suitable soft block type to replace a solid block
-  public static @NonNull BlockData getSoftType(@NonNull BlockData data) {
+  public static @NonNull BlockData softType(@NonNull BlockData data) {
     if (data.getMaterial() == Material.SAND || MaterialTags.SANDSTONES.isTagged(data)) {
       return Material.SAND.createBlockData();
     } else if (data.getMaterial() == Material.RED_SAND || MaterialTags.RED_SANDSTONES.isTagged(data)) {

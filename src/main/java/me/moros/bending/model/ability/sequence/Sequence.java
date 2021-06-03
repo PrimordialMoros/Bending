@@ -22,7 +22,7 @@ package me.moros.bending.model.ability.sequence;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -32,10 +32,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Immutable and thread-safe representation of a sequence
  */
 public final class Sequence {
-  private final List<AbilityAction> sequence = new ArrayList<>();
+  private final List<SequenceStep> sequence = new ArrayList<>();
   private Component instructions;
 
-  public Sequence(@NonNull AbilityAction action, @NonNull AbilityAction... actions) {
+  public Sequence(@NonNull SequenceStep action, @NonNull SequenceStep... actions) {
     this.sequence.add(action);
     this.sequence.addAll(List.of(actions));
   }
@@ -43,7 +43,7 @@ public final class Sequence {
   /**
    * @return Unmodifiable view of this sequence's actions
    */
-  public @NonNull List<@NonNull AbilityAction> actions() {
+  public @NonNull List<@NonNull SequenceStep> actions() {
     return List.copyOf(sequence);
   }
 
@@ -54,20 +54,20 @@ public final class Sequence {
     return instructions;
   }
 
-  private static Component generateInstructions(List<AbilityAction> actions) {
+  private static Component generateInstructions(List<SequenceStep> actions) {
     TextComponent.Builder builder = Component.text();
     for (int i = 0; i < actions.size(); i++) {
-      AbilityAction abilityAction = actions.get(i);
+      SequenceStep sequenceStep = actions.get(i);
       if (i != 0) {
         builder.append(Component.text(" > "));
       }
-      AbilityDescription desc = abilityAction.abilityDescription();
-      ActivationMethod action = abilityAction.action();
+      AbilityDescription desc = sequenceStep.ability();
+      Activation action = sequenceStep.activation();
       String actionKey = action.key();
-      if (action == ActivationMethod.SNEAK && i + 1 < actions.size()) {
+      if (action == Activation.SNEAK && i + 1 < actions.size()) {
         // Check if the next instruction is to release sneak.
-        AbilityAction next = actions.get(i + 1);
-        if (desc.equals(next.abilityDescription()) && next.action() == ActivationMethod.SNEAK_RELEASE) {
+        SequenceStep next = actions.get(i + 1);
+        if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
           actionKey = "bending.activation.sneak-tap";
           i++;
         }
@@ -78,15 +78,15 @@ public final class Sequence {
     return builder.build();
   }
 
-  public boolean matches(@NonNull AbilityAction[] actions) {
-    int actionsLength = actions.length - 1;
+  public boolean matches(@NonNull List<@NonNull SequenceStep> actions) {
+    int actionsLength = actions.size() - 1;
     int sequenceLength = sequence.size() - 1;
     if (actionsLength < sequenceLength) {
       return false;
     }
     for (int i = 0; i <= sequenceLength; i++) {
-      AbilityAction first = sequence.get(sequenceLength - i);
-      AbilityAction second = actions[actionsLength - i];
+      SequenceStep first = sequence.get(sequenceLength - i);
+      SequenceStep second = actions.get(actionsLength - i);
       if (!first.equals(second)) {
         return false;
       }

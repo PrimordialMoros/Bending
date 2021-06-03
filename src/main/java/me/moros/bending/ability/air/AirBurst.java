@@ -29,9 +29,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -70,8 +71,8 @@ public class AirBurst extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, AirBurst.class)
         .ifPresent(b -> b.release(Mode.CONE));
       return false;
@@ -82,7 +83,7 @@ public class AirBurst extends AbilityInstance {
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
-    if (method == ActivationMethod.FALL) {
+    if (method == Activation.FALL) {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
@@ -94,7 +95,7 @@ public class AirBurst extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -233,17 +234,17 @@ public class AirBurst extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public int chargeTime;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double power;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double sphereRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double coneRange;
     public double fallThreshold;
 

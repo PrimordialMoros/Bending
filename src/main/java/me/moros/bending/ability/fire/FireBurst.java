@@ -34,9 +34,10 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
@@ -79,8 +80,8 @@ public class FireBurst extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, FireBurst.class)
         .ifPresent(b -> b.release(true));
       return false;
@@ -97,7 +98,7 @@ public class FireBurst extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -211,7 +212,7 @@ public class FireBurst extends AbilityInstance {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2).isPresent()) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2) == null) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {
@@ -226,20 +227,20 @@ public class FireBurst extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public int chargeTime;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.FIRE_TICKS)
+    @Modifiable(Attribute.FIRE_TICKS)
     public int fireTicks;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
 
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double sphereRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double coneRange;
 
     @Override

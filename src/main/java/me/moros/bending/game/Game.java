@@ -20,7 +20,6 @@
 package me.moros.bending.game;
 
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.BendingFallingBlock;
@@ -29,6 +28,7 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.Flight;
@@ -43,31 +43,23 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public final class Game {
   private final BendingStorage storage;
-  private final ProtectionSystem protectionSystem;
 
-  private final AbilityRegistry abilityRegistry;
   private final SequenceManager sequenceManager;
   private final WorldManager worldManager;
 
-  private final AttributeSystem attributeSystem;
   private final ActivationController activationController;
   private final BoardManager boardManager;
 
-  private final BenderRegistry benderRegistry;
-
   public Game(@NonNull BendingStorage storage) {
     this.storage = storage;
-    protectionSystem = new ProtectionSystem();
 
-    abilityRegistry = new AbilityRegistry();
-    sequenceManager = new SequenceManager(this);
+    sequenceManager = new SequenceManager();
     worldManager = new WorldManager();
 
-    attributeSystem = new AttributeSystem();
-    activationController = new ActivationController(this);
+    activationController = new ActivationController();
     boardManager = new BoardManager();
 
-    new AbilityInitializer(this);
+    new AbilityInitializer();
     loadStorage();
 
     TempArmor.init();
@@ -75,7 +67,8 @@ public final class Game {
     TempArmorStand.init();
     BendingFallingBlock.init();
 
-    benderRegistry = new BenderRegistry(storage);
+    Registries.PROTECTIONS.init();
+    Registries.BENDERS.init(storage);
 
     Tasker.repeatingTask(this::update, 1);
     Tasker.repeatingTask(FireTick::cleanup, 5);
@@ -97,7 +90,7 @@ public final class Game {
     removeTemporary();
     Bending.configManager().reload();
     Bending.translationManager().reload();
-    benderRegistry.onlinePlayers().forEach(worldManager::createPassives);
+    Registries.BENDERS.forEach(worldManager::createPassives);
   }
 
   public void cleanup() {
@@ -105,7 +98,8 @@ public final class Game {
     removeTemporary();
     Flight.removeAll();
     MovementHandler.resetAll();
-    benderRegistry.onlinePlayers().forEach(storage::savePlayerAsync);
+    Registries.BENDERS.onlinePlayers().forEach(storage::savePlayerAsync);
+    Tasker.INSTANCE.shutdown();
     storage.close();
   }
 
@@ -118,19 +112,11 @@ public final class Game {
 
   private void loadStorage() {
     storage.createElements(Element.all());
-    storage.createAbilities(abilityRegistry.abilities().collect(Collectors.toSet()));
+    storage.createAbilities(Registries.ABILITIES);
   }
 
   public @NonNull BendingStorage storage() {
     return storage;
-  }
-
-  public @NonNull ProtectionSystem protectionSystem() {
-    return protectionSystem;
-  }
-
-  public @NonNull AbilityRegistry abilityRegistry() {
-    return abilityRegistry;
   }
 
   public @NonNull SequenceManager sequenceManager() {
@@ -145,19 +131,11 @@ public final class Game {
     return worldManager;
   }
 
-  public @NonNull AttributeSystem attributeSystem() {
-    return attributeSystem;
-  }
-
   public @NonNull ActivationController activationController() {
     return activationController;
   }
 
   public @NonNull BoardManager boardManager() {
     return boardManager;
-  }
-
-  public @NonNull BenderRegistry benderRegistry() {
-    return benderRegistry;
   }
 }

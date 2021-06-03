@@ -40,11 +40,12 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -58,7 +59,6 @@ import me.moros.bending.util.FireTick;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -99,8 +99,8 @@ public class EarthLine extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
       return false;
     }
@@ -108,11 +108,11 @@ public class EarthLine extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Block source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
+    Block source = user.find(userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b));
     if (source == null || !MaterialUtil.isTransparent(source.getRelative(BlockFace.UP))) {
       return false;
     }
-    BlockData fakeData = MaterialUtil.getFocusedType(source.getBlockData());
+    BlockData fakeData = MaterialUtil.focusedType(source.getBlockData());
     Optional<EarthLine> line = Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
       State state = line.get().states.current();
@@ -132,7 +132,7 @@ public class EarthLine extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -353,19 +353,19 @@ public class EarthLine extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double explosionRadius;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double explosionDamage;
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long prisonDuration;
 
     @Override

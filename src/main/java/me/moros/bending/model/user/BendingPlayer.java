@@ -27,14 +27,16 @@ import java.util.concurrent.CompletableFuture;
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.game.BenderRegistry;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.registry.BenderRegistry;
+import me.moros.bending.registry.Registries;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingPlayer extends BendingUser implements PresetUser {
   private final BendingProfile profile;
@@ -67,7 +69,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public Optional<AbilityDescription> selectedAbility() {
+  public @Nullable AbilityDescription selectedAbility() {
     return boundAbility(currentSlot());
   }
 
@@ -161,7 +163,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
    * Use {@link BenderRegistry#register(Player, BendingProfile)}
    */
   public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull BendingProfile profile) {
-    if (Bending.game().benderRegistry().isRegistered(player.getUniqueId())) {
+    if (Registries.BENDERS.contains(player.getUniqueId())) {
       return Optional.empty();
     }
     BendingPlayer bendingPlayer = new BendingPlayer(player, profile);

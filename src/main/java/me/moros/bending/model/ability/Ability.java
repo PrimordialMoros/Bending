@@ -37,7 +37,7 @@ public interface Ability extends Updatable {
    * @param method the type of activation that is used
    * @return true if ability was successfully activated, false otherwise
    */
-  boolean activate(@NonNull User user, @NonNull ActivationMethod method);
+  boolean activate(@NonNull User user, @NonNull Activation method);
 
   /**
    * Load the config and apply any possible modifiers.

@@ -67,9 +67,9 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
    * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  public BlockShot(@NonNull User user, @NonNull Block block, double range, int speed) {
+  public BlockShot(@NonNull User user, @NonNull Block block, @NonNull Material material, double range, int speed) {
     this.user = user;
-    this.material = block.getType();
+    this.material = material;
     this.location = Vector3.center(block);
     this.range = range;
     this.speed = Math.min(100, speed);
@@ -157,9 +157,15 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
 
   public void redirect() {
     Block ignore = location.toBlock(user.world());
+    Predicate<Block> predicate;
+    if (material == Material.WATER) {
+      predicate = b -> b.equals(ignore) || MaterialUtil.isWater(b);
+    } else {
+      predicate = b -> b.equals(ignore);
+    }
     target = user.rayTraceEntity(range)
       .map(e -> new Vector3(e.getEyeLocation()))
-      .orElseGet(() -> user.rayTrace(range, b -> b.equals(ignore)))
+      .orElseGet(() -> user.rayTrace(range, predicate))
       .snapToBlockCenter();
     settingUp = false;
   }

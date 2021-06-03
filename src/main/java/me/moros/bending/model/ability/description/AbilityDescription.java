@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -44,7 +44,7 @@ public class AbilityDescription {
   private final String name;
   private final Function<AbilityDescription, ? extends Ability> constructor;
   private final Element element;
-  private final EnumSet<ActivationMethod> activationMethods;
+  private final EnumSet<Activation> activations;
   private final boolean hidden;
   private final boolean canBind;
   private final boolean sourcePlant;
@@ -55,12 +55,12 @@ public class AbilityDescription {
     name = builder.name;
     constructor = builder.constructor;
     element = builder.element;
-    activationMethods = builder.activationMethods;
-    canBind = builder.canBind && !isActivatedBy(ActivationMethod.SEQUENCE);
+    activations = builder.activations;
+    canBind = builder.canBind && !isActivatedBy(Activation.SEQUENCE);
     hidden = builder.hidden;
     sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
-    hashcode = Objects.hash(name, constructor, element, activationMethods, hidden, canBind, sourcePlant, bypassCooldown);
+    hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
     createAbility(); // Init config values
   }
 
@@ -92,8 +92,8 @@ public class AbilityDescription {
     return bypassCooldown;
   }
 
-  public boolean isActivatedBy(@NonNull ActivationMethod method) {
-    return activationMethods.contains(method);
+  public boolean isActivatedBy(@NonNull Activation method) {
+    return activations.contains(method);
   }
 
   public @NonNull Ability createAbility() {
@@ -106,19 +106,19 @@ public class AbilityDescription {
 
   public @NonNull Component meta() {
     String type = "Ability";
-    if (isActivatedBy(ActivationMethod.PASSIVE)) {
+    if (isActivatedBy(Activation.PASSIVE)) {
       type = "Passive";
-    } else if (isActivatedBy(ActivationMethod.SEQUENCE)) {
+    } else if (isActivatedBy(Activation.SEQUENCE)) {
       type = "Sequence";
     }
-    Component details = displayName().append(Component.newline())
+    Component details = Component.text().append(displayName()).append(Component.newline())
       .append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
       .append(element().displayName().append(Component.newline()))
       .append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
       .append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
       .append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
       .append(Component.text(permission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
-      .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY));
+      .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY)).build();
 
     return Component.text(name(), element().color())
       .hoverEvent(HoverEvent.showText(details))
@@ -150,7 +150,7 @@ public class AbilityDescription {
     private final String name;
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private Element element;
-    private EnumSet<ActivationMethod> activationMethods;
+    private EnumSet<Activation> activations;
     private boolean canBind = true;
     private boolean hidden = false;
     private boolean sourcePlant = false;
@@ -166,13 +166,13 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder activation(@NonNull ActivationMethod method, @Nullable ActivationMethod... methods) {
-      Collection<ActivationMethod> c = new ArrayList<>();
+    public @NonNull AbilityDescriptionBuilder activation(@NonNull Activation method, @Nullable Activation... methods) {
+      Collection<Activation> c = new ArrayList<>();
       if (methods != null) {
         c.addAll(List.of(methods));
       }
       c.add(method);
-      activationMethods = EnumSet.copyOf(c);
+      activations = EnumSet.copyOf(c);
       return this;
     }
 
@@ -203,8 +203,8 @@ public class AbilityDescription {
 
     private void validate() {
       Objects.requireNonNull(element, "Element cannot be null");
-      Objects.requireNonNull(activationMethods, "Activation Methods cannot be null");
-      if (activationMethods.isEmpty()) {
+      Objects.requireNonNull(activations, "Activation Methods cannot be null");
+      if (activations.isEmpty()) {
         throw new IllegalStateException("Activation methods cannot be empty");
       }
     }

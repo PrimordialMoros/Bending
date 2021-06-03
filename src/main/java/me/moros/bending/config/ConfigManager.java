@@ -20,18 +20,41 @@
 package me.moros.bending.config;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
+import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.AttributeConverter;
+import me.moros.bending.model.attribute.AttributeModifier;
+import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.attribute.ModifierOperation;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ConfigManager {
+public final class ConfigManager {
+  private static final Map<Class<? extends Number>, AttributeConverter> converters;
+
+  static {
+    converters = Map.of(Double.class, AttributeConverter.DOUBLE,
+      Integer.class, AttributeConverter.INT,
+      Long.class, AttributeConverter.LONG,
+      double.class, AttributeConverter.DOUBLE,
+      int.class, AttributeConverter.INT,
+      long.class, AttributeConverter.LONG
+    );
+  }
+
   private final Collection<Configurable> instances = new ArrayList<>();
   private final HoconConfigurationLoader loader;
 
@@ -72,5 +95,78 @@ public class ConfigManager {
 
   public void add(@NonNull Configurable c) {
     instances.add(c);
+  }
+
+  @SuppressWarnings({"unchecked", "deprecation"})
+  public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
+    Collection<AttributeModifier> userModifiers = Registries.ATTRIBUTES.get(ability.user().entity().getUniqueId());
+    if (userModifiers.isEmpty()) {
+      return config;
+    }
+
+    AbilityDescription desc = ability.description();
+    Collection<AttributeModifier> activeModifiers = userModifiers.stream()
+      .filter(modifier -> modifier.policy().shouldModify(desc)).collect(Collectors.toList());
+
+    if (activeModifiers.isEmpty()) {
+      return config;
+    }
+
+    T newConfig;
+    try {
+      newConfig = (T) config.clone();
+    } catch (CloneNotSupportedException e) {
+      Bending.logger().warn(e.getMessage());
+      return config;
+    }
+
+    for (Field field : newConfig.getClass().getDeclaredFields()) {
+      if (field.isAnnotationPresent(Modifiable.class)) {
+        boolean wasAccessible = field.isAccessible();
+        field.setAccessible(true);
+        modifyField(field, newConfig, activeModifiers);
+        field.setAccessible(wasAccessible);
+      }
+    }
+
+    return newConfig;
+  }
+
+  private void modifyField(Field field, Configurable config, Collection<AttributeModifier> activeModifiers) {
+    double value;
+    try {
+      value = ((Number) field.get(config)).doubleValue();
+    } catch (IllegalAccessException e) {
+      Bending.logger().warn(e.getMessage());
+      return;
+    }
+
+    double[] operations = new double[]{0, 1, 1};
+    for (AttributeModifier modifier : activeModifiers) {
+      if (hasAttribute(field, modifier.attribute())) {
+        if (modifier.type() == ModifierOperation.ADDITIVE) {
+          operations[0] += modifier.value();
+        } else if (modifier.type() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
+          operations[1] += modifier.value();
+        } else if (modifier.type() == ModifierOperation.MULTIPLICATIVE) {
+          operations[2] *= modifier.value();
+        }
+      }
+    }
+    value = (value + operations[0]) * operations[1] * operations[2];
+    try {
+      field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
+    } catch (IllegalAccessException e) {
+      Bending.logger().warn(e.getMessage());
+    }
+  }
+
+  private boolean hasAttribute(Field field, Attribute attribute) {
+    for (Modifiable a : field.getAnnotationsByType(Modifiable.class)) {
+      if (attribute.equals(a.value())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

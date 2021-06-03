@@ -35,7 +35,6 @@ import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.PersistentDataLayer;
-import me.moros.bending.util.Tasker;
 import me.moros.storage.logging.Logger;
 import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.Metrics;
@@ -93,7 +92,6 @@ public class Bending extends JavaPlugin {
       game.cleanup();
     }
     getServer().getScheduler().cancelTasks(this);
-    Tasker.INSTANCE.shutdown();
   }
 
   @Override

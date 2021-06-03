@@ -31,6 +31,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -117,7 +118,7 @@ public final class BoardManager {
       if (desc != null && !desc.canBind()) {
         scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
       } else {
-        scoreboardPlayers.get(player.getUniqueId()).updateAll();
+        scoreboardPlayers.get(player.getUniqueId()).updateAll(desc, cooldown);
       }
     }
   }
@@ -160,20 +161,30 @@ public final class BoardManager {
     }
 
     private void updateSlot(int slot) {
+      updateSlot(slot, null, false);
+    }
+
+    private void updateSlot(int slot, AbilityDescription specific, boolean forceSpecific) {
       if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
         return;
       }
-      BendingPlayer bendingPlayer = Bending.game().benderRegistry().user(player);
+      BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
       String prefix = slot == selectedSlot ? ">" : "  ";
 
-      AbilityDescription desc = bendingPlayer.boundAbility(slot).orElse(null);
+      AbilityDescription desc = bendingPlayer.boundAbility(slot);
       Component component;
       if (desc == null) {
         component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
       } else {
         Component name = Component.text(desc.name(), desc.element().color());
-        if (bendingPlayer.onCooldown(desc)) {
-          name = name.decorate(TextDecoration.STRIKETHROUGH);
+        if (desc.equals(specific)) {
+          if (forceSpecific) {
+            name = name.decorate(TextDecoration.STRIKETHROUGH);
+          }
+        } else {
+          if (bendingPlayer.onCooldown(desc)) {
+            name = name.decorate(TextDecoration.STRIKETHROUGH);
+          }
         }
         component = Component.text(prefix).append(name);
       }
@@ -186,7 +197,11 @@ public final class BoardManager {
     }
 
     private void updateAll() {
-      IntStream.rangeClosed(1, 9).forEach(this::updateSlot);
+      updateAll(null, false);
+    }
+
+    private void updateAll(AbilityDescription specific, boolean forceSpecific) {
+      IntStream.rangeClosed(1, 9).forEach(i -> updateSlot(i, specific, forceSpecific));
     }
 
     private void activeSlot(int oldSlot, int newSlot) {

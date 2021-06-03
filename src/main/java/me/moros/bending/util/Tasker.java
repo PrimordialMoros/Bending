@@ -46,9 +46,11 @@ public enum Tasker {
   public void shutdown() {
     executor.shutdown();
     try {
-      executor.awaitTermination(60, TimeUnit.SECONDS);
+      if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+        executor.shutdownNow();
+      }
     } catch (InterruptedException e) {
-      Bending.logger().warn(e.getMessage());
+      executor.shutdownNow();
     }
   }
 

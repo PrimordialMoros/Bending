@@ -21,15 +21,17 @@ package me.moros.bending.ability.air.sequences;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
@@ -37,6 +39,7 @@ import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
@@ -69,15 +72,15 @@ public class AirWheel extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
       return false;
     }
     if (scooterDesc == null) {
-      scooterDesc = Bending.game().abilityRegistry().abilityDescription("AirScooter").orElseThrow(RuntimeException::new);
+      scooterDesc = Objects.requireNonNull(Registries.ABILITIES.ability("AirScooter"));
     }
     scooter = new AirScooter(scooterDesc);
-    if (user.onCooldown(scooterDesc) || !scooter.activate(user, ActivationMethod.ATTACK)) {
+    if (user.onCooldown(scooterDesc) || !scooter.activate(user, Activation.ATTACK)) {
       return false;
     }
     scooter.canRender = false;
@@ -92,7 +95,7 @@ public class AirWheel extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -151,9 +154,9 @@ public class AirWheel extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
 
     @Override

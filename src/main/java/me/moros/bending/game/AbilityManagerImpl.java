@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,17 +33,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.moros.bending.Bending;
 import me.moros.bending.model.AbilityManager;
-import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable.UpdateResult;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AbilityManagerImpl implements AbilityManager {
-  private final Multimap<User, Ability> globalInstances;
-  private final Collection<Map.Entry<User, Ability>> addQueue;
+  private final Multimap<UUID, Ability> globalInstances;
+  private final Collection<Map.Entry<UUID, Ability>> addQueue;
 
   @SuppressWarnings("UnstableApiUsage")
   AbilityManagerImpl() {
@@ -52,7 +53,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void addAbility(@NonNull User user, @NonNull Ability instance) {
-    addQueue.add(Map.entry(user, instance));
+    addQueue.add(Map.entry(user.entity().getUniqueId(), instance));
   }
 
   @Override
@@ -60,22 +61,21 @@ public class AbilityManagerImpl implements AbilityManager {
     if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
       return;
     }
-    if (globalInstances.remove(ability.user(), ability)) {
+    if (globalInstances.remove(ability.user().entity().getUniqueId(), ability)) {
       ability.onUserChange(user);
       ability.loadConfig();
-      globalInstances.put(user, ability);
+      globalInstances.put(user.entity().getUniqueId(), ability);
     }
   }
 
   @Override
   public void createPassives(@NonNull User user) {
-    Collection<AbilityDescription> userPassives = Element.all().stream()
-      .flatMap(Bending.game().abilityRegistry()::passives).collect(Collectors.toList());
-    for (AbilityDescription passive : userPassives) {
+    Collection<AbilityDescription> allPassives = Registries.ABILITIES.passives().collect(Collectors.toList());
+    for (AbilityDescription passive : allPassives) {
       destroyInstanceType(user, passive);
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
-        if (ability.activate(user, ActivationMethod.PASSIVE)) {
+        if (ability.activate(user, Activation.PASSIVE)) {
           addAbility(user, ability);
         }
       }
@@ -99,7 +99,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyInstance(@NonNull Ability ability) {
-    if (globalInstances.remove(ability.user(), ability)) {
+    if (globalInstances.remove(ability.user().entity().getUniqueId(), ability)) {
       ability.onDestroy();
     }
   }
@@ -112,7 +112,7 @@ public class AbilityManagerImpl implements AbilityManager {
   @Override
   public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
     boolean destroyed = false;
-    Iterator<Ability> iterator = globalInstances.get(user).iterator();
+    Iterator<Ability> iterator = globalInstances.get(user.entity().getUniqueId()).iterator();
     while (iterator.hasNext()) {
       Ability ability = iterator.next();
       if (type.isInstance(ability)) {
@@ -126,7 +126,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public @NonNull Stream<Ability> userInstances(@NonNull User user) {
-    return globalInstances.get(user).stream();
+    return globalInstances.get(user.entity().getUniqueId()).stream();
   }
 
   @Override
@@ -151,7 +151,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyUserInstances(@NonNull User user) {
-    globalInstances.removeAll(user).forEach(Ability::onDestroy);
+    globalInstances.removeAll(user.entity().getUniqueId()).forEach(Ability::onDestroy);
   }
 
   @Override

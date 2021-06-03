@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -32,9 +31,10 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
@@ -52,7 +52,6 @@ import me.moros.bending.util.ExpiringSet;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -94,7 +93,7 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (!user.hasPermission("bending.lava")) {
       return false;
     }
@@ -107,12 +106,12 @@ public class LavaDisk extends AbilityInstance {
     loadConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !EarthMaterials.isMetalBendable(b);
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
-    if (source.isEmpty()) {
+    Block source = user.find(userConfig.selectRange, predicate);
+    if (source == null) {
       return false;
     }
     double r = 1.3;
-    location = Vector3.center(source.get());
+    location = Vector3.center(source);
     AABB aabb = new AABB(new Vector3(-r, -0.3, -r), new Vector3(r, 0.3, r));
     collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
     for (Block block : WorldMethods.nearbyBlocks(user.world(), aabb.at(location))) {
@@ -133,7 +132,7 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -276,19 +275,19 @@ public class LavaDisk extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double minDamage;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double maxDamage;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.STRENGTH)
+    @Modifiable(Attribute.STRENGTH)
     public double power;
     public double powerDiminishPerEntity;
 

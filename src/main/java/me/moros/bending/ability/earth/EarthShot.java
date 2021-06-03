@@ -30,9 +30,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.BendingFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
@@ -45,7 +46,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -94,8 +94,8 @@ public class EarthShot extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
-    if (method == ActivationMethod.ATTACK) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
+    if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class)
         .filter(e -> !e.launched).forEach(EarthShot::launch);
       return false;
@@ -116,11 +116,11 @@ public class EarthShot extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   private boolean prepare() {
-    source = SourceUtil.find(user, userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b)).orElse(null);
+    source = user.find(userConfig.selectRange, b -> EarthMaterials.isEarthbendable(user, b));
     if (source == null) {
       return false;
     }
@@ -147,7 +147,7 @@ public class EarthShot extends AbilityInstance {
       solidData = Material.MAGMA_BLOCK.createBlockData();
       canConvert = false;
     } else {
-      solidData = MaterialUtil.getSolidType(source.getBlockData());
+      solidData = MaterialUtil.solidType(source.getBlockData());
     }
     if (mode == Mode.METAL) {
       SoundUtil.METAL.play(source.getLocation());
@@ -229,7 +229,7 @@ public class EarthShot extends AbilityInstance {
     if (!canConvert) {
       return;
     }
-    Block check = WorldMethods.rayTraceBlocks(user.world(), user.ray(), userConfig.selectRange * 2, false, true).orElse(null);
+    Block check = WorldMethods.rayTraceBlocks(user.world(), user.ray(), userConfig.selectRange * 2, false, true);
     if (user.sneaking() && readySource.equals(check)) {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
@@ -357,19 +357,19 @@ public class EarthShot extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.RANGE)
+    @Modifiable(Attribute.RANGE)
     public double range;
-    @Attribute(Attribute.DAMAGE)
+    @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Attribute(Attribute.CHARGE_TIME)
+    @Modifiable(Attribute.CHARGE_TIME)
     public long chargeTime;
-    @Attribute(Attribute.SPEED)
+    @Modifiable(Attribute.SPEED)
     public double speed;
-    @Attribute(Attribute.AMOUNT)
+    @Modifiable(Attribute.AMOUNT)
     public int maxAmount;
 
     public boolean allowConvertMagma;

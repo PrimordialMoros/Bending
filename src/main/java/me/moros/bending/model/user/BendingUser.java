@@ -19,11 +19,14 @@
 
 package me.moros.bending.model.user;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
@@ -31,7 +34,6 @@ import me.moros.atlas.caffeine.cache.Scheduler;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent.BindType;
 import me.moros.bending.events.ElementChangeEvent.ElementAction;
-import me.moros.bending.game.BenderRegistry;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.CooldownExpiry;
@@ -39,6 +41,8 @@ import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.registry.BenderRegistry;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.Tasker;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -48,10 +52,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class BendingUser implements User {
   private final LivingEntity entity;
   private final Set<Element> elements;
-  private final AbilityDescription[] slots;
+  private final List<AbilityDescription> slots;
   private final Cache<AbilityDescription, Long> cooldowns;
   private final CompositeBendingConditional bendingConditional;
-
 
   protected BendingUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     this.entity = entity;
@@ -63,7 +66,7 @@ public class BendingUser implements User {
       })
       .scheduler(Scheduler.systemScheduler())
       .build();
-    slots = new Preset(data.slots()).toBinds();
+    slots = new Preset(Arrays.asList(data.slots())).toBinds();
     elements = EnumSet.copyOf(data.elements().stream().map(Element::fromName).flatMap(Optional::stream).collect(Collectors.toList()));
     bendingConditional = BendingConditions.builder().build();
     validateSlots();
@@ -117,10 +120,9 @@ public class BendingUser implements User {
 
   @Override
   public @NonNull Preset createPresetFromSlots(@NonNull String name) {
-    String[] copy = new String[9];
-    for (int slot = 0; slot < 9; slot++) {
-      AbilityDescription desc = slots[slot];
-      copy[slot] = desc == null ? null : desc.name();
+    List<String> copy = new ArrayList<>(9);
+    for (AbilityDescription desc : slots) {
+      copy.add(desc == null ? null : desc.name());
     }
     return new Preset(0, name, copy);
   }
@@ -128,7 +130,7 @@ public class BendingUser implements User {
   @Override
   public int bindPreset(@NonNull Preset preset) {
     if (Bending.eventBus().postBindChangeEvent(this, BindType.MULTIPLE)) {
-      System.arraycopy(preset.toBinds(), 0, slots, 0, 9);
+      Collections.copy(slots, preset.toBinds());
       validateSlots();
       if (this instanceof BendingPlayer) {
         Bending.game().boardManager().updateBoard((Player) entity());
@@ -139,11 +141,11 @@ public class BendingUser implements User {
   }
 
   @Override
-  public Optional<AbilityDescription> boundAbility(int slot) {
+  public @Nullable AbilityDescription boundAbility(int slot) {
     if (slot < 1 || slot > 9) {
-      return Optional.empty();
+      return null;
     }
-    return Optional.ofNullable(slots[slot - 1]);
+    return slots.get(slot - 1);
   }
 
   @Override
@@ -152,7 +154,7 @@ public class BendingUser implements User {
       return;
     }
     if (Bending.eventBus().postBindChangeEvent(this, BindType.SINGLE)) {
-      slots[slot - 1] = desc;
+      slots.set(slot - 1, desc);
       if (this instanceof BendingPlayer) {
         Bending.game().boardManager().updateBoardSlot((Player) entity(), desc);
       }
@@ -160,8 +162,8 @@ public class BendingUser implements User {
   }
 
   @Override
-  public Optional<AbilityDescription> selectedAbility() {
-    return Optional.empty(); // Non-player bending users don't have anything selected.
+  public @Nullable AbilityDescription selectedAbility() {
+    return null; // Non-player bending users don't have anything selected.
   }
 
   @Override
@@ -185,11 +187,12 @@ public class BendingUser implements User {
 
   @Override
   public void validateSlots() {
-    IntStream.rangeClosed(1, 9).forEach(i -> boundAbility(i).ifPresent(desc -> {
-      if (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind()) {
-        slots[i] = null;
+    for (int i = 0; i < 9; i++) {
+      AbilityDescription desc = slots.get(i);
+      if (desc != null && (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind())) {
+        slots.set(i, null);
       }
-    }));
+    }
   }
 
   @Override
@@ -209,7 +212,7 @@ public class BendingUser implements User {
    * Use {@link BenderRegistry#register(LivingEntity, BenderData)}
    */
   public static Optional<BendingUser> createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
-    if (Bending.game().benderRegistry().isRegistered(entity.getUniqueId()) || entity instanceof Player) {
+    if (Registries.BENDERS.contains(entity.getUniqueId()) || entity instanceof Player) {
       return Optional.empty();
     }
     return Optional.of(new BendingUser(entity, data));

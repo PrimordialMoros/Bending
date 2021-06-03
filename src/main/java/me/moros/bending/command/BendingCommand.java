@@ -38,12 +38,13 @@ import me.moros.bending.Bending;
 import me.moros.bending.command.Commands.UserException;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.sequence.Sequence;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -65,7 +66,7 @@ public class BendingCommand extends BaseCommand {
   @CommandPermission("bending.command.toggle")
   @Description("Toggles bending")
   public void onToggle(BendingPlayer player, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
     if (bendingPlayer.bendingConditional().contains(BendingConditions.TOGGLED)) {
       bendingPlayer.bendingConditional().remove(BendingConditions.TOGGLED);
       Message.TOGGLE_ON.send(bendingPlayer);
@@ -91,7 +92,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
     if (target == null && !player.hasPermission("bending.command.choose." + element)) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(player, element.displayName());
       return;
@@ -111,7 +112,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
     if (target == null && !player.hasPermission("bending.command.add." + element)) {
       Message.ELEMENT_ADD_NO_PERMISSION.send(player, element.displayName());
       return;
@@ -132,7 +133,7 @@ public class BendingCommand extends BaseCommand {
     if (target == null && !(user instanceof Player)) {
       throw new UserException();
     }
-    BendingPlayer player = Bending.game().benderRegistry().user(target == null ? (Player) user : target.getPlayer());
+    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
     if (player.removeElement(element)) {
       Bending.game().abilityManager(player.world()).createPassives(player);
       Message.ELEMENT_REMOVE_SUCCESS.send(player, element.displayName());
@@ -222,12 +223,12 @@ public class BendingCommand extends BaseCommand {
   @CommandCompletion("@players")
   @Description("Show all bound abilities")
   public static void onBindList(BendingPlayer player, @Optional OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Bending.game().benderRegistry().user(target.getPlayer());
+    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
     Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName());
     for (int slot = 1; slot <= 9; slot++) {
-      Component meta = bendingPlayer.boundAbility(slot).map(AbilityDescription::meta).orElse(null);
-      if (meta != null) {
-        player.sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(meta));
+      AbilityDescription desc = bendingPlayer.boundAbility(slot);
+      if (desc != null) {
+        player.sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(desc.meta()));
       }
     }
   }
@@ -253,10 +254,10 @@ public class BendingCommand extends BaseCommand {
   public static void onInfo(CommandSender user, AbilityDescription ability) {
     String descKey = "bending.ability." + ability.name().toLowerCase() + ".description";
     String instKey = "bending.ability." + ability.name().toLowerCase() + ".instructions";
-    Component description = Bending.translationManager().getTranslation(descKey);
-    Component instructions = Bending.translationManager().getTranslation(instKey);
-    if (instructions == null && ability.isActivatedBy(ActivationMethod.SEQUENCE)) {
-      Sequence sequence = Bending.game().sequenceManager().sequence(ability);
+    Component description = Bending.translationManager().translate(descKey);
+    Component instructions = Bending.translationManager().translate(instKey);
+    if (instructions == null && ability.isActivatedBy(Activation.SEQUENCE)) {
+      Sequence sequence = Registries.ABILITIES.sequence(ability);
       if (sequence != null) {
         instructions = sequence.instructions();
       }
@@ -274,16 +275,16 @@ public class BendingCommand extends BaseCommand {
   }
 
   private static Collection<Component> collectAbilities(CommandSender user, Element element) {
-    return Bending.game().abilityRegistry().abilities()
+    return Registries.ABILITIES.abilities()
       .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> !desc.isActivatedBy(ActivationMethod.SEQUENCE))
+      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE))
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());
   }
 
   private static Collection<Component> collectSequences(CommandSender user, Element element) {
-    return Bending.game().sequenceManager().sequences()
+    return Registries.ABILITIES.sequences()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
@@ -292,8 +293,8 @@ public class BendingCommand extends BaseCommand {
   }
 
   private static Collection<Component> collectPassives(CommandSender user, Element element) {
-    return Bending.game().abilityRegistry().passives(element)
-      .filter(desc -> !desc.hidden())
+    return Registries.ABILITIES.passives()
+      .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());

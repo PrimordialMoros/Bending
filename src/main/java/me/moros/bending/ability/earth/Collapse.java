@@ -30,13 +30,13 @@ import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
@@ -63,20 +63,19 @@ public class Collapse extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
-    if (source.isEmpty()) {
+    Block origin = user.find(userConfig.selectRange, predicate);
+    if (origin == null) {
       return false;
     }
-    Block origin = source.get();
 
     height = userConfig.maxHeight;
 
-    boolean sneak = method == ActivationMethod.SNEAK;
+    boolean sneak = method == Activation.SNEAK;
     if (sneak) {
       int offset = NumberConversions.ceil(userConfig.radius);
       int size = offset * 2 + 1;
@@ -91,14 +90,14 @@ public class Collapse extends AbilityInstance {
         if (checked[dx][dz]) {
           continue;
         }
-        Optional<Pillar> pillar = BlockMethods.getBottomValid(block, height, predicate).flatMap(this::createPillar);
+        Optional<Pillar> pillar = BlockMethods.findBottomBlock(block, height, predicate).flatMap(this::createPillar);
         if (pillar.isPresent()) {
           checked[dx][dz] = true;
           pillars.add(pillar.get());
         }
       }
     } else {
-      BlockMethods.getBottomValid(origin, height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
+      BlockMethods.findBottomBlock(origin, height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);
@@ -114,7 +113,7 @@ public class Collapse extends AbilityInstance {
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     this.height = height;
     for (Block block : sources) {
-      BlockMethods.getBottomValid(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
+      BlockMethods.findBottomBlock(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
       removalPolicy = Policies.builder().build();
@@ -125,7 +124,7 @@ public class Collapse extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -153,13 +152,13 @@ public class Collapse extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double radius;
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public int maxHeight;
 
     @Override

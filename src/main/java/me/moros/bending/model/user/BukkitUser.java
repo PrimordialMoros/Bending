@@ -47,6 +47,7 @@ import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface BukkitUser extends ForwardingAudience.Single {
   @NonNull LivingEntity entity();
@@ -131,11 +132,8 @@ public interface BukkitUser extends ForwardingAudience.Single {
   default void flying(boolean flying) {
   }
 
-  default Optional<Inventory> inventory() {
-    if (entity() instanceof InventoryHolder) {
-      return Optional.of(((InventoryHolder) entity()).getInventory());
-    }
-    return Optional.empty();
+  default @Nullable Inventory inventory() {
+    return entity() instanceof InventoryHolder ? ((InventoryHolder) entity()).getInventory() : null;
   }
 
   default boolean isOnGround() {

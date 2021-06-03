@@ -22,11 +22,12 @@ package me.moros.bending.ability.water.passives;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.WorldMethods;
@@ -41,7 +42,7 @@ public class HydroSink extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     return true;
@@ -57,7 +58,8 @@ public class HydroSink extends AbilityInstance implements Ability {
   }
 
   public static boolean canHydroSink(@NonNull User user) {
-    if (!Bending.game().abilityRegistry().abilityDescription("HydroSink").map(user::canBend).orElse(false)) {
+    AbilityDescription desc = Registries.ABILITIES.ability("HydroSink");
+    if (desc == null || !user.canBend(desc)) {
       return false;
     }
 

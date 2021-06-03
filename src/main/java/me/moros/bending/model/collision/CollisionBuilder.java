@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import me.moros.bending.game.AbilityRegistry;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -40,12 +40,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 // TODO improve collision registering to allow addon collisions
 public class CollisionBuilder {
-  private final AbilityRegistry registry;
   private final List<CollisionLayer> layers;
   private final Collection<RegisteredCollision> simpleCollisions;
 
-  public CollisionBuilder(@NonNull AbilityRegistry registry) {
-    this.registry = registry;
+  public CollisionBuilder() {
     layers = new ArrayList<>();
     simpleCollisions = new ArrayList<>();
   }
@@ -93,7 +91,7 @@ public class CollisionBuilder {
   }
 
   private List<AbilityDescription> mapAbilities(Collection<String> abilities) {
-    return abilities.stream().map(registry::abilityDescription).flatMap(Optional::stream).collect(Collectors.toList());
+    return abilities.stream().map(Registries.ABILITIES::ability).filter(Objects::nonNull).collect(Collectors.toList());
   }
 
   private static Collection<RegisteredCollision> registerSelfCancellingCollisions(List<AbilityDescription> layer) {

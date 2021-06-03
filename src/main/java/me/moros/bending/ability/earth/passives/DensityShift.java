@@ -27,9 +27,10 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -51,7 +52,7 @@ public class DensityShift extends AbilityInstance implements Ability {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
     return true;
@@ -59,7 +60,7 @@ public class DensityShift extends AbilityInstance implements Ability {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -91,7 +92,7 @@ public class DensityShift extends AbilityInstance implements Ability {
       if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) {
         continue;
       }
-      TempBlock.create(b, MaterialUtil.getSoftType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::forceWeak);
+      TempBlock.create(b, MaterialUtil.softType(b.getBlockData()), userConfig.duration, true).ifPresent(TempBlock::forceWeak);
     }
   }
 
@@ -101,9 +102,9 @@ public class DensityShift extends AbilityInstance implements Ability {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.DURATION)
+    @Modifiable(Attribute.DURATION)
     public long duration;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public double radius;
 
     @Override

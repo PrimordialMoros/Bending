@@ -19,14 +19,17 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Optional;
+import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
-import me.moros.bending.game.ProtectionSystem;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.registry.ProtectionRegistry;
+import me.moros.bending.registry.Registries;
 import org.bukkit.block.Block;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -65,21 +68,22 @@ public interface User extends BukkitUser, ElementUser {
   /**
    * Retrieve the ability assigned to the specified slot.
    * @param slot the slot number to check, slot must be in range [1, 9] (inclusive)
-   * @return the ability bound to given slot if found
+   * @return the ability bound to given slot if found, null otherwise
    */
-  Optional<AbilityDescription> boundAbility(int slot);
+  @Nullable AbilityDescription boundAbility(int slot);
 
   /**
    * Retrives the currently selected ability for the user.
-   * @return the ability in the currently selected slot for the user if found
+   * @return the ability in the currently selected slot for the user if found, null otherwise
    */
-  Optional<AbilityDescription> selectedAbility();
+  @Nullable AbilityDescription selectedAbility();
 
   /**
    * @return the ability's name or an empty string if no ability is bound to the currently selected slot
    */
   default @NonNull String selectedAbilityName() {
-    return selectedAbility().map(AbilityDescription::name).orElse("");
+    AbilityDescription selected = selectedAbility();
+    return selected == null ? "" : selected.name();
   }
 
   /**
@@ -128,9 +132,32 @@ public interface User extends BukkitUser, ElementUser {
   }
 
   /**
-   * @see ProtectionSystem#canBuild(User, Block)
+   * @see ProtectionRegistry#canBuild(User, Block)
    */
   default boolean canBuild(@NonNull Block block) {
-    return Bending.game().protectionSystem().canBuild(this, block);
+    return Registries.PROTECTIONS.canBuild(this, block);
+  }
+
+  /**
+   * Attempt to find a possible block source that matches the given predicate.
+   * @param range the max range to check
+   * @param predicate the predicate to check
+   * @return the source block if one was found, null otherwise
+   */
+  default @Nullable Block find(double range, @NonNull Predicate<@NonNull Block> predicate) {
+    BlockIterator it = new BlockIterator(entity(), Math.min(100, NumberConversions.ceil(range)));
+    while (it.hasNext()) {
+      Block block = it.next();
+      if (block.getType().isAir()) {
+        continue;
+      }
+      if (predicate.test(block) && TempBlock.isBendable(block) && canBuild(block)) {
+        return block;
+      }
+      if (!block.isPassable()) {
+        break;
+      }
+    }
+    return null;
   }
 }

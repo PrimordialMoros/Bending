@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,14 +31,14 @@ import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActivationMethod;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.SourceUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -68,24 +67,23 @@ public class RaiseEarth extends AbilityInstance {
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull ActivationMethod method) {
+  public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Optional<Block> source = SourceUtil.find(user, userConfig.selectRange, predicate);
-    if (source.isEmpty()) {
+    origin = user.find(userConfig.selectRange, predicate);
+    if (origin == null) {
       return false;
     }
-    origin = source.get();
 
     loadRaised();
 
-    boolean wall = method == ActivationMethod.SNEAK;
+    boolean wall = method == Activation.SNEAK;
     if (wall) {
       raiseWall(userConfig.wallMaxHeight, userConfig.wallWidth);
     } else {
-      BlockMethods.getTopValid(origin, userConfig.columnMaxHeight, predicate).ifPresent(b -> createPillar(b, userConfig.columnMaxHeight));
+      BlockMethods.findTopBlock(origin, userConfig.columnMaxHeight, predicate).ifPresent(b -> createPillar(b, userConfig.columnMaxHeight));
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), wall ? userConfig.wallCooldown : userConfig.columnCooldown);
@@ -113,7 +111,7 @@ public class RaiseEarth extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.game().attributeSystem().calculate(this, config);
+    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -165,7 +163,7 @@ public class RaiseEarth extends AbilityInstance {
           }
         }
       } else {
-        BlockMethods.getTopValid(check, height, predicate).ifPresent(b -> createPillar(b, height));
+        BlockMethods.findTopBlock(check, height, predicate).ifPresent(b -> createPillar(b, height));
       }
     }
   }
@@ -183,17 +181,17 @@ public class RaiseEarth extends AbilityInstance {
   }
 
   private static class Config extends Configurable {
-    @Attribute(Attribute.SELECTION)
+    @Modifiable(Attribute.SELECTION)
     public double selectRange;
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long columnCooldown;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public int columnMaxHeight;
-    @Attribute(Attribute.COOLDOWN)
+    @Modifiable(Attribute.COOLDOWN)
     public long wallCooldown;
-    @Attribute(Attribute.HEIGHT)
+    @Modifiable(Attribute.HEIGHT)
     public int wallMaxHeight;
-    @Attribute(Attribute.RADIUS)
+    @Modifiable(Attribute.RADIUS)
     public int wallWidth;
 
     @Override
