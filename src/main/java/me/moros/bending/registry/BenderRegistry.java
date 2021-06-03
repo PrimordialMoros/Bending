@@ -86,7 +86,8 @@ public final class BenderRegistry implements Registry<User> {
     return players.values().stream().filter(BendingPlayer::valid).collect(Collectors.toList());
   }
 
-  public void invalidate(@NonNull UUID uuid) {
+  public void invalidate(@NonNull User user) {
+    UUID uuid = user.entity().getUniqueId();
     players.remove(uuid);
     entities.remove(uuid);
     if (cache != null) {

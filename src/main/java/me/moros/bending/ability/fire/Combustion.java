@@ -163,11 +163,11 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
     exploded = true;
     Location loc = center.toLocation(user.world());
-    ParticleUtil.create(Particle.FLAME, loc, userConfig.particleRange).extra(0.2).count(20)
+    ParticleUtil.create(Particle.FLAME, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.SMOKE_LARGE, loc, userConfig.particleRange).extra(0.2).count(20)
+    ParticleUtil.create(Particle.SMOKE_LARGE, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.FIREWORKS_SPARK, loc, userConfig.particleRange).extra(0.2).count(20)
+    ParticleUtil.create(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
 
     BendingExplosion.builder()
@@ -205,10 +205,10 @@ public class Combustion extends AbilityInstance implements Explosive {
     private double distanceTravelled = 0;
 
     public CombustBeam() {
-      super(user, user.ray(userConfig.range), 0.35, 1);
+      super(user, user.ray(userConfig.range), 0.3, 1);
       canCollide = Block::isLiquid;
       singleCollision = true;
-      steps = 3;
+      steps = 4;
     }
 
     @Override
@@ -216,8 +216,8 @@ public class Combustion extends AbilityInstance implements Explosive {
       distanceTravelled += speed;
       renderRing();
       Location bukkitLocation = bukkitLocation();
-      ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
-      ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation, userConfig.particleRange).extra(0.06).spawn();
+      ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation).extra(0.06).spawn();
+      ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation).extra(0.06).spawn();
     }
 
     @Override
@@ -232,7 +232,7 @@ public class Combustion extends AbilityInstance implements Explosive {
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorMethods.circle(Vector3.ONE, user.direction(), 20).forEach(v -> {
           Vector3 velocity = v.multiply(radius);
-          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()), userConfig.particleRange)
+          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
             .count(0).offset(velocity.x, velocity.y, velocity.z).extra(0.09).spawn();
         });
       }

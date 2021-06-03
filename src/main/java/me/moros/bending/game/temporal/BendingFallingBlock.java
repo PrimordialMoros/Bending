@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingFallingBlock implements Temporary {
   public static final TemporalManager<FallingBlock, BendingFallingBlock> MANAGER = new TemporalManager<>();
+
   private final FallingBlock fallingBlock;
   private final BukkitTask revertTask;
 

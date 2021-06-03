@@ -22,6 +22,7 @@ package me.moros.bending.game.temporal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
@@ -37,7 +38,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
-  public static final TemporalManager<LivingEntity, TempArmor> MANAGER = new TemporalManager<>();
+  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>();
+
   private final LivingEntity entity;
   private final ItemStack[] snapshot;
   private final BukkitTask revertTask;
@@ -49,12 +51,12 @@ public class TempArmor implements Temporary {
     this.entity = entity;
     this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
     entity.getEquipment().setArmorContents(armor);
-    MANAGER.addEntry(entity, this);
+    MANAGER.addEntry(entity.getUniqueId(), this);
     revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-    if (MANAGER.isTemp(user.entity())) {
+    if (MANAGER.isTemp(user.entity().getUniqueId())) {
       return Optional.empty();
     }
     if (user.entity().getEquipment() == null) {
@@ -80,7 +82,7 @@ public class TempArmor implements Temporary {
       return;
     }
     entity.getEquipment().setArmorContents(snapshot);
-    MANAGER.removeEntry(entity);
+    MANAGER.removeEntry(entity.getUniqueId());
     revertTask.cancel();
   }
 

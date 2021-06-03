@@ -48,7 +48,7 @@ public class AbilityManagerImpl implements AbilityManager {
   @SuppressWarnings("UnstableApiUsage")
   AbilityManagerImpl() {
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
-    addQueue = new ArrayList<>(32);
+    addQueue = new ArrayList<>(16);
   }
 
   @Override

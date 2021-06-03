@@ -218,14 +218,8 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private boolean launchEarthGlove() {
-    Side side;
-    if (lastUsedSide.getOrDefault(user.entity().getUniqueId(), Side.LEFT) == Side.RIGHT) {
-      side = Side.LEFT;
-    } else {
-      side = Side.RIGHT;
-    }
+    Side side = lastUsedSide.merge(user.entity().getUniqueId(), Side.RIGHT, (s1, s2) -> s1 == Side.RIGHT ? Side.LEFT : Side.RIGHT);
     Vector3 gloveSpawnLocation = user.handSide(side == Side.RIGHT);
-    lastUsedSide.put(user.entity().getUniqueId(), side);
     Vector3 target = user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.range));

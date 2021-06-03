@@ -89,10 +89,10 @@ public final class ProtectionRegistry implements Registry<Protection> {
 
   /**
    * Remove the block protection cache for the specified user.
-   * @param uuid the unique id of the user to invalidate
+   * @param user the user for which the cache will be invalidated
    */
-  public void invalidate(@NonNull UUID uuid) {
-    cache.remove(uuid);
+  public void invalidate(@NonNull User user) {
+    cache.remove(user.entity().getUniqueId());
   }
 
   /**

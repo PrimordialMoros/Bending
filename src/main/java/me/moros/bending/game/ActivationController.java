@@ -56,7 +56,6 @@ import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.Flight;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
@@ -94,17 +93,16 @@ public final class ActivationController {
   }
 
   public void onUserDeconstruct(@NonNull User user) {
-    TempArmor.MANAGER.get(user.entity()).ifPresent(TempArmor::revert);
+    TempArmor.MANAGER.get(user.entity().getUniqueId()).ifPresent(TempArmor::revert);
     Bending.game().abilityManager(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer) {
       Bending.game().storage().savePlayerAsync((BendingPlayer) user);
     }
-    Flight.remove(user);
-    UUID uuid = user.entity().getUniqueId();
-    Bending.game().boardManager().invalidate(uuid);
-    Registries.ATTRIBUTES.invalidate(uuid);
-    Registries.BENDERS.invalidate(uuid);
-    Registries.PROTECTIONS.invalidate(uuid);
+    Bending.game().boardManager().invalidate(user);
+    Bending.game().flightManager().remove(user);
+    Registries.ATTRIBUTES.invalidate(user);
+    Registries.BENDERS.invalidate(user);
+    Registries.PROTECTIONS.invalidate(user);
   }
 
   public void onUserSwing(@NonNull User user) {
@@ -204,7 +202,7 @@ public final class ActivationController {
     if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
       return false;
     }
-    return !Flight.hasFlight(user);
+    return !Bending.game().flightManager().hasFlight(user);
   }
 
   private boolean onSuffocation(@NonNull User user) {

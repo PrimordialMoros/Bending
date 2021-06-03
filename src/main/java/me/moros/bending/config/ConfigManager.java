@@ -39,6 +39,7 @@ import me.moros.bending.model.attribute.AttributeConverter;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.attribute.ModifierOperation;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -99,13 +100,9 @@ public final class ConfigManager {
 
   @SuppressWarnings({"unchecked", "deprecation"})
   public <T extends Configurable> T calculate(@NonNull Ability ability, @NonNull T config) {
-    Collection<AttributeModifier> userModifiers = Registries.ATTRIBUTES.get(ability.user().entity().getUniqueId());
-    if (userModifiers.isEmpty()) {
-      return config;
-    }
-
+    User user = ability.user();
     AbilityDescription desc = ability.description();
-    Collection<AttributeModifier> activeModifiers = userModifiers.stream()
+    Collection<AttributeModifier> activeModifiers = Registries.ATTRIBUTES.attributes(user)
       .filter(modifier -> modifier.policy().shouldModify(desc)).collect(Collectors.toList());
 
     if (activeModifiers.isEmpty()) {

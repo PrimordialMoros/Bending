@@ -31,7 +31,6 @@ import me.moros.bending.model.Element;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.FireTick;
-import me.moros.bending.util.Flight;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
@@ -44,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class Game {
   private final BendingStorage storage;
 
+  private final FlightManager flightManager;
   private final SequenceManager sequenceManager;
   private final WorldManager worldManager;
 
@@ -53,6 +53,7 @@ public final class Game {
   public Game(@NonNull BendingStorage storage) {
     this.storage = storage;
 
+    flightManager = new FlightManager();
     sequenceManager = new SequenceManager();
     worldManager = new WorldManager();
 
@@ -77,7 +78,7 @@ public final class Game {
   private void update() {
     activationController.clearCache();
     worldManager.update();
-    Flight.updateAll();
+    flightManager.update();
   }
 
   public boolean isDisabledWorld(@NonNull UUID worldID) {
@@ -85,22 +86,24 @@ public final class Game {
   }
 
   public void reload() {
-    worldManager.destroyAllInstances();
-    sequenceManager.clear();
-    removeTemporary();
+    cleanup(false);
     Bending.configManager().reload();
     Bending.translationManager().reload();
     Registries.BENDERS.forEach(worldManager::createPassives);
   }
 
-  public void cleanup() {
+  public void cleanup(boolean shutdown) {
     worldManager.destroyAllInstances();
+    flightManager.removeAll();
+    sequenceManager.clear();
     removeTemporary();
-    Flight.removeAll();
     MovementHandler.resetAll();
-    Registries.BENDERS.onlinePlayers().forEach(storage::savePlayerAsync);
-    Tasker.INSTANCE.shutdown();
-    storage.close();
+
+    if (shutdown) {
+      Registries.BENDERS.onlinePlayers().forEach(storage::savePlayerAsync);
+      Tasker.INSTANCE.shutdown();
+      storage.close();
+    }
   }
 
   private void removeTemporary() {
@@ -117,6 +120,10 @@ public final class Game {
 
   public @NonNull BendingStorage storage() {
     return storage;
+  }
+
+  public @NonNull FlightManager flightManager() {
+    return flightManager;
   }
 
   public @NonNull SequenceManager sequenceManager() {

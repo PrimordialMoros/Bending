@@ -29,6 +29,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class FireTick {
   public static final int MAX_TICKS = 100;
@@ -46,6 +47,10 @@ public final class FireTick {
     if (entity instanceof LivingEntity) {
       INSTANCES.remove((LivingEntity) entity);
     }
+  }
+
+  public static @Nullable User fireTickSource(@NonNull LivingEntity entity) {
+    return INSTANCES.get(entity);
   }
 
   /**

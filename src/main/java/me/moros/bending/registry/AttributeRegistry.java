@@ -19,43 +19,43 @@
 
 package me.moros.bending.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AttributeRegistry implements Registry<AttributeModifier> {
-  private final Map<UUID, Collection<AttributeModifier>> modifierMap;
+  private final Multimap<UUID, AttributeModifier> modifierMap;
 
+  @SuppressWarnings("UnstableApiUsage")
   AttributeRegistry() {
-    modifierMap = new HashMap<>();
+    modifierMap = MultimapBuilder.hashKeys().arrayListValues().build();
   }
 
   public void add(@NonNull User user, @NonNull AttributeModifier modifier) {
-    modifierMap.computeIfAbsent(user.entity().getUniqueId(), u -> new ArrayList<>()).add(modifier);
+    modifierMap.put(user.entity().getUniqueId(), modifier);
   }
 
-  public void invalidate(@NonNull UUID uuid) {
-    modifierMap.remove(uuid);
+  public void invalidate(@NonNull User user) {
+    modifierMap.removeAll(user.entity().getUniqueId());
   }
 
-  public boolean contains(@NonNull UUID uuid) {
-    return modifierMap.containsKey(uuid);
+  public boolean contains(@NonNull User user) {
+    return modifierMap.containsKey(user.entity().getUniqueId());
   }
 
-  public @NonNull Collection<@NonNull AttributeModifier> get(@NonNull UUID uuid) {
-    return modifierMap.getOrDefault(uuid, new ArrayList<>());
+  public @NonNull Stream<@NonNull AttributeModifier> attributes(@NonNull User user) {
+    return modifierMap.get(user.entity().getUniqueId()).stream();
   }
 
   @Override
   public @NonNull Iterator<AttributeModifier> iterator() {
-    return modifierMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).iterator();
+    return Collections.unmodifiableCollection(modifierMap.values()).iterator();
   }
 }

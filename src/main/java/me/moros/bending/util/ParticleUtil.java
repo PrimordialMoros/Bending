@@ -32,7 +32,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @see ParticleBuilder
  */
 public final class ParticleUtil {
-  public static final int DEFAULT_DIST = 32;
   public static final Color AIR = fromHex("EEEEEE");
 
   private ParticleUtil() {
@@ -40,27 +39,23 @@ public final class ParticleUtil {
 
   public static @NonNull ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
     Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
-    return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
+    return effect.builder().location(center).extra(0);
   }
 
   public static @NonNull ParticleBuilder createAir(@NonNull Location center) {
-    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(AIR, 1.8F).force(true);
+    return Particle.REDSTONE.builder().location(center).extra(0).color(AIR, 1.8F);
   }
 
   public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
-    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal)).force(true);
+    return Particle.REDSTONE.builder().location(center).extra(0).color(fromHex(hexVal));
   }
 
   public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
-    return Particle.REDSTONE.builder().location(center).receivers(DEFAULT_DIST).extra(0).color(fromHex(hexVal), size).force(true);
+    return Particle.REDSTONE.builder().location(center).extra(0).color(fromHex(hexVal), size);
   }
 
   public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
-    return effect.builder().location(center).receivers(DEFAULT_DIST).extra(0).force(true);
-  }
-
-  public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center, int range) {
-    return effect.builder().location(center).receivers(range).extra(0).force(true);
+    return effect.builder().location(center).extra(0);
   }
 
   /**

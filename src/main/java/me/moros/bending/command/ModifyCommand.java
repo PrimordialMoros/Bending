@@ -67,7 +67,7 @@ public class ModifyCommand extends BaseCommand {
   @Description("Clear all existing modifiers for a player")
   public static void onClear(BendingPlayer player, @Optional @CommandPermission("bending.command.modify.others") OnlinePlayer target) {
     BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    Registries.ATTRIBUTES.invalidate(bendingPlayer.entity().getUniqueId());
+    Registries.ATTRIBUTES.invalidate(bendingPlayer);
     recalculate(bendingPlayer);
     Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.entity().getName());
   }

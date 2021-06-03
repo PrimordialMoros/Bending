@@ -31,6 +31,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -129,8 +130,8 @@ public final class BoardManager {
     }
   }
 
-  public void invalidate(@NonNull UUID uuid) {
-    scoreboardPlayers.remove(uuid);
+  public void invalidate(@NonNull User user) {
+    scoreboardPlayers.remove(user.entity().getUniqueId());
   }
 
   private static class Board {

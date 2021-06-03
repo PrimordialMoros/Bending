@@ -23,13 +23,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import me.moros.bending.Bending;
+import me.moros.bending.game.FlightManager.Flight;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Flight;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -52,7 +53,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   public AbstractSpout(@NonNull User user, double height) {
     this.user = user;
     this.height = height;
-    this.flight = Flight.get(user);
+    this.flight = Bending.game().flightManager().get(user);
     this.flight.flying(true);
   }
 

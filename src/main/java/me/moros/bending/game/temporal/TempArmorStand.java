@@ -37,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempArmorStand implements Temporary {
   public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
+
   private final ArmorStand armorStand;
   private final BukkitTask revertTask;
 

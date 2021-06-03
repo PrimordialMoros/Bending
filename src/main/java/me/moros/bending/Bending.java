@@ -89,7 +89,7 @@ public class Bending extends JavaPlugin {
   @Override
   public void onDisable() {
     if (game != null) {
-      game.cleanup();
+      game.cleanup(true);
     }
     getServer().getScheduler().cancelTasks(this);
   }

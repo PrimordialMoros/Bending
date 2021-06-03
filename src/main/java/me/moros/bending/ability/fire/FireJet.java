@@ -36,7 +36,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
-import me.moros.bending.util.Flight;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.Tasker;
@@ -53,8 +52,6 @@ public class FireJet extends AbilityInstance {
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
-
-  private Flight flight;
 
   private boolean jetBlast;
   private long duration;
@@ -79,7 +76,6 @@ public class FireJet extends AbilityInstance {
       return false;
     }
 
-    flight = Flight.get(user);
     if (ignitable) {
       Tasker.sync(() -> igniteBlock(block), 1);
     }
@@ -152,7 +148,6 @@ public class FireJet extends AbilityInstance {
   @Override
   public void onDestroy() {
     user.addCooldown(description(), jetBlast ? userConfig.jetBlastCooldown : userConfig.cooldown);
-    flight.release();
   }
 
   @Override
