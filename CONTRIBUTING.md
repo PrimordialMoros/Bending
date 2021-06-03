@@ -37,6 +37,7 @@ The project currently has a single module, but it may be split into sub-modules 
 - `game` - Contains all data and controllers for the main logic of the game
 - `model` - Contains the model for the plugin's data and systems
 - `protection` - Contains all world/region protection systems
+- `registry` - Contains all registry systems
 - `storage` - Contains everything related to persistent storage (databases)
 - `util` - Contains all utility classes
 

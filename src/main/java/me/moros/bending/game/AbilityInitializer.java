@@ -123,8 +123,7 @@ public final class AbilityInitializer {
     int sequenceAmount = Registries.ABILITIES.register(sequences);
     int collisionAmount = Registries.COLLISIONS.register(buildCollisions());
 
-    Bending.logger().info("Registered " + abilityAmount + " core abilities!");
-    Bending.logger().info("Registered " + sequenceAmount + " core sequences!");
+    Bending.logger().info("Registered " + (abilityAmount + sequenceAmount) + " abilities!");
     Bending.logger().info("Registered " + collisionAmount + " collisions!");
   }
 
