@@ -49,19 +49,13 @@ public final class BendingEventBus {
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
-    if (user.valid()) { // User might not be valid when cooldown is added
-      CooldownAddEvent event = new CooldownAddEvent(user, desc, duration);
-      manager.callEvent(event);
-      return !event.isCancelled();
-    } else {
-      return false;
-    }
+    CooldownAddEvent event = new CooldownAddEvent(user, desc, duration);
+    manager.callEvent(event);
+    return !event.isCancelled();
   }
 
   public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
-    if (user.valid()) { // User might not be valid when cooldown expires
-      manager.callEvent(new CooldownRemoveEvent(user, desc));
-    }
+    manager.callEvent(new CooldownRemoveEvent(user, desc));
   }
 
   /**

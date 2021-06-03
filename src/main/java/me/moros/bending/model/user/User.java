@@ -109,12 +109,6 @@ public interface User extends BukkitUser, ElementUser {
   }
 
   /**
-   * Checks bound abilities and clears any invalid ability slots.
-   * A slot is considered invalid if the user doesn't have the ability's element or doesn't have its permission.
-   */
-  void validateSlots();
-
-  /**
    * Check if the user has the specified permission.
    * This will always return true if the user is a non-player.
    * @param permission the permission to check

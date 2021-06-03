@@ -61,7 +61,12 @@ public class BendingUser implements User {
     cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
       .removalListener((key, value, cause) -> {
         if (key != null) {
-          Tasker.sync(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0);
+          Tasker.sync(() -> {
+            if (valid()) { // Ensure user is valid before posting event
+              Bending.eventBus().postCooldownRemoveEvent(this, key);
+              updateBoard(key, false);
+            }
+          }, 0);
         }
       })
       .scheduler(Scheduler.systemScheduler())
@@ -132,9 +137,6 @@ public class BendingUser implements User {
     if (Bending.eventBus().postBindChangeEvent(this, BindType.MULTIPLE)) {
       Collections.copy(slots, preset.toBinds());
       validateSlots();
-      if (this instanceof BendingPlayer) {
-        Bending.game().boardManager().updateBoard((Player) entity());
-      }
       return preset.compare(createPresetFromSlots(""));
     }
     return 0;
@@ -155,9 +157,7 @@ public class BendingUser implements User {
     }
     if (Bending.eventBus().postBindChangeEvent(this, BindType.SINGLE)) {
       slots.set(slot - 1, desc);
-      if (this instanceof BendingPlayer) {
-        Bending.game().boardManager().updateBoardSlot((Player) entity(), desc);
-      }
+      updateBoard();
     }
   }
 
@@ -175,6 +175,7 @@ public class BendingUser implements User {
   public boolean addCooldown(@NonNull AbilityDescription desc, long duration) {
     if (duration > 0 && Bending.eventBus().postCooldownAddEvent(this, desc, duration)) {
       cooldowns.put(desc, duration);
+      updateBoard(desc, true);
       return true;
     }
     return false;
@@ -185,13 +186,32 @@ public class BendingUser implements User {
     return bendingConditional;
   }
 
-  @Override
-  public void validateSlots() {
+  private void updateBoard(AbilityDescription desc, boolean cooldown) {
+    if (entity instanceof Player) {
+      Bending.game().boardManager().updateBoardSlot((Player) entity, desc, cooldown);
+    }
+  }
+
+  private void updateBoard() {
+    if (entity instanceof Player) {
+      Bending.game().boardManager().updateBoard((Player) entity());
+    }
+  }
+
+  /**
+   * Checks bound abilities and clears any invalid ability slots.
+   */
+  private void validateSlots() {
+    boolean changed = false;
     for (int i = 0; i < 9; i++) {
       AbilityDescription desc = slots.get(i);
       if (desc != null && (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind())) {
         slots.set(i, null);
+        changed = true;
       }
+    }
+    if (changed) {
+      updateBoard();
     }
   }
 

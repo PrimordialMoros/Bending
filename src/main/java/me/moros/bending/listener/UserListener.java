@@ -32,10 +32,6 @@ import co.aikar.commands.lib.timings.MCTiming;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.events.BendingDamageEvent;
-import me.moros.bending.events.CooldownAddEvent;
-import me.moros.bending.events.CooldownRemoveEvent;
-import me.moros.bending.events.ElementChangeEvent;
-import me.moros.bending.events.ElementChangeEvent.ElementAction;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.Element;
@@ -336,26 +332,5 @@ public class UserListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerSlotChange(PlayerItemHeldEvent event) {
     game.boardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onCooldownAdd(CooldownAddEvent event) {
-    if (event.user() instanceof BendingPlayer) {
-      game.boardManager().updateBoardSlot((Player) event.user().entity(), event.ability(), true);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onCooldownRemove(CooldownRemoveEvent event) {
-    if (event.user() instanceof BendingPlayer) {
-      game.boardManager().updateBoardSlot((Player) event.user().entity(), event.ability(), false);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onElementChange(ElementChangeEvent event) {
-    if (event.user() instanceof BendingPlayer && event.type() != ElementAction.ADD) {
-      game.boardManager().updateBoard((Player) event.user().entity());
-    }
   }
 }

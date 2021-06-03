@@ -110,16 +110,12 @@ public final class BoardManager {
     }
   }
 
-  public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc) {
-    updateBoardSlot(player, desc, false);
-  }
-
   public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
     if (canUseScoreboard(player)) {
       if (desc != null && !desc.canBind()) {
         scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
       } else {
-        scoreboardPlayers.get(player.getUniqueId()).updateAll(desc, cooldown);
+        scoreboardPlayers.get(player.getUniqueId()).updateAll();
       }
     }
   }
@@ -162,10 +158,6 @@ public final class BoardManager {
     }
 
     private void updateSlot(int slot) {
-      updateSlot(slot, null, false);
-    }
-
-    private void updateSlot(int slot, AbilityDescription specific, boolean forceSpecific) {
       if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
         return;
       }
@@ -178,14 +170,8 @@ public final class BoardManager {
         component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
       } else {
         Component name = Component.text(desc.name(), desc.element().color());
-        if (desc.equals(specific)) {
-          if (forceSpecific) {
-            name = name.decorate(TextDecoration.STRIKETHROUGH);
-          }
-        } else {
-          if (bendingPlayer.onCooldown(desc)) {
-            name = name.decorate(TextDecoration.STRIKETHROUGH);
-          }
+        if (bendingPlayer.onCooldown(desc)) {
+          name = name.decorate(TextDecoration.STRIKETHROUGH);
         }
         component = Component.text(prefix).append(name);
       }
@@ -198,11 +184,7 @@ public final class BoardManager {
     }
 
     private void updateAll() {
-      updateAll(null, false);
-    }
-
-    private void updateAll(AbilityDescription specific, boolean forceSpecific) {
-      IntStream.rangeClosed(1, 9).forEach(i -> updateSlot(i, specific, forceSpecific));
+      IntStream.rangeClosed(1, 9).forEach(this::updateSlot);
     }
 
     private void activeSlot(int oldSlot, int newSlot) {
