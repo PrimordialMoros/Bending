@@ -102,8 +102,11 @@ public class Torrent extends AbilityInstance {
   private void launch() {
     if (states == null) {
       if (ring.isReady() && !user.onCooldown(description())) {
-        states = new StateChain(ring.complete()).addState(new TorrentStream()).start();
-        user.addCooldown(description(), userConfig.cooldown);
+        List<Block> sources = ring.complete();
+        if (!sources.isEmpty()) {
+          states = new StateChain(sources).addState(new TorrentStream()).start();
+          user.addCooldown(description(), userConfig.cooldown);
+        }
       }
     } else {
       State current = states.current();

@@ -286,7 +286,6 @@ public class BendingCommand extends BaseCommand {
   private static Collection<Component> collectSequences(CommandSender user, Element element) {
     return Registries.ABILITIES.sequences()
       .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());

@@ -70,7 +70,7 @@ public class CollisionBuilder {
     return this;
   }
 
-  public @NonNull Collection<RegisteredCollision> build() {
+  public @NonNull Collection<@NonNull RegisteredCollision> build() {
     Set<RegisteredCollision> collisionSet = new HashSet<>(simpleCollisions);
     int size = layers.size();
     for (int i = 0; i < size; i++) {

@@ -33,7 +33,7 @@ public abstract class PhaseTransformer {
     queue = new ArrayDeque<>(32);
   }
 
-  public boolean fillQueue(@NonNull Collection<Block> blocks) {
+  public boolean fillQueue(@NonNull Collection<@NonNull Block> blocks) {
     return queue.addAll(blocks);
   }
 

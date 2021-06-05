@@ -107,7 +107,7 @@ public class Collapse extends AbilityInstance {
     return false;
   }
 
-  public boolean activate(@NonNull User user, @NonNull Collection<Block> sources, int height) {
+  public boolean activate(@NonNull User user, @NonNull Collection<@NonNull Block> sources, int height) {
     this.user = user;
     loadConfig();
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);

@@ -193,7 +193,7 @@ public final class BlockMethods {
    * @param radius the radius of the circle
    * @return a collection of blocks representing the ring
    */
-  public static @NonNull Collection<Block> createBlockRing(@NonNull Block center, double radius) {
+  public static @NonNull Collection<@NonNull Block> createBlockRing(@NonNull Block center, double radius) {
     Vector3 centerVector = Vector3.center(center);
     int steps = NumberConversions.ceil(10 * radius);
     return VectorMethods.circle(Vector3.PLUS_I.multiply(radius), Vector3.PLUS_J, steps)

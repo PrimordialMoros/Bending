@@ -44,7 +44,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Registry for all valid benders
+ * Registry for all valid benders.
  */
 public final class BenderRegistry implements Registry<User> {
   private AsyncLoadingCache<UUID, BendingProfile> cache;

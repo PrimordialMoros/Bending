@@ -19,8 +19,8 @@
 
 package me.moros.bending.util;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingCombustEvent;
@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class FireTick {
   public static final int MAX_TICKS = 100;
-  private static final Map<LivingEntity, User> INSTANCES = new ConcurrentHashMap<>();
+  private static final Map<LivingEntity, User> INSTANCES = new HashMap<>();
 
   private FireTick() {
   }

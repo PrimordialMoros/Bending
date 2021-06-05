@@ -138,7 +138,7 @@ public class Pillar implements Updatable {
     }
   }
 
-  public @NonNull Collection<Block> pillarBlocks() {
+  public @NonNull Collection<@NonNull Block> pillarBlocks() {
     return List.copyOf(pillarBlocks);
   }
 

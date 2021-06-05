@@ -21,9 +21,9 @@ package me.moros.bending.registry;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import me.moros.bending.Bending;
@@ -42,8 +42,8 @@ public final class AbilityRegistry implements Registry<AbilityDescription> {
   private final Map<AbilityDescription, Sequence> sequences;
 
   AbilityRegistry() {
-    abilities = new HashMap<>();
-    sequences = new HashMap<>();
+    abilities = new ConcurrentHashMap<>();
+    sequences = new ConcurrentHashMap<>();
   }
 
   /**

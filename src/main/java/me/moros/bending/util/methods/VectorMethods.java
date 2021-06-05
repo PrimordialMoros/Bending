@@ -162,7 +162,7 @@ public final class VectorMethods {
    * @param direction the direction to check
    * @return a collection of normalized vectors corresponding to cardinal block faces
    */
-  public static @NonNull Collection<IntVector> decomposeDiagonals(@NonNull Vector3 origin, @NonNull Vector3 direction) {
+  public static @NonNull Collection<@NonNull IntVector> decomposeDiagonals(@NonNull Vector3 origin, @NonNull Vector3 direction) {
     double[] o = origin.toArray();
     double[] d = direction.toArray();
     Collection<IntVector> possibleCollisions = new ArrayList<>(3);

@@ -145,8 +145,8 @@ public class WaterRing extends AbilityInstance {
     userConfig = Bending.configManager().calculate(this, config);
   }
 
-  public @NonNull List<Block> complete() {
-    if (!ready) {
+  public @NonNull List<@NonNull Block> complete() {
+    if (!ready || completed) {
       return List.of();
     }
     completed = true;

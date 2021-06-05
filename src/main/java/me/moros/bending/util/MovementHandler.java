@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingRestrictEvent;
@@ -42,10 +43,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class MovementHandler {
-  public static final Map<LivingEntity, MovementHandler> instances = new HashMap<>();
+  public static final Map<UUID, MovementHandler> instances = new HashMap<>();
   private static DummyMovementHandler DUMMY;
 
-  private Set<ActionType> disabled;
+  private Set<ActionType> disabled = EnumSet.noneOf(ActionType.class);
   private BarInfo info;
 
   private final LivingEntity entity;
@@ -70,7 +71,7 @@ public class MovementHandler {
 
   private void reset() {
     resetWithoutRemoving();
-    instances.remove(entity);
+    instances.remove(entity.getUniqueId());
   }
 
   private void resetWithoutRemoving() {
@@ -85,7 +86,7 @@ public class MovementHandler {
     }
   }
 
-  public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
+  public @NonNull MovementHandler disableActions(@NonNull Collection<@NonNull ActionType> methods) {
     disabled = EnumSet.copyOf(methods);
     return this;
   }
@@ -107,7 +108,7 @@ public class MovementHandler {
       }
       return DUMMY;
     }
-    return instances.computeIfAbsent(entity, e -> new MovementHandler(e, event.duration()));
+    return instances.computeIfAbsent(entity.getUniqueId(), e -> new MovementHandler(entity, event.duration()));
   }
 
   public static boolean isRestricted(@NonNull Entity entity) {
@@ -176,7 +177,7 @@ public class MovementHandler {
     }
 
     @Override
-    public @NonNull MovementHandler disableActions(@NonNull Collection<ActionType> methods) {
+    public @NonNull MovementHandler disableActions(@NonNull Collection<@NonNull ActionType> methods) {
       return this;
     }
 

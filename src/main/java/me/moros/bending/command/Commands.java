@@ -117,11 +117,11 @@ public class Commands {
         BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
         permissionPredicate = bendingPlayer::hasPermission;
       }
-      return Registries.ABILITIES.abilities()
-        .filter(nonHidden)
-        .filter(desc -> desc.name().equalsIgnoreCase(name))
-        .filter(permissionPredicate)
-        .findAny().orElseThrow(() -> new InvalidCommandArgument("Could not find ability " + name));
+      AbilityDescription check = Registries.ABILITIES.ability(name.toLowerCase());
+      if (check == null || !nonHidden.test(check) || !permissionPredicate.test(check)) {
+        throw new InvalidCommandArgument("Could not find ability " + name);
+      }
+      return check;
     });
 
     commandContexts.registerIssuerAwareContext(Preset.class, c -> {

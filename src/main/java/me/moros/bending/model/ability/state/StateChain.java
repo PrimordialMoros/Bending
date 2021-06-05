@@ -37,12 +37,13 @@ public class StateChain implements Updatable {
   private boolean finished = false;
 
   public StateChain() {
-    this(new ArrayList<>());
+    chainStore = new ArrayList<>();
+    chainQueue = new ArrayDeque<>();
   }
 
   public StateChain(@NonNull Collection<@NonNull Block> store) {
-    chainStore = store;
-    chainQueue = new ArrayDeque<>();
+    this();
+    chainStore.addAll(store);
   }
 
   public @NonNull StateChain addState(@NonNull State state) {

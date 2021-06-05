@@ -19,7 +19,9 @@
 
 package me.moros.bending.game.temporal;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +37,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
@@ -56,10 +59,7 @@ public class TempArmor implements Temporary {
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-    if (MANAGER.isTemp(user.entity().getUniqueId())) {
-      return Optional.empty();
-    }
-    if (user.entity().getEquipment() == null) {
+    if (armor == null || MANAGER.isTemp(user.entity().getUniqueId()) || user.entity().getEquipment() == null) {
       return Optional.empty();
     }
     return Optional.of(new TempArmor(user.entity(), applyMetaToArmor(armor), duration));
@@ -72,8 +72,8 @@ public class TempArmor implements Temporary {
   /**
    * @return an unmodifiable view of the snapshot
    */
-  public @NonNull Collection<ItemStack> snapshot() {
-    return List.of(snapshot);
+  public @NonNull Collection<@Nullable ItemStack> snapshot() {
+    return Collections.unmodifiableCollection(Arrays.asList(snapshot));
   }
 
   @Override
