@@ -32,6 +32,7 @@ permissions:
       bending.command.add.other: true
       bending.command.remove.other: true
       bending.command.modify: true
+      bending.command.modify.other: true
   bending.player:
     default: true
     children:
@@ -100,6 +101,7 @@ permissions:
       bending.ability.FireJet: true
       bending.ability.FireShield: true
       bending.ability.FireWall: true
+      bending.ability.FlameRush: true
       bending.ability.HeatControl: true
   bending.water:
     children:
@@ -111,6 +113,7 @@ permissions:
       bending.ability.FrostBreath: true
       bending.ability.HealingWaters: true
       bending.ability.IceCrawl: true
+      bending.ability.IceSpike: true
       bending.ability.IceWall: true
       bending.ability.OctopusForm: true
       bending.ability.PhaseChange: true

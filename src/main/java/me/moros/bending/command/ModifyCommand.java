@@ -54,7 +54,7 @@ public class ModifyCommand extends BaseCommand {
   @Subcommand("add|a")
   @CommandCompletion("@elements|@allabilities * * * @players")
   @Description("Add a new modifier to the specified player")
-  public static void onAdd(BendingPlayer player, ModifyPolicy policy, Attribute attribute, ModifierOperation op, double amount, @Optional @CommandPermission("bending.command.modify.others") OnlinePlayer target) {
+  public static void onAdd(BendingPlayer player, ModifyPolicy policy, Attribute attribute, ModifierOperation op, double amount, @Optional @CommandPermission("bending.command.modify.other") OnlinePlayer target) {
     BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
     AttributeModifier modifier = new AttributeModifier(policy, attribute, op, amount);
     Registries.ATTRIBUTES.add(bendingPlayer, modifier);
@@ -65,7 +65,7 @@ public class ModifyCommand extends BaseCommand {
   @Subcommand("clear|c")
   @CommandCompletion("@players")
   @Description("Clear all existing modifiers for a player")
-  public static void onClear(BendingPlayer player, @Optional @CommandPermission("bending.command.modify.others") OnlinePlayer target) {
+  public static void onClear(BendingPlayer player, @Optional @CommandPermission("bending.command.modify.other") OnlinePlayer target) {
     BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
     Registries.ATTRIBUTES.invalidate(bendingPlayer);
     recalculate(bendingPlayer);
