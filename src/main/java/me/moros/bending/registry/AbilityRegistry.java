@@ -103,7 +103,7 @@ public final class AbilityRegistry implements Registry<AbilityDescription> {
         .map(SequenceStep::ability)
         .allMatch(this::contains);
       if (valid) {
-        abilities.put(desc.name(), desc);
+        register(desc);
         sequences.put(desc, sequence);
         return true;
       } else {
