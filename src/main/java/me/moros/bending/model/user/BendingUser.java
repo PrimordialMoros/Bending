@@ -26,7 +26,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
@@ -72,7 +71,8 @@ public class BendingUser implements User {
       .scheduler(Scheduler.systemScheduler())
       .build();
     slots = new Preset(Arrays.asList(data.slots())).toBinds();
-    elements = EnumSet.copyOf(data.elements().stream().map(Element::fromName).flatMap(Optional::stream).collect(Collectors.toList()));
+    elements = EnumSet.noneOf(Element.class);
+    data.elements().stream().map(Element::fromName).flatMap(Optional::stream).forEach(elements::add);
     bendingConditional = BendingConditions.builder().build();
     validateSlots();
   }
