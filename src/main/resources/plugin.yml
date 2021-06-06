@@ -43,6 +43,7 @@ permissions:
       bending.command.preset: true
       bending.command.toggle: true
       bending.command.board: true
+      bending.command.version: true
       bending.air: true
       bending.chi: true
       bending.earth: true

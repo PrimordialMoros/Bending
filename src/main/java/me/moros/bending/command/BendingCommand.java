@@ -160,7 +160,7 @@ public class BendingCommand extends BaseCommand {
   }
 
   @Subcommand("version|ver|v")
-  @CommandPermission("bending.command.help")
+  @CommandPermission("bending.command.version")
   @Description("View version info about the bending plugin")
   public static void onVersion(CommandSender user) {
     String link = "https://github.com/PrimordialMoros/Bending";

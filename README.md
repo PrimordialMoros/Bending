@@ -13,7 +13,7 @@ This project is a modern implementation of bending with the following key aspect
 - Accurate collision detection system
 - Balanced pvp and pve experience, extremely configurable
 
-For a full list of features check out the [features list](https://github.com/PrimordialMoros/Bending/wiki/Features).
+For more information check the [Wiki](https://github.com/PrimordialMoros/Bending/wiki/Home).
 
 Support and project discussion is available on [Discord](https://discord.gg/sjwncgE).
 
