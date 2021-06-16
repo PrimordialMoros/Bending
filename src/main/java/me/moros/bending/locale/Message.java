@@ -43,6 +43,7 @@ public interface Message {
 
   Args0 HELP_HEADER = () -> brand(translatable("bending.command.help.header", DARK_AQUA));
 
+  Args0 INVALID_PRESET_NAME = () -> translatable("bending.command.preset.invalid-name", RED);
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", YELLOW);
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", YELLOW);
 
@@ -60,9 +61,10 @@ public interface Message {
   Args1<String> PRESET_REMOVE_FAIL = preset -> translatable("bending.command.preset.remove-fail", RED)
     .args(text(preset));
 
-  Args2<Integer, String> PRESET_BIND_SUCCESS = (amount, preset) -> translatable("bending.command.preset.bind-success", GREEN)
-    .args(text(amount), text(preset));
-  Args1<String> PRESET_BIND_FAIL = preset -> translatable("bending.command.preset.bind-fail", YELLOW);
+  Args1<String> PRESET_BIND_SUCCESS = preset -> translatable("bending.command.preset.bind-success", GREEN)
+    .args(text(preset));
+  Args1<String> PRESET_BIND_FAIL = preset -> translatable("bending.command.preset.bind-fail", YELLOW)
+    .args(text(preset));
 
   Args1<String> MODIFIER_ADD = name -> translatable("bending.command.modifier.add", GREEN)
     .args(text(name));

@@ -22,6 +22,7 @@ package me.moros.bending.util;
 import java.util.regex.Pattern;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to handle chat related functionality.
@@ -38,7 +39,10 @@ public final class ChatUtil {
    * @param input input the input string to sanitize
    * @return the sanitized output string
    */
-  public static @NonNull String sanitizeInput(@NonNull String input) {
+  public static @NonNull String sanitizeInput(@Nullable String input) {
+    if (input == null) {
+      return "";
+    }
     String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
     return output.length() > 16 ? output.substring(0, 16) : output;
   }

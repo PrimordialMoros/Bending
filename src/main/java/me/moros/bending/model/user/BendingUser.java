@@ -106,6 +106,7 @@ public class BendingUser implements User {
     if (hasElement(element) && Bending.eventBus().postElementChangeEvent(this, ElementAction.REMOVE)) {
       elements.remove(element);
       validateSlots();
+      updateBoard();
       return true;
     }
     return false;
@@ -117,6 +118,7 @@ public class BendingUser implements User {
       elements.clear();
       elements.add(element);
       validateSlots();
+      updateBoard();
       Bending.game().abilityManager(world()).createPassives(this);
       return true;
     }
@@ -133,13 +135,16 @@ public class BendingUser implements User {
   }
 
   @Override
-  public int bindPreset(@NonNull Preset preset) {
+  public boolean bindPreset(@NonNull Preset preset) {
     if (Bending.eventBus().postBindChangeEvent(this, BindType.MULTIPLE)) {
+      Preset oldBinds = createPresetFromSlots("");
       Collections.copy(slots, preset.toBinds());
       validateSlots();
-      return preset.compare(createPresetFromSlots(""));
+      updateBoard();
+      Preset newBinds = createPresetFromSlots("");
+      return oldBinds.compare(newBinds) > 0;
     }
-    return 0;
+    return false;
   }
 
   @Override
@@ -202,16 +207,11 @@ public class BendingUser implements User {
    * Checks bound abilities and clears any invalid ability slots.
    */
   private void validateSlots() {
-    boolean changed = false;
     for (int i = 0; i < 9; i++) {
       AbilityDescription desc = slots.get(i);
       if (desc != null && (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind())) {
         slots.set(i, null);
-        changed = true;
       }
-    }
-    if (changed) {
-      updateBoard();
     }
   }
 

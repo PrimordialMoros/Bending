@@ -56,7 +56,7 @@ public interface User extends BukkitUser, ElementUser {
    */
   @NonNull Preset createPresetFromSlots(@NonNull String name);
 
-  int bindPreset(@NonNull Preset preset);
+  boolean bindPreset(@NonNull Preset preset);
 
   /**
    * Assigns an ability to the specified slot.

@@ -64,6 +64,10 @@ public class PresetCommand extends BaseCommand {
   @Description("Create a new preset")
   public static void onPresetCreate(BendingPlayer player, String name) {
     String input = ChatUtil.sanitizeInput(name);
+    if (input.isEmpty()) {
+      Message.INVALID_PRESET_NAME.send(player);
+      return;
+    }
     Preset preset = player.createPresetFromSlots(input);
     if (preset.isEmpty()) {
       Message.EMPTY_PRESET.send(player);
@@ -87,9 +91,8 @@ public class PresetCommand extends BaseCommand {
   @CommandCompletion("@presets")
   @Description("Bind an existing preset")
   public static void onPresetBind(BendingPlayer player, Preset preset) {
-    int count = player.bindPreset(preset);
-    if (count > 0) {
-      Message.PRESET_BIND_SUCCESS.send(player, count, preset.name());
+    if (player.bindPreset(preset)) {
+      Message.PRESET_BIND_SUCCESS.send(player, preset.name());
     } else {
       Message.PRESET_BIND_FAIL.send(player, preset.name());
     }

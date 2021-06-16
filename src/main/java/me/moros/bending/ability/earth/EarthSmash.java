@@ -397,10 +397,12 @@ public class EarthSmash extends AbilityInstance {
     private final Set<Entity> affectedEntities;
     private final Vector3 origin;
     private final Vector3 direction;
+    private Vector3 location;
 
     private ShotState() {
       affectedEntities = new HashSet<>();
       origin = new Vector3(boulder.center.toArray());
+      location = new Vector3(origin.toArray());
       direction = user.direction();
       SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
     }
@@ -409,7 +411,8 @@ public class EarthSmash extends AbilityInstance {
     public @NonNull UpdateResult update() {
       CollisionUtil.handleEntityCollisions(user, boulder.collider(), this::onEntityHit);
       cleanAll();
-      Block newCenter = boulder.center.add(direction).toBlock(boulder.world);
+      location = location.add(direction);
+      Block newCenter = location.toBlock(boulder.world);
       if (!boulder.isValidBlock(newCenter)) {
         return UpdateResult.REMOVE;
       }
