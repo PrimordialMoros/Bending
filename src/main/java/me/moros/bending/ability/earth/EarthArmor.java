@@ -22,7 +22,7 @@ package me.moros.bending.ability.earth;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -63,7 +63,7 @@ public class EarthArmor extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Mode mode;
-  private BendingFallingBlock fallingBlock;
+  private TempFallingBlock fallingBlock;
 
   private boolean formed = false;
   private int resistance;
@@ -97,7 +97,7 @@ public class EarthArmor extends AbilityInstance {
     }
     BlockData data = source.getBlockData().clone();
     TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
-    fallingBlock = new BendingFallingBlock(source, data, new Vector3(0, 0.2, 0), false, 10000);
+    fallingBlock = new TempFallingBlock(source, data, new Vector3(0, 0.2, 0), false, 10000);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;
   }

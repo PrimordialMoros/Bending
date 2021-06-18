@@ -88,13 +88,13 @@ public class FlameRush extends AbilityInstance {
     startTime = System.currentTimeMillis();
     charging = true;
 
-    if (user.headBlock().isLiquid()) {
+    if (Policies.IN_LIQUID.test(user, description())) {
       return false;
     }
 
     removalPolicy = Policies.builder()
-      .add(Policies.IN_LIQUID)
       .add(SwappedSlotsRemovalPolicy.of(description()))
+      .add(Policies.IN_LIQUID)
       .build();
 
     return true;
@@ -144,6 +144,7 @@ public class FlameRush extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.location().add(new Vector3(0, 1.2, 0));
     Vector3 lookingDir = user.direction().multiply(userConfig.range * factor);
+    removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     stream = new FireStream(new Ray(origin, lookingDir), factor);
   }
 

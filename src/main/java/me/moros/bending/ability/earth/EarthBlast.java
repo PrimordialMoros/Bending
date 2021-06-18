@@ -201,7 +201,7 @@ public class EarthBlast extends AbilityInstance {
     private final double damage;
 
     public Blast(User user, Block block) {
-      super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 100);
+      super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 20);
       if (EarthMaterials.isMetalBendable(block)) {
         damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
       } else if (EarthMaterials.isLavaBendable(block)) {

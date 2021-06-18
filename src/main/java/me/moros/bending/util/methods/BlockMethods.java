@@ -50,8 +50,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Utility class with useful {@link Block} related methods. Note: This is not thread-safe.
  */
 public final class BlockMethods {
-  public static final Set<BlockFace> MAIN_FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
-  public static final Set<BlockFace> CARDINAL_FACES = Set.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
+  public static final Set<BlockFace> FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
+  public static final Set<BlockFace> SIDES = Set.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
 
   private BlockMethods() {
   }
@@ -174,7 +174,7 @@ public final class BlockMethods {
    */
   public static boolean isInfiniteWater(@NonNull Block block) {
     int sources = 0;
-    for (BlockFace face : CARDINAL_FACES) {
+    for (BlockFace face : SIDES) {
       Block adjacent = block.getRelative(face);
       if (!TempBlock.isBendable(adjacent)) {
         continue;

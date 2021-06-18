@@ -30,13 +30,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -125,11 +128,30 @@ public class TempBlock implements Temporary {
 
   public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {
     Material mat = BlockMethods.isInfiniteWater(block) ? Material.WATER : Material.AIR;
+    Block above = block.getRelative(BlockFace.UP);
+    if (mat == Material.AIR && MaterialUtil.isWater(above)) {
+      return create(block, calculateWaterData(above), duration, true);
+    }
     return create(block, mat.createBlockData(), duration, true);
   }
 
   public static Optional<TempBlock> forceCreateAir(@NonNull Block block) {
     return create(block, Material.AIR.createBlockData(), 0, true);
+  }
+
+  // Handle falling water
+  private static BlockData calculateWaterData(Block above) {
+    BlockData data = above.getBlockData();
+    int level;
+    if (data instanceof Levelled) {
+      level = ((Levelled) data).getLevel();
+      if (level <= 7) {
+        level += 8;
+      }
+    } else {
+      level = 8;
+    }
+    return MaterialUtil.waterData(level);
   }
 
   private void addState(BlockData data, long duration, boolean bendable) {

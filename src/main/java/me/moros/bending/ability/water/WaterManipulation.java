@@ -146,10 +146,10 @@ public class WaterManipulation extends AbilityInstance {
 
         if (isIce) {
           Location center = manip.center().toLocation(user.world());
-          ParticleUtil.create(Particle.ITEM_CRACK, center).count(10)
-            .offset(0.5, 0.5, 0.5).data(new ItemStack(Material.ICE)).spawn();
-          ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(10)
-            .offset(0.5, 0.5, 0.5).spawn();
+          ParticleUtil.create(Particle.ITEM_CRACK, center).count(4)
+            .offset(0.4, 0.4, 0.4).data(new ItemStack(Material.ICE)).spawn();
+          ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(6)
+            .offset(0.4, 0.4, 0.4).spawn();
         } else {
           Block trail1 = manip.previousBlock();
           if (trail1 != null) {
@@ -254,7 +254,7 @@ public class WaterManipulation extends AbilityInstance {
 
   private class Manip extends BlockShot {
     public Manip(User user, Block block) {
-      super(user, block, isIce ? block.getType() : Material.WATER, userConfig.range, isIce ? 80 : 100);
+      super(user, block, isIce ? block.getType() : Material.WATER, userConfig.range, isIce ? 16 : 20);
       allowUnderWater = true;
     }
 

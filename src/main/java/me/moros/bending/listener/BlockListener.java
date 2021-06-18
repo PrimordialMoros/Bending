@@ -20,7 +20,7 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.game.Game;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -139,7 +139,7 @@ public class BlockListener implements Listener {
       if (fb.hasMetadata(Metadata.FALLING_BLOCK)) {
         event.setCancelled(true);
       }
-      BendingFallingBlock.MANAGER.get(fb).ifPresent(BendingFallingBlock::revert);
+      TempFallingBlock.MANAGER.get(fb).ifPresent(TempFallingBlock::revert);
     } else {
       if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) {
         event.setCancelled(true);

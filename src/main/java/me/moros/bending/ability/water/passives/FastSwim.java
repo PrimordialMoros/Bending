@@ -27,7 +27,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.PotionUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -57,8 +56,7 @@ public class FastSwim extends AbilityInstance implements Ability {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       return UpdateResult.CONTINUE;
     }
-
-    if (MaterialUtil.isWater(user.locBlock())) {
+    if (user.entity().isInWater()) {
       PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
     }
     return UpdateResult.CONTINUE;

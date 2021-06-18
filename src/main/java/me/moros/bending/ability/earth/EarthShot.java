@@ -27,7 +27,7 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -80,7 +80,7 @@ public class EarthShot extends AbilityInstance {
   private BlockData data;
   private Vector3 location;
   private Vector3 lastVelocity;
-  private BendingFallingBlock projectile;
+  private TempFallingBlock projectile;
 
   private boolean ready = false;
   private boolean launched = false;
@@ -156,7 +156,7 @@ public class EarthShot extends AbilityInstance {
       SoundUtil.EARTH.play(source.getLocation());
     }
 
-    projectile = new BendingFallingBlock(source, solidData, new Vector3(0, 0.65, 0), false, 6000);
+    projectile = new TempFallingBlock(source, solidData, new Vector3(0, 0.65, 0), false, 6000);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
@@ -288,7 +288,7 @@ public class EarthShot extends AbilityInstance {
     } else {
       origin = Vector3.center(readySource);
       Vector3 dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile = new BendingFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
+      projectile = new TempFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
       TempBlock.createAir(readySource);
     }
     location = projectile.center();

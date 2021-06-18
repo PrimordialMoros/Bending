@@ -285,7 +285,7 @@ public class WaterGimbal extends AbilityInstance {
     private final Set<Entity> affectedEntities = new HashSet<>();
 
     public GimbalStream() {
-      super(user, Material.WATER, userConfig.range, 70);
+      super(user, Material.WATER, userConfig.range, 16);
     }
 
     @Override

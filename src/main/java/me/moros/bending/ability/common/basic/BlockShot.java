@@ -63,8 +63,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   protected final double range;
 
   /**
-   * The maximum speed is 100 and represents movement of 1 block per tick.
-   * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
+   * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
   public BlockShot(@NonNull User user, @NonNull Block block, @NonNull Material material, double range, int speed) {
@@ -72,7 +71,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     this.material = material;
     this.location = Vector3.center(block);
     this.range = range;
-    this.speed = Math.min(100, speed);
+    this.speed = Math.min(20, speed);
     buffer = speed;
 
     redirect();
@@ -102,10 +101,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   @Override
   public @NonNull UpdateResult update() {
     buffer += speed;
-    if (buffer < 100) {
+    if (buffer < 20) {
       return UpdateResult.CONTINUE;
     }
-    buffer -= 100; // Reduce buffer by one since we moved
+    buffer -= 20;
 
     clean();
     if (Math.abs(location.y - firstDestination.y) < 0.5) {
@@ -120,7 +119,9 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       direction = direction.multiply(2);
     }
     for (IntVector v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
-      if (diagonalsPredicate.test(originBlock.getRelative(v.x, v.y, v.z))) {
+      Block diagonal = originBlock.getRelative(v.x, v.y, v.z);
+      if (diagonalsPredicate.test(diagonal)) {
+        onBlockHit(diagonal);
         return UpdateResult.REMOVE;
       }
     }
@@ -136,9 +137,6 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
       return UpdateResult.REMOVE;
     }
-    if (!MaterialUtil.isTransparent(current)) {
-      onBlockHit(current);
-    }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
       BlockMethods.tryBreakPlant(current);
       if (material == Material.WATER && MaterialUtil.isWater(current)) {
@@ -150,9 +148,19 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
         TempBlock.create(current, material.createBlockData(), false);
       }
     } else {
+      onBlockHit(current);
       return UpdateResult.REMOVE;
     }
-    return location.distanceSq(target) < 0.8 ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+
+    if (location.distanceSq(target) < 0.8) {
+      // Project the target block
+      Block projected = location.add(direction).toBlock(user.world());
+      if (!MaterialUtil.isTransparent(projected)) {
+        onBlockHit(projected);
+      }
+      return UpdateResult.REMOVE;
+    }
+    return UpdateResult.CONTINUE;
   }
 
   public void redirect() {

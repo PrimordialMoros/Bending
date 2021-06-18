@@ -19,7 +19,7 @@
 
 package me.moros.bending.util.collision;
 
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3;
 import me.moros.bending.model.user.User;
@@ -100,7 +100,7 @@ public final class CollisionUtil {
     if (entity instanceof Player) {
       return ((Player) entity).getGameMode() != GameMode.SPECTATOR;
     } else if (entity instanceof FallingBlock) {
-      return !BendingFallingBlock.MANAGER.isTemp((FallingBlock) entity);
+      return !TempFallingBlock.MANAGER.isTemp((FallingBlock) entity);
     } else if (entity instanceof ArmorStand) {
       return ((ArmorStand) entity).isVisible();
     }

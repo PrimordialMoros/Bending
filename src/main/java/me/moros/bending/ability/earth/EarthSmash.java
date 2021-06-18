@@ -38,7 +38,7 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -315,6 +315,7 @@ public class EarthSmash extends AbilityInstance {
   private class LiftState implements EarthSmashState {
     private final Vector3 origin;
     private int tick = 0;
+    private long nextLiftTime = 0;
 
     private LiftState() {
       this.origin = new Vector3(boulder.center.toArray());
@@ -322,13 +323,20 @@ public class EarthSmash extends AbilityInstance {
 
     @Override
     public @NonNull UpdateResult update() {
-      cleanAll();
-      boulder.center(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
-      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
-      CollisionUtil.handleEntityCollisions(user, boulder.collider(), entity -> {
+      Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3.PLUS_J));
+      CollisionUtil.handleEntityCollisions(user, liftCollider, entity -> {
         entity.setVelocity(new Vector3(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
         return true;
       }, true, true);
+
+      long time = System.currentTimeMillis();
+      if (time < nextLiftTime) {
+        return UpdateResult.CONTINUE;
+      }
+      nextLiftTime = time + 60;
+      cleanAll();
+      boulder.center(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
+      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
       render();
       clearSourceArea();
       return UpdateResult.CONTINUE;
@@ -398,6 +406,8 @@ public class EarthSmash extends AbilityInstance {
     private final Vector3 origin;
     private final Vector3 direction;
     private Vector3 location;
+    private int buffer;
+    private final int speed = 18;
 
     private ShotState() {
       affectedEntities = new HashSet<>();
@@ -405,10 +415,16 @@ public class EarthSmash extends AbilityInstance {
       location = new Vector3(origin.toArray());
       direction = user.direction();
       SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
+      buffer = speed;
     }
 
     @Override
     public @NonNull UpdateResult update() {
+      buffer += speed;
+      if (buffer < 20) {
+        return UpdateResult.CONTINUE;
+      }
+      buffer -= 20;
       CollisionUtil.handleEntityCollisions(user, boulder.collider(), this::onEntityHit);
       cleanAll();
       location = location.add(direction);
@@ -573,7 +589,7 @@ public class EarthSmash extends AbilityInstance {
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
         TempBlock.createAir(block);
-        new BendingFallingBlock(block, blockData, velocity, true, 5000);
+        new TempFallingBlock(block, blockData, velocity, true, 5000);
         Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
         ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
           .offset(0.5, 0.5, 0.5).data(blockData).spawn();
@@ -608,6 +624,8 @@ public class EarthSmash extends AbilityInstance {
     public double knockback;
     @Modifiable(Attribute.STRENGTH)
     public double knockup;
+    @Modifiable(Attribute.SPEED)
+    public int speed;
 
     @Override
     public void onConfigReload() {

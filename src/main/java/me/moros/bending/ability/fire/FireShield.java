@@ -83,7 +83,7 @@ public class FireShield extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (user.headBlock().isLiquid()) {
+    if (Policies.IN_LIQUID.test(user, description())) {
       return false;
     }
 
@@ -94,12 +94,16 @@ public class FireShield extends AbilityInstance {
       removalPolicy = Policies.builder()
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(ExpireRemovalPolicy.of(userConfig.shieldDuration))
-        .add(Policies.NOT_SNEAKING).build();
+        .add(Policies.NOT_SNEAKING)
+        .add(Policies.IN_LIQUID)
+        .build();
     } else {
       shield = new DiskShield();
       removalPolicy = Policies.builder()
         .add(SwappedSlotsRemovalPolicy.of(description()))
-        .add(ExpireRemovalPolicy.of(userConfig.diskDuration)).build();
+        .add(ExpireRemovalPolicy.of(userConfig.diskDuration))
+        .add(Policies.IN_LIQUID)
+        .build();
     }
 
     return true;

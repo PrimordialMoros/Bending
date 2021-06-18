@@ -61,7 +61,7 @@ public class AirSpout extends AbilityInstance {
     if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
       return false;
     }
-    if (user.headBlock().isLiquid()) {
+    if (Policies.IN_LIQUID.test(user, description())) {
       return false;
     }
 
@@ -87,11 +87,7 @@ public class AirSpout extends AbilityInstance {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, description())) {
-      return UpdateResult.REMOVE;
-    }
-
-    if (user.headBlock().isLiquid()) {
+    if (removalPolicy.test(user, description()) || user.headBlock().isLiquid()) {
       return UpdateResult.REMOVE;
     }
 

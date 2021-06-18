@@ -82,7 +82,8 @@ public class AirSwipe extends AbilityInstance {
     loadConfig();
     startTime = System.currentTimeMillis();
     charging = true;
-    if (user.headBlock().isLiquid()) {
+
+    if (user.mainHandSide().toBlock(user.world()).isLiquid()) {
       return false;
     }
 

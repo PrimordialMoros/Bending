@@ -126,7 +126,7 @@ public class IceWall extends AbilityInstance {
       if (!user.canBuild(forwardBlock)) {
         return i;
       }
-      if (!MaterialUtil.isTransparent(forwardBlock) && forwardBlock.getType() != Material.WATER) {
+      if (!MaterialUtil.isTransparent(forwardBlock) && !WaterMaterials.isWaterOrIceBendable(forwardBlock)) {
         return i;
       }
     }
@@ -197,7 +197,7 @@ public class IceWall extends AbilityInstance {
         return false;
       }
       BlockMethods.tryBreakPlant(block);
-      return MaterialUtil.isTransparentOrWater(block);
+      return MaterialUtil.isTransparent(block) || WaterMaterials.isWaterOrIceBendable(block);
     }
   }
 

@@ -168,7 +168,7 @@ public class Torrent extends AbilityInstance {
     private boolean clicked = false;
 
     public TorrentStream() {
-      super(user, Material.WATER, userConfig.range, 90);
+      super(user, Material.WATER, userConfig.range, 18);
     }
 
     @Override

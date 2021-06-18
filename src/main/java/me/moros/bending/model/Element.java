@@ -19,11 +19,8 @@
 
 package me.moros.bending.model;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -64,14 +61,6 @@ public enum Element {
     if (value.isEmpty()) {
       return Optional.empty();
     }
-    return all().stream().filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
-  }
-
-  public static @NonNull Collection<@NonNull String> elementNames() {
-    return List.of("Air", "Water", "Earth", "Fire");
-  }
-
-  public static @NonNull Set<@NonNull Element> all() {
-    return EnumSet.allOf(Element.class);
+    return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
   }
 }

@@ -29,7 +29,7 @@ import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -243,7 +243,7 @@ public class Shockwave extends AbilityInstance {
       double deltaY = Math.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
       Vector3 velocity = new Vector3(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
-      new BendingFallingBlock(block, data, velocity, true, 450);
+      new TempFallingBlock(block, data, velocity, true, 450);
       ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
       if (ThreadLocalRandom.current().nextInt(6) == 0) {

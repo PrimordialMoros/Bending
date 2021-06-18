@@ -112,7 +112,7 @@ public class TravellingSource implements State {
     Location dest = user.headBlock().getLocation();
     Block result = null;
     double minDistance = Double.MAX_VALUE;
-    for (BlockFace face : BlockMethods.CARDINAL_FACES) {
+    for (BlockFace face : BlockMethods.SIDES) {
       Block block = check.getRelative(face);
       if (!isValid(block)) {
         continue;

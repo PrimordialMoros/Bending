@@ -182,7 +182,7 @@ public class Pillar implements Updatable {
     }
 
     public @NonNull PillarBuilder direction(@NonNull BlockFace direction) {
-      if (!BlockMethods.MAIN_FACES.contains(direction)) {
+      if (!BlockMethods.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
       this.direction = direction;

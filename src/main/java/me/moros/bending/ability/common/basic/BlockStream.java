@@ -62,15 +62,14 @@ public abstract class BlockStream implements State {
   protected final double range;
 
   /**
-   * The maximum speed is 100 and represents movement of 1 block per tick.
-   * Example: A speed of 75 means that the stream will advance 15 (75/100 * 20) blocks in a full cycle (20 ticks).
+   * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
   public BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
     this.user = user;
     this.material = material;
     this.range = range;
-    this.speed = Math.min(100, speed);
+    this.speed = Math.min(20, speed);
     buffer = speed;
   }
 
@@ -95,11 +94,12 @@ public abstract class BlockStream implements State {
 
   @Override
   public @NonNull UpdateResult update() {
-    // Since this moves block by block, our only choice is to skip an update every x ticks based on our buffer speed
     buffer += speed;
-    if (buffer < 100) {
+    if (buffer < 20) {
       return UpdateResult.CONTINUE;
     }
+    buffer -= 20;
+
     if (!started || stream.stream().noneMatch(this::isValid)) {
       return UpdateResult.REMOVE;
     }
@@ -117,7 +117,6 @@ public abstract class BlockStream implements State {
       direction = targetLoc.subtract(current).normalize();
     }
 
-    buffer -= 100; // Reduce buffer by one since we moved
 
     Vector3 originalVector = new Vector3(current.toArray());
     Block originBlock = originalVector.toBlock(user.world());

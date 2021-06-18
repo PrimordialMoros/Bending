@@ -35,7 +35,7 @@ import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -299,7 +299,7 @@ public class EarthLine extends AbilityInstance {
       for (Block block : wall) {
         Vector3 velocity = VectorMethods.gaussianOffset(Vector3.ZERO, 0.2, 0.1, 0.2);
         TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
-        new BendingFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
+        new TempFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
       }
     }
 

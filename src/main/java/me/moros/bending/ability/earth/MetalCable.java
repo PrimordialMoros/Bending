@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -84,7 +84,7 @@ public class MetalCable extends AbilityInstance {
   private Vector3 location;
   private Arrow cable;
   private CableTarget target;
-  private BendingFallingBlock projectile;
+  private TempFallingBlock projectile;
 
   private boolean hasHit = false;
   private boolean launched = false;
@@ -300,7 +300,7 @@ public class MetalCable extends AbilityInstance {
       BlockData data = block.getBlockData();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
       Vector3 velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
-      projectile = new BendingFallingBlock(block, data, velocity, true, 30000);
+      projectile = new TempFallingBlock(block, data, velocity, true, 30000);
       target = new CableTarget(projectile.fallingBlock());
     } else {
       target = new CableTarget(block);

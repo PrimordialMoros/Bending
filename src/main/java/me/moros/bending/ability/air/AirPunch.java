@@ -69,19 +69,18 @@ public class AirPunch extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (user.headBlock().isLiquid()) {
-      return false;
-    }
-
-    removalPolicy = Policies.builder().build();
-
-    user.addCooldown(description(), userConfig.cooldown);
     Vector3 origin = user.mainHandSide();
     Vector3 lookingDir = user.direction().multiply(userConfig.range);
 
+    if (origin.toBlock(user.world()).isLiquid()) {
+      return false;
+    }
+
+    user.addCooldown(description(), userConfig.cooldown);
     double length = user.velocity().subtract(user.direction()).getNorm();
     double factor = (length == 0) ? 1 : Math.max(0.5, Math.min(1.5, 1 / length));
     stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
+    removalPolicy = Policies.builder().build();
     return true;
   }
 

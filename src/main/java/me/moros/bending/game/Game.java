@@ -19,10 +19,11 @@
 
 package me.moros.bending.game;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 import me.moros.bending.Bending;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
@@ -66,7 +67,7 @@ public final class Game {
     TempArmor.init();
     TempBlock.init();
     TempArmorStand.init();
-    BendingFallingBlock.init();
+    TempFallingBlock.init();
 
     Registries.PROTECTIONS.init();
     Registries.BENDERS.init(storage);
@@ -110,11 +111,11 @@ public final class Game {
     TempArmor.MANAGER.removeAll();
     TempBlock.MANAGER.removeAll();
     TempArmorStand.MANAGER.removeAll();
-    BendingFallingBlock.MANAGER.removeAll();
+    TempFallingBlock.MANAGER.removeAll();
   }
 
   private void loadStorage() {
-    storage.createElements(Element.all());
+    storage.createElements(EnumSet.allOf(Element.class));
     storage.createAbilities(Registries.ABILITIES);
   }
 

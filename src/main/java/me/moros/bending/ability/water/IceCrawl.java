@@ -29,7 +29,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.BendingFallingBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -178,7 +178,7 @@ public class IceCrawl extends AbilityInstance {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       if (entity.isValid() && entity instanceof LivingEntity) {
         Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
-        new BendingFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
+        new TempFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
         MovementHandler.restrictEntity(user, (LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
       }
       return true;

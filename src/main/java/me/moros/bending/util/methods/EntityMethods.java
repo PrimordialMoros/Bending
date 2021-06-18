@@ -47,7 +47,7 @@ public final class EntityMethods {
    */
   public static boolean isAgainstWall(@NonNull Entity entity, @NonNull Predicate<Block> predicate) {
     Block origin = entity.getLocation().getBlock();
-    for (BlockFace face : BlockMethods.CARDINAL_FACES) {
+    for (BlockFace face : BlockMethods.SIDES) {
       Block relative = origin.getRelative(face);
       if (relative.isPassable() || relative.getType() == Material.BARRIER) {
         continue;
@@ -61,7 +61,6 @@ public final class EntityMethods {
 
   /**
    * Accurately checks if an entity is standing on ground using {@link AABB}.
-   * Note: For mobs you should prefer {@link Entity#isOnGround()}. This method is to be used for Players.
    * @param entity the entity to check
    * @return true if entity standing on ground, false otherwise
    */

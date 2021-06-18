@@ -67,8 +67,9 @@ public class Tornado extends AbilityInstance {
     loadConfig();
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
-      .add(Policies.NOT_SNEAKING)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(Policies.NOT_SNEAKING)
+      .add(Policies.IN_LIQUID)
       .build();
     startTime = System.currentTimeMillis();
     return true;
@@ -81,11 +82,7 @@ public class Tornado extends AbilityInstance {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, description()) || user.headBlock().isLiquid()) {
-      return UpdateResult.REMOVE;
-    }
-
-    if (!user.canBuild(user.locBlock())) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     Vector3 base = user.rayTrace(userConfig.range, false);
