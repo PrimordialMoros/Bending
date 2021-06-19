@@ -19,7 +19,6 @@
 
 package me.moros.bending.storage;
 
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -42,7 +41,7 @@ public interface BendingStorage extends Storage {
 
   void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
 
-  boolean createElements(@NonNull Set<@NonNull Element> elements);
+  boolean createElements(@NonNull Iterable<Element> elements);
 
   boolean createAbilities(@NonNull Iterable<AbilityDescription> abilities);
 

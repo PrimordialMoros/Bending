@@ -133,7 +133,7 @@ public final class StorageImpl implements BendingStorage {
    * @param elements the elements to add
    */
   @Override
-  public boolean createElements(@NonNull Set<@NonNull Element> elements) {
+  public boolean createElements(@NonNull Iterable<Element> elements) {
     try {
       DB.useHandle(handle -> {
         PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertElements(type));

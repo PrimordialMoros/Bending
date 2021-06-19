@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.user.profile;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.checkerframework.checker.index.qual.Positive;
@@ -78,7 +79,7 @@ public final class BendingProfile {
       "UUID: " + uuid + "\n" +
       "Board: " + board + "\n" +
       "Elements: " + data.elements() + "\n" +
-      "Slots: " + data.slots() + "\n" +
+      "Slots: " + Arrays.toString(data.slots()) + "\n" +
       "Presets: " + data.presets();
   }
 }

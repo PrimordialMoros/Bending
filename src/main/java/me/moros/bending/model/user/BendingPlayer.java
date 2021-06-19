@@ -120,8 +120,8 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public Optional<Preset> presetByName(@NonNull String name) {
-    if (!presets.contains(name.toLowerCase())) {
+  public Optional<Preset> presetByName(@Nullable String name) {
+    if (name == null || !presets.contains(name.toLowerCase())) {
       return Optional.empty();
     }
     return Optional.ofNullable(presetCache.synchronous().get(name.toLowerCase()));

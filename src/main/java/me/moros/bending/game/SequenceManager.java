@@ -32,8 +32,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.Sequence;
-import me.moros.bending.model.ability.sequence.SequenceStep;
+import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
+import me.moros.bending.model.ability.description.SequenceStep;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -62,16 +62,12 @@ public final class SequenceManager {
     }
     buffer.addLast(new SequenceStep(desc, action));
     List<SequenceStep> bufferSteps = new ArrayList<>(buffer);
-    var it = Registries.ABILITIES.sequenceIterator();
-    while (it.hasNext()) {
-      var entry = it.next();
-      AbilityDescription sequenceDesc = entry.getKey();
-      Sequence sequence = entry.getValue();
+    for (Sequence sequence : Registries.SEQUENCES) {
       if (sequence.matches(bufferSteps)) {
-        if (!user.canBend(sequenceDesc)) {
+        if (!user.canBend(sequence)) {
           continue;
         }
-        Ability ability = sequenceDesc.createAbility();
+        Ability ability = sequence.createAbility();
         if (ability.activate(user, Activation.SEQUENCE)) {
           Bending.game().abilityManager(user.world()).addAbility(user, ability);
         }

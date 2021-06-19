@@ -70,7 +70,7 @@ public class Commands {
       BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
       permissionPredicate = bendingPlayer::hasPermission;
     }
-    return Registries.ABILITIES.abilities().filter(predicate)
+    return Registries.ABILITIES.stream().filter(predicate)
       .filter(permissionPredicate).map(AbilityDescription::name).collect(Collectors.toList());
   }
 
@@ -101,23 +101,16 @@ public class Commands {
     });
 
     commandContexts.registerContext(Element.class, c -> {
-      String name = c.popFirstArg().toLowerCase();
+      String name = c.popFirstArg();
       return Element.fromName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
     });
 
     commandContexts.registerIssuerAwareContext(AbilityDescription.class, c -> {
-      String name = c.popFirstArg();
-      if (name == null || name.isEmpty()) {
-        throw new InvalidCommandArgument("Could not find ability name");
-      }
       Player player = c.getPlayer();
-      Predicate<AbilityDescription> permissionPredicate = x -> true;
-      if (player != null) {
-        BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
-        permissionPredicate = bendingPlayer::hasPermission;
-      }
-      AbilityDescription check = Registries.ABILITIES.ability(name.toLowerCase());
+      Predicate<AbilityDescription> permissionPredicate = player == null ? x -> true : d -> player.hasPermission(d.permission());
+      String name = c.popFirstArg();
+      AbilityDescription check = Registries.ABILITIES.ability(name);
       if (check == null || !nonHidden.test(check) || !permissionPredicate.test(check)) {
         throw new InvalidCommandArgument("Could not find ability " + name);
       }
@@ -129,13 +122,13 @@ public class Commands {
       if (player == null) {
         throw new UserException();
       }
-      String name = c.popFirstArg().toLowerCase();
+      String name = c.popFirstArg();
       return Registries.BENDERS.user(player).presetByName(name)
         .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
     });
 
     commandContexts.registerContext(ModifyPolicy.class, c -> {
-      String name = c.popFirstArg().toLowerCase();
+      String name = c.popFirstArg();
       Optional<Element> element = Element.fromName(name);
       if (element.isPresent()) {
         return ModifyPolicy.of(element.get());

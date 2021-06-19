@@ -30,6 +30,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -146,6 +147,70 @@ public class AbilityDescription {
     return new AbilityDescriptionBuilder(name, constructor);
   }
 
+  private static Component generateInstructions(List<SequenceStep> actions) {
+    TextComponent.Builder builder = Component.text();
+    for (int i = 0; i < actions.size(); i++) {
+      SequenceStep sequenceStep = actions.get(i);
+      if (i != 0) {
+        builder.append(Component.text(" > "));
+      }
+      AbilityDescription desc = sequenceStep.ability();
+      Activation action = sequenceStep.activation();
+      String actionKey = action.key();
+      if (action == Activation.SNEAK && i + 1 < actions.size()) {
+        // Check if the next instruction is to release sneak.
+        SequenceStep next = actions.get(i + 1);
+        if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
+          actionKey = "bending.activation.sneak-tap";
+          i++;
+        }
+      }
+      builder.append(Component.text(desc.name())).append(Component.text(" ("))
+        .append(Component.translatable(actionKey)).append(Component.text(")"));
+    }
+    return builder.build();
+  }
+
+  /**
+   * Immutable and thread-safe representation of a sequence
+   */
+  public static final class Sequence extends AbilityDescription {
+    private final List<SequenceStep> steps;
+    private Component instructions;
+
+    private Sequence(AbilityDescriptionBuilder builder, List<SequenceStep> steps) {
+      super(builder);
+      this.steps = List.copyOf(steps);
+    }
+
+    public @NonNull List<@NonNull SequenceStep> steps() {
+      return steps;
+    }
+
+    public @NonNull Component instructions() {
+      if (instructions == null) {
+        instructions = generateInstructions(steps);
+      }
+      return instructions;
+    }
+
+    public boolean matches(@NonNull List<@NonNull SequenceStep> otherSteps) {
+      int actionsLength = otherSteps.size() - 1;
+      int sequenceLength = steps.size() - 1;
+      if (actionsLength < sequenceLength) {
+        return false;
+      }
+      for (int i = 0; i <= sequenceLength; i++) {
+        SequenceStep first = steps.get(sequenceLength - i);
+        SequenceStep second = otherSteps.get(actionsLength - i);
+        if (!first.equals(second)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
   public static class AbilityDescriptionBuilder {
     private final String name;
     private final Function<AbilityDescription, ? extends Ability> constructor;
@@ -198,12 +263,29 @@ public class AbilityDescription {
 
     public @NonNull AbilityDescription build() {
       validate();
+      if (activations.contains(Activation.SEQUENCE)) {
+        throw new IllegalStateException("Can't build sequence");
+      }
       return new AbilityDescription(this);
+    }
+
+    public @NonNull Sequence buildSequence(@NonNull SequenceStep step1, @NonNull SequenceStep step2, @NonNull SequenceStep... steps) {
+      validate();
+      if (!activations.contains(Activation.SEQUENCE)) {
+        throw new IllegalStateException("Ability must be activated by sequence");
+      }
+      List<SequenceStep> sequenceSteps = new ArrayList<>();
+      sequenceSteps.add(Objects.requireNonNull(step1, "Sequence steps cannot be null"));
+      sequenceSteps.add(Objects.requireNonNull(step2, "Sequence steps cannot be null"));
+      if (steps != null) {
+        sequenceSteps.addAll(List.of(steps));
+      }
+      return new Sequence(this, sequenceSteps);
     }
 
     private void validate() {
       Objects.requireNonNull(element, "Element cannot be null");
-      Objects.requireNonNull(activations, "Activation Methods cannot be null");
+      Objects.requireNonNull(activations, "Activations cannot be null");
       if (activations.isEmpty()) {
         throw new IllegalStateException("Activation methods cannot be empty");
       }

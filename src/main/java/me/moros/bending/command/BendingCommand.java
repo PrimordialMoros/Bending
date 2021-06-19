@@ -40,7 +40,7 @@ import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.sequence.Sequence;
+import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
@@ -256,11 +256,8 @@ public class BendingCommand extends BaseCommand {
     String instKey = "bending.ability." + ability.name().toLowerCase() + ".instructions";
     Component description = Bending.translationManager().translate(descKey);
     Component instructions = Bending.translationManager().translate(instKey);
-    if (instructions == null && ability.isActivatedBy(Activation.SEQUENCE)) {
-      Sequence sequence = Registries.ABILITIES.sequence(ability);
-      if (sequence != null) {
-        instructions = sequence.instructions();
-      }
+    if (instructions == null && ability instanceof Sequence) {
+      instructions = ((Sequence) ability).instructions();
     }
     if (description == null && instructions == null) {
       Message.ABILITY_INFO_EMPTY.send(user, ability.displayName());
@@ -275,7 +272,7 @@ public class BendingCommand extends BaseCommand {
   }
 
   private static Collection<Component> collectAbilities(CommandSender user, Element element) {
-    return Registries.ABILITIES.abilities()
+    return Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE))
       .filter(desc -> user.hasPermission(desc.permission()))
@@ -284,7 +281,7 @@ public class BendingCommand extends BaseCommand {
   }
 
   private static Collection<Component> collectSequences(CommandSender user, Element element) {
-    return Registries.ABILITIES.sequences()
+    return Registries.SEQUENCES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
@@ -292,8 +289,8 @@ public class BendingCommand extends BaseCommand {
   }
 
   private static Collection<Component> collectPassives(CommandSender user, Element element) {
-    return Registries.ABILITIES.passives()
-      .filter(desc -> element == desc.element() && !desc.hidden())
+    return Registries.ABILITIES.stream()
+      .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());

@@ -20,8 +20,8 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.game.Game;
-import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;

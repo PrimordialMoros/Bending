@@ -26,6 +26,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An immutable and thread-safe object that represents a bending element
@@ -57,8 +58,8 @@ public enum Element {
     return color;
   }
 
-  public static Optional<Element> fromName(@NonNull String value) {
-    if (value.isEmpty()) {
+  public static Optional<Element> fromName(@Nullable String value) {
+    if (value == null || value.isEmpty()) {
       return Optional.empty();
     }
     return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();

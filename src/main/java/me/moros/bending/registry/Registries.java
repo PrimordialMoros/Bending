@@ -25,6 +25,7 @@ public final class Registries {
   public static final BenderRegistry BENDERS = new BenderRegistry();
   public static final CollisionRegistry COLLISIONS = new CollisionRegistry();
   public static final ProtectionRegistry PROTECTIONS = new ProtectionRegistry();
+  public static final SequenceRegistry SEQUENCES = new SequenceRegistry();
 
   private Registries() {
   }

@@ -17,12 +17,11 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability.sequence;
+package me.moros.bending.model.ability.description;
 
 import java.util.Objects;
 
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
