@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.temporal;
 
-import org.bukkit.util.NumberConversions;
+import me.moros.bending.model.math.FastMath;
 
 public interface Temporary {
   long DEFAULT_REVERT = 600_000;
@@ -27,6 +27,6 @@ public interface Temporary {
   void revert();
 
   static int toTicks(long duration) {
-    return NumberConversions.ceil(duration <= 0 ? DEFAULT_REVERT : duration / 50.0);
+    return FastMath.ceil(duration <= 0 ? DEFAULT_REVERT : duration / 50.0);
   }
 }

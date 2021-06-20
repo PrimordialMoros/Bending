@@ -38,7 +38,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -58,7 +59,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -73,7 +73,7 @@ public class Shockwave extends AbilityInstance {
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
-  private Vector3 origin;
+  private Vector3d origin;
 
   private boolean released;
   private double range;
@@ -157,11 +157,11 @@ public class Shockwave extends AbilityInstance {
         }
       }
 
-      Vector3 loc = new Vector3(entity.getLocation());
+      Vector3d loc = new Vector3d(entity.getLocation());
 
       if (!inRange) {
         for (Block block : positions) {
-          AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3(0.5, 1, 0.5)).at(new Vector3(block));
+          AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.5, 1, 0.5)).at(new Vector3d(block));
           if (blockBounds.intersects(AABBUtils.entityBounds(entity))) {
             inRange = true;
             break;
@@ -172,7 +172,7 @@ public class Shockwave extends AbilityInstance {
       if (inRange) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
-        Vector3 push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
+        Vector3d push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
         entity.setVelocity(push.clampVelocity());
         affectedEntities.add(entity);
       }
@@ -192,14 +192,14 @@ public class Shockwave extends AbilityInstance {
     range = cone ? userConfig.coneRange : userConfig.ringRange;
 
     origin = user.location().snapToBlockCenter();
-    Vector3 dir = user.direction().setY(0).normalize();
+    Vector3d dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
-      VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 1.5)).forEach(v ->
+      VectorMethods.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
         streams.add(new Ripple(new Ray(origin, v.multiply(range)), 0))
       );
     } else {
-      VectorMethods.circle(dir, Vector3.PLUS_J, NumberConversions.ceil(6 * range)).forEach(v ->
+      VectorMethods.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
         streams.add(new Ripple(new Ray(origin, v.multiply(range)), 75))
       );
     }
@@ -241,7 +241,7 @@ public class Shockwave extends AbilityInstance {
       affectedBlocks.add(block);
       recentAffectedBlocks.add(block);
       double deltaY = Math.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
-      Vector3 velocity = new Vector3(0, deltaY, 0);
+      Vector3d velocity = new Vector3d(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
       new TempFallingBlock(block, data, velocity, true, 450);
       ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))

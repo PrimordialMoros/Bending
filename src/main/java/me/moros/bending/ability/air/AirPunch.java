@@ -34,7 +34,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -69,15 +69,15 @@ public class AirPunch extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Vector3 origin = user.mainHandSide();
-    Vector3 lookingDir = user.direction().multiply(userConfig.range);
+    Vector3d origin = user.mainHandSide();
+    Vector3d lookingDir = user.direction().multiply(userConfig.range);
 
     if (origin.toBlock(user.world()).isLiquid()) {
       return false;
     }
 
     user.addCooldown(description(), userConfig.cooldown);
-    double length = user.velocity().subtract(user.direction()).getNorm();
+    double length = user.velocity().subtract(user.direction()).length();
     double factor = (length == 0) ? 1 : Math.max(0.5, Math.min(1.5, 1 / length));
     stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
     removalPolicy = Policies.builder().build();
@@ -118,9 +118,9 @@ public class AirPunch extends AbilityInstance {
 
     @Override
     public void render() {
-      VectorMethods.circle(Vector3.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
+      VectorMethods.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
         ParticleUtil.create(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
-          .count(0).offset(v.x, v.y, v.z).extra(-0.04).spawn()
+          .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
       );
     }
 
@@ -134,7 +134,7 @@ public class AirPunch extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
+      Vector3d velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
       entity.setVelocity(velocity.clampVelocity());
       return true;
     }

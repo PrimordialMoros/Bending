@@ -34,8 +34,8 @@ public class Rotation {
     this.q3 = q3;
   }
 
-  public Rotation(@NonNull Vector3 axis, double angle) throws IllegalArgumentException {
-    double norm = axis.getNorm();
+  public Rotation(@NonNull Vector3d axis, double angle) throws IllegalArgumentException {
+    double norm = axis.length();
     if (norm == 0) {
       throw new IllegalArgumentException();
     }
@@ -44,9 +44,9 @@ public class Rotation {
     double coeff = Math.sin(halfAngle) / norm;
 
     q0 = Math.cos(halfAngle);
-    q1 = coeff * axis.x;
-    q2 = coeff * axis.y;
-    q3 = coeff * axis.z;
+    q1 = coeff * axis.getX();
+    q2 = coeff * axis.getY();
+    q3 = coeff * axis.getZ();
   }
 
   /**
@@ -89,12 +89,12 @@ public class Rotation {
    * @param u vector to apply the rotation to
    * @return a new vector which is the image of u by the rotation
    */
-  public @NonNull Vector3 applyTo(@NonNull Vector3 u) {
-    double x = u.x;
-    double y = u.y;
-    double z = u.z;
+  public @NonNull Vector3d applyTo(@NonNull Vector3d u) {
+    double x = u.getX();
+    double y = u.getY();
+    double z = u.getZ();
     double s = q1 * x + q2 * y + q3 * z;
-    return new Vector3(2 * (q0 * (x * q0 - (q2 * z - q3 * y)) + s * q1) - x,
+    return new Vector3d(2 * (q0 * (x * q0 - (q2 * z - q3 * y)) + s * q1) - x,
       2 * (q0 * (y * q0 - (q3 * x - q1 * z)) + s * q2) - y,
       2 * (q0 * (z * q0 - (q1 * y - q2 * x)) + s * q3) - z);
   }
@@ -121,15 +121,15 @@ public class Rotation {
    * @param u vector to apply the inverse of the rotation to
    * @return a new vector which such that u is its image by the rotation
    */
-  public @NonNull Vector3 applyInverseTo(@NonNull Vector3 u) {
-    double x = u.x;
-    double y = u.y;
-    double z = u.z;
+  public @NonNull Vector3d applyInverseTo(@NonNull Vector3d u) {
+    double x = u.getX();
+    double y = u.getY();
+    double z = u.getZ();
 
     double s = q1 * x + q2 * y + q3 * z;
     double m0 = -q0;
 
-    return new Vector3(2 * (m0 * (x * m0 - (q2 * z - q3 * y)) + s * q1) - x,
+    return new Vector3d(2 * (m0 * (x * m0 - (q2 * z - q3 * y)) + s * q1) - x,
       2 * (m0 * (y * m0 - (q3 * x - q1 * z)) + s * q2) - y,
       2 * (m0 * (z * m0 - (q1 * y - q2 * x)) + s * q3) - z);
   }

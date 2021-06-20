@@ -23,13 +23,13 @@ import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.registry.ProtectionRegistry;
 import me.moros.bending.registry.Registries;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -139,7 +139,7 @@ public interface User extends BukkitUser, ElementUser {
    * @return the source block if one was found, null otherwise
    */
   default @Nullable Block find(double range, @NonNull Predicate<@NonNull Block> predicate) {
-    BlockIterator it = new BlockIterator(entity(), Math.min(100, NumberConversions.ceil(range)));
+    BlockIterator it = new BlockIterator(entity(), Math.min(100, FastMath.ceil(range)));
     while (it.hasNext()) {
       Block block = it.next();
       if (block.getType().isAir()) {

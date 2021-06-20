@@ -32,7 +32,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -47,7 +48,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -102,7 +102,7 @@ public class WaterWave extends AbilityInstance {
     user.entity().setVelocity(user.direction().multiply(userConfig.speed * factor).clampVelocity());
     user.entity().setFallDistance(0);
 
-    Vector3 center = user.location().add(Vector3.MINUS_J);
+    Vector3d center = user.location().add(Vector3d.MINUS_J);
     for (Block block : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
@@ -135,7 +135,7 @@ public class WaterWave extends AbilityInstance {
     }
     affectedEntities.add(entity);
     DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-    int potionDuration = NumberConversions.round(userConfig.slowDuration / 50.0);
+    int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
     PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
     return true;
   }

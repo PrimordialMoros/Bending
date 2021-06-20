@@ -17,19 +17,29 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.collision;
+package me.moros.bending.model.math;
 
-import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
+public final class FastMath {
+  private FastMath() {
+  }
 
-public interface Collider {
-  boolean intersects(@NonNull Collider collider);
+  public static int floor(double num) {
+    int y = (int) num;
+    if (num < y) {
+      return y - 1;
+    }
+    return y;
+  }
 
-  @NonNull Vector3d position();
+  public static int ceil(double num) {
+    int y = (int) num;
+    if (num > y) {
+      return y + 1;
+    }
+    return y;
+  }
 
-  @NonNull Collider at(@NonNull Vector3d point);
-
-  @NonNull Vector3d halfExtents();
-
-  boolean contains(@NonNull Vector3d point);
+  public static int round(double num) {
+    return floor(num + 0.5);
+  }
 }

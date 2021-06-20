@@ -21,7 +21,7 @@ package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static java.lang.Math.abs;
@@ -30,34 +30,34 @@ import static java.lang.Math.abs;
  * Oriented bounding box
  */
 public class OBB implements Collider {
-  private final Vector3 center;
-  private final Vector3[] axes;
-  private final Vector3 e; // Half extents in local space.
+  private final Vector3d center;
+  private final Vector3d[] axes;
+  private final Vector3d e; // Half extents in local space.
 
-  private OBB(Vector3 center, Vector3[] axes, Vector3 halfExtents) {
+  private OBB(Vector3d center, Vector3d[] axes, Vector3d halfExtents) {
     this.center = center;
-    this.axes = new Vector3[3];
+    this.axes = new Vector3d[3];
     System.arraycopy(axes, 0, this.axes, 0, 3);
     this.e = halfExtents;
   }
 
   public OBB(@NonNull AABB aabb) {
     this.center = aabb.position();
-    this.axes = new Vector3[]{Vector3.PLUS_I, Vector3.PLUS_J, Vector3.PLUS_K};
+    this.axes = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
     this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
     this.center = rotation.applyTo(aabb.position());
     double[][] m = rotation.getMatrix();
-    this.axes = new Vector3[3];
+    this.axes = new Vector3d[3];
     for (int i = 0; i < 3; i++) {
-      this.axes[i] = new Vector3(m[i]);
+      this.axes[i] = new Vector3d(m[i]);
     }
     this.e = aabb.halfExtents();
   }
 
-  public OBB(@NonNull AABB aabb, @NonNull Vector3 axis, double angle) {
+  public OBB(@NonNull AABB aabb, @NonNull Vector3d axis, double angle) {
     this(aabb, new Rotation(axis, angle));
   }
 
@@ -78,7 +78,7 @@ public class OBB implements Collider {
   }
 
   private boolean intersects(OBB other) {
-    final Vector3 pos = other.center.subtract(center);
+    final Vector3d pos = other.center.subtract(center);
     for (int i = 0; i < 3; i++) {
       if (getSeparatingPlane(pos, axes[i], other) || getSeparatingPlane(pos, other.axes[i], other)) {
         return false;
@@ -86,7 +86,7 @@ public class OBB implements Collider {
     }
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (getSeparatingPlane(pos, axes[i].crossProduct(other.axes[j]), other)) {
+        if (getSeparatingPlane(pos, axes[i].cross(other.axes[j]), other)) {
           return false;
         }
       }
@@ -95,51 +95,51 @@ public class OBB implements Collider {
   }
 
   // check if there's a separating plane in between the selected axes
-  private boolean getSeparatingPlane(Vector3 pos, Vector3 plane, OBB other) {
-    final double dot = abs(pos.dotProduct(plane));
-    final double x1 = abs((axes[0].multiply(e.x)).dotProduct(plane));
-    final double y1 = abs((axes[1].multiply(e.y)).dotProduct(plane));
-    final double z1 = abs((axes[2].multiply(e.z)).dotProduct(plane));
-    final double x2 = abs((other.axes[0].multiply(other.e.x)).dotProduct(plane));
-    final double y2 = abs((other.axes[1].multiply(other.e.y)).dotProduct(plane));
-    final double z2 = abs((other.axes[2].multiply(other.e.z)).dotProduct(plane));
+  private boolean getSeparatingPlane(Vector3d pos, Vector3d plane, OBB other) {
+    final double dot = abs(pos.dot(plane));
+    final double x1 = abs((axes[0].multiply(e.getX())).dot(plane));
+    final double y1 = abs((axes[1].multiply(e.getY())).dot(plane));
+    final double z1 = abs((axes[2].multiply(e.getZ())).dot(plane));
+    final double x2 = abs((other.axes[0].multiply(other.e.getX())).dot(plane));
+    final double y2 = abs((other.axes[1].multiply(other.e.getY())).dot(plane));
+    final double z2 = abs((other.axes[2].multiply(other.e.getZ())).dot(plane));
     return dot > x1 + y1 + z1 + x2 + y2 + z2;
   }
 
   // Returns the position closest to the target that lies on/in the OBB.
-  public @NonNull Vector3 closestPosition(@NonNull Vector3 target) {
-    Vector3 t = target.subtract(center);
-    Vector3 closest = center;
+  public @NonNull Vector3d closestPosition(@NonNull Vector3d target) {
+    Vector3d t = target.subtract(center);
+    Vector3d closest = center;
     double[] extentArray = e.toArray();
     for (int i = 0; i < 3; i++) {
-      Vector3 axis = axes[i];
+      Vector3d axis = axes[i];
       double r = extentArray[i];
-      double dist = Math.max(-r, Math.min(t.dotProduct(axis), r));
+      double dist = Math.max(-r, Math.min(t.dot(axis), r));
       closest = closest.add(axis.multiply(dist));
     }
     return closest;
   }
 
   @Override
-  public @NonNull Vector3 position() {
+  public @NonNull Vector3d position() {
     return center;
   }
 
   @Override
-  public @NonNull OBB at(@NonNull Vector3 point) {
+  public @NonNull OBB at(@NonNull Vector3d point) {
     return new OBB(point, axes, e);
   }
 
   @Override
-  public @NonNull Vector3 halfExtents() {
-    double x = e.dotProduct(Vector3.PLUS_I);
-    double y = e.dotProduct(Vector3.PLUS_J);
-    double z = e.dotProduct(Vector3.PLUS_K);
-    return new Vector3(x, y, z);
+  public @NonNull Vector3d halfExtents() {
+    double x = e.dot(Vector3d.PLUS_I);
+    double y = e.dot(Vector3d.PLUS_J);
+    double z = e.dot(Vector3d.PLUS_K);
+    return new Vector3d(x, y, z);
   }
 
   @Override
-  public boolean contains(@NonNull Vector3 point) {
+  public boolean contains(@NonNull Vector3d point) {
     return closestPosition(point).distanceSq(point) <= 0.01;
   }
 }

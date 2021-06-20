@@ -34,6 +34,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -42,7 +43,6 @@ import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -77,7 +77,7 @@ public class Collapse extends AbilityInstance {
 
     boolean sneak = method == Activation.SNEAK;
     if (sneak) {
-      int offset = NumberConversions.ceil(userConfig.radius);
+      int offset = FastMath.ceil(userConfig.radius);
       int size = offset * 2 + 1;
       // Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
       boolean[][] checked = new boolean[size][size];

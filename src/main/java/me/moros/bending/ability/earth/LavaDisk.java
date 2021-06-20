@@ -40,7 +40,8 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -65,7 +66,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -77,7 +77,7 @@ public class LavaDisk extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Vector3 location;
+  private Vector3d location;
   private Collider collider;
 
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(1000);
@@ -111,8 +111,8 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     double r = 1.3;
-    location = Vector3.center(source);
-    AABB aabb = new AABB(new Vector3(-r, -0.3, -r), new Vector3(r, 0.3, r));
+    location = Vector3d.center(source);
+    AABB aabb = new AABB(new Vector3d(-r, -0.3, -r), new Vector3d(r, 0.3, r));
     collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
     for (Block block : WorldMethods.nearbyBlocks(user.world(), aabb.at(location))) {
       if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.getRelative(BlockFace.UP))) {
@@ -154,10 +154,10 @@ public class LavaDisk extends AbilityInstance {
     }
 
     distance = location.distance(user.eyeLocation());
-    Vector3 targetLocation = user.eyeLocation().add(user.direction().multiply(launched ? userConfig.range + 5 : 3));
+    Vector3d targetLocation = user.eyeLocation().add(user.direction().multiply(launched ? userConfig.range + 5 : 3));
     if (location.distanceSq(targetLocation) > 0.5 * 0.5) {
       double speed = launched ? userConfig.speed : 0.66 * userConfig.speed;
-      Vector3 direction = targetLocation.subtract(location).normalize();
+      Vector3d direction = targetLocation.subtract(location).normalize();
       location = location.add(direction.multiply(speed));
       collider = collider.at(location);
       if (launched) {
@@ -167,7 +167,7 @@ public class LavaDisk extends AbilityInstance {
 
     double deltaDistance = distance - userConfig.selectRange;
     double distanceModifier = (deltaDistance <= 0) ? 1 : ((distance >= userConfig.range) ? 0 : 1 - (deltaDistance / userConfig.range));
-    int deltaSpeed = Math.max(5, NumberConversions.ceil(15 * distanceModifier));
+    int deltaSpeed = Math.max(5, FastMath.ceil(15 * distanceModifier));
     rotationAngle += (deltaSpeed % 2 == 0) ? ++deltaSpeed : deltaSpeed;
     if (rotationAngle >= 360) {
       rotationAngle = 0;
@@ -252,7 +252,7 @@ public class LavaDisk extends AbilityInstance {
       for (int j = 0; j <= 288; j += 72) {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
-        Vector3 temp = new Vector3(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
+        Vector3d temp = new Vector3d(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
         Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
         ParticleUtil.createRGB(loc, colors[index], size).spawn();
         if (length > 0.5) {

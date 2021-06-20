@@ -21,7 +21,7 @@ package me.moros.bending.util.collision;
 
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.DummyCollider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -40,7 +40,7 @@ public final class AABBUtils {
     if (block.isPassable()) {
       return DUMMY_COLLIDER;
     }
-    return new AABB(new Vector3(block.getBoundingBox().getMin()), new Vector3(block.getBoundingBox().getMax()));
+    return new AABB(new Vector3d(block.getBoundingBox().getMin()), new Vector3d(block.getBoundingBox().getMax()));
   }
 
   /**
@@ -48,6 +48,6 @@ public final class AABBUtils {
    * @return the provided entity's {@link AABB}
    */
   public static @NonNull AABB entityBounds(@NonNull Entity entity) {
-    return new AABB(new Vector3(entity.getBoundingBox().getMin()), new Vector3(entity.getBoundingBox().getMax()));
+    return new AABB(new Vector3d(entity.getBoundingBox().getMin()), new Vector3d(entity.getBoundingBox().getMax()));
   }
 }

@@ -40,7 +40,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -173,7 +173,7 @@ public class Torrent extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3 velocity = direction.setY(Math.min(direction.y, userConfig.verticalPush));
+      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
       entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
       if (entity instanceof LivingEntity) {
         if (clicked && !shouldFreeze) {

@@ -23,6 +23,7 @@ import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActionType;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
@@ -44,7 +45,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntityListener implements Listener {
@@ -124,7 +124,7 @@ public class EntityListener implements Listener {
     if (TempBlock.MANAGER.isTemp(event.getCombuster())) {
       int ticks = event.getDuration() * 20;
       if (ticks > FireTick.MAX_TICKS) {
-        event.setDuration(NumberConversions.ceil(FireTick.MAX_TICKS / 20.0));
+        event.setDuration(FastMath.ceil(FireTick.MAX_TICKS / 20.0));
       }
     }
   }

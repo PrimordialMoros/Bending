@@ -23,7 +23,8 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.methods.EntityMethods;
@@ -31,17 +32,16 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractLine extends MovementResolver implements Updatable, SimpleAbility {
   private final User user;
 
-  protected final Vector3 origin;
+  protected final Vector3d origin;
 
-  protected Vector3 location;
-  protected Vector3 targetLocation;
-  protected Vector3 direction;
+  protected Vector3d location;
+  protected Vector3d targetLocation;
+  protected Vector3d direction;
   protected Collider collider;
   protected LivingEntity target;
 
@@ -55,7 +55,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   public AbstractLine(@NonNull User user, @NonNull Block source, double range, double speed, boolean followTarget) {
     super(user.world());
     this.user = user;
-    this.location = new Vector3(source.getLocation().add(0.5, 1.25, 0.5));
+    this.location = new Vector3d(source.getLocation().add(0.5, 1.25, 0.5));
     this.origin = location;
     this.range = range;
     this.speed = speed;
@@ -74,7 +74,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   public @NonNull UpdateResult update() {
     if (locked) {
       if (isValidTarget()) {
-        targetLocation = new Vector3(target.getLocation());
+        targetLocation = new Vector3d(target.getLocation());
         direction = targetLocation.subtract(location).setY(0).normalize();
       } else {
         locked = false;
@@ -95,7 +95,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
       return UpdateResult.REMOVE;
     }
 
-    Vector3 newLocation = resolve(location, direction);
+    Vector3d newLocation = resolve(location, direction);
     if (newLocation == null) {
       onCollision();
       return UpdateResult.REMOVE;
@@ -110,13 +110,13 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     Block block = location.toBlock(user.world());
 
     if (skipVertical) { // Advance location vertically if possible to match target height
-      int y1 = NumberConversions.floor(targetLocation.y);
-      int y2 = NumberConversions.floor(newLocation.y);
+      int y1 = FastMath.floor(targetLocation.getY());
+      int y2 = FastMath.floor(newLocation.getY());
       if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
-        location = newLocation.add(Vector3.PLUS_J);
+        location = newLocation.add(Vector3d.PLUS_J);
         block = block.getRelative(BlockFace.UP);
       } else if (y1 < y2 && isValidBlock(block.getRelative(BlockFace.DOWN))) {
-        location = newLocation.add(Vector3.MINUS_J);
+        location = newLocation.add(Vector3d.MINUS_J);
         block = block.getRelative(BlockFace.DOWN);
       }
     }
@@ -145,6 +145,6 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (target instanceof Player && !((Player) target).isOnline()) {
       return false;
     }
-    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(new Vector3(target.getLocation())) < 5 * 5;
+    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(new Vector3d(target.getLocation())) < 5 * 5;
   }
 }

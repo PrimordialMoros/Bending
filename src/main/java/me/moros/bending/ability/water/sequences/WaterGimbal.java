@@ -44,7 +44,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -210,7 +210,7 @@ public class WaterGimbal extends AbilityInstance {
         return;
       }
       if (center == null) {
-        center = user.location().add(Vector3.PLUS_J).add(user.direction().setY(0).multiply(2)).toBlock(user.world());
+        center = user.location().add(Vector3d.PLUS_J).add(user.direction().setY(0).multiply(2)).toBlock(user.world());
         TempBlock.create(center, Material.WATER.createBlockData(), 50);
       }
       chain.chainStore().clear();
@@ -231,15 +231,15 @@ public class WaterGimbal extends AbilityInstance {
       double yaw = Math.toRadians(-user.yaw()) - Math.PI / 2;
       double cos = Math.cos(yaw);
       double sin = Math.sin(yaw);
-      Vector3 center = user.location().add(Vector3.PLUS_J);
+      Vector3d center = user.location().add(Vector3d.PLUS_J);
       for (int i = 0; i < 2; i++) {
         double theta = Math.toRadians(angle);
         angle += 18;
         if (angle >= 360) {
           angle = 0;
         }
-        Vector3 v1 = new Vector3(Math.cos(theta), Math.sin(theta), 0).multiply(3.4);
-        Vector3 v2 = new Vector3(v1.toArray());
+        Vector3d v1 = new Vector3d(Math.cos(theta), Math.sin(theta), 0).multiply(3.4);
+        Vector3d v2 = new Vector3d(v1.toArray());
         v1 = VectorMethods.rotateAroundAxisX(v1, 0.7, 0.7);
         v1 = VectorMethods.rotateAroundAxisY(v1, cos, sin);
         v2 = VectorMethods.rotateAroundAxisX(v2, 0.7, -0.7);
@@ -294,7 +294,7 @@ public class WaterGimbal extends AbilityInstance {
         return false;
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3 velocity = direction.setY(Math.min(direction.y, userConfig.verticalPush));
+      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
       entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
       affectedEntities.add(entity);
       return false;

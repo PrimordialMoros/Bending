@@ -36,7 +36,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -52,7 +53,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -98,7 +98,7 @@ public class AirBreath extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
-    Vector3 offset = new Vector3(0, -0.1, 0);
+    Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
@@ -138,7 +138,7 @@ public class AirBreath extends AbilityInstance {
       if (MaterialUtil.isWater(spawnLoc.getBlock())) {
         ParticleUtil.create(Particle.WATER_BUBBLE, spawnLoc).count(3).offset(offset, offset, offset).spawn();
       } else {
-        ParticleUtil.createAir(spawnLoc).count(NumberConversions.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
+        ParticleUtil.createAir(spawnLoc).count(FastMath.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
       }
     }
 

@@ -41,7 +41,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -162,7 +162,7 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.world());
+      Location spawnLoc = location.subtract(new Vector3d(x, 2, z)).toLocation(user.world());
       new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
     }
 

@@ -32,7 +32,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -107,7 +107,7 @@ public class AirScooter extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
 
-    stuckCount = user.velocity().getNormSq() < 0.1 ? stuckCount + 1 : 0;
+    stuckCount = user.velocity().lengthSq() < 0.1 ? stuckCount + 1 : 0;
     if (stuckCount > 10 || !move()) {
       return UpdateResult.REMOVE;
     }
@@ -155,26 +155,26 @@ public class AirScooter extends AbilityInstance {
     }
     double delta = getPrediction() - height;
     double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
-    Vector3 velocity = user.direction().setY(0).normalize().multiply(userConfig.speed).setY(force);
+    Vector3d velocity = user.direction().setY(0).normalize().multiply(userConfig.speed).setY(force);
     user.entity().setVelocity(velocity.clampVelocity());
     user.entity().setFallDistance(0);
     return true;
   }
 
   private boolean isColliding() {
-    double speed = user.velocity().setY(0).getNorm();
-    Vector3 direction = user.direction().setY(0).normalize(Vector3.ZERO);
-    Vector3 front = user.eyeLocation().subtract(new Vector3(0, 0.5, 0))
+    double speed = user.velocity().setY(0).length();
+    Vector3d direction = user.direction().setY(0).normalize(Vector3d.ZERO);
+    Vector3d front = user.eyeLocation().subtract(new Vector3d(0, 0.5, 0))
       .add(direction.multiply(Math.max(userConfig.speed, speed)));
     Block block = front.toBlock(user.world());
     return !MaterialUtil.isTransparentOrWater(block) || !block.isPassable();
   }
 
   private double getPrediction() {
-    double playerSpeed = user.velocity().setY(0).getNorm();
+    double playerSpeed = user.velocity().setY(0).length();
     double speed = Math.max(userConfig.speed, playerSpeed) * 3;
-    Vector3 offset = user.direction().setY(0).normalize().multiply(speed);
-    Vector3 location = user.location().add(offset);
+    Vector3d offset = user.direction().setY(0).normalize().multiply(speed);
+    Vector3d location = user.location().add(offset);
     AABB userBounds = AABBUtils.entityBounds(user.entity()).at(location);
     if (!WorldMethods.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
       return 2.25;

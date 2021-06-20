@@ -35,7 +35,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -91,17 +91,17 @@ public class EarthShards extends AbilityInstance {
       long time = System.currentTimeMillis();
       if (time >= nextFireTime) {
         nextFireTime = time + userConfig.interval;
-        Vector3 rightOrigin = user.handSide(true);
-        Vector3 leftOrigin = user.handSide(false);
-        Vector3 target = user.rayTrace(userConfig.range);
+        Vector3d rightOrigin = user.handSide(true);
+        Vector3d leftOrigin = user.handSide(false);
+        Vector3d target = user.rayTrace(userConfig.range);
         double distance = target.distance(user.eyeLocation());
         for (int i = 0; i < 2; i++) {
           if (firedShots >= userConfig.maxShots) {
             break;
           }
           firedShots++;
-          Vector3 origin = (i == 0) ? rightOrigin : leftOrigin;
-          Vector3 dir = VectorMethods.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
+          Vector3d origin = (i == 0) ? rightOrigin : leftOrigin;
+          Vector3d dir = VectorMethods.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
           streams.add(new ShardStream(new Ray(origin, dir)));
         }
       }

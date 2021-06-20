@@ -28,7 +28,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -85,12 +85,12 @@ public class FerroControl extends AbilityInstance implements Ability {
         controlledEntity = null;
         return UpdateResult.CONTINUE;
       }
-      Vector3 targetLocation = user.eyeLocation().add(user.direction().multiply(userConfig.entityRange));
-      Vector3 entityLocation = new Vector3(controlledEntity.getLocation());
+      Vector3d targetLocation = user.eyeLocation().add(user.direction().multiply(userConfig.entityRange));
+      Vector3d entityLocation = new Vector3d(controlledEntity.getLocation());
       if (entityLocation.distanceSq(targetLocation) < 1) {
-        controlledEntity.setVelocity(Vector3.ZERO.toBukkitVector());
+        controlledEntity.setVelocity(Vector3d.ZERO.toBukkitVector());
       } else {
-        Vector3 dir = targetLocation.subtract(entityLocation).normalize().multiply(userConfig.controlSpeed);
+        Vector3d dir = targetLocation.subtract(entityLocation).normalize().multiply(userConfig.controlSpeed);
         controlledEntity.setVelocity(dir.clampVelocity());
       }
     }

@@ -22,7 +22,7 @@ package me.moros.bending.util.methods;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.collision.AABBUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -68,8 +68,8 @@ public final class EntityMethods {
     if (!(entity instanceof Player)) {
       return entity.isOnGround();
     }
-    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, 0.05, 0));
-    AABB floorBounds = new AABB(new Vector3(-1, -0.1, -1), new Vector3(1, 0.1, 1)).at(new Vector3(entity.getLocation()));
+    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3d(0, 0.05, 0));
+    AABB floorBounds = new AABB(new Vector3d(-1, -0.1, -1), new Vector3d(1, 0.1, 1)).at(new Vector3d(entity.getLocation()));
     for (Block block : WorldMethods.nearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
       if (entityBounds.intersects(AABBUtils.blockBounds(block))) {
         return true;
@@ -86,16 +86,16 @@ public final class EntityMethods {
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
     int maxHeight = entity.getWorld().getMaxHeight();
-    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3(0, maxHeight, 0));
+    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3d(0, maxHeight, 0));
     Block origin = entity.getLocation().getBlock();
     for (int i = 0; i < maxHeight; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
       if (check.getY() <= 0) {
         break;
       }
-      AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(check)) : AABBUtils.blockBounds(check);
+      AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(check)) : AABBUtils.blockBounds(check);
       if (checkBounds.intersects(entityBounds)) {
-        return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.y);
+        return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
       }
     }
     return maxHeight;
@@ -106,7 +106,7 @@ public final class EntityMethods {
    * @param entity the entity to get the vector for
    * @return the resulting vector
    */
-  public static @NonNull Vector3 entityCenter(@NonNull Entity entity) {
-    return new Vector3(entity.getLocation()).add(new Vector3(0, entity.getHeight() / 2, 0));
+  public static @NonNull Vector3d entityCenter(@NonNull Entity entity) {
+    return new Vector3d(entity.getLocation()).add(new Vector3d(0, entity.getHeight() / 2, 0));
   }
 }

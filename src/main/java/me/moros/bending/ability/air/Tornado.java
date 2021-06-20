@@ -30,7 +30,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -85,7 +85,7 @@ public class Tornado extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    Vector3 base = user.rayTrace(userConfig.range, false);
+    Vector3d base = user.rayTrace(userConfig.range, false);
     Block baseBlock = base.toBlock(user.world());
     if (MaterialUtil.isTransparent(baseBlock.getRelative(BlockFace.DOWN))) {
       return UpdateResult.CONTINUE;
@@ -99,12 +99,12 @@ public class Tornado extends AbilityInstance {
     double height = 2 + factor * (userConfig.height - 2);
     double radius = 2 + factor * (userConfig.radius - 2);
 
-    AABB box = new AABB(new Vector3(-radius, 0, -radius), new Vector3(radius, height, radius)).at(base);
+    AABB box = new AABB(new Vector3d(-radius, 0, -radius), new Vector3d(radius, height, radius)).at(base);
     CollisionUtil.handleEntityCollisions(user, box, entity -> {
-      double dy = entity.getLocation().getY() - base.y;
+      double dy = entity.getLocation().getY() - base.getY();
       double r = 2 + (radius - 2) * dy;
-      Vector3 delta = EntityMethods.entityCenter(entity).subtract(base);
-      double distSq = delta.x * delta.x + delta.z * delta.z;
+      Vector3d delta = EntityMethods.entityCenter(entity).subtract(base);
+      double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
       if (distSq > r * r) {
         return false;
       }
@@ -118,12 +118,12 @@ public class Tornado extends AbilityInstance {
         } else {
           velY = 0.6;
         }
-        Vector3 velocity = user.direction().setY(velY).multiply(factor);
+        Vector3d velocity = user.direction().setY(velY).multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
       } else {
-        Vector3 normal = delta.setY(0).normalize();
-        Vector3 ortho = normal.crossProduct(Vector3.PLUS_J).normalize();
-        Vector3 velocity = ortho.add(normal).normalize().multiply(factor);
+        Vector3d normal = delta.setY(0).normalize();
+        Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
+        Vector3d velocity = ortho.add(normal).normalize().multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
       }
       return false;
@@ -133,7 +133,7 @@ public class Tornado extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private void render(Vector3 base, double factor, double height, double radius) {
+  private void render(Vector3d base, double factor, double height, double radius) {
     double amount = Math.min(30, Math.max(4, factor * 30));
     yOffset += 0.1;
     if (yOffset >= 1) {
@@ -145,7 +145,7 @@ public class Tornado extends AbilityInstance {
         double r = 2 + (radius - 2) * y / height;
         double x = r * Math.cos(y + offset);
         double z = r * Math.sin(y + offset);
-        Location loc = base.add(new Vector3(x, y, z)).toLocation(user.world());
+        Location loc = base.add(new Vector3d(x, y, z)).toLocation(user.world());
         ParticleUtil.createAir(loc).spawn();
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
           SoundUtil.AIR.play(loc);

@@ -39,7 +39,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -226,7 +226,7 @@ public class IceSpike extends AbilityInstance {
       }
 
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
-      AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3(currentIndex));
+      AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3d(currentIndex));
       CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
 
       if (canMove(currentIndex)) {
@@ -256,7 +256,7 @@ public class IceSpike extends AbilityInstance {
         return false;
       }
       affectedEntities.add(entity);
-      entity.setVelocity(Vector3.PLUS_J.multiply(userConfig.knockup).clampVelocity());
+      entity.setVelocity(Vector3d.PLUS_J.multiply(userConfig.knockup).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       return true;
     }

@@ -37,7 +37,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -94,7 +94,7 @@ public class AirShield extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     currentPoint++;
-    Vector3 center = center();
+    Vector3d center = center();
     double spacing = userConfig.radius / 4;
     for (int i = 1; i < 8; i++) {
       double y = (i * spacing) - userConfig.radius;
@@ -104,7 +104,7 @@ public class AirShield extends AbilityInstance {
       }
       double x = userConfig.radius * factor * Math.cos(i * currentPoint);
       double z = userConfig.radius * factor * Math.sin(i * currentPoint);
-      Vector3 loc = center.add(new Vector3(x, y, z));
+      Vector3d loc = center.add(new Vector3d(x, y, z));
       ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
         .offset(0.2, 0.2, 0.2).spawn();
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
@@ -118,9 +118,9 @@ public class AirShield extends AbilityInstance {
     }
 
     CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
-      Vector3 toEntity = new Vector3(entity.getLocation()).subtract(center);
-      Vector3 normal = toEntity.setY(0).normalize();
-      double strength = ((userConfig.radius - toEntity.getNorm()) / userConfig.radius) * userConfig.maxPush;
+      Vector3d toEntity = new Vector3d(entity.getLocation()).subtract(center);
+      Vector3d normal = toEntity.setY(0).normalize();
+      double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;
       strength = Math.max(0, Math.min(1, strength));
       entity.setVelocity(entity.getVelocity().add(normal.multiply(strength).clampVelocity()));
       return false;
@@ -129,7 +129,7 @@ public class AirShield extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private Vector3 center() {
+  private Vector3d center() {
     return EntityMethods.entityCenter(user.entity());
   }
 

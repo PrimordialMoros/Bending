@@ -35,7 +35,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -60,7 +60,7 @@ public class AirBlast extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private AirStream stream;
-  private Vector3 origin;
+  private Vector3d origin;
 
   private boolean launched;
   private boolean selectedOrigin;
@@ -134,14 +134,14 @@ public class AirBlast extends AbilityInstance {
 
   private void launch() {
     launched = true;
-    Vector3 target = user.rayTraceEntity(userConfig.range).map(EntityMethods::entityCenter)
+    Vector3d target = user.rayTraceEntity(userConfig.range).map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.range));
     if (user.sneaking()) {
-      Vector3 temp = new Vector3(origin.toArray());
-      origin = new Vector3(target.toArray());
+      Vector3d temp = new Vector3d(origin.toArray());
+      origin = new Vector3d(target.toArray());
       target = temp;
     }
-    Vector3 direction = target.subtract(origin).normalize();
+    Vector3d direction = target.subtract(origin).normalize();
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     stream = new AirStream(new Ray(origin, direction.multiply(userConfig.range)));
@@ -194,10 +194,10 @@ public class AirBlast extends AbilityInstance {
         return false;
       }
 
-      Vector3 push = ray.direction.normalize();
+      Vector3d push = ray.direction.normalize();
       if (!isUser) {
         // Cap vertical push
-        push = push.setY(Math.max(-0.3, Math.min(0.3, push.y)));
+        push = push.setY(Math.max(-0.3, Math.min(0.3, push.getY())));
       }
 
       factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
@@ -205,11 +205,11 @@ public class AirBlast extends AbilityInstance {
       if (isUser && user.isOnGround()) {
         factor *= 0.5;
       }
-      Vector3 velocity = new Vector3(entity.getVelocity());
+      Vector3d velocity = new Vector3d(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
-      double strength = velocity.dotProduct(push.normalize());
+      double strength = velocity.dot(push.normalize());
       if (strength > factor) {
-        double f = velocity.normalize().dotProduct(push.normalize());
+        double f = velocity.normalize().dot(push.normalize());
         velocity = velocity.multiply(0.5).add(push.normalize().multiply(f));
       } else if (strength + factor * 0.5 > factor) {
         velocity = velocity.add(push.multiply(factor - strength));

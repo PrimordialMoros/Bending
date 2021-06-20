@@ -21,7 +21,7 @@ package me.moros.bending.ability.common.basic;
 
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -30,8 +30,8 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
   private final User user;
   protected final Ray ray;
 
-  protected Vector3 location;
-  protected Vector3 dir;
+  protected Vector3d location;
+  protected Vector3d dir;
 
   private final double maxRange;
 
@@ -44,7 +44,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     super(user.world());
     this.user = user;
     this.ray = ray;
-    this.maxRange = ray.direction.getNorm();
+    this.maxRange = ray.direction.length();
     dir = ray.direction.setY(0).normalize();
     this.location = ray.origin;
   }
@@ -59,7 +59,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
       nextUpdate = time + interval;
     }
 
-    Vector3 newLocation = resolve(location, dir);
+    Vector3d newLocation = resolve(location, dir);
     if (newLocation == null) {
       return UpdateResult.REMOVE;
     }

@@ -29,7 +29,7 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -41,11 +41,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private final User user;
 
-  private final Vector3 dir;
+  private final Vector3d dir;
   private final AABB box;
   protected final Disk collider;
   protected final Ray ray;
-  protected Vector3 location;
+  protected Vector3d location;
 
   protected final double radius;
 
@@ -55,10 +55,10 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     this.location = ray.origin;
     this.radius = radius;
     this.dir = ray.direction.normalize().multiply(speed);
-    box = new AABB(new Vector3(-radius, -radius, -radius), new Vector3(radius, radius, radius));
-    AABB bounds = new AABB(new Vector3(-0.15, -radius, -radius), new Vector3(0.15, radius, radius));
+    box = new AABB(new Vector3d(-radius, -radius, -radius), new Vector3d(radius, radius, radius));
+    AABB bounds = new AABB(new Vector3d(-0.15, -radius, -radius), new Vector3d(0.15, radius, radius));
     double angle = Math.toRadians(user.yaw());
-    OBB obb = new OBB(bounds, Vector3.PLUS_J, angle);
+    OBB obb = new OBB(bounds, Vector3d.PLUS_J, angle);
     collider = new Disk(obb, new Sphere(radius));
   }
 
@@ -71,7 +71,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     if (!resolveMovement(radius)) {
       return UpdateResult.REMOVE;
     }
-    Block base = location.subtract(new Vector3(0, radius + 0.25, 0)).toBlock(user.world());
+    Block base = location.subtract(new Vector3d(0, radius + 0.25, 0)).toBlock(user.world());
     if (base.isLiquid()) {
       return UpdateResult.REMOVE;
     }
@@ -92,7 +92,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     return collider.at(location);
   }
 
-  public @NonNull Vector3 location() {
+  public @NonNull Vector3d location() {
     return location;
   }
 
@@ -101,28 +101,28 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     Collection<Block> nearbyBlocks = WorldMethods.nearbyBlocks(user.world(), box.at(location));
     Collider checkCollider = collider();
     // Calculate top and bottom positions and add a small buffer
-    double topY = location.y + radius + 0.05;
-    double bottomY = location.y - radius - 0.05;
+    double topY = location.getY() + radius + 0.05;
+    double bottomY = location.getY() - radius - 0.05;
     for (Block block : nearbyBlocks) {
       AABB blockBounds = AABBUtils.blockBounds(block);
       if (blockBounds.intersects(checkCollider)) {
-        if (blockBounds.min.y > topY) { // Collision on the top part
+        if (blockBounds.min.getY() > topY) { // Collision on the top part
           return false;
         }
-        double resolution = blockBounds.max.y - bottomY;
+        double resolution = blockBounds.max.getY() - bottomY;
         if (resolution > maxResolution) {
           return false;
         } else {
-          location = location.add(new Vector3(0, resolution, 0));
+          location = location.add(new Vector3d(0, resolution, 0));
           return checkCollisions(nearbyBlocks);
         }
       }
     }
     // Try to fall if the block below doesn't have a bounding box.
     if (location.setY(bottomY).toBlock(user.world()).isPassable()) {
-      Disk tempCollider = collider.at(location.subtract(Vector3.PLUS_J));
+      Disk tempCollider = collider.at(location.subtract(Vector3d.PLUS_J));
       if (nearbyBlocks.stream().map(AABBUtils::blockBounds).noneMatch(tempCollider::intersects)) {
-        location = location.add(Vector3.MINUS_J);
+        location = location.add(Vector3d.MINUS_J);
         return true;
       }
     }

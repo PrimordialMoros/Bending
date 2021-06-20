@@ -33,7 +33,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -111,7 +111,7 @@ public class AirSpout extends AbilityInstance {
     return List.of(spout.collider());
   }
 
-  public void handleMovement(@NonNull Vector3 velocity) {
+  public void handleMovement(@NonNull Vector3d velocity) {
     AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
   }
 

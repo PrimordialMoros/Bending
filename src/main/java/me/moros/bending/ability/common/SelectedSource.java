@@ -25,7 +25,7 @@ import java.util.Map;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import org.bukkit.Location;
@@ -42,7 +42,7 @@ public class SelectedSource implements State {
 
   private StateChain chain;
   private final User user;
-  private Vector3 origin;
+  private Vector3d origin;
   private Block block;
   private Material material;
   private BlockState state;
@@ -72,7 +72,7 @@ public class SelectedSource implements State {
     if (block.equals(this.block)) {
       return false;
     }
-    Vector3 newOrigin = Vector3.center(block);
+    Vector3d newOrigin = Vector3d.center(block);
     if (user.eyeLocation().distanceSq(newOrigin) > distanceSq) {
       return false;
     }

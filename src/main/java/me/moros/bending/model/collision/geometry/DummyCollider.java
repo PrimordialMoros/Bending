@@ -20,7 +20,7 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -28,11 +28,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public final class DummyCollider extends AABB {
   public DummyCollider() {
-    super(Vector3.ZERO, Vector3.ZERO);
+    super(Vector3d.ZERO, Vector3d.ZERO);
   }
 
   @Override
-  public @NonNull AABB grow(@NonNull Vector3 diff) {
+  public @NonNull AABB grow(@NonNull Vector3d diff) {
     return this;
   }
 
@@ -47,22 +47,22 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull Vector3 position() {
-    return Vector3.ZERO;
+  public @NonNull Vector3d position() {
+    return Vector3d.ZERO;
   }
 
   @Override
-  public @NonNull AABB at(@NonNull Vector3 pos) {
+  public @NonNull AABB at(@NonNull Vector3d pos) {
     return this;
   }
 
   @Override
-  public @NonNull Vector3 halfExtents() {
-    return Vector3.ZERO;
+  public @NonNull Vector3d halfExtents() {
+    return Vector3d.ZERO;
   }
 
   @Override
-  public boolean contains(@NonNull Vector3 point) {
+  public boolean contains(@NonNull Vector3d point) {
     return false;
   }
 }

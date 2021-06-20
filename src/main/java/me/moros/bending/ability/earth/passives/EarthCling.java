@@ -29,7 +29,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -78,10 +78,10 @@ public class EarthCling extends AbilityInstance implements Ability {
     long counter = Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count();
     if (counter > 0 && EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
       if (counter == 2) {
-        user.entity().setVelocity(Vector3.ZERO.toBukkitVector());
+        user.entity().setVelocity(Vector3d.ZERO.toBukkitVector());
         user.entity().setFallDistance(0);
       } else {
-        if (user.velocity().y < 0) {
+        if (user.velocity().getY() < 0) {
           float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
           user.entity().setFallDistance(fallDistance);
           user.entity().setVelocity(user.velocity().multiply(userConfig.speed).clampVelocity());

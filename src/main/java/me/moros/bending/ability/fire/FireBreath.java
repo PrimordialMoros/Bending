@@ -37,7 +37,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -56,7 +57,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -107,7 +107,7 @@ public class FireBreath extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    Vector3 offset = new Vector3(0, -0.1, 0);
+    Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FireStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
@@ -143,7 +143,7 @@ public class FireBreath extends AbilityInstance {
       Location spawnLoc = bukkitLocation();
       double offset = 0.2 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.createFire(user, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
+      ParticleUtil.createFire(user, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).spawn();
     }
 

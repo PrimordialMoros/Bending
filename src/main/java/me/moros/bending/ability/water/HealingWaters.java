@@ -27,6 +27,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -39,7 +40,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -121,7 +121,7 @@ public class HealingWaters extends AbilityInstance {
       .forEach(target::removePotionEffect);
     AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
     if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
-      int ticks = NumberConversions.floor(userConfig.duration / 50.0);
+      int ticks = FastMath.floor(userConfig.duration / 50.0);
       PotionUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power);
       return true;
     }

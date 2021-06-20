@@ -47,7 +47,8 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -75,7 +76,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -221,7 +221,7 @@ public class EarthLine extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3(x, 2, z)).toLocation(user.world());
+      Location spawnLoc = location.subtract(new Vector3d(x, 2, z)).toLocation(user.world());
       Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getType();
       new TempArmorStand(spawnLoc, type, 700);
     }
@@ -292,12 +292,12 @@ public class EarthLine extends AbilityInstance {
         .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 3, 0.5F))
         .buildAndExplode(user, description(), location);
 
-      Predicate<Block> predicate = b -> b.getY() >= NumberConversions.floor(location.y) && EarthMaterials.isEarthOrSand(b);
+      Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
       List<Block> wall = WorldMethods.nearbyBlocks(center, userConfig.explosionRadius, predicate);
       wall.removeIf(b -> !user.canBuild(b));
       Collections.shuffle(wall);
       for (Block block : wall) {
-        Vector3 velocity = VectorMethods.gaussianOffset(Vector3.ZERO, 0.2, 0.1, 0.2);
+        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
         new TempFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
       }
@@ -308,7 +308,7 @@ public class EarthLine extends AbilityInstance {
         return;
       }
       raisedSpikes = true;
-      Vector3 loc = location.add(Vector3.MINUS_J);
+      Vector3d loc = location.add(Vector3d.MINUS_J);
       Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
 
       Pillar.builder(user, loc.toBlock(user.world())).predicate(predicate).build(1).ifPresent(spikes::add);
@@ -335,9 +335,9 @@ public class EarthLine extends AbilityInstance {
       }
 
       imprisoned = true;
-      entity.setVelocity(Vector3.MINUS_J.toBukkitVector());
+      entity.setVelocity(Vector3d.MINUS_J.toBukkitVector());
       Material mat = material;
-      VectorMethods.circle(Vector3.PLUS_I.multiply(0.8), Vector3.PLUS_J, 8).forEach(v -> {
+      VectorMethods.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         Location loc = entity.getLocation().add(0, -1.1, 0);
         new TempArmorStand(loc.add(v.toBukkitVector()), mat, userConfig.prisonDuration);
         new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);

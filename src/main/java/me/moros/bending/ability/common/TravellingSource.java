@@ -22,7 +22,7 @@ package me.moros.bending.ability.common;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -76,8 +76,8 @@ public class TravellingSource implements State {
       return UpdateResult.REMOVE;
     }
     clean();
-    Vector3 target = Vector3.center(user.locBlock());
-    Vector3 location = Vector3.center(source);
+    Vector3d target = Vector3d.center(user.locBlock());
+    Vector3d location = Vector3d.center(source);
 
     double distSq = target.distanceSq(location);
     if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
@@ -93,7 +93,7 @@ public class TravellingSource implements State {
     } else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.headBlock().getY()) {
       source = source.getRelative(BlockFace.DOWN);
     } else {
-      Vector3 direction = target.subtract(location).normalize();
+      Vector3d direction = target.subtract(location).normalize();
       Block nextBlock = location.add(direction).toBlock(user.world());
       if (source.equals(nextBlock)) {
         source = findPath(nextBlock);

@@ -41,7 +41,8 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -60,7 +61,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -140,9 +140,9 @@ public class Combustion extends AbilityInstance implements Explosive {
       explode();
     } else if (collidedAbility instanceof Combustion) {
       Combustion other = (Combustion) collidedAbility;
-      Vector3 first = collision.colliderSelf().position();
-      Vector3 second = collision.colliderOther().position();
-      Vector3 center = first.add(second).multiply(0.5);
+      Vector3d first = collision.colliderSelf().position();
+      Vector3d second = collision.colliderOther().position();
+      Vector3d center = first.add(second).multiply(0.5);
       createExplosion(center, userConfig.power + other.userConfig.power, userConfig.damage + other.userConfig.damage);
       other.exploded = true;
     } else if (collidedAbility instanceof Explosive) {
@@ -157,7 +157,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     createExplosion(beam.location(), userConfig.power, userConfig.damage);
   }
 
-  private void createExplosion(Vector3 center, double size, double damage) {
+  private void createExplosion(Vector3d center, double size, double damage) {
     if (exploded) {
       return;
     }
@@ -221,7 +221,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public @NonNull Vector3 controlDirection() {
+    public @NonNull Vector3d controlDirection() {
       return user.direction().multiply(speed);
     }
 
@@ -230,10 +230,10 @@ public class Combustion extends AbilityInstance implements Explosive {
         SoundUtil.COMBUSTION.play(bukkitLocation(), 1.5F, 0);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
-        VectorMethods.circle(Vector3.ONE, user.direction(), 20).forEach(v -> {
-          Vector3 velocity = v.multiply(radius);
+        VectorMethods.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
+          Vector3d velocity = v.multiply(radius);
           ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
-            .count(0).offset(velocity.x, velocity.y, velocity.z).extra(0.09).spawn();
+            .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
         });
       }
     }
@@ -257,7 +257,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       return true;
     }
 
-    private @NonNull Vector3 location() {
+    private @NonNull Vector3d location() {
       return location;
     }
   }
@@ -286,7 +286,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       power = abilityNode.node("power").getDouble(3.4);
       range = abilityNode.node("range").getDouble(48.0);
 
-      particleRange = NumberConversions.ceil(range);
+      particleRange = FastMath.ceil(range);
     }
   }
 }

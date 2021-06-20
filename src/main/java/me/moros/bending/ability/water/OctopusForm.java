@@ -34,7 +34,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -59,7 +59,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class OctopusForm extends AbilityInstance {
   private static final Config config = new Config();
   private static final double RADIUS = 3.0;
-  private static final AABB TENTACLE_BOX = new AABB(new Vector3(-1, 0.0, -1), new Vector3(1, 2.5, 1));
+  private static final AABB TENTACLE_BOX = new AABB(new Vector3d(-1, 0.0, -1), new Vector3d(1, 2.5, 1));
 
 
   private User user;
@@ -163,7 +163,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private void renderTentacles(boolean forceUpdate) {
-    Vector3 center = user.location().snapToBlockCenter();
+    Vector3d center = user.location().snapToBlockCenter();
     long time = System.currentTimeMillis();
     for (Tentacle tentacle : tentacles) {
       if (forceUpdate || time > tentacle.nextUpdateTime) {
@@ -189,10 +189,10 @@ public class OctopusForm extends AbilityInstance {
     if (!formed) {
       return;
     }
-    Vector3 center = user.location().floor().add(new Vector3(0.5, 0, 0.5));
+    Vector3d center = user.location().floor().add(new Vector3d(0.5, 0, 0.5));
     double r = RADIUS + 0.5;
     for (double phi = 0; phi < Math.PI * 2; phi += Math.PI / 4) {
-      Vector3 tentacleBase = center.add(new Vector3(Math.cos(phi) * r, 0, Math.sin(phi) * r));
+      Vector3d tentacleBase = center.add(new Vector3d(Math.cos(phi) * r, 0, Math.sin(phi) * r));
       CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
     }
   }
@@ -200,7 +200,7 @@ public class OctopusForm extends AbilityInstance {
   private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3 dir = EntityMethods.entityCenter(entity).subtract(user.location());
+      Vector3d dir = EntityMethods.entityCenter(entity).subtract(user.location());
       entity.setVelocity(dir.normalize().multiply(userConfig.knockback).clampVelocity());
       affectedEntities.add(entity);
     }
@@ -249,19 +249,19 @@ public class OctopusForm extends AbilityInstance {
       updateBlocks(user.location().snapToBlockCenter());
     }
 
-    private void updateBlocks(Vector3 center) {
+    private void updateBlocks(Vector3d center) {
       blocks.clear();
       long time = System.currentTimeMillis();
       nextUpdateTime = time + ThreadLocalRandom.current().nextLong(250, 550);
       double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
       double xBottom = cos * (RADIUS + bottomOffset);
       double zBottom = sin * (RADIUS + bottomOffset);
-      blocks.add(center.add(new Vector3(xBottom, 1, zBottom)).toBlock(user.world()));
+      blocks.add(center.add(new Vector3d(xBottom, 1, zBottom)).toBlock(user.world()));
       if (time > topFormTime) {
         double topOffset = ThreadLocalRandom.current().nextDouble(1);
         double xTop = cos * (RADIUS + topOffset);
         double zTop = sin * (RADIUS + topOffset);
-        blocks.add(center.add(new Vector3(xTop, 2, zTop)).toBlock(user.world()));
+        blocks.add(center.add(new Vector3d(xTop, 2, zTop)).toBlock(user.world()));
       }
     }
   }

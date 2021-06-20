@@ -70,7 +70,8 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void createPassives(@NonNull User user) {
-    Collection<AbilityDescription> allPassives = Registries.ABILITIES.passives().collect(Collectors.toList());
+    Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream()
+      .filter(d -> d.isActivatedBy(Activation.PASSIVE)).collect(Collectors.toList());
     for (AbilityDescription passive : allPassives) {
       destroyInstanceType(user, passive);
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {

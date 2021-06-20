@@ -35,7 +35,8 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
@@ -48,7 +49,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -89,11 +89,11 @@ public class Catapult extends AbilityInstance {
   }
 
   private Block getBase() {
-    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3(0, 0.2, 0));
-    AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.location());
+    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
+    AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
     return WorldMethods.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtils.blockBounds(b))).stream()
       .filter(this::isValidBlock)
-      .min(Comparator.comparingDouble(b -> Vector3.center(b).distanceSq(user.location())))
+      .min(Comparator.comparingDouble(b -> Vector3d.center(b).distanceSq(user.location())))
       .orElse(null);
   }
 
@@ -106,13 +106,13 @@ public class Catapult extends AbilityInstance {
 
 
   private boolean launch(boolean sneak) {
-    double angle = Vector3.PLUS_J.angle(user.direction());
+    double angle = Vector3d.PLUS_J.angle(user.direction());
 
     int length = 0;
     Block base = getBase();
     boolean forceVertical = false;
     if (base != null) {
-      length = getLength(new Vector3(base.getRelative(BlockFace.UP)), Vector3.MINUS_J);
+      length = getLength(new Vector3d(base.getRelative(BlockFace.UP)), Vector3d.MINUS_J);
       if (angle > ANGLE) {
         forceVertical = true;
       }
@@ -121,7 +121,7 @@ public class Catapult extends AbilityInstance {
         .build(3, 1).orElse(null);
     } else {
       if (angle >= ANGLE && angle <= 2 * ANGLE) {
-        Vector3 reverse = user.direction().negate();
+        Vector3d reverse = user.direction().negate();
         length = getLength(user.location(), reverse);
       }
     }
@@ -133,14 +133,14 @@ public class Catapult extends AbilityInstance {
     startTime = System.currentTimeMillis();
     user.addCooldown(description(), userConfig.cooldown);
 
-    Vector3 origin = user.location().add(new Vector3(0, 0.5, 0));
+    Vector3d origin = user.location().add(new Vector3d(0, 0.5, 0));
     SoundUtil.EARTH.play(origin.toLocation(user.world()));
     if (base != null) {
       ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
         .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
     }
 
-    Vector3 direction = forceVertical ? Vector3.PLUS_J : user.direction();
+    Vector3d direction = forceVertical ? Vector3d.PLUS_J : user.direction();
     double factor = length / (double) userConfig.length;
     double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
     return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
@@ -150,13 +150,13 @@ public class Catapult extends AbilityInstance {
     }, true, true);
   }
 
-  private int getLength(Vector3 origin, Vector3 direction) {
+  private int getLength(Vector3d origin, Vector3d direction) {
     Set<Block> checked = new HashSet<>();
     for (double i = 0.5; i <= userConfig.length; i += 0.5) {
       Block block = origin.add(direction.multiply(i)).toBlock(user.world());
       if (!checked.contains(block)) {
         if (!isValidBlock(block)) {
-          return NumberConversions.ceil(i) - 1;
+          return FastMath.ceil(i) - 1;
         }
         checked.add(block);
       }

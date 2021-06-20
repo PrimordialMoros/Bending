@@ -24,10 +24,10 @@ import java.util.Map;
 
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingCombustEvent;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -64,7 +64,7 @@ public final class FireTick {
     if (ticks <= 0) {
       return;
     }
-    int duration = NumberConversions.ceil(Math.min(ticks, MAX_TICKS) / 20.0);
+    int duration = FastMath.ceil(Math.min(ticks, MAX_TICKS) / 20.0);
     BendingCombustEvent event = Bending.eventBus().postBendingCombustEvent(source, entity, duration);
     if (!event.isCancelled() && entity.getFireTicks() < ticks) {
       entity.setFireTicks(ticks);

@@ -38,7 +38,7 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -180,7 +180,7 @@ public class FireShield extends AbilityInstance {
 
   private class DiskShield implements Shield {
     private Disk disk;
-    private Vector3 location;
+    private Vector3d location;
     private long nextRenderTime = 0;
 
     private DiskShield() {
@@ -191,9 +191,9 @@ public class FireShield extends AbilityInstance {
     public void update() {
       location = user.eyeLocation().add(user.direction().multiply(userConfig.diskRange));
       double r = userConfig.diskRadius;
-      AABB aabb = new AABB(new Vector3(-r, -r, -1), new Vector3(r, r, 1));
-      Vector3 right = user.rightSide();
-      Rotation rotation = new Rotation(Vector3.PLUS_J, Math.toRadians(user.yaw()));
+      AABB aabb = new AABB(new Vector3d(-r, -r, -1), new Vector3d(r, r, 1));
+      Vector3d right = user.rightSide();
+      Rotation rotation = new Rotation(Vector3d.PLUS_J, Math.toRadians(user.yaw()));
       rotation = rotation.applyTo(new Rotation(right, Math.toRadians(user.pitch())));
       disk = new Disk(new OBB(aabb, rotation), new Sphere(userConfig.diskRadius)).at(location);
     }
@@ -206,10 +206,10 @@ public class FireShield extends AbilityInstance {
       }
       nextRenderTime = time + 200;
       Rotation rotation = new Rotation(user.direction(), Math.toRadians(20));
-      double[] array = Vector3.PLUS_J.crossProduct(user.direction()).normalize().toArray();
+      double[] array = Vector3d.PLUS_J.cross(user.direction()).normalize().toArray();
       for (int i = 0; i < 18; i++) {
         for (double j = 0.2; j <= 1; j += 0.2) {
-          Location spawnLoc = location.add(new Vector3(array).multiply(j * userConfig.diskRadius)).toLocation(user.world());
+          Location spawnLoc = location.add(new Vector3d(array).multiply(j * userConfig.diskRadius)).toLocation(user.world());
           ParticleUtil.createFire(user, spawnLoc)
             .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
           if (rand.nextInt(12) == 0) {
@@ -246,7 +246,7 @@ public class FireShield extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3 center = center();
+      Vector3d center = center();
       double radius = userConfig.shieldRadius;
       currentPoint++;
       double spacing = radius / 16;
@@ -258,7 +258,7 @@ public class FireShield extends AbilityInstance {
         }
         double x = radius * factor * Math.cos(i * currentPoint);
         double z = radius * factor * Math.sin(i * currentPoint);
-        Location spawnLoc = center.add(new Vector3(x, y, z)).toLocation(user.world());
+        Location spawnLoc = center.add(new Vector3d(x, y, z)).toLocation(user.world());
         ParticleUtil.createFire(user, spawnLoc)
           .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
         if (rand.nextInt(12) == 0) {
@@ -267,7 +267,7 @@ public class FireShield extends AbilityInstance {
       }
     }
 
-    private Vector3 center() {
+    private Vector3d center() {
       return EntityMethods.entityCenter(user.entity());
     }
   }

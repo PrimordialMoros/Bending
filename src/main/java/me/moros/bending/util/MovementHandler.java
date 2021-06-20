@@ -31,6 +31,7 @@ import java.util.UUID;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BendingRestrictEvent;
 import me.moros.bending.model.ability.ActionType;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -38,7 +39,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,7 +66,7 @@ public class MovementHandler {
       entity.setAI(false);
     }
     entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.customMetadata(this));
-    Tasker.sync(this::reset, NumberConversions.ceil(duration / 50.0));
+    Tasker.sync(this::reset, FastMath.ceil(duration / 50.0));
   }
 
   private void reset() {

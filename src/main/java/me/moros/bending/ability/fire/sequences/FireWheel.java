@@ -35,7 +35,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -71,9 +71,9 @@ public class FireWheel extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Vector3 direction = user.direction().setY(0).normalize();
-    Vector3 location = user.location().add(direction);
-    location = location.add(new Vector3(0, userConfig.radius, 0));
+    Vector3d direction = user.direction().setY(0).normalize();
+    Vector3d location = user.location().add(direction);
+    location = location.add(new Vector3d(0, userConfig.radius, 0));
     if (location.toBlock(user.world()).isLiquid()) {
       return false;
     }
@@ -120,7 +120,7 @@ public class FireWheel extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
+      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
       VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 36).forEach(v ->
         ParticleUtil.createFire(user, location.add(v).toLocation(user.world())).extra(0.01).spawn()
       );

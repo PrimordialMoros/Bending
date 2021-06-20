@@ -25,14 +25,14 @@ import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.collision.AABBUtils;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
-import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -69,16 +69,16 @@ public final class WorldMethods {
    * @return all collected blocks
    */
   public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
-    int r = NumberConversions.ceil(radius) + 1;
+    int r = FastMath.ceil(radius) + 1;
     double originX = location.getX();
     double originY = location.getY();
     double originZ = location.getZ();
-    Vector3 pos = new Vector3(location);
+    Vector3d pos = new Vector3d(location);
     List<Block> blocks = new ArrayList<>();
     for (double x = originX - r; x <= originX + r; x++) {
       for (double y = originY - r; y <= originY + r; y++) {
         for (double z = originZ - r; z <= originZ + r; z++) {
-          Vector3 loc = new Vector3(x, y, z);
+          Vector3d loc = new Vector3d(x, y, z);
           if (pos.distanceSq(loc) > radius * radius) {
             continue;
           }
@@ -123,10 +123,10 @@ public final class WorldMethods {
       return List.of();
     }
     List<Block> blocks = new ArrayList<>();
-    for (double x = box.min.x; x <= box.max.x; x++) {
-      for (double y = box.min.y; y <= box.max.y; y++) {
-        for (double z = box.min.z; z <= box.max.z; z++) {
-          Vector3 loc = new Vector3(x, y, z);
+    for (double x = box.min.getX(); x <= box.max.getX(); x++) {
+      for (double y = box.min.getY(); y <= box.max.getY(); y++) {
+        for (double z = box.min.getZ(); z <= box.max.getZ(); z++) {
+          Vector3d loc = new Vector3d(x, y, z);
           Block block = loc.toBlock(world);
           if (predicate.test(block)) {
             blocks.add(block);

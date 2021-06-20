@@ -40,7 +40,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -157,14 +157,14 @@ public class EarthBlast extends AbilityInstance {
     Collection<EarthBlast> blasts = Bending.game().abilityManager(user.world()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
     for (EarthBlast eb : blasts) {
-      Vector3 center = eb.blast.center();
+      Vector3d center = eb.blast.center();
       double dist = center.distanceSq(user.eyeLocation());
       if (dist > config.shatterRange * config.shatterRange) {
         continue;
       }
       if (eb.blast.collider().intersects(user.ray(dist))) {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
-        double range = Math.min(1, inverse.direction.getNorm());
+        double range = Math.min(1, inverse.direction.length());
         Block block = center.toBlock(user.world());
         Block rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
         if (block.equals(rayTraced)) {

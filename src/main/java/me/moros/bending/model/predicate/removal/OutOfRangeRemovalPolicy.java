@@ -22,17 +22,17 @@ package me.moros.bending.model.predicate.removal;
 import java.util.function.Supplier;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class OutOfRangeRemovalPolicy implements RemovalPolicy {
   private final double rangeSq;
-  private final Vector3 origin;
-  private final Supplier<Vector3> fromSupplier;
+  private final Vector3d origin;
+  private final Supplier<Vector3d> fromSupplier;
 
-  private OutOfRangeRemovalPolicy(double range, Vector3 origin, Supplier<Vector3> from) {
+  private OutOfRangeRemovalPolicy(double range, Vector3d origin, Supplier<Vector3d> from) {
     this.rangeSq = range * range;
     this.origin = origin;
     this.fromSupplier = from;
@@ -46,11 +46,11 @@ public class OutOfRangeRemovalPolicy implements RemovalPolicy {
     return fromSupplier.get().distanceSq(origin == null ? user.eyeLocation() : origin) > rangeSq;
   }
 
-  public static @NonNull RemovalPolicy of(double range, @NonNull Supplier<Vector3> from) {
+  public static @NonNull RemovalPolicy of(double range, @NonNull Supplier<Vector3d> from) {
     return of(range, null, from);
   }
 
-  public static @NonNull RemovalPolicy of(double range, @Nullable Vector3 origin, @NonNull Supplier<Vector3> from) {
+  public static @NonNull RemovalPolicy of(double range, @Nullable Vector3d origin, @NonNull Supplier<Vector3d> from) {
     return new OutOfRangeRemovalPolicy(range, origin, from);
   }
 }

@@ -41,7 +41,8 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -67,12 +68,11 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MetalCable extends AbilityInstance {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
 
   private static final Config config = new Config();
 
@@ -80,8 +80,8 @@ public class MetalCable extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<Vector3> pointLocations = new ArrayList<>();
-  private Vector3 location;
+  private final Collection<Vector3d> pointLocations = new ArrayList<>();
+  private Vector3d location;
   private Arrow cable;
   private CableTarget target;
   private TempFallingBlock projectile;
@@ -145,7 +145,7 @@ public class MetalCable extends AbilityInstance {
     if (cable == null || !cable.isValid()) {
       return UpdateResult.REMOVE;
     }
-    location = new Vector3(cable.getLocation());
+    location = new Vector3d(cable.getLocation());
     double distance = user.location().distance(location);
     if (hasHit) {
       if (!handleMovement(distance)) {
@@ -191,7 +191,7 @@ public class MetalCable extends AbilityInstance {
       return false;
     }
     Entity entityToMove = user.entity();
-    Vector3 targetLocation = location;
+    Vector3d targetLocation = location;
     if (target.type == CableTarget.Type.ENTITY) {
       if (target.entity != null) {
         cable.teleport(target.entity.getLocation());
@@ -202,12 +202,12 @@ public class MetalCable extends AbilityInstance {
         targetLocation = ray.origin.add(ray.direction);
       }
     }
-    Vector3 direction = targetLocation.subtract(new Vector3(entityToMove.getLocation())).normalize();
+    Vector3d direction = targetLocation.subtract(new Vector3d(entityToMove.getLocation())).normalize();
     if (distance > 3) {
       entityToMove.setVelocity(direction.multiply(userConfig.pullSpeed).clampVelocity());
     } else {
       if (target.type == CableTarget.Type.ENTITY) {
-        entityToMove.setVelocity(Vector3.ZERO.toBukkitVector());
+        entityToMove.setVelocity(Vector3d.ZERO.toBukkitVector());
         if (target.entity instanceof FallingBlock) {
           FallingBlock fb = (FallingBlock) target.entity;
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
@@ -222,7 +222,7 @@ public class MetalCable extends AbilityInstance {
         if (distance <= 3 && distance > 1.5) {
           entityToMove.setVelocity(direction.multiply(0.4 * userConfig.pullSpeed).clampVelocity());
         } else {
-          user.entity().setVelocity(new Vector3(0, 0.5, 0).toBukkitVector());
+          user.entity().setVelocity(new Vector3d(0, 0.5, 0).toBukkitVector());
           return false;
         }
       }
@@ -235,7 +235,7 @@ public class MetalCable extends AbilityInstance {
       return false;
     }
 
-    Vector3 targetLocation = user.rayTraceEntity(userConfig.range)
+    Vector3d targetLocation = user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.range));
 
@@ -243,8 +243,8 @@ public class MetalCable extends AbilityInstance {
       return false;
     }
 
-    Vector3 origin = user.mainHandSide();
-    Vector3 dir = targetLocation.subtract(origin).normalize();
+    Vector3d origin = user.mainHandSide();
+    Vector3d dir = targetLocation.subtract(origin).normalize();
     Arrow arrow = user.world().spawnArrow(origin.toLocation(user.world()), dir.toBukkitVector(), 1.8F, 0);
     arrow.setShooter(user.entity());
     arrow.setGravity(false);
@@ -252,7 +252,7 @@ public class MetalCable extends AbilityInstance {
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
     arrow.setMetadata(Metadata.METAL_CABLE, Metadata.customMetadata(this));
     cable = arrow;
-    location = new Vector3(cable.getLocation());
+    location = new Vector3d(cable.getLocation());
     SoundUtil.METAL.play(arrow.getLocation());
 
     removalPolicy = Policies.builder()
@@ -268,9 +268,9 @@ public class MetalCable extends AbilityInstance {
       return true;
     }
     pointLocations.clear();
-    pointLocations.addAll(getLinePoints(user.mainHandSide(), location, NumberConversions.ceil(distance * 2)));
+    pointLocations.addAll(getLinePoints(user.mainHandSide(), location, FastMath.ceil(distance * 2)));
     int counter = 0;
-    for (Vector3 temp : pointLocations) {
+    for (Vector3d temp : pointLocations) {
       Block block = temp.toBlock(user.world());
       if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
         if (++counter > 2) {
@@ -282,8 +282,8 @@ public class MetalCable extends AbilityInstance {
     return true;
   }
 
-  private Collection<Vector3> getLinePoints(Vector3 startLoc, Vector3 endLoc, int points) {
-    Vector3 diff = endLoc.subtract(startLoc).multiply(1.0 / points);
+  private Collection<Vector3d> getLinePoints(Vector3d startLoc, Vector3d endLoc, int points) {
+    Vector3d diff = endLoc.subtract(startLoc).multiply(1.0 / points);
     return IntStream.rangeClosed(1, points).mapToObj(i -> startLoc.add(diff.multiply(i)))
       .collect(Collectors.toList());
   }
@@ -299,7 +299,7 @@ public class MetalCable extends AbilityInstance {
     if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockData data = block.getBlockData();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-      Vector3 velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
+      Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
       projectile = new TempFallingBlock(block, data, velocity, true, 30000);
       target = new CableTarget(projectile.fallingBlock());
     } else {
@@ -338,12 +338,12 @@ public class MetalCable extends AbilityInstance {
     }
 
     launched = true;
-    Vector3 targetLocation = user.rayTraceEntity(userConfig.projectileRange)
+    Vector3d targetLocation = user.rayTraceEntity(userConfig.projectileRange)
       .map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.projectileRange));
 
-    Vector3 velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
-    target.entity.setVelocity(velocity.add(new Vector3(0, 0.2, 0)).clampVelocity());
+    Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
+    target.entity.setVelocity(velocity.add(new Vector3d(0, 0.2, 0)).clampVelocity());
     target.entity.setFallDistance(0);
     if (target.entity instanceof FallingBlock) {
       removalPolicy = Policies.builder()

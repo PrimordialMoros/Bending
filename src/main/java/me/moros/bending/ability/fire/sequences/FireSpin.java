@@ -39,7 +39,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
@@ -69,8 +69,8 @@ public class FireSpin extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Vector3 origin = user.location().add(Vector3.PLUS_J);
-    VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 40).forEach(
+    Vector3d origin = user.location().add(Vector3d.PLUS_J);
+    VectorMethods.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 40).forEach(
       v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
     );
 

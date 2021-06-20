@@ -25,7 +25,7 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.collision.AABBUtils;
@@ -67,8 +67,8 @@ public class HydroSink extends AbilityInstance implements Ability {
       return false;
     }
 
-    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3(0, 0.2, 0));
-    AABB floorBounds = new AABB(new Vector3(-1, -0.5, -1), new Vector3(1, 0, 1)).at(user.location());
+    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
+    AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
     return WorldMethods.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtils.blockBounds(b)))
       .stream().anyMatch(WaterMaterials::isWaterBendable);
   }

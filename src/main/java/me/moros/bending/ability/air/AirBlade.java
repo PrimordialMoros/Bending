@@ -37,7 +37,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -60,8 +60,8 @@ public class AirBlade extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Vector3 origin;
-  private Vector3 direction;
+  private Vector3d origin;
+  private Vector3d direction;
   private Blade blade;
 
   private boolean charging;
@@ -84,7 +84,7 @@ public class AirBlade extends AbilityInstance {
     charging = true;
     direction = user.direction().setY(0).normalize();
     double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
-    origin = user.location().add(direction).add(new Vector3(0, maxRadius, 0));
+    origin = user.location().add(direction).add(new Vector3d(0, maxRadius, 0));
 
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
@@ -126,7 +126,7 @@ public class AirBlade extends AbilityInstance {
       long time = System.currentTimeMillis();
       if (user.sneaking() && time > startTime + 100) {
         double timeFactor = Math.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
-        Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(direction);
+        Vector3d rotateAxis = Vector3d.PLUS_J.cross(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
         VectorMethods.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
           ParticleUtil.createAir(origin.add(v).toLocation(user.world())).spawn()
@@ -189,7 +189,7 @@ public class AirBlade extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(this.ray.direction);
+      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
       VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
         ParticleUtil.createAir(location.add(v).toLocation(user.world())).spawn()
       );
@@ -205,7 +205,7 @@ public class AirBlade extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3 velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
+      Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       entity.setVelocity(velocity.clampVelocity());
       return true;
     }

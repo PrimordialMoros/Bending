@@ -36,7 +36,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -202,16 +202,16 @@ public class AirBurst extends AbilityInstance {
         return false;
       }
 
-      Vector3 push = ray.direction.normalize();
+      Vector3d push = ray.direction.normalize();
       // Cap vertical push
-      push = push.setY(Math.max(-0.3, Math.min(0.3, push.y)));
+      push = push.setY(Math.max(-0.3, Math.min(0.3, push.getY())));
 
       factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
-      Vector3 velocity = new Vector3(entity.getVelocity());
+      Vector3d velocity = new Vector3d(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
-      double strength = velocity.dotProduct(push.normalize());
+      double strength = velocity.dot(push.normalize());
       if (strength > factor) {
-        double f = velocity.normalize().dotProduct(push.normalize());
+        double f = velocity.normalize().dot(push.normalize());
         velocity = velocity.multiply(0.5).add(push.normalize().multiply(f));
       } else if (strength + factor * 0.5 > factor) {
         velocity = velocity.add(push.multiply(factor - strength));

@@ -39,7 +39,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -61,7 +62,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -109,7 +109,7 @@ public class FrostBreath extends AbilityInstance {
     }
 
     user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
-    Vector3 offset = new Vector3(0, -0.1, 0);
+    Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FrostStream(ray));
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
@@ -145,9 +145,9 @@ public class FrostBreath extends AbilityInstance {
       Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(NumberConversions.ceil(0.75 * distanceTravelled))
+      ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).spawn();
-      ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(NumberConversions.ceil(0.4 * distanceTravelled))
+      ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(FastMath.ceil(0.4 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
     }
 
@@ -165,7 +165,7 @@ public class FrostBreath extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
-        int potionDuration = NumberConversions.round(userConfig.slowDuration / 50.0);
+        int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
         PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
         ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
           .offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();

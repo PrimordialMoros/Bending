@@ -36,8 +36,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.IntVector;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -123,13 +123,13 @@ public class WaterSpout extends AbilityInstance {
     return List.of(spout.collider());
   }
 
-  public void handleMovement(@NonNull Vector3 velocity) {
+  public void handleMovement(@NonNull Vector3d velocity) {
     AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
   }
 
   private class Spout extends AbstractSpout {
-    private IntVector lastPosition;
-    private final Vector3 g = new Vector3(0, -0.1, 0); // Applied as extra gravity
+    private Vector3i lastPosition;
+    private final Vector3d g = new Vector3d(0, -0.1, 0); // Applied as extra gravity
 
     public Spout() {
       super(user, userConfig.height);
@@ -138,7 +138,7 @@ public class WaterSpout extends AbilityInstance {
 
     @Override
     public void render() {
-      IntVector newPosition = user.location().toIntVector();
+      Vector3i newPosition = user.location().toVector3i();
       if (newPosition.equals(lastPosition)) {
         return;
       }

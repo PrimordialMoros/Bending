@@ -35,7 +35,8 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -44,7 +45,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -148,9 +148,9 @@ public class RaiseEarth extends AbilityInstance {
 
   private void raiseWall(int height, int width) {
     double w = (width - 1) / 2.0;
-    Vector3 side = user.direction().crossProduct(Vector3.PLUS_J).normalize();
-    Vector3 center = Vector3.center(origin);
-    for (int i = -NumberConversions.ceil(w); i <= NumberConversions.floor(w); i++) {
+    Vector3d side = user.direction().cross(Vector3d.PLUS_J).normalize();
+    Vector3d center = Vector3d.center(origin);
+    for (int i = -FastMath.ceil(w); i <= FastMath.floor(w); i++) {
       Block check = center.add(side.multiply(i)).toBlock(user.world());
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < height; j++) {

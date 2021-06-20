@@ -30,7 +30,8 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -49,7 +50,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -97,7 +97,7 @@ public class EarthArmor extends AbilityInstance {
     }
     BlockData data = source.getBlockData().clone();
     TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
-    fallingBlock = new TempFallingBlock(source, data, new Vector3(0, 0.2, 0), false, 10000);
+    fallingBlock = new TempFallingBlock(source, data, new Vector3d(0, 0.2, 0), false, 10000);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;
   }
@@ -125,7 +125,7 @@ public class EarthArmor extends AbilityInstance {
       return;
     }
     TempArmor.create(user, getArmorSet(mode), userConfig.duration);
-    int duration = NumberConversions.round(userConfig.duration / 50.0);
+    int duration = FastMath.round(userConfig.duration / 50.0);
     PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     user.addCooldown(description(), userConfig.cooldown);
@@ -136,7 +136,7 @@ public class EarthArmor extends AbilityInstance {
     if (!fallingBlock.fallingBlock().isValid()) {
       return false;
     }
-    Vector3 center = fallingBlock.center();
+    Vector3d center = fallingBlock.center();
 
     Block currentBlock = center.toBlock(user.world());
     BlockMethods.tryBreakPlant(currentBlock);
@@ -152,7 +152,7 @@ public class EarthArmor extends AbilityInstance {
       return true;
     }
 
-    Vector3 dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
+    Vector3d dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
     fallingBlock.fallingBlock().setVelocity(dir.clampVelocity());
     return true;
   }

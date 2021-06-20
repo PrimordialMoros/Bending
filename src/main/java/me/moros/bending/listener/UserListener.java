@@ -38,7 +38,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BendingProfile;
@@ -264,7 +264,7 @@ public class UserListener implements Listener {
       return;
     }
 
-    final Vector3 velocity = new Vector3(to).subtract(new Vector3(from));
+    final Vector3d velocity = new Vector3d(to).subtract(new Vector3d(from));
     game.activationController().onUserMove(Registries.BENDERS.user(event.getPlayer()), velocity);
   }
 

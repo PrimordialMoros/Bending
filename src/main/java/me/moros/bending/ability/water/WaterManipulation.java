@@ -43,7 +43,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -64,7 +65,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -208,7 +208,7 @@ public class WaterManipulation extends AbilityInstance {
     Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
     for (WaterManipulation manip : manips) {
-      Vector3 center = manip.manip.center();
+      Vector3d center = manip.manip.center();
       double dist = center.distanceSq(manip.user().eyeLocation());
       double dist2 = center.distanceSq(user.eyeLocation());
       if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) {
@@ -217,7 +217,7 @@ public class WaterManipulation extends AbilityInstance {
       Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
       if (selectSphere.intersects(user.ray(dist))) {
         Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
-        double range = Math.min(1, inverse.direction.getNorm());
+        double range = Math.min(1, inverse.direction.length());
         Block block = center.toBlock(user.world());
         Block rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
         if (block.equals(rayTraced)) {
@@ -262,7 +262,7 @@ public class WaterManipulation extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       entity.setVelocity(direction.multiply(0.5).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      int potionDuration = NumberConversions.round(userConfig.slowDuration / 50.0);
+      int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
       PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
       return true;
     }

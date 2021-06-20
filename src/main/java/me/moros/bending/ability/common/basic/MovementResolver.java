@@ -21,8 +21,8 @@ package me.moros.bending.ability.common.basic;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.model.math.IntVector;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.World;
@@ -39,7 +39,7 @@ public abstract class MovementResolver {
     this.world = world;
   }
 
-  protected @Nullable Vector3 resolve(@NonNull Vector3 origin, @NonNull Vector3 direction) {
+  protected @Nullable Vector3d resolve(@NonNull Vector3d origin, @NonNull Vector3d direction) {
     Block original = origin.toBlock(world);
     Block destination = origin.add(direction).toBlock(world);
     int offset = 0;
@@ -54,8 +54,8 @@ public abstract class MovementResolver {
     }
 
     int diagonalCollisions = 0;
-    for (IntVector v : VectorMethods.decomposeDiagonals(origin, direction)) {
-      Block block = original.getRelative(v.x, v.y + offset, v.z);
+    for (Vector3i v : VectorMethods.decomposeDiagonals(origin, direction)) {
+      Block block = original.getRelative(v.getX(), v.getY() + offset, v.getZ());
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
           return null;
@@ -63,7 +63,7 @@ public abstract class MovementResolver {
       }
     }
 
-    return origin.add(direction).add(new Vector3(0, offset, 0));
+    return origin.add(direction).add(new Vector3d(0, offset, 0));
   }
 
   protected abstract boolean isValidBlock(@NonNull Block block);

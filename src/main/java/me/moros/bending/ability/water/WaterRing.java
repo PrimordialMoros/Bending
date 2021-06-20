@@ -46,8 +46,9 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.IntVector;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -66,7 +67,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,7 +82,7 @@ public class WaterRing extends AbilityInstance {
   private Config userConfig;
 
   private RemovalPolicy removalPolicy;
-  private IntVector lastPosition;
+  private Vector3i lastPosition;
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
@@ -159,16 +159,16 @@ public class WaterRing extends AbilityInstance {
   }
 
   private Block getClosestRingBlock() {
-    Vector3 dir = user.direction().setY(0).normalize().multiply(radius);
-    Block target = Vector3.center(user.headBlock()).add(dir).toBlock(user.world());
+    Vector3d dir = user.direction().setY(0).normalize().multiply(radius);
+    Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
     Block result = ring.get(0);
-    Vector3 targetVector = new Vector3(target);
+    Vector3d targetVector = new Vector3d(target);
     double minDistance = Double.MAX_VALUE;
     for (Block block : ring) {
       if (target.equals(block)) {
         return target;
       }
-      double d = new Vector3(block).distanceSq(targetVector);
+      double d = new Vector3d(block).distanceSq(targetVector);
       if (d < minDistance) {
         minDistance = d;
         result = block;
@@ -178,8 +178,8 @@ public class WaterRing extends AbilityInstance {
   }
 
   private int getDirectionIndex() {
-    Vector3 dir = user.direction().setY(0).normalize().multiply(radius);
-    Block target = Vector3.center(user.headBlock()).add(dir).toBlock(user.world());
+    Vector3d dir = user.direction().setY(0).normalize().multiply(radius);
+    Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
     return Math.max(0, ring.indexOf(target));
   }
 
@@ -204,7 +204,7 @@ public class WaterRing extends AbilityInstance {
     if (sources <= 0 || !user.canBuild(user.headBlock())) {
       return UpdateResult.REMOVE;
     }
-    IntVector newPosition = user.location().toIntVector();
+    Vector3i newPosition = user.location().toVector3i();
     if (!newPosition.equals(lastPosition)) {
       ring.clear();
       ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
@@ -242,7 +242,7 @@ public class WaterRing extends AbilityInstance {
     Collections.rotate(ring, 1);
     index = ++index % ring.size();
 
-    for (int i = 0; i < Math.min(ring.size(), NumberConversions.ceil(sources * 0.8)); i++) {
+    for (int i = 0; i < Math.min(ring.size(), FastMath.ceil(sources * 0.8)); i++) {
       Block block = ring.get(i);
       if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
         ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
@@ -265,11 +265,11 @@ public class WaterRing extends AbilityInstance {
       if (affectedEntities.contains(entity)) {
         return false;
       }
-      AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
+      AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
       AABB entityBounds = AABBUtils.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        Vector3 velocity = new Vector3(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
+        Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
         entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
         affectedEntities.add(entity);
       }
@@ -338,8 +338,8 @@ public class WaterRing extends AbilityInstance {
     long time = System.currentTimeMillis();
     if (time >= nextShardTime) {
       nextShardTime = time + userConfig.cooldown;
-      Vector3 origin = new Vector3(getClosestRingBlock());
-      Vector3 lookingDir = user.direction().multiply(userConfig.shardRange + radius);
+      Vector3d origin = new Vector3d(getClosestRingBlock());
+      Vector3d lookingDir = user.direction().multiply(userConfig.shardRange + radius);
       shards.add(new IceShard(new Ray(origin, lookingDir)));
     }
   }

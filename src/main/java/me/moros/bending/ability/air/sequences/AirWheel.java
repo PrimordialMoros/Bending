@@ -37,7 +37,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
@@ -52,7 +52,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AirWheel extends AbilityInstance {
-  private static final AABB BOUNDS = new AABB(new Vector3(-0.4, -2, -2), new Vector3(0.4, 2, 2));
+  private static final AABB BOUNDS = new AABB(new Vector3d(-0.4, -2, -2), new Vector3d(0.4, 2, 2));
   private static final Config config = new Config();
   private static AbilityDescription scooterDesc;
 
@@ -63,7 +63,7 @@ public class AirWheel extends AbilityInstance {
 
   private AirScooter scooter;
   private Collider collider;
-  private Vector3 center;
+  private Vector3d center;
 
   private long nextRenderTime;
 
@@ -88,7 +88,7 @@ public class AirWheel extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    center = user.location().add(new Vector3(0, 0.8, 0));
+    center = user.location().add(new Vector3d(0, 0.8, 0));
     nextRenderTime = 0;
     return true;
   }
@@ -101,15 +101,15 @@ public class AirWheel extends AbilityInstance {
   @Override
   public @NonNull UpdateResult update() {
     long time = System.currentTimeMillis();
-    center = user.location().add(new Vector3(0, 0.8, 0)).add(user.direction().setY(0).multiply(1.2));
-    collider = new Disk(new OBB(BOUNDS, Vector3.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
+    center = user.location().add(new Vector3d(0, 0.8, 0)).add(user.direction().setY(0).multiply(1.2));
+    collider = new Disk(new OBB(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
 
     if (time >= nextRenderTime) {
       render();
       nextRenderTime = time + 100;
     }
 
-    Block base = center.subtract(new Vector3(0, 1.6, 0)).toBlock(user.world());
+    Block base = center.subtract(new Vector3d(0, 1.6, 0)).toBlock(user.world());
     BlockMethods.tryCoolLava(user, base);
     BlockMethods.tryExtinguishFire(user, base);
 
@@ -133,13 +133,13 @@ public class AirWheel extends AbilityInstance {
   }
 
   private void render() {
-    Vector3 rotateAxis = Vector3.PLUS_J.crossProduct(user.direction().setY(0));
+    Vector3d rotateAxis = Vector3d.PLUS_J.cross(user.direction().setY(0));
     VectorMethods.circle(user.direction().multiply(1.6), rotateAxis, 40).forEach(v ->
       ParticleUtil.createAir(center.add(v).toLocation(user.world())).spawn()
     );
   }
 
-  public @NonNull Vector3 center() {
+  public @NonNull Vector3d center() {
     return center;
   }
 

@@ -52,7 +52,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -141,7 +141,7 @@ public final class ActivationController {
     Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
   }
 
-  public void onUserMove(@NonNull User user, @NonNull Vector3 velocity) {
+  public void onUserMove(@NonNull User user, @NonNull Vector3d velocity) {
     if (user.hasElement(Element.AIR)) {
       AirSpout spout = cache.getAirSpout(user);
       if (spout != null) {

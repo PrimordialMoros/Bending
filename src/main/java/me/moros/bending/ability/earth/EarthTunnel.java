@@ -31,7 +31,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -53,7 +53,7 @@ public class EarthTunnel extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Predicate<Block> predicate;
-  private Vector3 center;
+  private Vector3d center;
 
   private double distance = 0;
   private int radius = 0;
@@ -78,7 +78,7 @@ public class EarthTunnel extends AbilityInstance {
       return false;
     }
 
-    center = Vector3.center(block);
+    center = Vector3d.center(block);
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 
     return true;
@@ -98,7 +98,7 @@ public class EarthTunnel extends AbilityInstance {
       if (distance > userConfig.range) {
         return UpdateResult.REMOVE;
       }
-      Vector3 offset = VectorMethods.orthogonal(user.direction(), Math.toRadians(angle), radius);
+      Vector3d offset = VectorMethods.orthogonal(user.direction(), Math.toRadians(angle), radius);
       Block current = center.add(offset).toBlock(user.world());
       if (!user.canBuild(current)) {
         return UpdateResult.REMOVE;
@@ -115,7 +115,7 @@ public class EarthTunnel extends AbilityInstance {
         if (block == null) {
           return UpdateResult.REMOVE;
         }
-        center = Vector3.center(block);
+        center = Vector3d.center(block);
 
         if (++radius > userConfig.radius) {
           radius = 0;

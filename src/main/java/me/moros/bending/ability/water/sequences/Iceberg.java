@@ -40,7 +40,8 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -51,7 +52,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -63,7 +63,7 @@ public class Iceberg extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private StateChain states;
-  private Vector3 tip;
+  private Vector3d tip;
 
   private final List<BlockIterator> lines = new ArrayList<>();
   private final Collection<Block> blocks = new HashSet<>();
@@ -165,17 +165,17 @@ public class Iceberg extends AbilityInstance {
       if (src.isEmpty()) {
         return;
       }
-      Vector3 origin = Vector3.center(src.get());
-      Vector3 target = user.rayTrace(userConfig.selectRange + userConfig.length);
-      Vector3 direction = target.subtract(origin).normalize();
+      Vector3d origin = Vector3d.center(src.get());
+      Vector3d target = user.rayTrace(userConfig.selectRange + userConfig.length);
+      Vector3d direction = target.subtract(origin).normalize();
       tip = origin.add(direction.multiply(userConfig.length));
-      Vector3 targetLocation = origin.add(direction.multiply(userConfig.length - 1)).snapToBlockCenter();
-      double radius = Math.ceil(0.2 * userConfig.length);
+      Vector3d targetLocation = origin.add(direction.multiply(userConfig.length - 1)).snapToBlockCenter();
+      double radius = FastMath.ceil(0.2 * userConfig.length);
       for (Block block : WorldMethods.nearbyBlocks(origin.toLocation(user.world()), radius, WaterMaterials::isWaterOrIceBendable)) {
         if (!user.canBuild(block)) {
           continue;
         }
-        lines.add(line(Vector3.center(block), targetLocation));
+        lines.add(line(Vector3d.center(block), targetLocation));
       }
       if (lines.size() < 5) {
         lines.clear();
@@ -185,10 +185,10 @@ public class Iceberg extends AbilityInstance {
     }
   }
 
-  private BlockIterator line(Vector3 origin, Vector3 target) {
-    Vector3 direction = target.subtract(origin);
+  private BlockIterator line(Vector3d origin, Vector3d target) {
+    Vector3d direction = target.subtract(origin);
     final double length = target.distance(origin);
-    return new BlockIterator(user.world(), origin.toBukkitVector(), direction.toBukkitVector(), 0, NumberConversions.round(length));
+    return new BlockIterator(user.world(), origin.toBukkitVector(), direction.toBukkitVector(), 0, FastMath.round(length));
   }
 
   @Override

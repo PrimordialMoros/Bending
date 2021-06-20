@@ -26,8 +26,9 @@ import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.IntVector;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
@@ -43,7 +44,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.MainHand;
-import org.bukkit.util.NumberConversions;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -60,20 +60,20 @@ public interface BukkitUser extends ForwardingAudience.Single {
     return entity().getLocation().getBlock();
   }
 
-  default @NonNull Vector3 location() {
-    return new Vector3(entity().getLocation());
+  default @NonNull Vector3d location() {
+    return new Vector3d(entity().getLocation());
   }
 
-  default @NonNull Vector3 eyeLocation() {
-    return new Vector3(entity().getEyeLocation());
+  default @NonNull Vector3d eyeLocation() {
+    return new Vector3d(entity().getEyeLocation());
   }
 
-  default @NonNull Vector3 direction() {
-    return new Vector3(entity().getLocation().getDirection());
+  default @NonNull Vector3d direction() {
+    return new Vector3d(entity().getLocation().getDirection());
   }
 
-  default @NonNull Vector3 velocity() {
-    return new Vector3(entity().getVelocity());
+  default @NonNull Vector3d velocity() {
+    return new Vector3d(entity().getVelocity());
   }
 
   default int yaw() {
@@ -181,7 +181,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
   /**
    * @return {@link #rayTrace(double, boolean)} ignoring liquids and passable blocks
    */
-  default @NonNull Vector3 rayTrace(double range) {
+  default @NonNull Vector3d rayTrace(double range) {
     return rayTrace(range, true);
   }
 
@@ -192,7 +192,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @param ignoreLiquids whether liquids should be ignored
    * @return the target location
    */
-  default @NonNull Vector3 rayTrace(double range, boolean ignoreLiquids) {
+  default @NonNull Vector3d rayTrace(double range, boolean ignoreLiquids) {
     Location origin = entity().getEyeLocation();
     Vector dir = entity().getLocation().getDirection();
     FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
@@ -201,7 +201,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
       Ray ray = ray(range);
       return ray.origin.add(ray.direction);
     }
-    return new Vector3(result.getHitPosition());
+    return new Vector3d(result.getHitPosition());
   }
 
   /**
@@ -211,26 +211,25 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @param ignore a filter for unwanted blocks
    * @return the target location
    */
-  default @NonNull Vector3 rayTrace(double range, @NonNull Predicate<Block> ignore) {
-    Vector3 dir = direction();
+  default @NonNull Vector3d rayTrace(double range, @NonNull Predicate<Block> ignore) {
+    Vector3d dir = direction();
     Ray ray = new Ray(eyeLocation(), dir.multiply(range));
     double step = 0.5;
-    Vector3 increment = dir.multiply(step);
-    Set<Block> checked = new HashSet<>(NumberConversions.ceil(2 * range));
+    Vector3d increment = dir.multiply(step);
+    Set<Block> checked = new HashSet<>(FastMath.ceil(2 * range));
     for (double i = 0.1; i <= range; i += step) {
-      Vector3 current = ray.origin.add(dir.multiply(i));
-      IntVector vec = current.toIntVector();
-      if (!world().isChunkLoaded(vec.x >> 4, vec.z >> 4)) {
+      Vector3d current = ray.origin.add(dir.multiply(i));
+      if (!world().isChunkLoaded((int) current.getX() >> 4, (int) current.getZ() >> 4)) {
         return current.subtract(increment);
       }
       Block block = current.toBlock(world());
-      for (IntVector intVector : VectorMethods.decomposeDiagonals(current, increment)) {
-        Block diagonalBlock = block.getRelative(intVector.x, intVector.y, intVector.z);
+      for (Vector3i vector : VectorMethods.decomposeDiagonals(current, increment)) {
+        Block diagonalBlock = block.getRelative(vector.getX(), vector.getY(), vector.getZ());
         if (checked.contains(diagonalBlock) || ignore.test(diagonalBlock)) {
           continue;
         }
         checked.add(diagonalBlock);
-        AABB blockBounds = diagonalBlock.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3(diagonalBlock)) : AABBUtils.blockBounds(diagonalBlock);
+        AABB blockBounds = diagonalBlock.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(diagonalBlock)) : AABBUtils.blockBounds(diagonalBlock);
         if (blockBounds.intersects(ray)) {
           return current;
         }
@@ -245,8 +244,8 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @see #rightSide()
    * @see #leftSide()
    */
-  default @NonNull Vector3 mainHandSide() {
-    Vector3 dir = direction().multiply(0.4);
+  default @NonNull Vector3d mainHandSide() {
+    Vector3d dir = direction().multiply(0.4);
     if (entity() instanceof Player) {
       return handSide(((Player) entity()).getMainHand() == MainHand.RIGHT);
     }
@@ -258,8 +257,8 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * @param right whether to get the right hand
    * @return a vector which represents the user's specified hand location
    */
-  default @NonNull Vector3 handSide(boolean right) {
-    Vector3 offset = direction().multiply(0.4).add(new Vector3(0, 1.2, 0));
+  default @NonNull Vector3d handSide(boolean right) {
+    Vector3d offset = direction().multiply(0.4).add(new Vector3d(0, 1.2, 0));
     return right ? rightSide().add(offset) : leftSide().add(offset);
   }
 
@@ -267,18 +266,18 @@ public interface BukkitUser extends ForwardingAudience.Single {
    * Gets the user's right side.
    * @return a vector which represents the user's right side
    */
-  default @NonNull Vector3 rightSide() {
+  default @NonNull Vector3d rightSide() {
     double angle = Math.toRadians(yaw());
-    return location().subtract(new Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
+    return location().subtract(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   /**
    * Gets the user's left side.
    * @return a vector which represents the user's left side
    */
-  default @NonNull Vector3 leftSide() {
+  default @NonNull Vector3d leftSide() {
     double angle = Math.toRadians(yaw());
-    return location().add(new Vector3(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
+    return location().add(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   @Override

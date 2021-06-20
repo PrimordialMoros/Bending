@@ -41,8 +41,9 @@ import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -55,7 +56,6 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -142,8 +142,8 @@ public class FlameRush extends AbilityInstance {
     }
     charging = false;
     user.addCooldown(description(), userConfig.cooldown);
-    Vector3 origin = user.location().add(new Vector3(0, 1.2, 0));
-    Vector3 lookingDir = user.direction().multiply(userConfig.range * factor);
+    Vector3d origin = user.location().add(new Vector3d(0, 1.2, 0));
+    Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     stream = new FireStream(new Ray(origin, lookingDir), factor);
   }
@@ -180,7 +180,7 @@ public class FlameRush extends AbilityInstance {
   private class FireStream extends ParticleStream {
     private final double factor;
 
-    private Vector3 streamDirection;
+    private Vector3d streamDirection;
     private double currentPoint = 0;
     private double distanceTravelled = 0;
 
@@ -197,10 +197,10 @@ public class FlameRush extends AbilityInstance {
       currentPoint += Math.PI / 30;
       distanceTravelled += speed;
       double radius = 0.2 * factor + 0.6 * (distanceTravelled / maxRange);
-      int amount = NumberConversions.ceil(12 * radius);
+      int amount = FastMath.ceil(12 * radius);
       double offset = 0.5 * radius;
       ParticleUtil.createFire(user, bukkitLocation()).count(amount).offset(offset, offset, offset).spawn();
-      Vector3 vec = new Rotation(streamDirection, currentPoint).applyTo(Vector3.ONE.multiply(radius));
+      Vector3d vec = new Rotation(streamDirection, currentPoint).applyTo(Vector3d.ONE.multiply(radius));
       Location spiral1 = location.add(vec).toLocation(user.world());
       Location spiral2 = location.subtract(vec).toLocation(user.world());
       ParticleUtil.createFire(user, spiral1).spawn();
@@ -210,7 +210,7 @@ public class FlameRush extends AbilityInstance {
       collider = new Sphere(location, collisionRadius + 0.7 * radius);
     }
 
-    public @NonNull Vector3 controlDirection() {
+    public @NonNull Vector3d controlDirection() {
       streamDirection = streamDirection.add(user.direction().multiply(0.08)).normalize().multiply(speed);
       return streamDirection;
     }
@@ -235,7 +235,7 @@ public class FlameRush extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), NumberConversions.round(8 * factor));
+      FragileStructure.tryDamageStructure(List.of(block), FastMath.round(8 * factor));
       return true;
     }
   }

@@ -33,7 +33,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -61,7 +61,7 @@ public class Bolt extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Vector3 targetLocation;
+  private Vector3d targetLocation;
 
   private boolean struck = false;
   private long startTime;
@@ -148,7 +148,7 @@ public class Bolt extends AbilityInstance {
     for (int i = 0; i < 2; i++) {
       Block target = targetLocation.toBlock(user.world()).getRelative(BlockFace.DOWN);
       if (MaterialUtil.isTransparent(target)) {
-        targetLocation = targetLocation.add(Vector3.MINUS_J);
+        targetLocation = targetLocation.add(Vector3d.MINUS_J);
       } else {
         break;
       }

@@ -21,7 +21,7 @@ package me.moros.bending.util.collision;
 
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.GameMode;
 import org.bukkit.entity.ArmorStand;
@@ -69,10 +69,10 @@ public final class CollisionUtil {
    */
   public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
     final double buffer = 4.0; // Buffer needed to check for nearby entities that have locations outside the check range but still intersect
-    Vector3 extent = collider.halfExtents().add(new Vector3(buffer, buffer, buffer));
-    Vector3 pos = collider.position();
+    Vector3d extent = collider.halfExtents().add(new Vector3d(buffer, buffer, buffer));
+    Vector3d pos = collider.position();
     boolean hit = false;
-    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.x, extent.y, extent.z)) {
+    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ())) {
       if (livingOnly && !(entity instanceof LivingEntity)) {
         continue;
       }

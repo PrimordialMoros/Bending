@@ -26,12 +26,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Immutable 3D Vector implementation with integer coordinates
  */
-public class IntVector {
-  public static final IntVector ZERO = new IntVector(0, 0, 0);
+public class Vector3i {
+  public static final Vector3i ZERO = new Vector3i(0, 0, 0);
 
-  public final int x;
-  public final int y;
-  public final int z;
+  private final int x;
+  private final int y;
+  private final int z;
 
   /**
    * Build a vector from its coordinates.
@@ -39,13 +39,13 @@ public class IntVector {
    * @param y the y coordinate
    * @param z the z coordinate
    */
-  public IntVector(int x, int y, int z) {
+  public Vector3i(int x, int y, int z) {
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
-  public IntVector(@NonNull Block b) {
+  public Vector3i(@NonNull Block b) {
     this(b.getX(), b.getY(), b.getZ());
   }
 
@@ -55,7 +55,7 @@ public class IntVector {
    * @throws IllegalArgumentException if array does not have 3 elements
    * @see #toArray()
    */
-  public IntVector(int[] v) throws IllegalArgumentException {
+  public Vector3i(int[] v) throws IllegalArgumentException {
     if (v.length != 3) {
       throw new IllegalArgumentException();
     }
@@ -65,9 +65,30 @@ public class IntVector {
   }
 
   /**
+   * @return the x coordinate
+   */
+  public int getX() {
+    return x;
+  }
+
+  /**
+   * @return the y coordinate
+   */
+  public int getY() {
+    return y;
+  }
+
+  /**
+   * @return the z coordinate
+   */
+  public int getZ() {
+    return z;
+  }
+
+  /**
    * Get the vector coordinates as a dimension 3 array.
    * @return vector coordinates
-   * @see #IntVector(int[])
+   * @see #Vector3i(int[])
    */
   public int[] toArray() {
     return new int[]{x, y, z};
@@ -92,8 +113,8 @@ public class IntVector {
    * @param v vector to add
    * @return a new vector
    */
-  public @NonNull IntVector add(@NonNull IntVector v) {
-    return new IntVector(x + v.x, y + v.y, z + v.z);
+  public @NonNull Vector3i add(@NonNull Vector3i v) {
+    return new Vector3i(x + v.x, y + v.y, z + v.z);
   }
 
   /**
@@ -101,16 +122,16 @@ public class IntVector {
    * @param v vector to subtract
    * @return a new vector
    */
-  public @NonNull IntVector subtract(@NonNull IntVector v) {
-    return new IntVector(x - v.x, y - v.y, z - v.z);
+  public @NonNull Vector3i subtract(@NonNull Vector3i v) {
+    return new Vector3i(x - v.x, y - v.y, z - v.z);
   }
 
   /**
    * Get the opposite of the instance.
    * @return a new vector which is opposite to the instance
    */
-  public @NonNull IntVector negate() {
-    return new IntVector(-x, -y, -z);
+  public @NonNull Vector3i negate() {
+    return new Vector3i(-x, -y, -z);
   }
 
   /**
@@ -118,33 +139,33 @@ public class IntVector {
    * @param a scalar
    * @return a new vector
    */
-  public @NonNull IntVector multiply(int a) {
-    return new IntVector(a * x, a * y, a * z);
+  public @NonNull Vector3i multiply(int a) {
+    return new Vector3i(a * x, a * y, a * z);
   }
 
-  public @NonNull IntVector multiply(@NonNull IntVector v) {
-    return new IntVector(x * v.x, y * v.y, z * v.z);
+  public @NonNull Vector3i multiply(@NonNull Vector3i v) {
+    return new Vector3i(x * v.x, y * v.y, z * v.z);
   }
 
-  public int dotProduct(@NonNull IntVector v) {
+  public int dotProduct(@NonNull Vector3i v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
-  public @NonNull IntVector crossProduct(@NonNull IntVector v) {
+  public @NonNull Vector3i crossProduct(@NonNull Vector3i v) {
     int newX = y * v.z - v.y * z;
     int newY = z * v.x - v.z * x;
     int newZ = x * v.y - v.x * y;
-    return new IntVector(newX, newY, newZ);
+    return new Vector3i(newX, newY, newZ);
   }
 
-  public double distance(@NonNull IntVector v) {
+  public double distance(@NonNull Vector3i v) {
     int dx = v.x - x;
     int dy = v.y - y;
     int dz = v.z - z;
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
-  public int distanceSq(@NonNull IntVector v) {
+  public int distanceSq(@NonNull Vector3i v) {
     int dx = v.x - x;
     int dy = v.y - y;
     int dz = v.z - z;
@@ -156,8 +177,8 @@ public class IntVector {
     if (this == other) {
       return true;
     }
-    if (other instanceof IntVector) {
-      final IntVector v = (IntVector) other;
+    if (other instanceof Vector3i) {
+      final Vector3i v = (Vector3i) other;
       return (x == v.x) && (y == v.y) && (z == v.z);
     }
     return false;
@@ -174,6 +195,10 @@ public class IntVector {
   @Override
   public String toString() {
     return "[" + x + ", " + y + ", " + z + "]";
+  }
+
+  public @NonNull Vector3d toVector3d() {
+    return new Vector3d(x, y, z);
   }
 
   public @NonNull Block toBlock(@NonNull World world) {

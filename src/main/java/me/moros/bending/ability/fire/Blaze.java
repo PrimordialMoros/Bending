@@ -36,7 +36,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -45,7 +46,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -82,15 +82,15 @@ public class Blaze extends AbilityInstance {
   private boolean release(boolean cone) {
     double range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    Vector3 origin = user.location().snapToBlockCenter();
-    Vector3 dir = user.direction().setY(0).normalize();
+    Vector3d origin = user.location().snapToBlockCenter();
+    Vector3d dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
-      VectorMethods.createArc(dir, Vector3.PLUS_J, deltaAngle, NumberConversions.ceil(range / 2)).forEach(v ->
+      VectorMethods.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 2)).forEach(v ->
         streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     } else {
-      VectorMethods.circle(dir, Vector3.PLUS_J, NumberConversions.ceil(6 * range)).forEach(v ->
+      VectorMethods.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
         streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     }

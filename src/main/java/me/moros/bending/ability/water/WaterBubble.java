@@ -31,7 +31,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -141,7 +141,7 @@ public class WaterBubble extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    Vector3 centerLoc = new Vector3(center);
+    Vector3d centerLoc = new Vector3d(center);
     for (Block block : bubble) {
       if (!MaterialUtil.isAir(block)) {
         continue;
@@ -150,7 +150,7 @@ public class WaterBubble extends AbilityInstance {
       if (tb == null) {
         continue;
       }
-      double distance = new Vector3(block).distanceSq(centerLoc);
+      double distance = new Vector3d(block).distanceSq(centerLoc);
       double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
       long delay = (long) (1500 * factor);
       tb.revert();

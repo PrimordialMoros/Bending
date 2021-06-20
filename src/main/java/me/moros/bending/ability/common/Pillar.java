@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SoundUtil;
@@ -81,8 +81,8 @@ public class Pillar implements Updatable {
       return UpdateResult.REMOVE;
     }
 
-    Vector3 location = new Vector3(origin.getRelative(direction, currentLength + 1));
-    AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3(0, 0.65, 0)).at(location);
+    Vector3d location = new Vector3d(origin.getRelative(direction, currentLength + 1));
+    AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3d(0, 0.65, 0)).at(location);
     CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true); // Push entities
 
     long time = System.currentTimeMillis();
@@ -123,7 +123,7 @@ public class Pillar implements Updatable {
     return true;
   }
 
-  protected @NonNull Vector3 normalizeVelocity(Vector3 velocity, double factor) {
+  protected @NonNull Vector3d normalizeVelocity(Vector3d velocity, double factor) {
     switch (direction) {
       case NORTH:
       case SOUTH:
@@ -152,7 +152,7 @@ public class Pillar implements Updatable {
 
   public boolean onEntityHit(@NonNull Entity entity) {
     double factor = 0.75 * (length - 0.4 * currentLength) / length;
-    entity.setVelocity(normalizeVelocity(new Vector3(entity.getVelocity()), factor).clampVelocity());
+    entity.setVelocity(normalizeVelocity(new Vector3d(entity.getVelocity()), factor).clampVelocity());
     return true;
   }
 

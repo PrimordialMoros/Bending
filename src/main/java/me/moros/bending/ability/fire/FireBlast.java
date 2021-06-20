@@ -41,7 +41,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -60,7 +61,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -143,8 +143,8 @@ public class FireBlast extends AbilityInstance implements Explosive {
     charging = false;
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
-    Vector3 origin = user.mainHandSide();
-    Vector3 lookingDir = user.direction().multiply(userConfig.range * factor);
+    Vector3d origin = user.mainHandSide();
+    Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
     stream = new FireStream(new Ray(origin, lookingDir));
   }
 
@@ -176,9 +176,9 @@ public class FireBlast extends AbilityInstance implements Explosive {
       FireBlast other = (FireBlast) collidedAbility;
       double collidedFactor = other.factor;
       if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
-        Vector3 first = collision.colliderSelf().position();
-        Vector3 second = collision.colliderOther().position();
-        Vector3 center = first.add(second).multiply(0.5);
+        Vector3d first = collision.colliderSelf().position();
+        Vector3d second = collision.colliderOther().position();
+        Vector3d center = first.add(second).multiply(0.5);
         double radius = userConfig.explosionRadius + other.userConfig.explosionRadius;
         double dmg = userConfig.damage + other.userConfig.damage;
         createExplosion(center, radius, dmg * (factor + other.factor - 1));
@@ -201,7 +201,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     createExplosion(stream.location(), userConfig.explosionRadius, userConfig.damage * factor);
   }
 
-  private void createExplosion(Vector3 center, double size, double damage) {
+  private void createExplosion(Vector3d center, double size, double damage) {
     if (exploded || factor < userConfig.chargeFactor) {
       return;
     }
@@ -226,7 +226,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       canCollide = Block::isLiquid;
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.02 * factor;
-      amount = NumberConversions.ceil(6 * Math.pow(factor, 4));
+      amount = FastMath.ceil(6 * Math.pow(factor, 4));
       explosive = factor == userConfig.chargeFactor;
       singleCollision = explosive;
     }
@@ -259,15 +259,15 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      Vector3 reverse = ray.direction.negate();
+      Vector3d reverse = ray.direction.negate();
       Location center = bukkitLocation();
       BlockMethods.tryLightBlock(block);
-      if (user.location().distanceSq(Vector3.center(block)) > 4) {
+      if (user.location().distanceSq(Vector3d.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), userConfig.igniteRadius * factor + 2) == null) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3d.center(b), reverse), userConfig.igniteRadius * factor + 2) == null) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {
@@ -276,12 +276,12 @@ public class FireBlast extends AbilityInstance implements Explosive {
           }
         }
       }
-      FragileStructure.tryDamageStructure(List.of(block), NumberConversions.round(4 * factor));
+      FragileStructure.tryDamageStructure(List.of(block), FastMath.round(4 * factor));
       explode();
       return true;
     }
 
-    private @NonNull Vector3 location() {
+    private @NonNull Vector3d location() {
       return location;
     }
   }

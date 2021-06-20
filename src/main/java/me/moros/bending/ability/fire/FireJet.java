@@ -30,7 +30,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -108,10 +108,10 @@ public class FireJet extends AbilityInstance {
   }
 
   private void jetBlastAnimation() {
-    Vector3 center = user.location().add(new Vector3(0, 0.2, 0));
-    VectorMethods.circle(Vector3.PLUS_I, Vector3.PLUS_J, 36).forEach(v ->
+    Vector3d center = user.location().add(new Vector3d(0, 0.2, 0));
+    VectorMethods.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
       ParticleUtil.createFire(user, center.add(v.multiply(0.5)).toLocation(user.world()))
-        .count(0).offset(v.x, v.y, v.z).extra(0.09).spawn()
+        .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(0.09).spawn()
     );
     SoundUtil.EXPLOSION.play(user.entity().getLocation(), 10, 0);
   }
@@ -128,15 +128,15 @@ public class FireJet extends AbilityInstance {
     user.entity().setVelocity(user.direction().multiply(speed).clampVelocity());
     user.entity().setFallDistance(0);
 
-    Vector3 target = user.location().add(user.velocity().negate());
+    Vector3d target = user.location().add(user.velocity().negate());
     int amount = jetBlast ? 16 : 10;
     double offset = jetBlast ? 0.7 : 0.4;
     double particleSpeed = 0.05 * Math.min(1, speed);
     for (int i = 0; i < amount; i++) {
-      Vector3 center = VectorMethods.gaussianOffset(user.location(), offset);
-      Vector3 v = target.subtract(center);
+      Vector3d center = VectorMethods.gaussianOffset(user.location(), offset);
+      Vector3d v = target.subtract(center);
       ParticleUtil.createFire(user, center.toLocation(user.world()))
-        .count(0).offset(v.x, v.y, v.z).extra(particleSpeed).spawn();
+        .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(particleSpeed).spawn();
     }
 
     if (ThreadLocalRandom.current().nextBoolean()) {

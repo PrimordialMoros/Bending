@@ -36,7 +36,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -64,7 +64,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthShot extends AbilityInstance {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3(0.25, 0.25, 0.25));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
 
   private enum Mode {ROCK, METAL, MAGMA}
 
@@ -78,8 +78,8 @@ public class EarthShot extends AbilityInstance {
   private Block source;
   private Block readySource;
   private BlockData data;
-  private Vector3 location;
-  private Vector3 lastVelocity;
+  private Vector3d location;
+  private Vector3d lastVelocity;
   private TempFallingBlock projectile;
 
   private boolean ready = false;
@@ -156,7 +156,7 @@ public class EarthShot extends AbilityInstance {
       SoundUtil.EARTH.play(source.getLocation());
     }
 
-    projectile = new TempFallingBlock(source, solidData, new Vector3(0, 0.65, 0), false, 6000);
+    projectile = new TempFallingBlock(source, solidData, new Vector3d(0, 0.65, 0), false, 6000);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
@@ -180,16 +180,16 @@ public class EarthShot extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
 
-      Vector3 velocity = new Vector3(projectile.fallingBlock().getVelocity());
-      if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.getNormSq() < 2.25) {
+      Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity());
+      if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < 2.25) {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking()) {
-        Vector3 dir = user.direction().multiply(0.2);
+        Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
       projectile.fallingBlock().setVelocity(velocity.normalize().multiply(1.8).clampVelocity());
-      lastVelocity = new Vector3(projectile.fallingBlock().getVelocity());
+      lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
       if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.center()), this::onEntityHit, true)) {
         return UpdateResult.REMOVE;
       }
@@ -217,7 +217,7 @@ public class EarthShot extends AbilityInstance {
     if (block.getY() >= targetY) {
       TempBlock.create(block, projectile.fallingBlock().getBlockData());
       projectile.revert();
-      location = new Vector3(block);
+      location = new Vector3d(block);
       readySource = block;
       ready = true;
     } else {
@@ -279,20 +279,20 @@ public class EarthShot extends AbilityInstance {
       prematureLaunch = true;
     }
 
-    Vector3 origin;
+    Vector3d origin;
     if (prematureLaunch) {
       origin = projectile.center();
-      Vector3 dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
+      Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
       projectile.fallingBlock().setGravity(true);
-      projectile.fallingBlock().setVelocity(dir.add(new Vector3(0, 0.2, 0)).clampVelocity());
+      projectile.fallingBlock().setVelocity(dir.add(new Vector3d(0, 0.2, 0)).clampVelocity());
     } else {
-      origin = Vector3.center(readySource);
-      Vector3 dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile = new TempFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3(0, 0.2, 0)), true, 30000);
+      origin = Vector3d.center(readySource);
+      Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
+      projectile = new TempFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3d(0, 0.2, 0)), true, 30000);
       TempBlock.createAir(readySource);
     }
     location = projectile.center();
-    lastVelocity = new Vector3(projectile.fallingBlock().getVelocity());
+    lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
@@ -314,7 +314,7 @@ public class EarthShot extends AbilityInstance {
     launched = true;
   }
 
-  private Vector3 getTarget(Block source) {
+  private Vector3d getTarget(Block source) {
     return user.rayTraceEntity(userConfig.range)
       .map(EntityMethods::entityCenter)
       .orElseGet(() -> user.rayTrace(userConfig.range, b -> b.equals(source)));

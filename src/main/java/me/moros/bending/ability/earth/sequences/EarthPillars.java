@@ -36,7 +36,8 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -49,7 +50,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -126,7 +126,7 @@ public class EarthPillars extends AbilityInstance {
       if (unique) {
         ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
           .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
-        int length = NumberConversions.floor(3 * factor);
+        int length = FastMath.floor(3 * factor);
         Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(length).ifPresent(pillars::add);
       }
       return true;
@@ -162,7 +162,7 @@ public class EarthPillars extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       }
-      entity.setVelocity(Vector3.PLUS_J.multiply(userConfig.knockup * factor).clampVelocity());
+      entity.setVelocity(Vector3d.PLUS_J.multiply(userConfig.knockup * factor).clampVelocity());
       return true;
     }
   }

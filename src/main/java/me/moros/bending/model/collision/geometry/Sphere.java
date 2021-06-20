@@ -20,21 +20,21 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Simple sphere collider
  */
 public class Sphere implements Collider {
-  public final Vector3 center;
+  public final Vector3d center;
   public final double radius;
 
   public Sphere(double radius) {
-    this(Vector3.ZERO, radius);
+    this(Vector3d.ZERO, radius);
   }
 
-  public Sphere(@NonNull Vector3 center, double radius) {
+  public Sphere(@NonNull Vector3d center, double radius) {
     this.center = center;
     this.radius = radius;
   }
@@ -56,25 +56,25 @@ public class Sphere implements Collider {
   }
 
   public boolean intersects(@NonNull Ray ray) {
-    Vector3 m = ray.origin.subtract(center);
-    double b = m.dotProduct(ray.direction);
-    return b * b - (m.dotProduct(m) - radius * radius) >= 0;
+    Vector3d m = ray.origin.subtract(center);
+    double b = m.dot(ray.direction);
+    return b * b - (m.dot(m) - radius * radius) >= 0;
   }
 
   private boolean intersects(AABB aabb) {
-    Vector3 min = aabb.min;
-    Vector3 max = aabb.max;
+    Vector3d min = aabb.min;
+    Vector3d max = aabb.max;
     // Get the point closest to sphere center on the aabb.
-    double x = Math.max(min.x, Math.min(center.x, max.x));
-    double y = Math.max(min.y, Math.min(center.y, max.y));
-    double z = Math.max(min.z, Math.min(center.z, max.z));
+    double x = Math.max(min.getX(), Math.min(center.getX(), max.getX()));
+    double y = Math.max(min.getY(), Math.min(center.getY(), max.getY()));
+    double z = Math.max(min.getZ(), Math.min(center.getZ(), max.getZ()));
     // Check if that point is inside of the sphere.
-    return contains(new Vector3(x, y, z));
+    return contains(new Vector3d(x, y, z));
   }
 
   private boolean intersects(OBB obb) {
-    Vector3 v = center.subtract(obb.closestPosition(center));
-    return v.dotProduct(v) <= radius * radius;
+    Vector3d v = center.subtract(obb.closestPosition(center));
+    return v.dot(v) <= radius * radius;
   }
 
   private boolean intersects(Sphere other) {
@@ -83,21 +83,21 @@ public class Sphere implements Collider {
   }
 
   @Override
-  public @NonNull Vector3 position() {
+  public @NonNull Vector3d position() {
     return center;
   }
 
   @Override
-  public @NonNull Sphere at(@NonNull Vector3 point) {
+  public @NonNull Sphere at(@NonNull Vector3d point) {
     return new Sphere(point, radius);
   }
 
   @Override
-  public @NonNull Vector3 halfExtents() {
-    return new Vector3(radius, radius, radius);
+  public @NonNull Vector3d halfExtents() {
+    return new Vector3d(radius, radius, radius);
   }
 
-  public boolean contains(@NonNull Vector3 point) {
+  public boolean contains(@NonNull Vector3d point) {
     double distSq = center.distanceSq(point);
     return distSq <= radius * radius;
   }

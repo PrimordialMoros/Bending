@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.methods.EntityMethods;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -51,8 +51,8 @@ public final class BurstUtil {
 
   // Negative angle for fall burst
   public static @NonNull Collection<@NonNull Ray> createBurst(@NonNull User user, double range, double angleStep, double angle) {
-    Vector3 center = EntityMethods.entityCenter(user.entity());
-    Vector3 userDIr = user.direction();
+    Vector3d center = EntityMethods.entityCenter(user.entity());
+    Vector3d userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();
     double epsilon = 0.001; // Needed for accuracy
     for (double theta = 0; theta < Math.PI - epsilon; theta += angleStep) {
@@ -61,12 +61,12 @@ public final class BurstUtil {
       for (double phi = 0; phi < 2 * Math.PI - epsilon; phi += angleStep) {
         double x = Math.cos(phi) * sinTheta;
         double y = Math.sin(phi) * sinTheta;
-        Vector3 direction = new Vector3(x, y, z);
+        Vector3d direction = new Vector3d(x, y, z);
         if (angle > 0 && direction.angle(userDIr) > angle) {
           continue;
         }
         if (angle < 0) {
-          double vectorAngle = direction.angle(Vector3.PLUS_J);
+          double vectorAngle = direction.angle(Vector3d.PLUS_J);
           if (vectorAngle < FALL_MIN_ANGLE || vectorAngle > FALL_MAX_ANGLE) {
             continue;
           }

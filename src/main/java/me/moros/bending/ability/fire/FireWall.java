@@ -35,7 +35,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.OBB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -55,7 +56,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -66,12 +66,12 @@ public class FireWall extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Collection<Vector3> bases;
+  private Collection<Vector3d> bases;
   private final ExpiringSet<Entity> cachedEntities = new ExpiringSet<>(500);
   private final ExpiringSet<Entity> damagedEntities = new ExpiringSet<>(500);
   private OBB collider;
-  private Vector3 center;
-  private Vector3 direction;
+  private Vector3d center;
+  private Vector3d direction;
 
   private double currentHeight;
   private double height;
@@ -104,8 +104,8 @@ public class FireWall extends AbilityInstance {
     height = userConfig.height;
     currentHeight = 1;
 
-    AABB aabb = new AABB(new Vector3(-hw, -0.5, -0.6), new Vector3(hw, userConfig.maxHeight, 0.6));
-    collider = new OBB(aabb, Vector3.PLUS_J, Math.toRadians(user.yaw())).at(center);
+    AABB aabb = new AABB(new Vector3d(-hw, -0.5, -0.6), new Vector3d(hw, userConfig.maxHeight, 0.6));
+    collider = new OBB(aabb, Vector3d.PLUS_J, Math.toRadians(user.yaw())).at(center);
 
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
@@ -151,9 +151,9 @@ public class FireWall extends AbilityInstance {
   }
 
   private void renderWall() {
-    for (Vector3 base : bases) {
+    for (Vector3d base : bases) {
       for (double h = 0; h <= currentHeight; h += 0.8) {
-        Vector3 pos = base.add(new Vector3(0, h, 0));
+        Vector3d pos = base.add(new Vector3d(0, h, 0));
         Block block = pos.toBlock(user.world());
         double speed = 1 - (h / (2 * currentHeight));
         if (MaterialUtil.isTransparent(block)) {
@@ -162,7 +162,7 @@ public class FireWall extends AbilityInstance {
               .offset(0.5, 0.25, 0.5).extra(0.01).spawn();
           } else {
             for (int i = 0; i < 2; i++) {
-              Vector3 center = VectorMethods.gaussianOffset(pos, 0.4);
+              Vector3d center = VectorMethods.gaussianOffset(pos, 0.4);
               ParticleUtil.createFire(user, center.toLocation(user.world())).count(0)
                 .offset(0, 1, 0).extra(0.07 * speed).spawn();
             }
@@ -175,10 +175,10 @@ public class FireWall extends AbilityInstance {
     }
   }
 
-  private Vector3 getValidBase(double searchHeight) {
-    Vector3 center = user.rayTrace(userConfig.range, false);
+  private Vector3d getValidBase(double searchHeight) {
+    Vector3d center = user.rayTrace(userConfig.range, false);
     for (double i = 0; i <= searchHeight; i += 0.5) {
-      Vector3 check = center.subtract(new Vector3(0, i, 0));
+      Vector3d check = center.subtract(new Vector3d(0, i, 0));
       Block block = check.toBlock(user.world());
       if (!user.canBuild(block)) {
         continue;
@@ -190,15 +190,15 @@ public class FireWall extends AbilityInstance {
     return null;
   }
 
-  private Collection<Vector3> setupBases() {
+  private Collection<Vector3d> setupBases() {
     double hw = userConfig.width / 2.0;
-    Vector3 side = direction.crossProduct(Vector3.PLUS_J).normalize();
-    Collection<Vector3> possibleBases = new ArrayList<>();
+    Vector3d side = direction.cross(Vector3d.PLUS_J).normalize();
+    Collection<Vector3d> possibleBases = new ArrayList<>();
     for (double i = -hw; i < hw; i += 0.9) {
-      Vector3 check = center.add(side.multiply(i));
+      Vector3d check = center.add(side.multiply(i));
       Block block = check.toBlock(user.world());
       if (MaterialUtil.isTransparent(block) && user.canBuild(block)) {
-        double baseY = NumberConversions.floor(check.y) + 0.25;
+        double baseY = FastMath.floor(check.getY()) + 0.25;
         possibleBases.add(check.setY(baseY));
       }
     }
@@ -210,7 +210,7 @@ public class FireWall extends AbilityInstance {
       return;
     }
 
-    Vector3 currentPosition = center.add(direction);
+    Vector3d currentPosition = center.add(direction);
     Block check = currentPosition.toBlock(user.world());
     if (!MaterialUtil.isTransparent(check) || !user.canBuild(check)) {
       return;
@@ -218,7 +218,7 @@ public class FireWall extends AbilityInstance {
     center = currentPosition;
     collider = collider.at(center);
     bases = setupBases();
-    distanceTravelled += direction.getNorm();
+    distanceTravelled += direction.length();
 
     if (currentHeight < userConfig.maxHeight) {
       double deltaHeight = (userConfig.maxHeight - userConfig.height) / userConfig.maxRange;
@@ -227,7 +227,7 @@ public class FireWall extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    double requiredY = center.y + currentHeight;
+    double requiredY = center.getY() + currentHeight;
     if (entity.getLocation().getY() > requiredY) {
       return false;
     }
@@ -238,7 +238,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!(entity instanceof LivingEntity)) {
-      entity.setVelocity(Vector3.ZERO.toBukkitVector());
+      entity.setVelocity(Vector3d.ZERO.toBukkitVector());
       return true;
     }
 
@@ -250,8 +250,8 @@ public class FireWall extends AbilityInstance {
           damagedEntities.add(entity);
           DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         }
-        Vector3 pos = EntityMethods.entityCenter(entity);
-        Vector3 velocity = pos.subtract(collider.closestPosition(pos)).normalize().multiply(userConfig.knockback);
+        Vector3d pos = EntityMethods.entityCenter(entity);
+        Vector3d velocity = pos.subtract(collider.closestPosition(pos)).normalize().multiply(userConfig.knockback);
         entity.setVelocity(velocity.clampVelocity());
         return true;
       } else {

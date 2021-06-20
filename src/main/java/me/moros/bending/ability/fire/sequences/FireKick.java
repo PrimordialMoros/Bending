@@ -39,7 +39,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
@@ -70,10 +70,10 @@ public class FireKick extends AbilityInstance {
     loadConfig();
 
     double height = user.entity().getEyeHeight();
-    Vector3 direction = user.direction().multiply(userConfig.range).add(new Vector3(0, height, 0)).normalize();
-    Vector3 origin = user.location();
-    Vector3 dir = user.direction();
-    Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
+    Vector3d direction = user.direction().multiply(userConfig.range).add(new Vector3d(0, height, 0)).normalize();
+    Vector3d origin = user.location();
+    Vector3d dir = user.direction();
+    Vector3d rotateAxis = dir.cross(Vector3d.PLUS_J).normalize().cross(dir);
     VectorMethods.createArc(direction, rotateAxis, Math.PI / 30, 11).forEach(
       v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
     );

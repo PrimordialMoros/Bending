@@ -27,7 +27,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -43,7 +44,6 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -194,9 +194,9 @@ public final class BlockMethods {
    * @return a collection of blocks representing the ring
    */
   public static @NonNull Collection<@NonNull Block> createBlockRing(@NonNull Block center, double radius) {
-    Vector3 centerVector = Vector3.center(center);
-    int steps = NumberConversions.ceil(10 * radius);
-    return VectorMethods.circle(Vector3.PLUS_I.multiply(radius), Vector3.PLUS_J, steps)
+    Vector3d centerVector = Vector3d.center(center);
+    int steps = FastMath.ceil(10 * radius);
+    return VectorMethods.circle(Vector3d.PLUS_I.multiply(radius), Vector3d.PLUS_J, steps)
       .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
   }
 

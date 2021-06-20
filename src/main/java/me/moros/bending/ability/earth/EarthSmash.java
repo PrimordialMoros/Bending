@@ -51,8 +51,9 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.IntVector;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -76,7 +77,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -158,7 +158,7 @@ public class EarthSmash extends AbilityInstance {
 
     boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
 
-    int minRequired = NumberConversions.ceil(Math.pow(userConfig.radius, 3) * 0.375);
+    int minRequired = FastMath.ceil(Math.pow(userConfig.radius, 3) * 0.375);
     if (boulder.data.size() < minRequired) {
       boulder = null;
       return false;
@@ -201,7 +201,7 @@ public class EarthSmash extends AbilityInstance {
     if (block == null) {
       return null;
     }
-    AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3(block));
+    AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
     return Bending.game().abilityManager(user.world()).instances(EarthSmash.class)
       .filter(filter)
       .filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
@@ -313,19 +313,19 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private class LiftState implements EarthSmashState {
-    private final Vector3 origin;
+    private final Vector3d origin;
     private int tick = 0;
     private long nextLiftTime = 0;
 
     private LiftState() {
-      this.origin = new Vector3(boulder.center.toArray());
+      this.origin = new Vector3d(boulder.center.toArray());
     }
 
     @Override
     public @NonNull UpdateResult update() {
-      Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3.PLUS_J));
+      Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
       CollisionUtil.handleEntityCollisions(user, liftCollider, entity -> {
-        entity.setVelocity(new Vector3(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
+        entity.setVelocity(new Vector3d(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
         return true;
       }, true, true);
 
@@ -335,7 +335,7 @@ public class EarthSmash extends AbilityInstance {
       }
       nextLiftTime = time + 60;
       cleanAll();
-      boulder.center(boulder.center.add(Vector3.PLUS_J).toBlock(boulder.world));
+      boulder.center(boulder.center.add(Vector3d.PLUS_J).toBlock(boulder.world));
       SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
       render();
       clearSourceArea();
@@ -352,13 +352,13 @@ public class EarthSmash extends AbilityInstance {
           for (int x = -half; x <= half; x++) {
             // Remove bottom layer
             if ((Math.abs(x) + Math.abs(z)) % 2 != 0) {
-              Block block = origin.add(new Vector3(x, -1, z)).toBlock(boulder.world);
+              Block block = origin.add(new Vector3d(x, -1, z)).toBlock(boulder.world);
               if (EarthMaterials.isEarthNotLava(user, block)) {
                 TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
               }
             }
             // Remove top layer
-            Block block = origin.add(new Vector3(x, 0, z)).toBlock(boulder.world);
+            Block block = origin.add(new Vector3d(x, 0, z)).toBlock(boulder.world);
             if (EarthMaterials.isEarthNotLava(user, block)) {
               TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
             }
@@ -383,7 +383,7 @@ public class EarthSmash extends AbilityInstance {
     @Override
     public @NonNull UpdateResult update() {
       if (user.sneaking()) {
-        Vector3 dir = user.direction().normalize().multiply(grabbedDistance);
+        Vector3d dir = user.direction().normalize().multiply(grabbedDistance);
         Block newCenter = user.eyeLocation().add(dir).toBlock(boulder.world);
         if (newCenter.equals(boulder.center.toBlock(boulder.world))) {
           return UpdateResult.CONTINUE;
@@ -403,16 +403,16 @@ public class EarthSmash extends AbilityInstance {
 
   private class ShotState implements EarthSmashState {
     private final Set<Entity> affectedEntities;
-    private final Vector3 origin;
-    private final Vector3 direction;
-    private Vector3 location;
+    private final Vector3d origin;
+    private final Vector3d direction;
+    private Vector3d location;
     private int buffer;
     private final int speed = 18;
 
     private ShotState() {
       affectedEntities = new HashSet<>();
-      origin = new Vector3(boulder.center.toArray());
-      location = new Vector3(origin.toArray());
+      origin = new Vector3d(boulder.center.toArray());
+      location = new Vector3d(origin.toArray());
       direction = user.direction();
       SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
       buffer = speed;
@@ -449,7 +449,7 @@ public class EarthSmash extends AbilityInstance {
       }
       affectedEntities.add(entity);
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3 velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
+      Vector3d velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
       entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
       return false;
     }
@@ -483,12 +483,12 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static class Boulder {
-    private final Map<IntVector, BlockData> data;
+    private final Map<Vector3i, BlockData> data;
     private final AABB bounds;
     private final AABB preciseBounds;
     private final World world;
     private User user;
-    private Vector3 center;
+    private Vector3d center;
 
     private final int size;
     private final long expireTime;
@@ -499,17 +499,17 @@ public class EarthSmash extends AbilityInstance {
       this.size = size;
       expireTime = System.currentTimeMillis() + duration;
       data = new HashMap<>();
-      center = Vector3.center(centerBlock);
+      center = Vector3d.center(centerBlock);
       double hr = size / 2.0;
-      preciseBounds = new AABB(new Vector3(-hr, -hr, -hr), new Vector3(hr, hr, hr));
-      bounds = preciseBounds.grow(Vector3.ONE);
+      preciseBounds = new AABB(new Vector3d(-hr, -hr, -hr), new Vector3d(hr, hr, hr));
+      bounds = preciseBounds.grow(Vector3d.ONE);
       int half = (size - 1) / 2;
-      IntVector tempVector = new IntVector(centerBlock.getRelative(BlockFace.DOWN, half)); // When mapping blocks use the real center block
+      Vector3i tempVector = new Vector3i(centerBlock.getRelative(BlockFace.DOWN, half)); // When mapping blocks use the real center block
       List<Material> earthData = new ArrayList<>();
       for (int dy = -half; dy <= half; dy++) {
         for (int dz = -half; dz <= half; dz++) {
           for (int dx = -half; dx <= half; dx++) {
-            IntVector point = new IntVector(dx, dy, dz);
+            Vector3i point = new Vector3i(dx, dy, dz);
             Block block = tempVector.add(point).toBlock(world);
             if (!user.canBuild(block)) {
               continue;
@@ -542,7 +542,7 @@ public class EarthSmash extends AbilityInstance {
 
     private void updateData() {
       data.entrySet().removeIf(entry -> {
-        Material type = center.add(new Vector3(entry.getKey())).toBlock(world).getType();
+        Material type = center.add(entry.getKey().toVector3d()).toBlock(world).getType();
         return type != entry.getValue().getMaterial();
       });
     }
@@ -550,9 +550,9 @@ public class EarthSmash extends AbilityInstance {
     private boolean blendSmash() {
       int originalSize = data.size();
       Collection<Block> removed = new ArrayList<>();
-      Iterator<IntVector> iterator = data.keySet().iterator();
+      Iterator<Vector3i> iterator = data.keySet().iterator();
       while (iterator.hasNext()) {
-        Block block = center.add(new Vector3(iterator.next())).toBlock(world);
+        Block block = center.add(iterator.next().toVector3d()).toBlock(world);
         if (!isValidBlock(block)) {
           removed.add(block);
           iterator.remove();
@@ -563,12 +563,12 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private boolean isValidCenter(Block check) {
-      Vector3 temp = Vector3.center(check);
-      return data.keySet().stream().map(bv -> temp.add(new Vector3(bv)).toBlock(world)).allMatch(this::isValidBlock);
+      Vector3d temp = Vector3d.center(check);
+      return data.keySet().stream().map(v -> temp.add(v.toVector3d()).toBlock(world)).allMatch(this::isValidBlock);
     }
 
     private void center(Block block) {
-      this.center = Vector3.center(block);
+      this.center = Vector3d.center(block);
     }
 
     private Collider collider() {
@@ -577,7 +577,7 @@ public class EarthSmash extends AbilityInstance {
 
     private Map<Block, BlockData> data() {
       return data.entrySet().stream()
-        .collect(Collectors.toMap(e -> center.add(new Vector3(e.getKey())).toBlock(world), Map.Entry::getValue));
+        .collect(Collectors.toMap(e -> center.add(e.getKey().toVector3d()).toBlock(world), Map.Entry::getValue));
     }
 
     private void shatter() {
@@ -585,7 +585,7 @@ public class EarthSmash extends AbilityInstance {
         return;
       }
       for (Map.Entry<Block, BlockData> entry : data().entrySet()) {
-        Vector3 velocity = VectorMethods.gaussianOffset(Vector3.ZERO, 0.2, 0.1, 0.2);
+        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
         TempBlock.createAir(block);

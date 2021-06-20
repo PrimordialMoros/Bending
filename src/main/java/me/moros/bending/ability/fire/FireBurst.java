@@ -41,7 +41,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -203,16 +203,16 @@ public class FireBurst extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      Vector3 reverse = ray.direction.negate();
+      Vector3d reverse = ray.direction.negate();
       Location center = bukkitLocation();
       BlockMethods.tryLightBlock(block);
       double igniteRadius = 1.5;
-      if (user.location().distanceSq(Vector3.center(block)) > 4) {
+      if (user.location().distanceSq(Vector3d.center(block)) > 4) {
         for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3.center(b), reverse), igniteRadius + 2) == null) {
+          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3d.center(b), reverse), igniteRadius + 2) == null) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {

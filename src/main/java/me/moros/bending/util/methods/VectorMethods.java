@@ -24,44 +24,44 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.model.math.IntVector;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3;
-import org.bukkit.util.NumberConversions;
+import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.math.Vector3i;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Utility class with useful {@link Vector3} related methods.
+ * Utility class with useful {@link Vector3d} related methods.
  */
 public final class VectorMethods {
   private VectorMethods() {
   }
 
   /**
-   * Create an arc by combining {@link #rotate(Vector3, Rotation, int)} and {@link #rotateInverse(Vector3, Rotation, int)}.
+   * Create an arc by combining {@link #rotate(Vector3d, Rotation, int)} and {@link #rotateInverse(Vector3d, Rotation, int)}.
    * Amount of rays will be rounded up to the nearest odd number. Minimum value is 3.
    * @param start the starting point
    * @param axis the axis around which to rotate
    * @param angle the rotation angle
    * @param rays the amount of vectors to return, must be an odd number, minimum 3
    * @return a list comprising of all the directions for this arc
-   * @see #rotateInverse(Vector3, Rotation, int)
+   * @see #rotateInverse(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3> createArc(@NonNull Vector3 start, @NonNull Vector3 axis, double angle, int rays) {
+  public static @NonNull Collection<@NonNull Vector3d> createArc(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int rays) {
     Rotation rotation = new Rotation(axis, angle);
     rays = Math.max(3, rays);
     if (rays % 2 == 0) {
       rays++;
     }
     int half = (rays - 1) / 2;
-    Collection<Vector3> arc = new ArrayList<>(rays);
+    Collection<Vector3d> arc = new ArrayList<>(rays);
     arc.add(start);
     arc.addAll(rotate(start, rotation, half));
     arc.addAll(rotateInverse(start, rotation, half));
     return arc;
   }
 
-  public static @NonNull Collection<@NonNull Vector3> circle(@NonNull Vector3 start, @NonNull Vector3 axis, int times) {
+  public static @NonNull Collection<@NonNull Vector3d> circle(@NonNull Vector3d start, @NonNull Vector3d axis, int times) {
     double angle = 2 * Math.PI / times;
     return rotate(start, axis, angle, times);
   }
@@ -73,36 +73,36 @@ public final class VectorMethods {
    * @param angle the rotation angle
    * @param times the amount of times to repeat the rotation
    * @return a list comprising of all the directions for this arc
-   * @see #rotateInverse(Vector3, Rotation, int)
+   * @see #rotateInverse(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3> rotate(@NonNull Vector3 start, @NonNull Vector3 axis, double angle, int times) {
+  public static @NonNull Collection<@NonNull Vector3d> rotate(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int times) {
     return rotate(start, new Rotation(axis, angle), times);
   }
 
-  private static @NonNull Collection<@NonNull Vector3> rotate(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
-    Collection<Vector3> arc = new ArrayList<>();
+  private static @NonNull Collection<@NonNull Vector3d> rotate(@NonNull Vector3d start, @NonNull Rotation rotation, int times) {
+    Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
     for (int i = 0; i < times; i++) {
       rotation.applyTo(vector, vector);
-      arc.add(new Vector3(vector));
+      arc.add(new Vector3d(vector));
     }
     return arc;
   }
 
   /**
    * Inversely repeat a rotation on a specific vector.
-   * @see #rotate(Vector3, Rotation, int)
+   * @see #rotate(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3> rotateInverse(@NonNull Vector3 start, @NonNull Vector3 axis, double angle, int times) {
+  public static @NonNull Collection<@NonNull Vector3d> rotateInverse(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int times) {
     return rotateInverse(start, new Rotation(axis, angle), times);
   }
 
-  private static @NonNull Collection<@NonNull Vector3> rotateInverse(@NonNull Vector3 start, @NonNull Rotation rotation, int times) {
-    Collection<Vector3> arc = new ArrayList<>();
+  private static @NonNull Collection<@NonNull Vector3d> rotateInverse(@NonNull Vector3d start, @NonNull Rotation rotation, int times) {
+    Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
     for (int i = 0; i < times; i++) {
       rotation.applyInverseTo(vector, vector);
-      arc.add(new Vector3(vector));
+      arc.add(new Vector3d(vector));
     }
     return arc;
   }
@@ -110,10 +110,10 @@ public final class VectorMethods {
   /**
    * Get an orthogonal vector.
    */
-  public static @NonNull Vector3 orthogonal(@NonNull Vector3 axis, double radians, double length) {
-    double[] arr = {axis.y, -axis.x, 0};
+  public static @NonNull Vector3d orthogonal(@NonNull Vector3d axis, double radians, double length) {
+    double[] arr = {axis.getY(), -axis.getX(), 0};
     Rotation rotation = new Rotation(axis, radians);
-    return rotation.applyTo(new Vector3(arr).normalize().multiply(length));
+    return rotation.applyTo(new Vector3d(arr).normalize().multiply(length));
   }
 
   /**
@@ -122,11 +122,11 @@ public final class VectorMethods {
    * @param cos the rotation's cosine
    * @param sin the rotation's sine
    * @return the resulting vector
-   * @see #rotateAroundAxisY(Vector3, double, double)
-   * @see #rotateAroundAxisZ(Vector3, double, double)
+   * @see #rotateAroundAxisY(Vector3d, double, double)
+   * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
-  public static @NonNull Vector3 rotateAroundAxisX(@NonNull Vector3 v, double cos, double sin) {
-    return new Vector3(v.x, v.y * cos - v.z * sin, v.y * sin + v.z * cos);
+  public static @NonNull Vector3d rotateAroundAxisX(@NonNull Vector3d v, double cos, double sin) {
+    return new Vector3d(v.getX(), v.getY() * cos - v.getZ() * sin, v.getY() * sin + v.getZ() * cos);
   }
 
   /**
@@ -135,11 +135,11 @@ public final class VectorMethods {
    * @param cos the rotation's cosine
    * @param sin the rotation's sine
    * @return the resulting vector
-   * @see #rotateAroundAxisX(Vector3, double, double)
-   * @see #rotateAroundAxisZ(Vector3, double, double)
+   * @see #rotateAroundAxisX(Vector3d, double, double)
+   * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
-  public static @NonNull Vector3 rotateAroundAxisY(@NonNull Vector3 v, double cos, double sin) {
-    return new Vector3(v.x * cos + v.z * sin, v.y, v.x * -sin + v.z * cos);
+  public static @NonNull Vector3d rotateAroundAxisY(@NonNull Vector3d v, double cos, double sin) {
+    return new Vector3d(v.getX() * cos + v.getZ() * sin, v.getY(), v.getX() * -sin + v.getZ() * cos);
   }
 
   /**
@@ -148,11 +148,11 @@ public final class VectorMethods {
    * @param cos the rotation's cosine
    * @param sin the rotation's sine
    * @return the resulting vector
-   * @see #rotateAroundAxisX(Vector3, double, double)
-   * @see #rotateAroundAxisY(Vector3, double, double)
+   * @see #rotateAroundAxisX(Vector3d, double, double)
+   * @see #rotateAroundAxisY(Vector3d, double, double)
    */
-  public static @NonNull Vector3 rotateAroundAxisZ(@NonNull Vector3 v, double cos, double sin) {
-    return new Vector3(v.x * cos - v.y * sin, v.x * sin + v.y * cos, v.z);
+  public static @NonNull Vector3d rotateAroundAxisZ(@NonNull Vector3d v, double cos, double sin) {
+    return new Vector3d(v.getX() * cos - v.getY() * sin, v.getX() * sin + v.getY() * cos, v.getZ());
   }
 
   /**
@@ -162,33 +162,33 @@ public final class VectorMethods {
    * @param direction the direction to check
    * @return a collection of normalized vectors corresponding to cardinal block faces
    */
-  public static @NonNull Collection<@NonNull IntVector> decomposeDiagonals(@NonNull Vector3 origin, @NonNull Vector3 direction) {
+  public static @NonNull Collection<@NonNull Vector3i> decomposeDiagonals(@NonNull Vector3d origin, @NonNull Vector3d direction) {
     double[] o = origin.toArray();
     double[] d = direction.toArray();
-    Collection<IntVector> possibleCollisions = new ArrayList<>(3);
+    Collection<Vector3i> possibleCollisions = new ArrayList<>(3);
     for (int i = 0; i < 3; i++) {
-      int a = NumberConversions.floor(o[i] + d[i]);
-      int b = NumberConversions.floor(o[i]);
+      int a = FastMath.floor(o[i] + d[i]);
+      int b = FastMath.floor(o[i]);
       int delta = Math.min(1, Math.max(-1, a - b));
       if (delta != 0) {
         int[] v = new int[]{0, 0, 0};
         v[i] = delta;
-        possibleCollisions.add(new IntVector(v));
+        possibleCollisions.add(new Vector3i(v));
       }
     }
     if (possibleCollisions.isEmpty()) {
-      return List.of(IntVector.ZERO);
+      return List.of(Vector3i.ZERO);
     }
     return possibleCollisions;
   }
 
-  public static @NonNull Vector3 gaussianOffset(Vector3 target, double offset) {
+  public static @NonNull Vector3d gaussianOffset(Vector3d target, double offset) {
     return gaussianOffset(target, offset, offset, offset);
   }
 
-  public static @NonNull Vector3 gaussianOffset(Vector3 target, double offsetX, double offsetY, double offsetZ) {
+  public static @NonNull Vector3d gaussianOffset(Vector3d target, double offsetX, double offsetY, double offsetZ) {
     ThreadLocalRandom r = ThreadLocalRandom.current();
     double[] v = {r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ};
-    return target.add(new Vector3(v));
+    return target.add(new Vector3d(v));
   }
 }

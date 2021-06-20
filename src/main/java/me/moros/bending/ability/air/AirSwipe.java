@@ -41,7 +41,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
@@ -138,9 +138,9 @@ public class AirSwipe extends AbilityInstance {
     }
     charging = false;
     user.addCooldown(description(), userConfig.cooldown);
-    Vector3 origin = user.mainHandSide();
-    Vector3 dir = user.direction();
-    Vector3 rotateAxis = dir.crossProduct(Vector3.PLUS_J).normalize().crossProduct(dir);
+    Vector3d origin = user.mainHandSide();
+    Vector3d dir = user.direction();
+    Vector3d rotateAxis = dir.cross(Vector3d.PLUS_J).normalize().cross(dir);
     int steps = userConfig.arc / 5;
     VectorMethods.createArc(dir, rotateAxis, Math.PI / 36, steps).forEach(
       v -> streams.add(new AirStream(new Ray(origin, v.multiply(userConfig.range * factor))))
@@ -200,7 +200,7 @@ public class AirSwipe extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       if (!affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-        Vector3 velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
+        Vector3d velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
         entity.setVelocity(velocity.clampVelocity());
         affectedEntities.add(entity);
         return true;

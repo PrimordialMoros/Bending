@@ -29,7 +29,7 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
@@ -66,13 +66,13 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     // Remove if player gets too far away from ground.
-    distance = user.location().y - block.getY();
+    distance = user.location().getY() - block.getY();
     if (distance > maxHeight) {
       return UpdateResult.REMOVE;
     }
     flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
-    collider = new AABB(new Vector3(-0.5, -distance, -0.5), new Vector3(0.5, 0, 0.5)).at(user.location());
+    collider = new AABB(new Vector3d(-0.5, -distance, -0.5), new Vector3d(0.5, 0, 0.5)).at(user.location());
     render();
     postRender();
     return UpdateResult.CONTINUE;
@@ -97,8 +97,8 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     return flight;
   }
 
-  public static void limitVelocity(@NonNull User user, @NonNull Vector3 velocity, double speed) {
-    if (velocity.getNormSq() > speed * speed) {
+  public static void limitVelocity(@NonNull User user, @NonNull Vector3d velocity, double speed) {
+    if (velocity.lengthSq() > speed * speed) {
       user.entity().setVelocity(velocity.normalize().multiply(speed).clampVelocity());
     }
   }

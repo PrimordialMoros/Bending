@@ -19,7 +19,7 @@
 
 package me.moros.bending.game.temporal;
 
-import me.moros.bending.model.math.Vector3;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Metadata;
@@ -40,7 +40,7 @@ public class TempFallingBlock implements Temporary {
   public static void init() {
   }
 
-  public TempFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
+  public TempFallingBlock(@NonNull Location location, @NonNull BlockData data, @NonNull Vector3d velocity, boolean gravity, long duration) {
     fallingBlock = location.getWorld().spawnFallingBlock(location, data);
     fallingBlock.setVelocity(velocity.clampVelocity());
     fallingBlock.setGravity(gravity);
@@ -51,15 +51,15 @@ public class TempFallingBlock implements Temporary {
   }
 
   public TempFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
-    this(location, data, Vector3.ZERO, false, duration);
+    this(location, data, Vector3d.ZERO, false, duration);
   }
 
-  public TempFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector3 velocity, boolean gravity, long duration) {
+  public TempFallingBlock(@NonNull Block block, @NonNull BlockData data, @NonNull Vector3d velocity, boolean gravity, long duration) {
     this(block.getLocation().add(0.5, 0, 0.5), data, velocity, gravity, duration);
   }
 
   public TempFallingBlock(@NonNull Block block, @NonNull BlockData data, long duration) {
-    this(block, data, Vector3.ZERO, false, duration);
+    this(block, data, Vector3d.ZERO, false, duration);
   }
 
   @Override
@@ -76,7 +76,7 @@ public class TempFallingBlock implements Temporary {
     return fallingBlock;
   }
 
-  public @NonNull Vector3 center() {
-    return new Vector3(fallingBlock.getLocation()).add(new Vector3(0, 0.5, 0));
+  public @NonNull Vector3d center() {
+    return new Vector3d(fallingBlock.getLocation()).add(new Vector3d(0, 0.5, 0));
   }
 }
