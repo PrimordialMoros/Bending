@@ -151,10 +151,10 @@ public class BendingCommand extends BaseCommand {
       return;
     }
     if (Bending.game().boardManager().toggleScoreboard(player.entity())) {
-      player.profile().board(true);
+      player.board(true);
       Message.BOARD_TOGGLED_ON.send(player);
     } else {
-      player.profile().board(false);
+      player.board(false);
       Message.BOARD_TOGGLED_OFF.send(player);
     }
   }

@@ -26,8 +26,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.registry.ProtectionRegistry;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.protection.ProtectionCache;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -126,10 +125,10 @@ public interface User extends BukkitUser, ElementUser {
   }
 
   /**
-   * @see ProtectionRegistry#canBuild(User, Block)
+   * @see ProtectionCache#canBuild(User, Block)
    */
   default boolean canBuild(@NonNull Block block) {
-    return Registries.PROTECTIONS.canBuild(this, block);
+    return ProtectionCache.INSTANCE.canBuild(this, block);
   }
 
   /**

@@ -55,6 +55,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.WaterMaterials;
@@ -102,7 +103,7 @@ public final class ActivationController {
     Bending.game().flightManager().remove(user);
     Registries.ATTRIBUTES.invalidate(user);
     Registries.BENDERS.invalidate(user);
-    Registries.PROTECTIONS.invalidate(user);
+    ProtectionCache.INSTANCE.invalidate(user);
   }
 
   public void onUserSwing(@NonNull User user) {

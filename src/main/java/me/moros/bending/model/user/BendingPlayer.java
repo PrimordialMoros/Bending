@@ -20,6 +20,7 @@
 package me.moros.bending.model.user;
 
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +31,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
-import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.BenderRegistry;
 import me.moros.bending.registry.Registries;
 import org.bukkit.GameMode;
@@ -39,21 +41,31 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingPlayer extends BendingUser implements PresetUser {
-  private final BendingProfile profile;
   private final Set<String> presets;
   private final AsyncLoadingCache<String, Preset> presetCache;
+  private final int internalId;
+  private boolean board;
 
-  private BendingPlayer(Player player, BendingProfile profile) {
-    super(player, profile.data());
-    this.profile = profile;
-    presets = new HashSet<>(profile.data().presets());
+  private BendingPlayer(Player player, PlayerProfile profile, BenderData data) {
+    super(player, data);
+    this.internalId = profile.id();
+    this.board = profile.board();
+    presets = new HashSet<>(data.presets());
     presetCache = Caffeine.newBuilder()
       .maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
       .buildAsync(this::loadPreset);
   }
 
-  public @NonNull BendingProfile profile() {
-    return profile;
+  public int id() {
+    return internalId;
+  }
+
+  public boolean board() {
+    return board;
+  }
+
+  public void board(boolean value) {
+    this.board = value;
   }
 
   @Override
@@ -137,7 +149,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
       return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
     presets.add(name);
-    return Bending.game().storage().savePresetAsync(profile.id(), preset).thenApply(result ->
+    return Bending.game().storage().savePresetAsync(internalId, preset).thenApply(result ->
       result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL
     );
   }
@@ -156,17 +168,17 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     if (!presets.contains(name.toLowerCase())) {
       return null;
     }
-    return Bending.game().storage().loadPreset(profile().id(), name);
+    return Bending.game().storage().loadPreset(internalId, name);
   }
 
   /**
-   * Use {@link BenderRegistry#register(Player, BendingProfile)}
+   * Use {@link BenderRegistry#register(Player, Entry)}
    */
-  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull BendingProfile profile) {
+  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull PlayerProfile profile, @NonNull BenderData data) {
     if (Registries.BENDERS.contains(player.getUniqueId())) {
       return Optional.empty();
     }
-    BendingPlayer bendingPlayer = new BendingPlayer(player, profile);
+    BendingPlayer bendingPlayer = new BendingPlayer(player, profile, data);
     return Optional.of(bendingPlayer);
   }
 }

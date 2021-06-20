@@ -19,39 +19,24 @@
 
 package me.moros.bending.model.user.profile;
 
-import java.util.Set;
+public final class PlayerProfile {
+  private final int id;
+  private final boolean board;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-/**
- * Holds data from the database that are needed to construct the BendingPlayer object
- */
-public final class BenderData {
-  public static final BenderData EMPTY = new BenderData();
-
-  private final String[] slots;
-  private final Set<String> elements;
-  private final Set<String> presets;
-
-  public BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements, @NonNull Set<@NonNull String> presets) {
-    this.slots = slots;
-    this.elements = elements;
-    this.presets = presets;
+  public PlayerProfile(int id) {
+    this(id, false);
   }
 
-  private BenderData() {
-    this(new String[9], Set.of(), Set.of());
+  public PlayerProfile(int id, boolean board) {
+    this.id = id;
+    this.board = board;
   }
 
-  public @NonNull String[] slots() {
-    return slots;
+  public int id() {
+    return id;
   }
 
-  public @NonNull Set<@NonNull String> elements() {
-    return elements;
-  }
-
-  public @NonNull Set<@NonNull String> presets() {
-    return presets;
+  public boolean board() {
+    return board;
   }
 }

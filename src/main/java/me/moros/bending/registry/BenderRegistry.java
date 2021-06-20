@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +37,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BenderData;
-import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.storage.BendingStorage;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -47,7 +48,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Registry for all valid benders.
  */
 public final class BenderRegistry implements Registry<User> {
-  private AsyncLoadingCache<UUID, BendingProfile> cache;
+  private AsyncLoadingCache<UUID, Entry<PlayerProfile, BenderData>> cache;
   private final Map<UUID, BendingPlayer> players;
   private final Map<UUID, BendingUser> entities;
 
@@ -99,19 +100,17 @@ public final class BenderRegistry implements Registry<User> {
     if (contains(entity.getUniqueId())) {
       return;
     }
-    if (entity instanceof Player) {
-      BendingUser.createUser(entity, data).ifPresent(user -> {
-        entities.put(entity.getUniqueId(), user);
-        Bending.game().abilityManager(user.world()).createPassives(user);
-      });
-    }
+    BendingUser.createUser(entity, data).ifPresent(user -> {
+      entities.put(entity.getUniqueId(), user);
+      Bending.game().abilityManager(user.world()).createPassives(user);
+    });
   }
 
-  public void register(@NonNull Player player, @NonNull BendingProfile profile) {
+  public void register(@NonNull Player player, @NonNull Entry<PlayerProfile, BenderData> data) {
     if (contains(player.getUniqueId())) {
       return;
     }
-    BendingPlayer.createUser(player, profile).ifPresent(user -> {
+    BendingPlayer.createUser(player, data.getKey(), data.getValue()).ifPresent(user -> {
       players.put(player.getUniqueId(), user);
       Bending.game().abilityManager(user.world()).createPassives(user);
       Bending.game().boardManager().canUseScoreboard(player);
@@ -119,18 +118,12 @@ public final class BenderRegistry implements Registry<User> {
     });
   }
 
-  public @Nullable BendingProfile profileSync(@NonNull UUID uuid) {
-    if (cache == null) {
-      return null;
-    }
-    return cache.synchronous().get(uuid);
+  public @Nullable Entry<PlayerProfile, BenderData> profileSync(@NonNull UUID uuid) {
+    return cache == null ? null : cache.synchronous().get(uuid);
   }
 
-  public @NonNull CompletableFuture<@Nullable BendingProfile> profile(@NonNull UUID uuid) {
-    if (cache == null) {
-      return CompletableFuture.completedFuture(null);
-    }
-    return cache.get(uuid);
+  public @NonNull CompletableFuture<@Nullable Entry<PlayerProfile, BenderData>> profile(@NonNull UUID uuid) {
+    return cache == null ? CompletableFuture.completedFuture(null) : cache.get(uuid);
   }
 
   @Override

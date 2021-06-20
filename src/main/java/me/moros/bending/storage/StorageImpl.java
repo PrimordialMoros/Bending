@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -45,7 +46,7 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.PresetUser;
 import me.moros.bending.model.user.profile.BenderData;
-import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.util.Tasker;
 import me.moros.storage.SqlStreamReader;
@@ -94,16 +95,17 @@ public final class StorageImpl implements BendingStorage {
    * Creates a new profile for the given uuid or returns an existing one if possible.
    */
   @Override
-  public @NonNull BendingProfile createProfile(@NonNull UUID uuid) {
-    BendingProfile profile = loadProfile(uuid);
-    if (profile == null) {
-      profile = DB.withHandle(handle -> {
+  public @NonNull Entry<PlayerProfile, BenderData> createProfile(@NonNull UUID uuid) {
+    Entry<PlayerProfile, BenderData> entry = loadProfile(uuid);
+    if (entry == null) {
+      entry = DB.withHandle(handle -> {
         int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
           .executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
-        return new BendingProfile(uuid, id, new BenderData());
+        PlayerProfile profile = new PlayerProfile(id);
+        return Map.entry(profile, BenderData.EMPTY);
       });
     }
-    return profile;
+    return entry;
   }
 
   /**
@@ -111,7 +113,7 @@ public final class StorageImpl implements BendingStorage {
    * @param uuid the player's uuid
    * @see #createProfile(UUID)
    */
-  public @NonNull CompletableFuture<@Nullable BendingProfile> loadProfileAsync(@NonNull UUID uuid) {
+  public @NonNull CompletableFuture<@Nullable Entry<PlayerProfile, BenderData>> loadProfileAsync(@NonNull UUID uuid) {
     return Tasker.async(() -> loadProfile(uuid));
   }
 
@@ -122,7 +124,7 @@ public final class StorageImpl implements BendingStorage {
    */
   public void savePlayerAsync(@NonNull BendingPlayer bendingPlayer) {
     Tasker.async(() -> {
-      updateProfile(bendingPlayer.profile());
+      updateProfile(bendingPlayer);
       saveElements(bendingPlayer);
       saveSlots(bendingPlayer);
     });
@@ -205,7 +207,7 @@ public final class StorageImpl implements BendingStorage {
     Tasker.async(() -> deletePreset(presetId));
   }
 
-  private BendingProfile loadProfile(UUID uuid) {
+  private Entry<PlayerProfile, BenderData> loadProfile(UUID uuid) {
     try {
       return DB.withHandle(handle -> {
         Optional<Map<String, Object>> result = handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
@@ -215,8 +217,9 @@ public final class StorageImpl implements BendingStorage {
         }
         int id = (int) result.get().get("player_id");
         boolean board = (boolean) result.get().getOrDefault("board", true);
+        PlayerProfile profile = new PlayerProfile(id, board);
         BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
-        return new BendingProfile(uuid, id, data, board);
+        return Map.entry(profile, data);
       });
     } catch (Exception e) {
       logger.severe(e.getMessage());
@@ -224,11 +227,11 @@ public final class StorageImpl implements BendingStorage {
     return null;
   }
 
-  private boolean updateProfile(BendingProfile profile) {
+  private boolean updateProfile(BendingPlayer player) {
     try {
       DB.useHandle(handle ->
         handle.createUpdate(SqlQueries.PLAYER_UPDATE_BOARD_FOR_ID.query())
-          .bind(0, profile.board()).bind(1, profile.id()).execute()
+          .bind(0, player.board()).bind(1, player.id()).execute()
       );
       return true;
     } catch (Exception e) {
@@ -238,7 +241,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean saveElements(BendingPlayer player) {
-    int id = player.profile().id();
+    int id = player.id();
     try {
       DB.useHandle(handle -> {
         handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE_FOR_ID.query()).bind(0, id).execute();
@@ -256,7 +259,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean saveSlots(BendingPlayer player) {
-    int id = player.profile().id();
+    int id = player.id();
     List<String> abilities = player.createPresetFromSlots("").abilities();
     try {
       DB.useHandle(handle -> {

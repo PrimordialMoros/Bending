@@ -22,6 +22,7 @@ package me.moros.bending.listener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +42,8 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
@@ -91,9 +93,9 @@ public class UserListener implements Listener {
     long startTime = System.currentTimeMillis();
     try {
       // Timeout after 1000ms so as to not block the login thread excessively
-      BendingProfile profile = Registries.BENDERS.profile(uuid).get(1000, TimeUnit.MILLISECONDS);
+      Entry<PlayerProfile, BenderData> entry = Registries.BENDERS.profile(uuid).get(1000, TimeUnit.MILLISECONDS);
       long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
+      if (entry != null && deltaTime > 500) {
         Bending.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
       }
     } catch (TimeoutException e) {
@@ -109,9 +111,9 @@ public class UserListener implements Listener {
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
     String name = player.getName();
-    BendingProfile profile = Registries.BENDERS.profileSync(uuid);
-    if (profile != null) {
-      Registries.BENDERS.register(player, profile);
+    Entry<PlayerProfile, BenderData> entry = Registries.BENDERS.profileSync(uuid);
+    if (entry != null) {
+      Registries.BENDERS.register(player, entry);
     } else {
       Bending.logger().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
     }

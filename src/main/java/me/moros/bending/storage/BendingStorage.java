@@ -19,6 +19,7 @@
 
 package me.moros.bending.storage;
 
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +27,8 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.profile.BendingProfile;
+import me.moros.bending.model.user.profile.BenderData;
+import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.storage.Storage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,9 +37,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Handles all Storage tasks and their concurrency
  */
 public interface BendingStorage extends Storage {
-  @NonNull BendingProfile createProfile(@NonNull UUID uuid);
+  @NonNull Entry<PlayerProfile, BenderData> createProfile(@NonNull UUID uuid);
 
-  @NonNull CompletableFuture<@Nullable BendingProfile> loadProfileAsync(@NonNull UUID uuid);
+  @NonNull CompletableFuture<@Nullable Entry<PlayerProfile, BenderData>> loadProfileAsync(@NonNull UUID uuid);
 
   void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
 
