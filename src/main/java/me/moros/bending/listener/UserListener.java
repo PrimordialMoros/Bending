@@ -113,7 +113,7 @@ public class UserListener implements Listener {
     String name = player.getName();
     Entry<PlayerProfile, BenderData> entry = Registries.BENDERS.profileSync(uuid);
     if (entry != null) {
-      Registries.BENDERS.register(player, entry);
+      BendingPlayer.createUser(player, entry.getKey(), entry.getValue()).ifPresent(Registries.BENDERS::register);
     } else {
       Bending.logger().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
     }

@@ -29,21 +29,17 @@ import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import me.moros.bending.protection.PluginNotFoundException;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class WorldGuardProtection implements Protection {
+public final class WorldGuardProtection implements Protection {
   private final WorldGuard worldGuard;
   private final StateFlag bendingFlag;
 
-  public WorldGuardProtection() throws PluginNotFoundException {
-    if (!Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-      throw new PluginNotFoundException("WorldGuard");
-    }
+  public WorldGuardProtection(@NonNull Plugin plugin) {
     worldGuard = WorldGuard.getInstance();
     bendingFlag = (StateFlag) worldGuard.getFlagRegistry().get("bending");
   }
@@ -65,10 +61,5 @@ public class WorldGuardProtection implements Protection {
     }
     // Query WorldGuard to see if a non-member (entity) can build in a region.
     return query.testState(location, list -> Association.NON_MEMBER, Flags.BUILD);
-  }
-
-  @Override
-  public String toString() {
-    return "WorldGuard";
   }
 }

@@ -23,21 +23,23 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import me.moros.bending.Bending;
-import me.moros.bending.protection.PluginNotFoundException;
 import me.moros.bending.protection.instances.GriefPreventionProtection;
+import me.moros.bending.protection.instances.LWCProtection;
 import me.moros.bending.protection.instances.Protection;
 import me.moros.bending.protection.instances.TownyProtection;
 import me.moros.bending.protection.instances.WorldGuardProtection;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents the protection system which hooks into other region protection plugins.
  */
 public final class ProtectionRegistry implements Registry<Protection> {
-
   private final Map<String, Protection> protections;
 
   ProtectionRegistry() {
@@ -48,6 +50,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
     register("WorldGuard", WorldGuardProtection::new);
     register("GriefPrevention", GriefPreventionProtection::new);
     register("Towny", TownyProtection::new);
+    register("LWC", LWCProtection::new);
   }
 
   /**
@@ -62,16 +65,17 @@ public final class ProtectionRegistry implements Registry<Protection> {
   /**
    * Register a new {@link Protection}
    * @param name the name of the protection to register
-   * @param creator the factory function that creates the protection instance
+   * @param factory the factory function that creates the protection instance
    */
-  public void register(@NonNull String name, @NonNull ProtectionFactory creator) {
-    if (Bending.configManager().config().node("protection", name).getBoolean(true)) {
-      try {
-        Protection method = creator.create();
-        protections.put(name, method);
+  public void register(@NonNull String name, @NonNull ProtectionFactory factory) {
+    if (!contains(name) && Bending.configManager().config().node("protection", name).getBoolean(true)) {
+      Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
+      if (plugin != null) {
+        Protection protection = factory.apply(plugin);
+        protections.put(name, protection);
         Bending.logger().info("Registered bending protection for " + name);
-      } catch (PluginNotFoundException e) {
-        Bending.logger().warn("ProtectMethod " + name + " not able to be used since plugin was not found.");
+      } else {
+        Bending.logger().warn("Plugin " + name + " was not found, skipping protection hook");
       }
     }
   }
@@ -86,7 +90,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
   }
 
   @FunctionalInterface
-  public interface ProtectionFactory {
-    @NonNull Protection create() throws PluginNotFoundException;
+  public interface ProtectionFactory extends Function<Plugin, Protection> {
+    @NonNull Protection apply(@NonNull Plugin plugin);
   }
 }

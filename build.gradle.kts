@@ -11,15 +11,18 @@ version = "1.1.0-SNAPSHOT"
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
     mavenCentral()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://maven.enginehub.org/repo/")
-    maven("https://repo.codemc.org/repository/maven-public")
+    maven("https://repo.codemc.org/repository/maven-public/")
+    maven("https://ci.ender.zone/plugin/repository/everything/")
     maven("https://jitpack.io")
 }
 
@@ -34,6 +37,7 @@ dependencies {
     }
     compileOnly("com.github.TownyAdvanced", "Towny", "0.96.7.0")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0")
+    compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
 }
 
 tasks {

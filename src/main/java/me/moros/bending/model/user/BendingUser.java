@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,7 +40,6 @@ import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.BenderData;
-import me.moros.bending.registry.BenderRegistry;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.Tasker;
 import org.bukkit.entity.LivingEntity;
@@ -229,9 +227,6 @@ public class BendingUser implements User {
     return entity.hashCode();
   }
 
-  /**
-   * Use {@link BenderRegistry#register(LivingEntity, BenderData)}
-   */
   public static Optional<BendingUser> createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     if (Registries.BENDERS.contains(entity.getUniqueId()) || entity instanceof Player) {
       return Optional.empty();

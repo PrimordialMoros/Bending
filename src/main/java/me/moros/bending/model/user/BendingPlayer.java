@@ -20,7 +20,6 @@
 package me.moros.bending.model.user;
 
 import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -33,7 +32,6 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
-import me.moros.bending.registry.BenderRegistry;
 import me.moros.bending.registry.Registries;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -171,9 +169,6 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     return Bending.game().storage().loadPreset(internalId, name);
   }
 
-  /**
-   * Use {@link BenderRegistry#register(Player, Entry)}
-   */
   public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull PlayerProfile profile, @NonNull BenderData data) {
     if (Registries.BENDERS.contains(player.getUniqueId())) {
       return Optional.empty();

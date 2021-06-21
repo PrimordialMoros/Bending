@@ -19,23 +19,19 @@
 
 package me.moros.bending.protection.instances;
 
-import me.moros.bending.protection.PluginNotFoundException;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class GriefPreventionProtection implements Protection {
+public final class GriefPreventionProtection implements Protection {
   private final GriefPrevention griefPrevention;
 
-  public GriefPreventionProtection() throws PluginNotFoundException {
-    griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
-    if (griefPrevention == null) {
-      throw new PluginNotFoundException("GriefPrevention");
-    }
+  public GriefPreventionProtection(@NonNull Plugin plugin) {
+    griefPrevention = (GriefPrevention) plugin;
   }
 
   @Override
@@ -46,10 +42,5 @@ public class GriefPreventionProtection implements Protection {
       return reason == null || claim == null || claim.siegeData != null;
     }
     return true;
-  }
-
-  @Override
-  public String toString() {
-    return "GriefPrevention";
   }
 }

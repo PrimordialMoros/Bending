@@ -96,26 +96,20 @@ public final class BenderRegistry implements Registry<User> {
     }
   }
 
-  public void register(@NonNull LivingEntity entity, @NonNull BenderData data) {
-    if (contains(entity.getUniqueId())) {
+  public void register(@NonNull User user) {
+    UUID uuid = user.entity().getUniqueId();
+    if (contains(uuid)) {
       return;
     }
-    BendingUser.createUser(entity, data).ifPresent(user -> {
-      entities.put(entity.getUniqueId(), user);
-      Bending.game().abilityManager(user.world()).createPassives(user);
-    });
-  }
-
-  public void register(@NonNull Player player, @NonNull Entry<PlayerProfile, BenderData> data) {
-    if (contains(player.getUniqueId())) {
-      return;
+    Bending.game().abilityManager(user.world()).createPassives(user);
+    if (user instanceof BendingPlayer) {
+      BendingPlayer bendingPlayer = (BendingPlayer) user;
+      players.put(uuid, bendingPlayer);
+      Bending.game().boardManager().canUseScoreboard(bendingPlayer.entity());
+      Bending.eventBus().postBendingPlayerLoadEvent(bendingPlayer);
+    } else if (user instanceof BendingUser) {
+      entities.put(uuid, (BendingUser) user);
     }
-    BendingPlayer.createUser(player, data.getKey(), data.getValue()).ifPresent(user -> {
-      players.put(player.getUniqueId(), user);
-      Bending.game().abilityManager(user.world()).createPassives(user);
-      Bending.game().boardManager().canUseScoreboard(player);
-      Bending.eventBus().postBendingPlayerLoadEvent(user);
-    });
   }
 
   public @Nullable Entry<PlayerProfile, BenderData> profileSync(@NonNull UUID uuid) {

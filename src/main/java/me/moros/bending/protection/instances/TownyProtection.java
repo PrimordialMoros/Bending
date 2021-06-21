@@ -30,23 +30,19 @@ import com.palmergames.bukkit.towny.object.WorldCoord;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import com.palmergames.bukkit.towny.war.eventwar.WarUtil;
 import com.palmergames.bukkit.towny.war.flagwar.FlagWar;
-import me.moros.bending.protection.PluginNotFoundException;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class TownyProtection implements Protection {
+public final class TownyProtection implements Protection {
   private final Towny towny;
   private final TownyAPI api;
 
-  public TownyProtection() throws PluginNotFoundException {
-    towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
-    if (towny == null) {
-      throw new PluginNotFoundException("Towny");
-    }
+  public TownyProtection(@NonNull Plugin plugin) {
+    towny = (Towny) plugin;
     api = TownyAPI.getInstance();
   }
 
@@ -75,10 +71,5 @@ public class TownyProtection implements Protection {
     }
     TownBlock townBlock = api.getTownBlock(block.getLocation());
     return townBlock == null || !townBlock.hasTown();
-  }
-
-  @Override
-  public String toString() {
-    return "Towny";
   }
 }

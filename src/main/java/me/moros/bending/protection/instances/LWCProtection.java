@@ -17,12 +17,29 @@
  *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.protection;
+package me.moros.bending.protection.instances;
 
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.lwc.LWCPlugin;
+import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class PluginNotFoundException extends Exception {
-  public PluginNotFoundException(@NonNull String pluginName) {
-    super(pluginName + " not found in plugin manager.");
+public final class LWCProtection implements Protection {
+  private final LWC lwc;
+
+  public LWCProtection(@NonNull Plugin plugin) {
+    lwc = ((LWCPlugin) plugin).getLWC();
+  }
+
+  @Override
+  public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
+    if (entity instanceof Player) {
+      com.griefcraft.model.Protection protection = lwc.getProtectionCache().getProtection(block);
+      return protection == null || lwc.canAccessProtection((Player) entity, protection);
+    }
+    return true;
   }
 }
