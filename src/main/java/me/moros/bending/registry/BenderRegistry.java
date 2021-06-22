@@ -106,7 +106,7 @@ public final class BenderRegistry implements Registry<User> {
       BendingPlayer bendingPlayer = (BendingPlayer) user;
       players.put(uuid, bendingPlayer);
       Bending.game().boardManager().canUseScoreboard(bendingPlayer.entity());
-      Bending.eventBus().postBendingPlayerLoadEvent(bendingPlayer);
+      Bending.eventBus().postPlayerLoadEvent(bendingPlayer);
     } else if (user instanceof BendingUser) {
       entities.put(uuid, (BendingUser) user);
     }

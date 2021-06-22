@@ -21,6 +21,9 @@ package me.moros.bending.util.methods;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.Bending;
+import me.moros.bending.events.BendingVelocityEvent;
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.collision.AABBUtils;
@@ -28,6 +31,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -36,6 +40,26 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public final class EntityMethods {
   private EntityMethods() {
+  }
+
+  /**
+   * Set an entity's velocity and post a {@link BendingVelocityEvent} if it's a LivingEntity.
+   * @param ability the ability the causes this velocity change
+   * @param entity the target entity
+   * @param velocity the new velocity
+   * @return whether the new velocity was successfully applied
+   */
+  public static boolean applyVelocity(@NonNull Ability ability, @NonNull Entity entity, @NonNull Vector3d velocity) {
+    if (entity instanceof LivingEntity) {
+      BendingVelocityEvent event = Bending.eventBus().postVelocityEvent(ability.user(), (LivingEntity) entity, ability.description(), velocity);
+      if (!event.isCancelled()) {
+        entity.setVelocity(event.velocity().clampVelocity());
+        return true;
+      }
+      return false;
+    }
+    entity.setVelocity(velocity.clampVelocity());
+    return true;
   }
 
   /**

@@ -50,6 +50,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -213,8 +214,8 @@ public class EarthBlast extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      entity.setVelocity(direction.multiply(0.6).clampVelocity());
       DamageUtil.damageEntity(entity, user, damage, description());
+      EntityMethods.applyVelocity(EarthBlast.this, entity, direction.multiply(0.6));
       return true;
     }
 

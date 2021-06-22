@@ -65,7 +65,7 @@ public final class FireTick {
       return;
     }
     int duration = FastMath.ceil(Math.min(ticks, MAX_TICKS) / 20.0);
-    BendingCombustEvent event = Bending.eventBus().postBendingCombustEvent(source, entity, duration);
+    BendingCombustEvent event = Bending.eventBus().postCombustEvent(source, entity, duration);
     if (!event.isCancelled() && entity.getFireTicks() < ticks) {
       entity.setFireTicks(ticks);
       trackEntity(entity, source);

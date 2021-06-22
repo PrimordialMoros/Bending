@@ -52,6 +52,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -228,7 +229,7 @@ public class FlameRush extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
         FireTick.ignite(user, entity);
-        entity.setVelocity(streamDirection.normalize().multiply(0.9).clampVelocity());
+        EntityMethods.applyVelocity(FlameRush.this, entity, streamDirection.normalize().multiply(0.9));
       }
       return false;
     }

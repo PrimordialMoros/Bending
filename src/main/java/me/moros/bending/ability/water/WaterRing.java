@@ -63,6 +63,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -270,7 +271,7 @@ public class WaterRing extends AbilityInstance {
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
-        entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
+        EntityMethods.applyVelocity(WaterRing.this, entity, velocity.multiply(userConfig.knockback));
         affectedEntities.add(entity);
       }
     }

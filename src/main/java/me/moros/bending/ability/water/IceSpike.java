@@ -39,23 +39,27 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -252,13 +256,15 @@ public class IceSpike extends AbilityInstance {
     }
 
     private boolean onEntityHit(@NonNull Entity entity) {
-      if (affectedEntities.contains(entity) || entity.equals(user.entity())) {
-        return false;
+      if (!affectedEntities.contains(entity) && !entity.equals(user.entity())) {
+        affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
+        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+        EntityMethods.applyVelocity(IceSpike.this, entity, Vector3d.PLUS_J.multiply(userConfig.knockup));
+        return true;
       }
-      affectedEntities.add(entity);
-      entity.setVelocity(Vector3d.PLUS_J.multiply(userConfig.knockup).clampVelocity());
-      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      return true;
+      return false;
     }
   }
 
@@ -269,6 +275,10 @@ public class IceSpike extends AbilityInstance {
     public double damage;
     @Modifiable(Attribute.STRENGTH)
     public double knockup;
+    @Modifiable(Attribute.STRENGTH)
+    public int power;
+    @Modifiable(Attribute.DURATION)
+    public long slowDuration;
 
     @Modifiable(Attribute.COOLDOWN)
     public long columnCooldown;
@@ -286,6 +296,8 @@ public class IceSpike extends AbilityInstance {
       selectRange = abilityNode.node("select-range").getDouble(10.0);
       damage = abilityNode.node("damage").getDouble(3.0);
       knockup = abilityNode.node("knock-up").getDouble(0.8);
+      power = abilityNode.node("slow-power").getInt(2) - 1;
+      slowDuration = abilityNode.node("slow-duration").getLong(3000);
 
       CommentedConfigurationNode columnNode = abilityNode.node("column");
       columnCooldown = columnNode.node("cooldown").getLong(1500);

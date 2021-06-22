@@ -200,8 +200,8 @@ public class OctopusForm extends AbilityInstance {
   private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3d dir = EntityMethods.entityCenter(entity).subtract(user.location());
-      entity.setVelocity(dir.normalize().multiply(userConfig.knockback).clampVelocity());
+      Vector3d dir = EntityMethods.entityCenter(entity).subtract(user.location()).normalize().multiply(userConfig.knockback);
+      EntityMethods.applyVelocity(this, entity, dir);
       affectedEntities.add(entity);
     }
     return false;

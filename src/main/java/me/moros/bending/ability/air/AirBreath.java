@@ -48,6 +48,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -151,7 +152,7 @@ public class AirBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      entity.setVelocity(ray.direction.normalize().multiply(userConfig.knockback).clampVelocity());
+      EntityMethods.applyVelocity(AirBreath.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       FireTick.extinguish(entity);
       if (entity instanceof LivingEntity) {
         LivingEntity livingEntity = (LivingEntity) entity;
@@ -167,7 +168,7 @@ public class AirBreath extends AbilityInstance {
       }
       BlockMethods.tryCoolLava(user, block);
       if (!MaterialUtil.isTransparentOrWater(block) && user.pitch() > 30) {
-        user.entity().setVelocity(user.direction().multiply(-userConfig.knockback).clampVelocity());
+        EntityMethods.applyVelocity(AirBreath.this, user.entity(), user.direction().multiply(-userConfig.knockback));
         FireTick.extinguish(user.entity());
       }
       return !MaterialUtil.isWater(block);

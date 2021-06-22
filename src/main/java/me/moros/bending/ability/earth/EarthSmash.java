@@ -325,8 +325,8 @@ public class EarthSmash extends AbilityInstance {
     public @NonNull UpdateResult update() {
       Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
       CollisionUtil.handleEntityCollisions(user, liftCollider, entity -> {
-        entity.setVelocity(new Vector3d(entity.getVelocity()).setY(userConfig.raiseEntityPush).clampVelocity());
-        return true;
+        Vector3d push = new Vector3d(entity.getVelocity()).setY(userConfig.raiseEntityPush);
+        return EntityMethods.applyVelocity(EarthSmash.this, entity, push);
       }, true, true);
 
       long time = System.currentTimeMillis();
@@ -450,7 +450,7 @@ public class EarthSmash extends AbilityInstance {
       affectedEntities.add(entity);
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       Vector3d velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
-      entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
+      EntityMethods.applyVelocity(EarthSmash.this, entity, velocity.multiply(userConfig.knockback));
       return false;
     }
 

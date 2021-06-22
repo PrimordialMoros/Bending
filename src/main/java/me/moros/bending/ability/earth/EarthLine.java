@@ -249,6 +249,7 @@ public class EarthLine extends AbilityInstance {
           break;
       }
       DamageUtil.damageEntity(entity, user, damage, description());
+      EntityMethods.applyVelocity(EarthLine.this, entity, direction.normalize().multiply(1.2));
       return true;
     }
 
@@ -290,7 +291,7 @@ public class EarthLine extends AbilityInstance {
         .damage(userConfig.explosionDamage)
         .fireTicks(40)
         .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 3, 0.5F))
-        .buildAndExplode(user, description(), location);
+        .buildAndExplode(EarthLine.this, location);
 
       Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
       List<Block> wall = WorldMethods.nearbyBlocks(center, userConfig.explosionRadius, predicate);
@@ -335,12 +336,13 @@ public class EarthLine extends AbilityInstance {
       }
 
       imprisoned = true;
-      entity.setVelocity(Vector3d.MINUS_J.toBukkitVector());
+      EntityMethods.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
       Material mat = material;
+      Vector3d center = new Vector3d(entity.getLocation()).add(new Vector3d(0, -1.1, 0));
+      Vector3d offset = new Vector3d(0, -0.7, 0);
       VectorMethods.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
-        Location loc = entity.getLocation().add(0, -1.1, 0);
-        new TempArmorStand(loc.add(v.toBukkitVector()), mat, userConfig.prisonDuration);
-        new TempArmorStand(loc.add(0, -0.7, 0), mat, userConfig.prisonDuration);
+        new TempArmorStand(center.add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
+        new TempArmorStand(center.add(offset).add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
       });
       MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(EnumSet.allOf(ActionType.class));
     }

@@ -54,6 +54,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -196,7 +197,7 @@ public class FireBurst extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         FireTick.ignite(user, entity, userConfig.fireTicks);
-        entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
+        EntityMethods.applyVelocity(FireBurst.this, entity, ray.direction.normalize().multiply(0.5));
       }
       return true;
     }

@@ -19,6 +19,7 @@
 
 package me.moros.bending.util;
 
+import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -73,29 +74,31 @@ public final class BendingExplosion {
     }
   }
 
-  public boolean explode(@NonNull User source, @NonNull AbilityDescription sourceDesc, @NonNull Vector3d center) {
+  public boolean explode(@NonNull Ability source, @NonNull Vector3d center) {
+    User user = source.user();
+    AbilityDescription desc = source.description();
     if (particles) {
-      playParticles(center.toLocation(source.world()));
+      playParticles(center.toLocation(user.world()));
     }
     if (soundEffect != null) {
-      soundEffect.play(center.toLocation(source.world()));
+      soundEffect.play(center.toLocation(user.world()));
     }
-    return CollisionUtil.handleEntityCollisions(source, new Sphere(center, size), entity -> {
+    return CollisionUtil.handleEntityCollisions(user, new Sphere(center, size), entity -> {
       Vector3d entityCenter = EntityMethods.entityCenter(entity);
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
-        DamageUtil.damageEntity(entity, source, damage * distanceFactor, sourceDesc);
-        FireTick.ignite(source, entity, fireTicks);
+        DamageUtil.damageEntity(entity, user, damage * distanceFactor, desc);
+        FireTick.ignite(user, entity, fireTicks);
       } else {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
       }
       double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
-      if (entity.equals(source.entity())) {
+      if (entity.equals(user.entity())) {
         knockback *= selfKnockbackFactor;
       }
       Vector3d dir = entityCenter.subtract(center).normalize().multiply(knockback);
-      entity.setVelocity(dir.clampVelocity());
+      EntityMethods.applyVelocity(source, entity, dir);
       return true;
     }, livingOnly, true);
   }
@@ -164,8 +167,8 @@ public final class BendingExplosion {
       return new BendingExplosion(this);
     }
 
-    public boolean buildAndExplode(@NonNull User source, @NonNull AbilityDescription sourceDesc, @NonNull Vector3d center) {
-      return build().explode(source, sourceDesc, center);
+    public boolean buildAndExplode(@NonNull Ability source, @NonNull Vector3d center) {
+      return build().explode(source, center);
     }
   }
 }

@@ -44,6 +44,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -145,7 +146,7 @@ public class Catapult extends AbilityInstance {
     double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
     return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
       FireTick.extinguish(entity);
-      entity.setVelocity(direction.multiply(power).clampVelocity());
+      EntityMethods.applyVelocity(this, entity, direction.multiply(power));
       return true;
     }, true, true);
   }

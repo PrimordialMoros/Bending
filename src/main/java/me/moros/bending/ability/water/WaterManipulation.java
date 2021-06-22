@@ -57,6 +57,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -260,10 +261,12 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      entity.setVelocity(direction.multiply(0.5).clampVelocity());
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
-      PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+      EntityMethods.applyVelocity(WaterManipulation.this, entity, direction.multiply(0.5));
+      if (isIce) {
+        int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
+        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
+      }
       return true;
     }
 

@@ -176,7 +176,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       .fireTicks(userConfig.fireTicks)
       .ignoreInsideCollider(ignoreCollider)
       .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F))
-      .buildAndExplode(user, description(), center);
+      .buildAndExplode(this, center);
 
     FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 

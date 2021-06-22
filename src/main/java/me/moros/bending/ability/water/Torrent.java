@@ -46,6 +46,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -173,8 +174,6 @@ public class Torrent extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
-      entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
       if (entity instanceof LivingEntity) {
         if (clicked && !shouldFreeze) {
           shouldFreeze = true;
@@ -185,6 +184,8 @@ public class Torrent extends AbilityInstance {
           affectedEntities.add(entity);
         }
       }
+      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush)).multiply(userConfig.knockback);
+      EntityMethods.applyVelocity(Torrent.this, entity, velocity);
       return false;
     }
 

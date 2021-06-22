@@ -40,6 +40,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -125,7 +126,7 @@ public class FireJet extends AbilityInstance {
     double timeFactor = (System.currentTimeMillis() - startTime) / (double) duration;
     double speed = halfSpeed + halfSpeed * Math.sin(Math.PI * timeFactor);
 
-    user.entity().setVelocity(user.direction().multiply(speed).clampVelocity());
+    EntityMethods.applyVelocity(this, user.entity(), user.direction().multiply(speed));
     user.entity().setFallDistance(0);
 
     Vector3d target = user.location().add(user.velocity().negate());

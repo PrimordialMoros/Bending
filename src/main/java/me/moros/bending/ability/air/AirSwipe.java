@@ -201,7 +201,7 @@ public class AirSwipe extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
         Vector3d velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
-        entity.setVelocity(velocity.clampVelocity());
+        EntityMethods.applyVelocity(AirSwipe.this, entity, velocity);
         affectedEntities.add(entity);
         return true;
       }

@@ -204,10 +204,10 @@ public class MetalCable extends AbilityInstance {
     }
     Vector3d direction = targetLocation.subtract(new Vector3d(entityToMove.getLocation())).normalize();
     if (distance > 3) {
-      entityToMove.setVelocity(direction.multiply(userConfig.pullSpeed).clampVelocity());
+      EntityMethods.applyVelocity(this, entityToMove, direction.multiply(userConfig.pullSpeed));
     } else {
       if (target.type == CableTarget.Type.ENTITY) {
-        entityToMove.setVelocity(Vector3d.ZERO.toBukkitVector());
+        EntityMethods.applyVelocity(this, entityToMove, Vector3d.ZERO);
         if (target.entity instanceof FallingBlock) {
           FallingBlock fb = (FallingBlock) target.entity;
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
@@ -220,9 +220,9 @@ public class MetalCable extends AbilityInstance {
         return false;
       } else {
         if (distance <= 3 && distance > 1.5) {
-          entityToMove.setVelocity(direction.multiply(0.4 * userConfig.pullSpeed).clampVelocity());
+          EntityMethods.applyVelocity(this, entityToMove, direction.multiply(0.4 * userConfig.pullSpeed));
         } else {
-          user.entity().setVelocity(new Vector3d(0, 0.5, 0).toBukkitVector());
+          EntityMethods.applyVelocity(this, entityToMove, new Vector3d(0, 0.5, 0));
           return false;
         }
       }
@@ -343,7 +343,7 @@ public class MetalCable extends AbilityInstance {
       .orElseGet(() -> user.rayTrace(userConfig.projectileRange));
 
     Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
-    target.entity.setVelocity(velocity.add(new Vector3d(0, 0.2, 0)).clampVelocity());
+    EntityMethods.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));
     target.entity.setFallDistance(0);
     if (target.entity instanceof FallingBlock) {
       removalPolicy = Policies.builder()

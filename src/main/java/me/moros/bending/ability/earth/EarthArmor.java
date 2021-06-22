@@ -43,6 +43,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -153,7 +154,7 @@ public class EarthArmor extends AbilityInstance {
     }
 
     Vector3d dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
-    fallingBlock.fallingBlock().setVelocity(dir.clampVelocity());
+    EntityMethods.applyVelocity(this, fallingBlock.fallingBlock(), dir);
     return true;
   }
 

@@ -55,6 +55,7 @@ import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -212,7 +213,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       .fireTicks(userConfig.fireTicks)
       .ignoreInsideCollider(ignoreCollider)
       .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 5, 1))
-      .buildAndExplode(user, description(), center);
+      .buildAndExplode(this, center);
   }
 
   private class FireStream extends ParticleStream {
@@ -253,7 +254,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       FireTick.ignite(user, entity, userConfig.fireTicks);
-      entity.setVelocity(ray.direction.normalize().multiply(0.5).clampVelocity());
+      EntityMethods.applyVelocity(FireBlast.this, entity, ray.direction.normalize().multiply(0.5));
       return true;
     }
 

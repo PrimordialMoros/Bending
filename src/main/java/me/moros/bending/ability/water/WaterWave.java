@@ -43,6 +43,7 @@ import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -98,8 +99,7 @@ public class WaterWave extends AbilityInstance {
 
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
-
-    user.entity().setVelocity(user.direction().multiply(userConfig.speed * factor).clampVelocity());
+    EntityMethods.applyVelocity(this, user.entity(), user.direction().multiply(userConfig.speed * factor));
     user.entity().setFallDistance(0);
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);

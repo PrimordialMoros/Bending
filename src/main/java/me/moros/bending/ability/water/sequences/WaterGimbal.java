@@ -55,6 +55,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -295,7 +296,7 @@ public class WaterGimbal extends AbilityInstance {
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
-      entity.setVelocity(velocity.multiply(userConfig.knockback).clampVelocity());
+      EntityMethods.applyVelocity(WaterGimbal.this, entity, velocity);
       affectedEntities.add(entity);
       return false;
     }

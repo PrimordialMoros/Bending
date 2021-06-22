@@ -47,6 +47,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -218,7 +219,7 @@ public class AirBurst extends AbilityInstance {
       } else {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
-      entity.setVelocity(velocity.clampVelocity());
+      EntityMethods.applyVelocity(AirBurst.this, entity, velocity);
       entity.setFallDistance(0);
       return false;
     }

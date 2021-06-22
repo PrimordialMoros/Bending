@@ -216,7 +216,7 @@ public class AirBlast extends AbilityInstance {
       } else {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
-      entity.setVelocity(velocity.clampVelocity());
+      EntityMethods.applyVelocity(AirBlast.this, entity, velocity);
       entity.setFallDistance(0);
       return false;
     }

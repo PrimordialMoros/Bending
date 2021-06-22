@@ -78,13 +78,13 @@ public class EarthCling extends AbilityInstance implements Ability {
     long counter = Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count();
     if (counter > 0 && EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
       if (counter == 2) {
-        user.entity().setVelocity(Vector3d.ZERO.toBukkitVector());
+        EntityMethods.applyVelocity(this, user.entity(), Vector3d.ZERO);
         user.entity().setFallDistance(0);
       } else {
         if (user.velocity().getY() < 0) {
           float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
+          EntityMethods.applyVelocity(this, user.entity(), user.velocity().multiply(userConfig.speed));
           user.entity().setFallDistance(fallDistance);
-          user.entity().setVelocity(user.velocity().multiply(userConfig.speed).clampVelocity());
           ParticleUtil.create(Particle.CRIT, user.entity().getEyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05);
           ParticleUtil.create(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)

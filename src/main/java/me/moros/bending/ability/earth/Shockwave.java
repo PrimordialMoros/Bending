@@ -52,6 +52,7 @@ import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -173,7 +174,7 @@ public class Shockwave extends AbilityInstance {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
         Vector3d push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
-        entity.setVelocity(push.clampVelocity());
+        EntityMethods.applyVelocity(this, entity, push);
         affectedEntities.add(entity);
       }
     }

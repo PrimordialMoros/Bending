@@ -109,6 +109,7 @@ public class Tornado extends AbilityInstance {
         return false;
       }
 
+      Vector3d velocity;
       if (entity.equals(user.entity())) {
         double velY;
         if (dy >= height * .95) {
@@ -118,14 +119,13 @@ public class Tornado extends AbilityInstance {
         } else {
           velY = 0.6;
         }
-        Vector3d velocity = user.direction().setY(velY).multiply(factor);
-        entity.setVelocity(velocity.clampVelocity());
+        velocity = user.direction().setY(velY).multiply(factor);
       } else {
         Vector3d normal = delta.setY(0).normalize();
         Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
-        Vector3d velocity = ortho.add(normal).normalize().multiply(factor);
-        entity.setVelocity(velocity.clampVelocity());
+        velocity = ortho.add(normal).normalize().multiply(factor);
       }
+      EntityMethods.applyVelocity(this, entity, velocity);
       return false;
     }, true, true);
 

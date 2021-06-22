@@ -152,7 +152,7 @@ public class EarthGlove extends AbilityInstance {
       Vector3d returnLocation = user.eyeLocation().add(user.direction().multiply(isMetal ? 5 : 1.5));
       if (location.distanceSq(returnLocation) < 1) {
         if (grabbed && grabbedTarget != null) {
-          grabbedTarget.setVelocity(Vector3d.ZERO.toBukkitVector());
+          EntityMethods.applyVelocity(this, grabbedTarget, Vector3d.ZERO);
         }
         return UpdateResult.REMOVE;
       }
@@ -162,7 +162,7 @@ public class EarthGlove extends AbilityInstance {
           return UpdateResult.REMOVE;
         }
         Vector3d dir = returnLocation.subtract(new Vector3d(grabbedTarget.getLocation())).normalize().multiply(GLOVE_GRABBED_SPEED);
-        grabbedTarget.setVelocity(dir.clampVelocity());
+        EntityMethods.applyVelocity(this, grabbedTarget, dir);
         glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
         return UpdateResult.CONTINUE;
       } else {
@@ -255,7 +255,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private void updateGloveVelocity(Vector3d velocity) {
-    glove.setVelocity(velocity.clampVelocity());
+    EntityMethods.applyVelocity(this, glove, velocity);
     lastVelocity = new Vector3d(glove.getVelocity());
   }
 

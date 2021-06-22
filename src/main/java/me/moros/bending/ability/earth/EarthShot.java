@@ -188,7 +188,7 @@ public class EarthShot extends AbilityInstance {
         Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
-      projectile.fallingBlock().setVelocity(velocity.normalize().multiply(1.8).clampVelocity());
+      EntityMethods.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(1.8));
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
       if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.center()), this::onEntityHit, true)) {
         return UpdateResult.REMOVE;
@@ -284,7 +284,7 @@ public class EarthShot extends AbilityInstance {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
       projectile.fallingBlock().setGravity(true);
-      projectile.fallingBlock().setVelocity(dir.add(new Vector3d(0, 0.2, 0)).clampVelocity());
+      EntityMethods.applyVelocity(this, projectile.fallingBlock(), dir.add(new Vector3d(0, 0.2, 0)));
     } else {
       origin = Vector3d.center(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);

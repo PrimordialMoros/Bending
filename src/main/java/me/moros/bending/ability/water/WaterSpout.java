@@ -124,7 +124,7 @@ public class WaterSpout extends AbilityInstance {
   }
 
   public void handleMovement(@NonNull Vector3d velocity) {
-    AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
+    AbstractSpout.limitVelocity(this, velocity, userConfig.maxSpeed);
   }
 
   private class Spout extends AbstractSpout {
@@ -157,7 +157,7 @@ public class WaterSpout extends AbilityInstance {
     @Override
     public void postRender() {
       if (!user.flying()) {
-        user.entity().setVelocity(user.velocity().add(g).clampVelocity());
+        EntityMethods.applyVelocity(WaterSpout.this, user.entity(), user.velocity().add(g));
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
         SoundUtil.WATER.play(user.entity().getLocation());

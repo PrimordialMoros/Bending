@@ -156,7 +156,7 @@ public class AirScooter extends AbilityInstance {
     double delta = getPrediction() - height;
     double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
     Vector3d velocity = user.direction().setY(0).normalize().multiply(userConfig.speed).setY(force);
-    user.entity().setVelocity(velocity.clampVelocity());
+    EntityMethods.applyVelocity(this, user.entity(), velocity);
     user.entity().setFallDistance(0);
     return true;
   }

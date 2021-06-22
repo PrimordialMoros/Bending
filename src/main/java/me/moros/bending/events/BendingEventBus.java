@@ -23,6 +23,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent.BindType;
 import me.moros.bending.events.ElementChangeEvent.ElementAction;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -41,7 +42,7 @@ public final class BendingEventBus {
     manager = plugin.getServer().getPluginManager();
   }
 
-  public void postBendingPlayerLoadEvent(@NonNull BendingPlayer player) {
+  public void postPlayerLoadEvent(@NonNull BendingPlayer player) {
     manager.callEvent(new BendingPlayerLoadEvent(player));
   }
 
@@ -88,7 +89,7 @@ public final class BendingEventBus {
     return !event.isCancelled();
   }
 
-  public @NonNull BendingCombustEvent postBendingCombustEvent(@NonNull User source, @NonNull Entity target, int duration) {
+  public @NonNull BendingCombustEvent postCombustEvent(@NonNull User source, @NonNull Entity target, int duration) {
     BendingCombustEvent event = new BendingCombustEvent(source, target, duration);
     manager.callEvent(event);
     return event;
@@ -102,6 +103,12 @@ public final class BendingEventBus {
 
   public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
     BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
+    manager.callEvent(event);
+    return event;
+  }
+
+  public @NonNull BendingVelocityEvent postVelocityEvent(@NonNull User source, @NonNull LivingEntity target, @NonNull AbilityDescription desc, @NonNull Vector3d velocity) {
+    BendingVelocityEvent event = new BendingVelocityEvent(source, target, desc, velocity);
     manager.callEvent(event);
     return event;
   }

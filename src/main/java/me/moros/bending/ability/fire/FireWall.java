@@ -238,7 +238,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!(entity instanceof LivingEntity)) {
-      entity.setVelocity(Vector3d.ZERO.toBukkitVector());
+      EntityMethods.applyVelocity(this, entity, Vector3d.ZERO);
       return true;
     }
 
@@ -252,7 +252,7 @@ public class FireWall extends AbilityInstance {
         }
         Vector3d pos = EntityMethods.entityCenter(entity);
         Vector3d velocity = pos.subtract(collider.closestPosition(pos)).normalize().multiply(userConfig.knockback);
-        entity.setVelocity(velocity.clampVelocity());
+        EntityMethods.applyVelocity(this, entity, velocity);
         return true;
       } else {
         cachedEntities.add(entity);

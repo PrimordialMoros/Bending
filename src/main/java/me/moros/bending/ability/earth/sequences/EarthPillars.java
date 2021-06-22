@@ -46,6 +46,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -162,7 +163,7 @@ public class EarthPillars extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       }
-      entity.setVelocity(Vector3d.PLUS_J.multiply(userConfig.knockup * factor).clampVelocity());
+      EntityMethods.applyVelocity(EarthPillars.this, entity, Vector3d.PLUS_J.multiply(userConfig.knockup * factor));
       return true;
     }
   }

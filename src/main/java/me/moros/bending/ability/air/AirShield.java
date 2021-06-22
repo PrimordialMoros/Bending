@@ -122,7 +122,7 @@ public class AirShield extends AbilityInstance {
       Vector3d normal = toEntity.setY(0).normalize();
       double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;
       strength = Math.max(0, Math.min(1, strength));
-      entity.setVelocity(entity.getVelocity().add(normal.multiply(strength).clampVelocity()));
+      EntityMethods.applyVelocity(this, entity, new Vector3d(entity.getVelocity()).add(normal.multiply(strength)));
       return false;
     }, false);
 

@@ -33,6 +33,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -86,13 +87,9 @@ public class FerroControl extends AbilityInstance implements Ability {
         return UpdateResult.CONTINUE;
       }
       Vector3d targetLocation = user.eyeLocation().add(user.direction().multiply(userConfig.entityRange));
-      Vector3d entityLocation = new Vector3d(controlledEntity.getLocation());
-      if (entityLocation.distanceSq(targetLocation) < 1) {
-        controlledEntity.setVelocity(Vector3d.ZERO.toBukkitVector());
-      } else {
-        Vector3d dir = targetLocation.subtract(entityLocation).normalize().multiply(userConfig.controlSpeed);
-        controlledEntity.setVelocity(dir.clampVelocity());
-      }
+      Vector3d dir = targetLocation.subtract(new Vector3d(controlledEntity.getLocation()));
+      Vector3d velocity = dir.lengthSq() < 1 ? Vector3d.ZERO : dir.normalize().multiply(userConfig.controlSpeed);
+      EntityMethods.applyVelocity(this, controlledEntity, velocity);
     }
 
     return UpdateResult.CONTINUE;

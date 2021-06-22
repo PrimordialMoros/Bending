@@ -112,7 +112,7 @@ public class AirSpout extends AbilityInstance {
   }
 
   public void handleMovement(@NonNull Vector3d velocity) {
-    AbstractSpout.limitVelocity(user, velocity, userConfig.maxSpeed);
+    AbstractSpout.limitVelocity(this, velocity, userConfig.maxSpeed);
   }
 
   private class Spout extends AbstractSpout {

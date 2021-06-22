@@ -135,7 +135,7 @@ public class AirPunch extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3d velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
-      entity.setVelocity(velocity.clampVelocity());
+      EntityMethods.applyVelocity(AirPunch.this, entity, velocity);
       return true;
     }
 

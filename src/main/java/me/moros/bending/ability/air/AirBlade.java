@@ -47,6 +47,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -206,7 +207,7 @@ public class AirBlade extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
-      entity.setVelocity(velocity.clampVelocity());
+      EntityMethods.applyVelocity(AirBlade.this, entity, velocity);
       return true;
     }
 

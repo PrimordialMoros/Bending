@@ -45,6 +45,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -124,7 +125,7 @@ public class FireSpin extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         FireTick.ignite(user, entity);
-        entity.setVelocity(ray.direction.normalize().multiply(userConfig.knockback).clampVelocity());
+        EntityMethods.applyVelocity(FireSpin.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       }
       return true;
     }
