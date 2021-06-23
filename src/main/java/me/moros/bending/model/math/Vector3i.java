@@ -86,6 +86,27 @@ public class Vector3i {
   }
 
   /**
+   * @return a new vector copy with the given x coordinate
+   */
+  public @NonNull Vector3i setX(int value) {
+    return new Vector3i(value, y, z);
+  }
+
+  /**
+   * @return a new vector copy with the given y coordinate
+   */
+  public @NonNull Vector3i setY(int value) {
+    return new Vector3i(x, value, z);
+  }
+
+  /**
+   * @return a new vector copy with the given z coordinate
+   */
+  public @NonNull Vector3i setZ(int value) {
+    return new Vector3i(x, y, value);
+  }
+
+  /**
    * Get the vector coordinates as a dimension 3 array.
    * @return vector coordinates
    * @see #Vector3i(int[])
@@ -97,14 +118,14 @@ public class Vector3i {
   /**
    * @return Euclidean norm for the vector
    */
-  public double getNorm() {
+  public double length() {
     return Math.sqrt(x * x + y * y + z * z);
   }
 
   /**
    * @return square of the Euclidean norm for the vector
    */
-  public int getNormSq() {
+  public int lengthSq() {
     return x * x + y * y + z * z;
   }
 
@@ -147,11 +168,11 @@ public class Vector3i {
     return new Vector3i(x * v.x, y * v.y, z * v.z);
   }
 
-  public int dotProduct(@NonNull Vector3i v) {
+  public int dot(@NonNull Vector3i v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
-  public @NonNull Vector3i crossProduct(@NonNull Vector3i v) {
+  public @NonNull Vector3i cross(@NonNull Vector3i v) {
     int newX = y * v.z - v.y * z;
     int newY = z * v.x - v.z * x;
     int newZ = x * v.y - v.x * y;
