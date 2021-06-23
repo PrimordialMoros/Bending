@@ -76,6 +76,7 @@ tasks {
         options.compilerArgs.add("-Xlint:deprecation")
         options.isFork = true
         options.forkOptions.executable = "javac"
+        options.encoding = "UTF-8"
     }
     named<Copy>("processResources") {
         filesMatching("plugin.yml") {

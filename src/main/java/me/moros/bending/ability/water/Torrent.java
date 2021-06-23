@@ -196,26 +196,28 @@ public class Torrent extends AbilityInstance {
       }
     }
 
-    public void freeze() {
+    public boolean freeze() {
       if (!clicked || stream.isEmpty()) {
-        return;
+        return false;
       }
       Block head = stream.getFirst();
       if (head == null) {
-        return;
+        return false;
       }
       cleanAll();
       for (Block block : stream) {
         TempBlock.create(block, Material.ICE.createBlockData(), userConfig.freezeDuration, true);
       }
-      FragileStructure.tryDamageStructure(List.of(head), 8);
       stream.clear();
+      return true;
     }
 
     @Override
     public void onBlockHit(@NonNull Block block) {
       if (clicked) {
-        freeze();
+        if (freeze()) {
+          FragileStructure.tryDamageStructure(List.of(block), 8);
+        }
         return;
       }
       FragileStructure.tryDamageStructure(List.of(block), 1);
