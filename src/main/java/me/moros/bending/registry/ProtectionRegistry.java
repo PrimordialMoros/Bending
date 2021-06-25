@@ -37,7 +37,7 @@ import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Represents the protection system which hooks into other region protection plugins.
+ * Holds all the registered protection hooks for the current session.
  */
 public final class ProtectionRegistry implements Registry<Protection> {
   private final Map<String, Protection> protections;
@@ -54,7 +54,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
   }
 
   /**
-   * Check if there is a proection method registered for the specified key.
+   * Check if there is a protection method registered for the specified key.
    * @param name the protection name
    * @return true if that protection is registered, false otherwise
    */

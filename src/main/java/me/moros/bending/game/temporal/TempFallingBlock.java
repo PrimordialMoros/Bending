@@ -22,7 +22,6 @@ package me.moros.bending.game.temporal;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.util.Metadata;
 import me.moros.bending.util.Tasker;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -45,7 +44,6 @@ public class TempFallingBlock implements Temporary {
     fallingBlock.setVelocity(velocity.clampVelocity());
     fallingBlock.setGravity(gravity);
     fallingBlock.setDropItem(false);
-    fallingBlock.setMetadata(Metadata.FALLING_BLOCK, Metadata.emptyMetadata());
     MANAGER.addEntry(fallingBlock, this);
     revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }

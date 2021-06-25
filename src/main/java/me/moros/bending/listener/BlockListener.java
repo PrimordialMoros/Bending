@@ -26,7 +26,6 @@ import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -135,11 +134,10 @@ public class BlockListener implements Listener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockChange(EntityChangeBlockEvent event) {
     if (event.getEntityType() == EntityType.FALLING_BLOCK) {
-      FallingBlock fb = (FallingBlock) event.getEntity();
-      if (fb.hasMetadata(Metadata.FALLING_BLOCK)) {
+      TempFallingBlock.MANAGER.get((FallingBlock) event.getEntity()).ifPresent(tfb -> {
         event.setCancelled(true);
-      }
-      TempFallingBlock.MANAGER.get(fb).ifPresent(TempFallingBlock::revert);
+        tfb.revert();
+      });
     } else {
       if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) {
         event.setCancelled(true);
