@@ -42,12 +42,12 @@ public final class SoundUtil {
   public static final SoundEffect FIRE = new SoundEffect(Sound.BLOCK_FIRE_AMBIENT);
   public static final SoundEffect COMBUSTION = new SoundEffect(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1, 0);
   public static final SoundEffect LIGHTNING = new SoundEffect(Sound.ENTITY_CREEPER_HURT, 1, 0);
-  public static final SoundEffect LIGHTNING_BOLT = new SoundEffect(Sound.ENTITY_LIGHTNING_BOLT_THUNDER);
+  public static final SoundEffect LIGHTNING_CHARGING = new SoundEffect(Sound.BLOCK_BEEHIVE_WORK, 2, 0.5F);
 
   public static final SoundEffect FIRE_EXTINGUISH = new SoundEffect(Sound.BLOCK_FIRE_EXTINGUISH, 0.5F, 1);
   public static final SoundEffect LAVA_EXTINGUISH = new SoundEffect(Sound.BLOCK_LAVA_EXTINGUISH);
 
-  public static final SoundEffect EXPLOSION = new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE);
+  public static final SoundEffect EXPLOSION = new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 2, 0);
 
   private SoundUtil() {
   }

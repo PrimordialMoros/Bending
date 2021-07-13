@@ -31,6 +31,7 @@ import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -42,16 +43,17 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -59,11 +61,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class EarthShot extends AbilityInstance {
+public class EarthShot extends AbilityInstance implements Explosive {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
 
   private enum Mode {ROCK, METAL, MAGMA}
@@ -85,6 +86,7 @@ public class EarthShot extends AbilityInstance {
   private boolean ready = false;
   private boolean launched = false;
   private boolean canConvert = false;
+  private boolean exploded = false;
   private double damage;
   private int targetY;
   private long magmaStartTime = 0;
@@ -171,7 +173,7 @@ public class EarthShot extends AbilityInstance {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, description())) {
+    if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
@@ -181,16 +183,19 @@ public class EarthShot extends AbilityInstance {
       }
 
       Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity());
-      if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < 2.25) {
+      double minLength = userConfig.speed * 0.85;
+      if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < minLength * minLength) {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking()) {
         Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
-      EntityMethods.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(1.8));
+      EntityMethods.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
-      if (CollisionUtil.handleEntityCollisions(user, BOX.at(projectile.center()), this::onEntityHit, true)) {
+      Collider c = BOX.at(projectile.center());
+      boolean magma = mode == Mode.MAGMA;
+      if (CollisionUtil.handleEntityCollisions(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
     } else {
@@ -205,10 +210,13 @@ public class EarthShot extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (entity instanceof LivingEntity && userConfig.maxAmount > 1) {
-      ((LivingEntity) entity).setNoDamageTicks(0);
+    if (mode == Mode.MAGMA) {
+      explode();
+      return false;
     }
     DamageUtil.damageEntity(entity, user, damage, description());
+    Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity()).normalize().multiply(0.4);
+    EntityMethods.applyVelocity(this, entity, velocity);
     return true;
   }
 
@@ -229,7 +237,7 @@ public class EarthShot extends AbilityInstance {
     if (!canConvert) {
       return;
     }
-    Block check = WorldMethods.rayTraceBlocks(user.world(), user.ray(), userConfig.selectRange * 2, false, true);
+    Block check = RayTrace.of(user).range(userConfig.selectRange * 2).ignoreLiquids(false).result(user.world()).block();
     if (user.sneaking() && readySource.equals(check)) {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
@@ -315,24 +323,38 @@ public class EarthShot extends AbilityInstance {
   }
 
   private Vector3d getTarget(Block source) {
-    return user.rayTraceEntity(userConfig.range)
-      .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.range, b -> b.equals(source)));
+    return user.compositeRayTrace(userConfig.range).result(user.world(), b -> b.equals(source)).entityCenterOrPosition();
+  }
+
+
+  @Override
+  public void explode() {
+    if (exploded || mode != Mode.MAGMA) {
+      return;
+    }
+    exploded = true;
+    Vector3d center = projectile.center();
+    Location spawnLoc = center.toLocation(user.world());
+    ParticleUtil.create(Particle.SMOKE_LARGE, spawnLoc).count(12).offset(1, 1, 1).extra(0.05).spawn();
+    ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
+    BendingExplosion.builder()
+      .size(userConfig.explosionRadius)
+      .damage(damage)
+      .fireTicks(0)
+      .particles(false)
+      .soundEffect(SoundUtil.EXPLOSION)
+      .buildAndExplode(this, center);
   }
 
   @Override
   public void onDestroy() {
-    if (projectile.fallingBlock().isValid()) {
+    if (projectile != null) {
       if (launched) {
         Location spawnLoc = projectile.center().toLocation(user.world());
         BlockData data = projectile.fallingBlock().getBlockData();
         ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(6).offset(1, 1, 1).data(data).spawn();
         ParticleUtil.create(Particle.BLOCK_DUST, spawnLoc).count(4).offset(1, 1, 1).data(data).spawn();
-        if (mode == Mode.MAGMA) {
-          ParticleUtil.create(Particle.SMOKE_LARGE, spawnLoc).count(12).offset(1, 1, 1).extra(0.05).spawn();
-          ParticleUtil.create(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
-          SoundUtil.EXPLOSION.play(spawnLoc, 1.5F, 0);
-        }
+        explode();
         Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
         FragileStructure.tryDamageStructure(List.of(projected), mode == Mode.MAGMA ? 6 : 4);
       }
@@ -372,8 +394,11 @@ public class EarthShot extends AbilityInstance {
     @Modifiable(Attribute.AMOUNT)
     public int maxAmount;
 
-    public boolean allowConvertMagma;
     public boolean allowQuickLaunch;
+
+    public boolean allowConvertMagma;
+    @Modifiable(Attribute.RADIUS)
+    public double explosionRadius;
 
     @Override
     public void onConfigReload() {
@@ -384,10 +409,14 @@ public class EarthShot extends AbilityInstance {
       range = abilityNode.node("range").getDouble(48.0);
       damage = abilityNode.node("damage").getDouble(3.0);
       chargeTime = abilityNode.node("charge-time").getLong(1000);
-      speed = abilityNode.node("speed").getDouble(1.8);
+      speed = abilityNode.node("speed").getDouble(1.6);
       maxAmount = abilityNode.node("max-sources").getInt(1);
-      allowConvertMagma = abilityNode.node("allow-convert-magma").getBoolean(true);
       allowQuickLaunch = abilityNode.node("allow-quick-launch").getBoolean(true);
+
+      CommentedConfigurationNode magmaNode = abilityNode.node("magma");
+
+      allowConvertMagma = magmaNode.node("allow-convert").getBoolean(true);
+      explosionRadius = magmaNode.node("radius").getDouble(1.5);
     }
   }
 }

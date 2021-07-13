@@ -246,8 +246,7 @@ public class WaterRing extends AbilityInstance {
     for (int i = 0; i < Math.min(ring.size(), FastMath.ceil(sources * 0.8)); i++) {
       Block block = ring.get(i);
       if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
-        ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-          .count(5).offset(0.25, 0.25, 0.25).spawn();
+        ParticleUtil.createBubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.create(block, Material.WATER.createBlockData(), 250);
       }

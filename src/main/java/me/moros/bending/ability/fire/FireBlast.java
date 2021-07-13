@@ -51,6 +51,7 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -268,7 +269,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3d.center(b), reverse), userConfig.igniteRadius * factor + 2) == null) {
+          if (RayTrace.of(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).result(user.world()).hit()) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {
@@ -306,6 +307,8 @@ public class FireBlast extends AbilityInstance implements Explosive {
     public double chargeFactor;
     @Modifiable(Attribute.CHARGE_TIME)
     public long maxChargeTime;
+    @Modifiable(Attribute.COOLDOWN)
+    public long chargedCooldown;
 
     @Override
     public void onConfigReload() {
@@ -321,6 +324,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
       chargeFactor = Math.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
       maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);
+      chargedCooldown = abilityNode.node("charge").node("cooldown").getLong(500);
 
       abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");
       abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");

@@ -68,7 +68,7 @@ public final class ConfigManager {
       Files.createDirectories(path.getParent());
       configRoot = loader.load();
     } catch (IOException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
     }
   }
 
@@ -77,7 +77,7 @@ public final class ConfigManager {
       configRoot = loader.load();
       instances.forEach(Configurable::reload);
     } catch (IOException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
     }
   }
 
@@ -86,7 +86,7 @@ public final class ConfigManager {
       Bending.logger().info("Saving bending config");
       loader.save(configRoot);
     } catch (IOException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
     }
   }
 
@@ -113,7 +113,7 @@ public final class ConfigManager {
     try {
       newConfig = (T) config.clone();
     } catch (CloneNotSupportedException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
       return config;
     }
 
@@ -134,7 +134,7 @@ public final class ConfigManager {
     try {
       value = ((Number) field.get(config)).doubleValue();
     } catch (IllegalAccessException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
       return;
     }
 
@@ -154,7 +154,7 @@ public final class ConfigManager {
     try {
       field.set(config, converters.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
     } catch (IllegalAccessException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
     }
   }
 

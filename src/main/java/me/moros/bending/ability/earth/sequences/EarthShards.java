@@ -93,7 +93,7 @@ public class EarthShards extends AbilityInstance {
         nextFireTime = time + userConfig.interval;
         Vector3d rightOrigin = user.handSide(true);
         Vector3d leftOrigin = user.handSide(false);
-        Vector3d target = user.rayTrace(userConfig.range);
+        Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).position();
         double distance = target.distance(user.eyeLocation());
         for (int i = 0; i < 2; i++) {
           if (firedShots >= userConfig.maxShots) {

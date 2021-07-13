@@ -39,11 +39,11 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -68,7 +68,7 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
-    Block targetBlock = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.selectRange);
+    Block targetBlock = RayTrace.of(user).range(config.selectRange).result(user.world()).block();
     if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
     }

@@ -42,6 +42,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.material.MaterialUtil;
@@ -126,16 +127,14 @@ public class AirBlast extends AbilityInstance {
   }
 
   private boolean selectOrigin() {
-    origin = user.rayTrace(userConfig.selectRange)
-      .subtract(user.direction().multiply(0.5));
+    origin = RayTrace.of(user).range(userConfig.selectRange).result(user.world()).position().subtract(user.direction().multiply(0.5));
     selectedOrigin = true;
     return user.canBuild(origin.toBlock(user.world()));
   }
 
   private void launch() {
     launched = true;
-    Vector3d target = user.rayTraceEntity(userConfig.range).map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.range));
+    Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
     if (user.sneaking()) {
       Vector3d temp = new Vector3d(origin.toArray());
       origin = new Vector3d(target.toArray());

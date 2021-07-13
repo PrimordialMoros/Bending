@@ -50,7 +50,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -137,7 +136,7 @@ public class AirBreath extends AbilityInstance {
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       if (MaterialUtil.isWater(spawnLoc.getBlock())) {
-        ParticleUtil.create(Particle.WATER_BUBBLE, spawnLoc).count(3).offset(offset, offset, offset).spawn();
+        ParticleUtil.createBubble(spawnLoc.getBlock()).spawn();
       } else {
         ParticleUtil.createAir(spawnLoc).count(FastMath.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
       }

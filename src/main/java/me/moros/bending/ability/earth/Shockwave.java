@@ -208,7 +208,7 @@ public class Shockwave extends AbilityInstance {
     // First update in same tick to only apply cooldown if there are valid ripples
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     if (streams.isEmpty()) {
-      removalPolicy = (u, d) -> true;
+      removalPolicy = (u, d) -> true; // Remove in next tick
     } else {
       removalPolicy = Policies.builder().build();
       user.addCooldown(description(), userConfig.cooldown);

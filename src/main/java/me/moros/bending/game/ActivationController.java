@@ -57,6 +57,8 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.util.RayTrace;
+import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
@@ -122,7 +124,9 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    if (user.rayTraceEntity(3).isPresent()) {
+    RayTrace rayTrace = RayTrace.of(user).range(3).type(Type.ENTITY)
+      .entityPredicate(e -> e instanceof LivingEntity && !e.equals(user.entity()));
+    if (rayTrace.result(user.world()).hit()) {
       Bending.game().sequenceManager().registerStep(user, Activation.ATTACK_ENTITY);
     } else {
       Bending.game().sequenceManager().registerStep(user, Activation.ATTACK);

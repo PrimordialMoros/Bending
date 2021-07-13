@@ -41,7 +41,6 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
-import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
@@ -52,13 +51,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -217,11 +216,10 @@ public class WaterManipulation extends AbilityInstance {
       }
       Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
       if (selectSphere.intersects(user.ray(dist))) {
-        Ray inverse = new Ray(user.eyeLocation(), center.subtract(user.eyeLocation()));
-        double range = Math.min(1, inverse.direction.length());
-        Block block = center.toBlock(user.world());
-        Block rayTraced = WorldMethods.rayTraceBlocks(user.world(), inverse, range, false, true);
-        if (block.equals(rayTraced)) {
+        Vector3d direction = center.subtract(user.eyeLocation());
+        double range = Math.min(1, direction.length());
+        Block rayTraced = RayTrace.of(user.eyeLocation(), direction).range(range).ignoreLiquids(false).result(user.world()).block();
+        if (center.toBlock(user.world()).equals(rayTraced)) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }

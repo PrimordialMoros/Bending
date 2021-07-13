@@ -260,8 +260,7 @@ public class WaterGimbal extends AbilityInstance {
 
     private void render(Block block) {
       if (MaterialUtil.isWater(block)) {
-        ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-          .count(5).offset(0.25, 0.25, 0.25).spawn();
+        ParticleUtil.createBubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.create(block, Material.WATER.createBlockData(), 150);
       }

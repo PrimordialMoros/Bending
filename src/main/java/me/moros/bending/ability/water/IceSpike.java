@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Optional;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -58,7 +57,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -88,9 +86,9 @@ public class IceSpike extends AbilityInstance {
       CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
     } else {
       Block source = null;
-      Optional<LivingEntity> entity = user.rayTraceEntity(userConfig.selectRange);
-      if (entity.isPresent()) {
-        Block base = entity.get().getLocation().getBlock().getRelative(BlockFace.DOWN);
+      Entity entity = user.compositeRayTrace(userConfig.selectRange).result(user.world()).entity();
+      if (entity != null) {
+        Block base = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
         if (user.canBuild(base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {
           source = base;
         }

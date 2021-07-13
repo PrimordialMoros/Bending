@@ -38,7 +38,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -107,16 +106,13 @@ public abstract class BlockStream implements State {
     Block head = stream.getFirst();
     Vector3d current = Vector3d.center(head);
     if (controllable || direction == null) {
-      Vector3d targetLoc = user.rayTraceEntity(range)
-        .map(e -> new Vector3d(e.getEyeLocation()))
-        .orElseGet(() -> user.rayTrace(range));
+      Vector3d targetLoc = user.compositeRayTrace(range).result(user.world()).entityEyeLevelOrPosition();
       // Improve targeting when near
       if (new Vector3d(head).distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());
       }
       direction = targetLoc.subtract(current).normalize();
     }
-
 
     Vector3d originalVector = new Vector3d(current.toArray());
     Block originBlock = originalVector.toBlock(user.world());
@@ -171,8 +167,7 @@ public abstract class BlockStream implements State {
 
   protected void renderHead(@NonNull Block block) {
     if (material == Material.WATER && MaterialUtil.isWater(block)) {
-      ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-        .count(5).offset(0.25, 0.25, 0.25).spawn();
+      ParticleUtil.createBubble(block).spawn();
     } else {
       TempBlock.create(block, material.createBlockData());
     }

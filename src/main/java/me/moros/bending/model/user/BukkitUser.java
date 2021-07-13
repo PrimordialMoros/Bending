@@ -19,23 +19,13 @@
 
 package me.moros.bending.model.user;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.RayTrace;
+import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -44,8 +34,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.MainHand;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -141,101 +129,19 @@ public interface BukkitUser extends ForwardingAudience.Single {
   }
 
   /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity).
-   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
+   * @see #compositeRayTrace(double, Class)
    */
-  default Optional<LivingEntity> rayTraceEntity(double range) {
-    return rayTraceEntity(range, 0, LivingEntity.class);
+  default RayTrace compositeRayTrace(double range) {
+    return compositeRayTrace(range, LivingEntity.class);
   }
 
   /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity).
-   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
+   * Prepare a composite ray trace that targets LivingEntities.
+   * @see RayTrace
    */
-  default Optional<LivingEntity> rayTraceEntity(double range, int raySize) {
-    return rayTraceEntity(range, raySize, LivingEntity.class);
-  }
-
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-   * @see World#rayTraceEntities(Location, Vector, double, Predicate)
-   */
-  default <T extends Entity> Optional<T> rayTraceEntity(double range, @NonNull Class<T> type) {
-    return rayTraceEntity(range, 0, type);
-  }
-
-  /**
-   * Gets the targeted entity (predicate is used to ignore the user's entity) and filter to specified type.
-   * @see World#rayTraceEntities(Location, Vector, double, double, Predicate)
-   */
-  default <T extends Entity> Optional<T> rayTraceEntity(double range, int raySize, @NonNull Class<T> type) {
-    Predicate<Entity> predicate = e -> type.isInstance(e) && !e.equals(entity());
-    RayTraceResult result = world().rayTraceEntities(entity().getEyeLocation(), entity().getLocation().getDirection(), range, raySize, predicate);
-    if (result == null) {
-      return Optional.empty();
-    }
-    Entity entity = result.getHitEntity();
-    return type.isInstance(entity) ? Optional.of(type.cast(entity)) : Optional.empty();
-  }
-
-  /**
-   * @return {@link #rayTrace(double, boolean)} ignoring liquids and passable blocks
-   */
-  default @NonNull Vector3d rayTrace(double range) {
-    return rayTrace(range, true);
-  }
-
-  /**
-   * Gets the targeted location.
-   * <p> Note: Passable blocks are ignored by default.
-   * @param range the range for the check
-   * @param ignoreLiquids whether liquids should be ignored
-   * @return the target location
-   */
-  default @NonNull Vector3d rayTrace(double range, boolean ignoreLiquids) {
-    Location origin = entity().getEyeLocation();
-    Vector dir = entity().getLocation().getDirection();
-    FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
-    RayTraceResult result = world().rayTraceBlocks(origin, dir, range, fluid, true);
-    if (result == null) {
-      Ray ray = ray(range);
-      return ray.origin.add(ray.direction);
-    }
-    return new Vector3d(result.getHitPosition());
-  }
-
-  /**
-   * Gets the targeted location.
-   * <p> Note: Passable blocks are ignored by default.
-   * @param range the range for the check
-   * @param ignore a filter for unwanted blocks
-   * @return the target location
-   */
-  default @NonNull Vector3d rayTrace(double range, @NonNull Predicate<Block> ignore) {
-    Vector3d dir = direction();
-    Ray ray = new Ray(eyeLocation(), dir.multiply(range));
-    double step = 0.5;
-    Vector3d increment = dir.multiply(step);
-    Set<Block> checked = new HashSet<>(FastMath.ceil(2 * range));
-    for (double i = 0.1; i <= range; i += step) {
-      Vector3d current = ray.origin.add(dir.multiply(i));
-      if (!world().isChunkLoaded((int) current.getX() >> 4, (int) current.getZ() >> 4)) {
-        return current.subtract(increment);
-      }
-      Block block = current.toBlock(world());
-      for (Vector3i vector : VectorMethods.decomposeDiagonals(current, increment)) {
-        Block diagonalBlock = block.getRelative(vector.getX(), vector.getY(), vector.getZ());
-        if (checked.contains(diagonalBlock) || ignore.test(diagonalBlock)) {
-          continue;
-        }
-        checked.add(diagonalBlock);
-        AABB blockBounds = diagonalBlock.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(diagonalBlock)) : AABBUtils.blockBounds(diagonalBlock);
-        if (blockBounds.intersects(ray)) {
-          return current;
-        }
-      }
-    }
-    return ray.origin.add(ray.direction);
+  default <T extends Entity> RayTrace compositeRayTrace(double range, @NonNull Class<T> type) {
+    return RayTrace.of(eyeLocation(), direction()).range(range)
+      .type(Type.COMPOSITE).entityPredicate(e -> type.isInstance(e) && !e.equals(entity()));
   }
 
   /**

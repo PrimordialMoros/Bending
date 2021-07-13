@@ -61,8 +61,8 @@ public final class StorageFactory {
     String poolName = engine.name() + " Bending Hikari Connection Pool";
 
     return ConnectionBuilder.create(StorageImpl::new, engine)
-      .setPath(path).setDatabase(database).setHost(host).setPort(port)
-      .setUsername(username).setPassword(password)
+      .path(path).database(database).host(host).port(port)
+      .username(username).password(password)
       .build(poolName, Bending.logger());
   }
 }

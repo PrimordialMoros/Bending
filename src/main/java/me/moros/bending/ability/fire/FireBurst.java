@@ -51,6 +51,7 @@ import me.moros.bending.util.BurstUtil;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -213,7 +214,7 @@ public class FireBurst extends AbilityInstance {
           if (!user.canBuild(b)) {
             continue;
           }
-          if (WorldMethods.rayTraceBlocks(user.world(), new Ray(Vector3d.center(b), reverse), igniteRadius + 2) == null) {
+          if (RayTrace.of(Vector3d.center(b), reverse).range(igniteRadius + 2).result(user.world()).hit()) {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {

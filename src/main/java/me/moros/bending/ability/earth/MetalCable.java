@@ -235,10 +235,7 @@ public class MetalCable extends AbilityInstance {
       return false;
     }
 
-    Vector3d targetLocation = user.rayTraceEntity(userConfig.range)
-      .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.range));
-
+    Vector3d targetLocation = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
     if (targetLocation.toBlock(user.world()).isLiquid()) {
       return false;
     }
@@ -338,9 +335,7 @@ public class MetalCable extends AbilityInstance {
     }
 
     launched = true;
-    Vector3d targetLocation = user.rayTraceEntity(userConfig.projectileRange)
-      .map(EntityMethods::entityCenter)
-      .orElseGet(() -> user.rayTrace(userConfig.projectileRange));
+    Vector3d targetLocation = user.compositeRayTrace(userConfig.projectileRange).result(user.world()).entityCenterOrPosition();
 
     Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
     EntityMethods.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));

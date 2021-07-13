@@ -57,7 +57,6 @@ import me.moros.bending.ability.earth.passives.FerroControl;
 import me.moros.bending.ability.earth.sequences.EarthPillars;
 import me.moros.bending.ability.earth.sequences.EarthShards;
 import me.moros.bending.ability.fire.Blaze;
-import me.moros.bending.ability.fire.Bolt;
 import me.moros.bending.ability.fire.Combustion;
 import me.moros.bending.ability.fire.FireBlast;
 import me.moros.bending.ability.fire.FireBreath;
@@ -67,6 +66,7 @@ import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.ability.fire.FireWall;
 import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.fire.HeatControl;
+import me.moros.bending.ability.fire.Lightning;
 import me.moros.bending.ability.fire.sequences.FireKick;
 import me.moros.bending.ability.fire.sequences.FireSpin;
 import me.moros.bending.ability.fire.sequences.FireWheel;
@@ -384,7 +384,7 @@ public final class AbilityInitializer {
       .element(FIRE).activation(ATTACK).build();
     abilities.add(fireWall);
 
-    abilities.add(AbilityDescription.builder("Bolt", Bolt::new)
+    abilities.add(AbilityDescription.builder("Lightning", Lightning::new)
       .element(FIRE).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("Combustion", Combustion::new)

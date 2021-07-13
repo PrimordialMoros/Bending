@@ -94,7 +94,6 @@ permissions:
       bending.ability.FireSpin: true
       bending.ability.FireWheel: true
       bending.ability.Blaze: true
-      bending.ability.Bolt: true
       bending.ability.Combustion: true
       bending.ability.FireBlast: true
       bending.ability.FireBreath: true
@@ -104,6 +103,7 @@ permissions:
       bending.ability.FireWall: true
       bending.ability.FlameRush: true
       bending.ability.HeatControl: true
+      bending.ability.Lightning: true
   bending.water:
     children:
       bending.command.choose.Water: true

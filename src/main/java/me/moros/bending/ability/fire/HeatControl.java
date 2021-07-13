@@ -41,6 +41,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.WorldMethods;
@@ -141,7 +142,8 @@ public class HeatControl extends AbilityInstance implements Ability {
       return;
     }
     boolean acted = false;
-    Location center = user.rayTrace(userConfig.range).toLocation(user.world());
+    Location center = user.compositeRayTrace(userConfig.range)
+      .result(user.world()).position().toLocation(user.world());
     Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
@@ -166,7 +168,8 @@ public class HeatControl extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = user.rayTrace(userConfig.solidifyRange, false).toLocation(user.world());
+    Location center = RayTrace.of(user).range(userConfig.solidifyRange)
+      .ignoreLiquids(false).result(user.world()).position().toLocation(user.world());
     if (solidify.fillQueue(getShuffledBlocks(center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
       user.addCooldown(description(), userConfig.cooldown);
     }

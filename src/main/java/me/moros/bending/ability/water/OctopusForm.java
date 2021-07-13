@@ -48,7 +48,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -178,8 +177,7 @@ public class OctopusForm extends AbilityInstance {
       return;
     }
     if (MaterialUtil.isWater(block)) {
-      ParticleUtil.create(Particle.WATER_BUBBLE, block.getLocation().add(0.5, 0.5, 0.5))
-        .count(5).offset(0.25, 0.25, 0.25).spawn();
+      ParticleUtil.createBubble(block).spawn();
     } else if (MaterialUtil.isTransparent(block)) {
       TempBlock.create(block, Material.WATER.createBlockData(), 250);
     }

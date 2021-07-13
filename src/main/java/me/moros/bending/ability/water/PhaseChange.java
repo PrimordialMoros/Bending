@@ -39,6 +39,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -96,7 +97,8 @@ public class PhaseChange extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = user.rayTrace(userConfig.freezeRange, false).toLocation(user.world());
+    Location center = RayTrace.of(user).range(userConfig.freezeRange).ignoreLiquids(false)
+      .result(user.world()).position().toLocation(user.world());
     if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
       user.addCooldown(description(), userConfig.freezeCooldown);
     }
@@ -106,7 +108,8 @@ public class PhaseChange extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = user.rayTrace(userConfig.meltRange).toLocation(user.world());
+    Location center = user.compositeRayTrace(userConfig.meltRange)
+      .result(user.world()).position().toLocation(user.world());
     if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
       user.addCooldown(description(), 500);
     }

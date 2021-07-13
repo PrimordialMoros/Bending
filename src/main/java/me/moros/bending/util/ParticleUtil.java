@@ -24,6 +24,7 @@ import me.moros.bending.model.user.User;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -56,6 +57,11 @@ public final class ParticleUtil {
 
   public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
     return effect.builder().location(center).extra(0);
+  }
+
+  public static @NonNull ParticleBuilder createBubble(@NonNull Block center) {
+    return Particle.WATER_BUBBLE.builder().location(center.getLocation().add(0.5, 0.5, 0.5)).extra(0)
+      .count(3).offset(0.25, 0.25, 0.25);
   }
 
   /**

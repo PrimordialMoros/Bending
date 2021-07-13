@@ -35,11 +35,10 @@ import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.PersistentDataLayer;
-import me.moros.storage.logging.Logger;
-import me.moros.storage.logging.Slf4jLogger;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Bending extends JavaPlugin {
@@ -62,7 +61,7 @@ public class Bending extends JavaPlugin {
   public void onEnable() {
     new Metrics(this, 8717);
     plugin = this;
-    logger = new Slf4jLogger(LoggerFactory.getLogger(getClass().getSimpleName()));
+    logger = LoggerFactory.getLogger(getClass().getSimpleName());
     author = getDescription().getAuthors().get(0);
     version = getDescription().getVersion();
 

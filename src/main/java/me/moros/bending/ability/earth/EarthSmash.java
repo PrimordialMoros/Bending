@@ -60,15 +60,18 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.FireTick;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.PotionUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -77,6 +80,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -178,7 +182,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static boolean tryGrab(@NonNull User user) {
-    Block target = WorldMethods.rayTraceBlocks(user.world(), user.ray(), config.grabRange);
+    Block target = RayTrace.of(user).range(config.grabRange).result(user.world()).block();
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;
@@ -192,7 +196,7 @@ public class EarthSmash extends AbilityInstance {
     if (user.sneaking() && user.selectedAbilityName().equals("EarthSmash")) {
       EarthSmash earthSmash = getInstance(user, block, x -> true);
       if (earthSmash != null && earthSmash.boulder != null) {
-        earthSmash.boulder.shatter();
+        earthSmash.shatter();
       }
     }
   }
@@ -229,6 +233,30 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
+  private void shatter() {
+    if (boulder != null && !boulder.data.isEmpty()) {
+      Map<TempFallingBlock, ShardType> shards = new HashMap<>();
+      for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
+        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
+        Block block = entry.getKey();
+        BlockData blockData = entry.getValue();
+        TempBlock.createAir(block);
+        shards.put(new TempFallingBlock(block, blockData, velocity, true, 5000), shardType(blockData.getMaterial()));
+        Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
+        ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
+          .offset(0.5, 0.5, 0.5).data(blockData).spawn();
+        if (ThreadLocalRandom.current().nextBoolean()) {
+          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound(), 1, 1);
+        }
+      }
+      boulder.data.clear();
+      if (userConfig.shatterEffects) {
+        boulder = null;
+        state = new ShatteredState(shards);
+      }
+    }
+  }
+
   @Override
   public void onDestroy() {
     if (boulder != null) {
@@ -259,14 +287,14 @@ public class EarthSmash extends AbilityInstance {
       collision.removeSelf(true);
     }
     if (collision.removeSelf()) {
+      collision.removeSelf(false);
       if (collidedAbility instanceof FrostBreath) {
         ThreadLocalRandom rand = ThreadLocalRandom.current();
         boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
-        boulder.shatter();
       } else if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
         boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
-        boulder.shatter();
       }
+      shatter();
     }
   }
 
@@ -430,14 +458,16 @@ public class EarthSmash extends AbilityInstance {
       location = location.add(direction);
       Block newCenter = location.toBlock(boulder.world);
       if (!boulder.isValidBlock(newCenter)) {
-        return UpdateResult.REMOVE;
+        shatter();
+        return UpdateResult.CONTINUE;
       }
       boulder.center(newCenter);
       if (origin.distanceSq(boulder.center) > userConfig.shootRange * userConfig.shootRange) {
         return UpdateResult.REMOVE;
       }
       if (!boulder.blendSmash()) {
-        return UpdateResult.REMOVE;
+        shatter();
+        return UpdateResult.CONTINUE;
       }
       render();
       return UpdateResult.CONTINUE;
@@ -474,6 +504,74 @@ public class EarthSmash extends AbilityInstance {
     @Override
     public boolean canGrab() {
       return true;
+    }
+
+    @Override
+    public boolean canSlotSwitch() {
+      return true;
+    }
+  }
+
+  private enum ShardType {MAGMA, SAND, ICE, MUD, ROCK}
+
+  private static ShardType shardType(Material material) {
+    if (EarthMaterials.LAVA_BENDABLE.isTagged(material)) {
+      return ShardType.MAGMA;
+    } else if (EarthMaterials.SAND_BENDABLE.isTagged(material)) {
+      return ShardType.SAND;
+    } else if (WaterMaterials.ICE_BENDABLE.isTagged(material)) {
+      return ShardType.ICE;
+    } else if (material == Material.SOUL_SAND || material == Material.SOUL_SOIL || material == Material.BROWN_TERRACOTTA) {
+      return ShardType.MUD;
+    } else {
+      return ShardType.ROCK;
+    }
+  }
+
+  private class ShatteredState implements EarthSmashState {
+    private final Map<TempFallingBlock, ShardType> pieces;
+    private final Set<Entity> affectedEntities;
+
+    private ShatteredState(Map<TempFallingBlock, ShardType> pieces) {
+      this.pieces = pieces;
+      affectedEntities = new HashSet<>();
+    }
+
+    @Override
+    public @NonNull UpdateResult update() {
+      pieces.entrySet().removeIf(entry ->
+        CollisionUtil.handleEntityCollisions(user, AABB.BLOCK_BOUNDS.at(entry.getKey().center()), e -> onEntityHit(e, entry.getValue()))
+      );
+      return pieces.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    }
+
+    private boolean onEntityHit(Entity entity, ShardType type) {
+      if (!affectedEntities.contains(entity)) {
+        affectedEntities.add(entity);
+        DamageUtil.damageEntity(entity, user, userConfig.shatterDamage, description());
+        if (entity.isValid()) {
+          switch (type) {
+            case MAGMA:
+              FireTick.ignite(user, entity, userConfig.fireTicks);
+              return true;
+            case SAND:
+              PotionUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
+              return true;
+            case ICE:
+              PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.frostDuration / 50.0), userConfig.frostPower);
+              return true;
+            case MUD:
+              PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
+              return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    @Override
+    public boolean canCollide() {
+      return false;
     }
 
     @Override
@@ -579,26 +677,6 @@ public class EarthSmash extends AbilityInstance {
       return data.entrySet().stream()
         .collect(Collectors.toMap(e -> center.add(e.getKey().toVector3d()).toBlock(world), Map.Entry::getValue));
     }
-
-    private void shatter() {
-      if (data.isEmpty()) {
-        return;
-      }
-      for (Map.Entry<Block, BlockData> entry : data().entrySet()) {
-        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
-        Block block = entry.getKey();
-        BlockData blockData = entry.getValue();
-        TempBlock.createAir(block);
-        new TempFallingBlock(block, blockData, velocity, true, 5000);
-        Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
-          .offset(0.5, 0.5, 0.5).data(blockData).spawn();
-        if (ThreadLocalRandom.current().nextBoolean()) {
-          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound(), 1, 1);
-        }
-      }
-      data.clear();
-    }
   }
 
   private static class Config extends Configurable {
@@ -627,6 +705,25 @@ public class EarthSmash extends AbilityInstance {
     @Modifiable(Attribute.SPEED)
     public int speed;
 
+    public boolean shatterEffects;
+
+    @Modifiable(Attribute.DAMAGE)
+    public double shatterDamage;
+    @Modifiable(Attribute.FIRE_TICKS)
+    public int fireTicks;
+    @Modifiable(Attribute.STRENGTH)
+    public int frostPower;
+    @Modifiable(Attribute.DURATION)
+    public long frostDuration;
+    @Modifiable(Attribute.STRENGTH)
+    public int mudPower;
+    @Modifiable(Attribute.DURATION)
+    public long mudDuration;
+    @Modifiable(Attribute.STRENGTH)
+    public int sandPower;
+    @Modifiable(Attribute.DURATION)
+    public long sandDuration;
+
     @Override
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsmash");
@@ -642,6 +739,17 @@ public class EarthSmash extends AbilityInstance {
       damage = abilityNode.node("damage").getDouble(3.5);
       knockback = abilityNode.node("knockback").getDouble(2.8);
       knockup = abilityNode.node("knockup").getDouble(0.15);
+
+      CommentedConfigurationNode shatterNode = abilityNode.node("shatter-effects");
+      shatterEffects = shatterNode.node("enabled").getBoolean(true);
+      shatterDamage = shatterNode.node("damage").getDouble(1.0);
+      fireTicks = shatterNode.node("fire-ticks").getInt(25);
+      frostPower = shatterNode.node("frost-power").getInt(2) - 1;
+      frostDuration = shatterNode.node("frost-duration").getLong(1500);
+      mudPower = shatterNode.node("mud-power").getInt(2) - 1;
+      mudDuration = shatterNode.node("mud-duration").getLong(1500);
+      sandPower = shatterNode.node("sand-power").getInt(2) - 1;
+      sandDuration = shatterNode.node("sand-duration").getLong(1500);
 
       if (radius % 2 == 0) {
         radius++;

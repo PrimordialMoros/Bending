@@ -26,11 +26,11 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.RayTrace.CompositeResult;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -43,12 +43,12 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   protected Vector3d targetLocation;
   protected Vector3d direction;
   protected Collider collider;
-  protected LivingEntity target;
+  protected Entity target;
 
   protected final double range;
   protected final double speed;
 
-  protected boolean locked = false;
+  protected boolean locked;
   protected boolean controllable = false;
   protected boolean skipVertical = false;
 
@@ -59,14 +59,10 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     this.origin = location;
     this.range = range;
     this.speed = speed;
-    target = user.rayTraceEntity(range).orElse(null);
-    if (followTarget && target != null) {
-      targetLocation = EntityMethods.entityCenter(target);
-      locked = true;
-    } else {
-      target = null;
-      targetLocation = user.rayTrace(range);
-    }
+    CompositeResult result = user.compositeRayTrace(range).result(user.world());
+    target = result.entity();
+    targetLocation = result.entityCenterOrPosition();
+    locked = followTarget && target != null;
     direction = targetLocation.subtract(location).setY(0).normalize();
   }
 
@@ -82,7 +78,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     if (controllable) {
-      targetLocation = user.rayTrace(range);
+      targetLocation = user.compositeRayTrace(range).result(user.world()).entityCenterOrPosition();
       direction = targetLocation.subtract(origin).setY(0).normalize();
     }
 

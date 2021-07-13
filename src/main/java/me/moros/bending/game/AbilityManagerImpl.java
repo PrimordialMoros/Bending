@@ -174,7 +174,7 @@ public class AbilityManagerImpl implements AbilityManager {
       try (MCTiming timing = Bending.timingManager().of(ability.description().name()).startTiming()) {
         result = ability.update();
       } catch (Exception e) {
-        Bending.logger().warn(e.getMessage());
+        Bending.logger().warn(e.getMessage(), e);
       }
       if (result == UpdateResult.REMOVE) {
         globalIterator.remove();

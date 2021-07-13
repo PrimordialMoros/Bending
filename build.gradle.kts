@@ -21,16 +21,15 @@ repositories {
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://maven.enginehub.org/repo/")
-    maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://ci.ender.zone/plugin/repository/everything/")
     maven("https://jitpack.io")
 }
 
 dependencies {
-    api("me.moros", "atlas-core", "1.2.0-SNAPSHOT")
+    api("me.moros", "atlas-core", "1.2.1-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
-    compileOnly("org.checkerframework", "checker-qual", "3.13.0")
+    compileOnly("org.checkerframework", "checker-qual", "3.15.0")
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
         exclude(module = "worldguard")

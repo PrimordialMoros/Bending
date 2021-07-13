@@ -35,7 +35,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
 import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -140,8 +139,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
       BlockMethods.tryBreakPlant(current);
       if (material == Material.WATER && MaterialUtil.isWater(current)) {
-        ParticleUtil.create(Particle.WATER_BUBBLE, current.getLocation().add(0.5, 0.5, 0.5))
-          .count(5).offset(0.25, 0.25, 0.25).spawn();
+        ParticleUtil.createBubble(current).spawn();
         tempBlock = null;
       } else {
         tempBlock = current;
@@ -171,10 +169,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     } else {
       predicate = b -> b.equals(ignore);
     }
-    target = user.rayTraceEntity(range)
-      .map(e -> new Vector3d(e.getEyeLocation()))
-      .orElseGet(() -> user.rayTrace(range, predicate))
-      .snapToBlockCenter();
+    target = user.compositeRayTrace(range).result(user.world(), predicate).entityEyeLevelOrPosition().snapToBlockCenter();
     settingUp = false;
   }
 

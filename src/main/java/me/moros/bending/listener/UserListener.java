@@ -101,7 +101,7 @@ public class UserListener implements Listener {
     } catch (TimeoutException e) {
       Bending.logger().warn("Timed out while retrieving data for " + uuid);
     } catch (CancellationException | ExecutionException | InterruptedException e) {
-      Bending.logger().warn(e.getMessage());
+      Bending.logger().warn(e.getMessage(), e);
     }
   }
 
@@ -115,7 +115,7 @@ public class UserListener implements Listener {
     if (entry != null) {
       BendingPlayer.createUser(player, entry.getKey(), entry.getValue()).ifPresent(Registries.BENDERS::register);
     } else {
-      Bending.logger().severe("Could not create bending profile for: " + uuid + " (" + name + ")");
+      Bending.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
     }
     timing.stopTiming();
   }
