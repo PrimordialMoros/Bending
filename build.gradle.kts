@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.1-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
