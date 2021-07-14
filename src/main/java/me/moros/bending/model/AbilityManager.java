@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -45,15 +44,7 @@ public interface AbilityManager {
     return false;
   }
 
-  default boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
-    return false;
-  }
-
   default void destroyInstance(@NonNull Ability ability) {
-  }
-
-  default boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
-    return true;
   }
 
   default <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {

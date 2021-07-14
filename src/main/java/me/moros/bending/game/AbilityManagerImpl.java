@@ -73,7 +73,7 @@ public class AbilityManagerImpl implements AbilityManager {
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream()
       .filter(d -> d.isActivatedBy(Activation.PASSIVE)).collect(Collectors.toList());
     for (AbilityDescription passive : allPassives) {
-      destroyInstanceType(user, passive);
+      destroyInstanceType(user, passive.createAbility().getClass());
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
         if (ability.activate(user, Activation.PASSIVE)) {
@@ -94,20 +94,10 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public boolean hasAbility(@NonNull User user, @NonNull AbilityDescription desc) {
-    return hasAbility(user, desc.createAbility().getClass());
-  }
-
-  @Override
   public void destroyInstance(@NonNull Ability ability) {
     if (globalInstances.remove(ability.user().entity().getUniqueId(), ability)) {
       ability.onDestroy();
     }
-  }
-
-  @Override
-  public boolean destroyInstanceType(@NonNull User user, @NonNull AbilityDescription desc) {
-    return destroyInstanceType(user, desc.createAbility().getClass());
   }
 
   @Override

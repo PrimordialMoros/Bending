@@ -66,6 +66,7 @@ import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -101,7 +102,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, description())) {
+    if (Bending.game().abilityManager(user.world()).userInstances(user, Lightning.class).anyMatch(l -> !l.launched)) {
       return false;
     }
     this.user = user;
@@ -175,13 +176,11 @@ public class Lightning extends AbilityInstance {
   }
 
   private boolean advanceLightning() {
-    boolean remove = false;
     double counter = 0;
     while (arcIterator.hasNext() && counter < userConfig.speed) {
       LineSegment segment = arcIterator.next();
       CompositeResult result = RayTrace.of(segment.start, segment.direction).range(segment.length)
-        .type(Type.COMPOSITE).entityPredicate(e -> e instanceof LivingEntity && !e.equals(user.entity()))
-        .raySize(0.25).result(user.world());
+        .type(Type.COMPOSITE).entityPredicate(this::isValidEntity).ignoreLiquids(false).raySize(0.3).result(user.world());
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.LIGHTNING.play(segment.mid.toLocation(user.world()));
@@ -190,20 +189,14 @@ public class Lightning extends AbilityInstance {
         Block block = result.block();
         if (block != null) {
           explode(result.position(), result.block());
-          remove = true;
-          break;
+          return false;
         }
       }
-      if (!renderSegment(segment)) {
-        remove = true;
-        break;
-      }
-      if (electrocuteAround(result.entity())) {
-        remove = true;
-        break;
+      if (!renderSegment(segment) || electrocuteAround(result.entity())) {
+        return false;
       }
     }
-    return !remove && arcIterator.hasNext();
+    return arcIterator.hasNext();
   }
 
   private boolean renderSegment(LineSegment segment) {
@@ -215,6 +208,16 @@ public class Lightning extends AbilityInstance {
       ParticleUtil.create(Particle.END_ROD, v.toLocation(user.world())).spawn();
     }
     return true;
+  }
+
+  private boolean isValidEntity(Entity entity) {
+    if (!(entity instanceof LivingEntity)) {
+      return false;
+    }
+    if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) {
+      return false;
+    }
+    return !entity.equals(user.entity());
   }
 
   private boolean handleRedirection(Collection<Entity> entitiesToCheck) {
@@ -269,11 +272,7 @@ public class Lightning extends AbilityInstance {
   }
 
   private void explode(Vector3d center, Block block) {
-    if (block != null && WaterMaterials.isIceBendable(block)) {
-      FragileStructure.tryDamageStructure(List.of(block), 0);
-    }
-
-    if (exploded || factor < userConfig.chargeFactor) {
+    if (exploded) {
       return;
     }
     exploded = true;
@@ -284,12 +283,14 @@ public class Lightning extends AbilityInstance {
       .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 1))
       .buildAndExplode(this, center);
 
-    if (center.toBlock(user.world()).isLiquid()) {
+    if (WaterMaterials.isIceBendable(block)) {
+      FragileStructure.tryDamageStructure(List.of(block), 0);
+    }
+    if (block.isLiquid()) {
       return;
     }
-
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    for (Block b : WorldMethods.nearbyBlocks(center.snapToBlockCenter().toLocation(user.world()), userConfig.explosionRadius, predicate)) {
+    for (Block b : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.explosionRadius, predicate)) {
       if (user.canBuild(b)) {
         long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
         TempBlock.createAir(b, delay);
@@ -453,7 +454,7 @@ public class Lightning extends AbilityInstance {
       maxChargeTime = abilityNode.node("max-charge-time").getLong(3000);
       chargeFactor = abilityNode.node("charge-factor").getDouble(2.0);
 
-      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.6);
+      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.5);
       explosionDamage = abilityNode.node("explosion-damage").getDouble(3.0);
 
       duration = abilityNode.node("overcharge-duration").getLong(8000);
