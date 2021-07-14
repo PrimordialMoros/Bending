@@ -28,13 +28,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -52,7 +50,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingExplosion;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -62,10 +59,8 @@ import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -276,26 +271,16 @@ public class Lightning extends AbilityInstance {
       return;
     }
     exploded = true;
+    if (WaterMaterials.isIceBendable(block)) {
+      FragileStructure.tryDamageStructure(List.of(block), 0);
+    }
     BendingExplosion.builder()
       .size(userConfig.explosionRadius)
       .damage(userConfig.explosionDamage)
       .fireTicks(0)
+      .breakBlocks(true)
       .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 1))
       .buildAndExplode(this, center);
-
-    if (WaterMaterials.isIceBendable(block)) {
-      FragileStructure.tryDamageStructure(List.of(block), 0);
-    }
-    if (block.isLiquid()) {
-      return;
-    }
-    Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    for (Block b : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.explosionRadius, predicate)) {
-      if (user.canBuild(b)) {
-        long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-        TempBlock.createAir(b, delay);
-      }
-    }
   }
 
   @Override

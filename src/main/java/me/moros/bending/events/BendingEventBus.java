@@ -19,6 +19,8 @@
 
 package me.moros.bending.events;
 
+import java.util.Collection;
+
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent.BindType;
 import me.moros.bending.events.ElementChangeEvent.ElementAction;
@@ -27,6 +29,8 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.PluginManager;
@@ -97,6 +101,12 @@ public final class BendingEventBus {
 
   public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
     BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
+    manager.callEvent(event);
+    return event;
+  }
+
+  public @NonNull BendingExplosionEvent postExplosionEvent(@NonNull User source, @NonNull Location center, @NonNull Collection<@NonNull Block> blocks, double power) {
+    BendingExplosionEvent event = new BendingExplosionEvent(source, center.clone(), blocks, (float) power);
     manager.callEvent(event);
     return event;
   }

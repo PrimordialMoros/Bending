@@ -19,6 +19,13 @@
 
 package me.moros.bending.util;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
+import me.moros.bending.Bending;
+import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collider;
@@ -27,9 +34,13 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -42,6 +53,8 @@ public final class BendingExplosion {
   private final int fireTicks;
   private final boolean livingOnly;
   private final boolean particles;
+  private final boolean breakBlocks;
+  private final boolean placeFire;
   private final Collider ignoreInside;
   private final SoundEffect soundEffect;
 
@@ -52,6 +65,8 @@ public final class BendingExplosion {
     this.fireTicks = builder.fireTicks;
     this.livingOnly = builder.livingOnly;
     this.particles = builder.particles;
+    this.breakBlocks = builder.breakBlocks;
+    this.placeFire = builder.placeFire;
     this.ignoreInside = builder.ignoreInside;
     this.soundEffect = builder.soundEffect;
 
@@ -77,12 +92,39 @@ public final class BendingExplosion {
   public boolean explode(@NonNull Ability source, @NonNull Vector3d center) {
     User user = source.user();
     AbilityDescription desc = source.description();
+    Location bukkitLoc = center.toLocation(user.world());
+
+    Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
+    Collection<Block> blocks = breakBlocks ? WorldMethods.nearbyBlocks(bukkitLoc, size, predicate) : List.of();
+
+    if (Bending.eventBus().postExplosionEvent(user, bukkitLoc, blocks, size).isCancelled()) {
+      return false;
+    }
+
     if (particles) {
-      playParticles(center.toLocation(user.world()));
+      playParticles(bukkitLoc);
     }
     if (soundEffect != null) {
-      soundEffect.play(center.toLocation(user.world()));
+      soundEffect.play(bukkitLoc);
     }
+
+    if (breakBlocks && !blocks.isEmpty() && !bukkitLoc.getBlock().isLiquid()) {
+      ThreadLocalRandom rand = ThreadLocalRandom.current();
+      blocks.removeIf(b -> !user.canBuild(b));
+      for (Block block : blocks) {
+        long delay = BendingProperties.EXPLOSION_REVERT_TIME + rand.nextInt(1000);
+        TempBlock.createAir(block, delay);
+      }
+      if (placeFire) {
+        for (Block block : blocks) {
+          if (MaterialUtil.isIgnitable(block) && rand.nextInt(3) == 0) {
+            long delay = BendingProperties.FIRE_REVERT_TIME + rand.nextInt(1000);
+            TempBlock.create(block, Material.FIRE.createBlockData(), delay, true);
+          }
+        }
+      }
+    }
+
     return CollisionUtil.handleEntityCollisions(user, new Sphere(center, size), entity -> {
       Vector3d entityCenter = EntityMethods.entityCenter(entity);
       double distance = center.distance(entityCenter);
@@ -114,6 +156,8 @@ public final class BendingExplosion {
     private int fireTicks = 40;
     private boolean livingOnly = true;
     private boolean particles = true;
+    private boolean breakBlocks = false;
+    private boolean placeFire = false;
     private Collider ignoreInside = null;
     private SoundEffect soundEffect = null;
 
@@ -147,6 +191,16 @@ public final class BendingExplosion {
 
     public @NonNull ExplosionBuilder particles(boolean particles) {
       this.particles = particles;
+      return this;
+    }
+
+    public @NonNull ExplosionBuilder breakBlocks(boolean breakBlocks) {
+      this.breakBlocks = breakBlocks;
+      return this;
+    }
+
+    public @NonNull ExplosionBuilder placeFire(boolean placeFire) {
+      this.placeFire = placeFire;
       return this;
     }
 

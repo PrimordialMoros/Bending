@@ -195,7 +195,7 @@ public class EarthSmash extends AbilityInstance {
   public static void tryDestroy(@NonNull User user, @NonNull Block block) {
     if (user.sneaking() && user.selectedAbilityName().equals("EarthSmash")) {
       EarthSmash earthSmash = getInstance(user, block, x -> true);
-      if (earthSmash != null && earthSmash.boulder != null) {
+      if (earthSmash != null) {
         earthSmash.shatter();
       }
     }
@@ -208,7 +208,7 @@ public class EarthSmash extends AbilityInstance {
     AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
     return Bending.game().abilityManager(user.world()).instances(EarthSmash.class)
       .filter(filter)
-      .filter(s -> s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
+      .filter(s -> s.boulder != null && s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
       .findAny().orElse(null);
   }
 
@@ -283,17 +283,19 @@ public class EarthSmash extends AbilityInstance {
   @Override
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
+    boolean shatter = collision.removeSelf();
     if (collidedAbility instanceof FlameRush && ((FlameRush) collidedAbility).isFullyCharged()) {
-      collision.removeSelf(true);
+      shatter = true;
+    } else if (collidedAbility instanceof FrostBreath) {
+      ThreadLocalRandom rand = ThreadLocalRandom.current();
+      boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
+      shatter = true;
+    } else if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
+      boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
+      shatter = true;
     }
-    if (collision.removeSelf()) {
+    if (shatter) {
       collision.removeSelf(false);
-      if (collidedAbility instanceof FrostBreath) {
-        ThreadLocalRandom rand = ThreadLocalRandom.current();
-        boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
-      } else if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
-        boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
-      }
       shatter();
     }
   }

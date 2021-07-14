@@ -19,18 +19,15 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -47,16 +44,13 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -170,34 +164,17 @@ public class Combustion extends AbilityInstance implements Explosive {
     ParticleUtil.create(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
 
+    FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+
     BendingExplosion.builder()
       .size(size)
       .damage(damage)
       .fireTicks(userConfig.fireTicks)
+      .breakBlocks(true)
+      .placeFire(true)
       .ignoreInsideCollider(ignoreCollider)
       .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F))
       .buildAndExplode(this, center);
-
-    FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
-
-    if (loc.getBlock().isLiquid()) {
-      return;
-    }
-    Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = new ArrayList<>();
-    for (Block block : WorldMethods.nearbyBlocks(loc, size, predicate)) {
-      if (user.canBuild(block)) {
-        blocks.add(block);
-        long delay = BendingProperties.EXPLOSION_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-        TempBlock.createAir(block, delay);
-      }
-    }
-    for (Block block : blocks) {
-      if (MaterialUtil.isIgnitable(block) && ThreadLocalRandom.current().nextInt(3) == 0) {
-        long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-        TempBlock.create(block, Material.FIRE.createBlockData(), delay, true);
-      }
-    }
   }
 
   private class CombustBeam extends ParticleStream {
