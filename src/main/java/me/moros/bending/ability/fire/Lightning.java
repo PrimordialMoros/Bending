@@ -41,6 +41,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
+import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -61,6 +62,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -303,50 +305,53 @@ public class Lightning extends AbilityInstance {
     private final Vector3d start;
 
     private static final double OFFSET = 1.6;
-    private static final double FORK_CHANCE = 0.4;
-    private static final double FORK_LENGTH = 2;
+    private static final double FORK_CHANCE = 0.5;
 
     private Arc(Vector3d start, Vector3d end) {
       this.start = start;
-      List<LineSegment> startingSegments = new LinkedList<>();
-      startingSegments.add(new LineSegment(start, end));
-      segments = generateRecursively(OFFSET, startingSegments, FastMath.ceil(3 * start.distance(end)));
+      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 0.8, 0));
+      segments = generateRecursively(OFFSET, startingSegments, 2, FastMath.ceil(4 * start.distance(end)));
     }
 
-    private List<LineSegment> displaceMidpoint(LineSegment segment, double maxOffset) {
-      Vector3d offsetPoint = segment.mid.add(randomOffset(segment.direction, maxOffset));
-      LineSegment first = new LineSegment(segment.start, offsetPoint);
-      LineSegment second = new LineSegment(offsetPoint, segment.end);
-
-      if (rand.nextDouble() < FORK_CHANCE) {
-        Vector3d direction = offsetPoint.subtract(start).normalize();
-        Vector3d forkEnd = offsetPoint.add(randomOffset(direction, Math.min(maxOffset * FORK_LENGTH, 3 * 0.75)));
+    private List<LineSegment> displaceMidpoint(LineSegment segment, double maxOffset, double forkChance) {
+      Vector3d offsetPoint = randomOffset(segment, maxOffset);
+      LineSegment first = new LineSegment(segment.start, offsetPoint, segment.isFork);
+      LineSegment second = new LineSegment(offsetPoint, segment.end, segment.isFork);
+      if (forkChance > 0 && rand.nextDouble() < forkChance) {
+        Vector3d forkEnd = offsetPoint.add(randomDirection(offsetPoint.subtract(start), segment.length * 0.75));
         return List.of(first, new LineSegment(offsetPoint, forkEnd, true), second);
       }
-
       return List.of(first, second);
     }
 
-    private List<LineSegment> generateRecursively(double maxOffset, List<LineSegment> lines, int maxAmount) {
-      if (lines.size() < maxAmount) {
+    private List<LineSegment> generateRecursively(double maxOffset, List<LineSegment> lines, int counter, int maxAmount) {
+      if (counter < maxAmount) {
         ListIterator<LineSegment> it = lines.listIterator();
         while (it.hasNext()) {
-          List<LineSegment> split = displaceMidpoint(it.next(), maxOffset);
+          LineSegment toSplit = it.next();
+          if (toSplit.isFork && toSplit.length < 0.1) {
+            continue;
+          }
+          List<LineSegment> split = displaceMidpoint(toSplit, maxOffset, FORK_CHANCE);
           it.remove();
           split.forEach(it::add);
         }
-        return generateRecursively(maxOffset * 0.5, lines, maxAmount);
+        return generateRecursively(maxOffset * 0.5, lines, 2 * counter, maxAmount);
       }
       return List.copyOf(lines);
     }
 
-    private Vector3d randomOffset(Vector3d direction, double maxOffset) {
-      double t = rand.nextDouble(-maxOffset, maxOffset);
-      Vector3d side = Vector3d.PLUS_J.cross(direction).normalize();
-      Vector3d first = side.multiply(t);
-      t = rand.nextDouble(-maxOffset, maxOffset);
-      Vector3d second = side.cross(direction).normalize().multiply(t);
-      return first.add(second);
+    private Vector3d randomOffset(LineSegment segment, double maxOffset) {
+      double length = rand.nextDouble(-maxOffset, maxOffset);
+      double angle = rand.nextDouble(Math.PI);
+      return segment.mid.add(VectorMethods.orthogonal(segment.direction, angle, length));
+    }
+
+    private Vector3d randomDirection(Vector3d axis, double maxLength) {
+      Rotation rotation = new Rotation(axis, rand.nextDouble(Math.PI / 4));
+      Vector3d angledVector = rand.nextBoolean() ? rotation.applyTo(axis) : rotation.applyInverseTo(axis);
+      double halfLength = 0.5 * maxLength;
+      return angledVector.normalize().multiply(halfLength + rand.nextDouble() * halfLength);
     }
 
     @Override
