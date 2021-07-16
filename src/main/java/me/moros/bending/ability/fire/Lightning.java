@@ -309,7 +309,7 @@ public class Lightning extends AbilityInstance {
 
     private Arc(Vector3d start, Vector3d end) {
       this.start = start;
-      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 0.8, 0));
+      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 1.2, 0));
       segments = generateRecursively(OFFSET, startingSegments, 2, FastMath.ceil(4 * start.distance(end)));
     }
 
@@ -342,8 +342,8 @@ public class Lightning extends AbilityInstance {
     }
 
     private Vector3d randomOffset(LineSegment segment, double maxOffset) {
-      double length = rand.nextDouble(-maxOffset, maxOffset);
-      double angle = rand.nextDouble(Math.PI);
+      double length = maxOffset * 0.5 * (rand.nextGaussian() + 1);
+      double angle = rand.nextDouble(2 * Math.PI);
       return segment.mid.add(VectorMethods.orthogonal(segment.direction, angle, length));
     }
 
