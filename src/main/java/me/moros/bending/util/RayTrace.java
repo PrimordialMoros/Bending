@@ -148,15 +148,11 @@ public final class RayTrace {
     Vector dir = direction.toBukkitVector();
     FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
     Vector3d pos = origin.add(direction.multiply(range));
-    switch (type) {
-      case COMPOSITE:
-        return new CompositeResult(world.rayTrace(start, dir, range, fluid, ignorePassable, raySize, entityPredicate), pos);
-      case ENTITY:
-        return new CompositeResult(world.rayTraceEntities(start, dir, range, raySize, entityPredicate), pos);
-      default:
-      case BLOCK:
-        return new CompositeResult(world.rayTraceBlocks(start, dir, range, fluid, ignorePassable), pos);
-    }
+    return switch (type) {
+      case COMPOSITE -> new CompositeResult(world.rayTrace(start, dir, range, fluid, ignorePassable, raySize, entityPredicate), pos);
+      case ENTITY -> new CompositeResult(world.rayTraceEntities(start, dir, range, raySize, entityPredicate), pos);
+      case BLOCK -> new CompositeResult(world.rayTraceBlocks(start, dir, range, fluid, ignorePassable), pos);
+    };
   }
 
   public static @NonNull RayTrace of(@NonNull User user) {
@@ -207,8 +203,8 @@ public final class RayTrace {
     }
 
     public @NonNull Vector3d entityEyeLevelOrPosition() {
-      if (entity instanceof LivingEntity) {
-        return new Vector3d(((LivingEntity) entity).getEyeLocation());
+      if (entity instanceof LivingEntity livingEntity) {
+        return new Vector3d(livingEntity.getEyeLocation());
       }
       return position;
     }

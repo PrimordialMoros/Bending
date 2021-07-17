@@ -111,8 +111,8 @@ public class Torrent extends AbilityInstance {
       }
     } else {
       State current = states.current();
-      if (current instanceof TorrentStream) {
-        ((TorrentStream) current).clicked = true;
+      if (current instanceof TorrentStream torrentStream) {
+        torrentStream.clicked = true;
       }
     }
   }
@@ -141,8 +141,8 @@ public class Torrent extends AbilityInstance {
   public void onDestroy() {
     if (states != null) {
       State current = states.current();
-      if (current instanceof TorrentStream) {
-        ((TorrentStream) current).cleanAll();
+      if (current instanceof TorrentStream torrentStream) {
+        torrentStream.cleanAll();
       }
     }
   }
@@ -154,11 +154,8 @@ public class Torrent extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    if (states != null) {
-      State current = states.current();
-      if (current instanceof TorrentStream) {
-        return ((TorrentStream) current).colliders();
-      }
+    if (states != null && states.current() instanceof TorrentStream torrentStream) {
+      return torrentStream.colliders();
     }
     return List.of();
   }

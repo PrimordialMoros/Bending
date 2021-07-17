@@ -57,7 +57,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.WaterMaterials;
@@ -98,8 +97,8 @@ public final class ActivationController {
   public void onUserDeconstruct(@NonNull User user) {
     TempArmor.MANAGER.get(user.entity().getUniqueId()).ifPresent(TempArmor::revert);
     Bending.game().abilityManager(user.world()).destroyUserInstances(user);
-    if (user instanceof BendingPlayer) {
-      Bending.game().storage().savePlayerAsync((BendingPlayer) user);
+    if (user instanceof BendingPlayer bendingPlayer) {
+      Bending.game().storage().savePlayerAsync(bendingPlayer);
     }
     Bending.game().boardManager().invalidate(user);
     Bending.game().flightManager().remove(user);
@@ -124,9 +123,7 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    RayTrace rayTrace = RayTrace.of(user).range(3).type(Type.ENTITY)
-      .entityPredicate(e -> e instanceof LivingEntity && !e.equals(user.entity()));
-    if (rayTrace.result(user.world()).hit()) {
+    if (user.compositeRayTrace(3).result(user.world(), Type.ENTITY).hit()) {
       Bending.game().sequenceManager().registerStep(user, Activation.ATTACK_ENTITY);
     } else {
       Bending.game().sequenceManager().registerStep(user, Activation.ATTACK);
@@ -239,8 +236,8 @@ public final class ActivationController {
     }
     ignoreNextSwing(user);
 
-    if (entity instanceof LivingEntity) {
-      HealingWaters.healTarget(user, (LivingEntity) entity);
+    if (entity instanceof LivingEntity livingEntity) {
+      HealingWaters.healTarget(user, livingEntity);
     }
     if (block != null) {
       FerroControl.act(user, block);

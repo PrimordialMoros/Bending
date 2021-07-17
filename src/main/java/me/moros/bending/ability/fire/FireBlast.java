@@ -167,15 +167,13 @@ public class FireBlast extends AbilityInstance implements Explosive {
         collision.removeSelf(false);
       }
     }
-    if (fullyCharged && collidedAbility instanceof FireShield) {
+    if (fullyCharged && collidedAbility instanceof FireShield fireShield) {
       collision.removeOther(true);
-      boolean sphere = ((FireShield) collidedAbility).isSphere();
-      if (sphere) {
+      if (fireShield.isSphere()) {
         ignoreCollider = collision.colliderOther();
         explode();
       }
-    } else if (collidedAbility instanceof FireBlast) {
-      FireBlast other = (FireBlast) collidedAbility;
+    } else if (collidedAbility instanceof FireBlast other) {
       double collidedFactor = other.factor;
       if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
         Vector3d first = collision.colliderSelf().position();

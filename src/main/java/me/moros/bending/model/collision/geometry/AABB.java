@@ -47,10 +47,10 @@ public class AABB implements Collider {
   public boolean intersects(@NonNull Collider collider) {
     if (collider instanceof DummyCollider) {
       return false;
-    } else if (collider instanceof Sphere) {
-      return intersects((Sphere) collider);
-    } else if (collider instanceof AABB) {
-      return intersects((AABB) collider);
+    } else if (collider instanceof Sphere sphere) {
+      return intersects(sphere);
+    } else if (collider instanceof AABB aabb) {
+      return intersects(aabb);
     } else if (collider instanceof OBB) {
       return collider.intersects(this);
     } else if (collider instanceof Disk) {

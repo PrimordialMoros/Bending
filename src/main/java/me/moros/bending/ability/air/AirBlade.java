@@ -170,9 +170,8 @@ public class AirBlade extends AbilityInstance {
   @Override
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
-    if (collidedAbility instanceof AirBlade) {
-      double collidedFactor = ((AirBlade) collidedAbility).factor;
-      if (factor - collidedFactor > 0.1) {
+    if (collidedAbility instanceof AirBlade other) {
+      if (factor - other.factor > 0.1) {
         collision.removeSelf(false);
       }
     }

@@ -63,11 +63,11 @@ public final class PotionUtil {
   }
 
   public static boolean tryAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
-    if (entity.isValid() && entity instanceof LivingEntity) {
+    if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
       int minDuration = isPositive(type) ? 20 : duration;
-      PotionEffect effect = ((LivingEntity) entity).getPotionEffect(type);
+      PotionEffect effect = livingEntity.getPotionEffect(type);
       if (effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < amplifier) {
-        ((LivingEntity) entity).addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
+        livingEntity.addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
         return true;
       }
     }

@@ -47,7 +47,7 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingExplosion;
@@ -211,7 +211,7 @@ public class Lightning extends AbilityInstance {
     if (!(entity instanceof LivingEntity)) {
       return false;
     }
-    if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) {
+    if (entity instanceof Player player && player.getGameMode() == GameMode.SPECTATOR) {
       return false;
     }
     return !entity.equals(user.entity());
@@ -219,13 +219,15 @@ public class Lightning extends AbilityInstance {
 
   private boolean handleRedirection(Collection<Entity> entitiesToCheck) {
     for (Entity e : entitiesToCheck) {
-      if (e instanceof Player) {
-        BendingPlayer bendingPlayer = Registries.BENDERS.user((Player) e);
-        Lightning other = Bending.game().abilityManager(user.world()).userInstances(bendingPlayer, Lightning.class)
-          .filter(l -> !l.launched).findFirst().orElse(null);
-        if (other != null) {
-          other.startTime = 0;
-          return true;
+      if (e instanceof LivingEntity livingEntity) {
+        BendingUser bendingUser = Registries.BENDERS.user(livingEntity);
+        if (bendingUser != null) {
+          Lightning other = Bending.game().abilityManager(user.world()).userInstances(bendingUser, Lightning.class)
+            .filter(l -> !l.launched).findFirst().orElse(null);
+          if (other != null) {
+            other.startTime = 0;
+            return true;
+          }
         }
       }
     }
@@ -251,12 +253,12 @@ public class Lightning extends AbilityInstance {
   private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
       affectedEntities.add(entity);
-      if (entity instanceof Creeper) {
-        ((Creeper) entity).setPowered(true);
+      if (entity instanceof Creeper creeper) {
+        creeper.setPowered(true);
       }
       boolean hitWater = entity.isInWater();
       boolean grounded = EntityMethods.isOnGround(entity);
-      boolean hasMetalArmor = entity instanceof LivingEntity && InventoryUtil.hasMetalArmor((LivingEntity) entity);
+      boolean hasMetalArmor = entity instanceof LivingEntity livingEntity && InventoryUtil.hasMetalArmor(livingEntity);
       double dmgFactor = hitWater ? 2 : (grounded && hasMetalArmor ? 0.5 : 1);
       double damage = factor * dmgFactor * userConfig.damage;
       DamageUtil.damageEntity(entity, user, damage, description());

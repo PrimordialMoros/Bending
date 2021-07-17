@@ -98,8 +98,8 @@ public final class DamageUtil {
     if (entity.isInvulnerable() || !entity.isValid()) {
       return false;
     }
-    if (entity instanceof Player) {
-      GameMode mode = ((Player) entity).getGameMode();
+    if (entity instanceof Player player) {
+      GameMode mode = player.getGameMode();
       return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
     }
     return entity instanceof LivingEntity;

@@ -151,8 +151,8 @@ public class Shockwave extends AbilityInstance {
       boolean inRange = false;
       if (positions.contains(entity.getLocation().getBlock())) {
         inRange = true;
-      } else if (entity instanceof LivingEntity) {
-        Block eyeBlock = ((LivingEntity) entity).getEyeLocation().getBlock();
+      } else if (entity instanceof LivingEntity livingEntity) {
+        Block eyeBlock = livingEntity.getEyeLocation().getBlock();
         if (positions.contains(eyeBlock)) {
           inRange = true;
         }

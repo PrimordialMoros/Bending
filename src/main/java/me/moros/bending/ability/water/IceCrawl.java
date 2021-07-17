@@ -94,8 +94,8 @@ public class IceCrawl extends AbilityInstance {
     Optional<IceCrawl> line = Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class);
     if (method == Activation.SNEAK && line.isPresent()) {
       State state = line.get().states.current();
-      if (state instanceof SelectedSource) {
-        ((SelectedSource) state).reselect(source);
+      if (state instanceof SelectedSource selectedSource) {
+        selectedSource.reselect(source);
       }
       return false;
     }
@@ -176,10 +176,10 @@ public class IceCrawl extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      if (entity.isValid() && entity instanceof LivingEntity) {
+      if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
         Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
         new TempFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
-        MovementHandler.restrictEntity(user, (LivingEntity) entity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
+        MovementHandler.restrictEntity(user, livingEntity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
       }
       return true;
     }

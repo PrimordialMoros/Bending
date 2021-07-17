@@ -48,8 +48,7 @@ public final class TownyProtection implements Protection {
 
   @Override
   public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
-    if (entity instanceof Player) {
-      Player player = (Player) entity;
+    if (entity instanceof Player player) {
       boolean canBuild = PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.DIRT, TownyPermission.ActionType.BUILD);
       if (!canBuild && api.isWarTime()) {
         PlayerCache cache = towny.getCache(player);

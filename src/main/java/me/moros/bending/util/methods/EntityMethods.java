@@ -50,8 +50,8 @@ public final class EntityMethods {
    * @return whether the new velocity was successfully applied
    */
   public static boolean applyVelocity(@NonNull Ability ability, @NonNull Entity entity, @NonNull Vector3d velocity) {
-    if (entity instanceof LivingEntity) {
-      BendingVelocityEvent event = Bending.eventBus().postVelocityEvent(ability.user(), (LivingEntity) entity, ability.description(), velocity);
+    if (entity instanceof LivingEntity livingEntity) {
+      BendingVelocityEvent event = Bending.eventBus().postVelocityEvent(ability.user(), livingEntity, ability.description(), velocity);
       if (!event.isCancelled()) {
         entity.setVelocity(event.velocity().clampVelocity());
         return true;

@@ -113,8 +113,8 @@ public class WaterManipulation extends AbilityInstance {
       .filter(m -> m.manip == null).collect(Collectors.toList());
     for (WaterManipulation manip : manips) {
       State state = manip.states.current();
-      if (state instanceof SelectedSource) {
-        ((SelectedSource) state).reselect(source);
+      if (state instanceof SelectedSource selectedSource) {
+        selectedSource.reselect(source);
         return false;
       }
     }

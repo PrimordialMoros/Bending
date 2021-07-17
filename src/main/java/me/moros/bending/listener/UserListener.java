@@ -128,7 +128,7 @@ public class UserListener implements Listener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDeath(EntityDeathEvent event) {
     event.getDrops().removeIf(item -> Bending.dataLayer().hasArmorKey(item.getItemMeta()));
-    boolean keepInventory = event instanceof PlayerDeathEvent && ((PlayerDeathEvent) event).getKeepInventory();
+    boolean keepInventory = event instanceof PlayerDeathEvent pde && pde.getKeepInventory();
     TempArmor.MANAGER.get(event.getEntity().getUniqueId()).ifPresent(tempArmor -> {
       if (!keepInventory) {
         event.getDrops().addAll(tempArmor.snapshot());
@@ -143,8 +143,7 @@ public class UserListener implements Listener {
       return;
     }
     EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
-    if (lastDamageCause instanceof BendingDamageEvent) {
-      BendingDamageEvent cause = (BendingDamageEvent) lastDamageCause;
+    if (lastDamageCause instanceof BendingDamageEvent cause) {
       if (cause.ability().element() == Element.FIRE) {
         List<ItemStack> newDrops = new ArrayList<>();
         Iterator<ItemStack> it = event.getDrops().iterator();
@@ -176,8 +175,7 @@ public class UserListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
     EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
-    if (lastDamageCause instanceof BendingDamageEvent) {
-      BendingDamageEvent cause = (BendingDamageEvent) lastDamageCause;
+    if (lastDamageCause instanceof BendingDamageEvent cause) {
       AbilityDescription ability = cause.ability();
       String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
       TranslatableComponent msg = Bending.translationManager().translate(deathKey);
@@ -211,44 +209,40 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDamageLow(EntityDamageEvent event) {
-    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
-      return;
-    }
-    LivingEntity entity = (LivingEntity) event.getEntity();
-    double oldDamage = event.getDamage();
-    double newDamage = game.activationController().onEntityDamage(entity, event.getCause(), oldDamage);
-    if (newDamage <= 0) {
-      event.setCancelled(true);
-    } else if (oldDamage != newDamage) {
-      event.setDamage(newDamage);
+    if (event.getDamage() > 0 && event.getEntity() instanceof LivingEntity entity) {
+      double oldDamage = event.getDamage();
+      double newDamage = game.activationController().onEntityDamage(entity, event.getCause(), oldDamage);
+      if (newDamage <= 0) {
+        event.setCancelled(true);
+      } else if (oldDamage != newDamage) {
+        event.setDamage(newDamage);
+      }
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onEntityDamage(EntityDamageEvent event) {
-    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
-      return;
-    }
-    User user = Registries.BENDERS.user((LivingEntity) event.getEntity());
-    if (user != null) {
-      game.activationController().onUserDamage(user);
+    if (event.getDamage() > 0 && event.getEntity() instanceof LivingEntity entity) {
+      User user = Registries.BENDERS.user(entity);
+      if (user != null) {
+        game.activationController().onUserDamage(user);
+      }
     }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDamageByExplosion(EntityDamageByEntityEvent event) {
-    if (event.getDamage() <= 0 || !(event.getEntity() instanceof LivingEntity)) {
-      return;
-    }
-    if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
-      User user = Registries.BENDERS.user((LivingEntity) event.getEntity());
-      if (user != null) {
-        double oldDmg = event.getDamage();
-        double newDmg = FireShield.shieldFromExplosion(user, event.getDamager(), oldDmg);
-        if (newDmg <= 0) {
-          event.setCancelled(true);
-        } else if (oldDmg != newDmg) {
-          event.setDamage(newDmg);
+    if (event.getDamage() > 0 && event.getEntity() instanceof LivingEntity entity) {
+      if (event.getCause() == DamageCause.BLOCK_EXPLOSION || event.getCause() == DamageCause.ENTITY_EXPLOSION) {
+        User user = Registries.BENDERS.user(entity);
+        if (user != null) {
+          double oldDmg = event.getDamage();
+          double newDmg = FireShield.shieldFromExplosion(user, event.getDamager(), oldDmg);
+          if (newDmg <= 0) {
+            event.setCancelled(true);
+          } else if (oldDmg != newDmg) {
+            event.setDamage(newDmg);
+          }
         }
       }
     }
@@ -291,16 +285,9 @@ public class UserListener implements Listener {
     }
     BendingPlayer player = Registries.BENDERS.user(event.getPlayer());
     switch (event.getAction()) {
-      case RIGHT_CLICK_AIR:
-        game.activationController().onUserInteract(player, Activation.INTERACT);
-        break;
-      case RIGHT_CLICK_BLOCK:
-        game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
-        break;
-      case LEFT_CLICK_AIR:
-      case LEFT_CLICK_BLOCK:
-        game.activationController().onUserSwing(player);
-        break;
+      case RIGHT_CLICK_AIR -> game.activationController().onUserInteract(player, Activation.INTERACT);
+      case RIGHT_CLICK_BLOCK -> game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
+      case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(player);
     }
   }
 

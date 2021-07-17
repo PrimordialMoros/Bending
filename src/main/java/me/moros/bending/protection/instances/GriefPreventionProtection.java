@@ -36,8 +36,8 @@ public final class GriefPreventionProtection implements Protection {
 
   @Override
   public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
-    if (entity instanceof Player) {
-      String reason = griefPrevention.allowBuild((Player) entity, block.getLocation());
+    if (entity instanceof Player player) {
+      String reason = griefPrevention.allowBuild(player, block.getLocation());
       Claim claim = griefPrevention.dataStore.getClaimAt(block.getLocation(), true, null);
       return reason == null || claim == null || claim.siegeData != null;
     }

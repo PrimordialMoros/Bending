@@ -36,9 +36,9 @@ public final class LWCProtection implements Protection {
 
   @Override
   public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
-    if (entity instanceof Player) {
+    if (entity instanceof Player player) {
       com.griefcraft.model.Protection protection = lwc.getProtectionCache().getProtection(block);
-      return protection == null || lwc.canAccessProtection((Player) entity, protection);
+      return protection == null || lwc.canAccessProtection(player, protection);
     }
     return true;
   }

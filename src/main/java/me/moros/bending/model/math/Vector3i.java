@@ -198,8 +198,7 @@ public class Vector3i {
     if (this == other) {
       return true;
     }
-    if (other instanceof Vector3i) {
-      final Vector3i v = (Vector3i) other;
+    if (other instanceof Vector3i v) {
       return (x == v.x) && (y == v.y) && (z == v.z);
     }
     return false;

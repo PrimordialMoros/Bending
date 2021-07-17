@@ -185,30 +185,26 @@ public class EarthArmor extends AbilityInstance {
   }
 
   private static ItemStack[] getArmorSet(Mode mode) {
-    switch (mode) {
-      case IRON:
-        return new ItemStack[]{
-          new ItemStack(Material.IRON_BOOTS, 1),
-          new ItemStack(Material.IRON_LEGGINGS, 1),
-          new ItemStack(Material.IRON_CHESTPLATE, 1),
-          new ItemStack(Material.IRON_HELMET, 1)
-        };
-      case GOLD:
-        return new ItemStack[]{
-          new ItemStack(Material.GOLDEN_BOOTS, 1),
-          new ItemStack(Material.GOLDEN_LEGGINGS, 1),
-          new ItemStack(Material.GOLDEN_CHESTPLATE, 1),
-          new ItemStack(Material.GOLDEN_HELMET, 1)
-        };
-      case ROCK:
-      default:
-        return new ItemStack[]{
-          new ItemStack(Material.LEATHER_BOOTS, 1),
-          new ItemStack(Material.LEATHER_LEGGINGS, 1),
-          new ItemStack(Material.LEATHER_CHESTPLATE, 1),
-          new ItemStack(Material.LEATHER_HELMET, 1)
-        };
-    }
+    return switch (mode) {
+      case IRON -> new ItemStack[]{
+        new ItemStack(Material.IRON_BOOTS, 1),
+        new ItemStack(Material.IRON_LEGGINGS, 1),
+        new ItemStack(Material.IRON_CHESTPLATE, 1),
+        new ItemStack(Material.IRON_HELMET, 1)
+      };
+      case GOLD -> new ItemStack[]{
+        new ItemStack(Material.GOLDEN_BOOTS, 1),
+        new ItemStack(Material.GOLDEN_LEGGINGS, 1),
+        new ItemStack(Material.GOLDEN_CHESTPLATE, 1),
+        new ItemStack(Material.GOLDEN_HELMET, 1)
+      };
+      default -> new ItemStack[]{
+        new ItemStack(Material.LEATHER_BOOTS, 1),
+        new ItemStack(Material.LEATHER_LEGGINGS, 1),
+        new ItemStack(Material.LEATHER_CHESTPLATE, 1),
+        new ItemStack(Material.LEATHER_HELMET, 1)
+      };
+    };
   }
 
   private static class Config extends Configurable {

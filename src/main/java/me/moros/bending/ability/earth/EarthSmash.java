@@ -284,7 +284,7 @@ public class EarthSmash extends AbilityInstance {
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     boolean shatter = collision.removeSelf();
-    if (collidedAbility instanceof FlameRush && ((FlameRush) collidedAbility).isFullyCharged()) {
+    if (collidedAbility instanceof FlameRush other && other.isFullyCharged()) {
       shatter = true;
     } else if (collidedAbility instanceof FrostBreath) {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -553,19 +553,12 @@ public class EarthSmash extends AbilityInstance {
         DamageUtil.damageEntity(entity, user, userConfig.shatterDamage, description());
         if (entity.isValid()) {
           switch (type) {
-            case MAGMA:
-              FireTick.ignite(user, entity, userConfig.fireTicks);
-              return true;
-            case SAND:
-              PotionUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
-              return true;
-            case ICE:
-              PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.frostDuration / 50.0), userConfig.frostPower);
-              return true;
-            case MUD:
-              PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
-              return true;
+            case MAGMA -> FireTick.ignite(user, entity, userConfig.fireTicks);
+            case SAND -> PotionUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
+            case ICE -> PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.frostDuration / 50.0), userConfig.frostPower);
+            case MUD -> PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
           }
+          return true;
         }
       }
       return false;

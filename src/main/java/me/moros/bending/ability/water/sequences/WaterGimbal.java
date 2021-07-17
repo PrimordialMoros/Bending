@@ -164,8 +164,8 @@ public class WaterGimbal extends AbilityInstance {
   @Override
   public void onDestroy() {
     State current = states.current();
-    if (current instanceof GimbalStream) {
-      ((GimbalStream) current).cleanAll();
+    if (current instanceof GimbalStream gimbalStream) {
+      gimbalStream.cleanAll();
     }
   }
 
@@ -176,11 +176,7 @@ public class WaterGimbal extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    State current = states.current();
-    if (current instanceof GimbalStream) {
-      return ((GimbalStream) current).colliders();
-    }
-    return List.of();
+    return states.current() instanceof GimbalStream gimbalStream ? gimbalStream.colliders() : List.of();
   }
 
   private static class Gimbal implements State {
@@ -290,13 +286,12 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
-      if (!(entity instanceof LivingEntity) || affectedEntities.contains(entity)) {
-        return false;
+      if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
+        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+        Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
+        EntityMethods.applyVelocity(WaterGimbal.this, entity, velocity);
+        affectedEntities.add(entity);
       }
-      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
-      EntityMethods.applyVelocity(WaterGimbal.this, entity, velocity);
-      affectedEntities.add(entity);
       return false;
     }
 

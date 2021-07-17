@@ -158,22 +158,13 @@ public class EarthTunnel extends AbilityInstance {
   }
 
   private int getAmount(Material type) {
-    switch (type) {
-      case COAL:
-      case DIAMOND:
-      case EMERALD:
-      case QUARTZ:
-      case IRON_INGOT:
-      case GOLD_INGOT:
-        return 1;
-      case REDSTONE:
-        return 5;
-      case GOLD_NUGGET:
-        return 6;
-      case LAPIS_LAZULI:
-        return 9;
-    }
-    return 0;
+    return switch (type) {
+      case COAL, DIAMOND, EMERALD, QUARTZ, IRON_INGOT, GOLD_INGOT -> 1;
+      case REDSTONE -> 5;
+      case GOLD_NUGGET -> 6;
+      case LAPIS_LAZULI -> 9;
+      default -> 0;
+    };
   }
 
   @Override

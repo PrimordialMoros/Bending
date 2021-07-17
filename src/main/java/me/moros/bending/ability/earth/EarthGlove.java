@@ -157,7 +157,7 @@ public class EarthGlove extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
       if (grabbed) {
-        if (grabbedTarget == null || !grabbedTarget.isValid() || (grabbedTarget instanceof Player && !((Player) grabbedTarget).isOnline())) {
+        if (!isValidTarget()) {
           shatterGlove();
           return UpdateResult.REMOVE;
         }
@@ -185,6 +185,16 @@ public class EarthGlove extends AbilityInstance {
       }
     }
     return UpdateResult.CONTINUE;
+  }
+
+  private boolean isValidTarget() {
+    if (grabbedTarget == null || !grabbedTarget.isValid()) {
+      return false;
+    }
+    if (grabbedTarget instanceof Player player && !player.isOnline()) {
+      return false;
+    }
+    return grabbedTarget.getWorld().equals(user.world());
   }
 
   private boolean onEntityHit(Entity entity) {

@@ -208,8 +208,7 @@ public class MetalCable extends AbilityInstance {
     } else {
       if (target.type == CableTarget.Type.ENTITY) {
         EntityMethods.applyVelocity(this, entityToMove, Vector3d.ZERO);
-        if (target.entity instanceof FallingBlock) {
-          FallingBlock fb = (FallingBlock) target.entity;
+        if (target.entity instanceof FallingBlock fb) {
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
           ParticleUtil.create(Particle.BLOCK_CRACK, tempLocation).count(4)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();

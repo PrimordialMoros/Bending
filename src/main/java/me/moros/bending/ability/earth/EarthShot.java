@@ -308,17 +308,12 @@ public class EarthShot extends AbilityInstance implements Explosive {
 
     user.addCooldown(description(), userConfig.cooldown);
 
-    switch (mode) {
-      case METAL:
-        damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
-        break;
-      case MAGMA:
-        damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
-        break;
-      default:
-        damage = userConfig.damage;
-        break;
-    }
+    double dmgFactor = switch (mode) {
+      case METAL -> BendingProperties.METAL_MODIFIER;
+      case MAGMA -> BendingProperties.MAGMA_MODIFIER;
+      default -> 1;
+    };
+    damage = userConfig.damage * dmgFactor;
     launched = true;
   }
 

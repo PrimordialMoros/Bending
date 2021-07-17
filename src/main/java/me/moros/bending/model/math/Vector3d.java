@@ -280,12 +280,8 @@ public class Vector3d {
     if (this == other) {
       return true;
     }
-    if (other instanceof Vector3d) {
-      final Vector3d v = (Vector3d) other;
-      if (v.isNaN()) {
-        return this.isNaN();
-      }
-      return (x == v.x) && (y == v.y) && (z == v.z);
+    if (other instanceof Vector3d v) {
+      return v.isNaN() ? this.isNaN() : (x == v.x) && (y == v.y) && (z == v.z);
     }
     return false;
   }

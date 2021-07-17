@@ -152,19 +152,11 @@ public class AirBurst extends AbilityInstance {
       return;
     }
     released = true;
-    Collection<Ray> rays;
-    switch (mode) {
-      case CONE:
-        rays = BurstUtil.cone(user, userConfig.coneRange);
-        break;
-      case FALL:
-        rays = BurstUtil.fall(user, userConfig.sphereRange);
-        break;
-      case SPHERE:
-      default:
-        rays = BurstUtil.sphere(user, userConfig.sphereRange);
-        break;
-    }
+    Collection<Ray> rays = switch (mode) {
+      case CONE -> BurstUtil.cone(user, userConfig.coneRange);
+      case FALL -> BurstUtil.fall(user, userConfig.sphereRange);
+      default -> BurstUtil.sphere(user, userConfig.sphereRange);
+    };
     rays.forEach(r -> streams.add(new AirStream(r)));
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);

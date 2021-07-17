@@ -191,14 +191,14 @@ public class BendingUser implements User {
   }
 
   private void updateBoard(AbilityDescription desc, boolean cooldown) {
-    if (entity instanceof Player) {
-      Bending.game().boardManager().updateBoardSlot((Player) entity, desc, cooldown);
+    if (entity instanceof Player player) {
+      Bending.game().boardManager().updateBoardSlot(player, desc, cooldown);
     }
   }
 
   private void updateBoard() {
-    if (entity instanceof Player) {
-      Bending.game().boardManager().updateBoard((Player) entity());
+    if (entity instanceof Player player) {
+      Bending.game().boardManager().updateBoard(player);
     }
   }
 
@@ -216,8 +216,8 @@ public class BendingUser implements User {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof BendingUser) {
-      return entity().equals(((BendingUser) obj).entity());
+    if (obj instanceof BendingUser other) {
+      return entity().equals(other.entity());
     }
     return entity().equals(obj);
   }

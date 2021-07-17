@@ -111,16 +111,15 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   private boolean isHoldingFood() {
-    if (user instanceof BendingPlayer) {
-      PlayerInventory inventory = ((BendingPlayer) user).entity().getInventory();
-      return MaterialUtil.COOKABLE.containsKey(inventory.getItemInMainHand().getType());
+    if (user instanceof BendingPlayer bendingPlayer) {
+      return MaterialUtil.COOKABLE.containsKey(bendingPlayer.inventory().getItemInMainHand().getType());
     }
     return false;
   }
 
   private boolean cook() {
-    if (user instanceof BendingPlayer) {
-      PlayerInventory inventory = ((BendingPlayer) user).entity().getInventory();
+    if (user instanceof BendingPlayer bendingPlayer) {
+      PlayerInventory inventory = bendingPlayer.inventory();
       Material heldItem = inventory.getItemInMainHand().getType();
       if (MaterialUtil.COOKABLE.containsKey(heldItem)) {
         ItemStack cooked = new ItemStack(MaterialUtil.COOKABLE.get(heldItem));

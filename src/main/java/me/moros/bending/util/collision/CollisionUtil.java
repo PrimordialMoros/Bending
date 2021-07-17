@@ -97,12 +97,12 @@ public final class CollisionUtil {
   }
 
   private static boolean isValidEntity(Entity entity) {
-    if (entity instanceof Player) {
-      return ((Player) entity).getGameMode() != GameMode.SPECTATOR;
-    } else if (entity instanceof FallingBlock) {
-      return !TempFallingBlock.MANAGER.isTemp((FallingBlock) entity);
-    } else if (entity instanceof ArmorStand) {
-      return ((ArmorStand) entity).isVisible();
+    if (entity instanceof Player player) {
+      return player.getGameMode() != GameMode.SPECTATOR;
+    } else if (entity instanceof FallingBlock fallingBlock) {
+      return !TempFallingBlock.MANAGER.isTemp(fallingBlock);
+    } else if (entity instanceof ArmorStand armorStand) {
+      return armorStand.isVisible();
     }
     return true;
   }

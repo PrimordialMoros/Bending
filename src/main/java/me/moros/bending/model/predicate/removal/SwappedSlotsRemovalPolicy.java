@@ -33,10 +33,7 @@ public class SwappedSlotsRemovalPolicy implements RemovalPolicy {
 
   @Override
   public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
-    if (!(user instanceof BendingPlayer)) {
-      return false;
-    }
-    return !expected.equals(user.selectedAbility());
+    return user instanceof BendingPlayer && !expected.equals(user.selectedAbility());
   }
 
   public static @NonNull RemovalPolicy of(@NonNull AbilityDescription expected) {

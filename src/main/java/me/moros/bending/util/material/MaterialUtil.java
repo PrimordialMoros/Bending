@@ -172,7 +172,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isWaterLogged(@NonNull BlockData data) {
-    return data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged();
+    return data instanceof Waterlogged waterlogged && waterlogged.isWaterlogged();
   }
 
   public static boolean isMeltable(@NonNull Block block) {
@@ -189,16 +189,12 @@ public final class MaterialUtil {
       Material material = Material.getMaterial(data.getMaterial().name().replace("_POWDER", ""));
       return material == null ? def : material.createBlockData();
     }
-    switch (data.getMaterial()) {
-      case SAND:
-        return Material.SANDSTONE.createBlockData();
-      case RED_SAND:
-        return Material.RED_SANDSTONE.createBlockData();
-      case GRAVEL:
-        return Material.STONE.createBlockData();
-      default:
-        return def;
-    }
+    return switch (data.getMaterial()) {
+      case SAND -> Material.SANDSTONE.createBlockData();
+      case RED_SAND -> Material.RED_SANDSTONE.createBlockData();
+      case GRAVEL -> Material.STONE.createBlockData();
+      default -> def;
+    };
   }
 
   public static @NonNull BlockData focusedType(@NonNull BlockData data) {
@@ -217,30 +213,16 @@ public final class MaterialUtil {
       Material material = Material.getMaterial(data.getMaterial().name() + "_POWDER");
       return Objects.requireNonNullElse(material, Material.GRAVEL).createBlockData();
     }
-    switch (data.getMaterial()) {
-      case STONE:
-      case GRANITE:
-      case POLISHED_GRANITE:
-      case DIORITE:
-      case POLISHED_DIORITE:
-      case ANDESITE:
-      case POLISHED_ANDESITE:
-      case GRAVEL:
-        return Material.GRAVEL.createBlockData();
-      case DIRT:
-      case MYCELIUM:
-      case GRASS_BLOCK:
-      case GRASS_PATH:
-      case PODZOL:
-      case COARSE_DIRT:
-        return Material.COARSE_DIRT.createBlockData();
-    }
-    return Material.SAND.createBlockData();
+    return switch (data.getMaterial()) {
+      case STONE, GRANITE, POLISHED_GRANITE, DIORITE, POLISHED_DIORITE, ANDESITE, POLISHED_ANDESITE, GRAVEL -> Material.GRAVEL.createBlockData();
+      case DIRT, MYCELIUM, GRASS_BLOCK, DIRT_PATH, PODZOL, COARSE_DIRT -> Material.COARSE_DIRT.createBlockData();
+      default -> Material.SAND.createBlockData();
+    };
   }
 
   public static boolean isSourceBlock(@NonNull Block block) {
     BlockData blockData = block.getBlockData();
-    return blockData instanceof Levelled && ((Levelled) blockData).getLevel() == 0;
+    return blockData instanceof Levelled levelled && levelled.getLevel() == 0;
   }
 
   public static @NonNull BlockData lavaData(int level) {

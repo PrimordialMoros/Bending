@@ -138,7 +138,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (target == null || !target.isValid()) {
       return false;
     }
-    if (target instanceof Player && !((Player) target).isOnline()) {
+    if (target instanceof Player player && !player.isOnline()) {
       return false;
     }
     return target.getWorld().equals(user.world()) && targetLocation.distanceSq(new Vector3d(target.getLocation())) < 5 * 5;

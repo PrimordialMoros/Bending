@@ -164,8 +164,7 @@ public class FlameRush extends AbilityInstance {
       } else {
         collision.removeSelf(false);
       }
-    } else if (collidedAbility instanceof FlameRush) {
-      FlameRush other = (FlameRush) collidedAbility;
+    } else if (collidedAbility instanceof FlameRush other) {
       double collidedFactor = other.stream.factor;
       if (stream.factor > collidedFactor + 0.1) {
         collision.removeSelf(false);

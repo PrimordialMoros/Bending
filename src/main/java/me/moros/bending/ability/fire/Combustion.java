@@ -126,14 +126,12 @@ public class Combustion extends AbilityInstance implements Explosive {
   @Override
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
-    if (collidedAbility instanceof FireShield) {
-      boolean sphere = ((FireShield) collidedAbility).isSphere();
-      if (sphere) {
+    if (collidedAbility instanceof FireShield fireShield) {
+      if (fireShield.isSphere()) {
         ignoreCollider = collision.colliderOther();
       }
       explode();
-    } else if (collidedAbility instanceof Combustion) {
-      Combustion other = (Combustion) collidedAbility;
+    } else if (collidedAbility instanceof Combustion other) {
       Vector3d first = collision.colliderSelf().position();
       Vector3d second = collision.colliderOther().position();
       Vector3d center = first.add(second).multiply(0.5);

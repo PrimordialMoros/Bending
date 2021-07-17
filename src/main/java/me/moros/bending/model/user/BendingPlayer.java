@@ -35,6 +35,7 @@ import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -121,6 +122,11 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   @Override
   public void flying(boolean flying) {
     entity().setFlying(flying);
+  }
+
+  @Override
+  public @NonNull PlayerInventory inventory() {
+    return entity().getInventory();
   }
 
   // Presets

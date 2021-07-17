@@ -43,7 +43,7 @@ public final class EarthMaterials {
       .add(MaterialTags.TERRACOTTA.getValues())
       .add(MaterialTags.CONCRETES.getValues())
       .add(MaterialTags.CONCRETE_POWDER.getValues())
-      .add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.GRASS_PATH,
+      .add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.DIRT_PATH,
         Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
         Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
         Material.COAL_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE,

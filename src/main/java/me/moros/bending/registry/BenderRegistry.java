@@ -77,8 +77,8 @@ public final class BenderRegistry implements Registry<User> {
   }
 
   public @Nullable BendingUser user(@NonNull LivingEntity entity) {
-    if (entity instanceof Player) {
-      return user((Player) entity);
+    if (entity instanceof Player player) {
+      return user(player);
     }
     return entities.get(entity.getUniqueId());
   }
@@ -102,13 +102,12 @@ public final class BenderRegistry implements Registry<User> {
       return;
     }
     Bending.game().abilityManager(user.world()).createPassives(user);
-    if (user instanceof BendingPlayer) {
-      BendingPlayer bendingPlayer = (BendingPlayer) user;
+    if (user instanceof BendingPlayer bendingPlayer) {
       players.put(uuid, bendingPlayer);
       Bending.game().boardManager().canUseScoreboard(bendingPlayer.entity());
       Bending.eventBus().postPlayerLoadEvent(bendingPlayer);
-    } else if (user instanceof BendingUser) {
-      entities.put(uuid, (BendingUser) user);
+    } else if (user instanceof BendingUser bendingUser) {
+      entities.put(uuid, bendingUser);
     }
   }
 

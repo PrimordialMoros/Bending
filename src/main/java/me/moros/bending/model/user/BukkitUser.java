@@ -121,7 +121,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
   }
 
   default @Nullable Inventory inventory() {
-    return entity() instanceof InventoryHolder ? ((InventoryHolder) entity()).getInventory() : null;
+    return entity() instanceof InventoryHolder holder ? holder.getInventory() : null;
   }
 
   default boolean isOnGround() {
@@ -152,10 +152,7 @@ public interface BukkitUser extends ForwardingAudience.Single {
    */
   default @NonNull Vector3d mainHandSide() {
     Vector3d dir = direction().multiply(0.4);
-    if (entity() instanceof Player) {
-      return handSide(((Player) entity()).getMainHand() == MainHand.RIGHT);
-    }
-    return eyeLocation().add(dir);
+    return entity() instanceof Player player ? handSide(player.getMainHand() == MainHand.RIGHT) : eyeLocation().add(dir);
   }
 
   /**

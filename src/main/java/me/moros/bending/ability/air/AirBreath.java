@@ -153,8 +153,7 @@ public class AirBreath extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       EntityMethods.applyVelocity(AirBreath.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       FireTick.extinguish(entity);
-      if (entity instanceof LivingEntity) {
-        LivingEntity livingEntity = (LivingEntity) entity;
+      if (entity instanceof LivingEntity livingEntity) {
         livingEntity.setRemainingAir(livingEntity.getRemainingAir() + 1);
       }
       return false;

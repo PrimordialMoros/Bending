@@ -256,8 +256,8 @@ public class BendingCommand extends BaseCommand {
     String instKey = "bending.ability." + ability.name().toLowerCase() + ".instructions";
     Component description = Bending.translationManager().translate(descKey);
     Component instructions = Bending.translationManager().translate(instKey);
-    if (instructions == null && ability instanceof Sequence) {
-      instructions = ((Sequence) ability).instructions();
+    if (instructions == null && ability instanceof Sequence sequence) {
+      instructions = sequence.instructions();
     }
     if (description == null && instructions == null) {
       Message.ABILITY_INFO_EMPTY.send(user, ability.displayName());

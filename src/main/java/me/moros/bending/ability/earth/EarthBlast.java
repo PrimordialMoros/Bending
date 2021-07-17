@@ -102,8 +102,8 @@ public class EarthBlast extends AbilityInstance {
       .filter(eb -> eb.blast == null).collect(Collectors.toList());
     for (EarthBlast eblast : eblasts) {
       State state = eblast.states.current();
-      if (state instanceof SelectedSource) {
-        ((SelectedSource) state).reselect(source, fakeData);
+      if (state instanceof SelectedSource selectedSource) {
+        selectedSource.reselect(source, fakeData);
         return false;
       }
     }
@@ -179,8 +179,8 @@ public class EarthBlast extends AbilityInstance {
   @Override
   public void onDestroy() {
     State state = states.current();
-    if (state instanceof SelectedSource) {
-      ((SelectedSource) state).onDestroy();
+    if (state instanceof SelectedSource selectedSource) {
+      selectedSource.onDestroy();
     }
     if (blast != null) {
       blast.clean();

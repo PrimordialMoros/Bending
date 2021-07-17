@@ -143,8 +143,8 @@ public class TempBlock implements Temporary {
   private static BlockData calculateWaterData(Block above) {
     BlockData data = above.getBlockData();
     int level;
-    if (data instanceof Levelled) {
-      level = ((Levelled) data).getLevel();
+    if (data instanceof Levelled levelled) {
+      level = levelled.getLevel();
       if (level <= 7) {
         level += 8;
       }

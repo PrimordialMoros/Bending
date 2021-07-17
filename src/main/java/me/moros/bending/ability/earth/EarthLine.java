@@ -116,8 +116,8 @@ public class EarthLine extends AbilityInstance {
     Optional<EarthLine> line = Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
       State state = line.get().states.current();
-      if (state instanceof SelectedSource) {
-        ((SelectedSource) state).reselect(source, fakeData);
+      if (state instanceof SelectedSource selectedSource) {
+        selectedSource.reselect(source, fakeData);
       }
       return false;
     }
@@ -194,8 +194,8 @@ public class EarthLine extends AbilityInstance {
   @Override
   public void onDestroy() {
     State state = states.current();
-    if (state instanceof SelectedSource) {
-      ((SelectedSource) state).onDestroy();
+    if (state instanceof SelectedSource selectedSource) {
+      selectedSource.onDestroy();
     }
   }
 
@@ -237,16 +237,15 @@ public class EarthLine extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       double damage = userConfig.damage;
       switch (mode) {
-        case NORMAL:
-          raiseSpikes();
-          break;
-        case PRISON:
+        case NORMAL -> raiseSpikes();
+        case PRISON -> {
           imprisonTarget((LivingEntity) entity);
           return true;
-        case MAGMA:
+        }
+        case MAGMA -> {
           damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
           FireTick.ignite(user, entity);
-          break;
+        }
       }
       DamageUtil.damageEntity(entity, user, damage, description());
       EntityMethods.applyVelocity(EarthLine.this, entity, direction.normalize().multiply(1.2));

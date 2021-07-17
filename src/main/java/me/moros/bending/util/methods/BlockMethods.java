@@ -63,9 +63,9 @@ public final class BlockMethods {
   public static void tryLightBlock(@NonNull Block block) {
     BlockState state = block.getState(false);
     boolean light = false;
-    if (state instanceof Furnace) {
-      if (((Furnace) state).getBurnTime() < 800) {
-        ((Furnace) state).setBurnTime((short) 800);
+    if (state instanceof Furnace furnace) {
+      if (furnace.getBurnTime() < 800) {
+        furnace.setBurnTime((short) 800);
         light = true;
       }
     }

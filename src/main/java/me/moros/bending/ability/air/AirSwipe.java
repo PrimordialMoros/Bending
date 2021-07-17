@@ -159,9 +159,8 @@ public class AirSwipe extends AbilityInstance {
         collision.removeSelf(false);
       }
     }
-    if (collidedAbility instanceof AirSwipe) {
-      double collidedFactor = ((AirSwipe) collidedAbility).factor;
-      if (factor > collidedFactor + 0.1) {
+    if (collidedAbility instanceof AirSwipe other) {
+      if (factor > other.factor + 0.1) {
         collision.removeSelf(false);
       }
     }

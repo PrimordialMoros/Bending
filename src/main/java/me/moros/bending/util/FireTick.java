@@ -44,8 +44,8 @@ public final class FireTick {
 
   public static void extinguish(@NonNull Entity entity) {
     entity.setFireTicks(-1);
-    if (entity instanceof LivingEntity) {
-      INSTANCES.remove((LivingEntity) entity);
+    if (entity instanceof LivingEntity livingEntity) {
+      INSTANCES.remove(livingEntity);
     }
   }
 
@@ -73,8 +73,8 @@ public final class FireTick {
   }
 
   private static void trackEntity(Entity entity, User source) {
-    if (entity instanceof LivingEntity) {
-      INSTANCES.put((LivingEntity) entity, source);
+    if (entity instanceof LivingEntity livingEntity) {
+      INSTANCES.put(livingEntity, source);
     }
   }
 }

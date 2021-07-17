@@ -60,8 +60,8 @@ public class MovementHandler {
   private MovementHandler(LivingEntity entity, long duration) {
     this.entity = entity;
     hadAI = entity.hasAI();
-    if (entity instanceof Player) {
-      info = new BarInfo((Player) entity, duration);
+    if (entity instanceof Player player) {
+      info = new BarInfo(player, duration);
     } else {
       entity.setAI(false);
     }
@@ -78,9 +78,7 @@ public class MovementHandler {
     if (info != null) {
       info.remove();
     }
-    if (!(entity instanceof Player)) {
-      entity.setAI(hadAI);
-    }
+    entity.setAI(hadAI);
     if (entity.hasMetadata(Metadata.NO_MOVEMENT)) {
       entity.removeMetadata(Metadata.NO_MOVEMENT, Bending.plugin());
     }

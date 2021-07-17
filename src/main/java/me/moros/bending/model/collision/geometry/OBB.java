@@ -67,10 +67,10 @@ public class OBB implements Collider {
       return false;
     } else if (collider instanceof Sphere) {
       return collider.intersects(this);
-    } else if (collider instanceof AABB) {
-      return intersects(new OBB((AABB) collider));
-    } else if (collider instanceof OBB) {
-      return intersects((OBB) collider);
+    } else if (collider instanceof AABB aabb) {
+      return intersects(new OBB(aabb));
+    } else if (collider instanceof OBB obb) {
+      return intersects(obb);
     } else if (collider instanceof Disk) {
       return collider.intersects(this);
     }

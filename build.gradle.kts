@@ -9,8 +9,8 @@ group = "me.moros"
 version = "1.1.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
     withJavadocJar()
     withSourcesJar()
 }
@@ -30,7 +30,7 @@ dependencies {
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     compileOnly("org.checkerframework", "checker-qual", "3.15.0")
-    compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper", "paper-api", "1.17.1-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
         exclude(module = "worldguard")
     }
