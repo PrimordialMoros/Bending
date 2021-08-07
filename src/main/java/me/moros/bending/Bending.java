@@ -31,6 +31,7 @@ import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.UserListener;
 import me.moros.bending.listener.WorldListener;
 import me.moros.bending.locale.TranslationManager;
+import me.moros.bending.placeholder.BendingExpansion;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
@@ -83,6 +84,10 @@ public class Bending extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
     new Commands(this);
+
+    if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+      new BendingExpansion().register();
+    }
   }
 
   @Override

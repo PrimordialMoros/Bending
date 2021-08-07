@@ -21,6 +21,7 @@ repositories {
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://ci.ender.zone/plugin/repository/everything/")
     maven("https://jitpack.io")
 }
@@ -31,6 +32,7 @@ dependencies {
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     compileOnly("org.checkerframework", "checker-qual", "3.15.0")
     compileOnly("io.papermc.paper", "paper-api", "1.17.1-R0.1-SNAPSHOT")
+    compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
         exclude(module = "worldguard")
     }

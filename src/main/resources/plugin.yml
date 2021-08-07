@@ -3,7 +3,7 @@ description: Bending plugin for PaperMC.
 author: Moros
 version: ${pluginVersion}
 main: me.moros.bending.Bending
-softdepend: [WorldGuard, GriefPrevention, Towny, LWC]
+softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC]
 api-version: 1.16
 commands:
   bending:
