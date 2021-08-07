@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import co.aikar.commands.lib.timings.MCTiming;
+import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.events.BendingDamageEvent;
@@ -249,19 +250,20 @@ public class UserListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPlayerMove(PlayerMoveEvent event) {
-    Location from = event.getFrom();
-    Location to = event.getTo();
-    if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+  public void onUserMove(EntityMoveEvent event) {
+    if (!event.hasChangedBlock()) {
       return;
     }
-    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.MOVE)) {
+    LivingEntity entity = event.getEntity();
+    if (MovementHandler.isRestricted(entity, ActionType.MOVE)) {
       event.setCancelled(true);
       return;
     }
-
-    final Vector3d velocity = new Vector3d(to).subtract(new Vector3d(from));
-    game.activationController().onUserMove(Registries.BENDERS.user(event.getPlayer()), velocity);
+    User user = Registries.BENDERS.user(entity);
+    if (user != null) {
+      final Vector3d velocity = new Vector3d(event.getTo()).subtract(new Vector3d(event.getFrom()));
+      game.activationController().onUserMove(user, velocity);
+    }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

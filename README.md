@@ -23,7 +23,7 @@ Currently, downloads are available in [Github Releases](https://github.com/Primo
 
 ## Building
 
-This project requires Java 11 or newer and uses Gradle (which comes with a wrapper, so you don't need to install it).
+This project requires Java 16 or newer and uses Gradle (which comes with a wrapper, so you don't need to install it).
 
 Open a terminal and run `./gradlew build`.
 

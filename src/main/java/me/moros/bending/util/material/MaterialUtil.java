@@ -90,7 +90,7 @@ public final class MaterialUtil {
       .add(Tag.CROPS.getValues())
       .add(MaterialTags.MUSHROOMS.getValues())
       .add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN,
-        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakble plants", 38);
+        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakble plants", 41);
 
     TRANSPARENT = new MaterialSetTag(key)
       .add(BREAKABLE_PLANTS.getValues())
@@ -99,7 +99,7 @@ public final class MaterialUtil {
       .add(Tag.CARPETS.getValues())
       .add(Tag.BUTTONS.getValues())
       .add(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
-      .endsWith("TORCH").ensureSize("Transparent", 93);
+      .endsWith("TORCH").ensureSize("Transparent", 96);
 
     CONTAINERS = new MaterialSetTag(key).add(
       Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL,
