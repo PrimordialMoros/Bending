@@ -46,18 +46,26 @@ public final class EarthMaterials {
       .add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.DIRT_PATH,
         Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
         Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
-        Material.COAL_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE,
-        Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.NETHER_QUARTZ_ORE, Material.EMERALD_ORE,
-        Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
-        Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS
-      ).ensureSize("Earth", 96);
+        Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE, Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE,
+        Material.GOLD_ORE,  Material.DEEPSLATE_GOLD_ORE, Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE,
+        Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
+        Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE,
+        Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
+        Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS, Material.AMETHYST_BLOCK,
+        Material.DEEPSLATE, Material.CALCITE, Material.TUFF, Material.ROOTED_DIRT, Material.SMOOTH_BASALT
+      ).ensureSize("Earth", 111);
 
     SAND_BENDABLE = new MaterialSetTag(key)
       .add(Material.SAND, Material.RED_SAND, Material.SOUL_SAND, Material.SOUL_SOIL)
       .add(MaterialTags.SANDSTONES.getValues())
       .add(MaterialTags.RED_SANDSTONES.getValues()).ensureSize("Sand", 12);
 
-    METAL_BENDABLE = new MaterialSetTag(key).add(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.QUARTZ_BLOCK).ensureSize("Metal", 3);
+    METAL_BENDABLE = new MaterialSetTag(key).add(
+      Material.IRON_BLOCK, Material.RAW_IRON_BLOCK,
+      Material.GOLD_BLOCK, Material.RAW_GOLD_BLOCK,
+      Material.COPPER_BLOCK, Material.RAW_COPPER_BLOCK,
+      Material.QUARTZ_BLOCK
+    ).ensureSize("Metal", 7);
 
     LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).ensureSize("Lava", 2);
 
@@ -66,7 +74,7 @@ public final class EarthMaterials {
       .add(SAND_BENDABLE.getValues())
       .add(METAL_BENDABLE.getValues())
       .add(LAVA_BENDABLE.getValues())
-      .ensureSize("All", 113);
+      .ensureSize("All", 132);
   }
 
   private EarthMaterials() {

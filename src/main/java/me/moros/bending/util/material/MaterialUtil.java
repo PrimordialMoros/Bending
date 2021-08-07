@@ -67,14 +67,23 @@ public final class MaterialUtil {
     );
 
     ORES = Map.ofEntries(
+      entry(Material.COPPER_ORE, Material.COAL),
+      entry(Material.DEEPSLATE_COPPER_ORE, Material.COAL),
       entry(Material.COAL_ORE, Material.COAL),
+      entry(Material.DEEPSLATE_COAL_ORE, Material.COAL),
       entry(Material.LAPIS_ORE, Material.LAPIS_LAZULI),
+      entry(Material.DEEPSLATE_LAPIS_ORE, Material.LAPIS_LAZULI),
       entry(Material.REDSTONE_ORE, Material.REDSTONE),
+      entry(Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE),
       entry(Material.DIAMOND_ORE, Material.DIAMOND),
+      entry(Material.DEEPSLATE_DIAMOND_ORE, Material.DIAMOND),
       entry(Material.EMERALD_ORE, Material.EMERALD),
+      entry(Material.DEEPSLATE_EMERALD_ORE, Material.EMERALD),
       entry(Material.NETHER_QUARTZ_ORE, Material.QUARTZ),
       entry(Material.IRON_ORE, Material.IRON_INGOT),
+      entry(Material.DEEPSLATE_IRON_ORE, Material.IRON_INGOT),
       entry(Material.GOLD_ORE, Material.GOLD_INGOT),
+      entry(Material.DEEPSLATE_GOLD_ORE, Material.GOLD_INGOT),
       entry(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET)
     );
 
@@ -214,8 +223,9 @@ public final class MaterialUtil {
       return Objects.requireNonNullElse(material, Material.GRAVEL).createBlockData();
     }
     return switch (data.getMaterial()) {
-      case STONE, GRANITE, POLISHED_GRANITE, DIORITE, POLISHED_DIORITE, ANDESITE, POLISHED_ANDESITE, GRAVEL -> Material.GRAVEL.createBlockData();
-      case DIRT, MYCELIUM, GRASS_BLOCK, DIRT_PATH, PODZOL, COARSE_DIRT -> Material.COARSE_DIRT.createBlockData();
+      case STONE, GRANITE, POLISHED_GRANITE, DIORITE, POLISHED_DIORITE, ANDESITE, POLISHED_ANDESITE,
+        GRAVEL, DEEPSLATE, CALCITE, TUFF, SMOOTH_BASALT -> Material.GRAVEL.createBlockData();
+      case DIRT, MYCELIUM, GRASS_BLOCK, DIRT_PATH, PODZOL, COARSE_DIRT, ROOTED_DIRT -> Material.COARSE_DIRT.createBlockData();
       default -> Material.SAND.createBlockData();
     };
   }

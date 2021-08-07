@@ -149,7 +149,14 @@ public class EarthTunnel extends AbilityInstance {
       return;
     }
 
-    Material newType = type.name().contains("NETHER") ? Material.NETHERRACK : Material.STONE;
+    Material newType;
+    if (type.name().contains("NETHER")) {
+      newType = Material.NETHERRACK;
+    } else if (type.name().contains("DEEPSLATE")) {
+      newType = Material.DEEPSLATE;
+    } else {
+      newType = Material.STONE;
+    }
     block.setType(newType);
 
     int rand = ThreadLocalRandom.current().nextInt(100);
