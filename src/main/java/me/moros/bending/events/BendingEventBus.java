@@ -29,6 +29,7 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -93,8 +94,8 @@ public final class BendingEventBus {
     return !event.isCancelled();
   }
 
-  public @NonNull BendingCombustEvent postCombustEvent(@NonNull User source, @NonNull Entity target, int duration) {
-    BendingCombustEvent event = new BendingCombustEvent(source, target, duration);
+  public @NonNull BendingTickEffectEvent postTickEffectEvent(@NonNull User source, @NonNull Entity target, int duration, @NonNull BendingEffect type) {
+    BendingTickEffectEvent event = new BendingTickEffectEvent(source, target, duration, type);
     manager.callEvent(event);
     return event;
   }

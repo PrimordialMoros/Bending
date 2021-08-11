@@ -42,7 +42,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.EntityMethods;
@@ -124,7 +124,7 @@ public class FireSpin extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        FireTick.ignite(user, entity);
+        BendingEffect.FIRE_TICK.apply(user, entity);
         EntityMethods.applyVelocity(FireSpin.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       }
       return true;

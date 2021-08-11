@@ -46,7 +46,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -132,7 +132,7 @@ public class FireShield extends AbilityInstance {
       entity.remove();
       return true;
     }
-    FireTick.ignite(user, entity);
+    BendingEffect.FIRE_TICK.apply(user, entity);
     if (!affectedEntities.contains(entity)) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       affectedEntities.add(entity);

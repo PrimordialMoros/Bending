@@ -49,7 +49,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.EntityMethods;
@@ -227,7 +227,7 @@ public class FlameRush extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-        FireTick.ignite(user, entity);
+        BendingEffect.FIRE_TICK.apply(user, entity);
         EntityMethods.applyVelocity(FlameRush.this, entity, streamDirection.normalize().multiply(0.9));
       }
       return false;

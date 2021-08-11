@@ -33,7 +33,8 @@ public enum Attribute {
   RADIUS("Radius"),
   HEIGHT("Height"),
   AMOUNT("Amount"),
-  FIRE_TICKS("FireTicks");
+  FIRE_TICKS("FireTicks"),
+  FREEZE_TICKS("FreezeTicks");
 
   private final String value;
 

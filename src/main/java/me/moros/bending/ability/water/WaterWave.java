@@ -32,14 +32,13 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -48,7 +47,6 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -130,14 +128,13 @@ public class WaterWave extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (affectedEntities.contains(entity)) {
-      return false;
+    if (!affectedEntities.contains(entity)) {
+      affectedEntities.add(entity);
+      BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
+      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      return true;
     }
-    affectedEntities.add(entity);
-    DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-    int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
-    PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-    return true;
+    return false;
   }
 
   public void freeze() {
@@ -172,10 +169,8 @@ public class WaterWave extends AbilityInstance {
 
     @Modifiable(Attribute.DAMAGE)
     public double damage;
-    @Modifiable(Attribute.STRENGTH)
-    public int power;
-    @Modifiable(Attribute.DURATION)
-    public long slowDuration;
+    @Modifiable(Attribute.FREEZE_TICKS)
+    public int freezeTicks;
 
     @Override
     public void onConfigReload() {
@@ -187,8 +182,7 @@ public class WaterWave extends AbilityInstance {
       radius = abilityNode.node("radius").getDouble(1.7);
 
       damage = abilityNode.node("ice-damage").getDouble(2.0);
-      power = abilityNode.node("ice-slow-power").getInt(2) - 1;
-      slowDuration = abilityNode.node("ice-slow-duration").getLong(3500);
+      freezeTicks = abilityNode.node("ice-freeze-ticks").getInt(100);
     }
   }
 }

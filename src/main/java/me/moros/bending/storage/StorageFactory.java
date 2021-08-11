@@ -53,7 +53,7 @@ public final class StorageFactory {
 
     String path = "";
     if (engine == StorageType.H2) {
-      path = Bending.configFolder() + File.separator + "bending-h2;MODE=PostgreSQL";
+      path = Bending.configFolder() + File.separator + "bending-h2;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE";
     } else if (engine == StorageType.SQLITE) {
       path = Bending.configFolder() + File.separator + "bending-sqlite.db";
     }

@@ -42,15 +42,14 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
@@ -64,7 +63,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -196,7 +194,7 @@ public class WaterManipulation extends AbilityInstance {
       }
       if (WaterMaterials.isWaterBendable(source)) {
         isIce = WaterMaterials.isIceBendable(source);
-        manip = new Manip(user, source);
+        manip = new Manip(source);
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
         TempBlock.createAir(source);
@@ -252,19 +250,18 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   private class Manip extends BlockShot {
-    public Manip(User user, Block block) {
+    public Manip(Block block) {
       super(user, block, isIce ? block.getType() : Material.WATER, userConfig.range, isIce ? 16 : 20);
       allowUnderWater = true;
     }
 
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
+      if (isIce) {
+        BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
+      }
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       EntityMethods.applyVelocity(WaterManipulation.this, entity, direction.multiply(0.5));
-      if (isIce) {
-        int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
-        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-      }
       return true;
     }
 
@@ -284,11 +281,8 @@ public class WaterManipulation extends AbilityInstance {
     public double selectRange;
     @Modifiable(Attribute.DAMAGE)
     public double damage;
-
-    @Modifiable(Attribute.STRENGTH)
-    public int power;
-    @Modifiable(Attribute.DURATION)
-    public long slowDuration;
+    @Modifiable(Attribute.FREEZE_TICKS)
+    public int freezeTicks;
 
     public double redirectGrabRadius;
     public double rMin;
@@ -302,14 +296,11 @@ public class WaterManipulation extends AbilityInstance {
       range = abilityNode.node("range").getDouble(24.0);
       selectRange = abilityNode.node("select-range").getDouble(12.0);
       damage = abilityNode.node("damage").getDouble(2.0);
+      freezeTicks = abilityNode.node("iceblast-freeze-ticks").getInt(60);
+
       redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
       rMin = abilityNode.node("no-redirect-range").getDouble(5.0);
       rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
-
-      CommentedConfigurationNode iceNode = abilityNode.node("iceblast");
-
-      power = iceNode.node("slow-power").getInt(2) - 1;
-      slowDuration = iceNode.node("slow-duration").getLong(1500);
 
       abilityNode.node("no-redirect-range").comment("Manips within that distance from the bender who controls them cannot be redirected.");
     }

@@ -40,7 +40,7 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
@@ -188,7 +188,7 @@ public class AirBlast extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       boolean isUser = entity.equals(user.entity());
       double factor = isUser ? userConfig.self : userConfig.other;
-      FireTick.extinguish(entity);
+      BendingEffect.FIRE_TICK.reset(entity);
       if (factor == 0) {
         return false;
       }

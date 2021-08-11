@@ -60,7 +60,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.RayTrace;
@@ -553,9 +553,9 @@ public class EarthSmash extends AbilityInstance {
         DamageUtil.damageEntity(entity, user, userConfig.shatterDamage, description());
         if (entity.isValid()) {
           switch (type) {
-            case MAGMA -> FireTick.ignite(user, entity, userConfig.fireTicks);
+            case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
             case SAND -> PotionUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
-            case ICE -> PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.frostDuration / 50.0), userConfig.frostPower);
+            case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
             case MUD -> PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
           }
           return true;
@@ -706,10 +706,8 @@ public class EarthSmash extends AbilityInstance {
     public double shatterDamage;
     @Modifiable(Attribute.FIRE_TICKS)
     public int fireTicks;
-    @Modifiable(Attribute.STRENGTH)
-    public int frostPower;
-    @Modifiable(Attribute.DURATION)
-    public long frostDuration;
+    @Modifiable(Attribute.FREEZE_TICKS)
+    public int freezeTicks;
     @Modifiable(Attribute.STRENGTH)
     public int mudPower;
     @Modifiable(Attribute.DURATION)
@@ -739,8 +737,7 @@ public class EarthSmash extends AbilityInstance {
       shatterEffects = shatterNode.node("enabled").getBoolean(true);
       shatterDamage = shatterNode.node("damage").getDouble(1.0);
       fireTicks = shatterNode.node("fire-ticks").getInt(25);
-      frostPower = shatterNode.node("frost-power").getInt(2) - 1;
-      frostDuration = shatterNode.node("frost-duration").getLong(1500);
+      freezeTicks = shatterNode.node("freeze-ticks").getInt(60);
       mudPower = shatterNode.node("mud-power").getInt(2) - 1;
       mudDuration = shatterNode.node("mud-duration").getLong(1500);
       sandPower = shatterNode.node("sand-power").getInt(2) - 1;

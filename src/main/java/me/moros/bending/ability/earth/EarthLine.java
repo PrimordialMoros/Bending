@@ -56,7 +56,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
@@ -244,7 +244,7 @@ public class EarthLine extends AbilityInstance {
         }
         case MAGMA -> {
           damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
-          FireTick.ignite(user, entity);
+          BendingEffect.FIRE_TICK.apply(user, entity);
         }
       }
       DamageUtil.damageEntity(entity, user, damage, description());

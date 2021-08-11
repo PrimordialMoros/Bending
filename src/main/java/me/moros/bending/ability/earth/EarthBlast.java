@@ -144,7 +144,7 @@ public class EarthBlast extends AbilityInstance {
         return;
       }
       if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
-        blast = new Blast(user, source);
+        blast = new Blast(source);
         SoundUtil.EARTH.play(source.getLocation());
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
@@ -200,7 +200,7 @@ public class EarthBlast extends AbilityInstance {
   private class Blast extends BlockShot {
     private final double damage;
 
-    public Blast(User user, Block block) {
+    public Blast(Block block) {
       super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 20);
       if (EarthMaterials.isMetalBendable(block)) {
         damage = userConfig.damage * BendingProperties.METAL_MODIFIER;

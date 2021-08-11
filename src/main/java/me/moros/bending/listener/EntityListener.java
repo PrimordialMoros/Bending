@@ -20,13 +20,15 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.ability.earth.MetalCable;
+import me.moros.bending.events.BendingTickEffectEvent;
 import me.moros.bending.game.Game;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.math.FastMath;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.Metadata;
 import me.moros.bending.util.MovementHandler;
+import me.moros.bending.util.PotionUtil;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -45,6 +47,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntityListener implements Listener {
@@ -66,6 +69,18 @@ public class EntityListener implements Listener {
         } else {
           event.getEntity().remove();
         }
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityFreeze(BendingTickEffectEvent event) {
+    if (event.type() == BendingEffect.FROST_TICK && event.target() instanceof LivingEntity entity) {
+      int duration = event.duration();
+      if (duration > 30) {
+        int potionDuration = FastMath.round(0.5 * duration);
+        int power = FastMath.floor(duration / 30.0);
+        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, power);
       }
     }
   }
@@ -123,8 +138,8 @@ public class EntityListener implements Listener {
   public void onEntityCombustByBlock(EntityCombustByBlockEvent event) {
     if (TempBlock.MANAGER.isTemp(event.getCombuster())) {
       int ticks = event.getDuration() * 20;
-      if (ticks > FireTick.MAX_TICKS) {
-        event.setDuration(FastMath.ceil(FireTick.MAX_TICKS / 20.0));
+      if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
+        event.setDuration(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20.0));
       }
     }
   }

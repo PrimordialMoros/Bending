@@ -42,7 +42,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -136,7 +136,7 @@ public class FireWheel extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      FireTick.ignite(user, entity, userConfig.fireTicks);
+      BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
       return true;
     }
 

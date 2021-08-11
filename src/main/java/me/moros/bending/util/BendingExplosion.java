@@ -131,7 +131,7 @@ public final class BendingExplosion {
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, user, damage * distanceFactor, desc);
-        FireTick.ignite(user, entity, fireTicks);
+        BendingEffect.FIRE_TICK.apply(user, entity, fireTicks);
       } else {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
       }

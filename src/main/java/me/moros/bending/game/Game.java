@@ -31,7 +31,7 @@ import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
@@ -73,7 +73,7 @@ public final class Game {
     Registries.BENDERS.init(storage);
 
     Tasker.repeatingTask(this::update, 1);
-    Tasker.repeatingTask(FireTick::cleanup, 5);
+    Tasker.repeatingTask(BendingEffect::cleanup, 5);
   }
 
   private void update() {

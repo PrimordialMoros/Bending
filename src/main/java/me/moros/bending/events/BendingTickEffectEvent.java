@@ -20,19 +20,50 @@
 package me.moros.bending.events;
 
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.Cancellable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingCombustEvent extends EntityCombustByEntityEvent {
-  private final User user;
+public class BendingTickEffectEvent extends BendingUserEvent implements Cancellable {
+  private final Entity target;
+  private final BendingEffect type;
 
-  BendingCombustEvent(User user, Entity target, int duration) {
-    super(user.entity(), target, duration);
-    this.user = user;
+  private boolean cancelled = false;
+  private int duration;
+
+  BendingTickEffectEvent(User user, Entity target, int duration, BendingEffect type) {
+    super(user);
+    this.target = target;
+    this.duration = duration;
+    this.type = type;
   }
 
-  public @NonNull User user() {
-    return user;
+  public @NonNull Entity target() {
+    return target;
+  }
+
+  public int duration() {
+    return duration;
+  }
+
+  public void duration(int duration) {
+    if (duration > 0) {
+      this.duration = duration;
+    }
+  }
+
+  public @NonNull BendingEffect type() {
+    return type;
+  }
+
+  @Override
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
+  @Override
+  public void setCancelled(boolean cancel) {
+    this.cancelled = cancel;
   }
 }

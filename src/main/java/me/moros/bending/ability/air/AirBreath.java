@@ -43,7 +43,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -152,7 +152,7 @@ public class AirBreath extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       EntityMethods.applyVelocity(AirBreath.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
-      FireTick.extinguish(entity);
+      BendingEffect.FIRE_TICK.reset(entity);
       if (entity instanceof LivingEntity livingEntity) {
         livingEntity.setRemainingAir(livingEntity.getRemainingAir() + 1);
       }
@@ -167,7 +167,7 @@ public class AirBreath extends AbilityInstance {
       BlockMethods.tryCoolLava(user, block);
       if (!MaterialUtil.isTransparentOrWater(block) && user.pitch() > 30) {
         EntityMethods.applyVelocity(AirBreath.this, user.entity(), user.direction().multiply(-userConfig.knockback));
-        FireTick.extinguish(user.entity());
+        BendingEffect.FIRE_TICK.reset(user.entity());
       }
       return !MaterialUtil.isWater(block);
     }

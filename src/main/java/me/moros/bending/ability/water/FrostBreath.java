@@ -46,6 +46,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.PotionUtil;
@@ -107,7 +108,7 @@ public class FrostBreath extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
+    affectedEntities.clear();
     user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
     Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
@@ -165,6 +166,7 @@ public class FrostBreath extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
+        BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
         int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
         PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
         ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
@@ -203,6 +205,8 @@ public class FrostBreath extends AbilityInstance {
     public int power;
     @Modifiable(Attribute.DURATION)
     public long slowDuration;
+    @Modifiable(Attribute.FREEZE_TICKS)
+    public int freezeTicks;
 
     @Override
     public void onConfigReload() {
@@ -213,6 +217,7 @@ public class FrostBreath extends AbilityInstance {
       duration = abilityNode.node("duration").getLong(1500);
       power = abilityNode.node("slow-power").getInt(2) - 1;
       slowDuration = abilityNode.node("slow-duration").getLong(2500);
+      freezeTicks = abilityNode.node("freeze-ticks").getInt(5);
     }
   }
 }

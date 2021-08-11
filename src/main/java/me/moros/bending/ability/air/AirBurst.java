@@ -42,7 +42,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BurstUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -190,7 +190,7 @@ public class AirBurst extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       double factor = userConfig.power;
-      FireTick.extinguish(entity);
+      BendingEffect.FIRE_TICK.reset(entity);
       if (factor == 0) {
         return false;
       }

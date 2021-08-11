@@ -50,7 +50,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -203,7 +203,7 @@ public class LavaDisk extends AbilityInstance {
   private boolean damageEntity(Entity entity, double damage) {
     if (!affectedEntities.contains(entity)) {
       affectedEntities.add(entity);
-      FireTick.ignite(user, entity);
+      BendingEffect.FIRE_TICK.apply(user, entity);
       DamageUtil.damageEntity(entity, user, damage, description());
       currentPower -= userConfig.powerDiminishPerEntity;
       ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)

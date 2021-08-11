@@ -44,7 +44,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ExpiringSet;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
@@ -246,7 +246,7 @@ public class FireWall extends AbilityInstance {
     if (!cachedEntities.contains(entity)) {
       User entityUser = Registries.BENDERS.user((LivingEntity) entity);
       if (entityUser == null || HeatControl.canBurn(entityUser)) {
-        FireTick.ignite(user, entity);
+        BendingEffect.FIRE_TICK.apply(user, entity);
         if (!damagedEntities.contains(entity)) {
           damagedEntities.add(entity);
           DamageUtil.damageEntity(entity, user, userConfig.damage, description());

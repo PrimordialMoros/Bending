@@ -49,7 +49,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.FireTick;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundEffect;
@@ -252,7 +252,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
         return true;
       }
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      FireTick.ignite(user, entity, userConfig.fireTicks);
+      BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
       EntityMethods.applyVelocity(FireBlast.this, entity, ray.direction.normalize().multiply(0.5));
       return true;
     }
