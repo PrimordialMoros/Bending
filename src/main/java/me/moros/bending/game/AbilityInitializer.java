@@ -293,7 +293,7 @@ public final class AbilityInitializer {
       .element(EARTH).activation(ATTACK, SNEAK).build());
 
     abilities.add(AbilityDescription.builder("EarthLine", EarthLine::new)
-      .element(EARTH).activation(ATTACK, SNEAK).build());
+      .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());
 
     abilities.add(AbilityDescription.builder("EarthTunnel", EarthTunnel::new)
       .element(EARTH).activation(SNEAK).build());

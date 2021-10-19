@@ -46,6 +46,7 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -183,17 +184,18 @@ public class BendingCommand extends BaseCommand {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
       Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName());
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
       if (!abilities.isEmpty()) {
         Message.ABILITIES.send(user);
-        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), abilities));
+        user.sendMessage(Component.join(sep, abilities));
       }
       if (!sequences.isEmpty()) {
         Message.SEQUENCES.send(user);
-        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), sequences));
+        user.sendMessage(Component.join(sep, sequences));
       }
       if (!passives.isEmpty()) {
         Message.PASSIVES.send(user);
-        user.sendMessage(Component.join(Component.text(", ", NamedTextColor.WHITE), passives));
+        user.sendMessage(Component.join(sep, passives));
       }
     }
   }

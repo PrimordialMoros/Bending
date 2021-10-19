@@ -56,6 +56,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
 public final class StorageImpl implements BendingStorage {
+  private static final BenderData EMPTY = new BenderData(new String[9], Set.of(), Set.of());
   private final HikariDataSource source;
   private final StorageType type;
   private final Logger logger;
@@ -102,7 +103,7 @@ public final class StorageImpl implements BendingStorage {
         int id = (int) handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
           .executeAndReturnGeneratedKeys().mapToMap().one().get("player_id");
         PlayerProfile profile = new PlayerProfile(id);
-        return Map.entry(profile, BenderData.EMPTY);
+        return Map.entry(profile, EMPTY);
       });
     }
     return entry;

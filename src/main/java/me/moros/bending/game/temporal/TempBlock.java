@@ -32,6 +32,7 @@ import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
+import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -41,6 +42,8 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -57,15 +60,16 @@ public class TempBlock implements Temporary {
   public static void init() {
   }
 
-  private TempBlock(Block block, BlockData data, long duration, boolean bendable) {
+  private static boolean setBlockFast(Block block, BlockData data) {
+    BlockPos position = new BlockPos(block.getX(), block.getY(), block.getZ());
+    return ((CraftWorld) block.getWorld()).getHandle().setBlock(position, ((CraftBlockData) data).getState(), 2);
+  }
+
+  private TempBlock(Block block, long duration, boolean bendable) {
     snapshots = new ArrayDeque<>();
     this.block = block;
     this.bendable = bendable;
     snapshots.offerLast(new TempBlockState(block.getState(), duration, bendable));
-    block.setBlockData(data);
-    refreshGravityCache(block);
-    MANAGER.addEntry(block, this);
-    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
   }
 
   public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
@@ -119,7 +123,14 @@ public class TempBlock implements Temporary {
       return Optional.of(tb);
     }
 
-    return Optional.of(new TempBlock(block, data, duration, bendable));
+    TempBlock result = new TempBlock(block, duration, bendable);
+    if (setBlockFast(block, data)) {
+      refreshGravityCache(block);
+      MANAGER.addEntry(block, result);
+      result.revertTask = Tasker.sync(result::revert, Temporary.toTicks(duration));
+      return Optional.of(result);
+    }
+    return Optional.empty();
   }
 
   public static Optional<TempBlock> createAir(@NonNull Block block) {
@@ -164,7 +175,7 @@ public class TempBlock implements Temporary {
         tbs.weak = false;
       }
       this.bendable = bendable;
-      block.setBlockData(data);
+      setBlockFast(block, data);
       refreshGravityCache(block);
       revertTask.cancel();
       revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));

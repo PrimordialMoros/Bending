@@ -105,13 +105,6 @@ public class CollisionBuilder {
     return tempCollisions;
   }
 
-  private static class CollisionLayer {
-    private final List<AbilityDescription> layerAbilities;
-    private final boolean interCollisions;
-
-    private CollisionLayer(List<AbilityDescription> layerAbilities, boolean interCollisions) {
-      this.layerAbilities = layerAbilities;
-      this.interCollisions = interCollisions;
-    }
+  private record CollisionLayer(List<AbilityDescription> layerAbilities, boolean interCollisions) {
   }
 }

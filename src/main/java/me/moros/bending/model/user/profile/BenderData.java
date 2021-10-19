@@ -26,32 +26,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Holds data from the database that are needed to construct the BendingPlayer object
  */
-public final class BenderData {
-  public static final BenderData EMPTY = new BenderData();
-
-  private final String[] slots;
-  private final Set<String> elements;
-  private final Set<String> presets;
-
-  public BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements, @NonNull Set<@NonNull String> presets) {
-    this.slots = slots;
-    this.elements = elements;
-    this.presets = presets;
-  }
-
-  private BenderData() {
-    this(new String[9], Set.of(), Set.of());
-  }
-
-  public @NonNull String[] slots() {
-    return slots;
-  }
-
-  public @NonNull Set<@NonNull String> elements() {
-    return elements;
-  }
-
-  public @NonNull Set<@NonNull String> presets() {
-    return presets;
-  }
+public record BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements,
+                         @NonNull Set<@NonNull String> presets) {
 }

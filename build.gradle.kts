@@ -2,7 +2,8 @@ plugins {
     `java-library`
     signing
     `maven-publish`
-    id("com.github.johnrengelman.shadow").version("7.0.0")
+    id("com.github.johnrengelman.shadow").version("7.1.0")
+    id("io.papermc.paperweight.userdev").version("1.1.12")
 }
 
 group = "me.moros"
@@ -31,7 +32,7 @@ dependencies {
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     compileOnly("org.checkerframework", "checker-qual", "3.15.0")
-    compileOnly("io.papermc.paper", "paper-api", "1.17.1-R0.1-SNAPSHOT")
+    paperDevBundle("1.17.1-R0.1-SNAPSHOT")
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
         exclude(module = "worldguard")

@@ -102,7 +102,7 @@ public class HeatControl extends AbilityInstance implements Ability {
           return UpdateResult.CONTINUE;
         }
         int freezeTicks = user.entity().getFreezeTicks();
-        if (freezeTicks > 0) {
+        if (freezeTicks > 1) {
           user.entity().setFreezeTicks(freezeTicks - 2);
         }
         solidify.processQueue(1);

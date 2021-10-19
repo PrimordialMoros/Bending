@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
@@ -41,6 +40,7 @@ import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
@@ -53,11 +53,12 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.MovementHandler;
+import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
@@ -70,6 +71,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -88,7 +90,7 @@ public class EarthLine extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<Pillar> spikes = new ArrayList<>();
+  private final Collection<EarthSpike> spikes = new ArrayList<>();
 
   private StateChain states;
   private Line earthLine;
@@ -102,6 +104,9 @@ public class EarthLine extends AbilityInstance {
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (method == Activation.ATTACK) {
       Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+      return false;
+    }
+    if (user.onCooldown(description())) {
       return false;
     }
 
@@ -248,7 +253,8 @@ public class EarthLine extends AbilityInstance {
         }
       }
       DamageUtil.damageEntity(entity, user, damage, description());
-      EntityMethods.applyVelocity(EarthLine.this, entity, direction.normalize().multiply(1.2));
+      Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
+      EntityMethods.applyVelocity(EarthLine.this, entity, velocity);
       return true;
     }
 
@@ -309,10 +315,8 @@ public class EarthLine extends AbilityInstance {
       }
       raisedSpikes = true;
       Vector3d loc = location.add(Vector3d.MINUS_J);
-      Predicate<Block> predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-
-      Pillar.builder(user, loc.toBlock(user.world())).predicate(predicate).build(1).ifPresent(spikes::add);
-      Pillar.builder(user, loc.add(direction).toBlock(user.world())).predicate(predicate).build(2).ifPresent(spikes::add);
+      spikes.add(new EarthSpike(loc.toBlock(user.world()), 1, false));
+      spikes.add(new EarthSpike(loc.add(direction).toBlock(user.world()), 2, true));
     }
 
     private void imprisonTarget(LivingEntity entity) {
@@ -353,6 +357,62 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
+  private static class EarthSpike implements Updatable {
+    private static final long DELAY = 80;
+
+    private final Block origin;
+
+    private final int length;
+
+    private int currentLength = 0;
+    private long nextUpdateTime;
+
+    private EarthSpike(@NonNull Block origin, int length, boolean delay) {
+      this.origin = origin;
+      this.length = length;
+      nextUpdateTime = delay ? System.currentTimeMillis() + DELAY : 0;
+    }
+
+    @Override
+    public @NonNull UpdateResult update() {
+      if (currentLength >= length) {
+        return UpdateResult.REMOVE;
+      }
+      long time = System.currentTimeMillis();
+      if (time < nextUpdateTime) {
+        return UpdateResult.CONTINUE;
+      }
+      if (currentLength == 0) {
+        if (!EarthMaterials.isEarthOrSand(origin)) {
+          return UpdateResult.REMOVE;
+        }
+        TempBlock.create(origin, MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData()), 15000);
+      }
+      nextUpdateTime = time + DELAY;
+      Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
+      if (canMove(currentIndex)) {
+        ParticleUtil.create(Particle.BLOCK_DUST, currentIndex.getLocation().add(0.5, 0.5, 0.5)).count(24)
+          .offset(0.2, 0.2, 0.2).data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn();
+        TempBlock.create(currentIndex, Material.POINTED_DRIPSTONE.createBlockData(), 15000 - currentLength * DELAY);
+        SoundUtil.EARTH.play(currentIndex.getLocation());
+      } else {
+        return UpdateResult.REMOVE;
+      }
+      return UpdateResult.CONTINUE;
+    }
+
+    private boolean canMove(Block newBlock) {
+      if (MaterialUtil.isLava(newBlock)) {
+        return false;
+      }
+      if (!MaterialUtil.isTransparent(newBlock)) {
+        return false;
+      }
+      BlockMethods.tryBreakPlant(newBlock);
+      return true;
+    }
+  }
+
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
@@ -362,6 +422,10 @@ public class EarthLine extends AbilityInstance {
     public double selectRange;
     @Modifiable(Attribute.DAMAGE)
     public double damage;
+    @Modifiable(Attribute.STRENGTH)
+    public double knockback;
+    @Modifiable(Attribute.STRENGTH)
+    public double knockup;
     @Modifiable(Attribute.RADIUS)
     public double explosionRadius;
     @Modifiable(Attribute.DAMAGE)
@@ -377,6 +441,8 @@ public class EarthLine extends AbilityInstance {
       range = abilityNode.node("range").getDouble(20.0);
       selectRange = abilityNode.node("select-range").getDouble(6.0);
       damage = abilityNode.node("damage").getDouble(3.0);
+      knockback = abilityNode.node("knockback").getDouble(1.1);
+      knockup = abilityNode.node("knockup").getDouble(0.55);
       explosionRadius = abilityNode.node("explosion-radius").getDouble(3.5);
       explosionDamage = abilityNode.node("explosion-damage").getDouble(2.5);
       prisonDuration = abilityNode.node("prison-duration").getLong(1500);

@@ -171,7 +171,7 @@ public class Catapult extends AbilityInstance {
   }
 
   private static class EarthPillar extends Pillar {
-    protected EarthPillar(@NonNull PillarBuilder builder) {
+    private EarthPillar(@NonNull PillarBuilder builder) {
       super(builder);
     }
 

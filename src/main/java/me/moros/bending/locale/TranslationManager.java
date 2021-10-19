@@ -107,11 +107,7 @@ public class TranslationManager {
   }
 
   private boolean isValidPropertyFile(Path path) {
-    if (!Files.isRegularFile(path)) {
-      return false;
-    }
-    String name = path.getFileName().toString();
-    return name.length() > "properties".length() && name.endsWith(".properties");
+    return Files.isRegularFile(path) && path.getFileName().toString().endsWith(".properties");
   }
 
   private String removeFileExtension(Path path) {

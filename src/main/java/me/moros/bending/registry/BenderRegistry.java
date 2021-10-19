@@ -39,6 +39,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.storage.BendingStorage;
+import me.moros.bending.util.ExpiringSet;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -49,10 +50,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class BenderRegistry implements Registry<User> {
   private AsyncLoadingCache<UUID, Entry<PlayerProfile, BenderData>> cache;
+  private final ExpiringSet<UUID> recentlyExpiredUsers;
   private final Map<UUID, BendingPlayer> players;
   private final Map<UUID, BendingUser> entities;
 
   BenderRegistry() {
+    recentlyExpiredUsers = new ExpiringSet<>(100);
     players = new ConcurrentHashMap<>();
     entities = new ConcurrentHashMap<>();
   }
@@ -77,6 +80,10 @@ public final class BenderRegistry implements Registry<User> {
   }
 
   public @Nullable BendingUser user(@NonNull LivingEntity entity) {
+    // This is needed because player attributes are updated one last time after logout (SPIGOT-924)
+    if (recentlyExpiredUsers.contains(entity.getUniqueId())) {
+      return null;
+    }
     if (entity instanceof Player player) {
       return user(player);
     }
@@ -94,6 +101,7 @@ public final class BenderRegistry implements Registry<User> {
     if (cache != null) {
       cache.synchronous().invalidate(uuid);
     }
+    recentlyExpiredUsers.add(uuid);
   }
 
   public void register(@NonNull User user) {
@@ -124,15 +132,7 @@ public final class BenderRegistry implements Registry<User> {
     return new UserIterator(players.values().iterator(), entities.values().iterator());
   }
 
-  private static class UserIterator implements Iterator<User> {
-    private final Iterator<BendingPlayer> first;
-    private final Iterator<BendingUser> second;
-
-    private UserIterator(Iterator<BendingPlayer> first, Iterator<BendingUser> second) {
-      this.first = first;
-      this.second = second;
-    }
-
+  private record UserIterator(Iterator<BendingPlayer> first, Iterator<BendingUser> second) implements Iterator<User> {
     @Override
     public boolean hasNext() {
       return first.hasNext() || second.hasNext();
