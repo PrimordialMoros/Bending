@@ -416,7 +416,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean tableExists(String table) {
-    try (ResultSet rs = source.getConnection().getMetaData().getTables(null, null, "%", null)) {
+    try (ResultSet rs = source.getConnection().getMetaData().getTables(source.getConnection().getCatalog(), null, "%", null)) {
       while (rs.next()) {
         if (rs.getString(3).equalsIgnoreCase(table)) {
           return true;

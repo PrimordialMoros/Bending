@@ -59,7 +59,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
    * @return true if that protection is registered, false otherwise
    */
   public boolean contains(@NonNull String name) {
-    return protections.containsKey(name);
+    return protections.containsKey(name.toLowerCase());
   }
 
   /**
@@ -72,7 +72,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
       Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
       if (plugin != null) {
         Protection protection = factory.apply(plugin);
-        protections.put(name, protection);
+        protections.put(name.toLowerCase(), protection);
         Bending.logger().info("Registered bending protection for " + name);
       } else {
         Bending.logger().warn("Plugin " + name + " was not found, skipping protection hook");

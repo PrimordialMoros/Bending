@@ -7,12 +7,15 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.1.1-SNAPSHOT"
+version = "1.1.2-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
-    withJavadocJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+    if (!isSnapshot()) {
+        withJavadocJar()
+    }
     withSourcesJar()
 }
 
@@ -28,10 +31,11 @@ repositories {
 }
 
 dependencies {
-    api("me.moros", "atlas-core", "1.2.1-SNAPSHOT")
+    api("me.moros", "atlas-core", "1.3.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
-    compileOnly("org.checkerframework", "checker-qual", "3.15.0")
+    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
+    compileOnly("org.checkerframework", "checker-qual", "3.18.1")
     paperDevBundle("1.17.1-R0.1-SNAPSHOT")
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
@@ -50,6 +54,7 @@ tasks {
             relocate("co.aikar.commands", "me.moros.atlas.acf")
             relocate("co.aikar.locales", "me.moros.atlas.locales")
             relocate("com.github.benmanes.caffeine", "me.moros.atlas.caffeine")
+            relocate("com.github.stefvanschie.inventoryframework", "me.moros.atlas.inventoryframework")
             relocate("com.typesafe", "me.moros.atlas.typesafe")
             relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
             relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
@@ -70,14 +75,12 @@ tasks {
         isReproducibleFileOrder = true
     }
     withType<Sign>().configureEach {
-        onlyIf { !version.toString().endsWith("SNAPSHOT") }
+        onlyIf { !isSnapshot() }
     }
     withType<JavaCompile> {
         options.compilerArgs.add("-parameters")
         options.compilerArgs.add("-Xlint:unchecked")
         options.compilerArgs.add("-Xlint:deprecation")
-        options.isFork = true
-        options.forkOptions.executable = "javac"
         options.encoding = "UTF-8"
     }
     named<Copy>("processResources") {

@@ -183,7 +183,7 @@ public class BendingCommand extends BaseCommand {
     if (abilities.isEmpty() && sequences.isEmpty() && passives.isEmpty()) {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
-      Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName());
+      Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
       JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
       if (!abilities.isEmpty()) {
         Message.ABILITIES.send(user);
@@ -213,6 +213,9 @@ public class BendingCommand extends BaseCommand {
       Message.ABILITY_BIND_FAIL.send(player, ability.displayName());
       return;
     }
+    if (!player.hasPermission(ability)) {
+      Message.ABILITY_BIND_NO_PERMISSION.send(player, ability.displayName());
+    }
     if (slot == 0) {
       slot = player.currentSlot();
     }
@@ -226,7 +229,15 @@ public class BendingCommand extends BaseCommand {
   @Description("Show all bound abilities")
   public static void onBindList(BendingPlayer player, @Optional OnlinePlayer target) {
     BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName());
+    Collection<Element> elements = bendingPlayer.elements();
+    Component hover;
+    if (elements.isEmpty()) {
+      hover = Message.NO_ELEMENTS.build();
+    } else {
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY));
+      hover = Component.join(sep, bendingPlayer.elements().stream().map(Element::displayName).toList());
+    }
+    Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName(), hover);
     for (int slot = 1; slot <= 9; slot++) {
       AbilityDescription desc = bendingPlayer.boundAbility(slot);
       if (desc != null) {

@@ -21,6 +21,7 @@ package me.moros.bending.model.user;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -82,8 +83,8 @@ public class BendingUser implements User {
   }
 
   @Override
-  public @NonNull Set<@NonNull Element> elements() {
-    return Set.copyOf(elements);
+  public @NonNull Collection<@NonNull Element> elements() {
+    return Arrays.stream(Element.values()).filter(elements::contains).toList();
   }
 
   @Override

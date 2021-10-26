@@ -54,6 +54,10 @@ public enum Element {
     return Component.text(elementName, color);
   }
 
+  public @NonNull Component description() {
+    return Component.translatable("bending.element." + elementName.toLowerCase(), color);
+  }
+
   public @NonNull TextColor color() {
     return color;
   }

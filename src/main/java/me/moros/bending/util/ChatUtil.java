@@ -19,6 +19,9 @@
 
 package me.moros.bending.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -29,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class ChatUtil {
   private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
+  private static final Pattern SPACE = Pattern.compile(" ");
 
   private ChatUtil() {
   }
@@ -45,5 +49,49 @@ public final class ChatUtil {
     }
     String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
     return output.length() > 16 ? output.substring(0, 16) : output;
+  }
+
+  public static @NonNull List<@NonNull String> wrap(@NonNull String str, int wrapLength) {
+    if (wrapLength < 1) {
+      wrapLength = 1;
+    }
+    final int length = str.length();
+    int offset = 0;
+    List<String> lines = new ArrayList<>(length / wrapLength);
+    while (offset < length) {
+      int spaceToWrapAt = -1;
+      Matcher matcher = SPACE.matcher(str.substring(offset, Math.min(offset + wrapLength + 1, length)));
+      if (matcher.find()) {
+        if (matcher.start() == 0) {
+          offset += matcher.end();
+          continue;
+        }
+        spaceToWrapAt = matcher.start() + offset;
+      }
+      if (length - offset <= wrapLength) {
+        break;
+      }
+      while (matcher.find()) {
+        spaceToWrapAt = matcher.start() + offset;
+      }
+      if (spaceToWrapAt >= offset) {
+        lines.add(str.substring(offset, spaceToWrapAt));
+        offset = spaceToWrapAt + 1;
+      } else {
+        matcher = SPACE.matcher(str.substring(offset + wrapLength));
+        if (matcher.find()) {
+          spaceToWrapAt = matcher.start() + offset + wrapLength;
+        }
+        if (spaceToWrapAt >= 0) {
+          lines.add(str.substring(offset, spaceToWrapAt));
+          offset = spaceToWrapAt + 1;
+        } else {
+          lines.add(str.substring(offset, length));
+          offset = length;
+        }
+      }
+    }
+    lines.add(str.substring(offset, length));
+    return lines;
   }
 }

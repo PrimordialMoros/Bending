@@ -45,9 +45,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class Commands {
   private final PaperCommandManager commandManager;
 
-  private final Predicate<AbilityDescription> validBinds = desc -> desc.canBind() && !desc.hidden();
-  private final Predicate<AbilityDescription> nonHidden = desc -> !desc.hidden();
-
   public Commands(@NonNull Bending plugin) {
     commandManager = new PaperCommandManager(plugin);
     commandManager.enableUnstableAPI("help");
@@ -56,30 +53,40 @@ public class Commands {
     registerCommandCompletions();
     registerCommandConditions();
     commandManager.getCommandReplacements().addReplacement("bendingcommand", "bending|bend|b|avatar|atla|tla");
+    commandManager.getCommandReplacements().addReplacement("elementcommand", "elements|element|elem|ele");
     commandManager.getCommandReplacements().addReplacement("presetcommand", "presets|preset|pr|p");
     commandManager.getCommandReplacements().addReplacement("modifycommand", "bmodify|bmod|bm|modify|mod");
 
     commandManager.registerCommand(new BendingCommand());
+    commandManager.registerCommand(new ElementCommand());
     commandManager.registerCommand(new PresetCommand());
     commandManager.registerCommand(new ModifyCommand());
   }
 
-  private Collection<String> abilityCompletions(Player player, Predicate<AbilityDescription> predicate) {
-    Predicate<AbilityDescription> permissionPredicate = x -> true;
+  private Collection<String> abilityCompletions(Player player, boolean validOnly) {
+    Predicate<AbilityDescription> predicate = x -> true;
+    if (validOnly) {
+      predicate = AbilityDescription::canBind;
+    }
+    Predicate<AbilityDescription> hasPermission = x -> true;
+    Predicate<AbilityDescription> hasElement = x -> true;
     if (player != null) {
       BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
-      permissionPredicate = bendingPlayer::hasPermission;
+      hasPermission = bendingPlayer::hasPermission;
+      if (validOnly) {
+        hasElement = d -> bendingPlayer.hasElement(d.element());
+      }
     }
-    return Registries.ABILITIES.stream().filter(predicate)
-      .filter(permissionPredicate).map(AbilityDescription::name).collect(Collectors.toList());
+    return Registries.ABILITIES.stream().filter(desc -> !desc.hidden()).filter(predicate)
+      .filter(hasElement).filter(hasPermission).map(AbilityDescription::name).collect(Collectors.toList());
   }
 
   private void registerCommandCompletions() {
     CommandCompletions<BukkitCommandCompletionContext> commandCompletions = commandManager.getCommandCompletions();
 
-    commandCompletions.registerAsyncCompletion("abilities", c -> abilityCompletions(c.getPlayer(), validBinds));
+    commandCompletions.registerAsyncCompletion("abilities", c -> abilityCompletions(c.getPlayer(), true));
 
-    commandCompletions.registerAsyncCompletion("allabilities", c -> abilityCompletions(c.getPlayer(), nonHidden));
+    commandCompletions.registerAsyncCompletion("allabilities", c -> abilityCompletions(c.getPlayer(), false));
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
@@ -111,7 +118,7 @@ public class Commands {
       Predicate<AbilityDescription> permissionPredicate = player == null ? x -> true : d -> player.hasPermission(d.permission());
       String name = c.popFirstArg();
       AbilityDescription check = Registries.ABILITIES.ability(name);
-      if (check == null || !nonHidden.test(check) || !permissionPredicate.test(check)) {
+      if (check == null || check.hidden() || !permissionPredicate.test(check)) {
         throw new InvalidCommandArgument("Could not find ability " + name);
       }
       return check;

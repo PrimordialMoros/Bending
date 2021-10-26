@@ -19,28 +19,32 @@
 
 package me.moros.bending.util;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.collision.AABBUtils;
 import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
-import org.bukkit.FluidCollisionMode;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ClipContext.Fluid;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -60,6 +64,7 @@ public final class RayTrace {
 
   private Type type = Type.BLOCK;
 
+  private Set<BlockPos> ignoreBlocks = Set.of();
   private Predicate<Entity> entityPredicate = x -> true;
 
   private RayTrace(Vector3d origin, Vector3d direction) {
@@ -103,40 +108,119 @@ public final class RayTrace {
     return this;
   }
 
+  public @NonNull RayTrace ignoreBlocks(@NonNull Set<Block> ignoreBlocks) {
+    this.ignoreBlocks = Objects.requireNonNull(ignoreBlocks).stream()
+      .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
+    return this;
+  }
+
   public @NonNull RayTrace entityPredicate(@NonNull Predicate<Entity> entityPredicate) {
     this.entityPredicate = Objects.requireNonNull(entityPredicate);
     return this;
   }
 
-  /**
-   * Gets the targeted location.
-   * @param ignore a filter for unwanted blocks
-   * @return the target location
-   */
-  public @NonNull CompositeResult result(@NonNull World world, @NonNull Predicate<Block> ignore) {
-    Ray ray = new Ray(origin, direction.multiply(range));
-    double step = 0.5;
-    Vector3d increment = direction.multiply(step);
-    Set<Block> checked = new HashSet<>(FastMath.ceil(2 * range));
-    for (double i = 0.1; i <= range; i += step) {
-      Vector3d current = origin.add(direction.multiply(i));
-      if (!world.isChunkLoaded((int) current.getX() >> 4, (int) current.getZ() >> 4)) {
-        return new CompositeResult(null, current.subtract(increment));
-      }
-      Block block = current.toBlock(world);
-      for (Vector3i vector : VectorMethods.decomposeDiagonals(current, increment)) {
-        Block diagonalBlock = block.getRelative(vector.getX(), vector.getY(), vector.getZ());
-        if (checked.contains(diagonalBlock) || ignore.test(diagonalBlock)) {
-          continue;
-        }
-        checked.add(diagonalBlock);
-        AABB blockBounds = diagonalBlock.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(diagonalBlock)) : AABBUtils.blockBounds(diagonalBlock);
-        if (blockBounds.intersects(ray)) {
-          return new CompositeResult(current, diagonalBlock, null);
-        }
+  private BlockHit checkBlockCollision(Level world, ClipContext context, BlockPos pos, BlockHit miss) {
+    if (ignoreBlocks.contains(pos)) {
+      return null;
+    }
+    BlockState iblockdata = world.getTypeIfLoaded(pos);
+    if (iblockdata == null) {
+      return miss;
+    }
+    if (iblockdata.isAir()) return null;
+    FluidState fluid = iblockdata.getFluidState();
+    Vec3 vec3d = context.getFrom();
+    Vec3 vec3d1 = context.getTo();
+    VoxelShape voxelshape = context.getBlockShape(iblockdata, world, pos);
+    BlockHitResult res0 = world.clipWithInteractionOverride(vec3d, vec3d1, pos, voxelshape, iblockdata);
+    VoxelShape voxelshape1 = context.getFluidShape(fluid, world, pos);
+    BlockHitResult res1 = voxelshape1.clip(vec3d, vec3d1, pos);
+    double d0 = res0 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res0.getLocation());
+    double d1 = res1 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res1.getLocation());
+    BlockHit b0 = res0 == null ? null : new BlockHit(res0);
+    BlockHit b1 = res1 == null ? null : new BlockHit(res1);
+    return d0 <= d1 ? b0 : b1;
+  }
+
+  private static final record BlockHit(Vector3d position, Vector3i blockPosition) {
+    private BlockHit(BlockHitResult hitResult) {
+      this(hitResult.getLocation(), hitResult.getBlockPos());
+    }
+
+    private BlockHit(Vec3 pos, BlockPos bp) {
+      this(new Vector3d(pos.x, pos.y, pos.z), new Vector3i(bp.getX(), bp.getY(), bp.getZ()));
+    }
+  }
+
+  private CompositeResult rayTraceBlocks(World world, ClipContext clipContext) {
+    Level nmsWorld = ((CraftWorld) world).getHandle();
+    BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()));
+    BlockHit result = traverseBlocks(nmsWorld, clipContext, miss);
+    if (result != null && !miss.equals(result)) {
+      Vector3i bp = result.blockPosition();
+      Block block = world.getBlockAt(bp.getX(), bp.getY(), bp.getZ());
+      return new CompositeResult(result.position(), block, null);
+    }
+    return new CompositeResult(miss.position(), null, null);
+  }
+
+  private BlockHit traverseBlocks(Level level, ClipContext context, BlockHit miss) {
+    Vec3 start = context.getFrom();
+    Vec3 end = context.getTo();
+    if (start.equals(end)) {
+      return miss;
+    } else {
+      double d0 = Mth.lerp(-1.0E-7D, end.x, start.x);
+      double d1 = Mth.lerp(-1.0E-7D, end.y, start.y);
+      double d2 = Mth.lerp(-1.0E-7D, end.z, start.z);
+      double d3 = Mth.lerp(-1.0E-7D, start.x, end.x);
+      double d4 = Mth.lerp(-1.0E-7D, start.y, end.y);
+      double d5 = Mth.lerp(-1.0E-7D, start.z, end.z);
+      int i = Mth.floor(d3);
+      int j = Mth.floor(d4);
+      int k = Mth.floor(d5);
+      BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, j, k);
+      BlockHit t0 = checkBlockCollision(level, context, mutableBlockPos, miss);
+      if (t0 != null) {
+        return t0;
+      } else {
+        double d6 = d0 - d3;
+        double d7 = d1 - d4;
+        double d8 = d2 - d5;
+        int l = Mth.sign(d6);
+        int i1 = Mth.sign(d7);
+        int j1 = Mth.sign(d8);
+        double d9 = l == 0 ? Double.MAX_VALUE : (double) l / d6;
+        double d10 = i1 == 0 ? Double.MAX_VALUE : (double) i1 / d7;
+        double d11 = j1 == 0 ? Double.MAX_VALUE : (double) j1 / d8;
+        double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
+        double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
+        double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
+        BlockHit result;
+        do {
+          if (d12 > 1.0D && d13 > 1.0D && d14 > 1.0D) {
+            return miss;
+          }
+          if (d12 < d13) {
+            if (d12 < d14) {
+              i += l;
+              d12 += d9;
+            } else {
+              k += j1;
+              d14 += d11;
+            }
+          } else if (d13 < d14) {
+            j += i1;
+            d13 += d10;
+          } else {
+            k += j1;
+            d14 += d11;
+          }
+          result = checkBlockCollision(level, context, mutableBlockPos.set(i, j, k), miss);
+        } while (result == null);
+        return result;
       }
     }
-    return new CompositeResult(null, ray.origin.add(ray.direction));
   }
 
   public @NonNull CompositeResult result(@NonNull World world) {
@@ -144,15 +228,38 @@ public final class RayTrace {
   }
 
   public @NonNull CompositeResult result(@NonNull World world, @NonNull Type type) {
-    Location start = origin.toLocation(world);
-    Vector dir = direction.toBukkitVector();
-    FluidCollisionMode fluid = ignoreLiquids ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
-    Vector3d pos = origin.add(direction.multiply(range));
-    return switch (type) {
-      case COMPOSITE -> new CompositeResult(world.rayTrace(start, dir, range, fluid, ignorePassable, raySize, entityPredicate), pos);
-      case ENTITY -> new CompositeResult(world.rayTraceEntities(start, dir, range, raySize, entityPredicate), pos);
-      case BLOCK -> new CompositeResult(world.rayTraceBlocks(start, dir, range, fluid, ignorePassable), pos);
-    };
+    boolean checkEntities = type != Type.BLOCK;
+
+    Vec3 startPos = new Vec3(origin.getX(), origin.getY(), origin.getZ());
+    Vector3d endPoint = origin.add(direction.multiply(range));
+    Vec3 endPos = new Vec3(endPoint.getX(), endPoint.getY(), endPoint.getZ());
+
+    ClipContext.Block ccb = ignorePassable ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
+    ClipContext.Fluid ccf = ignoreLiquids ? Fluid.NONE : Fluid.ANY;
+    ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
+
+    CompositeResult blockResult = rayTraceBlocks(world, clipContext);
+    double blockHitDistance = blockResult.hit ? origin.distance(blockResult.position) : range;
+
+    CompositeResult entityResult = new CompositeResult(endPoint, null, null);
+    if (checkEntities) {
+      Location start = origin.toLocation(world);
+      RayTraceResult eResult = world.rayTraceEntities(start, direction.toBukkitVector(), blockHitDistance, raySize, entityPredicate);
+      Vector3d pos = eResult == null ? endPoint : new Vector3d(eResult.getHitPosition());
+      Entity entity = eResult == null ? null : eResult.getHitEntity();
+      entityResult = new CompositeResult(pos, null, entity);
+    }
+    if (!blockResult.hit) {
+      return entityResult;
+    }
+    if (!entityResult.hit) {
+      return blockResult;
+    }
+    double entityHitDistanceSquared = origin.distanceSq(entityResult.position);
+    if (entityHitDistanceSquared < (blockHitDistance * blockHitDistance)) {
+      return entityResult;
+    }
+    return blockResult;
   }
 
   public static @NonNull RayTrace of(@NonNull User user) {
@@ -171,13 +278,6 @@ public final class RayTrace {
     private final Entity entity;
 
     private final boolean hit;
-
-    private CompositeResult(RayTraceResult result, Vector3d position) {
-      this.position = result == null ? position : new Vector3d(result.getHitPosition());
-      this.block = result == null ? null : result.getHitBlock();
-      this.entity = result == null ? null : result.getHitEntity();
-      hit = block != null || entity != null;
-    }
 
     private CompositeResult(Vector3d position, Block block, Entity entity) {
       this.position = position;

@@ -21,6 +21,7 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -318,9 +319,9 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   private Vector3d getTarget(Block source) {
-    return user.compositeRayTrace(userConfig.range).result(user.world(), b -> b.equals(source)).entityCenterOrPosition();
+    return user.compositeRayTrace(userConfig.range).ignoreBlocks(source == null ? Set.of() : Set.of(source))
+      .result(user.world()).entityCenterOrPosition();
   }
-
 
   @Override
   public void explode() {

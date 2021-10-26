@@ -48,18 +48,16 @@ public final class WorldGuardProtection implements Protection {
   public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
     RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
     Location location = BukkitAdapter.adapt(block.getLocation());
+    StateFlag flagToCheck = bendingFlag == null ? Flags.BUILD : bendingFlag;
     if (entity instanceof Player player) {
       LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
       World world = BukkitAdapter.adapt(block.getWorld());
       if (worldGuard.getPlatform().getSessionManager().hasBypass(localPlayer, world)) {
         return true;
       }
-      if (bendingFlag != null && query.testState(location, localPlayer, bendingFlag)) {
-        return true;
-      }
-      return query.testState(location, localPlayer, Flags.BUILD);
+      return query.testState(location, localPlayer, flagToCheck);
     }
     // Query WorldGuard to see if a non-member (entity) can build in a region.
-    return query.testState(location, list -> Association.NON_MEMBER, Flags.BUILD);
+    return query.testState(location, list -> Association.NON_MEMBER, flagToCheck);
   }
 }

@@ -4,7 +4,7 @@ author: Moros
 version: ${pluginVersion}
 main: me.moros.bending.Bending
 softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC]
-api-version: 1.16
+api-version: 1.17
 commands:
   bending:
     description: Interact with the bending plugin
@@ -14,6 +14,10 @@ commands:
     description: Manage bending presets
     default: true
     aliases: [presets,preset,pr,p]
+  element:
+    description: Choose an element
+    default: true
+    aliases: [elements,element,elem,ele]
   modify:
       description: Manage bending attribute modifiers
       default: op

@@ -19,6 +19,7 @@
 
 package me.moros.bending.ability.common.basic;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
@@ -163,13 +164,8 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
 
   public void redirect() {
     Block ignore = location.toBlock(user.world());
-    Predicate<Block> predicate;
-    if (material == Material.WATER) {
-      predicate = b -> b.equals(ignore) || MaterialUtil.isWater(b);
-    } else {
-      predicate = b -> b.equals(ignore);
-    }
-    target = user.compositeRayTrace(range).result(user.world(), predicate).entityEyeLevelOrPosition().snapToBlockCenter();
+    target = user.compositeRayTrace(range).ignoreBlocks(Set.of(ignore)).result(user.world())
+      .entityEyeLevelOrPosition().snapToBlockCenter();
     settingUp = false;
   }
 

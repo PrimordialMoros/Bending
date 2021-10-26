@@ -29,7 +29,6 @@ import java.util.UUID;
 import me.moros.atlas.caffeine.cache.Cache;
 import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
@@ -64,15 +63,10 @@ public final class SequenceManager {
     List<SequenceStep> bufferSteps = new ArrayList<>(buffer);
     for (Sequence sequence : Registries.SEQUENCES) {
       if (sequence.matches(bufferSteps)) {
-        if (!user.canBend(sequence)) {
-          continue;
+        if (Bending.game().activationController().activateAbility(user, Activation.SEQUENCE, sequence) != null) {
+          buffer.clear(); // Consume all actions in the buffer
+          return;
         }
-        Ability ability = sequence.createAbility();
-        if (ability.activate(user, Activation.SEQUENCE)) {
-          Bending.game().abilityManager(user.world()).addAbility(user, ability);
-        }
-        buffer.clear(); // Consume all actions in the buffer
-        return;
       }
     }
   }

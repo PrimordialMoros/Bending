@@ -22,6 +22,7 @@ package me.moros.bending.locale;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -99,8 +100,8 @@ public interface Message {
   Args0 BOARD_TOGGLED_ON = () -> translatable("bending.command.board.on", GREEN);
   Args0 BOARD_TOGGLED_OFF = () -> translatable("bending.command.board.off", YELLOW);
 
-  Args1<Component> ELEMENT_ABILITIES_HEADER = element -> translatable("bending.command.display.abilities-header", DARK_AQUA)
-    .args(element);
+  Args2<Component, Component> ELEMENT_ABILITIES_HEADER = (element, desc) -> translatable("bending.command.display.abilities-header", DARK_AQUA)
+    .args(element.hoverEvent(HoverEvent.showText(desc)));
 
   Args1<Component> ELEMENT_ABILITIES_EMPTY = element -> translatable("bending.command.display.abilities-not-found", YELLOW)
     .args(element);
@@ -118,8 +119,13 @@ public interface Message {
   Args1<Component> ABILITY_BIND_FAIL = ability -> translatable("bending.command.bind.fail", YELLOW)
     .args(ability);
 
-  Args1<String> BOUND_SLOTS = name -> translatable("bending.command.display.header", DARK_AQUA)
-    .args(text(name));
+  Args1<Component> ABILITY_BIND_NO_PERMISSION = ability -> translatable("bending.command.bind.no-permission", RED)
+    .args(ability);
+
+  Args2<String, Component> BOUND_SLOTS = (name, elements) -> translatable("bending.command.binds.header", DARK_AQUA)
+    .args(text(name).hoverEvent(HoverEvent.showText(elements)));
+
+  Args0 NO_ELEMENTS = () -> translatable("bending.command.binds.no-elements", GRAY);
 
   Args0 CLEAR_ALL_SLOTS = () -> translatable("bending.command.clear.all", GREEN);
   Args1<Integer> CLEAR_SLOT = slot -> translatable("bending.command.clear.specific", GREEN)
@@ -141,6 +147,16 @@ public interface Message {
 
   // Scoreboard items not translatable yet?
   Args2<String, String> BENDING_BOARD_EMPTY_SLOT = (prefix, slot) -> text(prefix).append(text("-- Slot " + slot + " --", DARK_GRAY));
+
+  Args0 GUI_NO_PERMISSION = () -> translatable("bending.gui.no-permission", RED);
+
+  Args0 ELEMENTS_GUI_TITLE = () -> translatable("bending.gui.elements.title", DARK_PURPLE);
+
+  Args0 ELEMENTS_GUI_HELP_TITLE = () -> translatable("bending.gui.elements.help-title", DARK_AQUA);
+  Args0 ELEMENTS_GUI_CHOOSE = () -> translatable("bending.gui.elements.choose", GOLD);
+  Args0 ELEMENTS_GUI_DISPLAY = () -> translatable("bending.gui.elements.display", YELLOW);
+  Args0 ELEMENTS_GUI_ADD = () -> translatable("bending.gui.elements.add", GREEN);
+  Args0 ELEMENTS_GUI_REMOVE = () -> translatable("bending.gui.elements.remove", RED);
 
   static @NonNull Component brand(@NonNull ComponentLike message) {
     return text().append(PREFIX).append(message).build();

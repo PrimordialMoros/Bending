@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Set;
+import java.util.Collection;
 
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
@@ -29,7 +29,7 @@ public interface ElementUser {
   /**
    * @return an immutable collection of this user's elements
    */
-  @NonNull Set<@NonNull Element> elements();
+  @NonNull Collection<@NonNull Element> elements();
 
   /**
    * Check if the user has the specified element.
