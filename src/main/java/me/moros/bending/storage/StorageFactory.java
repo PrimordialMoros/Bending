@@ -40,7 +40,8 @@ public final class StorageFactory {
     CommentedConfigurationNode storageNode = Bending.configManager().config().node("storage");
     String configValue = storageNode.node("engine").getString("h2");
     StorageType engine = StorageType.parse(configValue, StorageType.H2);
-    if (!configValue.equalsIgnoreCase(engine.toString())) {
+    if (!configValue.equalsIgnoreCase(engine.toString()) || engine == StorageType.SQLITE) {
+      engine = StorageType.H2;
       Bending.logger().warn("Failed to parse: " + configValue + ". Defaulting to H2.");
     }
 
@@ -54,8 +55,6 @@ public final class StorageFactory {
     String path = "";
     if (engine == StorageType.H2) {
       path = Bending.configFolder() + File.separator + "bending-h2;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE";
-    } else if (engine == StorageType.SQLITE) {
-      path = Bending.configFolder() + File.separator + "bending-sqlite.db";
     }
 
     String poolName = engine.name() + " Bending Hikari Connection Pool";

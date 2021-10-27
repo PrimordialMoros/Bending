@@ -21,6 +21,7 @@ package me.moros.bending.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Utility class to handle chat related functionality.
  */
 public final class ChatUtil {
-  private static final Pattern NON_ALPHABETICAL = Pattern.compile("[^A-Za-z]");
+  private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
   private static final Pattern SPACE = Pattern.compile(" ");
 
   private ChatUtil() {
@@ -47,7 +48,7 @@ public final class ChatUtil {
     if (input == null) {
       return "";
     }
-    String output = NON_ALPHABETICAL.matcher(input).replaceAll("").toLowerCase();
+    String output = NON_ALPHANUMERIC.matcher(input).replaceAll("").toLowerCase(Locale.ROOT);
     return output.length() > 16 ? output.substring(0, 16) : output;
   }
 

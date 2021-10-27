@@ -22,7 +22,7 @@ package me.moros.bending.listener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -43,7 +43,6 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.Metadata;
@@ -91,10 +90,10 @@ public class UserListener implements Listener {
     UUID uuid = event.getUniqueId();
     long startTime = System.currentTimeMillis();
     try {
-      // Timeout after 1000ms so as to not block the login thread excessively
-      Entry<PlayerProfile, BenderData> entry = Registries.BENDERS.profile(uuid).get(1000, TimeUnit.MILLISECONDS);
+      // Timeout after 1000ms to not block the login thread excessively
+      PlayerProfile profile = Registries.BENDERS.profile(uuid).get(1000, TimeUnit.MILLISECONDS);
       long deltaTime = System.currentTimeMillis() - startTime;
-      if (entry != null && deltaTime > 500) {
+      if (profile != null && deltaTime > 500) {
         Bending.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
       }
     } catch (TimeoutException e) {
@@ -110,9 +109,9 @@ public class UserListener implements Listener {
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
     String name = player.getName();
-    Entry<PlayerProfile, BenderData> entry = Registries.BENDERS.profileSync(uuid);
-    if (entry != null) {
-      BendingPlayer.createUser(player, entry.getKey(), entry.getValue()).ifPresent(Registries.BENDERS::register);
+    PlayerProfile profile = Registries.BENDERS.profileSync(uuid);
+    if (profile != null) {
+      BendingPlayer.createUser(player, profile).ifPresent(Registries.BENDERS::register);
     } else {
       Bending.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
     }
@@ -176,7 +175,7 @@ public class UserListener implements Listener {
     EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
     if (lastDamageCause instanceof BendingDamageEvent cause) {
       AbilityDescription ability = cause.ability();
-      String deathKey = "bending.ability." + ability.name().toLowerCase() + ".death";
+      String deathKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".death";
       TranslatableComponent msg = Bending.translationManager().translate(deathKey);
       if (msg == null) {
         msg = Component.translatable("bending.ability.generic.death");

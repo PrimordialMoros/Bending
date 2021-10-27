@@ -19,7 +19,6 @@
 
 package me.moros.bending.game;
 
-import java.util.EnumSet;
 import java.util.UUID;
 
 import me.moros.bending.Bending;
@@ -28,7 +27,6 @@ import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.AbilityManager;
-import me.moros.bending.model.Element;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.BendingEffect;
@@ -62,7 +60,7 @@ public final class Game {
     boardManager = new BoardManager();
 
     new AbilityInitializer();
-    loadStorage();
+    storage.createAbilities(Registries.ABILITIES);
 
     TempArmor.init();
     TempBlock.init();
@@ -112,11 +110,6 @@ public final class Game {
     TempBlock.MANAGER.removeAll();
     TempArmorStand.MANAGER.removeAll();
     TempFallingBlock.MANAGER.removeAll();
-  }
-
-  private void loadStorage() {
-    storage.createElements(EnumSet.allOf(Element.class));
-    storage.createAbilities(Registries.ABILITIES);
   }
 
   public @NonNull BendingStorage storage() {

@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +35,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.ExpiringSet;
@@ -49,7 +47,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Registry for all valid benders.
  */
 public final class BenderRegistry implements Registry<User> {
-  private AsyncLoadingCache<UUID, Entry<PlayerProfile, BenderData>> cache;
+  private AsyncLoadingCache<UUID, PlayerProfile> cache;
   private final ExpiringSet<UUID> recentlyExpiredUsers;
   private final Map<UUID, BendingPlayer> players;
   private final Map<UUID, BendingUser> entities;
@@ -119,11 +117,11 @@ public final class BenderRegistry implements Registry<User> {
     }
   }
 
-  public @Nullable Entry<PlayerProfile, BenderData> profileSync(@NonNull UUID uuid) {
+  public @Nullable PlayerProfile profileSync(@NonNull UUID uuid) {
     return cache == null ? null : cache.synchronous().get(uuid);
   }
 
-  public @NonNull CompletableFuture<@Nullable Entry<PlayerProfile, BenderData>> profile(@NonNull UUID uuid) {
+  public @NonNull CompletableFuture<@Nullable PlayerProfile> profile(@NonNull UUID uuid) {
     return cache == null ? CompletableFuture.completedFuture(null) : cache.get(uuid);
   }
 

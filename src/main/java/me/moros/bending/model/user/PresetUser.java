@@ -32,7 +32,7 @@ public interface PresetUser {
   /**
    * @return an immutable collection of this user's preset names
    */
-  @NonNull Set<@NonNull String> presets();
+  @NonNull Set<@NonNull Preset> presets();
 
   /**
    * Check if the user has the specified preset.

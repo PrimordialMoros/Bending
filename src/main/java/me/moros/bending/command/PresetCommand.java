@@ -35,6 +35,7 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
@@ -45,11 +46,12 @@ public class PresetCommand extends BaseCommand {
   @Subcommand("list|ls|l")
   @Description("List all available presets")
   public static void onPresetList(BendingPlayer player) {
-    Collection<String> presets = player.presets();
+    Collection<Preset> presets = player.presets();
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(player);
     } else {
-      player.sendMessage(Component.text(String.join(", ", presets), NamedTextColor.GREEN));
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
+      player.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()));
     }
   }
 

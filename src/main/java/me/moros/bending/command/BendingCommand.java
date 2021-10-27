@@ -20,6 +20,7 @@
 package me.moros.bending.command;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import co.aikar.commands.BaseCommand;
@@ -238,12 +239,7 @@ public class BendingCommand extends BaseCommand {
       hover = Component.join(sep, bendingPlayer.elements().stream().map(Element::displayName).toList());
     }
     Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName(), hover);
-    for (int slot = 1; slot <= 9; slot++) {
-      AbilityDescription desc = bendingPlayer.boundAbility(slot);
-      if (desc != null) {
-        player.sendMessage(Component.text(slot + ". ", NamedTextColor.DARK_AQUA).append(desc.meta()));
-      }
-    }
+    bendingPlayer.createPresetFromSlots("").display().forEach(player::sendMessage);
   }
 
   @Subcommand("clear|c")
@@ -265,8 +261,8 @@ public class BendingCommand extends BaseCommand {
   @CommandCompletion("@allabilities")
   @Description("View info about a specific ability")
   public static void onInfo(CommandSender user, AbilityDescription ability) {
-    String descKey = "bending.ability." + ability.name().toLowerCase() + ".description";
-    String instKey = "bending.ability." + ability.name().toLowerCase() + ".instructions";
+    String descKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".description";
+    String instKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".instructions";
     Component description = Bending.translationManager().translate(descKey);
     Component instructions = Bending.translationManager().translate(instKey);
     if (instructions == null && ability instanceof Sequence sequence) {

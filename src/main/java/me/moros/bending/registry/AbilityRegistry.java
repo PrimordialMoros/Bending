@@ -22,6 +22,7 @@ package me.moros.bending.registry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -62,7 +63,7 @@ public final class AbilityRegistry implements Registry<AbilityDescription> {
    */
   public boolean register(@NonNull AbilityDescription desc) {
     if (!contains(desc)) {
-      abilities.put(desc.name().toLowerCase(), desc);
+      abilities.put(desc.name().toLowerCase(Locale.ROOT), desc);
       return true;
     }
     return false;
@@ -73,11 +74,11 @@ public final class AbilityRegistry implements Registry<AbilityDescription> {
    * @return the ability description or null if not found
    */
   public @Nullable AbilityDescription ability(@Nullable String name) {
-    return (name == null || name.isEmpty()) ? null : abilities.get(name.toLowerCase());
+    return (name == null || name.isEmpty()) ? null : abilities.get(name.toLowerCase(Locale.ROOT));
   }
 
   public boolean contains(@NonNull AbilityDescription desc) {
-    return abilities.containsKey(desc.name().toLowerCase());
+    return abilities.containsKey(desc.name().toLowerCase(Locale.ROOT));
   }
 
   public @NonNull Stream<AbilityDescription> stream() {

@@ -21,6 +21,7 @@ package me.moros.bending.registry;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -59,7 +60,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
    * @return true if that protection is registered, false otherwise
    */
   public boolean contains(@NonNull String name) {
-    return protections.containsKey(name.toLowerCase());
+    return protections.containsKey(name.toLowerCase(Locale.ROOT));
   }
 
   /**
@@ -72,7 +73,7 @@ public final class ProtectionRegistry implements Registry<Protection> {
       Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
       if (plugin != null) {
         Protection protection = factory.apply(plugin);
-        protections.put(name.toLowerCase(), protection);
+        protections.put(name.toLowerCase(Locale.ROOT), protection);
         Bending.logger().info("Registered bending protection for " + name);
       } else {
         Bending.logger().warn("Plugin " + name + " was not found, skipping protection hook");

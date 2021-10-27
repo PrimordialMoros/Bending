@@ -24,8 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
-import me.moros.atlas.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
@@ -40,23 +38,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingPlayer extends BendingUser implements PresetUser {
-  private final Set<String> presets;
-  private final AsyncLoadingCache<String, Preset> presetCache;
+  private final Set<Preset> presets;
   private final int internalId;
   private boolean board;
 
-  private BendingPlayer(Player player, PlayerProfile profile, BenderData data) {
-    super(player, data);
+  private BendingPlayer(Player player, PlayerProfile profile) {
+    super(player, profile.benderData());
     this.internalId = profile.id();
     this.board = profile.board();
-    presets = new HashSet<>(data.presets());
-    presetCache = Caffeine.newBuilder()
-      .maximumSize(8) // Average player will probably have 2-5 presets, this should be enough
-      .buildAsync(this::loadPreset);
-  }
-
-  public int id() {
-    return internalId;
+    presets = new HashSet<>(profile.benderData().presets());
   }
 
   public boolean board() {
@@ -131,28 +121,27 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   // Presets
   @Override
-  public @NonNull Set<@NonNull String> presets() {
+  public @NonNull Set<@NonNull Preset> presets() {
     return Set.copyOf(presets);
   }
 
   @Override
   public Optional<Preset> presetByName(@Nullable String name) {
-    if (name == null || !presets.contains(name.toLowerCase())) {
+    if (name == null) {
       return Optional.empty();
     }
-    return Optional.ofNullable(presetCache.synchronous().get(name.toLowerCase()));
+    return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny();
   }
 
   @Override
   public @NonNull CompletableFuture<@NonNull PresetCreateResult> addPreset(@NonNull Preset preset) {
-    String name = preset.name().toLowerCase();
-    if (preset.id() > 0 || presets.contains(name)) {
+    if (preset.id() > 0 || presets.contains(preset)) {
       return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
     }
     if (!Bending.eventBus().postPresetCreateEvent(this, preset)) {
       return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
-    presets.add(name);
+    presets.add(preset);
     return Bending.game().storage().savePresetAsync(internalId, preset).thenApply(result ->
       result ? PresetCreateResult.SUCCESS : PresetCreateResult.FAIL
     );
@@ -160,26 +149,23 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public boolean removePreset(@NonNull Preset preset) {
-    String name = preset.name().toLowerCase();
-    if (preset.id() <= 0 || !presets.contains(name)) {
+    if (preset.id() <= 0 || !presets.contains(preset)) {
       return false;
     }
     Bending.game().storage().deletePresetAsync(preset.id());
-    return presets.remove(name);
+    return presets.remove(preset);
   }
 
-  private Preset loadPreset(String name) {
-    if (!presets.contains(name.toLowerCase())) {
-      return null;
-    }
-    return Bending.game().storage().loadPreset(internalId, name);
+  public @NonNull PlayerProfile toProfile() {
+    BenderData data = new BenderData(createPresetFromSlots("").abilities(), elements(), presets);
+    return new PlayerProfile(internalId, board, data);
   }
 
-  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull PlayerProfile profile, @NonNull BenderData data) {
+  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull PlayerProfile profile) {
     if (Registries.BENDERS.contains(player.getUniqueId())) {
       return Optional.empty();
     }
-    BendingPlayer bendingPlayer = new BendingPlayer(player, profile, data);
+    BendingPlayer bendingPlayer = new BendingPlayer(player, profile);
     return Optional.of(bendingPlayer);
   }
 }

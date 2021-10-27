@@ -19,8 +19,8 @@
 
 package me.moros.bending.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -95,7 +95,7 @@ public final class BendingExplosion {
     Location bukkitLoc = center.toLocation(user.world());
 
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = breakBlocks ? WorldMethods.nearbyBlocks(bukkitLoc, size, predicate) : List.of();
+    Collection<Block> blocks = breakBlocks ? WorldMethods.nearbyBlocks(bukkitLoc, size, predicate) : new ArrayList<>();
 
     if (Bending.eventBus().postExplosionEvent(user, bukkitLoc, blocks, size).isCancelled()) {
       return false;

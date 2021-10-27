@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Collection;
+import java.util.Set;
 
 import me.moros.bending.events.ElementChangeEvent;
 import me.moros.bending.model.Element;
@@ -27,9 +27,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface ElementUser {
   /**
-   * @return an immutable collection of this user's elements
+   * @return a copy of this user's elements
    */
-  @NonNull Collection<@NonNull Element> elements();
+  @NonNull Set<@NonNull Element> elements();
 
   /**
    * Check if the user has the specified element.

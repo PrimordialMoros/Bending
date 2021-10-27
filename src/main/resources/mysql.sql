@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS bending_players (
     player_id       INT AUTO_INCREMENT      NOT NULL,
-    uuid            BINARY(16)              NOT NULL,
+    player_uuid     BINARY(16)              NOT NULL,
     board           BOOL                    NOT NULL DEFAULT TRUE,
     PRIMARY KEY (player_id)
 ) DEFAULT CHARSET = utf8mb4;
@@ -14,18 +14,11 @@ CREATE TABLE IF NOT EXISTS bending_abilities (
 ) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX ability_name_index ON bending_abilities (ability_name);
 
-CREATE TABLE IF NOT EXISTS bending_elements (
-    element_id      INT AUTO_INCREMENT      NOT NULL,
-    element_name    VARCHAR(16)             NOT NULL UNIQUE,
-    PRIMARY KEY (element_id)
-) DEFAULT CHARSET = utf8mb4;
-
 CREATE TABLE IF NOT EXISTS bending_players_elements (
-    element_id      INT                     NOT NULL,
-    player_id       INT                     NOT NULL,
-    FOREIGN KEY(element_id) REFERENCES bending_elements(element_id) ON DELETE CASCADE,
+    player_id       INT                                NOT NULL,
+    element         ENUM('air','water','earth','fire') NOT NULL,
     FOREIGN KEY(player_id) REFERENCES bending_players(player_id) ON DELETE CASCADE,
-    PRIMARY KEY(element_id, player_id)
+    PRIMARY KEY(player_id, element)
 ) DEFAULT CHARSET = utf8mb4;
 CREATE INDEX elements_index ON bending_players_elements (player_id);
 

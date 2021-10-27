@@ -19,13 +19,27 @@
 
 package me.moros.bending.model.user.profile;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.preset.Preset;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Holds data from the database that are needed to construct the BendingPlayer object
+ * Holds data from the database that are needed to construct the BendingProfile object
  */
-public record BenderData(@NonNull String[] slots, @NonNull Set<@NonNull String> elements,
-                         @NonNull Set<@NonNull String> presets) {
+public record BenderData(@NonNull List<@Nullable AbilityDescription> slots, @NonNull Set<@NonNull Element> elements,
+                         @NonNull Set<@NonNull Preset> presets) {
+  public static final BenderData EMPTY = new BenderData(List.of(), Set.of(), Set.of());
+
+  public BenderData(@NonNull List<@Nullable AbilityDescription> slots, @NonNull Set<@NonNull Element> elements,
+                    @NonNull Set<@NonNull Preset> presets) {
+    this.slots = Collections.unmodifiableList(slots);
+    this.elements = Set.copyOf(elements);
+    this.presets = Set.copyOf(presets);
+  }
 }

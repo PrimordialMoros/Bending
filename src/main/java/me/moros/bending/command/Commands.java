@@ -21,6 +21,7 @@ package me.moros.bending.command;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -90,7 +91,7 @@ public class Commands {
 
     commandCompletions.registerAsyncCompletion("presets", c -> {
       Player player = c.getPlayer();
-      return player == null ? List.of() : Registries.BENDERS.user(player).presets();
+      return player == null ? List.of() : Registries.BENDERS.user(player).presets().stream().map(Preset::name).toList();
     });
 
     commandCompletions.registerStaticCompletion("elements", List.of("Air", "Water", "Earth", "Fire"));
@@ -148,7 +149,7 @@ public class Commands {
     });
 
     commandContexts.registerContext(ModifierOperation.class, c -> {
-      String name = c.popFirstArg().toLowerCase();
+      String name = c.popFirstArg().toLowerCase(Locale.ROOT);
       if (name.startsWith("m")) {
         return ModifierOperation.MULTIPLICATIVE;
       }

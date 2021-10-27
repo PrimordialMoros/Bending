@@ -19,12 +19,7 @@
 
 package me.moros.bending.model.user;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,7 +46,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class BendingUser implements User {
   private final LivingEntity entity;
   private final Set<Element> elements;
-  private final List<AbilityDescription> slots;
+  private final AbilityDescription[] slots;
   private final Cache<AbilityDescription, Long> cooldowns;
   private final CompositeBendingConditional bendingConditional;
 
@@ -70,9 +65,12 @@ public class BendingUser implements User {
       })
       .scheduler(Scheduler.systemScheduler())
       .build();
-    slots = new Preset(Arrays.asList(data.slots())).toBinds();
+    slots = new AbilityDescription[9];
+    for (int i = 0; i < Math.min(data.slots().size(), 9); i++) {
+      slots[i] = data.slots().get(i);
+    }
     elements = EnumSet.noneOf(Element.class);
-    data.elements().stream().map(Element::fromName).flatMap(Optional::stream).forEach(elements::add);
+    elements.addAll(data.elements());
     bendingConditional = BendingConditions.builder().build();
     validateSlots();
   }
@@ -83,8 +81,8 @@ public class BendingUser implements User {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Element> elements() {
-    return Arrays.stream(Element.values()).filter(elements::contains).toList();
+  public @NonNull Set<@NonNull Element> elements() {
+    return EnumSet.copyOf(elements);
   }
 
   @Override
@@ -127,18 +125,14 @@ public class BendingUser implements User {
 
   @Override
   public @NonNull Preset createPresetFromSlots(@NonNull String name) {
-    List<String> copy = new ArrayList<>(9);
-    for (AbilityDescription desc : slots) {
-      copy.add(desc == null ? null : desc.name());
-    }
-    return new Preset(0, name, copy);
+    return new Preset(0, name, slots);
   }
 
   @Override
   public boolean bindPreset(@NonNull Preset preset) {
     if (Bending.eventBus().postBindChangeEvent(this, BindType.MULTIPLE)) {
       Preset oldBinds = createPresetFromSlots("");
-      Collections.copy(slots, preset.toBinds());
+      preset.copyTo(slots);
       validateSlots();
       updateBoard();
       Preset newBinds = createPresetFromSlots("");
@@ -152,7 +146,7 @@ public class BendingUser implements User {
     if (slot < 1 || slot > 9) {
       return null;
     }
-    return slots.get(slot - 1);
+    return slots[slot - 1];
   }
 
   @Override
@@ -161,7 +155,7 @@ public class BendingUser implements User {
       return;
     }
     if (Bending.eventBus().postBindChangeEvent(this, BindType.SINGLE)) {
-      slots.set(slot - 1, desc);
+      slots[slot - 1] = desc;
       updateBoard();
     }
   }
@@ -208,9 +202,9 @@ public class BendingUser implements User {
    */
   private void validateSlots() {
     for (int i = 0; i < 9; i++) {
-      AbilityDescription desc = slots.get(i);
+      AbilityDescription desc = slots[i];
       if (desc != null && (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind())) {
-        slots.set(i, null);
+        slots[i] = null;
       }
     }
   }

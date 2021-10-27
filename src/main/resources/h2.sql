@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS bending_players (
     player_id       SERIAL PRIMARY KEY      NOT NULL,
-    uuid            BINARY(16)              NOT NULL,
+    player_uuid     UUID                    NOT NULL,
     board           BOOLEAN                 NOT NULL DEFAULT TRUE
 );
 
@@ -12,17 +12,12 @@ CREATE TABLE IF NOT EXISTS bending_abilities (
 );
 CREATE INDEX IF NOT EXISTS ability_name_index ON bending_abilities (ability_name);
 
-CREATE TABLE IF NOT EXISTS bending_elements (
-    element_id      SERIAL PRIMARY KEY      NOT NULL,
-    element_name    VARCHAR(16)             NOT NULL UNIQUE
-);
-
+CREATE TYPE element_enum AS ENUM ('air', 'water', 'earth', 'fire');
 CREATE TABLE IF NOT EXISTS bending_players_elements (
-    element_id      INTEGER                 NOT NULL,
     player_id       INTEGER                 NOT NULL,
-    FOREIGN KEY(element_id) REFERENCES bending_elements(element_id) ON DELETE CASCADE,
+    element         element_enum            NOT NULL,
     FOREIGN KEY(player_id) REFERENCES bending_players(player_id) ON DELETE CASCADE,
-    PRIMARY KEY(element_id, player_id)
+    PRIMARY KEY(player_id, element)
 );
 CREATE INDEX IF NOT EXISTS elements_index ON bending_players_elements (player_id);
 

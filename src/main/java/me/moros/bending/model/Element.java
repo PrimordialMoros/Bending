@@ -20,6 +20,7 @@
 package me.moros.bending.model;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 import net.kyori.adventure.text.Component;
@@ -55,7 +56,7 @@ public enum Element {
   }
 
   public @NonNull Component description() {
-    return Component.translatable("bending.element." + elementName.toLowerCase(), color);
+    return Component.translatable("bending.element." + elementName.toLowerCase(Locale.ROOT), color);
   }
 
   public @NonNull TextColor color() {
@@ -66,6 +67,6 @@ public enum Element {
     if (value == null || value.isEmpty()) {
       return Optional.empty();
     }
-    return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase())).findAny();
+    return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
   }
 }

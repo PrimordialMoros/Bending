@@ -121,7 +121,7 @@ public class AbilityDescription {
       .append(Component.text(permission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
       .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY)).build();
 
-    return Component.text(name(), element().color())
+    return displayName()
       .hoverEvent(HoverEvent.showText(details))
       .clickEvent(ClickEvent.runCommand("/bending info " + name()));
   }

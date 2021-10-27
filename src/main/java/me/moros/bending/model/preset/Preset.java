@@ -19,13 +19,22 @@
 
 package me.moros.bending.model.preset;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.registry.Registries;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -33,30 +42,29 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable representation of slots.
  */
 public final class Preset {
-  public static final Preset EMPTY = new Preset(List.of());
+  public static final Preset EMPTY = new Preset(new AbilityDescription[9]);
 
   private final int id;
   private final String name;
-  private final String[] abilities;
+  private final AbilityDescription[] abilities;
+  private TextColor presetColor;
 
   /**
    * Presets loaded from db have a positive id.
    * New presets must use a non positive id as they will acquire a real one when they get saved.
    */
-  public Preset(int id, @NonNull String name, @NonNull List<@Nullable String> abilities) {
+  public Preset(int id, @NonNull String name, @Nullable AbilityDescription @NonNull [] abilities) {
     this.id = id;
     this.name = name;
-    this.abilities = new String[9];
-    for (int slot = 0; slot < Math.min(9, abilities.size()); slot++) {
-      this.abilities[slot] = abilities.get(slot);
-    }
+    this.abilities = new AbilityDescription[9];
+    System.arraycopy(abilities, 0, this.abilities, 0, Math.min(9, abilities.length));
   }
 
   /**
    * Creates a dummy preset with id 0 and an empty name.
-   * @see #Preset(int, String, List)
+   * @see #Preset(int, String, AbilityDescription[])
    */
-  public Preset(@NonNull List<@Nullable String> abilities) {
+  public Preset(@Nullable AbilityDescription @NonNull [] abilities) {
     this(0, "", abilities);
   }
 
@@ -68,16 +76,23 @@ public final class Preset {
     return name;
   }
 
+  public @NonNull Component displayName() {
+    if (presetColor == null) {
+      presetColor = dominantColor();
+    }
+    return Component.text(name, presetColor);
+  }
+
   /**
-   * @return an immutable copy of the names of the abilities that this preset holds
+   * @return a copy of the names of the abilities that this preset holds
    */
-  public @NonNull List<@Nullable String> abilities() {
-    return List.of(abilities);
+  public @NonNull List<@Nullable AbilityDescription> abilities() {
+    return Arrays.asList(abilities);
   }
 
   public boolean isEmpty() {
-    for (String s : abilities) {
-      if (s != null) {
+    for (AbilityDescription desc : abilities) {
+      if (desc != null) {
         return false;
       }
     }
@@ -94,7 +109,43 @@ public final class Preset {
     return count;
   }
 
-  public @NonNull List<@Nullable AbilityDescription> toBinds() {
-    return Arrays.stream(abilities).map(Registries.ABILITIES::ability).collect(Collectors.toList());
+  public void copyTo(@Nullable AbilityDescription @NonNull [] destination) {
+    if (destination.length != 9) {
+      throw new IllegalArgumentException("Destination array must be of length 9!");
+    }
+    System.arraycopy(abilities, 0, destination, 0, 9);
+  }
+
+  public @NonNull List<@NonNull Component> display() {
+    List<Component> components = new ArrayList<>();
+    for (int i = 0; i < 9; i++) {
+      AbilityDescription desc = abilities[i];
+      if (desc != null) {
+        components.add(Component.text((i + 1) + ". ", NamedTextColor.DARK_AQUA).append(desc.meta()));
+      }
+    }
+    return components;
+  }
+
+  public @NonNull Component meta() {
+    JoinConfiguration sep = JoinConfiguration.separator(Component.newline());
+    Component details = Component.text().append(Component.join(sep, display()))
+      .append(Component.newline()).append(Component.newline())
+      .append(Component.text("Click to bind this preset.", NamedTextColor.GRAY)).build();
+
+    return displayName()
+      .hoverEvent(HoverEvent.showText(details))
+      .clickEvent(ClickEvent.runCommand("/preset bind " + name()));
+  }
+
+  private TextColor dominantColor() {
+    Map<Element, Integer> counter = new EnumMap<>(Element.class);
+    for (AbilityDescription desc : abilities) {
+      if (desc != null) {
+        counter.compute(desc.element(), (k, v) -> (v == null) ? 1 : v + 1);
+      }
+    }
+    return counter.entrySet().stream().max(Entry.comparingByValue())
+      .map(e -> e.getKey().color()).orElse(NamedTextColor.WHITE);
   }
 }

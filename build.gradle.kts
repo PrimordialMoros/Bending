@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    api("me.moros", "atlas-core", "1.3.0-SNAPSHOT")
+    api("me.moros", "atlas-core", "1.4.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
