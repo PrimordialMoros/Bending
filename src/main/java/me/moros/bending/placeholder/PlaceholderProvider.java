@@ -19,10 +19,12 @@
 
 package me.moros.bending.placeholder;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.papermc.paper.text.PaperComponents;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -30,8 +32,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,12 +48,10 @@ public final class PlaceholderProvider {
   private void setup(PlaceholderBuilder builder) {
     builder.addStatic("elements", (player, user) -> user.elements().stream().map(Element::displayName)
       .map(this::toLegacy).collect(Collectors.joining(", ")));
-    builder.addStatic("element", (player, user) -> user.elements().stream().findFirst().map(Element::displayName)
-      .map(this::toLegacy).orElse(""));
-    builder.addStatic("element_color", (player, user) -> {
-      TextColor color = user.elements().stream().findFirst().map(Element::color).orElse(null);
-      return color == null ? "" : ChatColor.of(color.asHexString()).toString();
-    });
+    builder.addStatic("element", (player, user) -> findElement(user));
+    builder.addStatic("element_color", (player, user) ->
+      user.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
+    );
     builder.addStatic("selected_ability", (player, user) -> {
       AbilityDescription desc = user.selectedAbility();
       return desc == null ? "" : toLegacy(desc.displayName());
@@ -68,12 +66,23 @@ public final class PlaceholderProvider {
     });
   }
 
+  private String findElement(User user) {
+    Collection<Element> userElements = user.elements();
+    if (userElements.isEmpty()) {
+      return "NonBender";
+    } else if (userElements.size() > 1) {
+      return org.bukkit.ChatColor.DARK_PURPLE + "Avatar";
+    } else {
+      return toLegacy(userElements.iterator().next().displayName());
+    }
+  }
+
   private String formatBoolean(boolean value) {
     return value ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
   }
 
   private String toLegacy(Component component) {
-    return LegacyComponentSerializer.legacySection().serialize(component);
+    return PaperComponents.legacySectionSerializer().serialize(component);
   }
 
   public @Nullable String onPlaceholderRequest(@NonNull Player player, @NonNull String placeholder) {
