@@ -3,7 +3,7 @@ plugins {
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.0")
-    id("io.papermc.paperweight.userdev").version("1.1.12")
+    id("io.papermc.paperweight.userdev").version("1.1.14")
 }
 
 group = "me.moros"
