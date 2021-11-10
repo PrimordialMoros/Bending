@@ -1,3 +1,4 @@
 files:
-  - source: src/main/resources/bending_en.properties
-    translation: src/main/resources/bending_%locale_with_underscore%.properties
+  - source: /src/main/resources/bending_en.properties
+    translation: /src/main/resources/bending_%two_letters_code%.properties
+commit_message: '[ci-skip]'
