@@ -1,0 +1,3 @@
+files:
+  - source: src/main/resources/bending_en.properties
+    translation: src/main/resources/bending_%locale_with_underscore%.properties
