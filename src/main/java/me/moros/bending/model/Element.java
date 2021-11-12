@@ -52,11 +52,11 @@ public enum Element {
   }
 
   public @NonNull Component displayName() {
-    return Component.text(elementName, color);
+    return Component.translatable(key(), color);
   }
 
   public @NonNull Component description() {
-    return Component.translatable("bending.element." + elementName.toLowerCase(Locale.ROOT), color);
+    return Component.translatable(key() + ".description", color);
   }
 
   public @NonNull TextColor color() {
@@ -68,5 +68,9 @@ public enum Element {
       return Optional.empty();
     }
     return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
+  }
+
+  private String key() {
+    return "bending.element." + elementName.toLowerCase(Locale.ROOT);
   }
 }

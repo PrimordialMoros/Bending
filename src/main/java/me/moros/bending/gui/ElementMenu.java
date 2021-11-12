@@ -151,7 +151,8 @@ public final class ElementMenu implements BendingMenu {
     itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
     handleItemStackGlow(player, element, itemStack);
     ItemMeta itemMeta = itemStack.getItemMeta();
-    Component itemName = element.displayName().decoration(TextDecoration.ITALIC, false);
+    Component itemName = GlobalTranslator.render(element.displayName(), player.entity().locale())
+      .decoration(TextDecoration.ITALIC, false);
     itemMeta.displayName(itemName);
     itemMeta.lore(generateLore(player.entity(), element));
     itemStack.setItemMeta(itemMeta);

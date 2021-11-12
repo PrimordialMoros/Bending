@@ -126,8 +126,8 @@ public class Shockwave extends AbilityInstance {
       boolean charged = isCharged();
       if (charged) {
         ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
-        if (!user.sneaking()) {
-          release(false);
+        if (!user.sneaking() && !release(false)) {
+          return UpdateResult.REMOVE;
         }
       } else {
         if (!user.sneaking()) {
@@ -185,9 +185,9 @@ public class Shockwave extends AbilityInstance {
     return System.currentTimeMillis() >= startTime + userConfig.chargeTime;
   }
 
-  private void release(boolean cone) {
+  private boolean release(boolean cone) {
     if (released || !isCharged() || !user.isOnGround()) {
-      return;
+      return false;
     }
     released = true;
     range = cone ? userConfig.coneRange : userConfig.ringRange;
@@ -213,6 +213,7 @@ public class Shockwave extends AbilityInstance {
       removalPolicy = Policies.builder().build();
       user.addCooldown(description(), userConfig.cooldown);
     }
+    return true;
   }
 
   @Override
