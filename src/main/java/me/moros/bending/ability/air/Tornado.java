@@ -56,6 +56,7 @@ public class Tornado extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private double yOffset = 0;
+  private double currentAngle = 0;
   private long startTime;
 
   public Tornado(@NonNull AbilityDescription desc) {
@@ -140,8 +141,12 @@ public class Tornado extends AbilityInstance {
     if (yOffset >= 1) {
       yOffset = 0;
     }
+    currentAngle += 4.5;
+    if (currentAngle >= 360) {
+      currentAngle = 0;
+    }
     for (int i = 0; i < 3; i++) {
-      double offset = i * 2 * Math.PI / 3.0;
+      double offset = currentAngle + i * 2 * Math.PI / 3.0;
       for (double y = yOffset; y < height; y += (height / amount)) {
         double r = 2 + (radius - 2) * y / height;
         double x = r * Math.cos(y + offset);

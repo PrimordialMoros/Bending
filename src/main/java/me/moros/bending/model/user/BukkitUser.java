@@ -106,6 +106,13 @@ public interface BukkitUser extends ForwardingAudience.Single {
     return true; // Non-players are always considered sneaking so they can charge abilities.
   }
 
+  default boolean sprinting() {
+    return true;
+  }
+
+  default void sprinting(boolean sprinting) {
+  }
+
   default boolean allowFlight() {
     return true;
   }

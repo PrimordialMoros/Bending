@@ -51,7 +51,7 @@ public class AirAgility extends AbilityInstance implements Ability {
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().add(Policies.FLYING).build();
     return true;
   }
 
@@ -63,6 +63,8 @@ public class AirAgility extends AbilityInstance implements Ability {
   @Override
   public @NonNull UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
+      user.entity().removePotionEffect(PotionEffectType.JUMP);
+      user.entity().removePotionEffect(PotionEffectType.SPEED);
       return UpdateResult.CONTINUE;
     }
     handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);

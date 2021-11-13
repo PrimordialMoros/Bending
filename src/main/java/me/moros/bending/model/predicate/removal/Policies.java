@@ -31,6 +31,7 @@ public enum Policies implements RemovalPolicy {
   OFFLINE((u, d) -> !u.valid()),
   SNEAKING((u, d) -> u.sneaking()),
   NOT_SNEAKING((u, d) -> !u.sneaking()),
+  FLYING((u, d) -> u.flying()),
   IN_WATER((u, d) -> u.entity().isInWater()),
   NOT_IN_WATER((u, d) -> !u.entity().isInWater()),
   IN_LIQUID((u, d) -> u.entity().isInWater() || u.entity().isInLava());

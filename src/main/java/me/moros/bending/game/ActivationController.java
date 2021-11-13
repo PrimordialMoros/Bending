@@ -57,6 +57,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.WaterMaterials;
@@ -147,13 +148,13 @@ public final class ActivationController {
     if (user.hasElement(Element.AIR)) {
       AirSpout spout = cache.getAirSpout(user);
       if (spout != null) {
-        spout.handleMovement(velocity.setY(0));
+        spout.handleMovement(velocity);
       }
     }
     if (user.hasElement(Element.WATER)) {
       WaterSpout spout = cache.getWaterSpout(user);
       if (spout != null) {
-        spout.handleMovement(velocity.setY(0));
+        spout.handleMovement(velocity);
       }
     }
   }
@@ -167,6 +168,7 @@ public final class ActivationController {
     if (user != null) {
       if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK) {
         if (!onBurn(user)) {
+          BendingEffect.FIRE_TICK.reset(entity);
           return 0;
         }
       } else if (cause == DamageCause.FALL) {
@@ -280,6 +282,10 @@ public final class ActivationController {
       waterSpoutCache.clear();
       ignoreSwing.clear();
     }
+  }
+
+  public boolean hasSpout(@NonNull UUID uuid) {
+    return cache.airSpoutCache.containsKey(uuid) || cache.waterSpoutCache.containsKey(uuid);
   }
 
   public void clearCache() {

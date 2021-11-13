@@ -283,7 +283,7 @@ public class BendingCommand extends BaseCommand {
   private static Collection<Component> collectAbilities(CommandSender user, Element element) {
     return Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE))
+      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
       .filter(desc -> user.hasPermission(desc.permission()))
       .map(AbilityDescription::meta)
       .collect(Collectors.toList());

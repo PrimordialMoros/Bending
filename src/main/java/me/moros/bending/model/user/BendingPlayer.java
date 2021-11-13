@@ -95,6 +95,18 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
+  public boolean sprinting() {
+    return entity().isSprinting();
+  }
+
+  @Override
+  public void sprinting(boolean sprinting) {
+    if (sprinting() != sprinting) {
+      entity().setSprinting(sprinting);
+    }
+  }
+
+  @Override
   public boolean allowFlight() {
     return entity().getAllowFlight();
   }

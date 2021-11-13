@@ -43,7 +43,7 @@ public class FastSwim extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.builder().add(Policies.NOT_IN_WATER).add(Policies.FLYING).build();
     return true;
   }
 
@@ -54,11 +54,10 @@ public class FastSwim extends AbilityInstance implements Ability {
   @Override
   public @NonNull UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
+      user.entity().removePotionEffect(PotionEffectType.DOLPHINS_GRACE);
       return UpdateResult.CONTINUE;
     }
-    if (user.entity().isInWater()) {
-      PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
-    }
+    PotionUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
     return UpdateResult.CONTINUE;
   }
 

@@ -70,8 +70,10 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -248,18 +250,35 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onUserMove(EntityMoveEvent event) {
-    if (!event.hasChangedBlock()) {
-      return;
-    }
-    LivingEntity entity = event.getEntity();
-    if (MovementHandler.isRestricted(entity, ActionType.MOVE)) {
+    if (!handleMovement(event)) {
       event.setCancelled(true);
-      return;
     }
-    User user = Registries.BENDERS.user(entity);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerMove(PlayerMoveEvent event) {
+    if (!handleMovement(new EntityMoveEvent(event.getPlayer(), event.getFrom(), event.getTo()))) {
+      event.setCancelled(true);
+    }
+  }
+
+  private boolean handleMovement(EntityMoveEvent event) {
+    if (event.hasChangedBlock() && MovementHandler.isRestricted(event.getEntity(), ActionType.MOVE)) {
+      return false;
+    }
+    User user = Registries.BENDERS.user(event.getEntity());
     if (user != null) {
-      final Vector3d velocity = new Vector3d(event.getTo()).subtract(new Vector3d(event.getFrom()));
-      game.activationController().onUserMove(user, velocity);
+      double x = event.getTo().getX() - event.getFrom().getX();
+      double z = event.getTo().getZ() - event.getFrom().getZ();
+      game.activationController().onUserMove(user, new Vector3d(x, 0, z));
+    }
+    return true;
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onUserSprint(PlayerToggleSprintEvent event) {
+    if (event.isSprinting() && game.activationController().hasSpout(event.getPlayer().getUniqueId())) {
+      event.setCancelled(true);
     }
   }
 

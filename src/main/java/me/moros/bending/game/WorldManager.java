@@ -21,14 +21,13 @@ package me.moros.bending.game;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import co.aikar.commands.lib.timings.MCTiming;
-import me.moros.atlas.configurate.ConfigurationNode;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
 import me.moros.bending.model.AbilityManager;
@@ -44,15 +43,16 @@ public final class WorldManager {
   private final Set<UUID> disabledWorlds;
 
   WorldManager() {
-    ConfigurationNode node = Bending.configManager().config().node("properties", "disabled-worlds");
-    List<String> worldNames;
+    disabledWorlds = ConcurrentHashMap.newKeySet();
     try {
-      worldNames = node.getList(String.class, List.of());
-    } catch (SerializationException e) {
-      worldNames = List.of();
+      for (String w : Bending.configManager().config().node("properties", "disabled-worlds").getList(String.class, List.of())) {
+        World world = Bukkit.getWorld(w);
+        if (world != null) {
+          disabledWorlds.add(world.getUID());
+        }
+      }
+    } catch (SerializationException ignore) {
     }
-    disabledWorlds = worldNames.stream().map(Bukkit::getWorld).filter(Objects::nonNull).map(World::getUID)
-      .collect(Collectors.toSet());
     worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
       .collect(Collectors.toConcurrentMap(Function.identity(), w -> new ManagerPair()));
   }

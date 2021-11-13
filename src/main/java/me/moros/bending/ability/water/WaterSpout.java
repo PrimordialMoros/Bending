@@ -124,7 +124,7 @@ public class WaterSpout extends AbilityInstance {
   }
 
   public void handleMovement(@NonNull Vector3d velocity) {
-    AbstractSpout.limitVelocity(this, velocity, userConfig.maxSpeed);
+    AbstractSpout.limitVelocity(user.entity(), velocity, userConfig.maxSpeed);
   }
 
   private class Spout extends AbstractSpout {

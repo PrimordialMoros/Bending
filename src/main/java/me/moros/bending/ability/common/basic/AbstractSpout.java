@@ -25,7 +25,6 @@ import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
 import me.moros.bending.game.FlightManager.Flight;
-import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.Collider;
@@ -33,7 +32,6 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -62,6 +60,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   @Override
   public @NonNull UpdateResult update() {
     user.entity().setFallDistance(0);
+    user.sprinting(false);
     double maxHeight = height + 2; // Buffer for safety
     Block block = blockCast(user.locBlock(), maxHeight, ignore::contains);
     if (block == null || !validBlock.test(block)) {
@@ -99,9 +98,9 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     return flight;
   }
 
-  public static void limitVelocity(@NonNull Ability instance, @NonNull Vector3d velocity, double speed) {
+  public static void limitVelocity(@NonNull Entity entity, @NonNull Vector3d velocity, double speed) {
     if (velocity.lengthSq() > speed * speed) {
-      EntityMethods.applyVelocity(instance, instance.user().entity(), velocity.normalize().multiply(speed));
+      entity.setVelocity(velocity.normalize().multiply(speed).clampVelocity());
     }
   }
 

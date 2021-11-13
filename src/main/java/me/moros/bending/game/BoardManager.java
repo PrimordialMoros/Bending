@@ -19,14 +19,13 @@
 
 package me.moros.bending.game;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
+import io.papermc.paper.text.PaperComponents;
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -35,7 +34,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -43,6 +41,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -54,7 +53,7 @@ public final class BoardManager {
   private final boolean enabled;
 
   BoardManager() {
-    scoreboardPlayers = new HashMap<>();
+    scoreboardPlayers = new ConcurrentHashMap<>();
     enabled = Bending.configManager().config().node("properties", "bending-board").getBoolean(true);
   }
 
@@ -131,56 +130,47 @@ public final class BoardManager {
   }
 
   private static class Board {
-    private final String[] cachedSlots = new String[10];
-    private final Set<String> misc = new HashSet<>(); // Stores scoreboard scores for combos and misc abilities
-
-    private final Player player;
+    private static final String SEP = "  ------------  ";
+    private final Set<String> misc = ConcurrentHashMap.newKeySet(); // Used for combos and misc abilities
+    private final BendingPlayer player;
 
     private final Scoreboard bendingBoard;
     private final Objective bendingSlots;
     private int selectedSlot;
 
     private Board(Player player) {
-      this.player = player;
+      this.player = Registries.BENDERS.user(player);
       selectedSlot = player.getInventory().getHeldItemSlot() + 1;
       bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
       bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
       bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
       player.setScoreboard(bendingBoard);
-      Arrays.fill(cachedSlots, "");
       updateAll();
     }
 
     private void disableScoreboard() {
       bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
       bendingSlots.unregister();
-      player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+      player.entity().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
     private void updateSlot(int slot) {
-      if (slot < 1 || slot > 9 || !player.getScoreboard().equals(bendingBoard)) {
+      if (slot < 1 || slot > 9 || !player.entity().getScoreboard().equals(bendingBoard)) {
         return;
       }
-      BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
       String prefix = slot == selectedSlot ? ">" : "  ";
-
-      AbilityDescription desc = bendingPlayer.boundAbility(slot);
+      AbilityDescription desc = player.boundAbility(slot);
       Component component;
       if (desc == null) {
         component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
       } else {
-        Component name = Component.text(desc.name(), desc.element().color());
-        if (bendingPlayer.onCooldown(desc)) {
+        Component name = desc.displayName();
+        if (player.onCooldown(desc)) {
           name = name.decorate(TextDecoration.STRIKETHROUGH);
         }
         component = Component.text(prefix).append(name);
       }
-      String legacy = LegacyComponentSerializer.legacySection().serialize(component) + ChatColor.values()[slot].toString();
-      if (!cachedSlots[slot].equals(legacy)) {
-        bendingBoard.resetScores(cachedSlots[slot]);
-      }
-      cachedSlots[slot] = legacy;
-      bendingSlots.getScore(legacy).setScore(-slot);
+      getOrCreateTeam(slot).prefix(component);
     }
 
     private void updateAll() {
@@ -198,10 +188,10 @@ public final class BoardManager {
 
     private void updateMisc(AbilityDescription desc, boolean show) {
       Component component = Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH));
-      String legacy = LegacyComponentSerializer.legacySection().serialize(component);
+      String legacy = PaperComponents.legacySectionSerializer().serialize(component);
       if (show) {
         if (misc.isEmpty()) {
-          bendingSlots.getScore("  ------------  ").setScore(-10);
+          bendingSlots.getScore(SEP).setScore(-10);
         }
         misc.add(legacy);
         bendingSlots.getScore(legacy).setScore(-11);
@@ -209,9 +199,27 @@ public final class BoardManager {
         misc.remove(legacy);
         bendingBoard.resetScores(legacy);
         if (misc.isEmpty()) {
-          bendingBoard.resetScores("  ------------  ");
+          bendingBoard.resetScores(SEP);
         }
       }
+    }
+
+    private Team getOrCreateTeam(int slot) {
+      Team team = bendingBoard.getTeam(String.valueOf(slot));
+      return team == null ? createTeam(slot) : team;
+    }
+
+    private Team createTeam(int slot) {
+      Team team = bendingBoard.registerNewTeam(String.valueOf(slot));
+      String hidden = generateHiddenEntry(slot);
+      team.addEntry(hidden);
+      bendingSlots.getScore(hidden).setScore(-slot);
+      return team;
+    }
+
+    private String generateHiddenEntry(int slot) {
+      String hidden = ChatColor.values()[slot % 16].toString();
+      return slot <= 16 ? hidden : hidden + generateHiddenEntry(slot - 16);
     }
   }
 }

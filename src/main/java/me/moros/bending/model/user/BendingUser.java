@@ -54,13 +54,9 @@ public class BendingUser implements User {
     this.entity = entity;
     cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
       .removalListener((key, value, cause) -> {
-        if (key != null) {
-          Tasker.sync(() -> {
-            if (valid()) { // Ensure user is valid before posting event
-              Bending.eventBus().postCooldownRemoveEvent(this, key);
-              updateBoard(key, false);
-            }
-          }, 0);
+        if (key != null && valid()) { // Ensure user is valid before processing
+          updateBoard(key, false);
+          Tasker.sync(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0);
         }
       })
       .scheduler(Scheduler.systemScheduler())
