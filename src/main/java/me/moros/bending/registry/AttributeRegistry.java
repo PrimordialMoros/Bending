@@ -39,19 +39,19 @@ public final class AttributeRegistry implements Registry<AttributeModifier> {
   }
 
   public void add(@NonNull User user, @NonNull AttributeModifier modifier) {
-    modifierMap.put(user.entity().getUniqueId(), modifier);
+    modifierMap.put(user.uuid(), modifier);
   }
 
   public void invalidate(@NonNull User user) {
-    modifierMap.removeAll(user.entity().getUniqueId());
+    modifierMap.removeAll(user.uuid());
   }
 
   public boolean contains(@NonNull User user) {
-    return modifierMap.containsKey(user.entity().getUniqueId());
+    return modifierMap.containsKey(user.uuid());
   }
 
   public @NonNull Stream<@NonNull AttributeModifier> attributes(@NonNull User user) {
-    return modifierMap.get(user.entity().getUniqueId()).stream();
+    return modifierMap.get(user.uuid()).stream();
   }
 
   @Override

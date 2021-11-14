@@ -40,17 +40,17 @@ public final class FlightManager {
   }
 
   public boolean hasFlight(@NonNull User user) {
-    return instances.containsKey(user.entity().getUniqueId());
+    return instances.containsKey(user.uuid());
   }
 
   public @NonNull Flight get(@NonNull User user) {
-    Flight flight = instances.computeIfAbsent(user.entity().getUniqueId(), u -> new Flight(user));
+    Flight flight = instances.computeIfAbsent(user.uuid(), u -> new Flight(user));
     flight.references++;
     return flight;
   }
 
   public void remove(@NonNull User user) {
-    Flight instance = instances.remove(user.entity().getUniqueId());
+    Flight instance = instances.remove(user.uuid());
     if (instance != null) {
       instance.revert();
     }

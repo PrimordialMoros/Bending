@@ -55,7 +55,7 @@ public final class SequenceManager {
     if (desc == null) {
       return;
     }
-    Deque<SequenceStep> buffer = cache.get(user.entity().getUniqueId(), u -> new ArrayDeque<>(16));
+    Deque<SequenceStep> buffer = cache.get(user.uuid(), u -> new ArrayDeque<>(16));
     if (buffer.size() >= 16) {
       buffer.removeFirst();
     }

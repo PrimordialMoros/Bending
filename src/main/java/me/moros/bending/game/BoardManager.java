@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,12 +32,11 @@ import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.World;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
@@ -57,80 +57,52 @@ public final class BoardManager {
     enabled = Bending.configManager().config().node("properties", "bending-board").getBoolean(true);
   }
 
-  /**
-   * Force toggle the scoreboard for when a player changes worlds (for example when teleporting to a world where bending is disabled)
-   * @param player the player to force toggle
-   */
-  public void forceToggleScoreboard(@NonNull Player player) {
-    if (Bending.game().isDisabledWorld(player.getWorld().getUID())) {
-      UUID uuid = player.getUniqueId();
-      if (scoreboardPlayers.containsKey(uuid)) {
-        scoreboardPlayers.get(uuid).disableScoreboard();
-        scoreboardPlayers.remove(uuid);
-      }
+  public boolean enabled(@NonNull World world) {
+    return enabled && !Bending.game().isDisabledWorld(world.getUID());
+  }
+
+  public Optional<Board> tryEnableBoard(@NonNull BendingPlayer player) {
+    if (player.board() && enabled(player.world())) {
+      return Optional.of(scoreboardPlayers.computeIfAbsent(player.uuid(), k -> new Board(player)));
     } else {
-      canUseScoreboard(player);
+      invalidate(player);
+      return Optional.empty();
     }
   }
 
-  public boolean toggleScoreboard(@NonNull Player player) {
-    if (!enabled || Bending.game().isDisabledWorld(player.getWorld().getUID())) {
-      return false;
-    }
-    UUID uuid = player.getUniqueId();
-    if (scoreboardPlayers.containsKey(uuid)) {
-      scoreboardPlayers.get(uuid).disableScoreboard();
-      scoreboardPlayers.remove(uuid);
-      return false;
-    } else {
-      return canUseScoreboard(player);
-    }
+  public void updateBoard(@NonNull BendingPlayer player) {
+    tryEnableBoard(player).ifPresent(Board::updateAll);
   }
 
-  /**
-   * Checks if a player can use the bending board and creates a BendingBoardInstance if possible.
-   * @param player the player to check
-   * @return true if player can use the bending board, false otherwise
-   */
-  public boolean canUseScoreboard(@NonNull Player player) {
-    if (!enabled || Bending.game().isDisabledWorld(player.getWorld().getUID())) {
-      return false;
-    }
-    UUID uuid = player.getUniqueId();
-    if (!scoreboardPlayers.containsKey(uuid)) {
-      scoreboardPlayers.put(uuid, new Board(player));
-    }
-    return true;
-  }
-
-  public void updateBoard(@NonNull Player player) {
-    if (canUseScoreboard(player)) {
-      scoreboardPlayers.get(player.getUniqueId()).updateAll();
-    }
-  }
-
-  public void updateBoardSlot(@NonNull Player player, @Nullable AbilityDescription desc, boolean cooldown) {
-    if (canUseScoreboard(player)) {
+  public void updateBoardSlot(@NonNull BendingPlayer player, @Nullable AbilityDescription desc, boolean cooldown) {
+    tryEnableBoard(player).ifPresent(b -> {
       if (desc != null && !desc.canBind()) {
-        scoreboardPlayers.get(player.getUniqueId()).updateMisc(desc, cooldown);
+        b.updateMisc(desc, cooldown);
       } else {
-        scoreboardPlayers.get(player.getUniqueId()).updateAll();
+        b.updateAll();
       }
-    }
+    });
   }
 
-  public void changeActiveSlot(@NonNull Player player, int oldSlot, int newSlot) {
-    if (canUseScoreboard(player)) {
-      scoreboardPlayers.get(player.getUniqueId()).activeSlot(++oldSlot, ++newSlot);
+  public void changeActiveSlot(@NonNull BendingPlayer player, int oldSlot, int newSlot) {
+    if (validSlot(oldSlot) && validSlot(newSlot)) {
+      tryEnableBoard(player).ifPresent(b -> b.activeSlot(oldSlot, newSlot));
     }
   }
 
   public void invalidate(@NonNull User user) {
-    scoreboardPlayers.remove(user.entity().getUniqueId());
+    Board board = scoreboardPlayers.remove(user.uuid());
+    if (board != null) {
+      board.disableScoreboard();
+    }
+  }
+
+  private boolean validSlot(int slot) {
+    return 1 <= slot && slot <= 9;
   }
 
   private static class Board {
-    private static final String SEP = "  ------------  ";
+    private static final String SEP = " -------------- ";
     private final Set<String> misc = ConcurrentHashMap.newKeySet(); // Used for combos and misc abilities
     private final BendingPlayer player;
 
@@ -138,39 +110,38 @@ public final class BoardManager {
     private final Objective bendingSlots;
     private int selectedSlot;
 
-    private Board(Player player) {
-      this.player = Registries.BENDERS.user(player);
-      selectedSlot = player.getInventory().getHeldItemSlot() + 1;
+    private Board(BendingPlayer player) {
+      this.player = player;
+      selectedSlot = player.inventory().getHeldItemSlot() + 1;
       bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
       bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
       bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
-      player.setScoreboard(bendingBoard);
-      updateAll();
+      player.entity().setScoreboard(bendingBoard);
+      for (int slot = 1; slot <= 9; slot++) { // init slots
+        updateSlot(slot);
+        getOrCreateTeam(slot).prefix(Component.text(slot == selectedSlot ? ">" : "  "));
+      }
     }
 
     private void disableScoreboard() {
       bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
+      bendingBoard.getTeams().forEach(Team::unregister);
       bendingSlots.unregister();
       player.entity().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
     private void updateSlot(int slot) {
-      if (slot < 1 || slot > 9 || !player.entity().getScoreboard().equals(bendingBoard)) {
-        return;
-      }
-      String prefix = slot == selectedSlot ? ">" : "  ";
       AbilityDescription desc = player.boundAbility(slot);
-      Component component;
+      Component suffix;
       if (desc == null) {
-        component = Message.BENDING_BOARD_EMPTY_SLOT.build(prefix, String.valueOf(slot));
+        suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(String.valueOf(slot));
       } else {
-        Component name = desc.displayName();
+        suffix = desc.displayName();
         if (player.onCooldown(desc)) {
-          name = name.decorate(TextDecoration.STRIKETHROUGH);
+          suffix = suffix.decorate(TextDecoration.STRIKETHROUGH);
         }
-        component = Component.text(prefix).append(name);
       }
-      getOrCreateTeam(slot).prefix(component);
+      getOrCreateTeam(slot).suffix(suffix);
     }
 
     private void updateAll() {
@@ -178,12 +149,15 @@ public final class BoardManager {
     }
 
     private void activeSlot(int oldSlot, int newSlot) {
+      if (!player.entity().getScoreboard().equals(bendingBoard)) {
+        return;
+      }
       if (selectedSlot != oldSlot) {
         oldSlot = selectedSlot; // Fixes bug when slot is set using setHeldItemSlot
       }
       selectedSlot = newSlot;
-      updateSlot(oldSlot);
-      updateSlot(newSlot);
+      getOrCreateTeam(oldSlot).prefix(Component.text("  "));
+      getOrCreateTeam(newSlot).prefix(Component.text(">"));
     }
 
     private void updateMisc(AbilityDescription desc, boolean show) {

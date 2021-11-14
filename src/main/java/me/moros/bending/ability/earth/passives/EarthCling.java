@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth.passives;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
-import me.moros.bending.ability.earth.EarthGlove;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -75,9 +74,9 @@ public class EarthCling extends AbilityInstance implements Ability {
     if (!user.selectedAbilityName().equals("EarthGlove")) {
       return UpdateResult.CONTINUE;
     }
-    long counter = Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count();
-    if (counter > 0 && EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
-      if (counter == 2) {
+    if (EntityMethods.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
+      //noinspection ConstantConditions
+      if (!user.onCooldown(user.selectedAbility())) {
         EntityMethods.applyVelocity(this, user.entity(), Vector3d.ZERO);
         user.entity().setFallDistance(0);
       } else {

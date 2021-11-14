@@ -330,14 +330,15 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-    game.boardManager().forceToggleScoreboard(event.getPlayer());
     BendingPlayer bendingPlayer = Registries.BENDERS.user(event.getPlayer());
+    game.boardManager().tryEnableBoard(bendingPlayer);
     game.abilityManager(event.getFrom()).destroyUserInstances(bendingPlayer);
     game.abilityManager(event.getPlayer().getWorld()).createPassives(bendingPlayer);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerSlotChange(PlayerItemHeldEvent event) {
-    game.boardManager().changeActiveSlot(event.getPlayer(), event.getPreviousSlot(), event.getNewSlot());
+    BendingPlayer bendingPlayer = Registries.BENDERS.user(event.getPlayer());
+    game.boardManager().changeActiveSlot(bendingPlayer, event.getPreviousSlot() + 1, event.getNewSlot() + 1);
   }
 }

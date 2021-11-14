@@ -96,7 +96,7 @@ public final class ActivationController {
   }
 
   public void onUserDeconstruct(@NonNull User user) {
-    TempArmor.MANAGER.get(user.entity().getUniqueId()).ifPresent(TempArmor::revert);
+    TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
     Bending.game().abilityManager(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
       Bending.game().storage().savePlayerAsync(bendingPlayer);
@@ -109,7 +109,7 @@ public final class ActivationController {
   }
 
   public void onUserSwing(@NonNull User user) {
-    if (cache.ignoreSwing.contains(user.entity().getUniqueId())) {
+    if (cache.ignoreSwing.contains(user.uuid())) {
       return;
     }
     AbilityManager manager = Bending.game().abilityManager(user.world());
@@ -252,7 +252,7 @@ public final class ActivationController {
   }
 
   public void ignoreNextSwing(@NonNull User user) {
-    cache.ignoreSwing.add(user.entity().getUniqueId());
+    cache.ignoreSwing.add(user.uuid());
   }
 
   // Optimize player move events by caching instances every tick
@@ -268,12 +268,12 @@ public final class ActivationController {
     }
 
     private @Nullable AirSpout getAirSpout(@NonNull User user) {
-      UUID uuid = user.entity().getUniqueId();
+      UUID uuid = user.uuid();
       return airSpoutCache.computeIfAbsent(uuid, u -> Bending.game().abilityManager(user.world()).firstInstance(user, AirSpout.class).orElse(null));
     }
 
     private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
-      UUID uuid = user.entity().getUniqueId();
+      UUID uuid = user.uuid();
       return waterSpoutCache.computeIfAbsent(uuid, u -> Bending.game().abilityManager(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
     }
 

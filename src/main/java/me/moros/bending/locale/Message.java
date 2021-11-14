@@ -146,7 +146,7 @@ public interface Message {
   Args0 BENDING_BOARD_TITLE = () -> translatable("bending.board.title", Style.style(TextDecoration.BOLD));
 
   // Scoreboard items not translatable yet?
-  Args2<String, String> BENDING_BOARD_EMPTY_SLOT = (prefix, slot) -> text(prefix).append(text("-- Slot " + slot + " --", DARK_GRAY));
+  Args1<String> BENDING_BOARD_EMPTY_SLOT = slot -> text("-- Slot " + slot + " --", DARK_GRAY);
 
   Args0 GUI_NO_PERMISSION = () -> translatable("bending.gui.no-permission", RED);
 

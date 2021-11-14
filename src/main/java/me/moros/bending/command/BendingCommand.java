@@ -148,17 +148,18 @@ public class BendingCommand extends BaseCommand {
   @CommandPermission("bending.command.board")
   @Description("Toggle bending board visibility")
   public static void onBoard(BendingPlayer player) {
-    if (Bending.game().isDisabledWorld(player.world().getUID())) {
+    if (!Bending.game().boardManager().enabled(player.world())) {
       Message.BOARD_DISABLED.send(player);
       return;
     }
-    if (Bending.game().boardManager().toggleScoreboard(player.entity())) {
+    if (!player.board()) {
       player.board(true);
       Message.BOARD_TOGGLED_ON.send(player);
     } else {
       player.board(false);
       Message.BOARD_TOGGLED_OFF.send(player);
     }
+    Bending.game().boardManager().tryEnableBoard(player);
   }
 
   @Subcommand("version|ver|v")

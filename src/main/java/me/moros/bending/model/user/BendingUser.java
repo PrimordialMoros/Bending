@@ -182,13 +182,13 @@ public class BendingUser implements User {
   }
 
   private void updateBoard(AbilityDescription desc, boolean cooldown) {
-    if (entity instanceof Player player) {
+    if (this instanceof BendingPlayer player) {
       Bending.game().boardManager().updateBoardSlot(player, desc, cooldown);
     }
   }
 
   private void updateBoard() {
-    if (entity instanceof Player player) {
+    if (this instanceof BendingPlayer player) {
       Bending.game().boardManager().updateBoard(player);
     }
   }

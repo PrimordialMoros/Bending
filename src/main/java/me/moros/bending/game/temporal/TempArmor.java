@@ -59,7 +59,7 @@ public class TempArmor implements Temporary {
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-    if (armor == null || MANAGER.isTemp(user.entity().getUniqueId()) || user.entity().getEquipment() == null) {
+    if (armor == null || MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
       return Optional.empty();
     }
     return Optional.of(new TempArmor(user.entity(), applyMetaToArmor(armor), duration));

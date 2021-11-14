@@ -93,7 +93,7 @@ public final class BenderRegistry implements Registry<User> {
   }
 
   public void invalidate(@NonNull User user) {
-    UUID uuid = user.entity().getUniqueId();
+    UUID uuid = user.uuid();
     players.remove(uuid);
     entities.remove(uuid);
     if (cache != null) {
@@ -103,14 +103,14 @@ public final class BenderRegistry implements Registry<User> {
   }
 
   public void register(@NonNull User user) {
-    UUID uuid = user.entity().getUniqueId();
+    UUID uuid = user.uuid();
     if (contains(uuid)) {
       return;
     }
     Bending.game().abilityManager(user.world()).createPassives(user);
     if (user instanceof BendingPlayer bendingPlayer) {
       players.put(uuid, bendingPlayer);
-      Bending.game().boardManager().canUseScoreboard(bendingPlayer.entity());
+      Bending.game().boardManager().tryEnableBoard(bendingPlayer);
       Bending.eventBus().postPlayerLoadEvent(bendingPlayer);
     } else if (user instanceof BendingUser bendingUser) {
       entities.put(uuid, bendingUser);

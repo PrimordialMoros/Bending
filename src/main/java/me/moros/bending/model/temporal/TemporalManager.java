@@ -35,10 +35,7 @@ public class TemporalManager<K, V extends Temporary> {
   }
 
   public boolean isTemp(@Nullable K key) {
-    if (key == null) {
-      return false;
-    }
-    return instances.containsKey(key);
+    return key != null && instances.containsKey(key);
   }
 
   public Optional<V> get(@NonNull K key) {

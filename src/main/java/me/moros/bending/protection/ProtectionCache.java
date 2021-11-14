@@ -50,7 +50,7 @@ public enum ProtectionCache {
    * @param user the user for which the cache will be invalidated
    */
   public void invalidate(@NonNull User user) {
-    cache.remove(user.entity().getUniqueId());
+    cache.remove(user.uuid());
   }
 
   /**
@@ -63,7 +63,7 @@ public enum ProtectionCache {
    * @see #canBuildPostCache(User, Block)
    */
   public boolean canBuild(@NonNull User user, @NonNull Block block) {
-    UUID uuid = user.entity().getUniqueId();
+    UUID uuid = user.uuid();
     return cache.computeIfAbsent(uuid, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
   }
 

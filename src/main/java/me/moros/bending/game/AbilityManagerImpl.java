@@ -53,7 +53,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void addAbility(@NonNull User user, @NonNull Ability instance) {
-    addQueue.add(Map.entry(user.entity().getUniqueId(), instance));
+    addQueue.add(Map.entry(user.uuid(), instance));
   }
 
   @Override
@@ -61,10 +61,10 @@ public class AbilityManagerImpl implements AbilityManager {
     if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
       return;
     }
-    if (globalInstances.remove(ability.user().entity().getUniqueId(), ability)) {
+    if (globalInstances.remove(ability.user().uuid(), ability)) {
       ability.onUserChange(user);
       ability.loadConfig();
-      globalInstances.put(user.entity().getUniqueId(), ability);
+      globalInstances.put(user.uuid(), ability);
     }
   }
 
@@ -95,7 +95,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyInstance(@NonNull Ability ability) {
-    if (globalInstances.remove(ability.user().entity().getUniqueId(), ability)) {
+    if (globalInstances.remove(ability.user().uuid(), ability)) {
       ability.onDestroy();
     }
   }
@@ -103,7 +103,7 @@ public class AbilityManagerImpl implements AbilityManager {
   @Override
   public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
     boolean destroyed = false;
-    Iterator<Ability> iterator = globalInstances.get(user.entity().getUniqueId()).iterator();
+    Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
     while (iterator.hasNext()) {
       Ability ability = iterator.next();
       if (type.isInstance(ability)) {
@@ -117,7 +117,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public @NonNull Stream<Ability> userInstances(@NonNull User user) {
-    return globalInstances.get(user.entity().getUniqueId()).stream();
+    return globalInstances.get(user.uuid()).stream();
   }
 
   @Override
@@ -142,7 +142,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyUserInstances(@NonNull User user) {
-    globalInstances.removeAll(user.entity().getUniqueId()).forEach(Ability::onDestroy);
+    globalInstances.removeAll(user.uuid()).forEach(Ability::onDestroy);
   }
 
   @Override

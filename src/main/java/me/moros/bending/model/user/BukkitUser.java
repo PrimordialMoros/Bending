@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.user;
 
+import java.util.UUID;
+
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.RayTrace;
@@ -26,6 +28,7 @@ import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.methods.EntityMethods;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.identity.Identity;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -37,8 +40,12 @@ import org.bukkit.inventory.MainHand;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface BukkitUser extends ForwardingAudience.Single {
+public interface BukkitUser extends ForwardingAudience.Single, Identity {
   @NonNull LivingEntity entity();
+
+  default @NonNull UUID uuid() {
+    return entity().getUniqueId();
+  }
 
   default @NonNull Block headBlock() {
     return entity().getEyeLocation().getBlock();
