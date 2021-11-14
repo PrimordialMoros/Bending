@@ -28,11 +28,11 @@ import io.papermc.paper.text.PaperComponents;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,30 +46,30 @@ public final class PlaceholderProvider {
   }
 
   private void setup(PlaceholderBuilder builder) {
-    builder.addStatic("elements", (player, user) -> user.elements().stream().map(Element::displayName)
+    builder.addStatic("elements", player -> player.elements().stream().map(Element::displayName)
       .map(this::toLegacy).collect(Collectors.joining(", ")));
-    builder.addStatic("element", (player, user) -> findElement(user));
-    builder.addStatic("element_color", (player, user) ->
-      user.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
+    builder.addStatic("element", this::findElement);
+    builder.addStatic("element_color", (player) ->
+      player.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
     );
-    builder.addStatic("selected_ability", (player, user) -> {
-      AbilityDescription desc = user.selectedAbility();
+    builder.addStatic("selected_ability", (player) -> {
+      AbilityDescription desc = player.selectedAbility();
       return desc == null ? "" : toLegacy(desc.displayName());
     });
-    builder.addDynamic("has_element", (player, user, elementName) ->
-      formatBoolean(Element.fromName(elementName).map(user::hasElement).orElse(false))
+    builder.addDynamic("has_element", (player, elementName) ->
+      formatBoolean(Element.fromName(elementName).map(player::hasElement).orElse(false))
     );
-    builder.addDynamic("can_bend", (player, user, abilityName) -> {
+    builder.addDynamic("can_bend", (player, abilityName) -> {
       AbilityDescription desc = Registries.ABILITIES.ability(abilityName);
-      boolean result = (desc != null && user.canBend(desc));
+      boolean result = (desc != null && player.canBend(desc));
       return formatBoolean(result);
     });
   }
 
-  private String findElement(User user) {
+  private @NonNull String findElement(User user) {
     Collection<Element> userElements = user.elements();
     if (userElements.isEmpty()) {
-      return "NonBender";
+      return org.bukkit.ChatColor.RESET + "NonBender";
     } else if (userElements.size() > 1) {
       return org.bukkit.ChatColor.DARK_PURPLE + "Avatar";
     } else {
@@ -85,15 +85,14 @@ public final class PlaceholderProvider {
     return PaperComponents.legacySectionSerializer().serialize(component);
   }
 
-  public @Nullable String onPlaceholderRequest(@NonNull Player player, @NonNull String placeholder) {
-    User user = Registries.BENDERS.user(player);
+  public @Nullable String onPlaceholderRequest(@NonNull BendingPlayer player, @NonNull String placeholder) {
     for (var entry : placeholders.entrySet()) {
       String id = entry.getKey();
       Placeholder p = entry.getValue();
       if (p instanceof DynamicPlaceholder dp && placeholder.startsWith(id) && placeholder.length() > id.length()) {
-        return dp.handle(player, user, placeholder.substring(id.length()));
+        return dp.handle(player, placeholder.substring(id.length()));
       } else if (p instanceof StaticPlaceholder sp && placeholder.equals(id)) {
-        return sp.handle(player, user);
+        return sp.handle(player);
       }
     }
     return null;
@@ -120,11 +119,11 @@ public final class PlaceholderProvider {
 
   @FunctionalInterface
   private interface StaticPlaceholder extends Placeholder {
-    @NonNull String handle(Player player, User user);
+    @NonNull String handle(User user);
   }
 
   @FunctionalInterface
   private interface DynamicPlaceholder extends Placeholder {
-    @NonNull String handle(Player player, User user, String argument);
+    @NonNull String handle(User user, String argument);
   }
 }

@@ -21,6 +21,7 @@ package me.moros.bending.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
+import me.moros.bending.registry.Registries;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,9 +54,9 @@ public class BendingExpansion extends PlaceholderExpansion {
 
   @Override
   public String onPlaceholderRequest(Player player, @NotNull String params) {
-    if (player == null || !player.isOnline()) {
+    if (player == null || !Registries.BENDERS.contains(player.getUniqueId())) {
       return "";
     }
-    return provider.onPlaceholderRequest(player, params);
+    return provider.onPlaceholderRequest(Registries.BENDERS.user(player), params);
   }
 }
