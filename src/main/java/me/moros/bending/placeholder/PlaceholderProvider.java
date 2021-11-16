@@ -49,10 +49,10 @@ public final class PlaceholderProvider {
     builder.addStatic("elements", player -> player.elements().stream().map(Element::displayName)
       .map(this::toLegacy).collect(Collectors.joining(", ")));
     builder.addStatic("element", this::findElement);
-    builder.addStatic("element_color", (player) ->
+    builder.addStatic("element_color", player ->
       player.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
     );
-    builder.addStatic("selected_ability", (player) -> {
+    builder.addStatic("selected_ability", player -> {
       AbilityDescription desc = player.selectedAbility();
       return desc == null ? "" : toLegacy(desc.displayName());
     });

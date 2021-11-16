@@ -26,6 +26,7 @@ import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
 import me.moros.bending.game.Game;
+import me.moros.bending.hook.LuckPermsHook;
 import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.UserListener;
@@ -88,6 +89,7 @@ public class Bending extends JavaPlugin {
     if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       new BendingExpansion().register();
     }
+    new LuckPermsHook(this);
   }
 
   @Override

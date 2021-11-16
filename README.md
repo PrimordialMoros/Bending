@@ -32,3 +32,7 @@ Open a terminal and run `./gradlew build`.
 See [Contributing](CONTRIBUTING.md).
 
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcome and appreciated.
+
+### Special thanks to
+
+[JProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) for their great Java profiler

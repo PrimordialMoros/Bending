@@ -20,6 +20,8 @@
 package me.moros.bending.model;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -51,6 +53,10 @@ public enum Element {
     return elementName;
   }
 
+  private String key() {
+    return "bending.element." + elementName.toLowerCase(Locale.ROOT);
+  }
+
   public @NonNull Component displayName() {
     return Component.translatable(key(), color);
   }
@@ -70,7 +76,7 @@ public enum Element {
     return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
   }
 
-  private String key() {
-    return "bending.element." + elementName.toLowerCase(Locale.ROOT);
+  public static @NonNull Collection<@NonNull String> names() {
+    return List.of("Air", "Water", "Earth", "Fire");
   }
 }

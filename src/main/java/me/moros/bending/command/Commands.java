@@ -94,7 +94,7 @@ public class Commands {
       return player == null ? List.of() : Registries.BENDERS.user(player).presets().stream().map(Preset::name).toList();
     });
 
-    commandCompletions.registerStaticCompletion("elements", List.of("Air", "Water", "Earth", "Fire"));
+    commandCompletions.registerStaticCompletion("elements", Element.names());
   }
 
   private void registerCommandContexts() {
