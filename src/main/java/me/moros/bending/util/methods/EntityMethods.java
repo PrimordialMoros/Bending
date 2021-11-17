@@ -120,7 +120,7 @@ public final class EntityMethods {
       }
       AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(check)) : AABBUtils.blockBounds(check);
       if (checkBounds.intersects(entityBounds)) {
-        return Math.max(minHeight, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
+        return Math.abs(Math.max(minHeight, entity.getBoundingBox().getMinY() - checkBounds.max.getY()));
       }
     }
     return maxHeight;
