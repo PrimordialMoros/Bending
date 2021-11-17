@@ -110,16 +110,17 @@ public final class EntityMethods {
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
     int maxHeight = entity.getWorld().getMaxHeight();
+    int minHeight = entity.getWorld().getMinHeight();
     AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3d(0, maxHeight, 0));
     Block origin = entity.getLocation().getBlock();
     for (int i = 0; i < maxHeight; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
-      if (check.getY() <= 0) {
+      if (check.getY() <= minHeight) {
         break;
       }
       AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(check)) : AABBUtils.blockBounds(check);
       if (checkBounds.intersects(entityBounds)) {
-        return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
+        return Math.max(minHeight, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
       }
     }
     return maxHeight;
