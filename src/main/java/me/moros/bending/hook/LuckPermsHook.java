@@ -33,6 +33,7 @@ public final class LuckPermsHook {
     RegisteredServiceProvider<LuckPerms> provider = plugin.getServer().getServicesManager().getRegistration(LuckPerms.class);
     if (provider != null) {
       setupContexts(provider.getProvider().getContextManager());
+      Bending.logger().info("Successfully registered LuckPerms contexts!");
     }
   }
 

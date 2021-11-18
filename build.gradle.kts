@@ -36,12 +36,12 @@ dependencies {
     implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
     paperDevBundle("1.17.1-R0.1-SNAPSHOT")
-    compileOnly("com.github.TechFortress", "GriefPrevention", "16.7.1") {
-        exclude(module = "worldguard")
-    }
-    compileOnly("com.github.TownyAdvanced", "Towny", "0.96.7.0")
+    compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
+    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.2.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
-    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0")
+    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0") {
+        exclude(module = "bukkit")
+    }
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("net.luckperms", "api", "5.3")
     compileOnly("org.checkerframework", "checker-qual", "3.18.1")
