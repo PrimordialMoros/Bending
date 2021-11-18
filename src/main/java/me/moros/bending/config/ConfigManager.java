@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
@@ -103,7 +102,7 @@ public final class ConfigManager {
     User user = ability.user();
     AbilityDescription desc = ability.description();
     Collection<AttributeModifier> activeModifiers = Registries.ATTRIBUTES.attributes(user)
-      .filter(modifier -> modifier.policy().shouldModify(desc)).collect(Collectors.toList());
+      .filter(modifier -> modifier.policy().shouldModify(desc)).toList();
 
     if (activeModifiers.isEmpty()) {
       return config;

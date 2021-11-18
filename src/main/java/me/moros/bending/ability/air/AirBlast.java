@@ -22,7 +22,6 @@ package me.moros.bending.ability.air;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -84,7 +83,7 @@ public class AirBlast extends AbilityInstance {
       .add(Policies.IN_LIQUID)
       .build();
 
-    for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).collect(Collectors.toList())) {
+    for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).toList()) {
       if (!blast.launched) {
         if (method == Activation.SNEAK_RELEASE) {
           if (!blast.selectOrigin()) {

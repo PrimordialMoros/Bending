@@ -138,11 +138,8 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public Optional<Preset> presetByName(@Nullable String name) {
-    if (name == null) {
-      return Optional.empty();
-    }
-    return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny();
+  public @Nullable Preset presetByName(@NonNull String name) {
+    return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny().orElse(null);
   }
 
   @Override

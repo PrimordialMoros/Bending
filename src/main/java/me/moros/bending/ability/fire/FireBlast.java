@@ -22,7 +22,6 @@ package me.moros.bending.ability.fire;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -98,7 +97,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     removalPolicy = Policies.builder().add(Policies.IN_LIQUID).build();
 
-    for (FireBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, FireBlast.class).collect(Collectors.toList())) {
+    for (FireBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, FireBlast.class).toList()) {
       if (blast.charging) {
         blast.launch();
         return false;

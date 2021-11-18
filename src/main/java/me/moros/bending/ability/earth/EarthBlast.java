@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -77,7 +76,7 @@ public class EarthBlast extends AbilityInstance {
       return false;
     } else if (method == Activation.ATTACK) {
       Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
-        .collect(Collectors.toList());
+        .toList();
       for (EarthBlast eblast : eblasts) {
         if (eblast.blast == null) {
           eblast.launch();
@@ -99,7 +98,7 @@ public class EarthBlast extends AbilityInstance {
     BlockData fakeData = MaterialUtil.focusedType(source.getBlockData());
 
     Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
-      .filter(eb -> eb.blast == null).collect(Collectors.toList());
+      .filter(eb -> eb.blast == null).toList();
     for (EarthBlast eblast : eblasts) {
       State state = eblast.states.current();
       if (state instanceof SelectedSource selectedSource) {
@@ -155,7 +154,7 @@ public class EarthBlast extends AbilityInstance {
 
   private static boolean tryDestroy(User user) {
     Collection<EarthBlast> blasts = Bending.game().abilityManager(user.world()).instances(EarthBlast.class)
-      .filter(eb -> eb.blast != null && !user.equals(eb.user)).collect(Collectors.toList());
+      .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
     for (EarthBlast eb : blasts) {
       Vector3d center = eb.blast.center();
       double dist = center.distanceSq(user.eyeLocation());

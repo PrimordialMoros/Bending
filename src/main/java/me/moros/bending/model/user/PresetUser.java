@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,6 +26,7 @@ import me.moros.bending.events.PresetCreateEvent;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface PresetUser {
   /**
@@ -39,7 +39,7 @@ public interface PresetUser {
    * @param name the preset name to check
    * @return true the user has the specified preset, false otherwise
    */
-  Optional<Preset> presetByName(@NonNull String name);
+  @Nullable Preset presetByName(@NonNull String name);
 
   /**
    * Attempt to add and store the specified preset to the user. Calls a {@link PresetCreateEvent}.

@@ -22,7 +22,6 @@ package me.moros.bending.game;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.Ability;
@@ -42,8 +41,7 @@ public final class CollisionManager {
   }
 
   public void update() {
-    Collection<Ability> instances = manager.instances().filter(ability -> !ability.colliders().isEmpty())
-      .collect(Collectors.toList());
+    Collection<Ability> instances = manager.instances().filter(ability -> !ability.colliders().isEmpty()).toList();
     if (instances.size() < 2) {
       return;
     }
@@ -51,10 +49,10 @@ public final class CollisionManager {
     Map<AbilityDescription, Collection<Ability>> abilityCache = new HashMap<>(32);
     for (RegisteredCollision registeredCollision : Registries.COLLISIONS) {
       Collection<Ability> firstAbilities = abilityCache.computeIfAbsent(registeredCollision.first(), desc ->
-        instances.stream().filter(ability -> ability.description().equals(desc)).collect(Collectors.toList())
+        instances.stream().filter(ability -> ability.description().equals(desc)).toList()
       );
       Collection<Ability> secondAbilities = abilityCache.computeIfAbsent(registeredCollision.second(), desc ->
-        instances.stream().filter(ability -> ability.description().equals(desc)).collect(Collectors.toList())
+        instances.stream().filter(ability -> ability.description().equals(desc)).toList()
       );
       for (Ability first : firstAbilities) {
         Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::colliders);

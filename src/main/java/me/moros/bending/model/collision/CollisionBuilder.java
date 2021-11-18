@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.registry.Registries;
@@ -91,7 +90,7 @@ public class CollisionBuilder {
   }
 
   private List<AbilityDescription> mapAbilities(Collection<String> abilities) {
-    return abilities.stream().map(Registries.ABILITIES::ability).filter(Objects::nonNull).collect(Collectors.toList());
+    return abilities.stream().map(Registries.ABILITIES::ability).filter(Objects::nonNull).toList();
   }
 
   private static Collection<RegisteredCollision> registerSelfCancellingCollisions(List<AbilityDescription> layer) {

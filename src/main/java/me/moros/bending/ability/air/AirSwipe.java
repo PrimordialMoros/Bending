@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -87,7 +86,7 @@ public class AirSwipe extends AbilityInstance {
       return false;
     }
 
-    for (AirSwipe swipe : Bending.game().abilityManager(user.world()).userInstances(user, AirSwipe.class).collect(Collectors.toList())) {
+    for (AirSwipe swipe : Bending.game().abilityManager(user.world()).userInstances(user, AirSwipe.class).toList()) {
       if (swipe.charging) {
         swipe.launch();
         return false;
@@ -168,7 +167,7 @@ public class AirSwipe extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
+    return streams.stream().map(ParticleStream::collider).toList();
   }
 
   @Override

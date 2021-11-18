@@ -19,59 +19,107 @@
 
 package me.moros.bending.command;
 
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import co.aikar.commands.BukkitCommandCompletionContext;
-import co.aikar.commands.BukkitCommandExecutionContext;
-import co.aikar.commands.CommandCompletions;
-import co.aikar.commands.CommandContexts;
-import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.PaperCommandManager;
+import cloud.commandframework.CommandTree;
+import cloud.commandframework.arguments.parser.ParserRegistry;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
+import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
+import cloud.commandframework.minecraft.extras.MinecraftHelp;
+import cloud.commandframework.paper.PaperCommandManager;
+import io.leangen.geantyref.TypeToken;
 import me.moros.bending.Bending;
-import me.moros.bending.model.Element;
+import me.moros.bending.command.parser.AbilityDescriptionParser;
+import me.moros.bending.command.parser.AttributeModifierParser;
+import me.moros.bending.command.parser.ModifyPolicyParser;
+import me.moros.bending.command.parser.PresetParser;
+import me.moros.bending.command.parser.UserParser;
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.attribute.ModifierOperation;
+import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Commands {
-  private final PaperCommandManager commandManager;
+  private final PaperCommandManager<CommandSender> manager;
+  private final MinecraftHelp<CommandSender> minecraftHelp;
 
-  public Commands(@NonNull Bending plugin) {
-    commandManager = new PaperCommandManager(plugin);
-    commandManager.enableUnstableAPI("help");
+  public Commands(@NonNull Bending plugin) throws Exception {
+    Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
+      CommandExecutionCoordinator.simpleCoordinator();
+    manager = new PaperCommandManager<>(plugin, executionCoordinatorFunction, Function.identity(), Function.identity());
+    minecraftHelp = new MinecraftHelp<>("/bending help", c -> c, manager);
+    manager.registerAsynchronousCompletions();
+    new MinecraftExceptionHandler<CommandSender>()
+      .withInvalidSyntaxHandler()
+      .withInvalidSenderHandler()
+      .withNoPermissionHandler()
+      .withArgumentParsingHandler()
+      .withCommandExecutionHandler()
+      .withDecorator(Message::brand)
+      .apply(manager, c -> c);
 
-    registerCommandContexts();
-    registerCommandCompletions();
-    registerCommandConditions();
-    commandManager.getCommandReplacements().addReplacement("bendingcommand", "bending|bend|b|avatar|atla|tla");
-    commandManager.getCommandReplacements().addReplacement("elementcommand", "elements|element|elem|ele");
-    commandManager.getCommandReplacements().addReplacement("presetcommand", "presets|preset|pr|p");
-    commandManager.getCommandReplacements().addReplacement("modifycommand", "bmodify|bmod|bm|modify|mod");
+    manager.setCommandSuggestionProcessor(this::suggestionProvider);
 
-    commandManager.registerCommand(new BendingCommand());
-    commandManager.registerCommand(new ElementCommand());
-    commandManager.registerCommand(new PresetCommand());
-    commandManager.registerCommand(new ModifyCommand());
+    constructCommands();
   }
 
-  private Collection<String> abilityCompletions(Player player, boolean validOnly) {
+  private List<String> suggestionProvider(CommandPreprocessingContext<CommandSender> context, List<String> strings) {
+    String input;
+    if (context.getInputQueue().isEmpty()) {
+      input = "";
+    } else {
+      input = context.getInputQueue().peek().toLowerCase(Locale.ROOT);
+    }
+    List<String> suggestions = new LinkedList<>();
+    for (String suggestion : strings) {
+      if (suggestion.toLowerCase(Locale.ROOT).startsWith(input)) {
+        suggestions.add(suggestion);
+      }
+    }
+    return suggestions;
+  }
+
+  private void constructCommands() {
+    manager.registerCommandPreProcessor(c -> {
+      if (c.getCommandContext().getSender() instanceof Player player) {
+        c.getCommandContext().store(ContextKeys.BENDING_PLAYER, Registries.BENDERS.user(player));
+      }
+    });
+
+    ParserRegistry<CommandSender> parserRegistry = manager.getParserRegistry();
+    parserRegistry.registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser());
+    parserRegistry.registerParserSupplier(TypeToken.get(AttributeModifier.class), options -> new AttributeModifierParser());
+    parserRegistry.registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
+    parserRegistry.registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
+    parserRegistry.registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
+
+    new BendingCommand(manager, minecraftHelp);
+    new ElementCommand(manager);
+    new PresetCommand(manager);
+    new ModifyCommand(manager);
+  }
+
+  public static @NonNull List<@NonNull String> abilityCompletions(@Nullable CommandSender sender, boolean validOnly) {
     Predicate<AbilityDescription> predicate = x -> true;
     if (validOnly) {
       predicate = AbilityDescription::canBind;
     }
     Predicate<AbilityDescription> hasPermission = x -> true;
     Predicate<AbilityDescription> hasElement = x -> true;
-    if (player != null) {
+    if (sender instanceof Player player) {
       BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
       hasPermission = bendingPlayer::hasPermission;
       if (validOnly) {
@@ -79,98 +127,6 @@ public class Commands {
       }
     }
     return Registries.ABILITIES.stream().filter(desc -> !desc.hidden()).filter(predicate)
-      .filter(hasElement).filter(hasPermission).map(AbilityDescription::name).collect(Collectors.toList());
-  }
-
-  private void registerCommandCompletions() {
-    CommandCompletions<BukkitCommandCompletionContext> commandCompletions = commandManager.getCommandCompletions();
-
-    commandCompletions.registerAsyncCompletion("abilities", c -> abilityCompletions(c.getPlayer(), true));
-
-    commandCompletions.registerAsyncCompletion("allabilities", c -> abilityCompletions(c.getPlayer(), false));
-
-    commandCompletions.registerAsyncCompletion("presets", c -> {
-      Player player = c.getPlayer();
-      return player == null ? List.of() : Registries.BENDERS.user(player).presets().stream().map(Preset::name).toList();
-    });
-
-    commandCompletions.registerStaticCompletion("elements", Element.names());
-  }
-
-  private void registerCommandContexts() {
-    CommandContexts<BukkitCommandExecutionContext> commandContexts = commandManager.getCommandContexts();
-
-    commandContexts.registerIssuerOnlyContext(BendingPlayer.class, c -> {
-      Player player = c.getPlayer();
-      if (player == null) {
-        throw new UserException();
-      }
-      return Registries.BENDERS.user(player);
-    });
-
-    commandContexts.registerContext(Element.class, c -> {
-      String name = c.popFirstArg();
-      return Element.fromName(name)
-        .orElseThrow(() -> new InvalidCommandArgument("Could not find element " + name));
-    });
-
-    commandContexts.registerIssuerAwareContext(AbilityDescription.class, c -> {
-      Player player = c.getPlayer();
-      Predicate<AbilityDescription> permissionPredicate = player == null ? x -> true : d -> player.hasPermission(d.permission());
-      String name = c.popFirstArg();
-      AbilityDescription check = Registries.ABILITIES.ability(name);
-      if (check == null || check.hidden() || !permissionPredicate.test(check)) {
-        throw new InvalidCommandArgument("Could not find ability " + name);
-      }
-      return check;
-    });
-
-    commandContexts.registerIssuerAwareContext(Preset.class, c -> {
-      Player player = c.getPlayer();
-      if (player == null) {
-        throw new UserException();
-      }
-      String name = c.popFirstArg();
-      return Registries.BENDERS.user(player).presetByName(name)
-        .orElseThrow(() -> new InvalidCommandArgument("Could not find preset " + name));
-    });
-
-    commandContexts.registerContext(ModifyPolicy.class, c -> {
-      String name = c.popFirstArg();
-      Optional<Element> element = Element.fromName(name);
-      if (element.isPresent()) {
-        return ModifyPolicy.of(element.get());
-      }
-      AbilityDescription desc = Registries.ABILITIES.ability(name);
-      if (desc == null) {
-        throw new InvalidCommandArgument("Invalid policy. Policy must be an element or ability name");
-      }
-      return ModifyPolicy.of(desc);
-    });
-
-    commandContexts.registerContext(ModifierOperation.class, c -> {
-      String name = c.popFirstArg().toLowerCase(Locale.ROOT);
-      if (name.startsWith("m")) {
-        return ModifierOperation.MULTIPLICATIVE;
-      }
-      return ModifierOperation.ADDITIVE;
-    });
-  }
-
-  private void registerCommandConditions() {
-    commandManager.getCommandConditions().addCondition(Integer.class, "slot", (c, exec, value) -> {
-      if (value == null) {
-        return;
-      }
-      if (value < 0 || value > 9) { // 0 is reserved for current slot
-        throw new InvalidCommandArgument("Invalid slot number " + value + " . Slots must be in the 1-9 range!");
-      }
-    });
-  }
-
-  static class UserException extends InvalidCommandArgument {
-    UserException() {
-      super("You must be a player!");
-    }
+      .filter(hasElement).filter(hasPermission).map(AbilityDescription::name).toList();
   }
 }

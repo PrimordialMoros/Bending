@@ -36,6 +36,7 @@ import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args0;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
@@ -43,7 +44,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -110,7 +110,7 @@ public final class ElementMenu implements BendingMenu {
     Player player = meta.player.entity();
     Element element = meta.element;
     ActionType type = mapType(event.getClick());
-    if (type != null && type.executeCommand(player, element)) {
+    if (type != null && type.executeCommand(meta.player, element)) {
       if (type.keepOpen()) {
         handleItemStackGlow(meta.player(), element, meta.itemStack);
         meta.gui.update();
@@ -208,10 +208,10 @@ public final class ElementMenu implements BendingMenu {
 
     private final Args0 message;
     private final String permission;
-    private final BiConsumer<CommandSender, Element> commandConsumer;
+    private final BiConsumer<User, Element> commandConsumer;
     private final boolean keepOpen;
 
-    ActionType(Args0 message, String permission, BiConsumer<CommandSender, Element> commandConsumer, boolean keepOpen) {
+    ActionType(Args0 message, String permission, BiConsumer<User, Element> commandConsumer, boolean keepOpen) {
       this.message = message;
       this.permission = permission;
       this.commandConsumer = commandConsumer;
@@ -222,12 +222,12 @@ public final class ElementMenu implements BendingMenu {
       return keepOpen;
     }
 
-    private boolean executeCommand(CommandSender sender, Element element) {
-      if (!sender.hasPermission(permission)) {
-        Message.GUI_NO_PERMISSION.send(sender);
+    private boolean executeCommand(User user, Element element) {
+      if (!user.hasPermission(permission)) {
+        Message.GUI_NO_PERMISSION.send(user);
         return false;
       }
-      commandConsumer.accept(sender, element);
+      commandConsumer.accept(user, element);
       return true;
     }
   }

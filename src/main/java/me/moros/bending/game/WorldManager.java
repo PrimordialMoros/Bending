@@ -27,7 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import co.aikar.commands.lib.timings.MCTiming;
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
 import me.moros.bending.model.AbilityManager;
@@ -66,7 +67,7 @@ public final class WorldManager {
 
   public void update() {
     for (Map.Entry<World, ManagerPair> entry : worlds.entrySet()) {
-      MCTiming timing = Bending.timingManager().ofStart(entry.getKey().getName() + " - tick");
+      Timing timing = Timings.ofStart(Bending.plugin(), entry.getKey().getName() + " - tick");
       entry.getValue().update();
       timing.stopTiming();
     }

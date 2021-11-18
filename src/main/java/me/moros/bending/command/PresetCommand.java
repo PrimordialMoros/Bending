@@ -21,15 +21,10 @@ package me.moros.bending.command;
 
 import java.util.Collection;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Subcommand;
+import cloud.commandframework.Command.Builder;
+import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.paper.PaperCommandManager;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
@@ -38,14 +33,40 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-@CommandAlias("%presetcommand")
-@CommandPermission("bending.command.preset")
-public class PresetCommand extends BaseCommand {
-  @Default
-  @Subcommand("list|ls|l")
-  @Description("List all available presets")
-  public static void onPresetList(BendingPlayer player) {
+public final class PresetCommand {
+  PresetCommand(PaperCommandManager<CommandSender> manager) {
+    Builder<CommandSender> builder = manager.commandBuilder("preset", "presets", "pr", "p")
+      .meta(CommandMeta.DESCRIPTION, "Base command for bending presets")
+      .permission("bending.command.preset");
+    manager.command(
+      builder.literal("list", "ls", "l")
+        .meta(CommandMeta.DESCRIPTION, "List all available presets")
+        .senderType(Player.class)
+        .handler(c -> onList(c.get(ContextKeys.BENDING_PLAYER)))
+    ).command(
+      builder.literal("create", "c")
+        .meta(CommandMeta.DESCRIPTION, "Create a new preset")
+        .senderType(Player.class)
+        .argument(StringArgument.single("name"))
+        .handler(c -> onCreate(c.get(ContextKeys.BENDING_PLAYER), c.get("name")))
+    ).command(
+      builder.literal("remove", "rm", "r", "delete", "del", "d")
+        .meta(CommandMeta.DESCRIPTION, "Remove an existing preset")
+        .senderType(Player.class)
+        .argument(manager.argumentBuilder(Preset.class, "preset"))
+        .handler(c -> onRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
+    ).command(
+      builder.literal("bind", "b")
+        .meta(CommandMeta.DESCRIPTION, "Bind an existing preset")
+        .senderType(Player.class)
+        .argument(manager.argumentBuilder(Preset.class, "preset"))
+        .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
+    );
+  }
+
+  private static void onList(BendingPlayer player) {
     Collection<Preset> presets = player.presets();
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(player);
@@ -55,16 +76,7 @@ public class PresetCommand extends BaseCommand {
     }
   }
 
-  @HelpCommand
-  @CommandPermission("bending.command.help")
-  public static void doHelp(CommandSender user, CommandHelp help) {
-    Message.HELP_HEADER.send(user);
-    help.showHelp();
-  }
-
-  @Subcommand("create|c")
-  @Description("Create a new preset")
-  public static void onPresetCreate(BendingPlayer player, String name) {
+  private static void onCreate(BendingPlayer player, String name) {
     String input = ChatUtil.sanitizeInput(name);
     if (input.isEmpty()) {
       Message.INVALID_PRESET_NAME.send(player);
@@ -78,10 +90,7 @@ public class PresetCommand extends BaseCommand {
     player.addPreset(preset).thenAccept(result -> result.message().send(player, input));
   }
 
-  @Subcommand("remove|rm|r|delete|del|d")
-  @CommandCompletion("@presets")
-  @Description("Remove an existing preset")
-  public static void onPresetRemove(BendingPlayer player, Preset preset) {
+  private static void onRemove(BendingPlayer player, Preset preset) {
     if (player.removePreset(preset)) {
       Message.PRESET_REMOVE_SUCCESS.send(player, preset.name());
     } else {
@@ -89,10 +98,7 @@ public class PresetCommand extends BaseCommand {
     }
   }
 
-  @Subcommand("bind|b")
-  @CommandCompletion("@presets")
-  @Description("Bind an existing preset")
-  public static void onPresetBind(BendingPlayer player, Preset preset) {
+  private static void onBind(BendingPlayer player, Preset preset) {
     if (player.bindPreset(preset)) {
       Message.PRESET_BIND_SUCCESS.send(player, preset.name());
     } else {

@@ -21,31 +21,24 @@ package me.moros.bending.command;
 
 import java.util.Collection;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Conditions;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
+import cloud.commandframework.Command.Builder;
+import cloud.commandframework.arguments.standard.EnumArgument;
+import cloud.commandframework.arguments.standard.IntegerArgument;
+import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.minecraft.extras.MinecraftHelp;
+import cloud.commandframework.paper.PaperCommandManager;
 import me.moros.bending.Bending;
-import me.moros.bending.command.Commands.UserException;
+import me.moros.bending.command.parser.AbilityDescriptionParser;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -54,100 +47,105 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandAlias("%bendingcommand")
-public class BendingCommand extends BaseCommand {
-  @HelpCommand
-  @CommandPermission("bending.command.help")
-  public static void doHelp(CommandSender user, CommandHelp help) {
-    Message.HELP_HEADER.send(user);
-    help.showHelp();
+public final class BendingCommand {
+  BendingCommand(PaperCommandManager<CommandSender> manager, MinecraftHelp<CommandSender> help) {
+    Builder<CommandSender> builder = manager.commandBuilder("bending", "bend", "b", "avatar", "atla", "tla")
+      .meta(CommandMeta.DESCRIPTION, "Base command for bending");
+
+    var slotArg = IntegerArgument.<CommandSender>newBuilder("slot")
+      .withMin(0).withMax(9).asOptionalWithDefault(0);
+    var userArg = manager.argumentBuilder(User.class, "target")
+      .asOptionalWithDefault("me");
+    var abilityArg = manager.argumentBuilder(AbilityDescription.class, "ability")
+      .withParser(AbilityDescriptionParser.STRICT_PARSER);
+
+    //noinspection ConstantConditions
+    manager
+      .command(builder.literal("version", "ver", "v")
+        .meta(CommandMeta.DESCRIPTION, "View version info about the bending plugin")
+        .permission("bending.command.version")
+        .handler(c -> onVersion(c.getSender()))
+      ).command(builder.literal("reload", "r")
+        .meta(CommandMeta.DESCRIPTION, "Reloads the plugin and its config")
+        .permission("bending.command.reload")
+        .handler(c -> onReload(c.getSender()))
+      ).command(builder.literal("board")
+        .meta(CommandMeta.DESCRIPTION, "Toggle bending board visibility")
+        .permission("bending.command.board")
+        .senderType(Player.class)
+        .handler(c -> onBoard(c.get(ContextKeys.BENDING_PLAYER)))
+      ).command(builder.literal("toggle", "t")
+        .meta(CommandMeta.DESCRIPTION, "Toggles bending")
+        .permission("bending.command.toggle")
+        .senderType(Player.class)
+        .handler(c -> onToggle(c.get(ContextKeys.BENDING_PLAYER)))
+      ).command(builder.literal("info", "i")
+        .meta(CommandMeta.DESCRIPTION, "View info about a specific ability")
+        .permission("bending.command.help")
+        .argument(manager.argumentBuilder(AbilityDescription.class, "ability"))
+        .handler(c -> onInfo(c.getSender(), c.get("ability")))
+      ).command(builder.literal("list", "ls", "display", "d")
+        .meta(CommandMeta.DESCRIPTION, "List all available abilities for a specific element")
+        .permission("bending.command.display")
+        .argument(EnumArgument.of(Element.class, "element"))
+        .handler(c -> ElementCommand.onElementDisplay(c.getSender(), c.get("element")))
+      ).command(builder.literal("bind", "b")
+        .meta(CommandMeta.DESCRIPTION, "Bind an ability to a slot")
+        .permission("bending.command.bind")
+        .senderType(Player.class)
+        .argument(abilityArg.build())
+        .argument(slotArg.build())
+        .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("ability"), c.get("slot")))
+      ).command(builder.literal("clear", "c")
+        .meta(CommandMeta.DESCRIPTION, "Clear an ability slot")
+        .permission("bending.command.bind")
+        .senderType(Player.class)
+        .argument(slotArg.build())
+        .handler(c -> onClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
+      ).command(builder.literal("binds", "who", "w")
+        .meta(CommandMeta.DESCRIPTION, "Show all bound abilities")
+        .permission("bending.command.help")
+        .argument(userArg.build())
+        .handler(c -> onBindList(c.getSender(), c.get("target")))
+      ).command(builder.literal("choose", "ch")
+        .meta(CommandMeta.DESCRIPTION, "Choose an element")
+        .permission("bending.command.choose")
+        .senderType(Player.class)
+        .argument(EnumArgument.optional(Element.class, "element"))
+        .handler(c -> ElementCommand.onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
+      ).command(builder.literal("add", "a")
+        .meta(CommandMeta.DESCRIPTION, "Add an element")
+        .permission("bending.command.add")
+        .senderType(Player.class)
+        .argument(EnumArgument.optional(Element.class, "element"))
+        .handler(c -> ElementCommand.onElementAdd(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
+      ).command(builder.literal("remove", "rm", "delete", "del")
+        .meta(CommandMeta.DESCRIPTION, "Remove an element")
+        .permission("bending.command.remove")
+        .senderType(Player.class)
+        .argument(EnumArgument.optional(Element.class, "element"))
+        .handler(c -> ElementCommand.onElementRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
+      ).command(builder.literal("help", "h")
+        .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
+        .handler(c -> help.queryCommands(c.getOrDefault("query", ""), c.getSender()))
+    );
   }
 
-  @Subcommand("toggle|t")
-  @CommandCompletion("@players")
-  @CommandPermission("bending.command.toggle")
-  @Description("Toggles bending")
-  public void onToggle(BendingPlayer player, @Optional @CommandPermission("bending.command.toggle.others") OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    if (bendingPlayer.bendingConditional().contains(BendingConditions.TOGGLED)) {
-      bendingPlayer.bendingConditional().remove(BendingConditions.TOGGLED);
-      Message.TOGGLE_ON.send(bendingPlayer);
-    } else {
-      bendingPlayer.bendingConditional().add(BendingConditions.TOGGLED);
-      Message.TOGGLE_OFF.send(bendingPlayer);
-    }
+  private static void onVersion(CommandSender sender) {
+    String link = "https://github.com/PrimordialMoros/Bending";
+    Component version = Message.brand(Component.text("Version: ", NamedTextColor.DARK_AQUA))
+      .append(Component.text(Bending.version(), NamedTextColor.GREEN))
+      .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.author(), link)))
+      .clickEvent(ClickEvent.openUrl(link));
+    sender.sendMessage(version);
   }
 
-  @Subcommand("reload")
-  @CommandPermission("bending.command.reload")
-  @Description("Reloads the plugin and its config")
-  public void onReload(CommandSender user) {
+  private static void onReload(CommandSender sender) {
     Bending.game().reload();
-    Message.CONFIG_RELOAD.send(user);
+    Message.CONFIG_RELOAD.send(sender);
   }
 
-  @Subcommand("choose|ch")
-  @CommandPermission("bending.command.choose")
-  @CommandCompletion("@elements @players")
-  @Description("Choose an element")
-  public static void onElementChoose(CommandSender user, Element element, @Optional @CommandPermission("bending.command.choose.other") OnlinePlayer target) {
-    if (target == null && !(user instanceof Player)) {
-      throw new UserException();
-    }
-    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
-    if (target == null && !player.hasPermission("bending.command.choose." + element)) {
-      Message.ELEMENT_CHOOSE_NO_PERMISSION.send(player, element.displayName());
-      return;
-    }
-    if (player.chooseElement(element)) {
-      Message.ELEMENT_CHOOSE_SUCCESS.send(player, element.displayName());
-    } else {
-      Message.ELEMENT_CHOOSE_FAIL.send(player, element.displayName());
-    }
-  }
-
-  @Subcommand("add|a")
-  @CommandPermission("bending.command.add")
-  @CommandCompletion("@elements @players")
-  @Description("Add an element")
-  public static void onElementAdd(CommandSender user, Element element, @Optional @CommandPermission("bending.command.add.other") OnlinePlayer target) {
-    if (target == null && !(user instanceof Player)) {
-      throw new UserException();
-    }
-    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
-    if (target == null && !player.hasPermission("bending.command.add." + element)) {
-      Message.ELEMENT_ADD_NO_PERMISSION.send(player, element.displayName());
-      return;
-    }
-    if (player.addElement(element)) {
-      Bending.game().abilityManager(player.world()).createPassives(player);
-      Message.ELEMENT_ADD_SUCCESS.send(player, element.displayName());
-    } else {
-      Message.ELEMENT_ADD_FAIL.send(player, element.displayName());
-    }
-  }
-
-  @Subcommand("remove|rm|r|delete|del")
-  @CommandPermission("bending.command.remove")
-  @CommandCompletion("@elements @players")
-  @Description("Remove an element")
-  public static void onElementRemove(CommandSender user, Element element, @Optional @CommandPermission("bending.command.remove.other") OnlinePlayer target) {
-    if (target == null && !(user instanceof Player)) {
-      throw new UserException();
-    }
-    BendingPlayer player = Registries.BENDERS.user(target == null ? (Player) user : target.getPlayer());
-    if (player.removeElement(element)) {
-      Bending.game().abilityManager(player.world()).createPassives(player);
-      Message.ELEMENT_REMOVE_SUCCESS.send(player, element.displayName());
-    } else {
-      Message.ELEMENT_REMOVE_FAIL.send(player, element.displayName());
-    }
-  }
-
-  @Subcommand("bendingboard|board|bb")
-  @CommandPermission("bending.command.board")
-  @Description("Toggle bending board visibility")
-  public static void onBoard(BendingPlayer player) {
+  private static void onBoard(BendingPlayer player) {
     if (!Bending.game().boardManager().enabled(player.world())) {
       Message.BOARD_DISABLED.send(player);
       return;
@@ -162,51 +160,37 @@ public class BendingCommand extends BaseCommand {
     Bending.game().boardManager().tryEnableBoard(player);
   }
 
-  @Subcommand("version|ver|v")
-  @CommandPermission("bending.command.version")
-  @Description("View version info about the bending plugin")
-  public static void onVersion(CommandSender user) {
-    String link = "https://github.com/PrimordialMoros/Bending";
-    Component version = Message.brand(Component.text("Version: ", NamedTextColor.DARK_AQUA))
-      .append(Component.text(Bending.version(), NamedTextColor.GREEN))
-      .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.author(), link)))
-      .clickEvent(ClickEvent.openUrl(link));
-    user.sendMessage(version);
+  private static void onToggle(User user) {
+    if (user.bendingConditional().contains(BendingConditions.TOGGLED)) {
+      user.bendingConditional().remove(BendingConditions.TOGGLED);
+      Message.TOGGLE_ON.send(user);
+    } else {
+      user.bendingConditional().add(BendingConditions.TOGGLED);
+      Message.TOGGLE_OFF.send(user);
+    }
   }
 
-  @Subcommand("display|d|elements|element|elem|e")
-  @CommandPermission("bending.command.display")
-  @CommandCompletion("@elements")
-  @Description("List all available abilities for a specific element")
-  public static void onDisplay(CommandSender user, Element element) {
-    Collection<Component> abilities = collectAbilities(user, element);
-    Collection<Component> sequences = collectSequences(user, element);
-    Collection<Component> passives = collectPassives(user, element);
-    if (abilities.isEmpty() && sequences.isEmpty() && passives.isEmpty()) {
-      Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
+  private static void onInfo(CommandSender sender, AbilityDescription ability) {
+    String descKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".description";
+    String instKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".instructions";
+    Component description = Bending.translationManager().translate(descKey);
+    Component instructions = Bending.translationManager().translate(instKey);
+    if (instructions == null && ability instanceof Sequence sequence) {
+      instructions = sequence.instructions();
+    }
+    if (description == null && instructions == null) {
+      Message.ABILITY_INFO_EMPTY.send(sender, ability.displayName());
     } else {
-      Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
-      if (!abilities.isEmpty()) {
-        Message.ABILITIES.send(user);
-        user.sendMessage(Component.join(sep, abilities));
+      if (description != null) {
+        Message.ABILITY_INFO_DESCRIPTION.send(sender, ability.displayName(), description);
       }
-      if (!sequences.isEmpty()) {
-        Message.SEQUENCES.send(user);
-        user.sendMessage(Component.join(sep, sequences));
-      }
-      if (!passives.isEmpty()) {
-        Message.PASSIVES.send(user);
-        user.sendMessage(Component.join(sep, passives));
+      if (instructions != null) {
+        Message.ABILITY_INFO_INSTRUCTIONS.send(sender, ability.displayName(), instructions);
       }
     }
   }
 
-  @Subcommand("bind|b")
-  @CommandPermission("bending.command.bind")
-  @CommandCompletion("@abilities @range:1-9")
-  @Description("Bind an ability to a slot")
-  public static void onBind(BendingPlayer player, AbilityDescription ability, @Default("0") @Conditions("slot") Integer slot) {
+  private static void onBind(BendingPlayer player, AbilityDescription ability, int slot) {
     if (!player.hasElement(ability.element())) {
       Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.displayName(), ability.element().displayName());
       return;
@@ -225,29 +209,7 @@ public class BendingCommand extends BaseCommand {
     Message.ABILITY_BIND_SUCCESS.send(player, ability.displayName(), slot);
   }
 
-  @Subcommand("list|ls|binds")
-  @CommandPermission("bending.command.help")
-  @CommandCompletion("@players")
-  @Description("Show all bound abilities")
-  public static void onBindList(BendingPlayer player, @Optional OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    Collection<Element> elements = bendingPlayer.elements();
-    Component hover;
-    if (elements.isEmpty()) {
-      hover = Message.NO_ELEMENTS.build();
-    } else {
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY));
-      hover = Component.join(sep, bendingPlayer.elements().stream().map(Element::displayName).toList());
-    }
-    Message.BOUND_SLOTS.send(player, bendingPlayer.entity().getName(), hover);
-    bendingPlayer.createPresetFromSlots("").display().forEach(player::sendMessage);
-  }
-
-  @Subcommand("clear|c")
-  @CommandPermission("bending.command.bind")
-  @CommandCompletion("@range:1-9")
-  @Description("Clear an ability slot")
-  public static void onClearBind(BendingPlayer player, @Default("0") @Conditions("slot") Integer slot) {
+  private static void onClear(BendingPlayer player, int slot) {
     if (slot == 0) {
       player.bindPreset(Preset.EMPTY);
       Message.CLEAR_ALL_SLOTS.send(player);
@@ -257,52 +219,16 @@ public class BendingCommand extends BaseCommand {
     Message.CLEAR_SLOT.send(player, slot);
   }
 
-  @Subcommand("info|i")
-  @CommandPermission("bending.command.help")
-  @CommandCompletion("@allabilities")
-  @Description("View info about a specific ability")
-  public static void onInfo(CommandSender user, AbilityDescription ability) {
-    String descKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".description";
-    String instKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".instructions";
-    Component description = Bending.translationManager().translate(descKey);
-    Component instructions = Bending.translationManager().translate(instKey);
-    if (instructions == null && ability instanceof Sequence sequence) {
-      instructions = sequence.instructions();
-    }
-    if (description == null && instructions == null) {
-      Message.ABILITY_INFO_EMPTY.send(user, ability.displayName());
+  private static void onBindList(CommandSender sender, User user) {
+    Collection<Element> elements = user.elements();
+    Component hover;
+    if (elements.isEmpty()) {
+      hover = Message.NO_ELEMENTS.build();
     } else {
-      if (description != null) {
-        Message.ABILITY_INFO_DESCRIPTION.send(user, ability.displayName(), description);
-      }
-      if (instructions != null) {
-        Message.ABILITY_INFO_INSTRUCTIONS.send(user, ability.displayName(), instructions);
-      }
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY));
+      hover = Component.join(sep, user.elements().stream().map(Element::displayName).toList());
     }
-  }
-
-  private static Collection<Component> collectAbilities(CommandSender user, Element element) {
-    return Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> user.hasPermission(desc.permission()))
-      .map(AbilityDescription::meta)
-      .collect(Collectors.toList());
-  }
-
-  private static Collection<Component> collectSequences(CommandSender user, Element element) {
-    return Registries.SEQUENCES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> user.hasPermission(desc.permission()))
-      .map(AbilityDescription::meta)
-      .collect(Collectors.toList());
-  }
-
-  private static Collection<Component> collectPassives(CommandSender user, Element element) {
-    return Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> user.hasPermission(desc.permission()))
-      .map(AbilityDescription::meta)
-      .collect(Collectors.toList());
+    Message.BOUND_SLOTS.send(sender, user.entity().getName(), hover);
+    user.createPresetFromSlots("").display().forEach(sender::sendMessage);
   }
 }

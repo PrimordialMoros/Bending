@@ -109,12 +109,13 @@ public final class EntityMethods {
    * @return the distance in blocks between the entity and ground or the max world height.
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
-    int maxHeight = entity.getWorld().getMaxHeight();
-    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3d(0, maxHeight, 0));
+    int minHeight = entity.getWorld().getMinHeight();
+    int deltaHeight = entity.getWorld().getMaxHeight() - minHeight;
+    AABB entityBounds = AABBUtils.entityBounds(entity).grow(new Vector3d(0, deltaHeight, 0));
     Block origin = entity.getLocation().getBlock();
-    for (int i = 0; i < maxHeight; i++) {
+    for (int i = 0; i < deltaHeight; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
-      if (check.getY() <= 0) {
+      if (check.getY() <= minHeight) {
         break;
       }
       AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(new Vector3d(check)) : AABBUtils.blockBounds(check);
@@ -122,7 +123,7 @@ public final class EntityMethods {
         return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
       }
     }
-    return maxHeight;
+    return deltaHeight;
   }
 
   /**

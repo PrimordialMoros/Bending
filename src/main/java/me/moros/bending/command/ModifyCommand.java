@@ -19,16 +19,11 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
+import cloud.commandframework.Command.Builder;
+import cloud.commandframework.arguments.standard.DoubleArgument;
+import cloud.commandframework.arguments.standard.EnumArgument;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.paper.PaperCommandManager;
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.Ability;
@@ -36,40 +31,45 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-@CommandAlias("%modifycommand")
-@CommandPermission("bending.command.modify")
-public class ModifyCommand extends BaseCommand {
-  @HelpCommand
-  @CommandPermission("bending.command.help")
-  public static void doHelp(CommandSender user, CommandHelp help) {
-    user.sendMessage(Message.HELP_HEADER.build());
-    help.showHelp();
+public final class ModifyCommand {
+  ModifyCommand(PaperCommandManager<CommandSender> manager) {
+    Builder<CommandSender> builder = manager.commandBuilder("modifiers", "modifier", "modify", "mod")
+      .meta(CommandMeta.DESCRIPTION, "Base command for bending modifiers")
+      .permission("bending.command.modify");
+    manager
+      .command(builder.literal("add", "a")
+        .meta(CommandMeta.DESCRIPTION, "Add a new modifier to the specified user")
+        .senderType(Player.class)
+        .argument(manager.argumentBuilder(ModifyPolicy.class, "policy"))
+        .argument(EnumArgument.of(Attribute.class, "attribute"))
+        .argument(EnumArgument.of(ModifierOperation.class, "operation"))
+        .argument(DoubleArgument.of("amount"))
+        .handler(c -> {
+          AttributeModifier modifier = new AttributeModifier(c.get("policy"), c.get("attribute"), c.get("operation"), c.get("amount"));
+          onModify(c.get(ContextKeys.BENDING_PLAYER), modifier);
+        })
+      ).command(builder.literal("clear", "c")
+        .meta(CommandMeta.DESCRIPTION, "Clear all existing modifiers for a user")
+        .senderType(Player.class)
+        .handler(c -> onClear(c.get(ContextKeys.BENDING_PLAYER)))
+      );
   }
 
-  @Subcommand("add|a")
-  @CommandCompletion("@elements|@allabilities * * * @players")
-  @Description("Add a new modifier to the specified player")
-  public static void onAdd(BendingPlayer player, ModifyPolicy policy, Attribute attribute, ModifierOperation op, double amount, @Optional @CommandPermission("bending.command.modify.other") OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    AttributeModifier modifier = new AttributeModifier(policy, attribute, op, amount);
-    Registries.ATTRIBUTES.add(bendingPlayer, modifier);
-    recalculate(bendingPlayer);
-    Message.MODIFIER_ADD.send(bendingPlayer, bendingPlayer.entity().getName());
+  private static void onModify(User user, AttributeModifier modifier) {
+    Registries.ATTRIBUTES.add(user, modifier);
+    recalculate(user);
+    Message.MODIFIER_ADD.send(user, user.entity().getName());
   }
 
-  @Subcommand("clear|c")
-  @CommandCompletion("@players")
-  @Description("Clear all existing modifiers for a player")
-  public static void onClear(BendingPlayer player, @Optional @CommandPermission("bending.command.modify.other") OnlinePlayer target) {
-    BendingPlayer bendingPlayer = target == null ? player : Registries.BENDERS.user(target.getPlayer());
-    Registries.ATTRIBUTES.invalidate(bendingPlayer);
-    recalculate(bendingPlayer);
-    Message.MODIFIER_CLEAR.send(bendingPlayer, bendingPlayer.entity().getName());
+  private static void onClear(User user) {
+    Registries.ATTRIBUTES.invalidate(user);
+    recalculate(user);
+    Message.MODIFIER_CLEAR.send(user, user.entity().getName());
   }
 
   private static void recalculate(User user) {

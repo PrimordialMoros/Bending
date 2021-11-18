@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -156,7 +155,7 @@ public class WaterRing extends AbilityInstance {
     if (i == 0) {
       return ring;
     }
-    return Stream.concat(ring.subList(i, ring.size()).stream(), ring.subList(0, i).stream()).collect(Collectors.toList());
+    return Stream.concat(ring.subList(i, ring.size()).stream(), ring.subList(0, i).stream()).toList();
   }
 
   private Block getClosestRingBlock() {

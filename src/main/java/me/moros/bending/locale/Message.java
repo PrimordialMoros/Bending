@@ -30,8 +30,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.command.ConsoleCommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
@@ -141,7 +140,9 @@ public interface Message {
     .args(ability, instructions);
 
   Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", DARK_AQUA)
-    .args(text(author, GREEN), text(link, GREEN));
+    .args(text(author, GREEN), text(link, GREEN), text("AGPLv3", BLUE))
+    .append(newline()).append(newline())
+    .append(translatable("bending.command.version.hover.open-link", GRAY));
 
   Args0 BENDING_BOARD_TITLE = () -> translatable("bending.board.title", Style.style(TextDecoration.BOLD));
 

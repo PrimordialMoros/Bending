@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth.sequences;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -118,7 +117,7 @@ public class EarthShards extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
+    return streams.stream().map(ParticleStream::collider).toList();
   }
 
   @Override

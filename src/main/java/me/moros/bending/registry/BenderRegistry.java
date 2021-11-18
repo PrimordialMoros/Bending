@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.caffeine.cache.AsyncLoadingCache;
 import me.moros.atlas.caffeine.cache.Caffeine;
@@ -88,8 +87,11 @@ public final class BenderRegistry implements Registry<User> {
     return entities.get(entity.getUniqueId());
   }
 
+  /**
+   * @return an immutable collection of online {@link BendingPlayer}
+   */
   public @NonNull Collection<@NonNull BendingPlayer> onlinePlayers() {
-    return players.values().stream().filter(BendingPlayer::valid).collect(Collectors.toList());
+    return players.values().stream().filter(BendingPlayer::valid).toList();
   }
 
   public void invalidate(@NonNull User user) {

@@ -21,7 +21,6 @@ package me.moros.bending;
 
 import java.util.Objects;
 
-import co.aikar.commands.lib.timings.TimingManager;
 import me.moros.bending.command.Commands;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
@@ -50,7 +49,6 @@ public class Bending extends JavaPlugin {
 
   private ConfigManager configManager;
   private TranslationManager translationManager;
-  private TimingManager timingManager;
 
   private PersistentDataLayer dataLayer;
   private BendingEventBus eventBus;
@@ -71,7 +69,6 @@ public class Bending extends JavaPlugin {
 
     configManager = new ConfigManager(dir);
     translationManager = new TranslationManager(dir);
-    timingManager = TimingManager.of(this);
     eventBus = new BendingEventBus(this);
     dataLayer = new PersistentDataLayer(this);
 
@@ -84,7 +81,12 @@ public class Bending extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
     getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
-    new Commands(this);
+    try {
+      new Commands(this);
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      getServer().getPluginManager().disablePlugin(this);
+    }
 
     if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       new BendingExpansion().register();
@@ -111,10 +113,6 @@ public class Bending extends JavaPlugin {
 
   public static @MonotonicNonNull BendingEventBus eventBus() {
     return plugin.eventBus;
-  }
-
-  public static @MonotonicNonNull TimingManager timingManager() {
-    return plugin.timingManager;
   }
 
   public static @MonotonicNonNull Bending plugin() {

@@ -5,23 +5,6 @@ version: ${pluginVersion}
 main: me.moros.bending.Bending
 softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC, LuckPerms]
 api-version: 1.17
-commands:
-  bending:
-    description: Interact with the bending plugin
-    default: true
-    aliases: [bending,bend,b,avatar,atla,tla]
-  preset:
-    description: Manage bending presets
-    default: true
-    aliases: [presets,preset,pr,p]
-  element:
-    description: Choose an element
-    default: true
-    aliases: [elements,element,elem,ele]
-  modify:
-      description: Manage bending attribute modifiers
-      default: op
-      aliases: [bmodify,bmod,bm,modify,mod]
 permissions:
   bending.admin:
     description: Grants access to all commands and abilities.

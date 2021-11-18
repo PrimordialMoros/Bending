@@ -25,10 +25,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import co.aikar.commands.lib.timings.MCTiming;
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.moros.bending.Bending;
@@ -71,7 +71,7 @@ public class AbilityManagerImpl implements AbilityManager {
   @Override
   public void createPassives(@NonNull User user) {
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream()
-      .filter(d -> d.isActivatedBy(Activation.PASSIVE)).collect(Collectors.toList());
+      .filter(d -> d.isActivatedBy(Activation.PASSIVE)).toList();
     for (AbilityDescription passive : allPassives) {
       destroyInstanceType(user, passive.createAbility().getClass());
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
@@ -161,7 +161,7 @@ public class AbilityManagerImpl implements AbilityManager {
     while (globalIterator.hasNext()) {
       Ability ability = globalIterator.next();
       UpdateResult result = UpdateResult.REMOVE;
-      try (MCTiming timing = Bending.timingManager().of(ability.description().name()).startTiming()) {
+      try (Timing timing = Timings.of(Bending.plugin(), ability.description().name()).startTiming()) {
         result = ability.update();
       } catch (Exception e) {
         Bending.logger().warn(e.getMessage(), e);

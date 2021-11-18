@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -95,7 +94,7 @@ public class FireKick extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).collect(Collectors.toList());
+    return streams.stream().map(ParticleStream::collider).toList();
   }
 
   @Override

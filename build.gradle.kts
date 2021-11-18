@@ -33,7 +33,10 @@ repositories {
 dependencies {
     api("me.moros", "atlas-core", "1.4.0-SNAPSHOT")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
-    implementation("co.aikar","acf-paper", "0.5.0-SNAPSHOT")
+    implementation("cloud.commandframework","cloud-paper", "1.5.0")
+    implementation("cloud.commandframework","cloud-minecraft-extras", "1.5.0") {
+        exclude(group = "net.kyori")
+    }
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
     paperDevBundle("1.17.1-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
@@ -52,8 +55,7 @@ tasks {
         archiveClassifier.set("")
         archiveBaseName.set(rootProject.name)
         dependencies {
-            relocate("co.aikar.commands", "me.moros.atlas.acf")
-            relocate("co.aikar.locales", "me.moros.atlas.locales")
+            relocate("cloud.commandframework", "me.moros.atlas.cf")
             relocate("com.github.benmanes.caffeine", "me.moros.atlas.caffeine")
             relocate("com.github.stefvanschie.inventoryframework", "me.moros.atlas.inventoryframework")
             relocate("com.typesafe", "me.moros.atlas.typesafe")

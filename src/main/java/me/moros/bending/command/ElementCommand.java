@@ -19,55 +19,133 @@
 
 package me.moros.bending.command;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Optional;
+import java.util.Collection;
+
+import cloud.commandframework.Command.Builder;
+import cloud.commandframework.arguments.standard.EnumArgument;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.paper.PaperCommandManager;
+import me.moros.bending.Bending;
 import me.moros.bending.gui.ElementMenu;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandAlias("%elementcommand")
-public class ElementCommand extends BaseCommand {
-  @Default
-  @CommandPermission("bending.command.choose")
-  @CommandCompletion("@elements")
-  @Description("Choose an element")
-  public static void onElementChoose(Player user, @Optional Element element) {
+public final class ElementCommand {
+  ElementCommand(PaperCommandManager<CommandSender> manager) {
+    Builder<CommandSender> builder = manager.commandBuilder("element", "elements", "elem", "ele")
+      .meta(CommandMeta.DESCRIPTION, "Base command for bending element menu");
+    manager
+      .command(builder
+        .meta(CommandMeta.DESCRIPTION, "Choose an element")
+        .permission("bending.command.choose")
+        .senderType(Player.class)
+        .argument(EnumArgument.optional(Element.class, "element"))
+        .handler(c -> onBase(c.get(ContextKeys.BENDING_PLAYER), c.getOrDefault("element", null)))
+      );
+  }
+
+  private static void onBase(BendingPlayer player, Element element) {
     if (element == null) {
-      new ElementMenu(user);
+      new ElementMenu(player.entity());
     } else {
-      BendingCommand.onElementChoose(user, element, null);
+      onElementChoose(player, element);
     }
   }
 
-  @HelpCommand
-  @CommandPermission("bending.command.help")
-  public static void doHelp(CommandSender user, CommandHelp help) {
-    Message.HELP_HEADER.send(user);
-    help.showHelp();
+  public static void onElementChoose(User user, Element element) {
+    if (!user.hasPermission("bending.command.choose." + element)) {
+      Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
+      return;
+    }
+    if (user.chooseElement(element)) {
+      Message.ELEMENT_CHOOSE_SUCCESS.send(user, element.displayName());
+    } else {
+      Message.ELEMENT_CHOOSE_FAIL.send(user, element.displayName());
+    }
   }
 
-  public static void onElementChoose(CommandSender user, Element element) {
-    BendingCommand.onElementChoose(user, element, null);
+  public static void onElementAdd(User user, Element element) {
+    if (!user.hasPermission("bending.command.add." + element)) {
+      Message.ELEMENT_ADD_NO_PERMISSION.send(user, element.displayName());
+      return;
+    }
+    if (user.addElement(element)) {
+      Bending.game().abilityManager(user.world()).createPassives(user);
+      Message.ELEMENT_ADD_SUCCESS.send(user, element.displayName());
+    } else {
+      Message.ELEMENT_ADD_FAIL.send(user, element.displayName());
+    }
   }
 
-  public static void onElementAdd(CommandSender user, Element element) {
-    BendingCommand.onElementAdd(user, element, null);
+  public static void onElementRemove(User user, Element element) {
+    if (user.removeElement(element)) {
+      Bending.game().abilityManager(user.world()).createPassives(user);
+      Message.ELEMENT_REMOVE_SUCCESS.send(user, element.displayName());
+    } else {
+      Message.ELEMENT_REMOVE_FAIL.send(user, element.displayName());
+    }
   }
 
-  public static void onElementRemove(CommandSender user, Element element) {
-    BendingCommand.onElementRemove(user, element, null);
+  public static void onElementDisplay(User user, Element element) {
+    onElementDisplay(user.entity(), element);
   }
 
   public static void onElementDisplay(CommandSender user, Element element) {
-    BendingCommand.onDisplay(user, element);
+    Collection<Component> abilities = collectAbilities(user, element);
+    Collection<Component> sequences = collectSequences(user, element);
+    Collection<Component> passives = collectPassives(user, element);
+    if (abilities.isEmpty() && sequences.isEmpty() && passives.isEmpty()) {
+      Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
+    } else {
+      Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
+      if (!abilities.isEmpty()) {
+        Message.ABILITIES.send(user);
+        user.sendMessage(Component.join(sep, abilities));
+      }
+      if (!sequences.isEmpty()) {
+        Message.SEQUENCES.send(user);
+        user.sendMessage(Component.join(sep, sequences));
+      }
+      if (!passives.isEmpty()) {
+        Message.PASSIVES.send(user);
+        user.sendMessage(Component.join(sep, passives));
+      }
+    }
+  }
+
+  private static Collection<Component> collectAbilities(CommandSender user, Element element) {
+    return Registries.ABILITIES.stream()
+      .filter(desc -> element == desc.element() && !desc.hidden())
+      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
+      .filter(desc -> user.hasPermission(desc.permission()))
+      .map(AbilityDescription::meta)
+      .toList();
+  }
+
+  private static Collection<Component> collectSequences(CommandSender user, Element element) {
+    return Registries.SEQUENCES.stream()
+      .filter(desc -> element == desc.element() && !desc.hidden())
+      .filter(desc -> user.hasPermission(desc.permission()))
+      .map(AbilityDescription::meta)
+      .toList();
+  }
+
+  private static Collection<Component> collectPassives(CommandSender user, Element element) {
+    return Registries.ABILITIES.stream()
+      .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
+      .filter(desc -> user.hasPermission(desc.permission()))
+      .map(AbilityDescription::meta)
+      .toList();
   }
 }

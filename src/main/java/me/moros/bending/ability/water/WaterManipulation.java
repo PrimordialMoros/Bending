@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
@@ -87,7 +86,7 @@ public class WaterManipulation extends AbilityInstance {
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (method == Activation.ATTACK) {
       Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
-        .collect(Collectors.toList());
+        .toList();
       redirectAny(user);
       for (WaterManipulation manip : manips) {
         if (manip.manip == null) {
@@ -108,7 +107,7 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
-      .filter(m -> m.manip == null).collect(Collectors.toList());
+      .filter(m -> m.manip == null).toList();
     for (WaterManipulation manip : manips) {
       State state = manip.states.current();
       if (state instanceof SelectedSource selectedSource) {
@@ -204,7 +203,7 @@ public class WaterManipulation extends AbilityInstance {
 
   private static void redirectAny(User user) {
     Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).instances(WaterManipulation.class)
-      .filter(m -> m.manip != null && !user.equals(m.user)).collect(Collectors.toList());
+      .filter(m -> m.manip != null && !user.equals(m.user)).toList();
     for (WaterManipulation manip : manips) {
       Vector3d center = manip.manip.center();
       double dist = center.distanceSq(manip.user().eyeLocation());

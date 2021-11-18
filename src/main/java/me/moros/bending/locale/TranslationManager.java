@@ -76,7 +76,7 @@ public class TranslationManager {
   private void loadCustom() {
     Collection<Path> files;
     try (Stream<Path> stream = Files.list(translationsDirectory)) {
-      files = stream.filter(this::isValidPropertyFile).collect(Collectors.toList());
+      files = stream.filter(this::isValidPropertyFile).toList();
     } catch (IOException e) {
       files = List.of();
     }

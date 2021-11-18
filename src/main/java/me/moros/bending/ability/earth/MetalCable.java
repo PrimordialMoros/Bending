@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import me.moros.atlas.configurate.CommentedConfigurationNode;
@@ -280,8 +279,7 @@ public class MetalCable extends AbilityInstance {
 
   private Collection<Vector3d> getLinePoints(Vector3d startLoc, Vector3d endLoc, int points) {
     Vector3d diff = endLoc.subtract(startLoc).multiply(1.0 / points);
-    return IntStream.rangeClosed(1, points).mapToObj(i -> startLoc.add(diff.multiply(i)))
-      .collect(Collectors.toList());
+    return IntStream.rangeClosed(1, points).mapToObj(i -> startLoc.add(diff.multiply(i))).toList();
   }
 
   public void hitBlock(@NonNull Block block) {

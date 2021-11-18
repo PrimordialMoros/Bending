@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.math.FastMath;
@@ -197,7 +196,7 @@ public final class BlockMethods {
     Vector3d centerVector = Vector3d.center(center);
     int steps = FastMath.ceil(10 * radius);
     return VectorMethods.circle(Vector3d.PLUS_I.multiply(radius), Vector3d.PLUS_J, steps)
-      .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().collect(Collectors.toList());
+      .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().toList();
   }
 
   /**

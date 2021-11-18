@@ -29,7 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import co.aikar.commands.lib.timings.MCTiming;
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireShield;
@@ -107,7 +108,7 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
-    MCTiming timing = Bending.timingManager().ofStart("BendingProfile on join");
+    Timing timing = Timings.ofStart(Bending.plugin(), "BendingProfile on join");
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
     String name = player.getName();
