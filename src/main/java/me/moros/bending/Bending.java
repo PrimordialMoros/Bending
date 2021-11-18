@@ -89,7 +89,9 @@ public class Bending extends JavaPlugin {
     if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       new BendingExpansion().register();
     }
-    new LuckPermsHook(this);
+    if (getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
+      new LuckPermsHook(this);
+    }
   }
 
   @Override
