@@ -19,8 +19,8 @@
 
 package me.moros.bending.config;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public abstract class Configurable implements Cloneable {
   protected CommentedConfigurationNode config;

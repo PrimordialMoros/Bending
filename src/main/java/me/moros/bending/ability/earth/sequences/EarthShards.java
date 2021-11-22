@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth.sequences;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -47,6 +46,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 // TODO restrictions based on earthglove cooldown, add bleed effect
 public class EarthShards extends AbilityInstance {
@@ -135,7 +135,7 @@ public class EarthShards extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.createRGB(bukkitLocation(), "555555", 0.8F)
+      ParticleUtil.rgb(bukkitLocation(), "555555", 0.8F)
         .count(3).offset(0.1, 0.1, 0.1).spawn();
     }
 

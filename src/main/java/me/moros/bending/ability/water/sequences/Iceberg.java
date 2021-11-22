@@ -27,7 +27,6 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.water.IceCrawl;
@@ -54,6 +53,7 @@ import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Iceberg extends AbilityInstance {
   private static final Config config = new Config();

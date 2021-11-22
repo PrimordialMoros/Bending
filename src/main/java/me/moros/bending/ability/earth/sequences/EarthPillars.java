@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -53,6 +52,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthPillars extends AbilityInstance {
   private static final Config config = new Config();
@@ -125,7 +125,7 @@ public class EarthPillars extends AbilityInstance {
       .noneMatch(p -> p.origin().getX() == base.getX() && p.origin().getZ() == base.getZ());
     if (predicate.test(base)) {
       if (unique) {
-        ParticleUtil.create(Particle.BLOCK_DUST, entity.getLocation())
+        ParticleUtil.of(Particle.BLOCK_DUST, entity.getLocation())
           .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
         int length = FastMath.floor(3 * factor);
         Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(length).ifPresent(pillars::add);

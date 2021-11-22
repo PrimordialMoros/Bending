@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -51,6 +50,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirBlast extends AbilityInstance {
   private static final Config config = new Config();
@@ -119,7 +119,7 @@ public class AirBlast extends AbilityInstance {
       if (!description().equals(user.selectedAbility())) {
         return UpdateResult.REMOVE;
       }
-      ParticleUtil.createAir(origin.toLocation(user.world())).count(4).offset(0.5, 0.5, 0.5).spawn();
+      ParticleUtil.air(origin.toLocation(user.world())).count(4).offset(0.5, 0.5, 0.5).spawn();
     }
 
     return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -164,7 +164,7 @@ public class AirBlast extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.createAir(bukkitLocation()).count(6)
+      ParticleUtil.air(bukkitLocation()).count(6)
         .offset(0.275, 0.275, 0.275)
         .spawn();
     }

@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -53,6 +52,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 // TODO make tentacle extension animation
 public class OctopusForm extends AbilityInstance {
@@ -177,7 +177,7 @@ public class OctopusForm extends AbilityInstance {
       return;
     }
     if (MaterialUtil.isWater(block)) {
-      ParticleUtil.createBubble(block).spawn();
+      ParticleUtil.bubble(block).spawn();
     } else if (MaterialUtil.isTransparent(block)) {
       TempBlock.create(block, Material.WATER.createBlockData(), 250);
     }

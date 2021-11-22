@@ -99,7 +99,7 @@ public final class Game {
     MovementHandler.resetAll();
 
     if (shutdown) {
-      Registries.BENDERS.onlinePlayers().forEach(storage::savePlayerAsync);
+      Registries.BENDERS.players().forEach(storage::savePlayerAsync);
       Tasker.INSTANCE.shutdown();
       storage.close();
     }

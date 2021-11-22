@@ -25,7 +25,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
@@ -68,6 +67,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class LavaDisk extends AbilityInstance {
   private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
@@ -181,10 +181,10 @@ public class LavaDisk extends AbilityInstance {
   @Override
   public void onDestroy() {
     Location center = location.toLocation(user.world());
-    ParticleUtil.create(Particle.BLOCK_CRACK, center)
+    ParticleUtil.of(Particle.BLOCK_CRACK, center)
       .count(16).offset(0.1, 0.1, 0.1).extra(0.01)
       .data(Material.MAGMA_BLOCK.createBlockData()).spawn();
-    ParticleUtil.create(Particle.LAVA, center)
+    ParticleUtil.of(Particle.LAVA, center)
       .count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
     SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
     user.addCooldown(description(), userConfig.cooldown);
@@ -206,7 +206,7 @@ public class LavaDisk extends AbilityInstance {
       BendingEffect.FIRE_TICK.apply(user, entity);
       DamageUtil.damageEntity(entity, user, damage, description());
       currentPower -= userConfig.powerDiminishPerEntity;
-      ParticleUtil.create(Particle.LAVA, entity.getLocation()).count(4)
+      ParticleUtil.of(Particle.LAVA, entity.getLocation()).count(4)
         .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
       return true;
     }
@@ -229,7 +229,7 @@ public class LavaDisk extends AbilityInstance {
     if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
-      ParticleUtil.create(Particle.LAVA, block.getLocation())
+      ParticleUtil.of(Particle.LAVA, block.getLocation())
         .offset(0.5, 0.5, 0.5).extra(0.05).spawn();
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
         Location center = block.getLocation().add(0.5, 0.5, 0.5);
@@ -254,7 +254,7 @@ public class LavaDisk extends AbilityInstance {
         double length = 0.1 * i;
         Vector3d temp = new Vector3d(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
         Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
-        ParticleUtil.createRGB(loc, colors[index], size).spawn();
+        ParticleUtil.rgb(loc, colors[index], size).spawn();
         if (length > 0.5) {
           damageBlock(loc.getBlock());
         }

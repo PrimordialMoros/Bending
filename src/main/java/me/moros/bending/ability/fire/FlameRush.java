@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -59,6 +58,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FlameRush extends AbilityInstance {
   private static final Config config = new Config();
@@ -114,9 +114,9 @@ public class FlameRush extends AbilityInstance {
 
     if (charging) {
       if (user.sneaking()) {
-        ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
         if (System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-          ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
         }
       } else {
         launch();
@@ -199,14 +199,14 @@ public class FlameRush extends AbilityInstance {
       double radius = 0.2 * factor + 0.6 * (distanceTravelled / maxRange);
       int amount = FastMath.ceil(12 * radius);
       double offset = 0.5 * radius;
-      ParticleUtil.createFire(user, bukkitLocation()).count(amount).offset(offset, offset, offset).spawn();
+      ParticleUtil.fire(user, bukkitLocation()).count(amount).offset(offset, offset, offset).spawn();
       Vector3d vec = new Rotation(streamDirection, currentPoint).applyTo(Vector3d.ONE.multiply(radius));
       Location spiral1 = location.add(vec).toLocation(user.world());
       Location spiral2 = location.subtract(vec).toLocation(user.world());
-      ParticleUtil.createFire(user, spiral1).spawn();
-      ParticleUtil.createFire(user, spiral2).spawn();
-      ParticleUtil.create(Particle.SMOKE_LARGE, spiral1).spawn();
-      ParticleUtil.create(Particle.SMOKE_LARGE, spiral2).spawn();
+      ParticleUtil.fire(user, spiral1).spawn();
+      ParticleUtil.fire(user, spiral2).spawn();
+      ParticleUtil.of(Particle.SMOKE_LARGE, spiral1).spawn();
+      ParticleUtil.of(Particle.SMOKE_LARGE, spiral2).spawn();
       collider = new Sphere(location, collisionRadius + 0.7 * radius);
     }
 

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.water;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -42,6 +41,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class HealingWaters extends AbilityInstance {
   private static final org.bukkit.attribute.Attribute healthAttribute = org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
@@ -89,7 +89,7 @@ public class HealingWaters extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
     } else {
-      ParticleUtil.createRGB(user.mainHandSide().toLocation(user.world()), "00ffff").spawn();
+      ParticleUtil.rgb(user.mainHandSide().toLocation(user.world()), "00ffff").spawn();
     }
     return UpdateResult.CONTINUE;
   }
@@ -115,7 +115,7 @@ public class HealingWaters extends AbilityInstance {
       return false;
     }
 
-    ParticleUtil.createRGB(EntityMethods.entityCenter(target).toLocation(user.world()), "00ffff")
+    ParticleUtil.rgb(EntityMethods.entityCenter(target).toLocation(user.world()), "00ffff")
       .count(6).offset(0.35, 0.35, 0.35).spawn();
     target.getActivePotionEffects().stream().map(PotionEffect::getType).filter(PotionUtil::isNegative)
       .forEach(target::removePotionEffect);

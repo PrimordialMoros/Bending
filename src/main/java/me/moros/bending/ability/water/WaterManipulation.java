@@ -25,7 +25,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
@@ -64,6 +63,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class WaterManipulation extends AbilityInstance {
   private static final Config config = new Config();
@@ -143,9 +143,9 @@ public class WaterManipulation extends AbilityInstance {
 
         if (isIce) {
           Location center = manip.center().toLocation(user.world());
-          ParticleUtil.create(Particle.ITEM_CRACK, center).count(4)
+          ParticleUtil.of(Particle.ITEM_CRACK, center).count(4)
             .offset(0.4, 0.4, 0.4).data(new ItemStack(Material.ICE)).spawn();
-          ParticleUtil.create(Particle.SNOW_SHOVEL, center).count(6)
+          ParticleUtil.of(Particle.SNOW_SHOVEL, center).count(6)
             .offset(0.4, 0.4, 0.4).spawn();
         } else {
           Block trail1 = manip.previousBlock();

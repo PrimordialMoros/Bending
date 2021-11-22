@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
 import me.moros.bending.config.Configurable;
@@ -52,6 +51,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class HeatControl extends AbilityInstance implements Ability {
   private static final Config config = new Config();
@@ -95,7 +95,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       long time = System.currentTimeMillis();
       if (user.sneaking()) {
         if (isHoldingFood()) {
-          ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
           if (time > startTime + userConfig.cookInterval && cook()) {
             startTime = System.currentTimeMillis();
           }

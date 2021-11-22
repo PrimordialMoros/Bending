@@ -76,15 +76,15 @@ public final class BendingExplosion {
 
   private void playParticles(Location center) {
     if (size <= 1.5) {
-      ParticleUtil.create(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size))
+      ParticleUtil.of(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size))
         .offset(0.75, 0.75, 0.75).spawn();
     } else if (size <= 3) {
-      ParticleUtil.create(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size))
+      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size))
         .offset(1.5, 1.5, 1.5).spawn();
     } else if (size <= 5) {
-      ParticleUtil.create(Particle.EXPLOSION_HUGE, center).spawn();
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).spawn();
     } else {
-      ParticleUtil.create(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5))
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5))
         .offset(2.5, 2.5, 2.5).spawn();
     }
   }

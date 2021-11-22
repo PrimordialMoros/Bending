@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
@@ -62,6 +61,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Shockwave extends AbilityInstance {
   private static final Config config = new Config();
@@ -125,7 +125,7 @@ public class Shockwave extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
         if (!user.sneaking() && !release(false)) {
           return UpdateResult.REMOVE;
         }
@@ -246,7 +246,7 @@ public class Shockwave extends AbilityInstance {
       Vector3d velocity = new Vector3d(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
       new TempFallingBlock(block, data, velocity, true, 450);
-      ParticleUtil.create(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
+      ParticleUtil.of(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.EARTH.play(block.getLocation());

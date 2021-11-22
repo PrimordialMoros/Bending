@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractWheel;
@@ -53,6 +52,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirBlade extends AbilityInstance {
   private static final Config config = new Config();
@@ -130,7 +130,7 @@ public class AirBlade extends AbilityInstance {
         Vector3d rotateAxis = Vector3d.PLUS_J.cross(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
         VectorMethods.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
-          ParticleUtil.createAir(origin.add(v).toLocation(user.world())).spawn()
+          ParticleUtil.air(origin.add(v).toLocation(user.world())).spawn()
         );
       } else if (!user.sneaking()) {
         launch();
@@ -191,7 +191,7 @@ public class AirBlade extends AbilityInstance {
     public void render() {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
       VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
-        ParticleUtil.createAir(location.add(v).toLocation(user.world())).spawn()
+        ParticleUtil.air(location.add(v).toLocation(user.world())).spawn()
       );
     }
 

@@ -20,6 +20,7 @@
 package me.moros.bending.gui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -31,13 +32,12 @@ import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import me.moros.bending.command.ElementCommand;
+import me.moros.bending.command.BendingCommand;
 import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args0;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -78,7 +78,7 @@ public final class ElementMenu implements BendingMenu {
     BASE_GUI.addPane(elementsPane);
   }
 
-  public ElementMenu(@NonNull Player player) {
+  public ElementMenu(@NonNull BendingPlayer player) {
     if (!player.hasPermission(permission())) {
       Message.GUI_NO_PERMISSION.send(player);
       return;
@@ -88,17 +88,16 @@ public final class ElementMenu implements BendingMenu {
     OutlinePane pane = gui.getPanes().stream().filter(p -> p.getUUID().equals(innerPaneUUID) && p instanceof OutlinePane)
       .map(OutlinePane.class::cast).findAny().orElseThrow(() -> new RuntimeException("Gui cloning went wrong!"));
 
-    BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
-    for (Element element : Element.values()) {
-      ItemStack itemStack = generateItem(bendingPlayer, element);
-      DataWrapper data = new DataWrapper(bendingPlayer, element, itemStack, gui);
+    for (Element element : Element.VALUES) {
+      ItemStack itemStack = generateItem(player, element);
+      DataWrapper data = new DataWrapper(player, element, itemStack, gui);
       pane.addItem(new GuiItem(itemStack, event -> handleClick(event, data)));
     }
 
     StaticPane helpPane = new StaticPane(0, 0, 9, 1);
     helpPane.addItem(new GuiItem(generateHelpItem(player)), 4, 0);
     gui.addPane(helpPane);
-    gui.show(player);
+    gui.show(player.entity());
   }
 
   @Override
@@ -169,21 +168,14 @@ public final class ElementMenu implements BendingMenu {
     return lore;
   }
 
-  private static ItemStack generateHelpItem(Player player) {
+  private static ItemStack generateHelpItem(BendingPlayer player) {
     ItemStack itemStack = new ItemStack(Material.BOOK);
     ItemMeta itemMeta = itemStack.getItemMeta();
     // ItemStacks get translated early, so we render in default locale for now
-    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.locale())
+    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.entity().locale())
       .decoration(TextDecoration.ITALIC, false);
     itemMeta.displayName(itemName);
-    List<Component> lore = new ArrayList<>();
-    for (ActionType type : ActionType.values()) {
-      Component line = GlobalTranslator.render(type.message.build(), player.locale())
-        .decoration(TextDecoration.ITALIC, false)
-        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(type.permission));
-      lore.add(line);
-    }
-    itemMeta.lore(lore);
+    itemMeta.lore(ActionType.VALUES.stream().map(type -> type.toEntry(player)).toList());
     itemStack.setItemMeta(itemMeta);
     return itemStack;
   }
@@ -201,10 +193,10 @@ public final class ElementMenu implements BendingMenu {
   }
 
   private enum ActionType {
-    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, "bending.command.choose", ElementCommand::onElementChoose, false),
-    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, "bending.command.display", ElementCommand::onElementDisplay, false),
-    ADD(Message.ELEMENTS_GUI_ADD, "bending.command.add", ElementCommand::onElementAdd, true),
-    REMOVE(Message.ELEMENTS_GUI_REMOVE, "bending.command.remove", ElementCommand::onElementRemove, true);
+    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, "bending.command.choose", BendingCommand::onElementChoose, false),
+    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, "bending.command.display", BendingCommand::onElementDisplay, false),
+    ADD(Message.ELEMENTS_GUI_ADD, "bending.command.add", BendingCommand::onElementAdd, true),
+    REMOVE(Message.ELEMENTS_GUI_REMOVE, "bending.command.remove", BendingCommand::onElementRemove, true);
 
     private final Args0 message;
     private final String permission;
@@ -230,5 +222,13 @@ public final class ElementMenu implements BendingMenu {
       commandConsumer.accept(user, element);
       return true;
     }
+
+    private Component toEntry(BendingPlayer player) {
+      return GlobalTranslator.render(message.build(), player.entity().locale())
+        .decoration(TextDecoration.ITALIC, false)
+        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission));
+    }
+
+    private static final Collection<ActionType> VALUES = List.of(values());
   }
 }

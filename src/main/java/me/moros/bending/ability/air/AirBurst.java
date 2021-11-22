@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -51,6 +50,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirBurst extends AbilityInstance {
   private enum Mode {CONE, SPHERE, FALL}
@@ -107,7 +107,7 @@ public class AirBurst extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.createAir(user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.air(user.mainHandSide().toLocation(user.world())).spawn();
         if (!user.sneaking()) {
           release(Mode.SPHERE);
         }
@@ -174,7 +174,7 @@ public class AirBurst extends AbilityInstance {
     public void render() {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
-        ParticleUtil.createAir(bukkitLocation()).offset(0.2, 0.2, 0.2).spawn();
+        ParticleUtil.air(bukkitLocation()).offset(0.2, 0.2, 0.2).spawn();
         nextRenderTime = time + 75;
       }
     }

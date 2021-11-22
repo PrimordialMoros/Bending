@@ -126,7 +126,7 @@ public class SelectedSource implements State {
     }
     Location loc = origin.toLocation(user.world());
     if (particles) {
-      ParticleUtil.create(Particle.SMOKE_NORMAL, loc.add(0, 0.5, 0)).spawn();
+      ParticleUtil.of(Particle.SMOKE_NORMAL, loc.add(0, 0.5, 0)).spawn();
     }
     return UpdateResult.CONTINUE;
   }

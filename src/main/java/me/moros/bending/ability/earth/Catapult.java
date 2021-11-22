@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.Configurable;
@@ -52,6 +51,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Catapult extends AbilityInstance {
   private static final Config config = new Config();
@@ -137,7 +137,7 @@ public class Catapult extends AbilityInstance {
     Vector3d origin = user.location().add(new Vector3d(0, 0.5, 0));
     SoundUtil.EARTH.play(origin.toLocation(user.world()));
     if (base != null) {
-      ParticleUtil.create(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
+      ParticleUtil.of(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
         .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
     }
 

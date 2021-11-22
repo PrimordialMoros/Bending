@@ -19,19 +19,27 @@
 
 package me.moros.bending.model.temporal;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TemporalManager<K, V extends Temporary> {
   private final Map<K, V> instances;
+  private final Consumer<V> consumer;
 
   public TemporalManager() {
+    this(Temporary::revert);
+  }
+
+  public TemporalManager(@NonNull Consumer<V> consumer) {
     instances = new ConcurrentHashMap<>();
+    this.consumer = Objects.requireNonNull(consumer);
   }
 
   public boolean isTemp(@Nullable K key) {
@@ -58,12 +66,8 @@ public class TemporalManager<K, V extends Temporary> {
   }
 
   public void removeAll() {
-    new ArrayList<>(instances.values()).forEach(Temporary::revert);
+    List.copyOf(instances.values()).forEach(consumer);
     clear();
-  }
-
-  protected @NonNull Map<K, V> instances() {
-    return Map.copyOf(instances);
   }
 
   protected void clear() {

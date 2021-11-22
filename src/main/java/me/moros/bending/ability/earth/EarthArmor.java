@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempArmor;
@@ -53,6 +52,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthArmor extends AbilityInstance {
   private enum Mode {ROCK, IRON, GOLD}
@@ -169,7 +169,7 @@ public class EarthArmor extends AbilityInstance {
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
     SoundUtil.playSound(center, fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1);
-    ParticleUtil.create(Particle.BLOCK_CRACK, center)
+    ParticleUtil.of(Particle.BLOCK_CRACK, center)
       .count(8).offset(0.5, 0.5, 0.5)
       .data(fallingBlock.fallingBlock().getBlockData()).spawn();
   }

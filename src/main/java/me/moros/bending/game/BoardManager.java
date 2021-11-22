@@ -32,10 +32,10 @@ import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -185,15 +185,10 @@ public final class BoardManager {
 
     private Team createTeam(int slot) {
       Team team = bendingBoard.registerNewTeam(String.valueOf(slot));
-      String hidden = generateHiddenEntry(slot);
+      String hidden = ChatUtil.generateInvisibleString(slot);
       team.addEntry(hidden);
       bendingSlots.getScore(hidden).setScore(-slot);
       return team;
-    }
-
-    private String generateHiddenEntry(int slot) {
-      String hidden = ChatColor.values()[slot % 16].toString();
-      return slot <= 16 ? hidden : hidden + generateHiddenEntry(slot - 16);
     }
   }
 }

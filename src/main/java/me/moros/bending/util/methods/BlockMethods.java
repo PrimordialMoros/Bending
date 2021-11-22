@@ -84,7 +84,7 @@ public final class BlockMethods {
   public static void playLavaExtinguishEffect(@NonNull Block block) {
     Location center = block.getLocation().add(0.5, 0.7, 0.5);
     SoundUtil.LAVA_EXTINGUISH.play(center);
-    ParticleUtil.create(Particle.CLOUD, center).count(8)
+    ParticleUtil.of(Particle.CLOUD, center).count(8)
       .offset(0.3, 0.3, 0.3).spawn();
   }
 

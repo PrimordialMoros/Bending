@@ -21,7 +21,6 @@ package me.moros.bending.ability.fire;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -46,6 +45,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireJet extends AbilityInstance {
   private static final Config config = new Config();
@@ -111,7 +111,7 @@ public class FireJet extends AbilityInstance {
   private void jetBlastAnimation() {
     Vector3d center = user.location().add(new Vector3d(0, 0.2, 0));
     VectorMethods.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
-      ParticleUtil.createFire(user, center.add(v.multiply(0.5)).toLocation(user.world()))
+      ParticleUtil.fire(user, center.add(v.multiply(0.5)).toLocation(user.world()))
         .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(0.09).spawn()
     );
     SoundUtil.EXPLOSION.play(user.entity().getLocation(), 10, 0);
@@ -136,7 +136,7 @@ public class FireJet extends AbilityInstance {
     for (int i = 0; i < amount; i++) {
       Vector3d center = VectorMethods.gaussianOffset(user.location(), offset);
       Vector3d v = target.subtract(center);
-      ParticleUtil.createFire(user, center.toLocation(user.world()))
+      ParticleUtil.fire(user, center.toLocation(user.world()))
         .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(particleSpeed).spawn();
     }
 

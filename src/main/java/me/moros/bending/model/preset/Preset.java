@@ -135,7 +135,7 @@ public final class Preset {
 
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/preset bind " + name()));
+      .clickEvent(ClickEvent.runCommand("/bending preset bind " + name()));
   }
 
   private TextColor dominantColor() {

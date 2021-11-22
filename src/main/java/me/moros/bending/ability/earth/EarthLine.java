@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
@@ -80,6 +79,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON, MAGMA}
@@ -391,7 +391,7 @@ public class EarthLine extends AbilityInstance {
       nextUpdateTime = time + DELAY;
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
       if (canMove(currentIndex)) {
-        ParticleUtil.create(Particle.BLOCK_DUST, currentIndex.getLocation().add(0.5, 0.5, 0.5)).count(24)
+        ParticleUtil.of(Particle.BLOCK_DUST, currentIndex.getLocation().add(0.5, 0.5, 0.5)).count(24)
           .offset(0.2, 0.2, 0.2).data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn();
         TempBlock.create(currentIndex, Material.POINTED_DRIPSTONE.createBlockData(), 15000 - currentLength * DELAY);
         SoundUtil.EARTH.play(currentIndex.getLocation());

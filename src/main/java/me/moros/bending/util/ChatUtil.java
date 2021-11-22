@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.ChatColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -34,6 +35,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class ChatUtil {
   private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
   private static final Pattern SPACE = Pattern.compile(" ");
+  private static final String[] CHAT_CODES;
+
+  static  {
+    var arr = ChatColor.values();
+    CHAT_CODES = new String[arr.length];
+    for (ChatColor color : arr) {
+      CHAT_CODES[color.ordinal()] = color.toString();
+    }
+  }
 
   private ChatUtil() {
   }
@@ -50,6 +60,11 @@ public final class ChatUtil {
     }
     String output = NON_ALPHANUMERIC.matcher(input).replaceAll("").toLowerCase(Locale.ROOT);
     return output.length() > 16 ? output.substring(0, 16) : output;
+  }
+
+  public static @NonNull String generateInvisibleString(int slot) {
+    String hidden = CHAT_CODES[slot % CHAT_CODES.length];
+    return slot <= CHAT_CODES.length ? hidden : hidden + generateInvisibleString(slot - CHAT_CODES.length);
   }
 
   public static @NonNull List<@NonNull String> wrap(@NonNull String str, int wrapLength) {

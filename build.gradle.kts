@@ -1,17 +1,17 @@
 plugins {
-    `java-library`
+    java
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.0")
-    id("io.papermc.paperweight.userdev").version("1.1.14")
+    id("io.papermc.paperweight.userdev").version("1.2.0")
 }
 
 group = "me.moros"
-version = "1.1.2-SNAPSHOT"
+version = "1.2.0-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
     if (!isSnapshot()) {
         withJavadocJar()
@@ -31,7 +31,19 @@ repositories {
 }
 
 dependencies {
-    api("me.moros", "atlas-core", "1.4.0-SNAPSHOT")
+    implementation("me.moros", "storage", "2.1.0")
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.4") {
+        exclude(module = "checker-qual")
+    }
+    implementation("org.spongepowered", "configurate-hocon", "4.1.2")
+    implementation("org.jdbi", "jdbi3-core", "3.24.1") {
+        exclude(module = "caffeine")
+    }
+    implementation("com.zaxxer", "HikariCP", "5.0.0")
+    implementation("org.postgresql", "postgresql", "42.2.24") {
+        exclude(module = "checker-qual")
+    }
+    implementation("com.h2database", "h2", "1.4.200") //TODO update to 2.0.202 when available in maven central
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("cloud.commandframework","cloud-paper", "1.5.0")
     implementation("cloud.commandframework","cloud-minecraft-extras", "1.5.0") {
@@ -40,14 +52,19 @@ dependencies {
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
     paperDevBundle("1.17.1-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
-    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.2.0")
+    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.3.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0") {
         exclude(module = "bukkit")
     }
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("net.luckperms", "api", "5.3")
-    compileOnly("org.checkerframework", "checker-qual", "3.18.1")
+    compileOnly("org.checkerframework", "checker-qual", "3.19.0")
+}
+
+configurations.implementation {
+    exclude(module = "slf4j-api")
+    exclude(module = "error_prone_annotations")
 }
 
 tasks {
@@ -55,23 +72,24 @@ tasks {
         archiveClassifier.set("")
         archiveBaseName.set(rootProject.name)
         dependencies {
-            relocate("cloud.commandframework", "me.moros.atlas.cf")
-            relocate("com.github.benmanes.caffeine", "me.moros.atlas.caffeine")
-            relocate("com.github.stefvanschie.inventoryframework", "me.moros.atlas.inventoryframework")
-            relocate("com.typesafe", "me.moros.atlas.typesafe")
-            relocate("com.zaxxer.hikari", "me.moros.atlas.hikari")
-            relocate("io.leangen", "me.moros.atlas.jdbi-leangen")
-            relocate("org.antlr", "me.moros.atlas.jdbi-antlr")
+            relocate("cloud.commandframework", "me.moros.bending.internal.cf")
+            relocate("com.github.benmanes.caffeine", "me.moros.bending.internal.caffeine")
+            relocate("com.github.stefvanschie.inventoryframework", "me.moros.bending.internal.inventoryframework")
+            relocate("com.typesafe", "me.moros.bending.internal.typesafe")
+            relocate("com.zaxxer.hikari", "me.moros.bending.internal.hikari")
+            relocate("io.leangen", "me.moros.bending.internal.jdbi-leangen")
+            relocate("me.moros.storage", "me.moros.bending.internal.storage")
+            relocate("org.antlr", "me.moros.bending.internal.jdbi-antlr")
             relocate("org.bstats", "me.moros.bending.bstats")
-            relocate("org.h2", "me.moros.atlas.h2")
-            relocate("org.jdbi", "me.moros.atlas.jdbi")
-            relocate("org.postgresql", "me.moros.atlas.postgresql")
-            relocate("org.spongepowered.configurate", "me.moros.atlas.configurate")
+            relocate("org.h2", "me.moros.bending.internal.h2")
+            relocate("org.jdbi", "me.moros.bending.internal.jdbi")
+            relocate("org.postgresql", "me.moros.bending.internal.postgresql")
+            relocate("org.spongepowered.configurate", "me.moros.bending.internal.configurate")
         }
-        minimize()
+        //minimize()
     }
     build {
-        dependsOn(shadowJar)
+        dependsOn(reobfJar)
     }
     withType<AbstractArchiveTask> {
         isPreserveFileTimestamps = false

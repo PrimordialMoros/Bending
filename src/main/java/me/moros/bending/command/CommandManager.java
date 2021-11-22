@@ -19,18 +19,20 @@
 
 package me.moros.bending.command;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-import cloud.commandframework.CommandTree;
-import cloud.commandframework.arguments.parser.ParserRegistry;
+import cloud.commandframework.Command.Builder;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
+import cloud.commandframework.meta.CommandMeta;
+import cloud.commandframework.minecraft.extras.AudienceProvider;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import me.moros.bending.Bending;
@@ -40,6 +42,7 @@ import me.moros.bending.command.parser.ModifyPolicyParser;
 import me.moros.bending.command.parser.PresetParser;
 import me.moros.bending.command.parser.UserParser;
 import me.moros.bending.locale.Message;
+import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifyPolicy;
@@ -52,16 +55,18 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class Commands {
-  private final PaperCommandManager<CommandSender> manager;
-  private final MinecraftHelp<CommandSender> minecraftHelp;
+public final class CommandManager extends PaperCommandManager<CommandSender> {
+  public CommandManager(@NonNull Bending plugin) throws Exception {
+    super(plugin, CommandExecutionCoordinator.simpleCoordinator(), Function.identity(), Function.identity());
+    registerExceptionHandler();
+    registerAsynchronousCompletions();
+    setCommandSuggestionProcessor(this::suggestionProvider);
+    registerCommandPreProcessor(this::preprocessor);
+    registerParsers();
+    new BendingCommand(this);
+  }
 
-  public Commands(@NonNull Bending plugin) throws Exception {
-    Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
-      CommandExecutionCoordinator.simpleCoordinator();
-    manager = new PaperCommandManager<>(plugin, executionCoordinatorFunction, Function.identity(), Function.identity());
-    minecraftHelp = new MinecraftHelp<>("/bending help", c -> c, manager);
-    manager.registerAsynchronousCompletions();
+  private void registerExceptionHandler() {
     new MinecraftExceptionHandler<CommandSender>()
       .withInvalidSyntaxHandler()
       .withInvalidSenderHandler()
@@ -69,11 +74,17 @@ public class Commands {
       .withArgumentParsingHandler()
       .withCommandExecutionHandler()
       .withDecorator(Message::brand)
-      .apply(manager, c -> c);
+      .apply(this, AudienceProvider.nativeAudience());
+  }
 
-    manager.setCommandSuggestionProcessor(this::suggestionProvider);
+  public @NonNull Builder<@NonNull CommandSender> rootBuilder() {
+    return commandBuilder("bending", "bend", "b", "avatar", "atla", "tla")
+      .meta(CommandMeta.DESCRIPTION, "Base command for bending");
+  }
 
-    constructCommands();
+  public static @NonNull List<@NonNull String> combinedSuggestions(@NonNull CommandSender sender) {
+    return Stream.of(CommandManager.abilityCompletions(sender, false), Element.NAMES)
+      .flatMap(Collection::stream).toList();
   }
 
   private List<String> suggestionProvider(CommandPreprocessingContext<CommandSender> context, List<String> strings) {
@@ -92,24 +103,18 @@ public class Commands {
     return suggestions;
   }
 
-  private void constructCommands() {
-    manager.registerCommandPreProcessor(c -> {
-      if (c.getCommandContext().getSender() instanceof Player player) {
-        c.getCommandContext().store(ContextKeys.BENDING_PLAYER, Registries.BENDERS.user(player));
-      }
-    });
+  private void preprocessor(CommandPreprocessingContext<CommandSender> context) {
+    if (context.getCommandContext().getSender() instanceof Player player) {
+      context.getCommandContext().store(ContextKeys.BENDING_PLAYER, Registries.BENDERS.user(player));
+    }
+  }
 
-    ParserRegistry<CommandSender> parserRegistry = manager.getParserRegistry();
-    parserRegistry.registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser());
-    parserRegistry.registerParserSupplier(TypeToken.get(AttributeModifier.class), options -> new AttributeModifierParser());
-    parserRegistry.registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
-    parserRegistry.registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
-    parserRegistry.registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
-
-    new BendingCommand(manager, minecraftHelp);
-    new ElementCommand(manager);
-    new PresetCommand(manager);
-    new ModifyCommand(manager);
+  private void registerParsers() {
+    getParserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser(true));
+    getParserRegistry().registerParserSupplier(TypeToken.get(AttributeModifier.class), options -> new AttributeModifierParser());
+    getParserRegistry().registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
+    getParserRegistry().registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
+    getParserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
   }
 
   public static @NonNull List<@NonNull String> abilityCompletions(@Nullable CommandSender sender, boolean validOnly) {

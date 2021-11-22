@@ -22,7 +22,6 @@ package me.moros.bending.ability.water;
 import java.util.Collection;
 import java.util.HashSet;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -42,6 +41,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class WaterBubble extends AbilityInstance {
   private static final Config config = new Config();

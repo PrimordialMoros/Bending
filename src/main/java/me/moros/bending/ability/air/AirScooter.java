@@ -22,7 +22,6 @@ package me.moros.bending.ability.air;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequences.AirWheel;
 import me.moros.bending.config.Configurable;
@@ -46,6 +45,7 @@ import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirScooter extends AbilityInstance {
   private static final Config config = new Config();
@@ -133,7 +133,7 @@ public class AirScooter extends AbilityInstance {
       double x = 0.6 * Math.cos(theta) * sin;
       double y = 0.6 * Math.cos(verticalPosition);
       double z = 0.6 * Math.sin(theta) * sin;
-      ParticleUtil.createAir(user.entity().getLocation().add(x, y - 0.25, z)).spawn();
+      ParticleUtil.air(user.entity().getLocation().add(x, y - 0.25, z)).spawn();
     }
   }
 

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -49,6 +48,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireKick extends AbilityInstance {
   private static final Config config = new Config();
@@ -110,7 +110,7 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.createFire(user, bukkitLocation()).count(4)
+      ParticleUtil.fire(user, bukkitLocation()).count(4)
         .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
     }
 

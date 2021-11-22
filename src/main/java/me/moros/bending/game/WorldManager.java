@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
-import me.moros.atlas.configurate.serialize.SerializationException;
 import me.moros.bending.Bending;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 public final class WorldManager {
   public static final AbilityManager DUMMY_INSTANCE = new DummyAbilityManager();

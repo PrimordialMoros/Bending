@@ -26,8 +26,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
 
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;

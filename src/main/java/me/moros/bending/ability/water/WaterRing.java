@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -70,6 +69,7 @@ import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class WaterRing extends AbilityInstance {
   public static final double RING_RADIUS = 2.8;
@@ -245,7 +245,7 @@ public class WaterRing extends AbilityInstance {
     for (int i = 0; i < Math.min(ring.size(), FastMath.ceil(sources * 0.8)); i++) {
       Block block = ring.get(i);
       if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
-        ParticleUtil.createBubble(block).spawn();
+        ParticleUtil.bubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.create(block, Material.WATER.createBlockData(), 250);
       }
@@ -352,7 +352,7 @@ public class WaterRing extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.create(Particle.SNOW_SHOVEL, bukkitLocation()).count(3)
+      ParticleUtil.of(Particle.SNOW_SHOVEL, bukkitLocation()).count(3)
         .offset(0.25, 0.25, 0.25).spawn();
     }
 

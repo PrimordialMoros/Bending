@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth.passives;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -40,6 +39,7 @@ import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthCling extends AbilityInstance implements Ability {
   private static final BlockData STONE = Material.STONE.createBlockData();
@@ -84,9 +84,9 @@ public class EarthCling extends AbilityInstance implements Ability {
           float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
           EntityMethods.applyVelocity(this, user.entity(), user.velocity().multiply(userConfig.speed));
           user.entity().setFallDistance(fallDistance);
-          ParticleUtil.create(Particle.CRIT, user.entity().getEyeLocation()).count(2)
+          ParticleUtil.of(Particle.CRIT, user.entity().getEyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05);
-          ParticleUtil.create(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)
+          ParticleUtil.of(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)
             .offset(0.1, 0.4, 0.1).data(STONE);
         }
       }

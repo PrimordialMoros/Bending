@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -64,6 +63,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireBlast extends AbilityInstance implements Explosive {
   private static final Config config = new Config();
@@ -124,7 +124,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-        ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
       } else if (!user.sneaking()) {
         launch();
       }
@@ -233,7 +233,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     @Override
     public void render() {
       Location loc = bukkitLocation();
-      ParticleUtil.createFire(user, loc)
+      ParticleUtil.fire(user, loc)
         .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
     }
 

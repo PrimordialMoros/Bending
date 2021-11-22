@@ -39,7 +39,7 @@ public final class LuckPermsHook {
 
   private void setupContexts(ContextManager manager) {
     manager.registerCalculator(BendingContextBuilder.of("element")
-      .suggestions(Element.names())
+      .suggestions(Element.NAMES)
       .build(u -> u.elements().stream().map(Element::toString).toList())
     );
     manager.registerCalculator(BendingContextBuilder.of("avatar")

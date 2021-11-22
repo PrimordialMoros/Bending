@@ -56,9 +56,9 @@ public class TempArmorStand implements Temporary {
     if (particles) {
       Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
       BlockData data = material.createBlockData();
-      ParticleUtil.create(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
+      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
         .data(data).spawn();
-      ParticleUtil.create(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
+      ParticleUtil.of(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
         .data(data).spawn();
     }
 

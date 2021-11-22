@@ -144,7 +144,7 @@ public class Pillar implements Updatable {
   }
 
   public boolean onEntityHit(@NonNull Entity entity) {
-    double factor = 0.75 * (length - 0.4 * currentLength) / length;
+    double factor = 0.75 * (length - 0.2 * currentLength) / length;
     entity.setVelocity(normalizeVelocity(new Vector3d(entity.getVelocity()), factor).clampVelocity());
     return true;
   }

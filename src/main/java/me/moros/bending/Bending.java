@@ -21,7 +21,7 @@ package me.moros.bending;
 
 import java.util.Objects;
 
-import me.moros.bending.command.Commands;
+import me.moros.bending.command.CommandManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.events.BendingEventBus;
 import me.moros.bending.game.Game;
@@ -40,7 +40,6 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Bending extends JavaPlugin {
   private static Bending plugin;
@@ -61,7 +60,7 @@ public class Bending extends JavaPlugin {
   public void onEnable() {
     new Metrics(this, 8717);
     plugin = this;
-    logger = LoggerFactory.getLogger(getClass().getSimpleName());
+    logger = getSLF4JLogger();
     author = getDescription().getAuthors().get(0);
     version = getDescription().getVersion();
 
@@ -82,7 +81,7 @@ public class Bending extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new UserListener(game), this);
 
     try {
-      new Commands(this);
+      new CommandManager(this);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       getServer().getPluginManager().disablePlugin(this);

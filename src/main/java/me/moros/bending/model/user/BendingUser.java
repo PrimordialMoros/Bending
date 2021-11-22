@@ -23,9 +23,9 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
-import me.moros.atlas.caffeine.cache.Scheduler;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import me.moros.bending.Bending;
 import me.moros.bending.events.BindChangeEvent.BindType;
 import me.moros.bending.events.ElementChangeEvent.ElementAction;

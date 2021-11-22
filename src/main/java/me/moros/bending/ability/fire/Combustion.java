@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -57,6 +56,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Combustion extends AbilityInstance implements Explosive {
   private static final Config config = new Config();
@@ -155,11 +155,11 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
     exploded = true;
     Location loc = center.toLocation(user.world());
-    ParticleUtil.create(Particle.FLAME, loc).extra(0.2).count(20)
+    ParticleUtil.of(Particle.FLAME, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.SMOKE_LARGE, loc).extra(0.2).count(20)
+    ParticleUtil.of(Particle.SMOKE_LARGE, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
-    ParticleUtil.create(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
+    ParticleUtil.of(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
 
     FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
@@ -191,8 +191,8 @@ public class Combustion extends AbilityInstance implements Explosive {
       distanceTravelled += speed;
       renderRing();
       Location bukkitLocation = bukkitLocation();
-      ParticleUtil.create(Particle.SMOKE_NORMAL, bukkitLocation).extra(0.06).spawn();
-      ParticleUtil.create(Particle.FIREWORKS_SPARK, bukkitLocation).extra(0.06).spawn();
+      ParticleUtil.of(Particle.SMOKE_NORMAL, bukkitLocation).extra(0.06).spawn();
+      ParticleUtil.of(Particle.FIREWORKS_SPARK, bukkitLocation).extra(0.06).spawn();
     }
 
     @Override
@@ -207,7 +207,7 @@ public class Combustion extends AbilityInstance implements Explosive {
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorMethods.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
           Vector3d velocity = v.multiply(radius);
-          ParticleUtil.create(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
+          ParticleUtil.of(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
             .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
         });
       }

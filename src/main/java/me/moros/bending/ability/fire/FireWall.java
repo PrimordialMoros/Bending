@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -59,6 +58,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireWall extends AbilityInstance {
   private static final Config config = new Config();
@@ -159,12 +159,12 @@ public class FireWall extends AbilityInstance {
         double speed = 1 - (h / (2 * currentHeight));
         if (MaterialUtil.isTransparent(block)) {
           if (h == 0) {
-            ParticleUtil.createFire(user, pos.toLocation(user.world())).count(10)
+            ParticleUtil.fire(user, pos.toLocation(user.world())).count(10)
               .offset(0.5, 0.25, 0.5).extra(0.01).spawn();
           } else {
             for (int i = 0; i < 2; i++) {
               Vector3d center = VectorMethods.gaussianOffset(pos, 0.4);
-              ParticleUtil.createFire(user, center.toLocation(user.world())).count(0)
+              ParticleUtil.fire(user, center.toLocation(user.world())).count(0)
                 .offset(0, 1, 0).extra(0.07 * speed).spawn();
             }
           }

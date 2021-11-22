@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.Configurable;
@@ -50,6 +49,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirWheel extends AbilityInstance {
   private static final AABB BOUNDS = new AABB(new Vector3d(-0.4, -2, -2), new Vector3d(0.4, 2, 2));
@@ -135,7 +135,7 @@ public class AirWheel extends AbilityInstance {
   private void render() {
     Vector3d rotateAxis = Vector3d.PLUS_J.cross(user.direction().setY(0));
     VectorMethods.circle(user.direction().multiply(1.6), rotateAxis, 40).forEach(v ->
-      ParticleUtil.createAir(center.add(v).toLocation(user.world())).spawn()
+      ParticleUtil.air(center.add(v).toLocation(user.world())).spawn()
     );
   }
 

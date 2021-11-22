@@ -21,12 +21,14 @@ package me.moros.bending.command.parser;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.function.Predicate;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.bukkit.parsers.PlayerArgument.PlayerParseException;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.bukkit.Bukkit;
@@ -54,6 +56,12 @@ public final class UserParser implements ArgumentParser<CommandSender, User> {
 
   @Override
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
-    return Registries.BENDERS.onlinePlayers().stream().map(p -> p.entity().getName()).toList();
+    Predicate<BendingPlayer> canSee;
+    if (commandContext.getSender() instanceof Player sender) {
+      canSee = p -> sender.canSee(p.entity());
+    } else {
+      canSee = x -> true;
+    }
+    return Registries.BENDERS.players().filter(canSee).map(p -> p.entity().getName()).toList();
   }
 }

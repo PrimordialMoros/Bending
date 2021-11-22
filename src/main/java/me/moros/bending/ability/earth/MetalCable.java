@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
@@ -69,6 +68,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class MetalCable extends AbilityInstance {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
@@ -163,9 +163,9 @@ public class MetalCable extends AbilityInstance {
       if (CollisionUtil.handleEntityCollisions(user, BOX.at(location), this::onProjectileHit)) {
         BlockData bd = projectile.fallingBlock().getBlockData();
         Location bukkitLocation = location.toLocation(user.world());
-        ParticleUtil.create(Particle.BLOCK_CRACK, bukkitLocation).count(4)
+        ParticleUtil.of(Particle.BLOCK_CRACK, bukkitLocation).count(4)
           .offset(0.25, 0.15, 0.25).data(bd).spawn();
-        ParticleUtil.create(Particle.BLOCK_DUST, bukkitLocation).count(6)
+        ParticleUtil.of(Particle.BLOCK_DUST, bukkitLocation).count(6)
           .offset(0.25, 0.15, 0.25).data(bd).spawn();
         return UpdateResult.REMOVE;
       }
@@ -209,9 +209,9 @@ public class MetalCable extends AbilityInstance {
         EntityMethods.applyVelocity(this, entityToMove, Vector3d.ZERO);
         if (target.entity instanceof FallingBlock fb) {
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
-          ParticleUtil.create(Particle.BLOCK_CRACK, tempLocation).count(4)
+          ParticleUtil.of(Particle.BLOCK_CRACK, tempLocation).count(4)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
-          ParticleUtil.create(Particle.BLOCK_DUST, tempLocation).count(6)
+          ParticleUtil.of(Particle.BLOCK_DUST, tempLocation).count(6)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
           target.entity.remove();
         }
@@ -272,7 +272,7 @@ public class MetalCable extends AbilityInstance {
           return false;
         }
       }
-      ParticleUtil.createRGB(temp.toLocation(user.world()), "444444").spawn();
+      ParticleUtil.rgb(temp.toLocation(user.world()), "444444").spawn();
     }
     return true;
   }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -54,6 +53,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirBreath extends AbilityInstance {
   private static final Config config = new Config();
@@ -135,9 +135,9 @@ public class AirBreath extends AbilityInstance {
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       if (MaterialUtil.isWater(spawnLoc.getBlock())) {
-        ParticleUtil.createBubble(spawnLoc.getBlock()).spawn();
+        ParticleUtil.bubble(spawnLoc.getBlock()).spawn();
       } else {
-        ParticleUtil.createAir(spawnLoc).count(FastMath.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
+        ParticleUtil.air(spawnLoc).count(FastMath.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
       }
     }
 

@@ -140,7 +140,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
       BlockMethods.tryBreakPlant(current);
       if (material == Material.WATER && MaterialUtil.isWater(current)) {
-        ParticleUtil.createBubble(current).spawn();
+        ParticleUtil.bubble(current).spawn();
         tempBlock = null;
       } else {
         tempBlock = current;

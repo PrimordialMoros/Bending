@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -61,6 +60,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 // TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance {
@@ -288,9 +288,9 @@ public class EarthGlove extends AbilityInstance {
       return;
     }
     BlockData data = isMetal ? Material.IRON_BLOCK.createBlockData() : Material.STONE.createBlockData();
-    ParticleUtil.create(Particle.BLOCK_CRACK, glove.getLocation())
+    ParticleUtil.of(Particle.BLOCK_CRACK, glove.getLocation())
       .count(3).offset(0.1, 0.1, 0.1).data(data).spawn();
-    ParticleUtil.create(Particle.BLOCK_DUST, glove.getLocation())
+    ParticleUtil.of(Particle.BLOCK_DUST, glove.getLocation())
       .count(2).offset(0.1, 0.1, 0.1).data(data).spawn();
     onDestroy();
   }

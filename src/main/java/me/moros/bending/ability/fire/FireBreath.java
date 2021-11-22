@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -58,6 +57,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireBreath extends AbilityInstance {
   private static final Config config = new Config();
@@ -142,7 +142,7 @@ public class FireBreath extends AbilityInstance {
       Location spawnLoc = bukkitLocation();
       double offset = 0.2 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.createFire(user, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
+      ParticleUtil.fire(user, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).spawn();
     }
 

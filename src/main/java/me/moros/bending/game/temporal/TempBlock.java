@@ -22,7 +22,6 @@ package me.moros.bending.game.temporal;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,7 +49,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class TempBlock implements Temporary {
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
-  public static final TemporalManager<Block, TempBlock> MANAGER = new TempBlockManager();
+  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>(TempBlock::revertFully);
 
   private final Deque<TempBlockState> snapshots;
   private final Block block;
@@ -299,14 +298,6 @@ public class TempBlock implements Temporary {
       GRAVITY_CACHE.add(block);
     } else {
       GRAVITY_CACHE.remove(block);
-    }
-  }
-
-  private static class TempBlockManager extends TemporalManager<Block, TempBlock> {
-    @Override
-    public void removeAll() {
-      List.copyOf(instances().values()).forEach(TempBlock::revertFully);
-      clear();
     }
   }
 

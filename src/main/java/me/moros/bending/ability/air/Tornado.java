@@ -21,7 +21,6 @@ package me.moros.bending.ability.air;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -47,6 +46,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Tornado extends AbilityInstance {
   private static final Config config = new Config();
@@ -152,7 +152,7 @@ public class Tornado extends AbilityInstance {
         double x = r * Math.cos(y + offset);
         double z = r * Math.sin(y + offset);
         Location loc = base.add(new Vector3d(x, y, z)).toLocation(user.world());
-        ParticleUtil.createAir(loc).spawn();
+        ParticleUtil.air(loc).spawn();
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
           SoundUtil.AIR.play(loc);
         }

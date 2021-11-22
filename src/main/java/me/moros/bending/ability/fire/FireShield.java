@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -56,6 +55,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireShield extends AbilityInstance {
   private static final Config config = new Config();
@@ -210,7 +210,7 @@ public class FireShield extends AbilityInstance {
       for (int i = 0; i < 18; i++) {
         for (double j = 0.2; j <= 1; j += 0.2) {
           Location spawnLoc = location.add(new Vector3d(array).multiply(j * userConfig.diskRadius)).toLocation(user.world());
-          ParticleUtil.createFire(user, spawnLoc)
+          ParticleUtil.fire(user, spawnLoc)
             .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
           if (rand.nextInt(12) == 0) {
             SoundUtil.FIRE.play(spawnLoc);
@@ -259,7 +259,7 @@ public class FireShield extends AbilityInstance {
         double x = radius * factor * Math.cos(i * currentPoint);
         double z = radius * factor * Math.sin(i * currentPoint);
         Location spawnLoc = center.add(new Vector3d(x, y, z)).toLocation(user.world());
-        ParticleUtil.createFire(user, spawnLoc)
+        ParticleUtil.fire(user, spawnLoc)
           .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
         if (rand.nextInt(12) == 0) {
           SoundUtil.FIRE.play(spawnLoc);

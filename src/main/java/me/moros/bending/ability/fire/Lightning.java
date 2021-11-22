@@ -29,7 +29,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
@@ -74,6 +73,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Lightning extends AbilityInstance {
   private static final double POINT_DISTANCE = 0.2;
@@ -135,9 +135,9 @@ public class Lightning extends AbilityInstance {
       if (deltaTime > userConfig.minChargeTime) {
         Location spawnLoc = user.mainHandSide().toLocation(user.world());
         double offset = deltaTime / (3.0 * userConfig.duration);
-        ParticleUtil.createRGB(spawnLoc, "01E1FF").offset(offset, offset, offset).spawn();
+        ParticleUtil.rgb(spawnLoc, "01E1FF").offset(offset, offset, offset).spawn();
         if (deltaTime > userConfig.maxChargeTime) {
-          ParticleUtil.create(Particle.END_ROD, spawnLoc).spawn();
+          ParticleUtil.of(Particle.END_ROD, spawnLoc).spawn();
         }
       }
     } else {
@@ -202,7 +202,7 @@ public class Lightning extends AbilityInstance {
       if (!user.canBuild(loc.getBlock())) {
         return false;
       }
-      ParticleUtil.create(Particle.END_ROD, v.toLocation(user.world())).spawn();
+      ParticleUtil.of(Particle.END_ROD, v.toLocation(user.world())).spawn();
     }
     return true;
   }

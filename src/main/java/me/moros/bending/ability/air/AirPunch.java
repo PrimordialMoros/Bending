@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -50,6 +49,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirPunch extends AbilityInstance {
   private static final Config config = new Config();
@@ -119,7 +119,7 @@ public class AirPunch extends AbilityInstance {
     @Override
     public void render() {
       VectorMethods.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
-        ParticleUtil.create(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
+        ParticleUtil.of(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
           .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
       );
     }

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
@@ -62,6 +61,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireBurst extends AbilityInstance {
   private static final Config config = new Config();
@@ -111,7 +111,7 @@ public class FireBurst extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.createFire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
         if (!user.sneaking()) {
           release(false);
         }
@@ -179,7 +179,7 @@ public class FireBurst extends AbilityInstance {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
         Location loc = bukkitLocation();
-        ParticleUtil.createFire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+        ParticleUtil.fire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
         nextRenderTime = time + 75;
       }
     }

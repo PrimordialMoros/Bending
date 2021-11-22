@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
@@ -64,6 +63,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FrostBreath extends AbilityInstance {
   private static final Config config = new Config();
@@ -145,9 +145,9 @@ public class FrostBreath extends AbilityInstance {
       Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.create(Particle.SNOW_SHOVEL, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
+      ParticleUtil.of(Particle.SNOW_SHOVEL, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).spawn();
-      ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(FastMath.ceil(0.4 * distanceTravelled))
+      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(FastMath.ceil(0.4 * distanceTravelled))
         .offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
     }
 
@@ -168,7 +168,7 @@ public class FrostBreath extends AbilityInstance {
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
         int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
         PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
-        ParticleUtil.create(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
+        ParticleUtil.of(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
           .offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
       }
       return false;

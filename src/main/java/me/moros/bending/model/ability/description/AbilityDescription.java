@@ -123,7 +123,7 @@ public class AbilityDescription {
 
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/bending info " + name()));
+      .clickEvent(ClickEvent.runCommand("/bending help " + name()));
   }
 
   @Override

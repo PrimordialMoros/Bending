@@ -22,9 +22,9 @@ package me.moros.bending.util;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
-import me.moros.atlas.caffeine.cache.Scheduler;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ExpiringSet<E> {

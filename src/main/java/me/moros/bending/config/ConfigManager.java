@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
-import me.moros.atlas.configurate.hocon.HoconConfigurationLoader;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -41,19 +39,19 @@ import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 public final class ConfigManager {
-  private static final Map<Class<? extends Number>, AttributeConverter> converters;
+  private static final Map<Class<? extends Number>, AttributeConverter> converters = Map.of(
+    Double.class, AttributeConverter.DOUBLE,
+    Integer.class, AttributeConverter.INT,
+    Long.class, AttributeConverter.LONG,
+    double.class, AttributeConverter.DOUBLE,
+    int.class, AttributeConverter.INT,
+    long.class, AttributeConverter.LONG
+  );
 
-  static {
-    converters = Map.of(Double.class, AttributeConverter.DOUBLE,
-      Integer.class, AttributeConverter.INT,
-      Long.class, AttributeConverter.LONG,
-      double.class, AttributeConverter.DOUBLE,
-      int.class, AttributeConverter.INT,
-      long.class, AttributeConverter.LONG
-    );
-  }
 
   private final Collection<Configurable> instances = new ArrayList<>();
   private final HoconConfigurationLoader loader;

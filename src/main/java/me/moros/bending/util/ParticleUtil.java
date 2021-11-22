@@ -32,46 +32,46 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * You should prefer this over using a custom ParticleBuilder to ensure uniform rendering across different abilities.
  * @see ParticleBuilder
  */
-public final class ParticleUtil {
+public final class ParticleUtil extends ParticleBuilder {
   public static final Color AIR = fromHex("EEEEEE");
 
-  private ParticleUtil() {
+  public ParticleUtil(@NonNull Particle particle) {
+    super(particle);
   }
 
-  public static @NonNull ParticleBuilder createFire(@NonNull User user, @NonNull Location center) {
+  public static @NonNull ParticleBuilder fire(@NonNull User user, @NonNull Location center) {
     Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
-    return effect.builder().location(center).extra(0);
+    return new ParticleUtil(effect).location(center).extra(0);
   }
 
-  public static @NonNull ParticleBuilder createAir(@NonNull Location center) {
-    return Particle.REDSTONE.builder().location(center).extra(0).color(AIR, 1.8F);
+  public static @NonNull ParticleBuilder air(@NonNull Location center) {
+    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(AIR, 1.8F);
   }
 
-  public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal) {
-    return Particle.REDSTONE.builder().location(center).extra(0).color(fromHex(hexVal));
+  public static @NonNull ParticleBuilder rgb(@NonNull Location center, @NonNull String hexVal) {
+    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(fromHex(hexVal));
   }
 
-  public static @NonNull ParticleBuilder createRGB(@NonNull Location center, @NonNull String hexVal, float size) {
-    return Particle.REDSTONE.builder().location(center).extra(0).color(fromHex(hexVal), size);
+  public static @NonNull ParticleBuilder rgb(@NonNull Location center, @NonNull String hexVal, float size) {
+    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(fromHex(hexVal), size);
   }
 
-  public static @NonNull ParticleBuilder create(@NonNull Particle effect, @NonNull Location center) {
-    return effect.builder().location(center).extra(0);
+  public static @NonNull ParticleBuilder of(@NonNull Particle effect, @NonNull Location center) {
+    return new ParticleUtil(effect).location(center).extra(0);
   }
 
-  public static @NonNull ParticleBuilder createBubble(@NonNull Block center) {
-    return Particle.WATER_BUBBLE.builder().location(center.getLocation().add(0.5, 0.5, 0.5)).extra(0)
+  public static @NonNull ParticleBuilder bubble(@NonNull Block center) {
+    return new ParticleUtil(Particle.WATER_BUBBLE).location(center.getLocation().add(0.5, 0.5, 0.5)).extra(0)
       .count(3).offset(0.25, 0.25, 0.25);
   }
 
   /**
    * Asynchronously spawns and sends the given particle effect to its receivers.
    * Make sure you have collected the receivers in a sync thread first.
-   * @param pb the particle effect builder that holds the particle data to display
    */
-  public static void displayAsync(@NonNull ParticleBuilder pb) {
-    if (pb.hasReceivers()) {
-      Tasker.async(pb::spawn);
+  public void drawAsync() {
+    if (hasReceivers()) {
+      Tasker.async(this::spawn);
     }
   }
 

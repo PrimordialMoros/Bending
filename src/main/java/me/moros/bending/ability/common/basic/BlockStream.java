@@ -167,7 +167,7 @@ public abstract class BlockStream implements State {
 
   protected void renderHead(@NonNull Block block) {
     if (material == Material.WATER && MaterialUtil.isWater(block)) {
-      ParticleUtil.createBubble(block).spawn();
+      ParticleUtil.bubble(block).spawn();
     } else {
       TempBlock.create(block, material.createBlockData());
     }

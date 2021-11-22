@@ -21,7 +21,7 @@ package me.moros.bending.model.ability.description;
 
 import java.util.concurrent.TimeUnit;
 
-import me.moros.atlas.caffeine.cache.Expiry;
+import com.github.benmanes.caffeine.cache.Expiry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CooldownExpiry implements Expiry<AbilityDescription, Long> {

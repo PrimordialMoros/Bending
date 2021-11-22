@@ -26,21 +26,16 @@ import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
-import me.moros.bending.command.Commands;
+import me.moros.bending.command.CommandManager;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.registry.Registries;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AbilityDescriptionParser implements ArgumentParser<CommandSender, AbilityDescription> {
-  public static final AbilityDescriptionParser STRICT_PARSER = new AbilityDescriptionParser(true);
   private final boolean strict;
 
-  public AbilityDescriptionParser() {
-    this(false);
-  }
-
-  private AbilityDescriptionParser(boolean strict) {
+  public AbilityDescriptionParser(boolean strict) {
     this.strict = strict;
   }
 
@@ -59,6 +54,6 @@ public final class AbilityDescriptionParser implements ArgumentParser<CommandSen
 
   @Override
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
-    return Commands.abilityCompletions(commandContext.getSender(), strict);
+    return CommandManager.abilityCompletions(commandContext.getSender(), strict);
   }
 }

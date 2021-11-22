@@ -37,6 +37,8 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
  * @see TranslationManager
  */
 public interface Message {
+  TextColor TEXT_COLOR = TextColor.color(221, 221, 221);
+
   Component PREFIX = text("[", DARK_GRAY)
     .append(text("Bending", DARK_AQUA))
     .append(text("] ", DARK_GRAY));
@@ -45,6 +47,7 @@ public interface Message {
 
   Args0 INVALID_PRESET_NAME = () -> translatable("bending.command.preset.invalid-name", RED);
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", YELLOW);
+  Args0 PRESET_LIST_HEADER = () -> translatable("bending.command.preset.list.header", DARK_AQUA);
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", YELLOW);
 
   Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.create-success", GREEN)
@@ -133,10 +136,10 @@ public interface Message {
   Args1<Component> ABILITY_INFO_EMPTY = ability -> translatable("bending.command.info.empty", YELLOW)
     .args(ability);
 
-  Args2<Component, Component> ABILITY_INFO_DESCRIPTION = (ability, description) -> translatable("bending.command.info.description", TextColor.color(221, 221, 221))
+  Args2<Component, Component> ABILITY_INFO_DESCRIPTION = (ability, description) -> translatable("bending.command.info.description", TEXT_COLOR)
     .args(ability, description);
 
-  Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TextColor.color(221, 221, 221))
+  Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TEXT_COLOR)
     .args(ability, instructions);
 
   Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", DARK_AQUA)

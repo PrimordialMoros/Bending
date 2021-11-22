@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.TravellingSource;
@@ -65,6 +64,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class WaterGimbal extends AbilityInstance {
   private static final Config config = new Config();
@@ -256,7 +256,7 @@ public class WaterGimbal extends AbilityInstance {
 
     private void render(Block block) {
       if (MaterialUtil.isWater(block)) {
-        ParticleUtil.createBubble(block).spawn();
+        ParticleUtil.bubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.create(block, Material.WATER.createBlockData(), 150);
       }
@@ -297,7 +297,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     protected void renderHead(@NonNull Block block) {
-      ParticleUtil.create(Particle.SNOW_SHOVEL, block.getLocation().add(0.5, 0.5, 0.5))
+      ParticleUtil.of(Particle.SNOW_SHOVEL, block.getLocation().add(0.5, 0.5, 0.5))
         .count(6).offset(0.25, 0.25, 0.25).extra(0.05).spawn();
       if (!MaterialUtil.isWater(block)) {
         TempBlock.create(block, Material.WATER.createBlockData());

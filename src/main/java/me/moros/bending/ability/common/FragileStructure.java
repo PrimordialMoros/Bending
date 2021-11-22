@@ -104,7 +104,7 @@ public class FragileStructure {
       TempBlock.createAir(block);
       block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
       Location center = block.getLocation().add(0.5, 0.5, 0.5);
-      ParticleUtil.create(Particle.BLOCK_CRACK, center).count(2)
+      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2)
         .offset(0.3, 0.3, 0.3).data(blockData).spawn();
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
         SoundUtil.playSound(center, blockData.getSoundGroup().getBreakSound(), 2, 1);

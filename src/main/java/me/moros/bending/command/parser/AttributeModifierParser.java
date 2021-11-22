@@ -19,16 +19,14 @@
 
 package me.moros.bending.command.parser;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.stream.Stream;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
-import me.moros.bending.command.Commands;
+import me.moros.bending.command.CommandManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.ModifyPolicy;
@@ -55,7 +53,6 @@ public final class AttributeModifierParser implements ArgumentParser<CommandSend
 
   @Override
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
-    return Stream.of(Commands.abilityCompletions(commandContext.getSender(), false), Element.names())
-      .flatMap(Collection::stream).toList();
+    return CommandManager.combinedSuggestions(commandContext.getSender());
   }
 }

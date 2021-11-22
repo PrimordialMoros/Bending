@@ -32,7 +32,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.fire.FlameRush;
@@ -83,6 +82,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthSmash extends AbilityInstance {
   private static final Config config = new Config();
@@ -243,7 +243,7 @@ public class EarthSmash extends AbilityInstance {
         TempBlock.createAir(block);
         shards.put(new TempFallingBlock(block, blockData, velocity, true, 5000), shardType(blockData.getMaterial()));
         Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        ParticleUtil.create(Particle.BLOCK_CRACK, spawnLoc).count(4)
+        ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4)
           .offset(0.5, 0.5, 0.5).data(blockData).spawn();
         if (ThreadLocalRandom.current().nextBoolean()) {
           SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound(), 1, 1);
@@ -325,7 +325,7 @@ public class EarthSmash extends AbilityInstance {
     public @NonNull UpdateResult update() {
       if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
         if (user.sneaking()) {
-          ParticleUtil.create(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
           return UpdateResult.CONTINUE;
         } else {
           return createBoulder() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -363,7 +363,7 @@ public class EarthSmash extends AbilityInstance {
       if (time < nextLiftTime) {
         return UpdateResult.CONTINUE;
       }
-      nextLiftTime = time + 60;
+      nextLiftTime = time + 70;
       cleanAll();
       boulder.center(boulder.center.add(Vector3d.PLUS_J).toBlock(boulder.world));
       SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));

@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.moros.atlas.caffeine.cache.Cache;
-import me.moros.atlas.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.bukkit.block.Block;

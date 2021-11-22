@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
@@ -42,6 +41,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.methods.EntityMethods;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirSpout extends AbilityInstance {
   private static final Config config = new Config();
@@ -130,7 +130,7 @@ public class AirSpout extends AbilityInstance {
         return;
       }
       for (int i = 0; i < distance; i++) {
-        ParticleUtil.createAir(user.entity().getLocation().subtract(0, i, 0))
+        ParticleUtil.air(user.entity().getLocation().subtract(0, i, 0))
           .count(3).offset(0.4, 0.4, 0.4).spawn();
       }
       nextRenderTime = time + 100;

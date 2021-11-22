@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.atlas.configurate.CommentedConfigurationNode;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.Configurable;
@@ -55,6 +54,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirShield extends AbilityInstance {
   private static final Config config = new Config();
@@ -105,7 +105,7 @@ public class AirShield extends AbilityInstance {
       double x = userConfig.radius * factor * Math.cos(i * currentPoint);
       double z = userConfig.radius * factor * Math.sin(i * currentPoint);
       Vector3d loc = center.add(new Vector3d(x, y, z));
-      ParticleUtil.createAir(loc.toLocation(user.world())).count(5)
+      ParticleUtil.air(loc.toLocation(user.world())).count(5)
         .offset(0.2, 0.2, 0.2).spawn();
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundUtil.AIR.play(loc.toLocation(user.world()));
