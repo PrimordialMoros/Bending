@@ -54,15 +54,12 @@ public final class WorldManager {
       }
     } catch (SerializationException ignore) {
     }
-    worlds = Bukkit.getWorlds().stream().filter(w -> !isDisabledWorld(w.getUID()))
+    worlds = Bukkit.getWorlds().stream().filter(w -> isEnabled(w.getUID()))
       .collect(Collectors.toConcurrentMap(Function.identity(), w -> new ManagerPair()));
   }
 
   public @NonNull AbilityManager instance(@NonNull World world) {
-    if (isDisabledWorld(world.getUID())) {
-      return DUMMY_INSTANCE;
-    }
-    return worlds.computeIfAbsent(world, w -> new ManagerPair()).abilities;
+    return isEnabled(world.getUID()) ? worlds.computeIfAbsent(world, w -> new ManagerPair()).abilities : DUMMY_INSTANCE;
   }
 
   public void update() {
@@ -89,8 +86,8 @@ public final class WorldManager {
     instance(user.world()).createPassives(user);
   }
 
-  public boolean isDisabledWorld(@NonNull UUID worldID) {
-    return disabledWorlds.contains(worldID);
+  public boolean isEnabled(@NonNull UUID worldID) {
+    return !disabledWorlds.contains(worldID);
   }
 
   private static class ManagerPair {

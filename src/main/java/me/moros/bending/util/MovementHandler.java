@@ -65,7 +65,7 @@ public class MovementHandler {
     } else {
       entity.setAI(false);
     }
-    entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.customMetadata(this));
+    entity.setMetadata(Metadata.NO_MOVEMENT, Metadata.of(this));
     Tasker.sync(this::reset, FastMath.ceil(duration / 50.0));
   }
 
@@ -148,7 +148,7 @@ public class MovementHandler {
       endTime = System.currentTimeMillis() + duration;
       Component name = Component.text("Restricted");
       bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
-      barTask = Tasker.repeatingTask(this::updateBar, 1);
+      barTask = Tasker.repeat(this::updateBar, 1);
     }
 
     private void updateBar() {

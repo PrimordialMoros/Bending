@@ -40,6 +40,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.BoundingBox;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -57,7 +58,7 @@ public class Pillar implements Updatable {
   private final long interval;
   private final long duration;
 
-  private int currentLength;
+  private int currentDistance;
   private long nextUpdateTime;
 
   protected Pillar(@NonNull PillarBuilder builder) {
@@ -71,18 +72,20 @@ public class Pillar implements Updatable {
     this.duration = builder.duration;
     this.predicate = builder.predicate;
     this.pillarBlocks = new ArrayList<>(length);
-    currentLength = 0;
+    currentDistance = 0;
     nextUpdateTime = 0;
   }
 
   @Override
   public @NonNull UpdateResult update() {
-    if (currentLength >= distance) {
+    if (currentDistance >= distance) {
       return UpdateResult.REMOVE;
     }
 
-    Vector3d location = new Vector3d(origin.getRelative(direction, currentLength + 1));
-    AABB collider = AABB.BLOCK_BOUNDS.grow(new Vector3d(0, 0.65, 0)).at(location);
+    Block start = origin.getRelative(direction, currentDistance + 1);
+    Block finish = start.getRelative(opposite, length - 1);
+    BoundingBox box = BoundingBox.of(start, finish).expand(direction, 0.65);
+    AABB collider = new AABB(new Vector3d(box.getMin()), new Vector3d(box.getMax()));
     CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true); // Push entities
 
     long time = System.currentTimeMillis();
@@ -91,7 +94,7 @@ public class Pillar implements Updatable {
     }
 
     nextUpdateTime = time + interval;
-    Block currentIndex = origin.getRelative(direction, ++currentLength);
+    Block currentIndex = origin.getRelative(direction, ++currentDistance);
     return move(currentIndex) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
@@ -125,9 +128,9 @@ public class Pillar implements Updatable {
 
   protected @NonNull Vector3d normalizeVelocity(Vector3d velocity, double factor) {
     return switch (direction) {
-      case NORTH, SOUTH -> velocity.setX(direction.getDirection().getX() * factor);
-      case EAST, WEST -> velocity.setZ(direction.getDirection().getZ() * factor);
-      default -> velocity.setY(direction.getDirection().getY() * factor);
+      case NORTH, SOUTH -> velocity.setX(direction.getModX() * factor);
+      case EAST, WEST -> velocity.setZ(direction.getModZ() * factor);
+      default -> velocity.setY(direction.getModY() * factor);
     };
   }
 
@@ -144,7 +147,7 @@ public class Pillar implements Updatable {
   }
 
   public boolean onEntityHit(@NonNull Entity entity) {
-    double factor = 0.75 * (length - 0.2 * currentLength) / length;
+    double factor = 0.75 * (length - 0.4 * currentDistance) / length;
     entity.setVelocity(normalizeVelocity(new Vector3d(entity.getVelocity()), factor).clampVelocity());
     return true;
   }
@@ -221,7 +224,7 @@ public class Pillar implements Updatable {
     private int validateLength(int max) {
       for (int i = 0; i < max; i++) {
         Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
-        if (!TempBlock.isBendable(backwardBlock) || !user.canBuild(backwardBlock)) {
+        if (!TempBlock.isBendable(backwardBlock) || !user.canBuild(backwardBlock) || !predicate.test(backwardBlock)) {
           return i;
         }
       }

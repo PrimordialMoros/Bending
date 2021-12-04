@@ -50,7 +50,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
-import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.BlockMethods;
@@ -58,7 +57,6 @@ import me.moros.bending.util.methods.EntityMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -210,7 +208,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       .damage(damage)
       .fireTicks(userConfig.fireTicks)
       .ignoreInsideCollider(ignoreCollider)
-      .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 5, 1))
+      .sound(5, 1)
       .buildAndExplode(this, center);
   }
 
@@ -221,7 +219,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     private final boolean explosive;
 
     public FireStream(Ray ray) {
-      super(user, ray, userConfig.speed * factor, factor);
+      super(user, ray, userConfig.speed * factor, 0.8 + 0.5 * (factor - 1));
       canCollide = Block::isLiquid;
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.02 * factor;

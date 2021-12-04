@@ -12,24 +12,20 @@ permissions:
     children:
       bending.player: true
       bending.bluefire: true
-      bending.command.reload: true
       bending.command.add: true
-      bending.command.remove: true
-      bending.command.choose.other: true
-      bending.command.add.other: true
-      bending.command.remove.other: true
       bending.command.modify: true
-      bending.command.modify.other: true
+      bending.command.reload: true
+      bending.command.remove: true
   bending.player:
     default: true
     children:
       bending.command.bind: true
+      bending.command.board: true
       bending.command.choose: true
       bending.command.display: true
       bending.command.help: true
       bending.command.preset: true
       bending.command.toggle: true
-      bending.command.board: true
       bending.command.version: true
       bending.air: true
       bending.chi: true

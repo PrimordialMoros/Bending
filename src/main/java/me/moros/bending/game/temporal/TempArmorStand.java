@@ -50,7 +50,7 @@ public class TempArmorStand implements Temporary {
       entity.setVisible(false);
       entity.setGravity(false);
       Objects.requireNonNull(entity.getEquipment()).setHelmet(new ItemStack(material));
-      entity.setMetadata(Metadata.NO_INTERACT, Metadata.emptyMetadata());
+      entity.setMetadata(Metadata.NO_INTERACT, Metadata.empty());
     });
 
     if (particles) {

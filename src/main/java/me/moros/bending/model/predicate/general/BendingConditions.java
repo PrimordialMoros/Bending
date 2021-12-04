@@ -33,7 +33,7 @@ public enum BendingConditions implements BendingConditional {
   GAMEMODE((u, d) -> !u.spectator()),
   PERMISSION((u, d) -> u.hasPermission(d)),
   TOGGLED((u, d) -> false),
-  WORLD((u, d) -> !Bending.game().isDisabledWorld(u.world().getUID()));
+  WORLD((u, d) -> Bending.game().worldManager().isEnabled(u.world().getUID()));
 
   private final BendingConditional predicate;
 

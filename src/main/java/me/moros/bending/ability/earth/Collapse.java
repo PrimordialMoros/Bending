@@ -74,7 +74,6 @@ public class Collapse extends AbilityInstance {
     }
 
     height = userConfig.maxHeight;
-
     boolean sneak = method == Activation.SNEAK;
     if (sneak) {
       int offset = FastMath.ceil(userConfig.radius);

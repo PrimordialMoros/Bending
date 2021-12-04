@@ -245,7 +245,7 @@ public class MetalCable extends AbilityInstance {
     arrow.setGravity(false);
     arrow.setInvulnerable(true);
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
-    arrow.setMetadata(Metadata.METAL_CABLE, Metadata.customMetadata(this));
+    arrow.setMetadata(Metadata.METAL_CABLE, Metadata.of(this));
     cable = arrow;
     location = new Vector3d(cable.getLocation());
     SoundUtil.METAL.play(arrow.getLocation());

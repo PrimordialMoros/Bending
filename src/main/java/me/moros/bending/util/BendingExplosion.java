@@ -33,6 +33,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.methods.EntityMethods;
@@ -56,7 +57,7 @@ public final class BendingExplosion {
   private final boolean breakBlocks;
   private final boolean placeFire;
   private final Collider ignoreInside;
-  private final SoundEffect soundEffect;
+  private final SoundEffect sound;
 
   private BendingExplosion(ExplosionBuilder builder) {
     this.size = builder.size;
@@ -68,7 +69,7 @@ public final class BendingExplosion {
     this.breakBlocks = builder.breakBlocks;
     this.placeFire = builder.placeFire;
     this.ignoreInside = builder.ignoreInside;
-    this.soundEffect = builder.soundEffect;
+    this.sound = builder.sound;
 
     halfSize = size / 2;
     sizeFactor = Math.sqrt(size);
@@ -104,8 +105,8 @@ public final class BendingExplosion {
     if (particles) {
       playParticles(bukkitLoc);
     }
-    if (soundEffect != null) {
-      soundEffect.play(bukkitLoc);
+    if (sound != null) {
+      sound.play(bukkitLoc);
     }
 
     if (breakBlocks && !blocks.isEmpty() && !bukkitLoc.getBlock().isLiquid()) {
@@ -159,7 +160,7 @@ public final class BendingExplosion {
     private boolean breakBlocks = false;
     private boolean placeFire = false;
     private Collider ignoreInside = null;
-    private SoundEffect soundEffect = null;
+    private SoundEffect sound = null;
 
     private ExplosionBuilder() {
     }
@@ -209,8 +210,13 @@ public final class BendingExplosion {
       return this;
     }
 
-    public @NonNull ExplosionBuilder soundEffect(@Nullable SoundEffect soundEffect) {
-      this.soundEffect = soundEffect;
+    public @NonNull ExplosionBuilder sound(@Nullable SoundEffect sound) {
+      this.sound = sound;
+      return this;
+    }
+
+    public @NonNull ExplosionBuilder sound(float volume, float pitch) {
+      this.sound = SoundUtil.explosion(volume, pitch);
       return this;
     }
 

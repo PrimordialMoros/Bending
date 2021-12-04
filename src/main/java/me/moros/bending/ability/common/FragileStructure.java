@@ -45,7 +45,7 @@ public class FragileStructure {
     this.fragileBlocks = Set.copyOf(fragileBlocks);
     this.health = health;
     this.predicate = predicate;
-    this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.customMetadata(this)));
+    this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.of(this)));
   }
 
   public int health() {

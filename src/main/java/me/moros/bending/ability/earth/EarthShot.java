@@ -319,7 +319,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   private Vector3d getTarget(Block source) {
-    return user.compositeRayTrace(userConfig.range).ignoreBlocks(source == null ? Set.of() : Set.of(source))
+    return user.compositeRayTrace(userConfig.range).ignore(source == null ? Set.of() : Set.of(source))
       .result(user.world()).entityCenterOrPosition();
   }
 
@@ -338,7 +338,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       .damage(damage)
       .fireTicks(0)
       .particles(false)
-      .soundEffect(SoundUtil.EXPLOSION)
+      .sound(SoundUtil.EXPLOSION)
       .buildAndExplode(this, center);
   }
 

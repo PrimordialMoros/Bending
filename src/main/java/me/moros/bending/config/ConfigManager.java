@@ -52,7 +52,6 @@ public final class ConfigManager {
     long.class, AttributeConverter.LONG
   );
 
-
   private final Collection<Configurable> instances = new ArrayList<>();
   private final HoconConfigurationLoader loader;
 

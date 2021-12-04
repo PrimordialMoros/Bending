@@ -44,14 +44,12 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.VectorMethods;
 import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -171,7 +169,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       .breakBlocks(true)
       .placeFire(true)
       .ignoreInsideCollider(ignoreCollider)
-      .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 0.8F))
+      .sound(6, 0.8F)
       .buildAndExplode(this, center);
   }
 

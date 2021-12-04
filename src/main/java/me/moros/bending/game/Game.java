@@ -19,8 +19,6 @@
 
 package me.moros.bending.game;
 
-import java.util.UUID;
-
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
@@ -70,18 +68,14 @@ public final class Game {
     Registries.PROTECTIONS.init();
     Registries.BENDERS.init(storage);
 
-    Tasker.repeatingTask(this::update, 1);
-    Tasker.repeatingTask(BendingEffect::cleanup, 5);
+    Tasker.repeat(this::update, 1);
+    Tasker.repeat(BendingEffect::cleanup, 5);
   }
 
   private void update() {
     activationController.clearCache();
     worldManager.update();
     flightManager.update();
-  }
-
-  public boolean isDisabledWorld(@NonNull UUID worldID) {
-    return worldManager.isDisabledWorld(worldID);
   }
 
   public void reload() {

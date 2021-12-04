@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import cloud.commandframework.permission.CommandPermission;
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
@@ -33,6 +34,7 @@ import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import me.moros.bending.command.BendingCommand;
+import me.moros.bending.command.CommandPermissions;
 import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args0;
 import me.moros.bending.model.Element;
@@ -53,7 +55,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class ElementMenu implements BendingMenu {
+public final class ElementMenu {
   private static final ChestGui BASE_GUI;
   private static final UUID innerPaneUUID;
 
@@ -79,7 +81,7 @@ public final class ElementMenu implements BendingMenu {
   }
 
   public ElementMenu(@NonNull BendingPlayer player) {
-    if (!player.hasPermission(permission())) {
+    if (!player.hasPermission(CommandPermissions.HELP.toString())) {
       Message.GUI_NO_PERMISSION.send(player);
       return;
     }
@@ -98,11 +100,6 @@ public final class ElementMenu implements BendingMenu {
     helpPane.addItem(new GuiItem(generateHelpItem(player)), 4, 0);
     gui.addPane(helpPane);
     gui.show(player.entity());
-  }
-
-  @Override
-  public @NonNull String permission() {
-    return "bending.command.help";
   }
 
   private static void handleClick(InventoryClickEvent event, DataWrapper meta) {
@@ -193,19 +190,19 @@ public final class ElementMenu implements BendingMenu {
   }
 
   private enum ActionType {
-    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, "bending.command.choose", BendingCommand::onElementChoose, false),
-    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, "bending.command.display", BendingCommand::onElementDisplay, false),
-    ADD(Message.ELEMENTS_GUI_ADD, "bending.command.add", BendingCommand::onElementAdd, true),
-    REMOVE(Message.ELEMENTS_GUI_REMOVE, "bending.command.remove", BendingCommand::onElementRemove, true);
+    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, CommandPermissions.CHOOSE, BendingCommand::onElementChoose, false),
+    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.DISPLAY, BendingCommand::onElementDisplay, false),
+    ADD(Message.ELEMENTS_GUI_ADD, CommandPermissions.ADD, BendingCommand::onElementAdd, true),
+    REMOVE(Message.ELEMENTS_GUI_REMOVE, CommandPermissions.REMOVE, BendingCommand::onElementRemove, true);
 
     private final Args0 message;
     private final String permission;
     private final BiConsumer<User, Element> commandConsumer;
     private final boolean keepOpen;
 
-    ActionType(Args0 message, String permission, BiConsumer<User, Element> commandConsumer, boolean keepOpen) {
+    ActionType(Args0 message, CommandPermission permission, BiConsumer<User, Element> commandConsumer, boolean keepOpen) {
       this.message = message;
-      this.permission = permission;
+      this.permission = permission.toString();
       this.commandConsumer = commandConsumer;
       this.keepOpen = keepOpen;
     }

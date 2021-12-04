@@ -58,7 +58,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -71,7 +70,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -295,7 +293,7 @@ public class EarthLine extends AbilityInstance {
         .size(userConfig.explosionRadius)
         .damage(userConfig.explosionDamage)
         .fireTicks(40)
-        .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 3, 0.5F))
+        .sound(3, 0.5F)
         .buildAndExplode(EarthLine.this, location);
 
       Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);

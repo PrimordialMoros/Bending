@@ -98,11 +98,13 @@ public final class MaterialUtil {
       .add(Tag.SMALL_FLOWERS.getValues())
       .add(Tag.TALL_FLOWERS.getValues())
       .add(Tag.CROPS.getValues())
+      .add(Tag.CAVE_VINES.getValues())
       .add(MaterialTags.MUSHROOMS.getValues())
       .add(MaterialTags.CORAL.getValues())
       .add(MaterialTags.CORAL_FANS.getValues())
-      .add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN,
-        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakable plants", 75);
+      .add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN, Material.GLOW_LICHEN,
+        Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT, Material.TWISTING_VINES, Material.TWISTING_VINES_PLANT,
+        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakable plants", 82);
 
     TRANSPARENT = new MaterialSetTag(key)
       .add(BREAKABLE_PLANTS.getValues())
@@ -111,7 +113,7 @@ public final class MaterialUtil {
       .add(Tag.CARPETS.getValues())
       .add(Tag.BUTTONS.getValues())
       .add(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
-      .endsWith("TORCH").ensureSize("Transparent", 130);
+      .endsWith("TORCH").ensureSize("Transparent", 137);
 
     CONTAINERS = new MaterialSetTag(key).add(
       Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL,

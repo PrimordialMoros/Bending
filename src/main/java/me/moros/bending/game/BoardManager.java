@@ -58,7 +58,7 @@ public final class BoardManager {
   }
 
   public boolean enabled(@NonNull World world) {
-    return enabled && !Bending.game().isDisabledWorld(world.getUID());
+    return enabled && Bending.game().worldManager().isEnabled(world.getUID());
   }
 
   public Optional<Board> tryEnableBoard(@NonNull BendingPlayer player) {

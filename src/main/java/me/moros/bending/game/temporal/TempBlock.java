@@ -45,6 +45,7 @@ import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TempBlock implements Temporary {
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
@@ -256,11 +257,26 @@ public class TempBlock implements Temporary {
     cleanup();
   }
 
-  private void revertToSnapshot(final TempBlockState tempBlockState) {
-    bendable = tempBlockState.bendable;
-    BlockState state = tempBlockState.state;
+  private void revertToSnapshot(@NonNull Snapshot snapshot) {
+    bendable = snapshot.bendable;
+    BlockState state = snapshot.state;
     block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
     refreshGravityCache(block);
+  }
+
+  public static void revertToSnapshot(@NonNull Block block, @Nullable Snapshot snapshot) {
+    TempBlock tb = MANAGER.get(block).orElse(null);
+    if (snapshot == null) {
+      if (tb != null) {
+        tb.revert();
+      }
+      return;
+    }
+    if (tb != null) {
+      tb.revertToSnapshot(snapshot);
+    } else {
+      block.getWorld().getChunkAtAsync(block).thenRun(() -> snapshot.state.update(true, false));
+    }
   }
 
   private void cleanup() {
@@ -268,6 +284,10 @@ public class TempBlock implements Temporary {
     GRAVITY_CACHE.remove(block);
     MANAGER.removeEntry(block);
     revertTask.cancel();
+  }
+
+  public @NonNull Snapshot snapshot() {
+    return new Snapshot(block.getState(), bendable);
   }
 
   public boolean isBendable() {
@@ -301,15 +321,22 @@ public class TempBlock implements Temporary {
     }
   }
 
-  private static class TempBlockState {
-    private final BlockState state;
+  private static class TempBlockState extends Snapshot{
     private final int expirationTicks;
-    private final boolean bendable;
     private boolean weak = false;
 
     private TempBlockState(BlockState state, long expirationTime, boolean bendable) {
-      this.state = state;
+      super(state, bendable);
       this.expirationTicks = Bukkit.getCurrentTick() + Temporary.toTicks(expirationTime);
+    }
+  }
+
+  public static class Snapshot {
+    protected final BlockState state;
+    protected final boolean bendable;
+
+    private Snapshot(BlockState state, boolean bendable) {
+      this.state = state;
       this.bendable = bendable;
     }
   }

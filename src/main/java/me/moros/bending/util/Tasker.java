@@ -71,7 +71,7 @@ public enum Tasker {
     return null;
   }
 
-  public static @Nullable BukkitTask repeatingTask(@NonNull Runnable runnable, long interval) {
+  public static @Nullable BukkitTask repeat(@NonNull Runnable runnable, long interval) {
     if (Bending.plugin().isEnabled()) {
       return Bukkit.getScheduler().runTaskTimer(Bending.plugin(), runnable, 1, interval);
     }

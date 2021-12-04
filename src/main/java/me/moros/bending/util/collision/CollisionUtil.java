@@ -19,6 +19,8 @@
 
 package me.moros.bending.util.collision;
 
+import java.util.function.Predicate;
+
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3d;
@@ -68,20 +70,11 @@ public final class CollisionUtil {
    * @return true if it hit at least one entity
    */
   public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
-    final double buffer = 4.0; // Buffer needed to check for nearby entities that have locations outside the check range but still intersect
-    Vector3d extent = collider.halfExtents().add(new Vector3d(buffer, buffer, buffer));
+    Vector3d extent = collider.halfExtents();
     Vector3d pos = collider.position();
     boolean hit = false;
-    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ())) {
-      if (livingOnly && !(entity instanceof LivingEntity)) {
-        continue;
-      }
-      if (!selfCollision && entity.equals(user.entity())) {
-        continue;
-      }
-      if (!isValidEntity(entity)) {
-        continue;
-      }
+    Predicate<Entity> filter = entityPredicate(user.entity(), livingOnly, selfCollision);
+    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ(), filter)) {
       if (collider.intersects(AABBUtils.entityBounds(entity))) {
         if (!user.canBuild(entity.getLocation().getBlock())) {
           continue;
@@ -94,6 +87,13 @@ public final class CollisionUtil {
       }
     }
     return hit;
+  }
+
+  private static Predicate<Entity> entityPredicate(Entity source, boolean livingOnly, boolean selfCollision) {
+    Predicate<Entity> livingPredicate = livingOnly ? e -> e instanceof LivingEntity : e -> true;
+    Predicate<Entity> selfPredicate = !selfCollision ? e -> !e.equals(source) : e -> true;
+    Predicate<Entity> valid = CollisionUtil::isValidEntity;
+    return selfPredicate.and(livingPredicate).and(valid);
   }
 
   private static boolean isValidEntity(Entity entity) {

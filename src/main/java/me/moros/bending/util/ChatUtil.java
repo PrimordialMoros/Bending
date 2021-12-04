@@ -37,7 +37,7 @@ public final class ChatUtil {
   private static final Pattern SPACE = Pattern.compile(" ");
   private static final String[] CHAT_CODES;
 
-  static  {
+  static {
     var arr = ChatColor.values();
     CHAT_CODES = new String[arr.length];
     for (ChatColor color : arr) {

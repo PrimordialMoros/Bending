@@ -251,13 +251,13 @@ public class EarthGlove extends AbilityInstance {
     Item item = user.world().dropItem(spawnLocation.toLocation(user.world()), isMetal ? INGOT : STONE);
     item.setInvulnerable(true);
     item.setGravity(false);
-    item.setMetadata(Metadata.GLOVE_KEY, Metadata.customMetadata(this));
+    item.setMetadata(Metadata.GLOVE_KEY, Metadata.of(this));
     if (isMetal && InventoryUtil.removeItem(user, INGOT)) {
       return item;
     }
     item.setCanMobPickup(false);
     item.setCanPlayerPickup(false);
-    item.setMetadata(Metadata.NO_PICKUP, Metadata.emptyMetadata());
+    item.setMetadata(Metadata.NO_PICKUP, Metadata.empty());
     return item;
   }
 

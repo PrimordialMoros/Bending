@@ -108,13 +108,13 @@ public final class RayTrace {
     return this;
   }
 
-  public @NonNull RayTrace ignoreBlocks(@NonNull Set<Block> ignoreBlocks) {
+  public @NonNull RayTrace ignore(@NonNull Set<Block> ignoreBlocks) {
     this.ignoreBlocks = Objects.requireNonNull(ignoreBlocks).stream()
       .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
     return this;
   }
 
-  public @NonNull RayTrace entityPredicate(@NonNull Predicate<Entity> entityPredicate) {
+  public @NonNull RayTrace filter(@NonNull Predicate<Entity> entityPredicate) {
     this.entityPredicate = Objects.requireNonNull(entityPredicate);
     return this;
   }

@@ -40,13 +40,13 @@ dependencies {
         exclude(module = "caffeine")
     }
     implementation("com.zaxxer", "HikariCP", "5.0.0")
-    implementation("org.postgresql", "postgresql", "42.2.24") {
+    implementation("org.postgresql", "postgresql", "42.3.1") {
         exclude(module = "checker-qual")
     }
-    implementation("com.h2database", "h2", "1.4.200") //TODO update to 2.0.202 when available in maven central
+    implementation("com.h2database", "h2", "2.0.202")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
-    implementation("cloud.commandframework","cloud-paper", "1.5.0")
-    implementation("cloud.commandframework","cloud-minecraft-extras", "1.5.0") {
+    implementation("cloud.commandframework","cloud-paper", "1.6.0")
+    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.0") {
         exclude(group = "net.kyori")
     }
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")

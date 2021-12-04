@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class ParticleUtil extends ParticleBuilder {
   public static final Color AIR = fromHex("EEEEEE");
 
-  public ParticleUtil(@NonNull Particle particle) {
+  private ParticleUtil(@NonNull Particle particle) {
     super(particle);
   }
 

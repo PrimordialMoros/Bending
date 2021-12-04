@@ -155,7 +155,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    */
   default <T extends Entity> RayTrace compositeRayTrace(double range, @NonNull Class<T> type) {
     return RayTrace.of(eyeLocation(), direction()).range(range)
-      .type(Type.COMPOSITE).entityPredicate(e -> type.isInstance(e) && !e.equals(entity()));
+      .type(Type.COMPOSITE).filter(e -> type.isInstance(e) && !e.equals(entity()));
   }
 
   /**

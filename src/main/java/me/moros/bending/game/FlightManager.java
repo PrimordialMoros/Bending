@@ -62,11 +62,7 @@ public final class FlightManager {
   }
 
   public void update() {
-    for (Flight flight : instances.values()) {
-      if (flight.changedFlying && flight.user.flying() != flight.isFlying) {
-        flight.user.flying(flight.isFlying);
-      }
-    }
+    instances.values().forEach(Flight::update);
   }
 
   public static class Flight {
@@ -105,6 +101,12 @@ public final class FlightManager {
       if (changedFlying) {
         user.allowFlight(couldFly);
         user.flying(wasFlying);
+      }
+    }
+
+    private void update() {
+      if (changedFlying && user.flying() != isFlying) {
+        user.flying(isFlying);
       }
     }
   }

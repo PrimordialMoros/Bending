@@ -34,10 +34,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A builder to easily register collisions based on a layer system.
  * Normally, abilities that belong to the same layer will cancel each other out.
  * Moreover, they will remove all abilities in the layers below them and be removed by all abilities in layers above them.
- * <p>
- * Note: there is a special layer type (reserved for spout and shield abilities) in which inter-layer collisions are disabled.
  */
-// TODO improve collision registering to allow addon collisions
 public class CollisionBuilder {
   private final List<CollisionLayer> layers;
   private final Collection<RegisteredCollision> simpleCollisions;

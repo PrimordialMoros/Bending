@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempBlock.Snapshot;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.math.Vector3d;
@@ -32,7 +33,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +45,7 @@ public class SelectedSource implements State {
   private Vector3d origin;
   private Block block;
   private Material material;
-  private BlockState state;
+  private Snapshot snapshot;
 
   private final boolean particles;
   private final double distanceSq;
@@ -81,9 +81,7 @@ public class SelectedSource implements State {
     this.origin = newOrigin;
     this.material = data == null ? block.getType() : data.getMaterial();
     if (data != null) {
-      if (TempBlock.MANAGER.isTemp(block)) {
-        state = block.getState();
-      }
+      snapshot = TempBlock.MANAGER.get(block).map(TempBlock::snapshot).orElse(null);
       TempBlock.create(block, data);
       INSTANCES.put(block, this);
     }
@@ -137,11 +135,7 @@ public class SelectedSource implements State {
 
   public void onDestroy() {
     if (!particles && block != null && block.getType() == material) {
-      if (state != null) {
-        state.update(true, false);
-      } else {
-        TempBlock.MANAGER.get(block).ifPresent(TempBlock::revert);
-      }
+      TempBlock.revertToSnapshot(block, snapshot);
     }
     INSTANCES.remove(block);
   }

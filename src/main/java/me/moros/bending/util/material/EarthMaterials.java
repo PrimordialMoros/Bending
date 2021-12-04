@@ -39,21 +39,22 @@ public final class EarthMaterials {
   static {
     NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     EARTH_BENDABLE = new MaterialSetTag(key)
+      .add(Tag.DIRT.getValues())
       .add(Tag.STONE_BRICKS.getValues())
       .add(MaterialTags.TERRACOTTA.getValues())
       .add(MaterialTags.CONCRETES.getValues())
       .add(MaterialTags.CONCRETE_POWDER.getValues())
-      .add(Material.DIRT, Material.COARSE_DIRT, Material.MYCELIUM, Material.GRASS_BLOCK, Material.DIRT_PATH,
+      .add(Material.DIRT_PATH,
         Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
-        Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY, Material.PODZOL,
+        Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
         Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE, Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE,
         Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE,
         Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
         Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE,
         Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
         Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS, Material.AMETHYST_BLOCK,
-        Material.DEEPSLATE, Material.CALCITE, Material.TUFF, Material.ROOTED_DIRT, Material.SMOOTH_BASALT
-      ).ensureSize("Earth", 112);
+        Material.DEEPSLATE, Material.CALCITE, Material.TUFF, Material.SMOOTH_BASALT
+      ).ensureSize("Earth", 113);
 
     SAND_BENDABLE = new MaterialSetTag(key)
       .add(Material.SAND, Material.RED_SAND, Material.SOUL_SAND, Material.SOUL_SOIL)
@@ -74,7 +75,7 @@ public final class EarthMaterials {
       .add(SAND_BENDABLE.getValues())
       .add(METAL_BENDABLE.getValues())
       .add(LAVA_BENDABLE.getValues())
-      .ensureSize("All", 133);
+      .ensureSize("All", 134);
   }
 
   private EarthMaterials() {

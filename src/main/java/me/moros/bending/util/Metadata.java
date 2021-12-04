@@ -39,11 +39,11 @@ public final class Metadata {
   private Metadata() {
   }
 
-  public static @NonNull FixedMetadataValue emptyMetadata() {
-    return new FixedMetadataValue(Bending.plugin(), "");
+  public static @NonNull FixedMetadataValue empty() {
+    return of(null);
   }
 
-  public static @NonNull FixedMetadataValue customMetadata(@Nullable Object obj) {
+  public static @NonNull FixedMetadataValue of(@Nullable Object obj) {
     return new FixedMetadataValue(Bending.plugin(), obj);
   }
 }

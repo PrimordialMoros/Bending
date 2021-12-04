@@ -56,7 +56,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.RayTrace.CompositeResult;
 import me.moros.bending.util.RayTrace.Type;
-import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -65,7 +64,6 @@ import me.moros.bending.util.methods.VectorMethods;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -177,7 +175,7 @@ public class Lightning extends AbilityInstance {
     while (arcIterator.hasNext() && counter < userConfig.speed) {
       LineSegment segment = arcIterator.next();
       CompositeResult result = RayTrace.of(segment.start, segment.direction).range(segment.length)
-        .type(Type.COMPOSITE).entityPredicate(this::isValidEntity).ignoreLiquids(false).raySize(0.3).result(user.world());
+        .type(Type.COMPOSITE).filter(this::isValidEntity).ignoreLiquids(false).raySize(0.3).result(user.world());
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.LIGHTNING.play(segment.mid.toLocation(user.world()));
@@ -283,7 +281,7 @@ public class Lightning extends AbilityInstance {
       .damage(userConfig.explosionDamage)
       .fireTicks(0)
       .breakBlocks(true)
-      .soundEffect(new SoundEffect(Sound.ENTITY_GENERIC_EXPLODE, 6, 1))
+      .sound(6, 1)
       .buildAndExplode(this, center);
   }
 

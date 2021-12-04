@@ -49,8 +49,8 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
-import me.moros.bending.util.SoundEffect;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.methods.BlockMethods;
@@ -136,8 +136,8 @@ public class WaterManipulation extends AbilityInstance {
     if (manip != null) {
       UpdateResult result = manip.update();
       if (result == UpdateResult.CONTINUE) {
-        SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
+          SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
           effect.play(manip.center().toLocation(user.world()));
         }
 
