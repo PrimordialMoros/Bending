@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -38,8 +38,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -80,7 +79,7 @@ public class Collapse extends AbilityInstance {
       int size = offset * 2 + 1;
       // Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
       boolean[][] checked = new boolean[size][size];
-      for (Block block : WorldMethods.nearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
+      for (Block block : WorldUtil.nearbyBlocks(origin.getLocation(), userConfig.radius, predicate)) {
         if (block.getY() < origin.getY()) {
           continue;
         }
@@ -89,14 +88,14 @@ public class Collapse extends AbilityInstance {
         if (checked[dx][dz]) {
           continue;
         }
-        Optional<Pillar> pillar = BlockMethods.findBottomBlock(block, height, predicate).flatMap(this::createPillar);
+        Optional<Pillar> pillar = WorldUtil.findBottomBlock(block, height, predicate).flatMap(this::createPillar);
         if (pillar.isPresent()) {
           checked[dx][dz] = true;
           pillars.add(pillar.get());
         }
       }
     } else {
-      BlockMethods.findBottomBlock(origin, height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
+      WorldUtil.findBottomBlock(origin, height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);
@@ -112,7 +111,7 @@ public class Collapse extends AbilityInstance {
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     this.height = height;
     for (Block block : sources) {
-      BlockMethods.findBottomBlock(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
+      WorldUtil.findBottomBlock(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
       removalPolicy = Policies.builder().build();

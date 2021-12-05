@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -43,14 +43,14 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -163,7 +163,7 @@ public class FireWall extends AbilityInstance {
               .offset(0.5, 0.25, 0.5).extra(0.01).spawn();
           } else {
             for (int i = 0; i < 2; i++) {
-              Vector3d center = VectorMethods.gaussianOffset(pos, 0.4);
+              Vector3d center = VectorUtil.gaussianOffset(pos, 0.4);
               ParticleUtil.fire(user, center.toLocation(user.world())).count(0)
                 .offset(0, 1, 0).extra(0.07 * speed).spawn();
             }
@@ -239,7 +239,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!(entity instanceof LivingEntity)) {
-      EntityMethods.applyVelocity(this, entity, Vector3d.ZERO);
+      EntityUtil.applyVelocity(this, entity, Vector3d.ZERO);
       return true;
     }
 
@@ -251,9 +251,9 @@ public class FireWall extends AbilityInstance {
           damagedEntities.add(entity);
           DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         }
-        Vector3d pos = EntityMethods.entityCenter(entity);
+        Vector3d pos = EntityUtil.entityCenter(entity);
         Vector3d velocity = pos.subtract(collider.closestPosition(pos)).normalize().multiply(userConfig.knockback);
-        EntityMethods.applyVelocity(this, entity, velocity);
+        EntityUtil.applyVelocity(this, entity, velocity);
         return true;
       } else {
         cachedEntities.add(entity);

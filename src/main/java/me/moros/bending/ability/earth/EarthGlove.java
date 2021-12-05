@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -44,11 +44,11 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.InventoryUtil;
-import me.moros.bending.util.Metadata;
+import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -152,7 +152,7 @@ public class EarthGlove extends AbilityInstance {
       Vector3d returnLocation = user.eyeLocation().add(user.direction().multiply(isMetal ? 5 : 1.5));
       if (location.distanceSq(returnLocation) < 1) {
         if (grabbed && grabbedTarget != null) {
-          EntityMethods.applyVelocity(this, grabbedTarget, Vector3d.ZERO);
+          EntityUtil.applyVelocity(this, grabbedTarget, Vector3d.ZERO);
         }
         return UpdateResult.REMOVE;
       }
@@ -162,7 +162,7 @@ public class EarthGlove extends AbilityInstance {
           return UpdateResult.REMOVE;
         }
         Vector3d dir = returnLocation.subtract(new Vector3d(grabbedTarget.getLocation())).normalize().multiply(GLOVE_GRABBED_SPEED);
-        EntityMethods.applyVelocity(this, grabbedTarget, dir);
+        EntityUtil.applyVelocity(this, grabbedTarget, dir);
         glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
         return UpdateResult.CONTINUE;
       } else {
@@ -262,7 +262,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private void updateGloveVelocity(Vector3d velocity) {
-    EntityMethods.applyVelocity(this, glove, velocity);
+    EntityUtil.applyVelocity(this, glove, velocity);
     lastVelocity = new Vector3d(glove.getVelocity());
   }
 

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -37,7 +37,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -124,7 +124,7 @@ public class WaterBubble extends AbilityInstance {
 
   private void pushWater() {
     bubble.removeIf(this::checkBlockOutOfRange);
-    for (Block block : WorldMethods.nearbyBlocks(user.entity().getLocation(), radius, MaterialUtil::isWater)) {
+    for (Block block : WorldUtil.nearbyBlocks(user.entity().getLocation(), radius, MaterialUtil::isWater)) {
       if (!user.canBuild(block)) {
         continue;
       }

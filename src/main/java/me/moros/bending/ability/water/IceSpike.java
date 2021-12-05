@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -45,11 +45,11 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -247,7 +247,7 @@ public class IceSpike extends AbilityInstance {
       if (!MaterialUtil.isTransparent(newBlock) && newBlock.getType() != Material.WATER) {
         return false;
       }
-      BlockMethods.tryBreakPlant(newBlock);
+      WorldUtil.tryBreakPlant(newBlock);
       return true;
     }
 
@@ -256,7 +256,7 @@ public class IceSpike extends AbilityInstance {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        EntityMethods.applyVelocity(IceSpike.this, entity, Vector3d.PLUS_J.multiply(userConfig.knockup));
+        EntityUtil.applyVelocity(IceSpike.this, entity, Vector3d.PLUS_J.multiply(userConfig.knockup));
         return true;
       }
       return false;

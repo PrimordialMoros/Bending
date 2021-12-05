@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.locale;
@@ -39,11 +39,9 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 public interface Message {
   TextColor TEXT_COLOR = TextColor.color(221, 221, 221);
 
-  Component PREFIX = text("[", DARK_GRAY)
-    .append(text("Bending", DARK_AQUA))
-    .append(text("] ", DARK_GRAY));
-
-  Args0 HELP_HEADER = () -> brand(translatable("bending.command.help.header", DARK_AQUA));
+  Component PREFIX = text("[", GOLD)
+    .append(text("Bending", TEXT_COLOR))
+    .append(text("] ", GOLD));
 
   Args0 INVALID_PRESET_NAME = () -> translatable("bending.command.preset.invalid-name", RED);
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", YELLOW);
@@ -108,9 +106,9 @@ public interface Message {
   Args1<Component> ELEMENT_ABILITIES_EMPTY = element -> translatable("bending.command.display.abilities-not-found", YELLOW)
     .args(element);
 
-  Args0 ABILITIES = () -> translatable("bending.command.display.abilities", DARK_GRAY);
-  Args0 SEQUENCES = () -> translatable("bending.command.display.sequences", DARK_GRAY);
-  Args0 PASSIVES = () -> translatable("bending.command.display.passives", DARK_GRAY);
+  Args0 ABILITIES = () -> translatable("bending.command.display.abilities", TEXT_COLOR);
+  Args0 SEQUENCES = () -> translatable("bending.command.display.sequences", TEXT_COLOR);
+  Args0 PASSIVES = () -> translatable("bending.command.display.passives", TEXT_COLOR);
 
   Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> translatable("bending.command.bind.require-element", YELLOW)
     .args(ability, element);
@@ -142,8 +140,8 @@ public interface Message {
   Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TEXT_COLOR)
     .args(ability, instructions);
 
-  Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", DARK_AQUA)
-    .args(text(author, GREEN), text(link, GREEN), text("AGPLv3", BLUE))
+  Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", GOLD)
+    .args(text(author, DARK_AQUA), text(link, GREEN), text("AGPLv3", BLUE))
     .append(newline()).append(newline())
     .append(translatable("bending.command.version.hover.open-link", GRAY));
 

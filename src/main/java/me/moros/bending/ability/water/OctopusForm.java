@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -40,12 +40,12 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -114,7 +114,7 @@ public class OctopusForm extends AbilityInstance {
       Block current = user.locBlock();
       if (!current.equals(lastBlock)) {
         base.clear();
-        base.addAll(BlockMethods.createBlockRing(user.locBlock(), RADIUS));
+        base.addAll(WorldUtil.createBlockRing(user.locBlock(), RADIUS));
         lastBlock = current;
         forceUpdate = true;
       }
@@ -198,8 +198,8 @@ public class OctopusForm extends AbilityInstance {
   private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3d dir = EntityMethods.entityCenter(entity).subtract(user.location()).normalize().multiply(userConfig.knockback);
-      EntityMethods.applyVelocity(this, entity, dir);
+      Vector3d dir = EntityUtil.entityCenter(entity).subtract(user.location()).normalize().multiply(userConfig.knockback);
+      EntityUtil.applyVelocity(this, entity, dir);
       affectedEntities.add(entity);
     }
     return false;

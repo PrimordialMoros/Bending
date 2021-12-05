@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -40,11 +40,11 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -90,9 +90,9 @@ public class Catapult extends AbilityInstance {
   }
 
   private Block getBase() {
-    AABB entityBounds = AABBUtils.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
+    AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
     AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
-    return WorldMethods.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtils.blockBounds(b))).stream()
+    return WorldUtil.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtil.blockBounds(b))).stream()
       .filter(this::isValidBlock)
       .min(Comparator.comparingDouble(b -> Vector3d.center(b).distanceSq(user.location())))
       .orElse(null);
@@ -146,7 +146,7 @@ public class Catapult extends AbilityInstance {
     double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
     return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
       BendingEffect.FIRE_TICK.reset(entity);
-      EntityMethods.applyVelocity(this, entity, direction.multiply(power));
+      EntityUtil.applyVelocity(this, entity, direction.multiply(power));
       return true;
     }, true, true);
   }

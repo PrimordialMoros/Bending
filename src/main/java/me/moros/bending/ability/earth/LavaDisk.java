@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -49,15 +49,14 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -114,7 +113,7 @@ public class LavaDisk extends AbilityInstance {
     location = Vector3d.center(source);
     AABB aabb = new AABB(new Vector3d(-r, -0.3, -r), new Vector3d(r, 0.3, r));
     collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
-    for (Block block : WorldMethods.nearbyBlocks(user.world(), aabb.at(location))) {
+    for (Block block : WorldUtil.nearbyBlocks(user.world(), aabb.at(location))) {
       if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.getRelative(BlockFace.UP))) {
         return false;
       }
@@ -253,7 +252,7 @@ public class LavaDisk extends AbilityInstance {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
         Vector3d temp = new Vector3d(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
-        Location loc = location.add(VectorMethods.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
+        Location loc = location.add(VectorUtil.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
         ParticleUtil.rgb(loc, colors[index], size).spawn();
         if (length > 0.5) {
           damageBlock(loc.getBlock());
@@ -268,7 +267,7 @@ public class LavaDisk extends AbilityInstance {
   private boolean isLocationSafe() {
     Block block = location.toBlock(user.world());
     if (MaterialUtil.isWater(block)) {
-      BlockMethods.playLavaExtinguishEffect(block);
+      WorldUtil.playLavaExtinguishEffect(block);
       return false;
     }
     return MaterialUtil.isTransparent(block) || damageBlock(block);

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -44,15 +44,15 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -163,7 +163,7 @@ public class Shockwave extends AbilityInstance {
       if (!inRange) {
         for (Block block : positions) {
           AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.5, 1, 0.5)).at(new Vector3d(block));
-          if (blockBounds.intersects(AABBUtils.entityBounds(entity))) {
+          if (blockBounds.intersects(AABBUtil.entityBounds(entity))) {
             inRange = true;
             break;
           }
@@ -174,7 +174,7 @@ public class Shockwave extends AbilityInstance {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
         Vector3d push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
-        EntityMethods.applyVelocity(this, entity, push);
+        EntityUtil.applyVelocity(this, entity, push);
         affectedEntities.add(entity);
       }
     }
@@ -196,11 +196,11 @@ public class Shockwave extends AbilityInstance {
     Vector3d dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
-      VectorMethods.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
+      VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
         streams.add(new Ripple(new Ray(origin, v.multiply(range)), 0))
       );
     } else {
-      VectorMethods.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
+      VectorUtil.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
         streams.add(new Ripple(new Ray(origin, v.multiply(range)), 75))
       );
     }

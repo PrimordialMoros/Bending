@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
-import me.moros.bending.ability.air.sequences.AirWheel;
+import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
@@ -45,9 +45,9 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -129,7 +129,7 @@ public class AirBlade extends AbilityInstance {
         double timeFactor = Math.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
         Vector3d rotateAxis = Vector3d.PLUS_J.cross(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
-        VectorMethods.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
+        VectorUtil.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
           ParticleUtil.air(origin.add(v).toLocation(user.world())).spawn()
         );
       } else if (!user.sneaking()) {
@@ -190,7 +190,7 @@ public class AirBlade extends AbilityInstance {
     @Override
     public void render() {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
-      VectorMethods.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
+      VectorUtil.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
         ParticleUtil.air(location.add(v).toLocation(user.world())).spawn()
       );
     }
@@ -206,13 +206,13 @@ public class AirBlade extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
-      EntityMethods.applyVelocity(AirBlade.this, entity, velocity);
+      EntityUtil.applyVelocity(AirBlade.this, entity, velocity);
       return true;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      BlockMethods.tryExtinguishFire(user, block);
+      WorldUtil.tryExtinguishFire(user, block);
       return true;
     }
   }

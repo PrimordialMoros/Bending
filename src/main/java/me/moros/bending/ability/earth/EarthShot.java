@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -49,11 +49,11 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -141,7 +141,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       if (!MaterialUtil.isTransparent(temp)) {
         return false;
       }
-      BlockMethods.tryBreakPlant(temp);
+      WorldUtil.tryBreakPlant(temp);
     }
 
     data = source.getBlockData().clone();
@@ -192,7 +192,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
         Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.setY(0));
       }
-      EntityMethods.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
+      EntityUtil.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
       Collider c = BOX.at(projectile.center());
       boolean magma = mode == Mode.MAGMA;
@@ -217,7 +217,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     }
     DamageUtil.damageEntity(entity, user, damage, description());
     Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity()).normalize().multiply(0.4);
-    EntityMethods.applyVelocity(this, entity, velocity);
+    EntityUtil.applyVelocity(this, entity, velocity);
     return true;
   }
 
@@ -293,7 +293,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
       projectile.fallingBlock().setGravity(true);
-      EntityMethods.applyVelocity(this, projectile.fallingBlock(), dir.add(new Vector3d(0, 0.2, 0)));
+      EntityUtil.applyVelocity(this, projectile.fallingBlock(), dir.add(new Vector3d(0, 0.2, 0)));
     } else {
       origin = Vector3d.center(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);

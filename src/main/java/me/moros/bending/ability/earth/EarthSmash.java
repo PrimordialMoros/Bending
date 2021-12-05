@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -61,16 +61,15 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -228,7 +227,7 @@ public class EarthSmash extends AbilityInstance {
       if (!MaterialUtil.isTransparent(block)) {
         continue;
       }
-      BlockMethods.tryBreakPlant(block);
+      WorldUtil.tryBreakPlant(block);
       TempBlock.create(block, entry.getValue());
     }
   }
@@ -237,7 +236,7 @@ public class EarthSmash extends AbilityInstance {
     if (boulder != null && !boulder.data.isEmpty()) {
       Map<TempFallingBlock, ShardType> shards = new HashMap<>();
       for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
-        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
+        Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
         TempBlock.createAir(block);
@@ -356,7 +355,7 @@ public class EarthSmash extends AbilityInstance {
       Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
       CollisionUtil.handleEntityCollisions(user, liftCollider, entity -> {
         Vector3d push = new Vector3d(entity.getVelocity()).setY(userConfig.raiseEntityPush);
-        return EntityMethods.applyVelocity(EarthSmash.this, entity, push);
+        return EntityUtil.applyVelocity(EarthSmash.this, entity, push);
       }, true, true);
 
       long time = System.currentTimeMillis();
@@ -481,8 +480,8 @@ public class EarthSmash extends AbilityInstance {
       }
       affectedEntities.add(entity);
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-      Vector3d velocity = EntityMethods.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
-      EntityMethods.applyVelocity(EarthSmash.this, entity, velocity.multiply(userConfig.knockback));
+      Vector3d velocity = EntityUtil.entityCenter(entity).subtract(boulder.center).setY(userConfig.knockup).normalize();
+      EntityUtil.applyVelocity(EarthSmash.this, entity, velocity.multiply(userConfig.knockback));
       return false;
     }
 
@@ -554,9 +553,9 @@ public class EarthSmash extends AbilityInstance {
         if (entity.isValid()) {
           switch (type) {
             case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-            case SAND -> PotionUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
+            case SAND -> EntityUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
             case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-            case MUD -> PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
+            case MUD -> EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
           }
           return true;
         }

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.game.temporal;
@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
 import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -138,7 +138,7 @@ public class TempBlock implements Temporary {
   }
 
   public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {
-    Material mat = BlockMethods.isInfiniteWater(block) ? Material.WATER : Material.AIR;
+    Material mat = WorldUtil.isInfiniteWater(block) ? Material.WATER : Material.AIR;
     Block above = block.getRelative(BlockFace.UP);
     if (mat == Material.AIR && MaterialUtil.isWater(above)) {
       return create(block, calculateWaterData(above), duration, true);
@@ -321,7 +321,7 @@ public class TempBlock implements Temporary {
     }
   }
 
-  private static class TempBlockState extends Snapshot{
+  private static class TempBlockState extends Snapshot {
     private final int expirationTicks;
     private boolean weak = false;
 

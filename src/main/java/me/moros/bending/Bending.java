@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending;
@@ -23,19 +23,19 @@ import java.util.Objects;
 
 import me.moros.bending.command.CommandManager;
 import me.moros.bending.config.ConfigManager;
-import me.moros.bending.events.BendingEventBus;
+import me.moros.bending.event.BendingEventBus;
 import me.moros.bending.game.Game;
 import me.moros.bending.hook.LuckPermsHook;
+import me.moros.bending.hook.placeholder.BendingExpansion;
 import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.UserListener;
 import me.moros.bending.listener.WorldListener;
 import me.moros.bending.locale.TranslationManager;
-import me.moros.bending.placeholder.BendingExpansion;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
-import me.moros.bending.util.PersistentDataLayer;
+import me.moros.bending.util.metadata.PersistentDataLayer;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

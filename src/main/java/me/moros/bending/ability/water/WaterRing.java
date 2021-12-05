@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
-import me.moros.bending.ability.water.sequences.WaterGimbal;
+import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -53,15 +53,15 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.ExpiringSet;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.WorldUtil;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -191,7 +191,7 @@ public class WaterRing extends AbilityInstance {
     if (!ready) {
       if (states.update() == UpdateResult.REMOVE) {
         if (states.completed() && !states.chainStore().isEmpty()) {
-          ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
+          ring.addAll(WorldUtil.createBlockRing(user.headBlock(), this.radius));
           sources = ring.size();
           ready = true;
         } else {
@@ -207,7 +207,7 @@ public class WaterRing extends AbilityInstance {
     Vector3i newPosition = user.location().toVector3i();
     if (!newPosition.equals(lastPosition)) {
       ring.clear();
-      ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
+      ring.addAll(WorldUtil.createBlockRing(user.headBlock(), this.radius));
       Collections.rotate(ring, index);
       lastPosition = newPosition;
     }
@@ -265,11 +265,11 @@ public class WaterRing extends AbilityInstance {
         return false;
       }
       AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
-      AABB entityBounds = AABBUtils.entityBounds(entity);
+      AABB entityBounds = AABBUtil.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
-        EntityMethods.applyVelocity(WaterRing.this, entity, velocity.multiply(userConfig.knockback));
+        EntityUtil.applyVelocity(WaterRing.this, entity, velocity.multiply(userConfig.knockback));
         affectedEntities.add(entity);
       }
     }
@@ -295,7 +295,7 @@ public class WaterRing extends AbilityInstance {
     this.radius = radius;
     cleanAll();
     ring.clear();
-    ring.addAll(BlockMethods.createBlockRing(user.headBlock(), this.radius));
+    ring.addAll(WorldUtil.createBlockRing(user.headBlock(), this.radius));
   }
 
   private void cleanAll() {
@@ -371,7 +371,7 @@ public class WaterRing extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      return BlockMethods.tryCoolLava(user, block);
+      return WorldUtil.tryCoolLava(user, block);
     }
   }
 

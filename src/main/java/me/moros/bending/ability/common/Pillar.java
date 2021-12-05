@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.common;
@@ -33,9 +33,9 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -105,7 +105,7 @@ public class Pillar implements Updatable {
     if (!MaterialUtil.isTransparentOrWater(newBlock)) {
       return false;
     }
-    BlockMethods.tryBreakPlant(newBlock);
+    WorldUtil.tryBreakPlant(newBlock);
 
     SelectedSource.tryRevertSource(newBlock.getRelative(opposite));
 
@@ -178,7 +178,7 @@ public class Pillar implements Updatable {
     }
 
     public @NonNull PillarBuilder direction(@NonNull BlockFace direction) {
-      if (!BlockMethods.FACES.contains(direction)) {
+      if (!WorldUtil.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
       this.direction = direction;

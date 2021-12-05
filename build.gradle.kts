@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.2.0-SNAPSHOT"
+version = "1.3.0-SNAPSHOT"
 
 java {
     toolchain {
@@ -77,9 +77,9 @@ tasks {
             relocate("com.github.stefvanschie.inventoryframework", "me.moros.bending.internal.inventoryframework")
             relocate("com.typesafe", "me.moros.bending.internal.typesafe")
             relocate("com.zaxxer.hikari", "me.moros.bending.internal.hikari")
-            relocate("io.leangen", "me.moros.bending.internal.jdbi-leangen")
+            relocate("io.leangen", "me.moros.bending.internal.leangen")
             relocate("me.moros.storage", "me.moros.bending.internal.storage")
-            relocate("org.antlr", "me.moros.bending.internal.jdbi-antlr")
+            relocate("org.antlr", "me.moros.bending.internal.antlr")
             relocate("org.bstats", "me.moros.bending.bstats")
             relocate("org.h2", "me.moros.bending.internal.h2")
             relocate("org.jdbi", "me.moros.bending.internal.jdbi")
@@ -99,7 +99,6 @@ tasks {
         onlyIf { !isSnapshot() }
     }
     withType<JavaCompile> {
-        options.compilerArgs.add("-parameters")
         options.compilerArgs.add("-Xlint:unchecked")
         options.compilerArgs.add("-Xlint:deprecation")
         options.encoding = "UTF-8"
@@ -108,6 +107,9 @@ tasks {
         filesMatching("plugin.yml") {
             expand("pluginVersion" to project.version)
         }
+        from("LICENSE") {
+            rename { "${project.name.toUpperCase()}_${it}"}
+        }
     }
 }
 
@@ -115,7 +117,7 @@ publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
         pom {
-            name.set(project.name.toLowerCase())
+            name.set(project.name)
             description.set("Modern Bending plugin for Minecraft servers running PaperMC")
             url.set("https://github.com/PrimordialMoros/Bending")
             licenses {

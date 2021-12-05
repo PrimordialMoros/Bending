@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.common.basic;
@@ -31,9 +31,9 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -98,13 +98,13 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 
   // Try to resolve wheel location by checking collider-block intersections.
   public boolean resolveMovement(double maxResolution) {
-    Collection<Block> nearbyBlocks = WorldMethods.nearbyBlocks(user.world(), box.at(location));
+    Collection<Block> nearbyBlocks = WorldUtil.nearbyBlocks(user.world(), box.at(location));
     Collider checkCollider = collider();
     // Calculate top and bottom positions and add a small buffer
     double topY = location.getY() + radius + 0.05;
     double bottomY = location.getY() - radius - 0.05;
     for (Block block : nearbyBlocks) {
-      AABB blockBounds = AABBUtils.blockBounds(block);
+      AABB blockBounds = AABBUtil.blockBounds(block);
       if (blockBounds.intersects(checkCollider)) {
         if (blockBounds.min.getY() > topY) { // Collision on the top part
           return false;
@@ -121,7 +121,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     // Try to fall if the block below doesn't have a bounding box.
     if (location.setY(bottomY).toBlock(user.world()).isPassable()) {
       Disk tempCollider = collider.at(location.subtract(Vector3d.PLUS_J));
-      if (nearbyBlocks.stream().map(AABBUtils::blockBounds).noneMatch(tempCollider::intersects)) {
+      if (nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(tempCollider::intersects)) {
         location = location.add(Vector3d.MINUS_J);
         return true;
       }
@@ -132,7 +132,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private boolean checkCollisions(Collection<Block> nearbyBlocks) {
     // Check if there's any final collisions after all movements.
     Collider checkCollider = collider();
-    return nearbyBlocks.stream().map(AABBUtils::blockBounds).noneMatch(checkCollider::intersects);
+    return nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(checkCollider::intersects);
   }
 }
 

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.common.basic;
@@ -31,10 +31,10 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -118,7 +118,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if (location.add(direction).toBlock(user.world()).equals(previousBlock)) {
       direction = direction.multiply(2);
     }
-    for (Vector3i v : VectorMethods.decomposeDiagonals(originalVector, direction)) {
+    for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
       Block diagonal = originBlock.getRelative(v.getX(), v.getY(), v.getZ());
       if (diagonalsPredicate.test(diagonal)) {
         onBlockHit(diagonal);
@@ -138,7 +138,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
-      BlockMethods.tryBreakPlant(current);
+      WorldUtil.tryBreakPlant(current);
       if (material == Material.WATER && MaterialUtil.isWater(current)) {
         ParticleUtil.bubble(current).spawn();
         tempBlock = null;

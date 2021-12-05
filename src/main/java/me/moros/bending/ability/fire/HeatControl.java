@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -42,8 +42,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -149,10 +148,10 @@ public class HeatControl extends AbilityInstance implements Ability {
     Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
-    for (Block block : WorldMethods.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
+    for (Block block : WorldUtil.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
       if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block)) {
-        BlockMethods.tryExtinguishFire(user, block);
+        WorldUtil.tryExtinguishFire(user, block);
       } else if (MaterialUtil.isMeltable(block)) {
         toMelt.add(block);
       }
@@ -190,7 +189,7 @@ public class HeatControl extends AbilityInstance implements Ability {
   }
 
   private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
-    List<Block> newBlocks = WorldMethods.nearbyBlocks(center, radius, predicate);
+    List<Block> newBlocks = WorldUtil.nearbyBlocks(center, radius, predicate);
     newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;
@@ -213,7 +212,7 @@ public class HeatControl extends AbilityInstance implements Ability {
     @Override
     protected boolean processBlock(@NonNull Block block) {
       if (MaterialUtil.isLava(block) && TempBlock.isBendable(block)) {
-        return BlockMethods.tryCoolLava(user, block);
+        return WorldUtil.tryCoolLava(user, block);
       }
       return false;
     }
@@ -225,7 +224,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       if (!TempBlock.isBendable(block)) {
         return false;
       }
-      return BlockMethods.tryMelt(user, block);
+      return WorldUtil.tryMelt(user, block);
     }
   }
 

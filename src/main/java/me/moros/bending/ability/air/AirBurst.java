@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -40,12 +40,12 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BurstUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -152,9 +152,9 @@ public class AirBurst extends AbilityInstance {
     }
     released = true;
     Collection<Ray> rays = switch (mode) {
-      case CONE -> BurstUtil.cone(user, userConfig.coneRange);
-      case FALL -> BurstUtil.fall(user, userConfig.sphereRange);
-      default -> BurstUtil.sphere(user, userConfig.sphereRange);
+      case CONE -> VectorUtil.cone(user, userConfig.coneRange);
+      case FALL -> VectorUtil.fall(user, userConfig.sphereRange);
+      default -> VectorUtil.sphere(user, userConfig.sphereRange);
     };
     rays.forEach(r -> streams.add(new AirStream(r)));
     removalPolicy = Policies.builder().build();
@@ -210,17 +210,17 @@ public class AirBurst extends AbilityInstance {
       } else {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
-      EntityMethods.applyVelocity(AirBurst.this, entity, velocity);
+      EntityUtil.applyVelocity(AirBurst.this, entity, velocity);
       entity.setFallDistance(0);
       return false;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      if (BlockMethods.tryExtinguishFire(user, block)) {
+      if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
-      BlockMethods.tryCoolLava(user, block);
+      WorldUtil.tryCoolLava(user, block);
       return true;
     }
   }

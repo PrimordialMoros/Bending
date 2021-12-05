@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -59,8 +59,8 @@ import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -234,7 +234,7 @@ public class Lightning extends AbilityInstance {
 
   private boolean electrocuteAround(Entity entity) {
     if (entity != null) {
-      Collider collider = new Sphere(EntityMethods.entityCenter(entity), userConfig.radius);
+      Collider collider = new Sphere(EntityUtil.entityCenter(entity), userConfig.radius);
       Collection<Entity> entities = new ArrayList<>();
       CollisionUtil.handleEntityCollisions(user, collider, entities::add);
       boolean remove = handleRedirection(entities);
@@ -255,7 +255,7 @@ public class Lightning extends AbilityInstance {
         creeper.setPowered(true);
       }
       boolean hitWater = entity.isInWater();
-      boolean grounded = EntityMethods.isOnGround(entity);
+      boolean grounded = EntityUtil.isOnGround(entity);
       boolean hasMetalArmor = entity instanceof LivingEntity livingEntity && InventoryUtil.hasMetalArmor(livingEntity);
       double dmgFactor = hitWater ? 2 : (grounded && hasMetalArmor ? 0.5 : 1);
       double damage = factor * dmgFactor * userConfig.damage;
@@ -344,7 +344,7 @@ public class Lightning extends AbilityInstance {
     private Vector3d randomOffset(LineSegment segment, double maxOffset) {
       double length = maxOffset * 0.5 * (rand.nextGaussian() + 1);
       double angle = rand.nextDouble(2 * Math.PI);
-      return segment.mid.add(VectorMethods.orthogonal(segment.direction, angle, length));
+      return segment.mid.add(VectorUtil.orthogonal(segment.direction, angle, length));
     }
 
     private Vector3d randomDirection(Vector3d axis, double maxLength) {

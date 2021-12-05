@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -46,8 +46,8 @@ import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -160,7 +160,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     ParticleUtil.of(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
       .offset(1, 1, 1).spawn();
 
-    FragileStructure.tryDamageStructure(WorldMethods.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+    FragileStructure.tryDamageStructure(WorldUtil.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
 
     BendingExplosion.builder()
       .size(size)
@@ -203,7 +203,7 @@ public class Combustion extends AbilityInstance implements Explosive {
         SoundUtil.COMBUSTION.play(bukkitLocation(), 1.5F, 0);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
-        VectorMethods.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
+        VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
           Vector3d velocity = v.multiply(radius);
           ParticleUtil.of(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
             .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();

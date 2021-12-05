@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -42,7 +42,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -86,11 +86,11 @@ public class Blaze extends AbilityInstance {
     Vector3d dir = user.direction().setY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
-      VectorMethods.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 2)).forEach(v ->
+      VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 2)).forEach(v ->
         streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     } else {
-      VectorMethods.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
+      VectorUtil.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
         streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     }

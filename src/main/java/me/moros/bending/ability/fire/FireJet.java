@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -39,8 +39,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -110,7 +110,7 @@ public class FireJet extends AbilityInstance {
 
   private void jetBlastAnimation() {
     Vector3d center = user.location().add(new Vector3d(0, 0.2, 0));
-    VectorMethods.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
+    VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
       ParticleUtil.fire(user, center.add(v.multiply(0.5)).toLocation(user.world()))
         .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(0.09).spawn()
     );
@@ -126,7 +126,7 @@ public class FireJet extends AbilityInstance {
     double timeFactor = (System.currentTimeMillis() - startTime) / (double) duration;
     double speed = halfSpeed + halfSpeed * Math.sin(Math.PI * timeFactor);
 
-    EntityMethods.applyVelocity(this, user.entity(), user.direction().multiply(speed));
+    EntityUtil.applyVelocity(this, user.entity(), user.direction().multiply(speed));
     user.entity().setFallDistance(0);
 
     Vector3d target = user.location().add(user.velocity().negate());
@@ -134,7 +134,7 @@ public class FireJet extends AbilityInstance {
     double offset = jetBlast ? 0.7 : 0.4;
     double particleSpeed = 0.05 * Math.min(1, speed);
     for (int i = 0; i < amount; i++) {
-      Vector3d center = VectorMethods.gaussianOffset(user.location(), offset);
+      Vector3d center = VectorUtil.gaussianOffset(user.location(), offset);
       Vector3d v = target.subtract(center);
       ParticleUtil.fire(user, center.toLocation(user.world()))
         .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(particleSpeed).spawn();

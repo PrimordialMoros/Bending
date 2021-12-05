@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -43,7 +43,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -76,7 +76,7 @@ public class WaterSpout extends AbilityInstance {
     loadConfig();
 
     double h = userConfig.height + 2;
-    if (EntityMethods.distanceAboveGround(user.entity()) > h) {
+    if (EntityUtil.distanceAboveGround(user.entity()) > h) {
       return false;
     }
 
@@ -157,7 +157,7 @@ public class WaterSpout extends AbilityInstance {
     @Override
     public void postRender() {
       if (!user.flying()) {
-        EntityMethods.applyVelocity(WaterSpout.this, user.entity(), user.velocity().add(g));
+        EntityUtil.applyVelocity(WaterSpout.this, user.entity(), user.velocity().add(g));
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
         SoundUtil.WATER.play(user.entity().getLocation());

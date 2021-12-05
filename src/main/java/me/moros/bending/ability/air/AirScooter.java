@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
-import me.moros.bending.ability.air.sequences.AirWheel;
+import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -38,10 +38,10 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -81,7 +81,7 @@ public class AirScooter extends AbilityInstance {
 
     heightSmoother = new HeightSmoother();
 
-    double dist = EntityMethods.distanceAboveGround(user.entity());
+    double dist = EntityUtil.distanceAboveGround(user.entity());
     if ((dist < 0.5 || dist > 3)) {
       return false;
     }
@@ -146,7 +146,7 @@ public class AirScooter extends AbilityInstance {
     if (isColliding()) {
       return false;
     }
-    double height = EntityMethods.distanceAboveGround(user.entity());
+    double height = EntityUtil.distanceAboveGround(user.entity());
     double smoothedHeight = heightSmoother.add(height);
     if (user.locBlock().isLiquid()) {
       height = 0.5;
@@ -156,7 +156,7 @@ public class AirScooter extends AbilityInstance {
     double delta = getPrediction() - height;
     double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
     Vector3d velocity = user.direction().setY(0).normalize().multiply(userConfig.speed).setY(force);
-    EntityMethods.applyVelocity(this, user.entity(), velocity);
+    EntityUtil.applyVelocity(this, user.entity(), velocity);
     user.entity().setFallDistance(0);
     return true;
   }
@@ -175,8 +175,8 @@ public class AirScooter extends AbilityInstance {
     double speed = Math.max(userConfig.speed, playerSpeed) * 3;
     Vector3d offset = user.direction().setY(0).normalize().multiply(speed);
     Vector3d location = user.location().add(offset);
-    AABB userBounds = AABBUtils.entityBounds(user.entity()).at(location);
-    if (!WorldMethods.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
+    AABB userBounds = AABBUtil.entityBounds(user.entity()).at(location);
+    if (!WorldUtil.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
       return 2.25;
     }
     return 1.25;

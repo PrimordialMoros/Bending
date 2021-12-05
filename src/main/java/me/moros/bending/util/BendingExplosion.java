@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.util;
@@ -36,8 +36,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -96,7 +94,7 @@ public final class BendingExplosion {
     Location bukkitLoc = center.toLocation(user.world());
 
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = breakBlocks ? WorldMethods.nearbyBlocks(bukkitLoc, size, predicate) : new ArrayList<>();
+    Collection<Block> blocks = breakBlocks ? WorldUtil.nearbyBlocks(bukkitLoc, size, predicate) : new ArrayList<>();
 
     if (Bending.eventBus().postExplosionEvent(user, bukkitLoc, blocks, size).isCancelled()) {
       return false;
@@ -127,7 +125,7 @@ public final class BendingExplosion {
     }
 
     return CollisionUtil.handleEntityCollisions(user, new Sphere(center, size), entity -> {
-      Vector3d entityCenter = EntityMethods.entityCenter(entity);
+      Vector3d entityCenter = EntityUtil.entityCenter(entity);
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
@@ -141,7 +139,7 @@ public final class BendingExplosion {
         knockback *= selfKnockbackFactor;
       }
       Vector3d dir = entityCenter.subtract(center).normalize().multiply(knockback);
-      EntityMethods.applyVelocity(source, entity, dir);
+      EntityUtil.applyVelocity(source, entity, dir);
       return true;
     }, livingOnly, true);
   }

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -49,13 +49,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.InventoryUtil;
-import me.moros.bending.util.Metadata;
+import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -203,10 +203,10 @@ public class MetalCable extends AbilityInstance {
     }
     Vector3d direction = targetLocation.subtract(new Vector3d(entityToMove.getLocation())).normalize();
     if (distance > 3) {
-      EntityMethods.applyVelocity(this, entityToMove, direction.multiply(userConfig.pullSpeed));
+      EntityUtil.applyVelocity(this, entityToMove, direction.multiply(userConfig.pullSpeed));
     } else {
       if (target.type == CableTarget.Type.ENTITY) {
-        EntityMethods.applyVelocity(this, entityToMove, Vector3d.ZERO);
+        EntityUtil.applyVelocity(this, entityToMove, Vector3d.ZERO);
         if (target.entity instanceof FallingBlock fb) {
           Location tempLocation = fb.getLocation().add(0, 0.5, 0);
           ParticleUtil.of(Particle.BLOCK_CRACK, tempLocation).count(4)
@@ -218,9 +218,9 @@ public class MetalCable extends AbilityInstance {
         return false;
       } else {
         if (distance <= 3 && distance > 1.5) {
-          EntityMethods.applyVelocity(this, entityToMove, direction.multiply(0.4 * userConfig.pullSpeed));
+          EntityUtil.applyVelocity(this, entityToMove, direction.multiply(0.4 * userConfig.pullSpeed));
         } else {
-          EntityMethods.applyVelocity(this, entityToMove, new Vector3d(0, 0.5, 0));
+          EntityUtil.applyVelocity(this, entityToMove, new Vector3d(0, 0.5, 0));
           return false;
         }
       }
@@ -335,7 +335,7 @@ public class MetalCable extends AbilityInstance {
     Vector3d targetLocation = user.compositeRayTrace(userConfig.projectileRange).result(user.world()).entityCenterOrPosition();
 
     Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
-    EntityMethods.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));
+    EntityUtil.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));
     target.entity.setFallDistance(0);
     if (target.entity instanceof FallingBlock) {
       removalPolicy = Policies.builder()

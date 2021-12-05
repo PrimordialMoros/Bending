@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -40,10 +40,10 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -118,7 +118,7 @@ public class AirPunch extends AbilityInstance {
 
     @Override
     public void render() {
-      VectorMethods.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
+      VectorUtil.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
         ParticleUtil.of(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
           .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
       );
@@ -134,17 +134,17 @@ public class AirPunch extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3d velocity = EntityMethods.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
-      EntityMethods.applyVelocity(AirPunch.this, entity, velocity);
+      Vector3d velocity = EntityUtil.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
+      EntityUtil.applyVelocity(AirPunch.this, entity, velocity);
       return true;
     }
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      if (BlockMethods.tryExtinguishFire(user, block)) {
+      if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
-      BlockMethods.tryCoolLava(user, block);
+      WorldUtil.tryCoolLava(user, block);
       return true;
     }
   }

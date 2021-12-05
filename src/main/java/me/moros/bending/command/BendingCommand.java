@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.command;
@@ -58,12 +58,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingCommand {
+public final class BendingCommand {
   private final CommandManager manager;
   private final Builder<CommandSender> builder;
   private final MinecraftHelp<CommandSender> help;
 
-  protected BendingCommand(@NonNull CommandManager manager) {
+  BendingCommand(@NonNull CommandManager manager) {
     this.manager = manager;
     this.builder = manager.rootBuilder();
     this.help = MinecraftHelp.createNative("/bending help", manager);
@@ -71,7 +71,7 @@ public class BendingCommand {
     help.setHelpColors(HelpColors.of(
       NamedTextColor.DARK_GRAY,
       Message.TEXT_COLOR,
-      NamedTextColor.GOLD,
+      NamedTextColor.GREEN,
       NamedTextColor.DARK_AQUA,
       NamedTextColor.GRAY)
     );
@@ -214,8 +214,8 @@ public class BendingCommand {
   }
 
   private static void onVersion(CommandSender sender) {
-    String link = "https://github.com/PrimordialMoros/Bending";
-    Component version = Message.brand(Component.text("Version: ", NamedTextColor.DARK_AQUA))
+    String link = "https://github.com/PrimordialMoros/bending";
+    Component version = Message.brand(Component.text("Version: ", NamedTextColor.GOLD))
       .append(Component.text(Bending.version(), NamedTextColor.GREEN))
       .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.author(), link)))
       .clickEvent(ClickEvent.openUrl(link));

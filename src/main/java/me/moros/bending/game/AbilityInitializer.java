@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.game;
@@ -34,9 +34,9 @@ import me.moros.bending.ability.air.AirShield;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.AirSwipe;
 import me.moros.bending.ability.air.Tornado;
-import me.moros.bending.ability.air.passives.AirAgility;
-import me.moros.bending.ability.air.passives.GracefulDescent;
-import me.moros.bending.ability.air.sequences.AirWheel;
+import me.moros.bending.ability.air.passive.AirAgility;
+import me.moros.bending.ability.air.passive.GracefulDescent;
+import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.earth.Bulwark;
 import me.moros.bending.ability.earth.Catapult;
 import me.moros.bending.ability.earth.Collapse;
@@ -51,11 +51,11 @@ import me.moros.bending.ability.earth.LavaDisk;
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.ability.earth.RaiseEarth;
 import me.moros.bending.ability.earth.Shockwave;
-import me.moros.bending.ability.earth.passives.DensityShift;
-import me.moros.bending.ability.earth.passives.EarthCling;
-import me.moros.bending.ability.earth.passives.FerroControl;
-import me.moros.bending.ability.earth.sequences.EarthPillars;
-import me.moros.bending.ability.earth.sequences.EarthShards;
+import me.moros.bending.ability.earth.passive.DensityShift;
+import me.moros.bending.ability.earth.passive.EarthCling;
+import me.moros.bending.ability.earth.passive.FerroControl;
+import me.moros.bending.ability.earth.sequence.EarthPillars;
+import me.moros.bending.ability.earth.sequence.EarthShards;
 import me.moros.bending.ability.fire.Blaze;
 import me.moros.bending.ability.fire.Combustion;
 import me.moros.bending.ability.fire.FireBlast;
@@ -67,9 +67,9 @@ import me.moros.bending.ability.fire.FireWall;
 import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.fire.Lightning;
-import me.moros.bending.ability.fire.sequences.FireKick;
-import me.moros.bending.ability.fire.sequences.FireSpin;
-import me.moros.bending.ability.fire.sequences.FireWheel;
+import me.moros.bending.ability.fire.sequence.FireKick;
+import me.moros.bending.ability.fire.sequence.FireSpin;
+import me.moros.bending.ability.fire.sequence.FireWheel;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.ability.water.HealingWaters;
 import me.moros.bending.ability.water.IceCrawl;
@@ -83,10 +83,10 @@ import me.moros.bending.ability.water.WaterManipulation;
 import me.moros.bending.ability.water.WaterRing;
 import me.moros.bending.ability.water.WaterSpout;
 import me.moros.bending.ability.water.WaterWave;
-import me.moros.bending.ability.water.passives.FastSwim;
-import me.moros.bending.ability.water.passives.HydroSink;
-import me.moros.bending.ability.water.sequences.Iceberg;
-import me.moros.bending.ability.water.sequences.WaterGimbal;
+import me.moros.bending.ability.water.passive.FastSwim;
+import me.moros.bending.ability.water.passive.HydroSink;
+import me.moros.bending.ability.water.sequence.Iceberg;
+import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
 import me.moros.bending.model.ability.description.SequenceStep;

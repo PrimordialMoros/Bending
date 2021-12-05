@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -47,9 +47,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -112,9 +111,9 @@ public class AirShield extends AbilityInstance {
       }
     }
 
-    for (Block b : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isFire)) {
-      BlockMethods.tryCoolLava(user, b);
-      BlockMethods.tryExtinguishFire(user, b);
+    for (Block b : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isFire)) {
+      WorldUtil.tryCoolLava(user, b);
+      WorldUtil.tryExtinguishFire(user, b);
     }
 
     CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
@@ -122,7 +121,7 @@ public class AirShield extends AbilityInstance {
       Vector3d normal = toEntity.setY(0).normalize();
       double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;
       strength = Math.max(0, Math.min(1, strength));
-      EntityMethods.applyVelocity(this, entity, new Vector3d(entity.getVelocity()).add(normal.multiply(strength)));
+      EntityUtil.applyVelocity(this, entity, new Vector3d(entity.getVelocity()).add(normal.multiply(strength)));
       return false;
     }, false);
 
@@ -130,7 +129,7 @@ public class AirShield extends AbilityInstance {
   }
 
   private Vector3d center() {
-    return EntityMethods.entityCenter(user.entity());
+    return EntityUtil.entityCenter(user.entity());
   }
 
   @Override
@@ -154,11 +153,11 @@ public class AirShield extends AbilityInstance {
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
-      for (Block block : WorldMethods.nearbyBlocks(center().toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+      for (Block block : WorldUtil.nearbyBlocks(center().toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
         if (!user.canBuild(block)) {
           continue;
         }
-        BlockMethods.tryBreakPlant(block);
+        WorldUtil.tryBreakPlant(block);
         if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
           long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
           TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);

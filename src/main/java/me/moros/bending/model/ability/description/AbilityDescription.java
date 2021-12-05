@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.model.ability.description;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
@@ -113,12 +114,12 @@ public class AbilityDescription {
       type = "Sequence";
     }
     Component details = Component.text().append(displayName()).append(Component.newline())
-      .append(Component.text("Element: ", NamedTextColor.DARK_AQUA))
+      .append(Component.text("Element: ", NamedTextColor.GOLD))
       .append(element().displayName().append(Component.newline()))
-      .append(Component.text("Type: ", NamedTextColor.DARK_AQUA))
-      .append(Component.text(type, NamedTextColor.GREEN)).append(Component.newline())
-      .append(Component.text("Permission: ", NamedTextColor.DARK_AQUA))
-      .append(Component.text(permission(), NamedTextColor.GREEN)).append(Component.newline()).append(Component.newline())
+      .append(Component.text("Type: ", NamedTextColor.GOLD))
+      .append(Component.text(type, Message.TEXT_COLOR)).append(Component.newline())
+      .append(Component.text("Permission: ", NamedTextColor.GOLD))
+      .append(Component.text(permission(), Message.TEXT_COLOR)).append(Component.newline()).append(Component.newline())
       .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY)).build();
 
     return displayName()

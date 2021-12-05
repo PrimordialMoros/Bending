@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.common.basic;
@@ -32,10 +32,10 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.collision.AABBUtils;
+import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.VectorMethods;
+import me.moros.bending.util.VectorUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -100,7 +100,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     if (speed > 1) {
       toCheck.add(originalVector.add(directionVector.multiply(0.5)).toBlock(user.world()));
     }
-    for (Vector3i v : VectorMethods.decomposeDiagonals(originalVector, directionVector)) {
+    for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, directionVector)) {
       toCheck.add(originBlock.getRelative(v.getX(), v.getY(), v.getZ()));
     }
     return toCheck.stream().noneMatch(this::testCollision);
@@ -111,7 +111,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       return true;
     }
     if (!MaterialUtil.isTransparent(block)) {
-      if (AABBUtils.blockBounds(block).intersects(collider)) {
+      if (AABBUtil.blockBounds(block).intersects(collider)) {
         return onBlockHit(block);
       }
     }

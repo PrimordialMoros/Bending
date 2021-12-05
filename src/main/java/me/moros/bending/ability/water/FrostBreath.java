@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -47,12 +47,10 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.PotionUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.WorldMethods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -60,7 +58,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -153,7 +150,7 @@ public class FrostBreath extends AbilityInstance {
 
     @Override
     public void postRender() {
-      for (Block block : WorldMethods.nearbyBlocks(bukkitLocation(), collider.radius)) {
+      for (Block block : WorldUtil.nearbyBlocks(bukkitLocation(), collider.radius)) {
         if (!user.canBuild(block)) {
           continue;
         }
@@ -166,8 +163,6 @@ public class FrostBreath extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-        int potionDuration = FastMath.round(userConfig.slowDuration / 50.0);
-        PotionUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, userConfig.power);
         ParticleUtil.of(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
           .offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
       }
@@ -188,7 +183,7 @@ public class FrostBreath extends AbilityInstance {
           TempBlock.create(block, Material.SNOW.createBlockData(), duration, true);
         }
       }
-      BlockMethods.tryCoolLava(user, block);
+      WorldUtil.tryCoolLava(user, block);
       return true;
     }
   }
@@ -200,10 +195,6 @@ public class FrostBreath extends AbilityInstance {
     public double range;
     @Modifiable(Attribute.DURATION)
     public long duration;
-    @Modifiable(Attribute.STRENGTH)
-    public int power;
-    @Modifiable(Attribute.DURATION)
-    public long slowDuration;
     @Modifiable(Attribute.FREEZE_TICKS)
     public int freezeTicks;
 
@@ -214,8 +205,6 @@ public class FrostBreath extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(10000);
       range = abilityNode.node("range").getDouble(7.0);
       duration = abilityNode.node("duration").getLong(1500);
-      power = abilityNode.node("slow-power").getInt(2) - 1;
-      slowDuration = abilityNode.node("slow-duration").getLong(2500);
       freezeTicks = abilityNode.node("freeze-ticks").getInt(5);
     }
   }

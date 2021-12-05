@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.earth;
@@ -61,10 +61,9 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.VectorMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -252,7 +251,7 @@ public class EarthLine extends AbilityInstance {
       }
       DamageUtil.damageEntity(entity, user, damage, description());
       Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
-      EntityMethods.applyVelocity(EarthLine.this, entity, velocity);
+      EntityUtil.applyVelocity(EarthLine.this, entity, velocity);
       return true;
     }
 
@@ -260,7 +259,7 @@ public class EarthLine extends AbilityInstance {
     public boolean onBlockHit(@NonNull Block block) {
       if (MaterialUtil.isWater(block)) {
         if (mode == Mode.MAGMA) {
-          BlockMethods.playLavaExtinguishEffect(block);
+          WorldUtil.playLavaExtinguishEffect(block);
           return true;
         }
       }
@@ -297,11 +296,11 @@ public class EarthLine extends AbilityInstance {
         .buildAndExplode(EarthLine.this, location);
 
       Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
-      List<Block> wall = WorldMethods.nearbyBlocks(center, userConfig.explosionRadius, predicate);
+      List<Block> wall = WorldUtil.nearbyBlocks(center, userConfig.explosionRadius, predicate);
       wall.removeIf(b -> !user.canBuild(b));
       Collections.shuffle(wall);
       for (Block block : wall) {
-        Vector3d velocity = VectorMethods.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
+        Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
         new TempFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
       }
@@ -318,7 +317,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     private void imprisonTarget(LivingEntity entity) {
-      if (imprisoned || !entity.isValid() || EntityMethods.distanceAboveGround(entity) > 1.2) {
+      if (imprisoned || !entity.isValid() || EntityUtil.distanceAboveGround(entity) > 1.2) {
         return;
       }
       Material material = null;
@@ -327,7 +326,7 @@ public class EarthLine extends AbilityInstance {
         material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
       } else {
         Location center = blockToCheck.getLocation().add(0.5, 0.5, 0.5);
-        for (Block block : WorldMethods.nearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
+        for (Block block : WorldUtil.nearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
           material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
         }
       }
@@ -337,11 +336,11 @@ public class EarthLine extends AbilityInstance {
       }
 
       imprisoned = true;
-      EntityMethods.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
+      EntityUtil.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
       Material mat = material;
       Vector3d center = new Vector3d(entity.getLocation()).add(new Vector3d(0, -1.1, 0));
       Vector3d offset = new Vector3d(0, -0.7, 0);
-      VectorMethods.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
+      VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         new TempArmorStand(center.add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
         new TempArmorStand(center.add(offset).add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
       });
@@ -406,7 +405,7 @@ public class EarthLine extends AbilityInstance {
       if (!MaterialUtil.isTransparent(newBlock)) {
         return false;
       }
-      BlockMethods.tryBreakPlant(newBlock);
+      WorldUtil.tryBreakPlant(newBlock);
       return true;
     }
   }

@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.air;
@@ -40,7 +40,7 @@ import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
+import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -105,7 +105,7 @@ public class Tornado extends AbilityInstance {
     CollisionUtil.handleEntityCollisions(user, box, entity -> {
       double dy = entity.getLocation().getY() - base.getY();
       double r = 2 + (radius - 2) * dy;
-      Vector3d delta = EntityMethods.entityCenter(entity).subtract(base);
+      Vector3d delta = EntityUtil.entityCenter(entity).subtract(base);
       double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
       if (distSq > r * r) {
         return false;
@@ -127,7 +127,7 @@ public class Tornado extends AbilityInstance {
         Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
         velocity = ortho.add(normal).normalize().multiply(factor);
       }
-      EntityMethods.applyVelocity(this, entity, velocity);
+      EntityUtil.applyVelocity(this, entity, velocity);
       return false;
     }, true, true);
 

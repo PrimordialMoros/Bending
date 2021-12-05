@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.water;
@@ -41,8 +41,8 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -97,11 +97,11 @@ public class WaterWave extends AbilityInstance {
 
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
-    EntityMethods.applyVelocity(this, user.entity(), user.direction().multiply(userConfig.speed * factor));
+    EntityUtil.applyVelocity(this, user.entity(), user.direction().multiply(userConfig.speed * factor));
     user.entity().setFallDistance(0);
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);
-    for (Block block : WorldMethods.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
+    for (Block block : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
       }

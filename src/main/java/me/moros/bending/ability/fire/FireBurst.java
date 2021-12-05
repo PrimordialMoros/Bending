@@ -1,20 +1,20 @@
 /*
- *   Copyright 2020-2021 Moros <https://github.com/PrimordialMoros>
+ * Copyright 2020-2021 Moros
  *
- *    This file is part of Bending.
+ * This file is part of Bending.
  *
- *   Bending is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   Bending is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with Bending.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.moros.bending.ability.fire;
@@ -46,15 +46,14 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
-import me.moros.bending.util.BurstUtil;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.methods.BlockMethods;
-import me.moros.bending.util.methods.EntityMethods;
-import me.moros.bending.util.methods.WorldMethods;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -157,9 +156,9 @@ public class FireBurst extends AbilityInstance {
     released = true;
     Collection<Ray> rays;
     if (cone) {
-      rays = BurstUtil.cone(user, userConfig.coneRange);
+      rays = VectorUtil.cone(user, userConfig.coneRange);
     } else {
-      rays = BurstUtil.sphere(user, userConfig.sphereRange);
+      rays = VectorUtil.sphere(user, userConfig.sphereRange);
     }
     rays.forEach(r -> streams.add(new FireStream(r)));
     removalPolicy = Policies.builder().build();
@@ -197,7 +196,7 @@ public class FireBurst extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-        EntityMethods.applyVelocity(FireBurst.this, entity, ray.direction.normalize().multiply(0.5));
+        EntityUtil.applyVelocity(FireBurst.this, entity, ray.direction.normalize().multiply(0.5));
       }
       return true;
     }
@@ -206,10 +205,10 @@ public class FireBurst extends AbilityInstance {
     public boolean onBlockHit(@NonNull Block block) {
       Vector3d reverse = ray.direction.negate();
       Location center = bukkitLocation();
-      BlockMethods.tryLightBlock(block);
+      WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
       if (user.location().distanceSq(Vector3d.center(block)) > 4) {
-        for (Block b : WorldMethods.nearbyBlocks(center, igniteRadius)) {
+        for (Block b : WorldUtil.nearbyBlocks(center, igniteRadius)) {
           if (!user.canBuild(b)) {
             continue;
           }
