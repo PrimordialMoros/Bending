@@ -38,13 +38,13 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.WorldUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -112,6 +112,7 @@ public class Catapult extends AbilityInstance {
     int length = 0;
     Block base = getBase();
     boolean forceVertical = false;
+    boolean horizontal = false;
     if (base != null) {
       length = getLength(new Vector3d(base.getRelative(BlockFace.UP)), Vector3d.MINUS_J);
       if (angle > ANGLE) {
@@ -122,8 +123,8 @@ public class Catapult extends AbilityInstance {
         .build(3, 1).orElse(null);
     } else {
       if (angle >= ANGLE && angle <= 2 * ANGLE) {
-        Vector3d reverse = user.direction().negate();
-        length = getLength(user.location(), reverse);
+        length = getLength(user.location(), user.direction().negate());
+        horizontal = true;
       }
     }
 
@@ -142,9 +143,10 @@ public class Catapult extends AbilityInstance {
     }
 
     Vector3d direction = forceVertical ? Vector3d.PLUS_J : user.direction();
+    double horizontalFactor = horizontal ? userConfig.horizontalFactor : 1;
     double factor = length / (double) userConfig.length;
-    double power = factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
-    return CollisionUtil.handleEntityCollisions(user, new Sphere(origin, 1.5), entity -> {
+    double power = horizontalFactor * factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
+    return CollisionUtil.handle(user, new Sphere(origin, 1.5), entity -> {
       BendingEffect.FIRE_TICK.reset(entity);
       EntityUtil.applyVelocity(this, entity, direction.multiply(power));
       return true;
@@ -192,6 +194,8 @@ public class Catapult extends AbilityInstance {
     public double sneakPower;
     @Modifiable(Attribute.STRENGTH)
     public double clickPower;
+    @Modifiable(Attribute.STRENGTH)
+    public double horizontalFactor;
     public int length;
 
     @Override
@@ -201,6 +205,7 @@ public class Catapult extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(3000);
       sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
       clickPower = abilityNode.node("click-power").getDouble(1.8);
+      horizontalFactor = abilityNode.node("horizontal-factor").getDouble(1.4);
       length = Math.max(1, abilityNode.node("length").getInt(7));
     }
   }

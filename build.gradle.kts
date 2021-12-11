@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     implementation("me.moros", "storage", "2.1.0")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.4") {
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5") {
         exclude(module = "checker-qual")
     }
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
@@ -59,7 +59,7 @@ dependencies {
     }
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("net.luckperms", "api", "5.3")
-    compileOnly("org.checkerframework", "checker-qual", "3.19.0")
+    compileOnly("org.checkerframework", "checker-qual", "3.20.0")
 }
 
 configurations.implementation {
@@ -69,8 +69,6 @@ configurations.implementation {
 
 tasks {
     shadowJar {
-        archiveClassifier.set("")
-        archiveBaseName.set(rootProject.name)
         dependencies {
             relocate("cloud.commandframework", "me.moros.bending.internal.cf")
             relocate("com.github.benmanes.caffeine", "me.moros.bending.internal.caffeine")

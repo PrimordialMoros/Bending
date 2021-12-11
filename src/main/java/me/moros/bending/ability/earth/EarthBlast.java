@@ -37,6 +37,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -44,11 +45,11 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -155,13 +156,14 @@ public class EarthBlast extends AbilityInstance {
   private static boolean tryDestroy(User user) {
     Collection<EarthBlast> blasts = Bending.game().abilityManager(user.world()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
+    Ray ray = user.ray(config.shatterRange + 2);
     for (EarthBlast eb : blasts) {
       Vector3d center = eb.blast.center();
       double dist = center.distanceSq(user.eyeLocation());
       if (dist > config.shatterRange * config.shatterRange) {
         continue;
       }
-      if (eb.blast.collider().intersects(user.ray(dist))) {
+      if (eb.blast.collider().intersects(ray)) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
         Block block = center.toBlock(user.world());

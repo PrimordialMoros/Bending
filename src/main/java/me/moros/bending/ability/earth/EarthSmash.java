@@ -60,16 +60,16 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -353,7 +353,7 @@ public class EarthSmash extends AbilityInstance {
     @Override
     public @NonNull UpdateResult update() {
       Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
-      CollisionUtil.handleEntityCollisions(user, liftCollider, entity -> {
+      CollisionUtil.handle(user, liftCollider, entity -> {
         Vector3d push = new Vector3d(entity.getVelocity()).setY(userConfig.raiseEntityPush);
         return EntityUtil.applyVelocity(EarthSmash.this, entity, push);
       }, true, true);
@@ -454,7 +454,7 @@ public class EarthSmash extends AbilityInstance {
         return UpdateResult.CONTINUE;
       }
       buffer -= 20;
-      CollisionUtil.handleEntityCollisions(user, boulder.collider(), this::onEntityHit);
+      CollisionUtil.handle(user, boulder.collider(), this::onEntityHit);
       cleanAll();
       location = location.add(direction);
       Block newCenter = location.toBlock(boulder.world);
@@ -541,7 +541,8 @@ public class EarthSmash extends AbilityInstance {
     @Override
     public @NonNull UpdateResult update() {
       pieces.entrySet().removeIf(entry ->
-        CollisionUtil.handleEntityCollisions(user, AABB.BLOCK_BOUNDS.at(entry.getKey().center()), e -> onEntityHit(e, entry.getValue()))
+        entry.getKey().valid() &&
+          CollisionUtil.handle(user, AABB.BLOCK_BOUNDS.at(entry.getKey().center()), e -> onEntityHit(e, entry.getValue()))
       );
       return pieces.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
     }

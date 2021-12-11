@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -107,20 +106,16 @@ public class AbilityDescription {
   }
 
   public @NonNull Component meta() {
-    String type = "Ability";
+    String type = "ability";
     if (isActivatedBy(Activation.PASSIVE)) {
-      type = "Passive";
+      type = "passive";
     } else if (isActivatedBy(Activation.SEQUENCE)) {
-      type = "Sequence";
+      type = "sequence";
     }
-    Component details = Component.text().append(displayName()).append(Component.newline())
-      .append(Component.text("Element: ", NamedTextColor.GOLD))
-      .append(element().displayName().append(Component.newline()))
-      .append(Component.text("Type: ", NamedTextColor.GOLD))
-      .append(Component.text(type, Message.TEXT_COLOR)).append(Component.newline())
-      .append(Component.text("Permission: ", NamedTextColor.GOLD))
-      .append(Component.text(permission(), Message.TEXT_COLOR)).append(Component.newline()).append(Component.newline())
-      .append(Component.text("Click to view info about this ability.", NamedTextColor.GRAY)).build();
+    Component details = Component.text()
+      .append(Component.text(element() + " " + type, element.color()))
+      .append(Component.newline())
+      .append(Component.text("Click to view info about this " + type + ".", ColorPalette.NEUTRAL)).build();
 
     return displayName()
       .hoverEvent(HoverEvent.showText(details))

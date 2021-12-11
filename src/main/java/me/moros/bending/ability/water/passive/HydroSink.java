@@ -28,9 +28,9 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.WorldUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 

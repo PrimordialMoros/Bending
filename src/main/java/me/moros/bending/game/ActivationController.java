@@ -96,6 +96,7 @@ public final class ActivationController {
   }
 
   public void onUserDeconstruct(@NonNull User user) {
+    user.cleanup();
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
     Bending.game().abilityManager(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
@@ -237,7 +238,6 @@ public final class ActivationController {
       return;
     }
     ignoreNextSwing(user);
-
     if (entity instanceof LivingEntity livingEntity) {
       HealingWaters.healTarget(user, livingEntity);
     }

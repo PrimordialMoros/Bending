@@ -87,7 +87,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     collider = new Sphere(location, 1);
-    if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true)) {
+    if (CollisionUtil.handle(user, collider, this::onEntityHit, true)) {
       return UpdateResult.REMOVE;
     }
 

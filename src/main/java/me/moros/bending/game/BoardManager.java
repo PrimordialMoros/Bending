@@ -21,12 +21,10 @@ package me.moros.bending.game;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
-import io.papermc.paper.text.PaperComponents;
 import me.moros.bending.Bending;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -103,7 +101,7 @@ public final class BoardManager {
 
   private static class Board {
     private static final String SEP = " -------------- ";
-    private final Set<String> misc = ConcurrentHashMap.newKeySet(); // Used for combos and misc abilities
+    private final Map<AbilityDescription, Team> misc = new ConcurrentHashMap<>(); // Used for combos and misc abilities
     private final BendingPlayer player;
 
     private final Scoreboard bendingBoard;
@@ -160,18 +158,18 @@ public final class BoardManager {
       getOrCreateTeam(newSlot).prefix(Component.text(">"));
     }
 
-    private synchronized void updateMisc(AbilityDescription desc, boolean show) {
-      Component component = Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH));
-      String legacy = PaperComponents.legacySectionSerializer().serialize(component);
+    private void updateMisc(AbilityDescription desc, boolean show) {
+      if (show && misc.isEmpty()) {
+        bendingSlots.getScore(SEP).setScore(-10);
+      }
+      String id = Long.toHexString(System.nanoTime());
+      Team team = misc.computeIfAbsent(desc, d -> createTeam(11, id));
       if (show) {
-        if (misc.isEmpty()) {
-          bendingSlots.getScore(SEP).setScore(-10);
-        }
-        misc.add(legacy);
-        bendingSlots.getScore(legacy).setScore(-11);
+        team.prefix(Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH)));
       } else {
-        misc.remove(legacy);
-        bendingBoard.resetScores(legacy);
+        team.getEntries().forEach(bendingBoard::resetScores);
+        team.unregister();
+        misc.remove(desc);
         if (misc.isEmpty()) {
           bendingBoard.resetScores(SEP);
         }
@@ -180,11 +178,11 @@ public final class BoardManager {
 
     private Team getOrCreateTeam(int slot) {
       Team team = bendingBoard.getTeam(String.valueOf(slot));
-      return team == null ? createTeam(slot) : team;
+      return team == null ? createTeam(slot, String.valueOf(slot)) : team;
     }
 
-    private Team createTeam(int slot) {
-      Team team = bendingBoard.registerNewTeam(String.valueOf(slot));
+    private Team createTeam(int slot, String id) {
+      Team team = bendingBoard.registerNewTeam(id);
       String hidden = ChatUtil.generateInvisibleString(slot);
       team.addEntry(hidden);
       bendingSlots.getScore(hidden).setScore(-slot);

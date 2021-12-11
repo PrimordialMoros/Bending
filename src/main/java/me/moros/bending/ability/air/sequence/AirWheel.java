@@ -26,6 +26,7 @@ import java.util.Objects;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -40,11 +41,10 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -113,7 +113,7 @@ public class AirWheel extends AbilityInstance {
     WorldUtil.tryCoolLava(user, base);
     WorldUtil.tryExtinguishFire(user, base);
 
-    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit);
+    CollisionUtil.handle(user, collider, this::onEntityHit);
     return scooter.update();
   }
 

@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -45,11 +46,10 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
@@ -121,7 +121,7 @@ public class FireShield extends AbilityInstance {
     }
 
     shield.render();
-    CollisionUtil.handleEntityCollisions(user, shield.collider(), this::onEntityHit, false);
+    CollisionUtil.handle(user, shield.collider(), this::onEntityHit, false);
 
     shield.update();
     return UpdateResult.CONTINUE;

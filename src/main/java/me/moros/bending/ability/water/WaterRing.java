@@ -34,6 +34,7 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -53,7 +54,7 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
@@ -61,7 +62,6 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -252,7 +252,7 @@ public class WaterRing extends AbilityInstance {
     }
 
     if (userConfig.affectEntities) {
-      CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), radius + 2), this::checkCollisions, false);
+      CollisionUtil.handle(user, new Sphere(user.eyeLocation(), radius + 2), this::checkCollisions, false);
     }
 
     shards.removeIf(shard -> shard.update() == UpdateResult.REMOVE);

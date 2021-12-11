@@ -44,8 +44,8 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -79,7 +79,7 @@ public class FireWheel extends AbilityInstance {
     }
 
     wheel = new Wheel(new Ray(location, direction));
-    if (!wheel.resolveMovement(userConfig.radius)) {
+    if (!wheel.resolveMovement()) {
       return false;
     }
 

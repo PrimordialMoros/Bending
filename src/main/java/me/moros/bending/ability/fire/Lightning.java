@@ -51,16 +51,16 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.RayTrace.CompositeResult;
 import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -236,7 +236,7 @@ public class Lightning extends AbilityInstance {
     if (entity != null) {
       Collider collider = new Sphere(EntityUtil.entityCenter(entity), userConfig.radius);
       Collection<Entity> entities = new ArrayList<>();
-      CollisionUtil.handleEntityCollisions(user, collider, entities::add);
+      CollisionUtil.handle(user, collider, entities::add);
       boolean remove = handleRedirection(entities);
       if (!remove) {
         for (Entity e : entities) {

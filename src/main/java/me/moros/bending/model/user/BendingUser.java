@@ -19,19 +19,22 @@
 
 package me.moros.bending.model.user;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Scheduler;
 import me.moros.bending.Bending;
 import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.description.CooldownExpiry;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.predicate.general.CompositeBendingConditional;
 import me.moros.bending.model.preset.Preset;
@@ -47,20 +50,14 @@ public class BendingUser implements User {
   private final LivingEntity entity;
   private final Set<Element> elements;
   private final AbilityDescription[] slots;
-  private final Cache<AbilityDescription, Long> cooldowns;
+  private final Map<AbilityDescription, Long> cooldowns;
+  private final Collection<CompletableFuture<Void>> cooldownTasks;
   private final CompositeBendingConditional bendingConditional;
 
   protected BendingUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     this.entity = entity;
-    cooldowns = Caffeine.newBuilder().expireAfter(new CooldownExpiry())
-      .removalListener((key, value, cause) -> {
-        if (key != null && valid()) { // Ensure user is valid before processing
-          updateBoard(key, false);
-          Tasker.sync(() -> Bending.eventBus().postCooldownRemoveEvent(this, key), 0);
-        }
-      })
-      .scheduler(Scheduler.systemScheduler())
-      .build();
+    cooldowns = new ConcurrentHashMap<>();
+    cooldownTasks = new ArrayList<>();
     slots = new AbilityDescription[9];
     for (int i = 0; i < Math.min(data.slots().size(), 9); i++) {
       slots[i] = data.slots().get(i);
@@ -163,7 +160,7 @@ public class BendingUser implements User {
 
   @Override
   public boolean onCooldown(@NonNull AbilityDescription desc) {
-    return cooldowns.getIfPresent(desc) != null;
+    return cooldowns.containsKey(desc);
   }
 
   @Override
@@ -171,9 +168,27 @@ public class BendingUser implements User {
     if (duration > 0 && Bending.eventBus().postCooldownAddEvent(this, desc, duration)) {
       cooldowns.put(desc, duration);
       updateBoard(desc, true);
+      Executor delayed = CompletableFuture.delayedExecutor(duration, TimeUnit.MILLISECONDS);
+      cooldownTasks.add(CompletableFuture.runAsync(() -> removeCooldown(desc), delayed));
       return true;
     }
     return false;
+  }
+
+  @Override
+  public void cleanup() {
+    cooldownTasks.forEach(c -> c.complete(null));
+    cooldowns.clear();
+  }
+
+  private void removeCooldown(AbilityDescription desc) {
+    cooldowns.remove(desc);
+    if (valid()) { // Ensure user is valid before processing
+      Tasker.sync(() -> {
+        updateBoard(desc, false);
+        Bending.eventBus().postCooldownRemoveEvent(this, desc);
+      }, 0);
+    }
   }
 
   @Override

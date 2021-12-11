@@ -21,12 +21,15 @@ package me.moros.bending.ability.water;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -40,12 +43,11 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -68,6 +70,7 @@ public class OctopusForm extends AbilityInstance {
   private final Collection<Block> base = new ArrayList<>();
   private final List<Tentacle> tentacles = new ArrayList<>();
 
+  private final Set<TempBlock> affectedBlocks = new HashSet<>();
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
 
   private WaterRing ring;
@@ -179,7 +182,7 @@ public class OctopusForm extends AbilityInstance {
     if (MaterialUtil.isWater(block)) {
       ParticleUtil.bubble(block).spawn();
     } else if (MaterialUtil.isTransparent(block)) {
-      TempBlock.create(block, Material.WATER.createBlockData(), 250);
+      TempBlock.create(block, Material.WATER.createBlockData(), 250).ifPresent(affectedBlocks::add);
     }
   }
 
@@ -191,7 +194,7 @@ public class OctopusForm extends AbilityInstance {
     double r = RADIUS + 0.5;
     for (double phi = 0; phi < Math.PI * 2; phi += Math.PI / 4) {
       Vector3d tentacleBase = center.add(new Vector3d(Math.cos(phi) * r, 0, Math.sin(phi) * r));
-      CollisionUtil.handleEntityCollisions(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
+      CollisionUtil.handle(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
     }
   }
 
@@ -212,10 +215,10 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private void cleanAll() {
-    for (Tentacle t : tentacles) {
-      t.blocks.forEach(this::clean);
+    for (TempBlock tb : affectedBlocks) {
+      TempBlock.forceCreateAir(tb.block());
     }
-    base.forEach(this::clean);
+    affectedBlocks.clear();
   }
 
   @Override

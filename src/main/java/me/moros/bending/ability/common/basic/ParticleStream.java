@@ -32,10 +32,10 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -75,7 +75,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       render();
       postRender();
       if (steps <= 1 || i % FastMath.ceil(speed * steps) == 0) {
-        boolean hitEntity = CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
+        boolean hitEntity = CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
         if (hitEntity) {
           return UpdateResult.REMOVE;
         }

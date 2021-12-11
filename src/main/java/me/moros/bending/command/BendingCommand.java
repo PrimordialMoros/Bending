@@ -49,11 +49,11 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ChatUtil;
+import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -69,11 +69,11 @@ public final class BendingCommand {
     this.help = MinecraftHelp.createNative("/bending help", manager);
     help.setMaxResultsPerPage(9);
     help.setHelpColors(HelpColors.of(
-      NamedTextColor.DARK_GRAY,
-      Message.TEXT_COLOR,
-      NamedTextColor.GREEN,
-      NamedTextColor.DARK_AQUA,
-      NamedTextColor.GRAY)
+      ColorPalette.NEUTRAL,
+      ColorPalette.TEXT_COLOR,
+      ColorPalette.ACCENT,
+      ColorPalette.HEADER,
+      ColorPalette.NEUTRAL)
     );
     construct();
   }
@@ -214,9 +214,8 @@ public final class BendingCommand {
   }
 
   private static void onVersion(CommandSender sender) {
-    String link = "https://github.com/PrimordialMoros/bending";
-    Component version = Message.brand(Component.text("Version: ", NamedTextColor.GOLD))
-      .append(Component.text(Bending.version(), NamedTextColor.GREEN))
+    String link = "https://github.com/PrimordialMoros/Bending";
+    Component version = Component.text("Bending " + Bending.version(), ColorPalette.HEADER)
       .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.author(), link)))
       .clickEvent(ClickEvent.openUrl(link));
     sender.sendMessage(version);
@@ -306,7 +305,7 @@ public final class BendingCommand {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
       Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
       if (!abilities.isEmpty()) {
         Message.ABILITIES.send(user);
         user.sendMessage(Component.join(sep, abilities));
@@ -377,7 +376,7 @@ public final class BendingCommand {
     if (elements.isEmpty()) {
       hover = Message.NO_ELEMENTS.build();
     } else {
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.GRAY));
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
       hover = Component.join(sep, user.elements().stream().map(Element::displayName).toList());
     }
     Message.BOUND_SLOTS.send(sender, user.entity().getName(), hover);
@@ -390,7 +389,7 @@ public final class BendingCommand {
       Message.NO_PRESETS.send(player);
     } else {
       Message.PRESET_LIST_HEADER.send(player);
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE));
+      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
       player.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()));
     }
   }

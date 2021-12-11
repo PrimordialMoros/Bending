@@ -19,8 +19,11 @@
 
 package me.moros.bending.ability.water;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -38,11 +41,11 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -101,6 +104,7 @@ public class WaterWave extends AbilityInstance {
     user.entity().setFallDistance(0);
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);
+    Collection<TempBlock> toRevert = new ArrayList<>();
     for (Block block : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
@@ -108,22 +112,24 @@ public class WaterWave extends AbilityInstance {
       if (!user.canBuild(block)) {
         continue;
       }
-      TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(this::scheduleRevert);
+      TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(toRevert::add);
     }
+    scheduleRevert(toRevert);
     if (ice) {
-      CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), this::onEntityHit);
+      CollisionUtil.handle(user, new Sphere(center, userConfig.radius), this::onEntityHit);
     }
     return UpdateResult.CONTINUE;
   }
 
-  private void scheduleRevert(TempBlock tb) {
-    final Block block = tb.block();
+  private void scheduleRevert(Collection<TempBlock> tempBlocks) {
     Tasker.sync(() -> {
+      final Consumer<TempBlock> consumer;
       if (ice) {
-        TempBlock.create(block, Material.ICE.createBlockData(), 1000);
+        consumer = tb -> TempBlock.create(tb.block(), Material.ICE.createBlockData(), 1000);
       } else {
-        tb.revert();
+        consumer = TempBlock::revert;
       }
+      tempBlocks.forEach(consumer);
     }, 20);
   }
 

@@ -70,6 +70,10 @@ public class TempFallingBlock implements Temporary {
     revertTask.cancel();
   }
 
+  public boolean valid() {
+    return !revertTask.isCancelled();
+  }
+
   public @NonNull FallingBlock fallingBlock() {
     return fallingBlock;
   }

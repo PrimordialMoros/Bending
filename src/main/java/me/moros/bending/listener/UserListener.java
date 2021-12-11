@@ -46,9 +46,9 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Material;
@@ -57,6 +57,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -299,14 +300,13 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (event.getHand() != EquipmentSlot.HAND) {
-      return;
-    }
-    BendingPlayer player = Registries.BENDERS.user(event.getPlayer());
-    switch (event.getAction()) {
-      case RIGHT_CLICK_AIR -> game.activationController().onUserInteract(player, Activation.INTERACT);
-      case RIGHT_CLICK_BLOCK -> game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
-      case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(player);
+    if (event.getHand() == EquipmentSlot.HAND || (event.getHand() == EquipmentSlot.OFF_HAND && event.getAction() == Action.RIGHT_CLICK_AIR)) {
+      BendingPlayer player = Registries.BENDERS.user(event.getPlayer());
+      switch (event.getAction()) {
+        case RIGHT_CLICK_AIR -> game.activationController().onUserInteract(player, Activation.INTERACT);
+        case RIGHT_CLICK_BLOCK -> game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
+        case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(player);
+      }
     }
   }
 

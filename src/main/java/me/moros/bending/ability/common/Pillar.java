@@ -86,7 +86,7 @@ public class Pillar implements Updatable {
     Block finish = start.getRelative(opposite, length - 1);
     BoundingBox box = BoundingBox.of(start, finish).expand(direction, 0.65);
     AABB collider = new AABB(new Vector3d(box.getMin()), new Vector3d(box.getMax()));
-    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true); // Push entities
+    CollisionUtil.handle(user, collider, this::onEntityHit, false, true); // Push entities
 
     long time = System.currentTimeMillis();
     if (time < nextUpdateTime) {

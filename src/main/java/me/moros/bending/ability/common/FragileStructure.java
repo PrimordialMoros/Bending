@@ -27,9 +27,9 @@ import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;

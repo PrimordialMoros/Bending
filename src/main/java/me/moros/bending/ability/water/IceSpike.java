@@ -43,13 +43,13 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -81,7 +81,7 @@ public class IceSpike extends AbilityInstance {
     boolean field = method == Activation.SNEAK;
     if (field) {
       Collider collider = new Sphere(user.location(), userConfig.radius);
-      CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
+      CollisionUtil.handle(user, collider, this::createPillar, true);
     } else {
       Block source = null;
       Entity entity = user.compositeRayTrace(userConfig.selectRange).result(user.world()).entity();
@@ -227,7 +227,7 @@ public class IceSpike extends AbilityInstance {
 
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
       AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3d(currentIndex));
-      CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, true, true);
+      CollisionUtil.handle(user, collider, this::onEntityHit, true, true);
 
       if (canMove(currentIndex)) {
         pillarBlocks.offerFirst(currentIndex);

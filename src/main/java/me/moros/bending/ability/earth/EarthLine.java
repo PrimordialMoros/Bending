@@ -55,17 +55,17 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
+import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
+import me.moros.bending.util.material.EarthMaterials;
+import me.moros.bending.util.material.MaterialUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -189,7 +189,7 @@ public class EarthLine extends AbilityInstance {
   private void prisonMode() {
     if (mode == Mode.NORMAL) {
       mode = Mode.PRISON;
-      user.sendActionBar(Component.text("*Prison Mode*", NamedTextColor.GRAY));
+      user.sendActionBar(Component.text("*Prison Mode*", ColorPalette.TEXT_COLOR));
     }
   }
 
@@ -338,8 +338,8 @@ public class EarthLine extends AbilityInstance {
       imprisoned = true;
       EntityUtil.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
       Material mat = material;
-      Vector3d center = new Vector3d(entity.getLocation()).add(new Vector3d(0, -1.1, 0));
-      Vector3d offset = new Vector3d(0, -0.7, 0);
+      Vector3d center = new Vector3d(entity.getLocation()).add(Vector3d.MINUS_J);
+      Vector3d offset = new Vector3d(0, -0.6, 0);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         new TempArmorStand(center.add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
         new TempArmorStand(center.add(offset).add(v).toLocation(user.world()), mat, userConfig.prisonDuration);

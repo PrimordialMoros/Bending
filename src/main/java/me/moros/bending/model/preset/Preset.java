@@ -29,11 +29,11 @@ import java.util.Objects;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -121,7 +121,7 @@ public final class Preset {
     for (int i = 0; i < 9; i++) {
       AbilityDescription desc = abilities[i];
       if (desc != null) {
-        components.add(Component.text((i + 1) + ". ", NamedTextColor.GOLD).append(desc.meta()));
+        components.add(Component.text((i + 1) + ". ", ColorPalette.TEXT_COLOR).append(desc.meta()));
       }
     }
     return components;
@@ -131,7 +131,7 @@ public final class Preset {
     JoinConfiguration sep = JoinConfiguration.separator(Component.newline());
     Component details = Component.text().append(Component.join(sep, display()))
       .append(Component.newline()).append(Component.newline())
-      .append(Component.text("Click to bind this preset.", NamedTextColor.GRAY)).build();
+      .append(Component.text("Click to bind this preset.", ColorPalette.NEUTRAL)).build();
 
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
@@ -146,6 +146,6 @@ public final class Preset {
       }
     }
     return counter.entrySet().stream().max(Entry.comparingByValue())
-      .map(e -> e.getKey().color()).orElse(NamedTextColor.WHITE);
+      .map(e -> e.getKey().color()).orElse(ColorPalette.NEUTRAL);
   }
 }

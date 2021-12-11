@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,10 +35,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable and thread-safe object that represents a bending element
  */
 public enum Element {
-  AIR("Air", NamedTextColor.GRAY),
-  WATER("Water", NamedTextColor.AQUA),
-  EARTH("Earth", NamedTextColor.GREEN),
-  FIRE("Fire", NamedTextColor.RED);
+  AIR("Air", ColorPalette.AIR),
+  WATER("Water", ColorPalette.WATER),
+  EARTH("Earth", ColorPalette.EARTH),
+  FIRE("Fire", ColorPalette.FIRE);
 
   private final String elementName;
   private final TextColor color;

@@ -43,12 +43,12 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -116,7 +116,7 @@ public class AirShield extends AbilityInstance {
       WorldUtil.tryExtinguishFire(user, b);
     }
 
-    CollisionUtil.handleEntityCollisions(user, new Sphere(center, userConfig.radius), entity -> {
+    CollisionUtil.handle(user, new Sphere(center, userConfig.radius), entity -> {
       Vector3d toEntity = new Vector3d(entity.getLocation()).subtract(center);
       Vector3d normal = toEntity.setY(0).normalize();
       double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;

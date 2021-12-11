@@ -29,6 +29,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -44,15 +45,14 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -139,7 +139,7 @@ public class Shockwave extends AbilityInstance {
 
     Set<Block> positions = recentAffectedBlocks.snapshot();
     if (!positions.isEmpty()) {
-      CollisionUtil.handleEntityCollisions(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
+      CollisionUtil.handle(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
     }
 
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);

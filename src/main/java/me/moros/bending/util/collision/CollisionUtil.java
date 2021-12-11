@@ -38,24 +38,24 @@ public final class CollisionUtil {
   }
 
   /**
-   * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision. earlyEscape disabled
+   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision. earlyEscape disabled
    */
-  public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback) {
-    return handleEntityCollisions(user, collider, callback, true, false, false);
+  public static boolean handle(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback) {
+    return handle(user, collider, callback, true, false, false);
   }
 
   /**
-   * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision and earlyEscape disabled
+   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision and earlyEscape disabled
    */
-  public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly) {
-    return handleEntityCollisions(user, collider, callback, livingOnly, false, false);
+  public static boolean handle(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly) {
+    return handle(user, collider, callback, livingOnly, false, false);
   }
 
   /**
-   * @return {@link #handleEntityCollisions(User, Collider, CollisionCallback, boolean, boolean, boolean)} with earlyEscape disabled
+   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean, boolean)} with earlyEscape disabled
    */
-  public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
-    return handleEntityCollisions(user, collider, callback, livingOnly, selfCollision, false);
+  public static boolean handle(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
+    return handle(user, collider, callback, livingOnly, selfCollision, false);
   }
 
   /**
@@ -69,7 +69,7 @@ public final class CollisionUtil {
    * @param earlyEscape if true it will return on the first valid collision callback without evaluating other entities
    * @return true if it hit at least one entity
    */
-  public static boolean handleEntityCollisions(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
+  public static boolean handle(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
     Vector3d extent = collider.halfExtents();
     Vector3d pos = collider.position();
     boolean hit = false;

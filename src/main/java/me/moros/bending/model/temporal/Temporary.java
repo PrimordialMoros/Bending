@@ -21,6 +21,7 @@ package me.moros.bending.model.temporal;
 
 import me.moros.bending.model.math.FastMath;
 
+@FunctionalInterface
 public interface Temporary {
   long DEFAULT_REVERT = 600_000;
 

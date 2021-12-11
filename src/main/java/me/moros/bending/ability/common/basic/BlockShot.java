@@ -31,10 +31,10 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -70,6 +70,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     this.user = user;
     this.material = material;
     this.location = Vector3d.center(block);
+    this.collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
     this.range = range;
     this.speed = Math.min(20, speed);
     buffer = speed;
@@ -134,7 +135,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
-    if (CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit)) {
+    if (CollisionUtil.handle(user, collider, this::onEntityHit)) {
       return UpdateResult.REMOVE;
     }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {

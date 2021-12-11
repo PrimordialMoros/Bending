@@ -34,9 +34,9 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -147,7 +147,7 @@ public abstract class BlockStream implements State {
     for (Block block : stream) {
       Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(new Vector3d(block));
       colliders.add(collider);
-      hit |= CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, livingOnly, false);
+      hit |= CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false);
     }
 
     return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;

@@ -23,9 +23,9 @@ import java.util.UUID;
 
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.RayTrace.Type;
-import me.moros.bending.util.EntityUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.identity.Identity;

@@ -43,12 +43,12 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -179,7 +179,7 @@ public class EarthGlove extends AbilityInstance {
 
       updateGloveVelocity(lastVelocity.normalize().multiply(GLOVE_SPEED * factor));
       boolean sneaking = user.sneaking();
-      boolean collided = CollisionUtil.handleEntityCollisions(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
+      boolean collided = CollisionUtil.handle(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
       if (collided && !grabbed) {
         return UpdateResult.REMOVE;
       }
@@ -296,7 +296,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private static void tryDestroy(@NonNull User user) {
-    CollisionUtil.handleEntityCollisions(user, new Sphere(user.eyeLocation(), 8), entity -> {
+    CollisionUtil.handle(user, new Sphere(user.eyeLocation(), 8), entity -> {
       if (entity instanceof Item && user.entity().hasLineOfSight(entity) && entity.hasMetadata(Metadata.GLOVE_KEY)) {
         EarthGlove ability = (EarthGlove) entity.getMetadata(Metadata.GLOVE_KEY).get(0).value();
         if (ability != null && !user.equals(ability.user())) {

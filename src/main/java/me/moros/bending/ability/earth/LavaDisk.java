@@ -29,6 +29,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -49,14 +50,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.VectorUtil;
-import me.moros.bending.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -173,7 +173,7 @@ public class LavaDisk extends AbilityInstance {
     }
     displayLavaDisk();
     double damage = Math.max(userConfig.minDamage, userConfig.maxDamage * distanceModifier);
-    CollisionUtil.handleEntityCollisions(user, collider, e -> damageEntity(e, damage));
+    CollisionUtil.handle(user, collider, e -> damageEntity(e, damage));
     return UpdateResult.CONTINUE;
   }
 

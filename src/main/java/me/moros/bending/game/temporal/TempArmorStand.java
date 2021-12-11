@@ -23,9 +23,9 @@ import java.util.Objects;
 
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;

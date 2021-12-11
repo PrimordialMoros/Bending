@@ -23,8 +23,8 @@ import java.util.function.Predicate;
 
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
-import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;

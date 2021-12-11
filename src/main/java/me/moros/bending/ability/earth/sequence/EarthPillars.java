@@ -42,10 +42,10 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -95,7 +95,7 @@ public class EarthPillars extends AbilityInstance {
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     Collider collider = new Sphere(user.location(), userConfig.radius * factor);
-    CollisionUtil.handleEntityCollisions(user, collider, this::createPillar, true);
+    CollisionUtil.handle(user, collider, this::createPillar, true);
 
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);

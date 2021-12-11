@@ -46,6 +46,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
@@ -53,7 +54,6 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -196,7 +196,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
       Collider c = BOX.at(projectile.center());
       boolean magma = mode == Mode.MAGMA;
-      if (CollisionUtil.handleEntityCollisions(user, c, this::onEntityHit, true, false, magma)) {
+      if (CollisionUtil.handle(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
     } else {

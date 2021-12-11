@@ -48,14 +48,14 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -160,7 +160,7 @@ public class MetalCable extends AbilityInstance {
     }
     location = projectile.center();
     if (ticks % 4 == 0) {
-      if (CollisionUtil.handleEntityCollisions(user, BOX.at(location), this::onProjectileHit)) {
+      if (CollisionUtil.handle(user, BOX.at(location), this::onProjectileHit)) {
         BlockData bd = projectile.fallingBlock().getBlockData();
         Location bukkitLocation = location.toLocation(user.world());
         ParticleUtil.of(Particle.BLOCK_CRACK, bukkitLocation).count(4)
@@ -294,7 +294,7 @@ public class MetalCable extends AbilityInstance {
       BlockData data = block.getBlockData();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
       Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
-      projectile = new TempFallingBlock(block, data, velocity, true, 30000);
+      projectile = new TempFallingBlock(location.toLocation(user.world()), data, velocity, true, 30000);
       target = new CableTarget(projectile.fallingBlock());
     } else {
       target = new CableTarget(block);

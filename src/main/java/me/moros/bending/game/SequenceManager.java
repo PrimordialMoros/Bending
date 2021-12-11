@@ -26,8 +26,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -38,12 +38,12 @@ import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class SequenceManager {
-  private final Cache<UUID, Deque<SequenceStep>> cache;
+  private final LoadingCache<UUID, Deque<SequenceStep>> cache;
 
   SequenceManager() {
     cache = Caffeine.newBuilder()
       .expireAfterAccess(Duration.ofSeconds(10))
-      .build();
+      .build(u -> new ArrayDeque<>(16));
   }
 
   public void clear() {
@@ -55,7 +55,7 @@ public final class SequenceManager {
     if (desc == null) {
       return;
     }
-    Deque<SequenceStep> buffer = cache.get(user.uuid(), u -> new ArrayDeque<>(16));
+    Deque<SequenceStep> buffer = cache.get(user.uuid());
     if (buffer.size() >= 16) {
       buffer.removeFirst();
     }

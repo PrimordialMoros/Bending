@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -43,14 +44,13 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.VectorUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -147,7 +147,7 @@ public class FireWall extends AbilityInstance {
       nextRenderTime = time + 200;
       renderWall();
     }
-    CollisionUtil.handleEntityCollisions(user, collider, this::onEntityHit, false, true);
+    CollisionUtil.handle(user, collider, this::onEntityHit, false, true);
     return UpdateResult.CONTINUE;
   }
 

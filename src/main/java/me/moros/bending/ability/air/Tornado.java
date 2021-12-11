@@ -35,12 +35,12 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.EntityUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -102,7 +102,7 @@ public class Tornado extends AbilityInstance {
     double radius = 2 + factor * (userConfig.radius - 2);
 
     AABB box = new AABB(new Vector3d(-radius, 0, -radius), new Vector3d(radius, height, radius)).at(base);
-    CollisionUtil.handleEntityCollisions(user, box, entity -> {
+    CollisionUtil.handle(user, box, entity -> {
       double dy = entity.getLocation().getY() - base.getY();
       double r = 2 + (radius - 2) * dy;
       Vector3d delta = EntityUtil.entityCenter(entity).subtract(base);
