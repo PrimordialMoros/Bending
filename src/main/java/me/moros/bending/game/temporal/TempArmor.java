@@ -30,12 +30,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.Tasker;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -45,7 +43,7 @@ public class TempArmor implements Temporary {
 
   private final LivingEntity entity;
   private final ItemStack[] snapshot;
-  private final BukkitTask revertTask;
+  private boolean reverted = false;
 
   public static void init() {
   }
@@ -54,8 +52,7 @@ public class TempArmor implements Temporary {
     this.entity = entity;
     this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
     entity.getEquipment().setArmorContents(armor);
-    MANAGER.addEntry(entity.getUniqueId(), this);
-    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
+    MANAGER.addEntry(entity.getUniqueId(), this, Temporary.toTicks(duration));
   }
 
   public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
@@ -77,13 +74,14 @@ public class TempArmor implements Temporary {
   }
 
   @Override
-  public void revert() {
-    if (revertTask.isCancelled()) {
-      return;
+  public boolean revert() {
+    if (reverted) {
+      return false;
     }
+    reverted = true;
     entity.getEquipment().setArmorContents(snapshot);
     MANAGER.removeEntry(entity.getUniqueId());
-    revertTask.cancel();
+    return true;
   }
 
   private static ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {

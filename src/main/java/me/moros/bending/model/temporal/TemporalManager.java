@@ -26,20 +26,27 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.bukkit.Bukkit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TemporalManager<K, V extends Temporary> {
-  private final Map<K, V> instances;
   private final Consumer<V> consumer;
+  private final Map<K, V> instances;
+  private final TimerWheel<K, V> wheel;
 
   public TemporalManager() {
     this(Temporary::revert);
   }
 
   public TemporalManager(@NonNull Consumer<V> consumer) {
-    instances = new ConcurrentHashMap<>();
     this.consumer = Objects.requireNonNull(consumer);
+    this.instances = new ConcurrentHashMap<>();
+    this.wheel = new TimerWheel<>(this);
+  }
+
+  public void tick() {
+    wheel.advance(Bukkit.getCurrentTick());
   }
 
   public boolean isTemp(@Nullable K key) {
@@ -50,19 +57,35 @@ public class TemporalManager<K, V extends Temporary> {
     return Optional.ofNullable(instances.get(key));
   }
 
-  public void addEntry(@NonNull K key, @NonNull V value) {
+  public void addEntry(@NonNull K key, @NonNull V value, int tickDuration) {
     if (isTemp(key)) {
       return;
     }
     instances.put(key, value);
+    reschedule(key, tickDuration);
+  }
+
+  public void reschedule(@NonNull K key, int tickDuration) {
+    V value = instances.get(key);
+    if (value != null) {
+      Node<K, V> node = new Node<>(key, value);
+      int currentTick = Bukkit.getCurrentTick();
+      node.expirationTick(currentTick + tickDuration);
+      wheel.reschedule(node, currentTick);
+    }
   }
 
   /**
    * This is used inside {@link Temporary#revert}
    * @param key the key of the entry to remove
    */
-  public void removeEntry(@NonNull K key) {
-    instances.remove(key);
+  public boolean removeEntry(@NonNull K key) {
+    V result = instances.remove(key);
+    if (result != null) {
+      wheel.deschedule(new Node<>(key, result));
+      return true;
+    }
+    return false;
   }
 
   public void removeAll() {

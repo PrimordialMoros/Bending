@@ -22,19 +22,17 @@ package me.moros.bending.game.temporal;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.util.Tasker;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempFallingBlock implements Temporary {
   public static final TemporalManager<FallingBlock, TempFallingBlock> MANAGER = new TemporalManager<>();
 
   private final FallingBlock fallingBlock;
-  private final BukkitTask revertTask;
+  private boolean reverted = false;
 
   public static void init() {
   }
@@ -44,8 +42,7 @@ public class TempFallingBlock implements Temporary {
     fallingBlock.setVelocity(velocity.clampVelocity());
     fallingBlock.setGravity(gravity);
     fallingBlock.setDropItem(false);
-    MANAGER.addEntry(fallingBlock, this);
-    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
+    MANAGER.addEntry(fallingBlock, this, Temporary.toTicks(duration));
   }
 
   public TempFallingBlock(@NonNull Location location, @NonNull BlockData data, long duration) {
@@ -61,17 +58,18 @@ public class TempFallingBlock implements Temporary {
   }
 
   @Override
-  public void revert() {
-    if (revertTask.isCancelled()) {
-      return;
+  public boolean revert() {
+    if (reverted) {
+      return false;
     }
+    reverted = true;
     fallingBlock.remove();
     MANAGER.removeEntry(fallingBlock);
-    revertTask.cancel();
+    return true;
   }
 
   public boolean valid() {
-    return !revertTask.isCancelled();
+    return !reverted;
   }
 
   public @NonNull FallingBlock fallingBlock() {

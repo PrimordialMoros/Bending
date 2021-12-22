@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import me.moros.bending.Bending;
+import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
@@ -60,10 +61,7 @@ public final class Game {
     new AbilityInitializer();
     storage.createAbilities(Registries.ABILITIES);
 
-    TempArmor.init();
-    TempBlock.init();
-    TempArmorStand.init();
-    TempFallingBlock.init();
+    initTemporary();
 
     Registries.PROTECTIONS.init();
     Registries.BENDERS.init(storage);
@@ -73,6 +71,11 @@ public final class Game {
   }
 
   private void update() {
+    Cooldown.MANAGER.tick();
+    TempArmor.MANAGER.tick();
+    TempBlock.MANAGER.tick();
+    TempArmorStand.MANAGER.tick();
+    TempFallingBlock.MANAGER.tick();
     activationController.clearCache();
     worldManager.update();
     flightManager.update();
@@ -99,7 +102,16 @@ public final class Game {
     }
   }
 
+  private void initTemporary() {
+    Cooldown.init();
+    TempArmor.init();
+    TempBlock.init();
+    TempArmorStand.init();
+    TempFallingBlock.init();
+  }
+
   private void removeTemporary() {
+    Cooldown.MANAGER.removeAll();
     TempArmor.MANAGER.removeAll();
     TempBlock.MANAGER.removeAll();
     TempArmorStand.MANAGER.removeAll();

@@ -89,10 +89,6 @@ tasks {
     build {
         dependsOn(reobfJar)
     }
-    withType<AbstractArchiveTask> {
-        isPreserveFileTimestamps = false
-        isReproducibleFileOrder = true
-    }
     withType<Sign>().configureEach {
         onlyIf { !isSnapshot() }
     }

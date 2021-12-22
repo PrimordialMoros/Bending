@@ -26,14 +26,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.util.Tasker;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
 import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -43,7 +45,6 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
-import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -54,8 +55,8 @@ public class TempBlock implements Temporary {
 
   private final Deque<TempBlockState> snapshots;
   private final Block block;
-  private BukkitTask revertTask;
   private boolean bendable;
+  private boolean reverted = false;
 
   public static void init() {
   }
@@ -92,6 +93,11 @@ public class TempBlock implements Temporary {
     if (duration <= 0) {
       duration = DEFAULT_REVERT;
     }
+
+    if (WaterMaterials.ICE_BENDABLE.isTagged(data) && block.getWorld().getEnvironment() == Environment.NETHER) {
+      duration = FastMath.floor(0.5 * duration);
+    }
+
     if (duration < 50) {
       return Optional.empty();
     }
@@ -126,8 +132,7 @@ public class TempBlock implements Temporary {
     TempBlock result = new TempBlock(block, duration, bendable);
     if (setBlockFast(block, data)) {
       refreshGravityCache(block);
-      MANAGER.addEntry(block, result);
-      result.revertTask = Tasker.sync(result::revert, Temporary.toTicks(duration));
+      MANAGER.addEntry(block, result, Temporary.toTicks(duration));
       return Optional.of(result);
     }
     return Optional.empty();
@@ -177,8 +182,7 @@ public class TempBlock implements Temporary {
       this.bendable = bendable;
       setBlockFast(block, data);
       refreshGravityCache(block);
-      revertTask.cancel();
-      revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
+      MANAGER.reschedule(block, Temporary.toTicks(duration));
     }
   }
 
@@ -213,25 +217,25 @@ public class TempBlock implements Temporary {
   }
 
   @Override
-  public void revert() {
-    if (revertTask.isCancelled() || snapshots.isEmpty()) {
-      return;
+  public boolean revert() {
+    if (reverted || snapshots.isEmpty()) {
+      return false;
     }
-    revertTask.cancel();
     TempBlockState toRevert = cleanStatesReverse();
     if (snapshots.isEmpty()) {
       snapshots.offer(toRevert); // Add original snapshot back
       revertFully();
-      return;
+      return true;
     }
     revertToSnapshot(toRevert);
     TempBlockState nextState = snapshots.peekLast();
     if (nextState != null) {
       int deltaTicks = nextState.expirationTicks - Bukkit.getCurrentTick();
       if (deltaTicks > 0) {
-        revertTask = Tasker.sync(this::revert, deltaTicks);
+        MANAGER.reschedule(block, deltaTicks);
       }
     }
+    return false;
   }
 
   public @NonNull Block block() {
@@ -250,11 +254,12 @@ public class TempBlock implements Temporary {
   }
 
   private void revertFully() {
-    if (snapshots.isEmpty()) {
+    if (reverted || snapshots.isEmpty()) {
       return;
     }
     revertToSnapshot(snapshots.pollFirst());
     cleanup();
+    reverted = true;
   }
 
   private void revertToSnapshot(@NonNull Snapshot snapshot) {
@@ -283,7 +288,6 @@ public class TempBlock implements Temporary {
     snapshots.clear();
     GRAVITY_CACHE.remove(block);
     MANAGER.removeEntry(block);
-    revertTask.cancel();
   }
 
   public @NonNull Snapshot snapshot() {

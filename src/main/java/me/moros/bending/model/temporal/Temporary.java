@@ -25,7 +25,7 @@ import me.moros.bending.model.math.FastMath;
 public interface Temporary {
   long DEFAULT_REVERT = 600_000;
 
-  void revert();
+  boolean revert();
 
   static int toTicks(long duration) {
     return FastMath.ceil(duration <= 0 ? DEFAULT_REVERT : duration / 50.0);

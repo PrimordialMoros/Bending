@@ -24,7 +24,6 @@ import java.util.Objects;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.Tasker;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,14 +31,13 @@ import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempArmorStand implements Temporary {
   public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
 
   private final ArmorStand armorStand;
-  private final BukkitTask revertTask;
+  private boolean reverted = false;
 
   public static void init() {
   }
@@ -62,8 +60,7 @@ public class TempArmorStand implements Temporary {
         .data(data).spawn();
     }
 
-    MANAGER.addEntry(armorStand, this);
-    revertTask = Tasker.sync(this::revert, Temporary.toTicks(duration));
+    MANAGER.addEntry(armorStand, this, Temporary.toTicks(duration));
   }
 
   public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
@@ -71,13 +68,14 @@ public class TempArmorStand implements Temporary {
   }
 
   @Override
-  public void revert() {
-    if (revertTask.isCancelled()) {
-      return;
+  public boolean revert() {
+    if (reverted) {
+      return false;
     }
+    reverted = true;
     armorStand.remove();
     MANAGER.removeEntry(armorStand);
-    revertTask.cancel();
+    return true;
   }
 
   public @NonNull ArmorStand armorStand() {

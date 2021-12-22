@@ -34,8 +34,10 @@ The project currently has a single module, but it may be split into sub-modules 
 
 - `ability` - Contains all ability implementations
 - `command` - Contains all plugin commands
-- `event` - Contains all plugin commands
+- `event` - Contains all plugin provided events
 - `game` - Contains all data and controllers for the main logic of the game
+- `hook` - Contains all hooks that provide data to third-party plugins
+- `listener` - Contains all plugin listeners
 - `model` - Contains the model for the plugin's data and systems
 - `protection` - Contains all world/region protection systems
 - `registry` - Contains all registry systems

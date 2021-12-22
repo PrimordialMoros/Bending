@@ -48,8 +48,6 @@ public interface User extends BukkitUser, ElementUser {
    */
   boolean addCooldown(@NonNull AbilityDescription desc, long duration);
 
-  void cleanup();
-
   /**
    * Makes a preset out of this user's current slots.
    * @param name the name of the preset to be created
