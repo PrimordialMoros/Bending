@@ -40,7 +40,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.RayTraceResult;
@@ -122,7 +122,7 @@ public final class RayTrace {
     if (ignoreBlocks.contains(pos)) {
       return null;
     }
-    BlockState iblockdata = world.getTypeIfLoaded(pos);
+    BlockState iblockdata = world.getBlockStateIfLoaded(pos);
     if (iblockdata == null) {
       return miss;
     }

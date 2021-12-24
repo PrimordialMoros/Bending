@@ -3,7 +3,7 @@ plugins {
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.0")
-    id("io.papermc.paperweight.userdev").version("1.2.0")
+    id("io.papermc.paperweight.userdev").version("1.3.3")
 }
 
 group = "me.moros"
@@ -50,7 +50,7 @@ dependencies {
         exclude(group = "net.kyori")
     }
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
-    paperDevBundle("1.17.1-R0.1-SNAPSHOT")
+    paperDevBundle("1.18.1-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
     compileOnly("com.github.TownyAdvanced", "Towny", "0.97.3.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
@@ -59,7 +59,7 @@ dependencies {
     }
     compileOnly("me.clip", "placeholderapi", "2.10.10")
     compileOnly("net.luckperms", "api", "5.3")
-    compileOnly("org.checkerframework", "checker-qual", "3.20.0")
+    compileOnly("org.checkerframework", "checker-qual", "3.21.0")
 }
 
 configurations.implementation {

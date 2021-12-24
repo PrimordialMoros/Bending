@@ -37,7 +37,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
 
   protected long interval = 0;
 
-  private double distanceTravelled = 0;
+  protected double distanceTravelled = 0;
   private long nextUpdate = 0;
 
   public BlockLine(@NonNull User user, @NonNull Ray ray) {

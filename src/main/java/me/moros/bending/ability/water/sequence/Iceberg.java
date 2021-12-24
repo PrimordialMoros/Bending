@@ -188,8 +188,8 @@ public class Iceberg extends AbilityInstance {
 
   private BlockIterator line(Vector3d origin, Vector3d target) {
     Vector3d direction = target.subtract(origin);
-    final double length = target.distance(origin);
-    return new BlockIterator(user.world(), origin.toBukkitVector(), direction.toBukkitVector(), 0, FastMath.round(length));
+    final int length = FastMath.round(target.distance(origin));
+    return new BlockIterator(user.world(), origin.toBukkitVector(), direction.toBukkitVector(), 0, length);
   }
 
   @Override

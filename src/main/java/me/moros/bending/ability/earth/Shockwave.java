@@ -242,10 +242,10 @@ public class Shockwave extends AbilityInstance {
       }
       affectedBlocks.add(block);
       recentAffectedBlocks.add(block);
-      double deltaY = Math.min(0.25, 0.05 + location.distance(ray.origin) / (3 * range));
+      double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
       Vector3d velocity = new Vector3d(0, deltaY, 0);
       BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
-      new TempFallingBlock(block, data, velocity, true, 450);
+      new TempFallingBlock(block, data, velocity, true, 1500);
       ParticleUtil.of(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
       if (ThreadLocalRandom.current().nextInt(6) == 0) {

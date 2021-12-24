@@ -223,9 +223,8 @@ public class EarthLine extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3d(x, 2, z)).toLocation(user.world());
       Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getType();
-      new TempArmorStand(spawnLoc, type, 700);
+      new TempArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)), type, 700);
     }
 
     @Override
@@ -341,8 +340,8 @@ public class EarthLine extends AbilityInstance {
       Vector3d center = new Vector3d(entity.getLocation()).add(Vector3d.MINUS_J);
       Vector3d offset = new Vector3d(0, -0.6, 0);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
-        new TempArmorStand(center.add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
-        new TempArmorStand(center.add(offset).add(v).toLocation(user.world()), mat, userConfig.prisonDuration);
+        new TempArmorStand(user.world(), center.add(v), mat, userConfig.prisonDuration);
+        new TempArmorStand(user.world(), center.add(offset).add(v), mat, userConfig.prisonDuration);
       });
       MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(EnumSet.allOf(ActionType.class));
     }

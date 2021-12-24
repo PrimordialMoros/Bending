@@ -198,7 +198,7 @@ public class AirBlast extends AbilityInstance {
         push = push.setY(Math.max(-0.3, Math.min(0.3, push.getY())));
       }
 
-      factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
+      factor *= 1 - (distanceTravelled / (2 * maxRange));
       // Reduce the push if the player is on the ground.
       if (isUser && user.isOnGround()) {
         factor *= 0.5;

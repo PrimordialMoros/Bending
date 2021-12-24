@@ -33,6 +33,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import io.papermc.paper.text.PaperComponents;
 import me.moros.bending.command.BendingCommand;
 import me.moros.bending.command.CommandPermissions;
 import me.moros.bending.locale.Message;
@@ -43,7 +44,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ChatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -157,7 +157,7 @@ public final class ElementMenu {
 
   private static List<Component> generateLore(Player player, Element element) {
     Component base = GlobalTranslator.render(element.description(), player.locale());
-    String raw = PlainTextComponentSerializer.plainText().serialize(base);
+    String raw = PaperComponents.plainTextSerializer().serialize(base);
     List<Component> lore = new ArrayList<>();
     for (String s : ChatUtil.wrap(raw, 36)) {
       lore.add(Component.text(s, element.color()));

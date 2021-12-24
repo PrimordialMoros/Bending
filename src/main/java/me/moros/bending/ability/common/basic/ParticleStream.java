@@ -52,6 +52,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   protected boolean livingOnly = true;
   protected boolean singleCollision = false;
   protected int steps = 1;
+  protected double distanceTravelled = 0;
 
   protected final double speed;
   protected final double maxRange;
@@ -83,6 +84,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
       Vector3d originalVector = new Vector3d(location.toArray());
       location = location.add(vector);
+      distanceTravelled += speed;
       if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location.toBlock(user.world()))) {
         return UpdateResult.REMOVE;
       }

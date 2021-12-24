@@ -162,8 +162,7 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Location spawnLoc = location.subtract(new Vector3d(x, 2, z)).toLocation(user.world());
-      new TempArmorStand(spawnLoc, Material.PACKED_ICE, 1400);
+      new TempArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)), Material.PACKED_ICE, 1400);
     }
 
     @Override

@@ -19,52 +19,43 @@
 
 package me.moros.bending.game.temporal;
 
-import java.util.Objects;
-
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.metadata.Metadata;
+import me.moros.bending.util.packet.PacketUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TempArmorStand implements Temporary {
-  public static final TemporalManager<ArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
+  public static final TemporalManager<TempArmorStand, TempArmorStand> MANAGER = new TemporalManager<>();
 
-  private final ArmorStand armorStand;
+  private final int id;
   private boolean reverted = false;
 
   public static void init() {
   }
 
-  public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration, boolean particles) {
-    armorStand = location.getWorld().spawn(location, ArmorStand.class, entity -> {
-      entity.setInvulnerable(true);
-      entity.setVisible(false);
-      entity.setGravity(false);
-      Objects.requireNonNull(entity.getEquipment()).setHelmet(new ItemStack(material));
-      entity.setMetadata(Metadata.NO_INTERACT, Metadata.empty());
-    });
-
+  public TempArmorStand(@NonNull World world, @NonNull Vector3d center, @NonNull Material material, long duration, boolean particles) {
+    id = PacketUtil.createArmorStand(world, center, material);
     if (particles) {
-      Location center = armorStand.getEyeLocation().add(0, 0.2, 0);
+      Location spawnLoc = center.add(new Vector3d(0, 1.1, 0)).toLocation(world);
       BlockData data = material.createBlockData();
-      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(4).offset(0.25, 0.125, 0.25)
+      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(0.25, 0.125, 0.25)
         .data(data).spawn();
-      ParticleUtil.of(Particle.BLOCK_DUST, center).count(6).offset(0.25, 0.125, 0.25)
+      ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(0.25, 0.125, 0.25)
         .data(data).spawn();
     }
 
-    MANAGER.addEntry(armorStand, this, Temporary.toTicks(duration));
+    MANAGER.addEntry(this, this, Temporary.toTicks(duration));
   }
 
-  public TempArmorStand(@NonNull Location location, @NonNull Material material, long duration) {
-    this(location, material, duration, true);
+  public TempArmorStand(@NonNull World world, @NonNull Vector3d center, @NonNull Material material, long duration) {
+    this(world, center, material, duration, true);
   }
 
   @Override
@@ -73,12 +64,9 @@ public class TempArmorStand implements Temporary {
       return false;
     }
     reverted = true;
-    armorStand.remove();
-    MANAGER.removeEntry(armorStand);
+    //armorStand.remove();
+    PacketUtil.destroy(id);
+    MANAGER.removeEntry(this);
     return true;
-  }
-
-  public @NonNull ArmorStand armorStand() {
-    return armorStand;
   }
 }

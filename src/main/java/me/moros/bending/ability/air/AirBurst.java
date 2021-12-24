@@ -198,7 +198,7 @@ public class AirBurst extends AbilityInstance {
       // Cap vertical push
       push = push.setY(Math.max(-0.3, Math.min(0.3, push.getY())));
 
-      factor *= 1 - (location.distance(ray.origin) / (2 * maxRange));
+      factor *= 1 - (distanceTravelled / (2 * maxRange));
       Vector3d velocity = new Vector3d(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
       double strength = velocity.dot(push.normalize());

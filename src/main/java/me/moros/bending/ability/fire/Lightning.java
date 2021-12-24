@@ -122,7 +122,6 @@ public class Lightning extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     if (launched) {
-      advanceLightning();
       return advanceLightning() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
     }
     if (user.sneaking()) {
@@ -175,7 +174,7 @@ public class Lightning extends AbilityInstance {
     while (arcIterator.hasNext() && counter < userConfig.speed) {
       LineSegment segment = arcIterator.next();
       CompositeResult result = RayTrace.of(segment.start, segment.direction).range(segment.length)
-        .type(Type.COMPOSITE).filter(this::isValidEntity).ignoreLiquids(false).raySize(0.3).result(user.world());
+        .type(Type.COMPOSITE).filter(this::isValidEntity).ignoreLiquids(true).raySize(0.3).result(user.world());
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.LIGHTNING.play(segment.mid.toLocation(user.world()));
@@ -269,7 +268,7 @@ public class Lightning extends AbilityInstance {
   }
 
   private void explode(Vector3d center, Block block) {
-    if (exploded) {
+    if (exploded || block.isLiquid()) {
       return;
     }
     exploded = true;
@@ -309,7 +308,7 @@ public class Lightning extends AbilityInstance {
 
     private Arc(Vector3d start, Vector3d end) {
       this.start = start;
-      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 1.2, 0));
+      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 0.75 * OFFSET, 0));
       segments = generateRecursively(OFFSET, startingSegments, 2, FastMath.ceil(4 * start.distance(end)));
     }
 

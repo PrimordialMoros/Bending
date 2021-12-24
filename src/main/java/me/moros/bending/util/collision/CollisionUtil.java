@@ -38,7 +38,7 @@ public final class CollisionUtil {
   }
 
   /**
-   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision. earlyEscape disabled
+   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision, earlyEscape disabled
    */
   public static boolean handle(@NonNull User user, @NonNull Collider collider, @NonNull CollisionCallback callback) {
     return handle(user, collider, callback, true, false, false);

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -79,8 +78,9 @@ public class MetalCable extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<Vector3d> pointLocations = new ArrayList<>();
+  private Collection<Vector3d> pointLocations;
   private Vector3d location;
+  private Vector3d offset;
   private Arrow cable;
   private CableTarget target;
   private TempFallingBlock projectile;
@@ -259,12 +259,15 @@ public class MetalCable extends AbilityInstance {
   }
 
   private boolean visualizeLine(double distance) {
-    if (ticks % 2 == 0) {
-      return true;
+    boolean evenTicks = ticks % 2 == 0;
+    if (!evenTicks) {
+      int points = FastMath.ceil(distance * 2);
+      Vector3d origin = user.mainHandSide();
+      offset = location.subtract(origin).multiply(1.0 / points);
+      pointLocations = IntStream.rangeClosed(0, points - 1).mapToObj(i -> origin.add(offset.multiply(i))).toList();
     }
-    pointLocations.clear();
-    pointLocations.addAll(getLinePoints(user.mainHandSide(), location, FastMath.ceil(distance * 2)));
     int counter = 0;
+    Vector3d offset2 = offset.multiply(0.5);
     for (Vector3d temp : pointLocations) {
       Block block = temp.toBlock(user.world());
       if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
@@ -272,14 +275,10 @@ public class MetalCable extends AbilityInstance {
           return false;
         }
       }
-      ParticleUtil.rgb(temp.toLocation(user.world()), "444444").spawn();
+      Vector3d spawnLoc = evenTicks ? temp : temp.add(offset2);
+      ParticleUtil.rgb(spawnLoc.toLocation(user.world()), "444444", 0.75F).spawn();
     }
     return true;
-  }
-
-  private Collection<Vector3d> getLinePoints(Vector3d startLoc, Vector3d endLoc, int points) {
-    Vector3d diff = endLoc.subtract(startLoc).multiply(1.0 / points);
-    return IntStream.rangeClosed(1, points).mapToObj(i -> startLoc.add(diff.multiply(i))).toList();
   }
 
   public void hitBlock(@NonNull Block block) {
