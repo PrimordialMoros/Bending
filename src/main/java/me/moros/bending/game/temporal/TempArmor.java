@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 
 import me.moros.bending.Bending;
@@ -31,13 +31,14 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@SuppressWarnings("ConstantConditions")
 public class TempArmor implements Temporary {
   public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>();
 
@@ -49,21 +50,11 @@ public class TempArmor implements Temporary {
   }
 
   private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
+    EntityEquipment equipment = Objects.requireNonNull(entity.getEquipment());
     this.entity = entity;
-    this.snapshot = copyFilteredArmor(entity.getEquipment().getArmorContents());
-    entity.getEquipment().setArmorContents(armor);
+    this.snapshot = copyFilteredArmor(equipment.getArmorContents());
+    equipment.setArmorContents(armor);
     MANAGER.addEntry(entity.getUniqueId(), this, Temporary.toTicks(duration));
-  }
-
-  public static Optional<TempArmor> create(@NonNull User user, @NonNull ItemStack[] armor, long duration) {
-    if (armor == null || MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
-      return Optional.empty();
-    }
-    return Optional.of(new TempArmor(user.entity(), applyMetaToArmor(armor), duration));
-  }
-
-  public @NonNull LivingEntity entity() {
-    return entity;
   }
 
   /**
@@ -79,21 +70,93 @@ public class TempArmor implements Temporary {
       return false;
     }
     reverted = true;
-    entity.getEquipment().setArmorContents(snapshot);
+    Objects.requireNonNull(entity.getEquipment()).setArmorContents(snapshot);
     MANAGER.removeEntry(entity.getUniqueId());
     return true;
   }
 
-  private static ItemStack[] applyMetaToArmor(ItemStack[] armorItems) {
-    for (ItemStack item : armorItems) {
-      ItemMeta meta = item.getItemMeta();
-      meta.displayName(Component.text("Bending Armor"));
-      meta.lore(List.of(Component.text("Temporary")));
-      meta.setUnbreakable(true);
-      Bending.dataLayer().addArmorKey(meta);
-      item.setItemMeta(meta);
+  public static @NonNull Builder builder() {
+    return new Builder();
+  }
+
+  public static @NonNull Builder leather() {
+    return builder()
+      .head(Material.LEATHER_HELMET)
+      .chest(Material.LEATHER_CHESTPLATE)
+      .legs(Material.LEATHER_LEGGINGS)
+      .boots(Material.LEATHER_BOOTS);
+  }
+
+  public static @NonNull Builder iron() {
+    return builder()
+      .head(Material.IRON_HELMET)
+      .chest(Material.IRON_CHESTPLATE)
+      .legs(Material.IRON_LEGGINGS)
+      .boots(Material.IRON_BOOTS);
+  }
+
+  public static @NonNull Builder gold() {
+    return builder()
+      .head(Material.GOLDEN_HELMET)
+      .chest(Material.GOLDEN_CHESTPLATE)
+      .legs(Material.GOLDEN_LEGGINGS)
+      .boots(Material.GOLDEN_BOOTS);
+  }
+
+  public static final class Builder {
+    private final Material[] armor;
+    private long duration = 30000;
+
+    private Builder() {
+      this.armor = new Material[4];
     }
-    return armorItems;
+
+    public @NonNull Builder head(@Nullable Material material) {
+      armor[3] = material;
+      return this;
+    }
+
+    public @NonNull Builder chest(@Nullable Material material) {
+      armor[2] = material;
+      return this;
+    }
+
+    public @NonNull Builder legs(@Nullable Material material) {
+      armor[1] = material;
+      return this;
+    }
+
+    public @NonNull Builder boots(@Nullable Material material) {
+      armor[0] = material;
+      return this;
+    }
+
+    public @NonNull Builder duration(long duration) {
+      this.duration = duration;
+      return this;
+    }
+
+    public @Nullable TempArmor build(@NonNull User user) {
+      Objects.requireNonNull(user);
+      if (MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
+        return null;
+      }
+      ItemStack[] armorItems = new ItemStack[4];
+      for (int i = 0; i < 4; i++) {
+        Material mat = armor[i];
+        if (mat != null) {
+          ItemStack item = new ItemStack(mat);
+          ItemMeta meta = item.getItemMeta();
+          meta.displayName(Component.text("Bending Armor"));
+          meta.lore(List.of(Component.text("Temporary")));
+          meta.setUnbreakable(true);
+          Bending.dataLayer().addArmorKey(meta);
+          item.setItemMeta(meta);
+          armorItems[i] = item;
+        }
+      }
+      return new TempArmor(user.entity(), armorItems, duration);
+    }
   }
 
   private static ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {

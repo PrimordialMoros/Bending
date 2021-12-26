@@ -28,9 +28,8 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
@@ -52,7 +51,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -162,7 +160,8 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      new TempArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)), Material.PACKED_ICE, 1400);
+      TempPacketEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false).particles(true).duration(1400)
+        .buildArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)));
     }
 
     @Override
@@ -176,8 +175,9 @@ public class IceCrawl extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
-        Location spawnLoc = entity.getLocation().clone().add(0, -0.2, 0);
-        new TempFallingBlock(spawnLoc, Material.PACKED_ICE.createBlockData(), userConfig.freezeDuration);
+        Vector3d spawnLoc = new Vector3d(entity.getLocation()).subtract(new Vector3d(0, 0.2, 0));
+        TempPacketEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false)
+          .duration(userConfig.freezeDuration).buildFallingBlock(user.world(), spawnLoc);
         MovementHandler.restrictEntity(user, livingEntity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
       }
       return true;

@@ -28,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -53,6 +53,7 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.packet.PacketUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -73,6 +74,7 @@ public class Shockwave extends AbilityInstance {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
+  private final Collection<Block> blockBuffer = new ArrayList<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Vector3d origin;
 
@@ -136,7 +138,10 @@ public class Shockwave extends AbilityInstance {
       }
       return UpdateResult.CONTINUE;
     }
-
+    if (!blockBuffer.isEmpty()) {
+      PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
+      blockBuffer.clear();
+    }
     Set<Block> positions = recentAffectedBlocks.snapshot();
     if (!positions.isEmpty()) {
       CollisionUtil.handle(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
@@ -217,6 +222,14 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
+  public void onDestroy() {
+    if (!blockBuffer.isEmpty()) {
+      PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
+      blockBuffer.clear();
+    }
+  }
+
+  @Override
   public @MonotonicNonNull User user() {
     return user;
   }
@@ -237,15 +250,16 @@ public class Shockwave extends AbilityInstance {
 
     @Override
     public void render(@NonNull Block block) {
-      if (affectedBlocks.contains(block)) {
+      if (!affectedBlocks.add(block)) {
         return;
       }
-      affectedBlocks.add(block);
       recentAffectedBlocks.add(block);
       double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
       Vector3d velocity = new Vector3d(0, deltaY, 0);
-      BlockData data = block.getRelative(BlockFace.DOWN).getBlockData();
-      new TempFallingBlock(block, data, velocity, true, 1500);
+      Block below = block.getRelative(BlockFace.DOWN);
+      blockBuffer.add(below);
+      BlockData data = below.getBlockData();
+      TempPacketEntity.builder(data).velocity(velocity).duration(500).buildFallingBlock(user.world(), Vector3d.center(below));
       ParticleUtil.of(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
       if (ThreadLocalRandom.current().nextInt(6) == 0) {

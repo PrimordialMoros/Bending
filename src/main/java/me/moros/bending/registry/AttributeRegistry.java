@@ -33,7 +33,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class AttributeRegistry implements Registry<AttributeModifier> {
   private final Multimap<UUID, AttributeModifier> modifierMap;
 
-  @SuppressWarnings("UnstableApiUsage")
   AttributeRegistry() {
     modifierMap = MultimapBuilder.hashKeys().arrayListValues().build();
   }

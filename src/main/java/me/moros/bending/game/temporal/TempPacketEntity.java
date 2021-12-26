@@ -24,25 +24,26 @@ import java.util.Objects;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.packet.PacketUtil;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.FallingBlock;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class TempFallingBlock implements Temporary {
-  public static final Vector3d OFFSET = new Vector3d(0.5, 0, 0.5);
-  public static final TemporalManager<FallingBlock, TempFallingBlock> MANAGER = new TemporalManager<>();
+public class TempPacketEntity implements Temporary {
+  public static final TemporalManager<Integer, TempPacketEntity> MANAGER = new TemporalManager<>();
 
-  protected final FallingBlock fallingBlock;
+  protected final int id;
   protected boolean reverted = false;
 
   public static void init() {
   }
 
-  private TempFallingBlock(FallingBlock fallingBlock, long duration) {
-    this.fallingBlock = fallingBlock;
-    MANAGER.addEntry(fallingBlock, this, Temporary.toTicks(duration));
+  private TempPacketEntity(int id, long duration) {
+    this.id = id;
+    MANAGER.addEntry(id, this, Temporary.toTicks(duration));
   }
 
   @Override
@@ -51,8 +52,8 @@ public class TempFallingBlock implements Temporary {
       return false;
     }
     reverted = true;
-    fallingBlock.remove();
-    MANAGER.removeEntry(fallingBlock);
+    PacketUtil.destroy(id);
+    MANAGER.removeEntry(id);
     return true;
   }
 
@@ -60,22 +61,21 @@ public class TempFallingBlock implements Temporary {
     return !reverted;
   }
 
-  public @NonNull FallingBlock fallingBlock() {
-    return fallingBlock;
-  }
-
-  public @NonNull Vector3d center() {
-    return new Vector3d(fallingBlock.getLocation()).add(new Vector3d(0, 0.5, 0));
-  }
-
   public static @NonNull Builder builder(@NonNull BlockData data) {
     return new Builder(Objects.requireNonNull(data));
   }
 
+  private enum Type {
+    ARMOR_STAND,
+    FALLING_BLOCK
+  }
+
   public static final class Builder {
+    private static final Vector3d armorStandOffset = new Vector3d(0, 1.1, 0);
     private final BlockData data;
 
     private Vector3d velocity = Vector3d.ZERO;
+    private boolean particles = false;
     private boolean gravity = true;
     private long duration = 30000;
 
@@ -85,6 +85,11 @@ public class TempFallingBlock implements Temporary {
 
     public @NonNull Builder velocity(@NonNull Vector3d velocity) {
       this.velocity = Objects.requireNonNull(velocity);
+      return this;
+    }
+
+    public @NonNull Builder particles(boolean particles) {
+      this.particles = particles;
       return this;
     }
 
@@ -98,16 +103,32 @@ public class TempFallingBlock implements Temporary {
       return this;
     }
 
-    public @NonNull TempFallingBlock build(@NonNull Block block) {
-      return build(block.getWorld(), new Vector3d(block).add(OFFSET));
+    public @NonNull TempPacketEntity buildFallingBlock(@NonNull World world, @NonNull Vector3d center) {
+      return build(Type.FALLING_BLOCK, world, center);
     }
 
-    public @NonNull TempFallingBlock build(@NonNull World world, @NonNull Vector3d center) {
-      FallingBlock fallingBlock = Objects.requireNonNull(world).spawnFallingBlock(Objects.requireNonNull(center).toLocation(world), data);
-      fallingBlock.setVelocity(velocity.clampVelocity());
-      fallingBlock.setGravity(gravity);
-      fallingBlock.setDropItem(false);
-      return new TempFallingBlock(fallingBlock, duration);
+    public @NonNull TempPacketEntity buildArmorStand(@NonNull World world, @NonNull Vector3d center) {
+      return build(Type.ARMOR_STAND, world, center);
+    }
+
+    private TempPacketEntity build(Type type, World world, Vector3d center) {
+      Objects.requireNonNull(world);
+      Objects.requireNonNull(center);
+      int id = switch (type) {
+        case FALLING_BLOCK -> PacketUtil.createFallingBlock(world, center, data, velocity, gravity);
+        case ARMOR_STAND -> PacketUtil.createArmorStand(world, center, data.getMaterial(), velocity, gravity);
+      };
+      if (particles) {
+        spawnParticles(center.add(armorStandOffset).toLocation(world));
+      }
+      return new TempPacketEntity(id, duration);
+    }
+
+    private void spawnParticles(Location spawnLoc) {
+      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(0.25, 0.125, 0.25)
+        .data(data).spawn();
+      ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(0.25, 0.125, 0.25)
+        .data(data).spawn();
     }
   }
 }

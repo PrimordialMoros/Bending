@@ -119,8 +119,7 @@ public class TempBlock implements Temporary {
 
     TempBlock tb = MANAGER.get(block).orElse(null);
     if (tb != null && !tb.snapshots.isEmpty()) {
-      BlockState state = tb.snapshots.peekFirst().state;
-      if (data.matches(state.getBlockData())) {
+      if (data.matches(tb.snapshots.peekFirst().state.getBlockData())) {
         tb.revertFully();
         MANAGER.removeEntry(block);
         return Optional.empty();

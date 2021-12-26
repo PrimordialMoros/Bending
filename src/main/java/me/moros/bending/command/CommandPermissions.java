@@ -27,18 +27,18 @@ public final class CommandPermissions {
   private CommandPermissions() {
   }
 
-  public static CommandPermission HELP = create("help");
-  public static CommandPermission TOGGLE = create("toggle");
-  public static CommandPermission BOARD = create("board");
-  public static CommandPermission DISPLAY = create("display");
-  public static CommandPermission CHOOSE = create("choose");
-  public static CommandPermission ADD = create("add");
-  public static CommandPermission REMOVE = create("remove");
-  public static CommandPermission BIND = create("bind");
-  public static CommandPermission MODIFY = create("modify");
-  public static CommandPermission PRESET = create("preset");
-  public static CommandPermission VERSION = create("version");
-  public static CommandPermission RELOAD = create("reload");
+  public static final CommandPermission HELP = create("help");
+  public static final CommandPermission TOGGLE = create("toggle");
+  public static final CommandPermission BOARD = create("board");
+  public static final CommandPermission DISPLAY = create("display");
+  public static final CommandPermission CHOOSE = create("choose");
+  public static final CommandPermission ADD = create("add");
+  public static final CommandPermission REMOVE = create("remove");
+  public static final CommandPermission BIND = create("bind");
+  public static final CommandPermission MODIFY = create("modify");
+  public static final CommandPermission PRESET = create("preset");
+  public static final CommandPermission VERSION = create("version");
+  public static final CommandPermission RELOAD = create("reload");
 
   private static Permission create(@NonNull String node) {
     return Permission.of("bending.command." + node);

@@ -19,27 +19,39 @@
 
 package me.moros.bending.util.packet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import me.moros.bending.model.math.Vector3d;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -49,15 +61,39 @@ public final class PacketUtil {
   private PacketUtil() {
   }
 
-  public static int createArmorStand(World world, Vector3d center, Material material) {
+  public static int createArmorStand(World world, Vector3d center, Material material, Vector3d velocity, boolean gravity) {
     final int id = Entity.nextEntityId();
-    var packets = List.of(
-      createArmorStand(id, center),
-      makeInvisible(id),
-      setupEquipment(id, material)
-    );
+    Collection<Packet<?>> packets = new ArrayList<>();
+    packets.add(createArmorStand(id, center));
+    if (!gravity) {
+      packets.add(makeInvisible(id));
+    }
+    if (velocity.lengthSq() > 0) {
+      packets.add(addVelocity(id, velocity));
+    }
+    packets.add(setupEquipment(id, material));
     broadcast(packets, world, center);
     return id;
+  }
+
+  public static int createFallingBlock(World world, Vector3d center, BlockData data, Vector3d velocity, boolean gravity) {
+    final int id = Entity.nextEntityId();
+    BlockState state = ((CraftBlockData) data).getState();
+    Collection<Packet<?>> packets = new ArrayList<>();
+    packets.add(createFallingBlock(id, center, state));
+    if (!gravity) {
+      packets.add(noGravity(id));
+    }
+    if (velocity.lengthSq() > 0) {
+      packets.add(addVelocity(id, velocity));
+    }
+    broadcast(packets, world, center);
+    return id;
+  }
+
+  public static void refreshBlocks(Collection<org.bukkit.block.Block> blocks, World world, Vector3d center) {
+    Collection<Packet<?>> updatePackets = blocks.stream().map(PacketUtil::refreshBlock).collect(Collectors.toList());
+    broadcast(updatePackets, world, center, (world.getViewDistance() + 1) * 16);
   }
 
   public static void destroy(int id) {
@@ -71,8 +107,15 @@ public final class PacketUtil {
     }
   }
 
-  private static void broadcast(Collection<Packet<ClientGamePacketListener>> packets, World world, Vector3d center) {
-    int distanceSq = 32 * 32;
+  private static void broadcast(Collection<Packet<?>> packets, World world, Vector3d center) {
+    broadcast(packets, world, center, world.getViewDistance() * 16);
+  }
+
+  private static void broadcast(Collection<Packet<?>> packets, World world, Vector3d center, int dist) {
+    if (packets.isEmpty()) {
+      return;
+    }
+    int distanceSq = dist * dist;
     Location origin = center.toLocation(world);
     Location loc = origin.clone();
     for (Player player : world.getPlayers()) {
@@ -111,6 +154,29 @@ public final class PacketUtil {
     return new ClientboundAddMobPacket(packetByteBuffer);
   }
 
+  private static ClientboundAddEntityPacket createFallingBlock(int id, Vector3d center, BlockState state) {
+    double x = center.getX();
+    double y = center.getY();
+    double z = center.getZ();
+    return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, EntityType.FALLING_BLOCK, Block.getId(state), Vec3.ZERO);
+  }
+
+  private static ClientboundSetEntityMotionPacket addVelocity(int id, Vector3d vel) {
+    return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.getX(), vel.getY(), vel.getZ()));
+  }
+
+  private static ClientboundBlockUpdatePacket refreshBlock(org.bukkit.block.Block b) {
+    return new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlock) b).getNMS());
+  }
+
+  private static ClientboundSetEntityDataPacket noGravity(int id) {
+    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
+    packetByteBuffer.writeVarInt(id);
+    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.GRAVITY, true);
+    packetByteBuffer.writeDataWatcherEntriesEnd();
+    return new ClientboundSetEntityDataPacket(packetByteBuffer);
+  }
+
   private static ClientboundSetEntityDataPacket makeInvisible(int id) {
     PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
     packetByteBuffer.writeVarInt(id);
@@ -126,7 +192,8 @@ public final class PacketUtil {
   }
 
   private static final class PacketByteBuffer extends FriendlyByteBuf {
-    private static final int serializerTypeID = EntityDataSerializers.getSerializedId(EntityDataSerializers.BYTE);
+    private static final int byteSerializerId = EntityDataSerializers.getSerializedId(EntityDataSerializers.BYTE);
+    private static final int booleanSerializerId = EntityDataSerializers.getSerializedId(EntityDataSerializers.BOOLEAN);
 
     private static final PacketByteBuffer INSTANCE = new PacketByteBuffer();
 
@@ -141,8 +208,14 @@ public final class PacketUtil {
 
     private void writeDataWatcherEntry(DataWatcherKey key, byte value) {
       writeByte(key.index);
-      writeVarInt(serializerTypeID);
+      writeVarInt(byteSerializerId);
       EntityDataSerializers.BYTE.write(this, value);
+    }
+
+    private void writeDataWatcherEntry(DataWatcherKey key, boolean value) {
+      writeByte(key.index);
+      writeVarInt(booleanSerializerId);
+      EntityDataSerializers.BOOLEAN.write(this, value);
     }
 
     private void writeDataWatcherEntriesEnd() {
@@ -152,6 +225,7 @@ public final class PacketUtil {
 
   private enum DataWatcherKey {
     ENTITY_STATUS(0),
+    GRAVITY(5),
     ARMOR_STAND_STATUS(15);
 
     private final int index;

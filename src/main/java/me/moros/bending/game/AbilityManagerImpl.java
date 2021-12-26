@@ -45,7 +45,6 @@ public class AbilityManagerImpl implements AbilityManager {
   private final Multimap<UUID, Ability> globalInstances;
   private final Collection<Map.Entry<UUID, Ability>> addQueue;
 
-  @SuppressWarnings("UnstableApiUsage")
   AbilityManagerImpl() {
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
     addQueue = new ArrayList<>(16);

@@ -139,10 +139,9 @@ public class Blaze extends AbilityInstance {
 
     @Override
     public void render(@NonNull Block block) {
-      if (affectedBlocks.contains(block)) {
+      if (!affectedBlocks.add(block)) {
         return;
       }
-      affectedBlocks.add(block);
       TempBlock.create(block, Material.FIRE.createBlockData(), 500, true);
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.FIRE.play(block.getLocation());

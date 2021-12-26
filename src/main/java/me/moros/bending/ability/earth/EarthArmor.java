@@ -19,9 +19,12 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.function.Supplier;
+
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempArmor;
+import me.moros.bending.game.temporal.TempArmor.Builder;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -47,15 +50,12 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthArmor extends AbilityInstance {
-  private enum Mode {ROCK, IRON, GOLD}
-
   private static final Config config = new Config();
 
   private User user;
@@ -97,7 +97,8 @@ public class EarthArmor extends AbilityInstance {
     }
     BlockData data = source.getBlockData().clone();
     TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
-    fallingBlock = new TempFallingBlock(source, data, new Vector3d(0, 0.2, 0), false, 10000);
+    fallingBlock = TempFallingBlock.builder(data).velocity(new Vector3d(0, 0.2, 0))
+      .gravity(false).duration(10000).build(source);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;
   }
@@ -124,7 +125,7 @@ public class EarthArmor extends AbilityInstance {
     if (formed) {
       return;
     }
-    TempArmor.create(user, getArmorSet(mode), userConfig.duration);
+    mode.builder.get().duration(userConfig.duration).build(user);
     int duration = FastMath.round(userConfig.duration / 50.0);
     EntityUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
@@ -183,27 +184,16 @@ public class EarthArmor extends AbilityInstance {
       .map(e -> e.formed).orElse(false);
   }
 
-  private static ItemStack[] getArmorSet(Mode mode) {
-    return switch (mode) {
-      case IRON -> new ItemStack[]{
-        new ItemStack(Material.IRON_BOOTS, 1),
-        new ItemStack(Material.IRON_LEGGINGS, 1),
-        new ItemStack(Material.IRON_CHESTPLATE, 1),
-        new ItemStack(Material.IRON_HELMET, 1)
-      };
-      case GOLD -> new ItemStack[]{
-        new ItemStack(Material.GOLDEN_BOOTS, 1),
-        new ItemStack(Material.GOLDEN_LEGGINGS, 1),
-        new ItemStack(Material.GOLDEN_CHESTPLATE, 1),
-        new ItemStack(Material.GOLDEN_HELMET, 1)
-      };
-      default -> new ItemStack[]{
-        new ItemStack(Material.LEATHER_BOOTS, 1),
-        new ItemStack(Material.LEATHER_LEGGINGS, 1),
-        new ItemStack(Material.LEATHER_CHESTPLATE, 1),
-        new ItemStack(Material.LEATHER_HELMET, 1)
-      };
-    };
+  private enum Mode {
+    ROCK(TempArmor::leather),
+    IRON(TempArmor::iron),
+    GOLD(TempArmor::gold);
+
+    private final Supplier<TempArmor.Builder> builder;
+
+    Mode(Supplier<Builder> builder) {
+      this.builder = builder;
+    }
   }
 
   private static class Config extends Configurable {

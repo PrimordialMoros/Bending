@@ -159,7 +159,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
       SoundUtil.EARTH.play(source.getLocation());
     }
 
-    projectile = new TempFallingBlock(source, solidData, new Vector3d(0, 0.65, 0), false, 6000);
+    projectile = TempFallingBlock.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
+      .gravity(false).duration(6000).build(source);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
     }
@@ -297,7 +298,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
     } else {
       origin = Vector3d.center(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile = new TempFallingBlock(readySource, readySource.getBlockData(), dir.add(new Vector3d(0, 0.2, 0)), true, 30000);
+      projectile = TempFallingBlock.builder(readySource.getBlockData())
+        .velocity(dir.add(new Vector3d(0, 0.2, 0))).build(readySource);
       TempBlock.createAir(readySource);
     }
     location = projectile.center();

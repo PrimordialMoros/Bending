@@ -293,7 +293,7 @@ public class MetalCable extends AbilityInstance {
       BlockData data = block.getBlockData();
       TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
       Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
-      projectile = new TempFallingBlock(location.toLocation(user.world()), data, velocity, true, 30000);
+      projectile = TempFallingBlock.builder(data).velocity(velocity).build(user.world(), location);
       target = new CableTarget(projectile.fallingBlock());
     } else {
       target = new CableTarget(block);

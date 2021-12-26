@@ -240,7 +240,9 @@ public class EarthSmash extends AbilityInstance {
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
         TempBlock.createAir(block);
-        shards.put(new TempFallingBlock(block, blockData, velocity, true, 5000), shardType(blockData.getMaterial()));
+        TempFallingBlock projectile = TempFallingBlock.builder(blockData).velocity(velocity)
+          .duration(5000).build(block);
+        shards.put(projectile, shardType(blockData.getMaterial()));
         Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
         ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4)
           .offset(0.5, 0.5, 0.5).data(blockData).spawn();

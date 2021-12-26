@@ -33,9 +33,10 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempPacketEntity;
+import me.moros.bending.game.temporal.TempPacketEntity.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
@@ -223,8 +224,9 @@ public class EarthLine extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Material type = mode == Mode.MAGMA ? Material.MAGMA_BLOCK : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getType();
-      new TempArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)), type, 700);
+      BlockData data = mode == Mode.MAGMA ? Material.MAGMA_BLOCK.createBlockData() : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getBlockData();
+      TempPacketEntity.builder(data).gravity(false).particles(true).duration(700)
+        .buildArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)));
     }
 
     @Override
@@ -301,7 +303,10 @@ public class EarthLine extends AbilityInstance {
       for (Block block : wall) {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
-        new TempFallingBlock(block, Material.MAGMA_BLOCK.createBlockData(), velocity, true, 10000);
+        TempFallingBlock.builder(Material.MAGMA_BLOCK.createBlockData())
+          .velocity(velocity)
+          .duration(10000)
+          .build(block);
       }
     }
 
@@ -336,12 +341,13 @@ public class EarthLine extends AbilityInstance {
 
       imprisoned = true;
       EntityUtil.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
-      Material mat = material;
+      BlockData data = material.createBlockData();
       Vector3d center = new Vector3d(entity.getLocation()).add(Vector3d.MINUS_J);
       Vector3d offset = new Vector3d(0, -0.6, 0);
+      Builder builder = TempPacketEntity.builder(data).gravity(false).duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
-        new TempArmorStand(user.world(), center.add(v), mat, userConfig.prisonDuration);
-        new TempArmorStand(user.world(), center.add(offset).add(v), mat, userConfig.prisonDuration);
+        builder.buildArmorStand(user.world(), center.add(v));
+        builder.buildArmorStand(user.world(), center.add(offset).add(v));
       });
       MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(EnumSet.allOf(ActionType.class));
     }

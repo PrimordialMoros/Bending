@@ -22,9 +22,9 @@ package me.moros.bending.game;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.game.temporal.TempArmor;
-import me.moros.bending.game.temporal.TempArmorStand;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
@@ -74,8 +74,8 @@ public final class Game {
     Cooldown.MANAGER.tick();
     TempArmor.MANAGER.tick();
     TempBlock.MANAGER.tick();
-    TempArmorStand.MANAGER.tick();
     TempFallingBlock.MANAGER.tick();
+    TempPacketEntity.MANAGER.tick();
     activationController.clearCache();
     worldManager.update();
     flightManager.update();
@@ -106,16 +106,16 @@ public final class Game {
     Cooldown.init();
     TempArmor.init();
     TempBlock.init();
-    TempArmorStand.init();
     TempFallingBlock.init();
+    TempPacketEntity.init();
   }
 
   private void removeTemporary() {
     Cooldown.MANAGER.removeAll();
     TempArmor.MANAGER.removeAll();
     TempBlock.MANAGER.removeAll();
-    TempArmorStand.MANAGER.removeAll();
     TempFallingBlock.MANAGER.removeAll();
+    TempPacketEntity.MANAGER.removeAll();
   }
 
   public @NonNull BendingStorage storage() {
