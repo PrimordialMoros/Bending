@@ -90,7 +90,6 @@ import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
 import me.moros.bending.model.ability.description.SequenceStep;
-import me.moros.bending.model.collision.CollisionBuilder;
 import me.moros.bending.model.collision.RegisteredCollision;
 import me.moros.bending.registry.Registries;
 
@@ -130,7 +129,7 @@ public final class AbilityInitializer {
     shieldCollisions.addAll(layer0);
     shieldCollisions.addAll(layer1);
     shieldCollisions.add("EarthShot");
-    return new CollisionBuilder()
+    return RegisteredCollision.builder()
       .layer(layer0)
       .layer(layer1)
       .layer(layer2)

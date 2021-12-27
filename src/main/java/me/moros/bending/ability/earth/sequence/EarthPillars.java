@@ -150,7 +150,7 @@ public class EarthPillars extends AbilityInstance {
   }
 
   private class EarthPillar extends Pillar {
-    private EarthPillar(@NonNull PillarBuilder builder) {
+    private EarthPillar(@NonNull Builder builder) {
       super(builder);
     }
 

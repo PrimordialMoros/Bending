@@ -40,15 +40,14 @@ public final class PlaceholderProvider {
   private final Map<String, Placeholder> placeholders;
 
   PlaceholderProvider() {
-    PlaceholderBuilder builder = new PlaceholderBuilder();
-    setup(builder);
-    this.placeholders = builder.build();
+    this.placeholders = setup();
   }
 
-  private void setup(PlaceholderBuilder builder) {
+  private static Map<String, Placeholder> setup() {
+    Builder builder = new Builder();
     builder.addStatic("elements", player -> player.elements().stream().map(Element::displayName)
-      .map(this::toLegacy).collect(Collectors.joining(", ")));
-    builder.addStatic("element", this::findElement);
+      .map(PlaceholderProvider::toLegacy).collect(Collectors.joining(", ")));
+    builder.addStatic("element", PlaceholderProvider::findElement);
     builder.addStatic("element_color", player ->
       player.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
     );
@@ -64,9 +63,10 @@ public final class PlaceholderProvider {
       boolean result = (desc != null && player.canBend(desc));
       return formatBoolean(result);
     });
+    return builder.build();
   }
 
-  private @NonNull String findElement(User user) {
+  private static @NonNull String findElement(User user) {
     Collection<Element> userElements = user.elements();
     if (userElements.isEmpty()) {
       return org.bukkit.ChatColor.RESET + "NonBender";
@@ -77,11 +77,11 @@ public final class PlaceholderProvider {
     }
   }
 
-  private String formatBoolean(boolean value) {
+  private static String formatBoolean(boolean value) {
     return value ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
   }
 
-  private String toLegacy(Component component) {
+  private static String toLegacy(Component component) {
     return PaperComponents.legacySectionSerializer().serialize(component);
   }
 
@@ -98,8 +98,12 @@ public final class PlaceholderProvider {
     return null;
   }
 
-  private static final class PlaceholderBuilder {
-    private final Map<String, Placeholder> placeholders = new LinkedHashMap<>();
+  private static final class Builder {
+    private final Map<String, Placeholder> placeholders;
+
+    private Builder() {
+      placeholders = new LinkedHashMap<>();
+    }
 
     public void addStatic(String id, StaticPlaceholder placeholder) {
       this.placeholders.put(id, placeholder);

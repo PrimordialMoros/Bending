@@ -61,7 +61,7 @@ public class Pillar implements Updatable {
   private int currentDistance;
   private long nextUpdateTime;
 
-  protected Pillar(@NonNull PillarBuilder builder) {
+  protected Pillar(@NonNull Builder builder) {
     this.user = builder.user;
     this.origin = builder.origin;
     this.direction = builder.direction;
@@ -152,18 +152,18 @@ public class Pillar implements Updatable {
     return true;
   }
 
-  public static @NonNull PillarBuilder builder(@NonNull User user, @NonNull Block origin) {
+  public static @NonNull Builder builder(@NonNull User user, @NonNull Block origin) {
     return builder(user, origin, Pillar::new);
   }
 
-  public static <T extends Pillar> @NonNull PillarBuilder builder(@NonNull User user, @NonNull Block origin, @NonNull Function<PillarBuilder, T> constructor) {
-    return new PillarBuilder(user, origin, constructor);
+  public static <T extends Pillar> @NonNull Builder builder(@NonNull User user, @NonNull Block origin, @NonNull Function<Builder, T> constructor) {
+    return new Builder(user, origin, constructor);
   }
 
-  public static class PillarBuilder {
+  public static class Builder {
     private final User user;
     private final Block origin;
-    private final Function<PillarBuilder, ? extends Pillar> constructor;
+    private final Function<Builder, ? extends Pillar> constructor;
     private BlockFace direction = BlockFace.UP;
     private int length;
     private int distance;
@@ -171,13 +171,13 @@ public class Pillar implements Updatable {
     private long duration = BendingProperties.EARTHBENDING_REVERT_TIME;
     private Predicate<Block> predicate = b -> true;
 
-    public <T extends Pillar> PillarBuilder(@NonNull User user, @NonNull Block origin, @NonNull Function<PillarBuilder, T> constructor) {
+    public <T extends Pillar> Builder(@NonNull User user, @NonNull Block origin, @NonNull Function<Builder, T> constructor) {
       this.user = user;
       this.origin = origin;
       this.constructor = constructor;
     }
 
-    public @NonNull PillarBuilder direction(@NonNull BlockFace direction) {
+    public @NonNull Builder direction(@NonNull BlockFace direction) {
       if (!WorldUtil.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
@@ -185,17 +185,17 @@ public class Pillar implements Updatable {
       return this;
     }
 
-    public @NonNull PillarBuilder interval(@NonNegative long interval) {
+    public @NonNull Builder interval(@NonNegative long interval) {
       this.interval = interval;
       return this;
     }
 
-    public @NonNull PillarBuilder duration(@NonNegative long duration) {
+    public @NonNull Builder duration(@NonNegative long duration) {
       this.duration = duration;
       return this;
     }
 
-    public @NonNull PillarBuilder predicate(@NonNull Predicate<Block> predicate) {
+    public @NonNull Builder predicate(@NonNull Predicate<Block> predicate) {
       this.predicate = predicate;
       return this;
     }

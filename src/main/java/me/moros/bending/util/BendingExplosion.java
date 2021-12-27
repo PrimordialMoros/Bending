@@ -57,7 +57,7 @@ public final class BendingExplosion {
   private final Collider ignoreInside;
   private final SoundEffect sound;
 
-  private BendingExplosion(ExplosionBuilder builder) {
+  private BendingExplosion(Builder builder) {
     this.size = builder.size;
     this.damage = builder.damage;
     this.selfKnockbackFactor = builder.selfKnockbackFactor;
@@ -144,11 +144,11 @@ public final class BendingExplosion {
     }, livingOnly, true);
   }
 
-  public static @NonNull ExplosionBuilder builder() {
-    return new ExplosionBuilder();
+  public static @NonNull Builder builder() {
+    return new Builder();
   }
 
-  public static class ExplosionBuilder {
+  public static class Builder {
     private double size = 2.0;
     private double damage = 4.0;
     private double selfKnockbackFactor = 0.5;
@@ -160,60 +160,60 @@ public final class BendingExplosion {
     private Collider ignoreInside = null;
     private SoundEffect sound = null;
 
-    private ExplosionBuilder() {
+    private Builder() {
     }
 
-    public @NonNull ExplosionBuilder size(double size) {
+    public @NonNull Builder size(double size) {
       this.size = Math.abs(size);
       return this;
     }
 
-    public @NonNull ExplosionBuilder damage(double damage) {
+    public @NonNull Builder damage(double damage) {
       this.damage = Math.abs(damage);
       return this;
     }
 
-    public @NonNull ExplosionBuilder selfKnockbackFactor(double selfKnockbackFactor) {
+    public @NonNull Builder selfKnockbackFactor(double selfKnockbackFactor) {
       this.selfKnockbackFactor = Math.abs(selfKnockbackFactor);
       return this;
     }
 
-    public @NonNull ExplosionBuilder fireTicks(int fireTicks) {
+    public @NonNull Builder fireTicks(int fireTicks) {
       this.fireTicks = Math.abs(fireTicks);
       return this;
     }
 
-    public @NonNull ExplosionBuilder livingOnly(boolean livingOnly) {
+    public @NonNull Builder livingOnly(boolean livingOnly) {
       this.livingOnly = livingOnly;
       return this;
     }
 
-    public @NonNull ExplosionBuilder particles(boolean particles) {
+    public @NonNull Builder particles(boolean particles) {
       this.particles = particles;
       return this;
     }
 
-    public @NonNull ExplosionBuilder breakBlocks(boolean breakBlocks) {
+    public @NonNull Builder breakBlocks(boolean breakBlocks) {
       this.breakBlocks = breakBlocks;
       return this;
     }
 
-    public @NonNull ExplosionBuilder placeFire(boolean placeFire) {
+    public @NonNull Builder placeFire(boolean placeFire) {
       this.placeFire = placeFire;
       return this;
     }
 
-    public @NonNull ExplosionBuilder ignoreInsideCollider(@Nullable Collider ignoreInside) {
+    public @NonNull Builder ignoreInsideCollider(@Nullable Collider ignoreInside) {
       this.ignoreInside = ignoreInside;
       return this;
     }
 
-    public @NonNull ExplosionBuilder sound(@Nullable SoundEffect sound) {
+    public @NonNull Builder sound(@Nullable SoundEffect sound) {
       this.sound = sound;
       return this;
     }
 
-    public @NonNull ExplosionBuilder sound(float volume, float pitch) {
+    public @NonNull Builder sound(float volume, float pitch) {
       this.sound = SoundUtil.explosion(volume, pitch);
       return this;
     }

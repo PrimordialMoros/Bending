@@ -24,14 +24,14 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.predicate.general.BendingConditions.ConditionBuilder;
+import me.moros.bending.model.predicate.general.BendingConditions.Builder;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CompositeBendingConditional implements BendingConditional {
   private final Set<BendingConditional> conditionals;
 
-  CompositeBendingConditional(@NonNull ConditionBuilder builder) {
+  CompositeBendingConditional(@NonNull Builder builder) {
     this.conditionals = new HashSet<>(builder.conditionals());
   }
 

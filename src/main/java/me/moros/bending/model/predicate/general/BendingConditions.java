@@ -51,8 +51,8 @@ public enum BendingConditions implements BendingConditional {
    * {@link BendingConditions#ELEMENT}, {@link BendingConditions#GAMEMODE},
    * {@link BendingConditions#WORLD} and {@link BendingConditions#PERMISSION}.
    */
-  public static @NonNull ConditionBuilder builder() {
-    return new ConditionBuilder()
+  public static @NonNull Builder builder() {
+    return new Builder()
       .add(BendingConditions.COOLDOWN)
       .add(BendingConditions.ELEMENT)
       .add(BendingConditions.GAMEMODE)
@@ -60,19 +60,19 @@ public enum BendingConditions implements BendingConditional {
       .add(BendingConditions.PERMISSION);
   }
 
-  public static class ConditionBuilder {
+  public static class Builder {
     private final Set<BendingConditional> conditionals;
 
-    private ConditionBuilder() {
+    private Builder() {
       conditionals = new HashSet<>();
     }
 
-    public @NonNull ConditionBuilder add(@NonNull BendingConditional conditional) {
+    public @NonNull Builder add(@NonNull BendingConditional conditional) {
       conditionals.add(conditional);
       return this;
     }
 
-    public @NonNull ConditionBuilder remove(@NonNull BendingConditional conditional) {
+    public @NonNull Builder remove(@NonNull BendingConditional conditional) {
       conditionals.remove(conditional);
       return this;
     }

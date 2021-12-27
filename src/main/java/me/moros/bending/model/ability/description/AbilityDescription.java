@@ -52,7 +52,7 @@ public class AbilityDescription {
   private final boolean bypassCooldown;
   private final int hashcode;
 
-  private AbilityDescription(AbilityDescriptionBuilder builder) {
+  private AbilityDescription(Builder builder) {
     name = builder.name;
     constructor = builder.constructor;
     element = builder.element;
@@ -139,8 +139,8 @@ public class AbilityDescription {
     return hashcode;
   }
 
-  public static <T extends Ability> @NonNull AbilityDescriptionBuilder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
-    return new AbilityDescriptionBuilder(name, constructor);
+  public static <T extends Ability> @NonNull Builder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
+    return new Builder(name, constructor);
   }
 
   private static Component generateInstructions(List<SequenceStep> actions) {
@@ -174,7 +174,7 @@ public class AbilityDescription {
     private final List<SequenceStep> steps;
     private Component instructions;
 
-    private Sequence(AbilityDescriptionBuilder builder, List<SequenceStep> steps) {
+    private Sequence(Builder builder, List<SequenceStep> steps) {
       super(builder);
       this.steps = List.copyOf(steps);
     }
@@ -207,7 +207,7 @@ public class AbilityDescription {
     }
   }
 
-  public static class AbilityDescriptionBuilder {
+  public static class Builder {
     private final String name;
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private Element element;
@@ -217,17 +217,17 @@ public class AbilityDescription {
     private boolean sourcePlant = false;
     private boolean bypassCooldown = false;
 
-    public <T extends Ability> AbilityDescriptionBuilder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
+    public <T extends Ability> Builder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
       this.name = name;
       this.constructor = constructor;
     }
 
-    public @NonNull AbilityDescriptionBuilder element(@NonNull Element element) {
+    public @NonNull Builder element(@NonNull Element element) {
       this.element = element;
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder activation(@NonNull Activation method, @Nullable Activation... methods) {
+    public @NonNull Builder activation(@NonNull Activation method, @Nullable Activation... methods) {
       Collection<Activation> c = new ArrayList<>();
       if (methods != null) {
         c.addAll(List.of(methods));
@@ -237,22 +237,22 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder canBind(boolean canBind) {
+    public @NonNull Builder canBind(boolean canBind) {
       this.canBind = canBind;
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder hidden(boolean hidden) {
+    public @NonNull Builder hidden(boolean hidden) {
       this.hidden = hidden;
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder sourcePlant(boolean sourcePlant) {
+    public @NonNull Builder sourcePlant(boolean sourcePlant) {
       this.sourcePlant = sourcePlant;
       return this;
     }
 
-    public @NonNull AbilityDescriptionBuilder bypassCooldown(boolean bypassCooldown) {
+    public @NonNull Builder bypassCooldown(boolean bypassCooldown) {
       this.bypassCooldown = bypassCooldown;
       return this;
     }

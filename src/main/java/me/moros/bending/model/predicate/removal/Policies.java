@@ -50,25 +50,25 @@ public enum Policies implements RemovalPolicy {
   /**
    * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
    */
-  public static @NonNull PolicyBuilder builder() {
-    return new PolicyBuilder()
+  public static @NonNull Builder builder() {
+    return new Builder()
       .add(Policies.DEAD)
       .add(Policies.OFFLINE);
   }
 
-  public static class PolicyBuilder {
+  public static class Builder {
     private final Set<RemovalPolicy> policies;
 
-    private PolicyBuilder() {
+    private Builder() {
       policies = new HashSet<>();
     }
 
-    public @NonNull PolicyBuilder add(@NonNull RemovalPolicy policy) {
+    public @NonNull Builder add(@NonNull RemovalPolicy policy) {
       policies.add(policy);
       return this;
     }
 
-    public @NonNull PolicyBuilder remove(@NonNull RemovalPolicy policy) {
+    public @NonNull Builder remove(@NonNull RemovalPolicy policy) {
       policies.remove(policy);
       return this;
     }
@@ -81,7 +81,7 @@ public enum Policies implements RemovalPolicy {
   private static class CompositeRemovalPolicy implements RemovalPolicy {
     private final Set<RemovalPolicy> policies;
 
-    private CompositeRemovalPolicy(@NonNull PolicyBuilder builder) {
+    private CompositeRemovalPolicy(@NonNull Builder builder) {
       this.policies = Set.copyOf(builder.policies);
     }
 
