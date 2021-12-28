@@ -31,6 +31,7 @@ import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempBlock.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -202,9 +203,8 @@ public class Torrent extends AbilityInstance {
         return false;
       }
       cleanAll();
-      for (Block block : stream) {
-        TempBlock.create(block, Material.ICE.createBlockData(), userConfig.freezeDuration, true);
-      }
+      Builder builder = TempBlock.ice().duration(userConfig.freezeDuration);
+      stream.forEach(builder::build);
       stream.clear();
       return true;
     }

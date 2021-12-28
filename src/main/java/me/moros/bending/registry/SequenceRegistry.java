@@ -19,7 +19,6 @@
 
 package me.moros.bending.registry;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -47,7 +46,7 @@ public final class SequenceRegistry implements Registry<Sequence> {
    * @param sequences the map containing all the sequences
    * @return the amount of sequences that were registered.
    */
-  public int register(@NonNull Collection<@NonNull Sequence> sequences) {
+  public int register(@NonNull Iterable<@NonNull Sequence> sequences) {
     int counter = 0;
     for (Sequence sequence : sequences) {
       if (register(sequence)) {

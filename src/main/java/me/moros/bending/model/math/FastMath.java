@@ -25,18 +25,12 @@ public final class FastMath {
 
   public static int floor(double num) {
     int y = (int) num;
-    if (num < y) {
-      return y - 1;
-    }
-    return y;
+    return num < y ? y - 1 : y;
   }
 
   public static int ceil(double num) {
     int y = (int) num;
-    if (num > y) {
-      return y + 1;
-    }
-    return y;
+    return num > y ? y + 1 : y;
   }
 
   public static int round(double num) {

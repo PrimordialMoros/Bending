@@ -26,21 +26,24 @@ final class TimerWheel<K, V extends Temporary> {
   private final TemporalManager<K, V> manager;
   private final Node<K, V>[][] wheel;
   private final int[] index = {0, 0, 0, 0, 0};
+  private final int length;
 
   @SuppressWarnings("unchecked")
   TimerWheel(TemporalManager<K, V> manager) {
     this.manager = manager;
-    wheel = new Node[BUCKETS.length][];
-    for (int i = 0; i < wheel.length; i++) {
-      wheel[i] = new Node[BUCKETS[i]];
-      for (int j = 0; j < wheel[i].length; j++) {
+    length = BUCKETS.length;
+    wheel = new Node[length][];
+    for (int i = 0; i < length; i++) {
+      int innerLength = BUCKETS[i];
+      wheel[i] = new Node[innerLength];
+      for (int j = 0; j < innerLength; j++) {
         wheel[i][j] = new Node<>();
       }
     }
   }
 
   void advance(int currentTick) {
-    for (int i = 0; i < wheel.length; i++) {
+    for (int i = 0; i < length; i++) {
       boolean end = !increment(i);
       expire(wheel[i][index[i]], currentTick);
       if (end) {
@@ -94,7 +97,7 @@ final class TimerWheel<K, V extends Temporary> {
   }
 
   private Node<K, V> findBucket(int ticks) {
-    for (int i = 0; i < wheel.length; i++) {
+    for (int i = 0; i < length; i++) {
       int tickCapacity = SPANS[i + 1];
       if (ticks <= tickCapacity) {
         return add(i, ticks);

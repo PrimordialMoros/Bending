@@ -302,7 +302,7 @@ public class EarthLine extends AbilityInstance {
       Collections.shuffle(wall);
       for (Block block : wall) {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
-        TempBlock.createAir(block, BendingProperties.EXPLOSION_REVERT_TIME);
+        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
         TempFallingBlock.builder(Material.MAGMA_BLOCK.createBlockData())
           .velocity(velocity)
           .duration(10000)
@@ -359,7 +359,7 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
-  private static class EarthSpike implements Updatable {
+  private static final class EarthSpike implements Updatable {
     private static final long DELAY = 80;
 
     private final Block origin;
@@ -388,14 +388,15 @@ public class EarthLine extends AbilityInstance {
         if (!EarthMaterials.isEarthOrSand(origin)) {
           return UpdateResult.REMOVE;
         }
-        TempBlock.create(origin, MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData()), 15000);
+        BlockData data = MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData());
+        TempBlock.builder(data).duration(15000).build(origin);
       }
       nextUpdateTime = time + DELAY;
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
       if (canMove(currentIndex)) {
         ParticleUtil.of(Particle.BLOCK_DUST, currentIndex.getLocation().add(0.5, 0.5, 0.5)).count(24)
           .offset(0.2, 0.2, 0.2).data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn();
-        TempBlock.create(currentIndex, Material.POINTED_DRIPSTONE.createBlockData(), 15000 - currentLength * DELAY);
+        TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(15000 - currentLength * DELAY).build(currentIndex);
         SoundUtil.EARTH.play(currentIndex.getLocation());
       } else {
         return UpdateResult.REMOVE;

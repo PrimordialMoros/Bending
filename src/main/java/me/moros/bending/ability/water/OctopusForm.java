@@ -48,7 +48,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -158,7 +157,7 @@ public class OctopusForm extends AbilityInstance {
     for (Block block : base) {
       Block below = block.getRelative(BlockFace.DOWN);
       if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
-        TempBlock.create(below, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
+        TempBlock.ice().duration(BendingProperties.ICE_DURATION).build(below);
       }
       renderWaterBlock(block);
     }
@@ -182,7 +181,7 @@ public class OctopusForm extends AbilityInstance {
     if (MaterialUtil.isWater(block)) {
       ParticleUtil.bubble(block).spawn();
     } else if (MaterialUtil.isTransparent(block)) {
-      TempBlock.create(block, Material.WATER.createBlockData(), 250).ifPresent(affectedBlocks::add);
+      TempBlock.water().duration(250).build(block).ifPresent(affectedBlocks::add);
     }
   }
 
@@ -210,13 +209,13 @@ public class OctopusForm extends AbilityInstance {
 
   private void clean(Block block) {
     if (MaterialUtil.isWater(block)) {
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
     }
   }
 
   private void cleanAll() {
     for (TempBlock tb : affectedBlocks) {
-      TempBlock.forceCreateAir(tb.block());
+      TempBlock.air().fixWater(false).build(tb.block());
     }
     affectedBlocks.clear();
   }
@@ -234,7 +233,7 @@ public class OctopusForm extends AbilityInstance {
     return user;
   }
 
-  private class Tentacle {
+  private final class Tentacle {
     private final Collection<Block> blocks;
     private final double cos, sin;
     private final long topFormTime;

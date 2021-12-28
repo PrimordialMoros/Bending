@@ -52,7 +52,7 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull AABB at(@NonNull Vector3d pos) {
+  public @NonNull AABB at(@NonNull Vector3d point) {
     return this;
   }
 

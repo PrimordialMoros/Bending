@@ -76,7 +76,7 @@ public final class CollisionManager {
     }
   }
 
-  private Map.Entry<Collider, Collider> checkCollision(Collection<Collider> firstColliders, Collection<Collider> secondColliders) {
+  private Map.Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
     for (Collider firstCollider : firstColliders) {
       for (Collider secondCollider : secondColliders) {
         if (firstCollider.intersects(secondCollider)) {

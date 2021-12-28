@@ -240,7 +240,8 @@ public final class StorageImpl implements BendingStorage {
         List<AbilityDescription> abilities = profile.benderData().slots();
         handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE.query()).bind(0, id).execute();
         PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT.query());
-        for (int slot = 0; slot < abilities.size(); slot++) {
+        int size = abilities.size();
+        for (int slot = 0; slot < size; slot++) {
           int abilityId = getAbilityId(abilities.get(slot));
           if (abilityId <= 0) {
             continue;
@@ -271,7 +272,8 @@ public final class StorageImpl implements BendingStorage {
           return false;
         }
         PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
-        for (int slot = 0; slot < abilities.size(); slot++) {
+        int size = abilities.size();
+        for (int slot = 0; slot < size; slot++) {
           int abilityId = getAbilityId(abilities.get(slot));
           if (abilityId > 0) {
             batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
@@ -414,10 +416,10 @@ public final class StorageImpl implements BendingStorage {
 
     @Override
     protected Argument build(UUID value, ConfigRegistry config) {
-      ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-      bb.putLong(value.getMostSignificantBits());
-      bb.putLong(value.getLeastSignificantBits());
-      ByteArrayInputStream stream = new ByteArrayInputStream(bb.array());
+      ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
+      buffer.putLong(value.getMostSignificantBits());
+      buffer.putLong(value.getLeastSignificantBits());
+      ByteArrayInputStream stream = new ByteArrayInputStream(buffer.array());
       return (position, statement, ctx) -> statement.setBinaryStream(position, stream);
     }
   }

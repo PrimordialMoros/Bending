@@ -43,7 +43,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -142,7 +141,7 @@ public class Blaze extends AbilityInstance {
       if (!affectedBlocks.add(block)) {
         return;
       }
-      TempBlock.create(block, Material.FIRE.createBlockData(), 500, true);
+      TempBlock.fire().duration(500).build(block);
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.FIRE.play(block.getLocation());
       }

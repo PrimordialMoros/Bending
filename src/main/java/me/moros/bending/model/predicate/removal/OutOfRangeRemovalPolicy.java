@@ -27,7 +27,7 @@ import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class OutOfRangeRemovalPolicy implements RemovalPolicy {
+public final class OutOfRangeRemovalPolicy implements RemovalPolicy {
   private final double rangeSq;
   private final Vector3d origin;
   private final Supplier<Vector3d> fromSupplier;

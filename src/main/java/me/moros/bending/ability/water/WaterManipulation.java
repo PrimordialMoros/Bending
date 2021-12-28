@@ -175,7 +175,7 @@ public class WaterManipulation extends AbilityInstance {
     if (MaterialUtil.isTransparentOrWater(block)) {
       WorldUtil.tryBreakPlant(block);
       if (!MaterialUtil.isWater(block)) {
-        TempBlock.create(block, MaterialUtil.waterData(level));
+        TempBlock.builder(MaterialUtil.waterData(level)).build(block);
       }
     }
   }
@@ -196,7 +196,7 @@ public class WaterManipulation extends AbilityInstance {
         manip = new Manip(source);
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
-        TempBlock.createAir(source);
+        TempBlock.air().build(source);
       }
     }
   }

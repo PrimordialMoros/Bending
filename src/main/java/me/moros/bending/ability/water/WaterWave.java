@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempBlock.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -46,7 +47,6 @@ import me.moros.bending.util.Tasker;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -112,7 +112,7 @@ public class WaterWave extends AbilityInstance {
       if (!user.canBuild(block)) {
         continue;
       }
-      TempBlock.create(block, Material.WATER.createBlockData(), 1500).ifPresent(toRevert::add);
+      TempBlock.water().duration(1500).build(block).ifPresent(toRevert::add);
     }
     scheduleRevert(toRevert);
     if (ice) {
@@ -121,11 +121,12 @@ public class WaterWave extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private void scheduleRevert(Collection<TempBlock> tempBlocks) {
+  private void scheduleRevert(Iterable<TempBlock> tempBlocks) {
     Tasker.sync(() -> {
       final Consumer<TempBlock> consumer;
       if (ice) {
-        consumer = tb -> TempBlock.create(tb.block(), Material.ICE.createBlockData(), 1000);
+        Builder builder = TempBlock.ice().bendable(false).duration(1000);
+        consumer = tb -> builder.build(tb.block());
       } else {
         consumer = TempBlock::revert;
       }

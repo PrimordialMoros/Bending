@@ -22,12 +22,20 @@ package me.moros.bending.util.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
+import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.model.math.Vector3d;
+import net.kyori.adventure.text.Component;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -38,7 +46,9 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -59,6 +69,13 @@ import org.bukkit.inventory.ItemStack;
 
 public final class PacketUtil {
   private PacketUtil() {
+  }
+
+  public static void sendNotification(Player player, Material material, Component title) {
+    Collection<Packet<?>> packets = List.of(createNotification(material, title), clearNotification());
+    for (var packet : packets) {
+      ((CraftPlayer) player).getHandle().connection.send(packet);
+    }
   }
 
   public static int createArmorStand(World world, Vector3d center, Material material, Vector3d velocity, boolean gravity) {
@@ -93,7 +110,7 @@ public final class PacketUtil {
 
   public static void refreshBlocks(Collection<org.bukkit.block.Block> blocks, World world, Vector3d center) {
     Collection<Packet<?>> updatePackets = blocks.stream().map(PacketUtil::refreshBlock).collect(Collectors.toList());
-    broadcast(updatePackets, world, center, (world.getViewDistance() + 1) * 16);
+    broadcast(updatePackets, world, center, (world.getViewDistance() + 1) << 4);
   }
 
   public static void destroy(int id) {
@@ -108,7 +125,7 @@ public final class PacketUtil {
   }
 
   private static void broadcast(Collection<Packet<?>> packets, World world, Vector3d center) {
-    broadcast(packets, world, center, world.getViewDistance() * 16);
+    broadcast(packets, world, center, world.getViewDistance() << 4);
   }
 
   private static void broadcast(Collection<Packet<?>> packets, World world, Vector3d center, int dist) {
@@ -117,7 +134,7 @@ public final class PacketUtil {
     }
     int distanceSq = dist * dist;
     Location origin = center.toLocation(world);
-    Location loc = origin.clone();
+    Location loc = new Location(world, 0, 0, 0);
     for (Player player : world.getPlayers()) {
       if (player.getLocation(loc).distanceSquared(origin) <= distanceSq) {
         for (var packet : packets) {
@@ -125,6 +142,30 @@ public final class PacketUtil {
         }
       }
     }
+  }
+
+  private static ClientboundUpdateAdvancementsPacket createNotification(Material material, Component title) {
+    String identifier = "bending:notification";
+    ResourceLocation id = new ResourceLocation(identifier);
+    String criteriaId = "bending:criteria_progress";
+    net.minecraft.world.item.ItemStack icon = CraftItemStack.asNMSCopy(new ItemStack(material));
+    net.minecraft.network.chat.Component nmsTitle = PaperAdventure.asVanilla(title);
+    net.minecraft.network.chat.Component nmsDesc = PaperAdventure.asVanilla(Component.empty());
+    FrameType type = FrameType.TASK;
+    var advancement = Advancement.Builder.advancement()
+      .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
+      .addCriterion(criteriaId, new Criterion()).build(id);
+    AdvancementProgress progress = new AdvancementProgress();
+    progress.update(Map.of(criteriaId, new Criterion()), new String[][]{});
+    progress.grantProgress(criteriaId);
+    var progressMap = Map.of(id, progress);
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);
+  }
+
+  private static ClientboundUpdateAdvancementsPacket clearNotification() {
+    String identifier = "bending:notification";
+    ResourceLocation id = new ResourceLocation(identifier);
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(id), Map.of());
   }
 
   private static ClientboundAddMobPacket createArmorStand(int id, Vector3d center) {

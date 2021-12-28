@@ -56,7 +56,7 @@ public enum Policies implements RemovalPolicy {
       .add(Policies.OFFLINE);
   }
 
-  public static class Builder {
+  public static final class Builder {
     private final Set<RemovalPolicy> policies;
 
     private Builder() {
@@ -78,7 +78,7 @@ public enum Policies implements RemovalPolicy {
     }
   }
 
-  private static class CompositeRemovalPolicy implements RemovalPolicy {
+  private static final class CompositeRemovalPolicy implements RemovalPolicy {
     private final Set<RemovalPolicy> policies;
 
     private CompositeRemovalPolicy(@NonNull Builder builder) {

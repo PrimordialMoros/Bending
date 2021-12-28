@@ -49,8 +49,8 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -61,6 +61,8 @@ public class AirShield extends AbilityInstance {
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
+
+  private Vector3d center;
 
   private long currentPoint = 0;
   private long startTime;
@@ -79,6 +81,7 @@ public class AirShield extends AbilityInstance {
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
     startTime = System.currentTimeMillis();
+    center = EntityUtil.entityCenter(user.entity());
     return true;
   }
 
@@ -93,7 +96,7 @@ public class AirShield extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     currentPoint++;
-    Vector3d center = center();
+    center = EntityUtil.entityCenter(user.entity());
     double spacing = userConfig.radius / 4;
     for (int i = 1; i < 8; i++) {
       double y = (i * spacing) - userConfig.radius;
@@ -115,21 +118,17 @@ public class AirShield extends AbilityInstance {
       WorldUtil.tryCoolLava(user, b);
       WorldUtil.tryExtinguishFire(user, b);
     }
-
-    CollisionUtil.handle(user, new Sphere(center, userConfig.radius), entity -> {
-      Vector3d toEntity = new Vector3d(entity.getLocation()).subtract(center);
-      Vector3d normal = toEntity.setY(0).normalize();
-      double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;
-      strength = Math.max(0, Math.min(1, strength));
-      EntityUtil.applyVelocity(this, entity, new Vector3d(entity.getVelocity()).add(normal.multiply(strength)));
-      return false;
-    }, false);
-
+    CollisionUtil.handle(user, new Sphere(center, userConfig.radius), this::onEntityHit, false);
     return UpdateResult.CONTINUE;
   }
 
-  private Vector3d center() {
-    return EntityUtil.entityCenter(user.entity());
+  private boolean onEntityHit(Entity entity) {
+    Vector3d toEntity = new Vector3d(entity.getLocation()).subtract(center);
+    Vector3d normal = toEntity.setY(0).normalize();
+    double strength = ((userConfig.radius - toEntity.length()) / userConfig.radius) * userConfig.maxPush;
+    strength = Math.max(0, Math.min(1, strength));
+    EntityUtil.applyVelocity(this, entity, new Vector3d(entity.getVelocity()).add(normal.multiply(strength)));
+    return false;
   }
 
   @Override
@@ -146,21 +145,21 @@ public class AirShield extends AbilityInstance {
 
   @Override
   public @NonNull Collection<@NonNull Collider> colliders() {
-    return List.of(new Sphere(center(), userConfig.radius));
+    return List.of(new Sphere(center, userConfig.radius));
   }
 
   @Override
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
-      for (Block block : WorldUtil.nearbyBlocks(center().toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+      for (Block block : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
         if (!user.canBuild(block)) {
           continue;
         }
         WorldUtil.tryBreakPlant(block);
         if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
           long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
-          TempBlock.create(block, Material.ICE.createBlockData(), iceDuration, true);
+          TempBlock.ice().duration(iceDuration).build(block);
         }
       }
     }

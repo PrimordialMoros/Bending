@@ -186,7 +186,7 @@ public class IceCrawl extends AbilityInstance {
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       if (MaterialUtil.isWater(block)) {
-        TempBlock.create(block, Material.ICE.createBlockData(), BendingProperties.ICE_DURATION, true);
+        TempBlock.ice().duration(BendingProperties.ICE_DURATION).build(block);
       }
       return WorldUtil.tryCoolLava(user, block);
     }

@@ -276,11 +276,11 @@ public class Vector3d {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (this == other) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (other instanceof Vector3d v) {
+    if (obj instanceof Vector3d v) {
       return v.isNaN() ? this.isNaN() : (x == v.x) && (y == v.y) && (z == v.z);
     }
     return false;

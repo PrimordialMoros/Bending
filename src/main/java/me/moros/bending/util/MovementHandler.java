@@ -135,7 +135,7 @@ public class MovementHandler {
     instances.clear();
   }
 
-  private static class BarInfo {
+  private static final class BarInfo {
     private final Player player;
     private final BossBar bar;
     private final BukkitTask barTask;
@@ -170,7 +170,7 @@ public class MovementHandler {
     }
   }
 
-  private static class DummyMovementHandler extends MovementHandler {
+  private static final class DummyMovementHandler extends MovementHandler {
     private DummyMovementHandler() {
       super();
     }

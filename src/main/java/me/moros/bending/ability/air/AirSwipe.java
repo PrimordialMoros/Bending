@@ -132,7 +132,7 @@ public class AirSwipe extends AbilityInstance {
     if (deltaTime >= userConfig.maxChargeTime) {
       factor = userConfig.chargeFactor;
     } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
-      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / userConfig.maxChargeTime;
       factor += deltaFactor;
     }
     charging = false;

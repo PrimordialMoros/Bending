@@ -23,7 +23,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ExpireRemovalPolicy implements RemovalPolicy {
+public final class ExpireRemovalPolicy implements RemovalPolicy {
   private final long expireTime;
   private final boolean valid;
 

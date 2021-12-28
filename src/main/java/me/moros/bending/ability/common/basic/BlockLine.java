@@ -40,7 +40,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
   protected double distanceTravelled = 0;
   private long nextUpdate = 0;
 
-  public BlockLine(@NonNull User user, @NonNull Ray ray) {
+  protected BlockLine(@NonNull User user, @NonNull Ray ray) {
     super(user.world());
     this.user = user;
     this.ray = ray;

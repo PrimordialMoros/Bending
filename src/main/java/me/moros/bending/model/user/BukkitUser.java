@@ -40,6 +40,7 @@ import org.bukkit.inventory.MainHand;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+@FunctionalInterface
 public interface BukkitUser extends ForwardingAudience.Single, Identity {
   @NonNull LivingEntity entity();
 

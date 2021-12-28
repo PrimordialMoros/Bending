@@ -189,9 +189,9 @@ public final class RayTrace {
         int l = Mth.sign(d6);
         int i1 = Mth.sign(d7);
         int j1 = Mth.sign(d8);
-        double d9 = l == 0 ? Double.MAX_VALUE : (double) l / d6;
-        double d10 = i1 == 0 ? Double.MAX_VALUE : (double) i1 / d7;
-        double d11 = j1 == 0 ? Double.MAX_VALUE : (double) j1 / d8;
+        double d9 = l == 0 ? Double.MAX_VALUE : l / d6;
+        double d10 = i1 == 0 ? Double.MAX_VALUE : i1 / d7;
+        double d11 = j1 == 0 ? Double.MAX_VALUE : j1 / d8;
         double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
         double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
         double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
@@ -254,8 +254,8 @@ public final class RayTrace {
     if (!entityResult.hit) {
       return blockResult;
     }
-    double entityHitDistanceSquared = origin.distanceSq(entityResult.position);
-    if (entityHitDistanceSquared < (blockHitDistance * blockHitDistance)) {
+    double distSq = origin.distanceSq(entityResult.position);
+    if (distSq < (blockHitDistance * blockHitDistance)) {
       return entityResult;
     }
     return blockResult;

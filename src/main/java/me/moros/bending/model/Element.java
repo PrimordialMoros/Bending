@@ -76,7 +76,7 @@ public enum Element {
     return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
   }
 
-  public static Collection<Element> VALUES = List.of(values());
+  public static final Collection<Element> VALUES = List.of(values());
 
-  public static Collection<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
+  public static final Collection<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
 }

@@ -65,7 +65,7 @@ public final class FlightManager {
     instances.values().forEach(Flight::update);
   }
 
-  public static class Flight {
+  public static final class Flight {
     private final User user;
 
     private final boolean couldFly;

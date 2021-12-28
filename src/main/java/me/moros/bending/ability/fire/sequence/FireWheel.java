@@ -46,7 +46,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -143,7 +142,7 @@ public class FireWheel extends AbilityInstance {
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       if (MaterialUtil.isIgnitable(block) && user.canBuild(block)) {
-        TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+        TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(block);
       }
       return true;
     }

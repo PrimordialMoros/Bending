@@ -43,7 +43,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -147,8 +146,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       if (!user.canBuild(block)) {
         return false;
       }
-
-      TempBlock.create(block, Material.ICE.createBlockData(), true);
+      TempBlock.ice().build(block);
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundUtil.ICE.play(block.getLocation());
       }

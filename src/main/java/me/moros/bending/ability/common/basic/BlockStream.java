@@ -64,7 +64,7 @@ public abstract class BlockStream implements State {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  public BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
+  protected BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
     this.user = user;
     this.material = material;
     this.range = range;
@@ -169,7 +169,7 @@ public abstract class BlockStream implements State {
     if (material == Material.WATER && MaterialUtil.isWater(block)) {
       ParticleUtil.bubble(block).spawn();
     } else {
-      TempBlock.create(block, material.createBlockData());
+      TempBlock.builder(material.createBlockData()).build(block);
     }
   }
 
@@ -186,7 +186,7 @@ public abstract class BlockStream implements State {
 
   private void clean(@NonNull Block block) {
     if (isValid(block)) {
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
     }
   }
 }

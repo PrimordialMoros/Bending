@@ -104,7 +104,7 @@ public class TravellingSource implements State {
     if (source == null || !isValid(source) || !user.canBuild(source)) {
       return UpdateResult.REMOVE;
     }
-    TempBlock.create(source, data, 200);
+    TempBlock.builder(data).duration(200).build(source);
     return UpdateResult.CONTINUE;
   }
 
@@ -138,7 +138,7 @@ public class TravellingSource implements State {
 
   private void clean() {
     if (source.getType() == data.getMaterial()) {
-      TempBlock.createAir(source);
+      TempBlock.air().build(source);
     }
   }
 }

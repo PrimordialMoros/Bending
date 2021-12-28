@@ -138,7 +138,7 @@ public class FlameRush extends AbilityInstance {
       factor = userConfig.chargeFactor;
       fullyCharged = true;
     } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
-      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / userConfig.maxChargeTime;
       factor += deltaFactor;
     }
     charging = false;

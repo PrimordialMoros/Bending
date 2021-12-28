@@ -21,6 +21,8 @@ package me.moros.bending.ability.common;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,7 +47,7 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class Pillar implements Updatable {
+public class Pillar implements Updatable, Iterable<Block> {
   private final User user;
   private final Block origin;
   private final BlockFace direction;
@@ -113,15 +115,15 @@ public class Pillar implements Updatable {
       Block forwardBlock = newBlock.getRelative(opposite, i);
       Block backwardBlock = forwardBlock.getRelative(opposite);
       if (!predicate.test(backwardBlock)) {
-        TempBlock.createAir(forwardBlock, duration);
+        TempBlock.air().duration(duration).build(forwardBlock);
         playSound(forwardBlock);
         return false;
       }
       BlockData data = TempBlock.getLastValidData(backwardBlock);
-      TempBlock.create(forwardBlock, MaterialUtil.solidType(data), duration, true);
+      TempBlock.builder(MaterialUtil.solidType(data)).bendable(true).duration(duration).build(forwardBlock);
     }
     pillarBlocks.add(newBlock);
-    TempBlock.createAir(newBlock.getRelative(opposite, length), duration);
+    TempBlock.air().duration(duration).build(newBlock.getRelative(opposite, length));
     playSound(newBlock);
     return true;
   }
@@ -132,6 +134,11 @@ public class Pillar implements Updatable {
       case EAST, WEST -> velocity.setZ(direction.getModZ() * factor);
       default -> velocity.setY(direction.getModY() * factor);
     };
+  }
+
+  @Override
+  public @NonNull Iterator<Block> iterator() {
+    return Collections.unmodifiableCollection(pillarBlocks).iterator();
   }
 
   public @NonNull Collection<@NonNull Block> pillarBlocks() {

@@ -214,7 +214,7 @@ public class Lightning extends AbilityInstance {
     return !entity.equals(user.entity());
   }
 
-  private boolean handleRedirection(Collection<Entity> entitiesToCheck) {
+  private boolean handleRedirection(Iterable<Entity> entitiesToCheck) {
     for (Entity e : entitiesToCheck) {
       if (e instanceof LivingEntity livingEntity) {
         BendingUser bendingUser = Registries.BENDERS.user(livingEntity);
@@ -298,7 +298,7 @@ public class Lightning extends AbilityInstance {
     }
   }
 
-  private static class Arc implements Iterable<LineSegment> {
+  private static final class Arc implements Iterable<LineSegment> {
     private final ThreadLocalRandom rand = ThreadLocalRandom.current();
     private final List<LineSegment> segments;
     private final Vector3d start;
@@ -359,7 +359,7 @@ public class Lightning extends AbilityInstance {
     }
   }
 
-  private static class LineSegment implements Iterable<Vector3d> {
+  private static final class LineSegment implements Iterable<Vector3d> {
     private final Vector3d start;
     private final Vector3d end;
     private final Vector3d direction;
@@ -393,11 +393,11 @@ public class Lightning extends AbilityInstance {
 
         @Override
         public Vector3d next() {
-          if (hasNext()) {
-            f += POINT_DISTANCE;
-            return start.add(direction.multiply(f));
+          if (!hasNext()) {
+            throw new RuntimeException("Reached segment end");
           }
-          return null;
+          f += POINT_DISTANCE;
+          return start.add(direction.multiply(f));
         }
       };
     }

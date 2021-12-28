@@ -49,7 +49,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 
   protected final double radius;
 
-  public AbstractWheel(@NonNull User user, @NonNull Ray ray, double radius, double speed) {
+  protected AbstractWheel(@NonNull User user, @NonNull Ray ray, double radius, double speed) {
     this.user = user;
     this.ray = ray;
     this.location = ray.origin;

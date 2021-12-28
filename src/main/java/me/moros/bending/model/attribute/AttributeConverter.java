@@ -35,7 +35,7 @@ public enum AttributeConverter implements DoubleFunction<Number> {
   }
 
   @Override
-  public @NonNull Number apply(double input) {
-    return converter.apply(input);
+  public @NonNull Number apply(double value) {
+    return converter.apply(value);
   }
 }

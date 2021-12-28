@@ -182,11 +182,15 @@ public final class MaterialUtil {
   }
 
   public static boolean isWater(@NonNull Block block) {
-    return block.getType() == Material.WATER || isWaterLogged(block.getBlockData()) || isWaterPlant(block);
+    Material type = block.getType();
+    if (type == Material.WATER || type == Material.BUBBLE_COLUMN) {
+      return true;
+    }
+    return isWaterLogged(block) || isWaterPlant(block);
   }
 
-  public static boolean isWaterLogged(@NonNull BlockData data) {
-    return data instanceof Waterlogged waterlogged && waterlogged.isWaterlogged();
+  public static boolean isWaterLogged(@NonNull Block block) {
+    return block.getBlockData() instanceof Waterlogged waterlogged && waterlogged.isWaterlogged();
   }
 
   public static boolean isMeltable(@NonNull Block block) {

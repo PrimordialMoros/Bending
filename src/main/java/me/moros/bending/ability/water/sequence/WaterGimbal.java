@@ -179,7 +179,7 @@ public class WaterGimbal extends AbilityInstance {
     return states.current() instanceof GimbalStream gimbalStream ? gimbalStream.colliders() : List.of();
   }
 
-  private static class Gimbal implements State {
+  private static final class Gimbal implements State {
     private final User user;
 
     private StateChain chain;
@@ -208,7 +208,7 @@ public class WaterGimbal extends AbilityInstance {
       }
       if (center == null) {
         center = user.location().add(Vector3d.PLUS_J).add(user.direction().setY(0).multiply(2)).toBlock(user.world());
-        TempBlock.create(center, Material.WATER.createBlockData(), 50);
+        TempBlock.water().duration(50).build(center);
       }
       chain.chainStore().clear();
       chain.chainStore().addAll(Collections.nCopies(10, center));
@@ -258,7 +258,7 @@ public class WaterGimbal extends AbilityInstance {
       if (MaterialUtil.isWater(block)) {
         ParticleUtil.bubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
-        TempBlock.create(block, Material.WATER.createBlockData(), 150);
+        TempBlock.water().duration(150).build(block);
       }
       if (ThreadLocalRandom.current().nextInt(10) == 0) {
         SoundUtil.WATER.play(block.getLocation());
@@ -300,7 +300,7 @@ public class WaterGimbal extends AbilityInstance {
       ParticleUtil.of(Particle.SNOW_SHOVEL, block.getLocation().add(0.5, 0.5, 0.5))
         .count(6).offset(0.25, 0.25, 0.25).extra(0.05).spawn();
       if (!MaterialUtil.isWater(block)) {
-        TempBlock.create(block, Material.WATER.createBlockData());
+        TempBlock.water().build(block);
       }
     }
 

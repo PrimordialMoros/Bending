@@ -55,7 +55,6 @@ import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -217,7 +216,7 @@ public class FireBurst extends AbilityInstance {
           }
           if (MaterialUtil.isIgnitable(b)) {
             long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-            TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);
+            TempBlock.fire().duration(delay).build(b);
           }
         }
       }

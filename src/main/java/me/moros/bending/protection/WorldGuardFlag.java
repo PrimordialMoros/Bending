@@ -25,6 +25,9 @@ import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
 public final class WorldGuardFlag {
+  private WorldGuardFlag() {
+  }
+
   public static void registerFlag() {
     FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
     try {

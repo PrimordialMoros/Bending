@@ -22,6 +22,7 @@ package me.moros.bending.game.temporal;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +49,7 @@ import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TempBlock implements Temporary {
+public final class TempBlock implements Temporary {
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
   public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>(TempBlock::revertFully);
@@ -66,92 +67,11 @@ public class TempBlock implements Temporary {
     return ((CraftWorld) block.getWorld()).getHandle().setBlock(position, ((CraftBlockData) data).getState(), 2);
   }
 
-  private TempBlock(Block block, long duration, boolean bendable) {
+  private TempBlock(Block block, boolean bendable, int ticks) {
     snapshots = new ArrayDeque<>();
     this.block = block;
     this.bendable = bendable;
-    snapshots.offerLast(new TempBlockState(block.getState(), duration, bendable));
-  }
-
-  public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data) {
-    return create(block, data, 0, false);
-  }
-
-  public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, boolean bendable) {
-    return create(block, data, 0, bendable);
-  }
-
-  public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration) {
-    return create(block, data, duration, false);
-  }
-
-  public static Optional<TempBlock> create(@NonNull Block block, @NonNull BlockData data, long duration, boolean bendable) {
-    if (block instanceof TileState) {
-      return Optional.empty();
-    }
-
-    if (duration <= 0) {
-      duration = DEFAULT_REVERT;
-    }
-
-    if (WaterMaterials.ICE_BENDABLE.isTagged(data) && block.getWorld().getEnvironment() == Environment.NETHER) {
-      duration = FastMath.floor(0.5 * duration);
-    }
-
-    if (duration < 50) {
-      return Optional.empty();
-    }
-
-    if (block.getBlockData() instanceof Waterlogged) {
-      Waterlogged waterData = ((Waterlogged) block.getBlockData().clone());
-      if (waterData.isWaterlogged() && data.getMaterial().isAir()) {
-        waterData.setWaterlogged(false);
-        data = waterData;
-      } else if (!waterData.isWaterlogged() && data.getMaterial() == Material.WATER) {
-        waterData.setWaterlogged(true);
-        data = waterData;
-      }
-    }
-
-    if (block.getBlockData().matches(data)) {
-      return Optional.empty();
-    }
-
-    TempBlock tb = MANAGER.get(block).orElse(null);
-    if (tb != null && !tb.snapshots.isEmpty()) {
-      if (data.matches(tb.snapshots.peekFirst().state.getBlockData())) {
-        tb.revertFully();
-        MANAGER.removeEntry(block);
-        return Optional.empty();
-      }
-      tb.addState(data, duration, bendable);
-      return Optional.of(tb);
-    }
-
-    TempBlock result = new TempBlock(block, duration, bendable);
-    if (setBlockFast(block, data)) {
-      refreshGravityCache(block);
-      MANAGER.addEntry(block, result, Temporary.toTicks(duration));
-      return Optional.of(result);
-    }
-    return Optional.empty();
-  }
-
-  public static Optional<TempBlock> createAir(@NonNull Block block) {
-    return createAir(block, 0);
-  }
-
-  public static Optional<TempBlock> createAir(@NonNull Block block, long duration) {
-    Material mat = WorldUtil.isInfiniteWater(block) ? Material.WATER : Material.AIR;
-    Block above = block.getRelative(BlockFace.UP);
-    if (mat == Material.AIR && MaterialUtil.isWater(above)) {
-      return create(block, calculateWaterData(above), duration, true);
-    }
-    return create(block, mat.createBlockData(), duration, true);
-  }
-
-  public static Optional<TempBlock> forceCreateAir(@NonNull Block block) {
-    return create(block, Material.AIR.createBlockData(), 0, true);
+    snapshots.offerLast(new TempBlockState(block.getState(), bendable, ticks));
   }
 
   // Handle falling water
@@ -169,19 +89,19 @@ public class TempBlock implements Temporary {
     return MaterialUtil.waterData(level);
   }
 
-  private void addState(BlockData data, long duration, boolean bendable) {
+  private void addState(BlockData data, boolean bendable, int ticks) {
     cleanStates();
     if (!snapshots.isEmpty()) {
       TempBlockState tbs = snapshots.peekLast();
       if (!tbs.weak) {
-        snapshots.offerLast(new TempBlockState(block.getState(false), duration, bendable));
+        snapshots.offerLast(new TempBlockState(block.getState(false), bendable, ticks));
       } else {
         tbs.weak = false;
       }
       this.bendable = bendable;
       setBlockFast(block, data);
       refreshGravityCache(block);
-      MANAGER.reschedule(block, Temporary.toTicks(duration));
+      MANAGER.reschedule(block, ticks);
     }
   }
 
@@ -293,12 +213,8 @@ public class TempBlock implements Temporary {
     return new Snapshot(block.getState(), bendable);
   }
 
-  public boolean isBendable() {
-    return bendable;
-  }
-
   public static boolean isBendable(@NonNull Block block) {
-    return MANAGER.get(block).map(TempBlock::isBendable).orElse(true);
+    return MANAGER.get(block).map(tb -> tb.bendable).orElse(true);
   }
 
   public static boolean shouldIgnorePhysics(@NonNull Block block) {
@@ -324,13 +240,13 @@ public class TempBlock implements Temporary {
     }
   }
 
-  private static class TempBlockState extends Snapshot {
+  private static final class TempBlockState extends Snapshot {
     private final int expirationTicks;
     private boolean weak = false;
 
-    private TempBlockState(BlockState state, long expirationTime, boolean bendable) {
+    private TempBlockState(BlockState state, boolean bendable, int ticks) {
       super(state, bendable);
-      this.expirationTicks = Bukkit.getCurrentTick() + Temporary.toTicks(expirationTime);
+      this.expirationTicks = Bukkit.getCurrentTick() + ticks;
     }
   }
 
@@ -341,6 +257,124 @@ public class TempBlock implements Temporary {
     private Snapshot(BlockState state, boolean bendable) {
       this.state = state;
       this.bendable = bendable;
+    }
+  }
+
+  public static @NonNull Builder builder(@NonNull BlockData data) {
+    return new Builder(Objects.requireNonNull(data));
+  }
+
+  /**
+   * @return a {@link Builder} with bendable fire
+   */
+  public static @NonNull Builder fire() {
+    return new Builder(Material.FIRE.createBlockData()).bendable(true);
+  }
+
+  /**
+   * @return a {@link Builder} with water
+   */
+  public static @NonNull Builder water() {
+    return new Builder(Material.WATER.createBlockData());
+  }
+
+  /**
+   * @return a {@link Builder} with bendable ice
+   */
+  public static @NonNull Builder ice() {
+    return new Builder(Material.ICE.createBlockData()).bendable(true);
+  }
+
+  /**
+   * @return a {@link Builder} with bendable air
+   */
+  public static @NonNull Builder air() {
+    return new Builder(Material.AIR.createBlockData()).bendable(true);
+  }
+
+  public static final class Builder {
+    private final BlockData data;
+
+    private boolean fixWater;
+    private boolean bendable = false;
+    private long duration = 0;
+
+    private Builder(BlockData data) {
+      this.data = data;
+      fixWater = data.getMaterial().isAir();
+    }
+
+    public @NonNull Builder fixWater(boolean fixWater) {
+      this.fixWater = fixWater;
+      return this;
+    }
+
+    public @NonNull Builder bendable(boolean bendable) {
+      this.bendable = bendable;
+      return this;
+    }
+
+    public @NonNull Builder duration(long duration) {
+      this.duration = duration;
+      return this;
+    }
+
+    private int validateDuration(Block block) {
+      long time = duration <= 0 ? DEFAULT_REVERT : duration;
+      if (WaterMaterials.ICE_BENDABLE.isTagged(data) && block.getWorld().getEnvironment() == Environment.NETHER) {
+        time = FastMath.floor(0.5 * time);
+      }
+      return Temporary.toTicks(time);
+    }
+
+    private BlockData fixWaterData(Block block) {
+      if (fixWater) {
+        Material mat = WorldUtil.isInfiniteWater(block) ? Material.WATER : Material.AIR;
+        Block above = block.getRelative(BlockFace.UP);
+        return mat == Material.AIR && MaterialUtil.isWater(above) ? calculateWaterData(above) : mat.createBlockData();
+      }
+      return data;
+    }
+
+    private BlockData validateWaterlogged(BlockData blockData, BlockData newData) {
+      if (blockData instanceof Waterlogged waterData) {
+        if (waterData.isWaterlogged() && newData.getMaterial().isAir()) {
+          waterData.setWaterlogged(false);
+        } else if (!waterData.isWaterlogged() && newData.getMaterial() == Material.WATER) {
+          waterData.setWaterlogged(true);
+        }
+        return waterData;
+      }
+      return data;
+    }
+
+    public Optional<TempBlock> build(@NonNull Block block) {
+      if (block instanceof TileState) {
+        return Optional.empty();
+      }
+      BlockData blockData = block.getBlockData();
+      BlockData newData = validateWaterlogged(blockData, fixWaterData(block));
+      if (blockData.matches(newData)) {
+        return Optional.empty();
+      }
+      int ticks = validateDuration(block);
+      TempBlock tb = MANAGER.get(block).orElse(null);
+      if (tb != null && !tb.snapshots.isEmpty()) {
+        if (newData.matches(tb.snapshots.peekFirst().state.getBlockData())) {
+          tb.revertFully();
+          MANAGER.removeEntry(block);
+          return Optional.empty();
+        }
+        tb.addState(newData, bendable, ticks);
+        return Optional.of(tb);
+      }
+      TempBlock result = new TempBlock(block, bendable, ticks);
+      if (setBlockFast(block, newData)) {
+        refreshGravityCache(block);
+        MANAGER.addEntry(block, result, ticks);
+        return Optional.of(result);
+      }
+      return Optional.empty();
     }
   }
 }

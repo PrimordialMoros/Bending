@@ -291,7 +291,7 @@ public class MetalCable extends AbilityInstance {
     }
     if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockData data = block.getBlockData();
-      TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
       Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
       projectile = TempFallingBlock.builder(data).velocity(velocity).build(user.world(), location);
       target = new CableTarget(projectile.fallingBlock());
@@ -366,7 +366,7 @@ public class MetalCable extends AbilityInstance {
     return List.of(new Sphere(location, 0.8));
   }
 
-  private static class CableTarget {
+  private static final class CableTarget {
     private enum Type {ENTITY, BLOCK}
 
     private final Type type;

@@ -32,11 +32,11 @@ import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class TempPacketEntity implements Temporary {
+public final class TempPacketEntity implements Temporary {
   public static final TemporalManager<Integer, TempPacketEntity> MANAGER = new TemporalManager<>();
 
-  protected final int id;
-  protected boolean reverted = false;
+  private final int id;
+  private boolean reverted = false;
 
   public static void init() {
   }

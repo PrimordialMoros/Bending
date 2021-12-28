@@ -163,6 +163,7 @@ public interface Message {
     return text().append(PREFIX).append(message).build();
   }
 
+  @FunctionalInterface
   interface Args0 {
     @NonNull Component build();
 
@@ -175,6 +176,7 @@ public interface Message {
     }
   }
 
+  @FunctionalInterface
   interface Args1<A0> {
     @NonNull Component build(@NonNull A0 arg0);
 
@@ -187,6 +189,7 @@ public interface Message {
     }
   }
 
+  @FunctionalInterface
   interface Args2<A0, A1> {
     @NonNull Component build(@NonNull A0 arg0, @NonNull A1 arg1);
 

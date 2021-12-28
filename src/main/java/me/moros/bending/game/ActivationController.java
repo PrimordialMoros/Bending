@@ -255,7 +255,7 @@ public final class ActivationController {
   }
 
   // Optimize player move events by caching instances every tick
-  private static class ControllerCache {
+  private static final class ControllerCache {
     private final Map<UUID, AirSpout> airSpoutCache;
     private final Map<UUID, WaterSpout> waterSpoutCache;
     private final Set<UUID> ignoreSwing;

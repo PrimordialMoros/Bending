@@ -64,9 +64,11 @@ public final class WorldManager {
 
   public void update() {
     for (Map.Entry<World, ManagerPair> entry : worlds.entrySet()) {
-      Timing timing = Timings.ofStart(Bending.plugin(), entry.getKey().getName() + " - tick");
-      entry.getValue().update();
-      timing.stopTiming();
+      try (Timing timing = Timings.of(Bending.plugin(), entry.getKey().getName() + " - tick")) {
+        entry.getValue().update();
+      } catch (Exception e) {
+        Bending.logger().warn(e.getMessage(), e);
+      }
     }
   }
 
@@ -90,7 +92,7 @@ public final class WorldManager {
     return !disabledWorlds.contains(worldID);
   }
 
-  private static class ManagerPair {
+  private static final class ManagerPair {
     private final AbilityManager abilities;
     private final CollisionManager collisions;
 
@@ -105,7 +107,7 @@ public final class WorldManager {
     }
   }
 
-  private static class DummyAbilityManager implements AbilityManager {
+  private static final class DummyAbilityManager implements AbilityManager {
     private DummyAbilityManager() {
     }
   }

@@ -118,7 +118,7 @@ public class LavaDisk extends AbilityInstance {
         return false;
       }
       if (!MaterialUtil.isLava(block)) {
-        TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
       }
     }
     distance = location.distance(user.eyeLocation());
@@ -227,7 +227,7 @@ public class LavaDisk extends AbilityInstance {
     boolean tree = MaterialSetTag.LEAVES.isTagged(mat) || MaterialSetTag.LOGS_THAT_BURN.isTagged(mat);
     if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
-      TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
       ParticleUtil.of(Particle.LAVA, block.getLocation())
         .offset(0.5, 0.5, 0.5).extra(0.05).spawn();
       if (ThreadLocalRandom.current().nextInt(4) == 0) {

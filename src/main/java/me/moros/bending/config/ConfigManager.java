@@ -125,7 +125,7 @@ public final class ConfigManager {
     return newConfig;
   }
 
-  private void modifyField(Field field, Configurable config, Collection<AttributeModifier> activeModifiers) {
+  private void modifyField(Field field, Configurable config, Iterable<AttributeModifier> activeModifiers) {
     double value;
     try {
       value = ((Number) field.get(config)).doubleValue();

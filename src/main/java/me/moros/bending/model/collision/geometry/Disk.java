@@ -46,8 +46,8 @@ public class Disk implements Collider {
   }
 
   @Override
-  public @NonNull Disk at(@NonNull Vector3d position) {
-    return new Disk(obb.at(position), sphere.at(position));
+  public @NonNull Disk at(@NonNull Vector3d point) {
+    return new Disk(obb.at(point), sphere.at(point));
   }
 
   @Override

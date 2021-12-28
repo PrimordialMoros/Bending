@@ -30,12 +30,12 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class TempFallingBlock implements Temporary {
+public final class TempFallingBlock implements Temporary {
   public static final Vector3d OFFSET = new Vector3d(0.5, 0, 0.5);
   public static final TemporalManager<FallingBlock, TempFallingBlock> MANAGER = new TemporalManager<>();
 
-  protected final FallingBlock fallingBlock;
-  protected boolean reverted = false;
+  private final FallingBlock fallingBlock;
+  private boolean reverted = false;
 
   public static void init() {
   }

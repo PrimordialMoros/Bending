@@ -145,7 +145,8 @@ public class AbilityDescription {
 
   private static Component generateInstructions(List<SequenceStep> actions) {
     TextComponent.Builder builder = Component.text();
-    for (int i = 0; i < actions.size(); i++) {
+    int size = actions.size();
+    for (int i = 0; i < size; i++) {
       SequenceStep sequenceStep = actions.get(i);
       if (i != 0) {
         builder.append(Component.text(" > "));

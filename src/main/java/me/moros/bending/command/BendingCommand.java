@@ -50,10 +50,12 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ChatUtil;
 import me.moros.bending.util.ColorPalette;
+import me.moros.bending.util.packet.PacketUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -194,7 +196,7 @@ public final class BendingCommand {
 
   private static void onHelp(MinecraftHelp<CommandSender> help, String rawQuery, CommandSender sender) {
     if (!rawQuery.isEmpty()) {
-      int index = rawQuery.indexOf(" ");
+      int index = rawQuery.indexOf(' ');
       String query = rawQuery.substring(0, index > 0 ? index : rawQuery.length());
       if (query.length() <= 5) {
         Element element = Element.fromName(query).orElse(null);
@@ -259,6 +261,14 @@ public final class BendingCommand {
     }
   }
 
+  private static void sendElementNotification(User user, Element element) {
+    if (user instanceof BendingPlayer player) {
+      Component title = Component.text().append(Component.text("You can now bend", ColorPalette.TEXT_COLOR))
+        .append(Component.space()).append(element.displayName()).build();
+      PacketUtil.sendNotification(player.entity(), Material.NETHER_STAR, title);
+    }
+  }
+
   public static void onElementChoose(@NonNull User user, @NonNull Element element) {
     if (!user.hasPermission("bending.command.choose." + element)) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
@@ -266,6 +276,7 @@ public final class BendingCommand {
     }
     if (user.chooseElement(element)) {
       Message.ELEMENT_CHOOSE_SUCCESS.send(user, element.displayName());
+      sendElementNotification(user, element);
     } else {
       Message.ELEMENT_CHOOSE_FAIL.send(user, element.displayName());
     }
@@ -279,6 +290,7 @@ public final class BendingCommand {
     if (user.addElement(element)) {
       Bending.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_ADD_SUCCESS.send(user, element.displayName());
+      sendElementNotification(user, element);
     } else {
       Message.ELEMENT_ADD_FAIL.send(user, element.displayName());
     }

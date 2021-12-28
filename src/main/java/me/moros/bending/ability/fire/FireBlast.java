@@ -55,7 +55,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -135,7 +134,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     if (deltaTime >= userConfig.maxChargeTime) {
       factor = userConfig.chargeFactor;
     } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
-      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / (double) userConfig.maxChargeTime;
+      double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / userConfig.maxChargeTime;
       factor += deltaFactor;
     }
     charging = false;
@@ -268,7 +267,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
           }
           if (MaterialUtil.isIgnitable(b)) {
             long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-            TempBlock.create(b, Material.FIRE.createBlockData(), delay, true);
+            TempBlock.fire().duration(delay).build(b);
           }
         }
       }

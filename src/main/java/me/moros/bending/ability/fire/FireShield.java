@@ -178,7 +178,7 @@ public class FireShield extends AbilityInstance {
     Collider collider();
   }
 
-  private class DiskShield implements Shield {
+  private final class DiskShield implements Shield {
     private Disk disk;
     private Vector3d location;
     private long nextRenderTime = 0;
@@ -226,7 +226,7 @@ public class FireShield extends AbilityInstance {
     }
   }
 
-  private class SphereShield implements Shield {
+  private final class SphereShield implements Shield {
     private Sphere sphere;
     private int currentPoint = 0;
 

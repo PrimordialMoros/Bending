@@ -20,7 +20,8 @@
 package me.moros.bending.ability.common;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -35,28 +36,22 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class FragileStructure {
+public final class FragileStructure implements Iterable<Block> {
   private final Collection<Block> fragileBlocks;
   private final Predicate<Block> predicate;
   private int health;
 
-  private FragileStructure(Collection<Block> fragileBlocks, int health, Predicate<Block> predicate) {
-    this.fragileBlocks = Set.copyOf(fragileBlocks);
-    this.health = health;
+  private FragileStructure(Collection<Block> fragileBlocks, Predicate<Block> predicate, int health) {
+    this.fragileBlocks = fragileBlocks;
     this.predicate = predicate;
+    this.health = health;
     this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.of(this)));
   }
 
   public int health() {
     return health;
-  }
-
-  /**
-   * @return unmodifiable collection of blocks belonging to the same fragile structure
-   */
-  public @NonNull Collection<@NonNull Block> fragileBlocks() {
-    return fragileBlocks;
   }
 
   /**
@@ -75,14 +70,7 @@ public class FragileStructure {
     return 0;
   }
 
-  public static Optional<FragileStructure> create(@NonNull Collection<@NonNull Block> blocks, int health, @NonNull Predicate<Block> predicate) {
-    if (health < 0 || blocks.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(new FragileStructure(blocks, health, predicate));
-  }
-
-  public static boolean tryDamageStructure(@NonNull Collection<@NonNull Block> blocks, int damage) {
+  public static boolean tryDamageStructure(@NonNull Iterable<@NonNull Block> blocks, int damage) {
     for (Block block : blocks) {
       if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
         FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
@@ -101,7 +89,7 @@ public class FragileStructure {
         continue;
       }
       BlockData blockData = block.getType().createBlockData();
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
       block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
       Location center = block.getLocation().add(0.5, 0.5, 0.5);
       ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2)
@@ -109,6 +97,40 @@ public class FragileStructure {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
         SoundUtil.playSound(center, blockData.getSoundGroup().getBreakSound(), 2, 1);
       }
+    }
+  }
+
+  public static @NonNull Builder builder() {
+    return new Builder();
+  }
+
+  @Override
+  public @NonNull Iterator<Block> iterator() {
+    return fragileBlocks.iterator();
+  }
+
+  public static final class Builder {
+    private Predicate<Block> predicate;
+    private int health = 10;
+
+    private Builder() {
+    }
+
+    public @NonNull Builder health(int health) {
+      this.health = Math.max(1, health);
+      return this;
+    }
+
+    public @NonNull Builder predicate(@NonNull Predicate<Block> predicate) {
+      this.predicate = Objects.requireNonNull(predicate);
+      return this;
+    }
+
+    public @Nullable FragileStructure build(@NonNull Collection<@NonNull Block> blocks) {
+      if (blocks.isEmpty()) {
+        return null;
+      }
+      return new FragileStructure(Set.copyOf(blocks), predicate, health);
     }
   }
 }

@@ -173,14 +173,14 @@ public class FrostBreath extends AbilityInstance {
     public boolean onBlockHit(@NonNull Block block) {
       long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
       if (MaterialUtil.isWater(block)) {
-        TempBlock.create(block, Material.ICE.createBlockData(), duration, true);
+        TempBlock.ice().duration(duration).build(block);
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.ICE.play(block.getLocation());
         }
       } else if (MaterialUtil.isTransparent(block)) {
         Block below = block.getRelative(BlockFace.DOWN);
         if (below.isSolid() && !WaterMaterials.isIceBendable(below) && TempBlock.isBendable(below)) {
-          TempBlock.create(block, Material.SNOW.createBlockData(), duration, true);
+          TempBlock.builder(Material.SNOW.createBlockData()).bendable(true).duration(duration).build(block);
         }
       }
       WorldUtil.tryCoolLava(user, block);

@@ -142,10 +142,10 @@ public class Iceberg extends AbilityInstance {
     blocks.add(block);
     boolean canPlaceAir = !MaterialUtil.isWater(block) && !MaterialUtil.isAir(block);
     if (canPlaceAir) {
-      TempBlock.createAir(block, BendingProperties.ICE_DURATION + userConfig.regenDelay);
+      TempBlock.air().duration(BendingProperties.ICE_DURATION + userConfig.regenDelay).build(block);
     }
     Material ice = ThreadLocalRandom.current().nextBoolean() ? Material.PACKED_ICE : Material.ICE;
-    TempBlock.create(block, ice.createBlockData(), BendingProperties.ICE_DURATION, true);
+    TempBlock.builder(ice.createBlockData()).bendable(true).duration(BendingProperties.ICE_DURATION).build(block);
   }
 
   public static void launch(@NonNull User user) {

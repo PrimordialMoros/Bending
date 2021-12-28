@@ -24,7 +24,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class SwappedSlotsRemovalPolicy implements RemovalPolicy {
+public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
   private final AbilityDescription expected;
 
   private SwappedSlotsRemovalPolicy(AbilityDescription expected) {

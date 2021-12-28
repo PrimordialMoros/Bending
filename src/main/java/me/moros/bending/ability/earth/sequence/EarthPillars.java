@@ -149,7 +149,7 @@ public class EarthPillars extends AbilityInstance {
     return user;
   }
 
-  private class EarthPillar extends Pillar {
+  private final class EarthPillar extends Pillar {
     private EarthPillar(@NonNull Builder builder) {
       super(builder);
     }

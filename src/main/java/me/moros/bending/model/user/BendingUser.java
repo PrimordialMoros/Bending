@@ -51,7 +51,8 @@ public class BendingUser implements User {
     this.entity = entity;
     this.isPlayer = entity instanceof Player;
     slots = new AbilityDescription[9];
-    for (int i = 0; i < Math.min(data.slots().size(), 9); i++) {
+    int size = Math.min(data.slots().size(), 9);
+    for (int i = 0; i < size; i++) {
       slots[i] = data.slots().get(i);
     }
     elements = EnumSet.noneOf(Element.class);

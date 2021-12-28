@@ -19,7 +19,6 @@
 
 package me.moros.bending.registry;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
@@ -46,7 +45,7 @@ public final class AbilityRegistry implements Registry<AbilityDescription> {
    * @param abilities the abilities to register
    * @return the number of newly registered abilities
    */
-  public int register(@NonNull Collection<@NonNull AbilityDescription> abilities) {
+  public int register(@NonNull Iterable<@NonNull AbilityDescription> abilities) {
     int counter = 0;
     for (AbilityDescription desc : abilities) {
       if (register(desc)) {

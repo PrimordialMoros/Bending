@@ -82,7 +82,7 @@ public class SelectedSource implements State {
     this.material = data == null ? block.getType() : data.getMaterial();
     if (data != null) {
       snapshot = TempBlock.MANAGER.get(block).map(TempBlock::snapshot).orElse(null);
-      TempBlock.create(block, data);
+      TempBlock.builder(data).build(block);
       INSTANCES.put(block, this);
     }
     return true;

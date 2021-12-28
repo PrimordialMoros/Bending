@@ -68,9 +68,7 @@ public final class ChatUtil {
   }
 
   public static @NonNull List<@NonNull String> wrap(@NonNull String str, int wrapLength) {
-    if (wrapLength < 1) {
-      wrapLength = 1;
-    }
+    wrapLength = Math.max(1, wrapLength);
     final int length = str.length();
     int offset = 0;
     List<String> lines = new ArrayList<>(length / wrapLength);

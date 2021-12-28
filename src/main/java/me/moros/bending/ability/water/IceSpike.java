@@ -166,7 +166,7 @@ public class IceSpike extends AbilityInstance {
 
   private void clean(Block block) {
     if (WaterMaterials.isIceBendable(block)) {
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
     }
   }
 
@@ -182,7 +182,7 @@ public class IceSpike extends AbilityInstance {
     return user;
   }
 
-  private class IcePillar implements Updatable {
+  private final class IcePillar implements Updatable {
     private final Block origin;
     private final Material material;
     private final Deque<Block> pillarBlocks;
@@ -231,7 +231,7 @@ public class IceSpike extends AbilityInstance {
 
       if (canMove(currentIndex)) {
         pillarBlocks.offerFirst(currentIndex);
-        TempBlock.create(currentIndex, material.createBlockData());
+        TempBlock.builder(material.createBlockData()).build(currentIndex);
         SoundUtil.ICE.play(currentIndex.getLocation());
       } else {
         reverting = true;

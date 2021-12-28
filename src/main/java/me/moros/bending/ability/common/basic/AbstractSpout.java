@@ -50,7 +50,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   protected double distance;
 
-  public AbstractSpout(@NonNull User user, double height) {
+  protected AbstractSpout(@NonNull User user, double height) {
     this.user = user;
     this.height = height;
     this.flight = Bending.game().flightManager().get(user);
@@ -61,7 +61,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   public @NonNull UpdateResult update() {
     user.entity().setFallDistance(0);
     user.sprinting(false);
-    double maxHeight = height + 2; // Buffer for safety
+    double maxHeight = height + 3; // Buffer for safety
     Block block = blockCast(user.locBlock(), maxHeight, ignore::contains);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;

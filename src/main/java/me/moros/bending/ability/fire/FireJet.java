@@ -41,7 +41,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -100,7 +99,7 @@ public class FireJet extends AbilityInstance {
   }
 
   private void igniteBlock(Block block) {
-    TempBlock.create(block, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+    TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(block);
   }
 
   @Override

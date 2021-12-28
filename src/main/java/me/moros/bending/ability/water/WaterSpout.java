@@ -29,6 +29,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempBlock.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -47,6 +48,7 @@ import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.BubbleColumn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -146,10 +148,11 @@ public class WaterSpout extends AbilityInstance {
       column.forEach(this::clean);
       column.clear();
       ignore.clear();
-
       Block block = user.locBlock();
+      Builder bubbles = TempBlock.builder(Material.BUBBLE_COLUMN.createBlockData(d -> ((BubbleColumn) d).setDrag(false)));
       for (int i = 0; i < distance - 1; i++) {
-        TempBlock.create(block.getRelative(BlockFace.DOWN, i), Material.WATER.createBlockData()).ifPresent(tb -> column.add(tb.block()));
+        Builder builder = i <= distance ? bubbles : TempBlock.water();
+        builder.build(block.getRelative(BlockFace.DOWN, i)).ifPresent(tb -> column.add(tb.block()));
       }
       ignore.addAll(column);
     }
@@ -166,7 +169,7 @@ public class WaterSpout extends AbilityInstance {
 
     protected void clean(Block block) {
       if (MaterialUtil.isWater(block)) {
-        TempBlock.createAir(block);
+        TempBlock.air().build(block);
       }
     }
   }

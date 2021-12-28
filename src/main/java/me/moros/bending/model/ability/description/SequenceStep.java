@@ -47,8 +47,8 @@ public final class SequenceStep {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (other instanceof SequenceStep otherAction) {
+  public boolean equals(Object obj) {
+    if (obj instanceof SequenceStep otherAction) {
       return action == otherAction.action && desc.equals(otherAction.desc);
     }
     return false;

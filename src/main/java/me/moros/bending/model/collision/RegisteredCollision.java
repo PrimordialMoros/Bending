@@ -70,8 +70,8 @@ public final class RegisteredCollision {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    RegisteredCollision that = (RegisteredCollision) obj;
-    return (first.equals(that.first) && second.equals(that.second)) || (first.equals(that.second) && second.equals(that.first));
+    RegisteredCollision other = (RegisteredCollision) obj;
+    return (first.equals(other.first) && second.equals(other.second)) || (first.equals(other.second) && second.equals(other.first));
   }
 
   @Override
@@ -95,7 +95,7 @@ public final class RegisteredCollision {
    * Normally, abilities that belong to the same layer will cancel each other out.
    * Moreover, they will remove all abilities in the layers below them and be removed by all abilities in layers above them.
    */
-  public static class Builder {
+  public static final class Builder {
     private final List<CollisionLayer> layers;
     private final Collection<RegisteredCollision> simpleCollisions;
 

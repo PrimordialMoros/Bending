@@ -172,7 +172,7 @@ public class Catapult extends AbilityInstance {
     return user;
   }
 
-  private static class EarthPillar extends Pillar {
+  private static final class EarthPillar extends Pillar {
     private EarthPillar(@NonNull Builder builder) {
       super(builder);
     }

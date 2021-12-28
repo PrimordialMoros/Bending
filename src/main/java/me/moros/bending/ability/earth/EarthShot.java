@@ -144,7 +144,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       WorldUtil.tryBreakPlant(temp);
     }
 
-    data = source.getBlockData().clone();
+    data = source.getBlockData();
     BlockData solidData;
     if (mode == Mode.MAGMA) {
       solidData = Material.MAGMA_BLOCK.createBlockData();
@@ -162,7 +162,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     projectile = TempFallingBlock.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
       .gravity(false).duration(6000).build(source);
     if (!MaterialUtil.isLava(source)) {
-      TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
+      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
     }
     location = projectile.center();
     removalPolicy = Policies.builder()
@@ -225,7 +225,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
   private void handleSource() {
     Block block = projectile.fallingBlock().getLocation().getBlock();
     if (block.getY() >= targetY) {
-      TempBlock.create(block, projectile.fallingBlock().getBlockData());
+      TempBlock.builder(projectile.fallingBlock().getBlockData()).build(block);
       projectile.revert();
       location = new Vector3d(block);
       readySource = block;
@@ -254,7 +254,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       ParticleUtil.rgb(spawnLoc, "FF8C00").count(4).offset(0.5, 0.5, 0.5).spawn();
       if (userConfig.chargeTime <= 0 || System.currentTimeMillis() > magmaStartTime + userConfig.chargeTime) {
         mode = Mode.MAGMA;
-        TempBlock.create(readySource, Material.MAGMA_BLOCK.createBlockData());
+        TempBlock.builder(Material.MAGMA_BLOCK.createBlockData()).build(readySource);
         canConvert = false;
       }
     } else {
@@ -300,7 +300,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
       projectile = TempFallingBlock.builder(readySource.getBlockData())
         .velocity(dir.add(new Vector3d(0, 0.2, 0))).build(readySource);
-      TempBlock.createAir(readySource);
+      TempBlock.air().build(readySource);
     }
     location = projectile.center();
     lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
@@ -359,9 +359,9 @@ public class EarthShot extends AbilityInstance implements Explosive {
       projectile.revert();
     }
     if (!launched) {
-      TempBlock.create(source, data, BendingProperties.EARTHBENDING_REVERT_TIME, true);
+      TempBlock.builder(data).bendable(true).duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
       if (readySource != null) {
-        TempBlock.createAir(readySource);
+        TempBlock.air().build(readySource);
       }
     }
   }

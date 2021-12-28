@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public abstract class PhaseTransformer {
   private final Deque<Block> queue;
 
-  public PhaseTransformer() {
+  protected PhaseTransformer() {
     queue = new ArrayDeque<>(32);
   }
 

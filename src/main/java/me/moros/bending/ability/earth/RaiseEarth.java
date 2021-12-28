@@ -150,7 +150,9 @@ public class RaiseEarth extends AbilityInstance {
     double w = (width - 1) / 2.0;
     Vector3d side = user.direction().cross(Vector3d.PLUS_J).normalize();
     Vector3d center = Vector3d.center(origin);
-    for (int i = -FastMath.ceil(w); i <= FastMath.floor(w); i++) {
+    int min = -FastMath.ceil(w);
+    int max = FastMath.floor(w);
+    for (int i = min; i <= max; i++) {
       Block check = center.add(side.multiply(i)).toBlock(user.world());
       if (MaterialUtil.isTransparentOrWater(check)) {
         for (int j = 1; j < height; j++) {

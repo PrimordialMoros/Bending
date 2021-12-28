@@ -131,7 +131,7 @@ public class WaterBubble extends AbilityInstance {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
       }
-      TempBlock.forceCreateAir(block).ifPresent(tb -> bubble.add(block));
+      TempBlock.air().fixWater(false).build(block).ifPresent(tb -> bubble.add(block));
     }
   }
 
@@ -154,7 +154,7 @@ public class WaterBubble extends AbilityInstance {
       double factor = distance > radius ? 0.3 : 1 - (distance / (1.5 * radius));
       long delay = (long) (1500 * factor);
       tb.revert();
-      TempBlock.createAir(block, delay);
+      TempBlock.air().duration(delay).build(block);
     }
     user.addCooldown(description(), userConfig.cooldown);
   }

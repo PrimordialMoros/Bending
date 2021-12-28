@@ -182,7 +182,7 @@ public class AirScooter extends AbilityInstance {
     return 1.25;
   }
 
-  private static class HeightSmoother {
+  private static final class HeightSmoother {
     private final double[] values;
     private int index;
 

@@ -37,7 +37,6 @@ import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -112,13 +111,13 @@ public final class BendingExplosion {
       blocks.removeIf(b -> !user.canBuild(b));
       for (Block block : blocks) {
         long delay = BendingProperties.EXPLOSION_REVERT_TIME + rand.nextInt(1000);
-        TempBlock.createAir(block, delay);
+        TempBlock.air().duration(delay).build(block);
       }
       if (placeFire) {
         for (Block block : blocks) {
           if (MaterialUtil.isIgnitable(block) && rand.nextInt(3) == 0) {
             long delay = BendingProperties.FIRE_REVERT_TIME + rand.nextInt(1000);
-            TempBlock.create(block, Material.FIRE.createBlockData(), delay, true);
+            TempBlock.fire().duration(delay).build(block);
           }
         }
       }
@@ -148,7 +147,7 @@ public final class BendingExplosion {
     return new Builder();
   }
 
-  public static class Builder {
+  public static final class Builder {
     private double size = 2.0;
     private double damage = 4.0;
     private double selfKnockbackFactor = 0.5;

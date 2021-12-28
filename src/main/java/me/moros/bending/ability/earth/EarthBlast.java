@@ -148,7 +148,7 @@ public class EarthBlast extends AbilityInstance {
         SoundUtil.EARTH.play(source.getLocation());
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
-        TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
+        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
       }
     }
   }

@@ -107,7 +107,7 @@ public final class BendingEventBus {
   }
 
   public @NonNull BendingExplosionEvent postExplosionEvent(@NonNull User source, @NonNull Location center, @NonNull Collection<@NonNull Block> blocks, double power) {
-    BendingExplosionEvent event = new BendingExplosionEvent(source, center.clone(), blocks, (float) power);
+    BendingExplosionEvent event = new BendingExplosionEvent(source, center, blocks, (float) power);
     manager.callEvent(event);
     return event;
   }

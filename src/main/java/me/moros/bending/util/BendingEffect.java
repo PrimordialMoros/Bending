@@ -36,7 +36,7 @@ public enum BendingEffect {
 
   public static final int MAX_BLOCK_FIRE_TICKS = 100;
 
-  private final Map<LivingEntity, User> INSTANCES;
+  private final Map<LivingEntity, User> instances;
   private final int visual;
   private final boolean cumulative;
   private final TickGetter maxTicks;
@@ -44,7 +44,7 @@ public enum BendingEffect {
   private final TickSetter handler;
 
   BendingEffect(int visual, boolean cumulative, TickGetter maxTicks, TickGetter getter, TickSetter setter) {
-    INSTANCES = new HashMap<>();
+    instances = new HashMap<>();
     this.visual = visual;
     this.cumulative = cumulative;
     this.maxTicks = maxTicks;
@@ -74,23 +74,23 @@ public enum BendingEffect {
   public void reset(@NonNull Entity entity) {
     handler.set(entity, -1);
     if (entity instanceof LivingEntity livingEntity) {
-      INSTANCES.remove(livingEntity);
+      instances.remove(livingEntity);
     }
   }
 
   public @Nullable User tickSource(@NonNull LivingEntity entity) {
-    return INSTANCES.get(entity);
+    return instances.get(entity);
   }
 
   void trackEntity(Entity entity, User source) {
     if (entity instanceof LivingEntity livingEntity) {
-      INSTANCES.put(livingEntity, source);
+      instances.put(livingEntity, source);
     }
   }
 
   public static void cleanup() {
     for (BendingEffect tick : values()) {
-      tick.INSTANCES.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);
+      tick.instances.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);
     }
   }
 

@@ -217,7 +217,7 @@ public class EarthSmash extends AbilityInstance {
       if (block.getType() != entry.getValue().getMaterial()) {
         continue;
       }
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
     }
   }
 
@@ -228,7 +228,7 @@ public class EarthSmash extends AbilityInstance {
         continue;
       }
       WorldUtil.tryBreakPlant(block);
-      TempBlock.create(block, entry.getValue());
+      TempBlock.builder(entry.getValue()).build(block);
     }
   }
 
@@ -239,7 +239,7 @@ public class EarthSmash extends AbilityInstance {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
-        TempBlock.createAir(block);
+        TempBlock.air().build(block);
         TempFallingBlock projectile = TempFallingBlock.builder(blockData).velocity(velocity)
           .duration(5000).build(block);
         shards.put(projectile, shardType(blockData.getMaterial()));
@@ -301,6 +301,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
+  @FunctionalInterface
   interface EarthSmashState extends Updatable {
     default boolean canGrab() {
       return false;
@@ -315,7 +316,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private class ChargeState implements EarthSmashState {
+  private final class ChargeState implements EarthSmashState {
     private final long startTime;
 
     private ChargeState() {
@@ -343,7 +344,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private class LiftState implements EarthSmashState {
+  private final class LiftState implements EarthSmashState {
     private final Vector3d origin;
     private int tick = 0;
     private long nextLiftTime = 0;
@@ -385,13 +386,13 @@ public class EarthSmash extends AbilityInstance {
             if ((Math.abs(x) + Math.abs(z)) % 2 != 0) {
               Block block = origin.add(new Vector3d(x, -1, z)).toBlock(boulder.world);
               if (EarthMaterials.isEarthNotLava(user, block)) {
-                TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+                TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
               }
             }
             // Remove top layer
             Block block = origin.add(new Vector3d(x, 0, z)).toBlock(boulder.world);
             if (EarthMaterials.isEarthNotLava(user, block)) {
-              TempBlock.createAir(block, BendingProperties.EARTHBENDING_REVERT_TIME);
+              TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
             }
           }
         }
@@ -404,7 +405,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private class GrabState implements EarthSmashState {
+  private final class GrabState implements EarthSmashState {
     private final double grabbedDistance;
 
     private GrabState() {
@@ -432,7 +433,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private class ShotState implements EarthSmashState {
+  private final class ShotState implements EarthSmashState {
     private final Set<Entity> affectedEntities;
     private final Vector3d origin;
     private final Vector3d direction;
@@ -531,7 +532,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private class ShatteredState implements EarthSmashState {
+  private final class ShatteredState implements EarthSmashState {
     private final Map<TempFallingBlock, ShardType> pieces;
     private final Set<Entity> affectedEntities;
 
@@ -577,7 +578,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private static class Boulder {
+  private static final class Boulder {
     private final Map<Vector3i, BlockData> data;
     private final AABB bounds;
     private final AABB preciseBounds;

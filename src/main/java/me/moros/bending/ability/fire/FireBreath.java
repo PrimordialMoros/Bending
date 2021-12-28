@@ -51,7 +51,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -170,7 +169,7 @@ public class FireBreath extends AbilityInstance {
       }
       Block above = block.getRelative(BlockFace.UP);
       if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {
-        TempBlock.create(above, Material.FIRE.createBlockData(), BendingProperties.FIRE_REVERT_TIME, true);
+        TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(block);
       }
       return true;
     }

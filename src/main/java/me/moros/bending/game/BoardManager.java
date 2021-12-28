@@ -99,7 +99,7 @@ public final class BoardManager {
     return 1 <= slot && slot <= 9;
   }
 
-  private static class Board {
+  private static final class Board {
     private static final String SEP = " -------------- ";
     private final Map<AbilityDescription, Team> misc = new ConcurrentHashMap<>(); // Used for combos and misc abilities
     private final BendingPlayer player;

@@ -107,7 +107,7 @@ public class EarthTunnel extends AbilityInstance {
         if (userConfig.extractOres) {
           extract(current);
         }
-        TempBlock.createAir(current, BendingProperties.EARTHBENDING_REVERT_TIME);
+        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(current);
       }
       if (angle >= 360) {
         angle = 0;
@@ -127,7 +127,7 @@ public class EarthTunnel extends AbilityInstance {
         if (radius <= 0) {
           radius++;
         } else {
-          angle += 360 / (radius * 16);
+          angle += 22.5 / radius;
         }
       }
     }

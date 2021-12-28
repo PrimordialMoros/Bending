@@ -19,7 +19,6 @@
 
 package me.moros.bending.registry;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,7 +38,7 @@ public final class CollisionRegistry implements Registry<RegisteredCollision> {
     return collisions.contains(collision);
   }
 
-  public int register(@NonNull Collection<@NonNull RegisteredCollision> collisions) {
+  public int register(@NonNull Iterable<@NonNull RegisteredCollision> collisions) {
     int counter = 0;
     for (RegisteredCollision collision : collisions) {
       if (register(collision)) {

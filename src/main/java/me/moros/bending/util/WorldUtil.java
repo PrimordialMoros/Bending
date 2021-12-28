@@ -267,7 +267,7 @@ public final class WorldUtil {
       }
       return true;
     } else if (WaterMaterials.isIceBendable(block)) {
-      TempBlock.MANAGER.get(block).ifPresentOrElse(TempBlock::revert, () -> TempBlock.createAir(block));
+      TempBlock.MANAGER.get(block).ifPresentOrElse(TempBlock::revert, () -> TempBlock.air().build(block));
       return true;
     }
     return false;

@@ -58,7 +58,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   protected final double maxRange;
   protected final double collisionRadius;
 
-  public ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
+  protected ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
     this.user = user;
     this.ray = ray;
     this.speed = speed;

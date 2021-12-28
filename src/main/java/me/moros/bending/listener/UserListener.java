@@ -20,8 +20,8 @@
 package me.moros.bending.listener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -77,6 +77,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -109,17 +110,19 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
-    Timing timing = Timings.ofStart(Bending.plugin(), "BendingProfile on join");
-    Player player = event.getPlayer();
-    UUID uuid = player.getUniqueId();
-    String name = player.getName();
-    PlayerProfile profile = Registries.BENDERS.profileSync(uuid);
-    if (profile != null) {
-      BendingPlayer.createUser(player, profile).ifPresent(Registries.BENDERS::register);
-    } else {
-      Bending.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
+    try (Timing timing = Timings.ofStart(Bending.plugin(), "BendingProfile on join")) {
+      Player player = event.getPlayer();
+      UUID uuid = player.getUniqueId();
+      String name = player.getName();
+      PlayerProfile profile = Registries.BENDERS.profileSync(uuid);
+      if (profile != null) {
+        BendingPlayer.createUser(player, profile).ifPresent(Registries.BENDERS::register);
+      } else {
+        Bending.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
+      }
+    } catch (Exception e) {
+      Bending.logger().warn(e.getMessage(), e);
     }
-    timing.stopTiming();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -147,7 +150,7 @@ public class UserListener implements Listener {
     EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
     if (lastDamageCause instanceof BendingDamageEvent cause) {
       if (cause.ability().element() == Element.FIRE) {
-        List<ItemStack> newDrops = new ArrayList<>();
+        Collection<ItemStack> newDrops = new ArrayList<>();
         Iterator<ItemStack> it = event.getDrops().iterator();
         while (it.hasNext()) {
           ItemStack item = it.next();
@@ -199,9 +202,9 @@ public class UserListener implements Listener {
 
     ItemMeta meta = item.getItemMeta();
     if (meta != null && Bending.dataLayer().hasArmorKey(meta)) {
-      PlayerInventory inventory = (PlayerInventory) event.getClickedInventory();
-      if (inventory.getHolder() instanceof Player) {
-        if (!TempArmor.MANAGER.isTemp(inventory.getHolder().getUniqueId()) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
+      Inventory inventory = event.getClickedInventory();
+      if (inventory.getHolder() instanceof Player player) {
+        if (!TempArmor.MANAGER.isTemp(player.getUniqueId()) || event.getSlotType() != InventoryType.SlotType.ARMOR) {
           inventory.remove(item);
         }
       }

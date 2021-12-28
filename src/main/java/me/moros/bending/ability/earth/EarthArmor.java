@@ -95,8 +95,8 @@ public class EarthArmor extends AbilityInstance {
       resistance = userConfig.power;
       SoundUtil.EARTH.play(source.getLocation());
     }
-    BlockData data = source.getBlockData().clone();
-    TempBlock.createAir(source, BendingProperties.EARTHBENDING_REVERT_TIME);
+    BlockData data = source.getBlockData();
+    TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
     fallingBlock = TempFallingBlock.builder(data).velocity(new Vector3d(0, 0.2, 0))
       .gravity(false).duration(10000).build(source);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();

@@ -241,13 +241,13 @@ public class WaterRing extends AbilityInstance {
     }
     Collections.rotate(ring, 1);
     index = ++index % ring.size();
-
-    for (int i = 0; i < Math.min(ring.size(), FastMath.ceil(sources * 0.8)); i++) {
+    int length = Math.min(ring.size(), FastMath.ceil(sources * 0.8));
+    for (int i = 0; i < length; i++) {
       Block block = ring.get(i);
       if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
         ParticleUtil.bubble(block).spawn();
       } else if (MaterialUtil.isTransparent(block)) {
-        TempBlock.create(block, Material.WATER.createBlockData(), 250);
+        TempBlock.water().duration(250).build(block);
       }
     }
 
@@ -299,7 +299,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   private void cleanAll() {
-    ring.stream().filter(MaterialUtil::isWater).forEach(TempBlock::createAir);
+    ring.stream().filter(MaterialUtil::isWater).forEach(TempBlock.air()::build);
   }
 
   @Override

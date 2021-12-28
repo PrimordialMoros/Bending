@@ -66,7 +66,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  public BlockShot(@NonNull User user, @NonNull Block block, @NonNull Material material, double range, int speed) {
+  protected BlockShot(@NonNull User user, @NonNull Block block, @NonNull Material material, double range, int speed) {
     this.user = user;
     this.material = material;
     this.location = Vector3d.center(block);
@@ -145,7 +145,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
         tempBlock = null;
       } else {
         tempBlock = current;
-        TempBlock.create(current, material.createBlockData(), false);
+        TempBlock.builder(material.createBlockData()).build(current);
       }
     } else {
       onBlockHit(current);
@@ -201,7 +201,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
 
   public void clean(@NonNull Block block) {
     if (isValid(block)) {
-      TempBlock.createAir(block);
+      TempBlock.air().build(block);
     }
   }
 

@@ -25,7 +25,7 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 public abstract class Configurable implements Cloneable {
   protected CommentedConfigurationNode config;
 
-  public Configurable() {
+  protected Configurable() {
     Bending.configManager().add(this);
     reload();
   }

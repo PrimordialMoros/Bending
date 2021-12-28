@@ -39,7 +39,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TempArmor implements Temporary {
+public final class TempArmor implements Temporary {
   public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>();
 
   private final LivingEntity entity;
@@ -160,8 +160,9 @@ public class TempArmor implements Temporary {
   }
 
   private static ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
-    ItemStack[] copy = new ItemStack[armorItems.length];
-    for (int i = 0; i < armorItems.length; i++) {
+    int length = armorItems.length;
+    ItemStack[] copy = new ItemStack[length];
+    for (int i = 0; i < length; i++) {
       ItemStack item = armorItems[i];
       if (item != null && item.getItemMeta() != null) {
         if (!Bending.dataLayer().hasArmorKey(item.getItemMeta())) {

@@ -60,7 +60,7 @@ public enum BendingConditions implements BendingConditional {
       .add(BendingConditions.PERMISSION);
   }
 
-  public static class Builder {
+  public static final class Builder {
     private final Set<BendingConditional> conditionals;
 
     private Builder() {

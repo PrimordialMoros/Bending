@@ -31,8 +31,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class BendingExplosionEvent extends EntityExplodeEvent {
   private final User user;
 
-  BendingExplosionEvent(User user, Location center, Collection<Block> blocks, float power) {
-    super(user.entity(), center, List.copyOf(blocks), power);
+  BendingExplosionEvent(User user, Location location, Collection<Block> blocks, float yield) {
+    super(user.entity(), location, List.copyOf(blocks), yield);
     this.user = user;
   }
 

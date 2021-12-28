@@ -125,7 +125,7 @@ public final class AbilityInitializer {
   }
 
   private Collection<RegisteredCollision> buildCollisions() {
-    List<String> shieldCollisions = new ArrayList<>();
+    Collection<String> shieldCollisions = new ArrayList<>();
     shieldCollisions.addAll(layer0);
     shieldCollisions.addAll(layer1);
     shieldCollisions.add("EarthShot");

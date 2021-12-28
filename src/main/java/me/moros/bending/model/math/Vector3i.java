@@ -194,11 +194,11 @@ public class Vector3i {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (this == other) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (other instanceof Vector3i v) {
+    if (obj instanceof Vector3i v) {
       return (x == v.x) && (y == v.y) && (z == v.z);
     }
     return false;

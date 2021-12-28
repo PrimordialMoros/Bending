@@ -85,7 +85,7 @@ public final class SoundUtil {
    * Wrapper for {@link Sound} with utility methods.
    * @see SoundUtil
    */
-  public static class SoundEffect implements Sound.Type {
+  public static final class SoundEffect implements Sound.Type {
     private final Sound sound;
 
     private SoundEffect(Sound sound) {

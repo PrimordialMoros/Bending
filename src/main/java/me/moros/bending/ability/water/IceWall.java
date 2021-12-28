@@ -43,7 +43,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -137,7 +136,9 @@ public class IceWall extends AbilityInstance {
     double w = (width - 1) / 2.0;
     Vector3d side = user.direction().cross(Vector3d.PLUS_J).normalize();
     Vector3d center = Vector3d.center(origin);
-    for (int i = -FastMath.ceil(w); i <= FastMath.floor(w); i++) {
+    int min = -FastMath.ceil(w);
+    int max = FastMath.floor(w);
+    for (int i = min; i <= max; i++) {
       Block check = center.add(side.multiply(i)).toBlock(user.world());
       int h = height - Math.min(FastMath.ceil(height / 3.0), Math.abs(i));
       if (WaterMaterials.isWaterOrIceBendable(check)) {
@@ -150,7 +151,7 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    FragileStructure.create(wallBlocks, userConfig.wallHealth, WaterMaterials::isIceBendable);
+    FragileStructure.builder().health(userConfig.wallHealth).predicate(WaterMaterials::isIceBendable).build(wallBlocks);
   }
 
   @Override
@@ -158,13 +159,13 @@ public class IceWall extends AbilityInstance {
     return user;
   }
 
-  private class IceWallColumn implements Updatable {
-    protected final Block origin;
+  private final class IceWallColumn implements Updatable {
+    private final Block origin;
 
-    protected final int length;
+    private final int length;
 
-    protected int currentLength = 0;
-    protected long nextUpdateTime = 0;
+    private int currentLength = 0;
+    private long nextUpdateTime = 0;
 
     private IceWallColumn(@NonNull Block origin, int length) {
       this.origin = origin;
@@ -186,7 +187,7 @@ public class IceWall extends AbilityInstance {
       if (isValidBlock(currentIndex)) {
         wallBlocks.add(currentIndex);
         SoundUtil.ICE.play(currentIndex.getLocation());
-        TempBlock.create(currentIndex, Material.ICE.createBlockData());
+        TempBlock.ice().build(currentIndex);
         return UpdateResult.CONTINUE;
       }
       return UpdateResult.REMOVE;
