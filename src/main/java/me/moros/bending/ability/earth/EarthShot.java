@@ -414,7 +414,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       CommentedConfigurationNode magmaNode = abilityNode.node("magma");
 
       allowConvertMagma = magmaNode.node("allow-convert").getBoolean(true);
-      explosionRadius = magmaNode.node("radius").getDouble(1.5);
+      explosionRadius = magmaNode.node("explosion-radius").getDouble(2.5);
     }
   }
 }

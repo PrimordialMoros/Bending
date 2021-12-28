@@ -149,10 +149,10 @@ public class WaterSpout extends AbilityInstance {
       column.clear();
       ignore.clear();
       Block block = user.locBlock();
+      TempBlock.water().build(block).ifPresent(tb -> column.add(block));
       Builder bubbles = TempBlock.builder(Material.BUBBLE_COLUMN.createBlockData(d -> ((BubbleColumn) d).setDrag(false)));
-      for (int i = 0; i < distance - 1; i++) {
-        Builder builder = i <= distance ? bubbles : TempBlock.water();
-        builder.build(block.getRelative(BlockFace.DOWN, i)).ifPresent(tb -> column.add(tb.block()));
+      for (int i = 1; i < distance - 1; i++) {
+        bubbles.build(block.getRelative(BlockFace.DOWN, i)).ifPresent(tb -> column.add(tb.block()));
       }
       ignore.addAll(column);
     }

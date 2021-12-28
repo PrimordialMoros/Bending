@@ -313,7 +313,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       range = abilityNode.node("range").getDouble(18.0);
       speed = abilityNode.node("speed").getDouble(0.8);
       igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
-      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.0);
+      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.5);
 
       chargeFactor = Math.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
       maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);

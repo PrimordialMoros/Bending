@@ -61,7 +61,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   public @NonNull UpdateResult update() {
     user.entity().setFallDistance(0);
     user.sprinting(false);
-    double maxHeight = height + 3; // Buffer for safety
+    double maxHeight = height + 2; // Buffer for safety
     Block block = blockCast(user.locBlock(), maxHeight, ignore::contains);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
