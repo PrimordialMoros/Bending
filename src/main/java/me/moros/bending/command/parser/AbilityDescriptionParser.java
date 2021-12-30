@@ -33,20 +33,16 @@ import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AbilityDescriptionParser implements ArgumentParser<CommandSender, AbilityDescription> {
-  private final boolean strict;
-
-  public AbilityDescriptionParser(boolean strict) {
-    this.strict = strict;
-  }
-
   @Override
   public @NonNull ArgumentParseResult<AbilityDescription> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull Queue<@NonNull String> inputQueue) {
     String input = inputQueue.peek();
     if (input != null) {
       inputQueue.remove();
       AbilityDescription check = Registries.ABILITIES.ability(input);
-      if (check != null && !check.hidden() && commandContext.getSender().hasPermission(check.permission())) {
+      if (check != null && !check.hidden()) {
         return ArgumentParseResult.success(check);
+      } else {
+        return ArgumentParseResult.failure(new Throwable("Could not find ability " + input));
       }
     }
     return ArgumentParseResult.failure(new NoInputProvidedException(AbilityDescription.class, commandContext));
@@ -54,6 +50,6 @@ public final class AbilityDescriptionParser implements ArgumentParser<CommandSen
 
   @Override
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
-    return CommandManager.abilityCompletions(commandContext.getSender(), strict);
+    return CommandManager.abilityCompletions(commandContext.getSender(), true);
   }
 }

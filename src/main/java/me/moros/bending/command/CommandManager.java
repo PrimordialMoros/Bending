@@ -37,14 +37,12 @@ import cloud.commandframework.paper.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import me.moros.bending.Bending;
 import me.moros.bending.command.parser.AbilityDescriptionParser;
-import me.moros.bending.command.parser.AttributeModifierParser;
 import me.moros.bending.command.parser.ModifyPolicyParser;
 import me.moros.bending.command.parser.PresetParser;
 import me.moros.bending.command.parser.UserParser;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
@@ -67,13 +65,7 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
   }
 
   private void registerExceptionHandler() {
-    new MinecraftExceptionHandler<CommandSender>()
-      .withInvalidSyntaxHandler()
-      .withInvalidSenderHandler()
-      .withNoPermissionHandler()
-      .withArgumentParsingHandler()
-      .withCommandExecutionHandler()
-      .withDecorator(Message::brand)
+    new MinecraftExceptionHandler<CommandSender>().withDefaultHandlers().withDecorator(Message::brand)
       .apply(this, AudienceProvider.nativeAudience());
   }
 
@@ -110,8 +102,7 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
   }
 
   private void registerParsers() {
-    getParserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser(true));
-    getParserRegistry().registerParserSupplier(TypeToken.get(AttributeModifier.class), options -> new AttributeModifierParser());
+    getParserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser());
     getParserRegistry().registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
     getParserRegistry().registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
     getParserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());

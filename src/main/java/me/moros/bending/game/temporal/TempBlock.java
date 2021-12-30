@@ -345,7 +345,7 @@ public final class TempBlock implements Temporary {
         }
         return waterData;
       }
-      return data;
+      return newData;
     }
 
     public Optional<TempBlock> build(@NonNull Block block) {

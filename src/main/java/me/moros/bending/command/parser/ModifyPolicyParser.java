@@ -48,7 +48,7 @@ public final class ModifyPolicyParser implements ArgumentParser<CommandSender, M
       inputQueue.remove();
       return ArgumentParseResult.success(ModifyPolicy.of(desc));
     }
-    return ArgumentParseResult.failure(new Exception("Could not match policy " + input));
+    return ArgumentParseResult.failure(new Throwable("Could not match policy " + input));
   }
 
   @Override

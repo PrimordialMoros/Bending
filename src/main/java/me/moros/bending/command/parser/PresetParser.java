@@ -41,6 +41,8 @@ public final class PresetParser implements ArgumentParser<CommandSender, Preset>
       Preset preset = commandContext.get(ContextKeys.BENDING_PLAYER).presetByName(input);
       if (preset != null) {
         return ArgumentParseResult.success(preset);
+      } else {
+        return ArgumentParseResult.failure(new Throwable("Could not find preset " + input));
       }
     }
     return ArgumentParseResult.failure(new NoInputProvidedException(PresetParser.class, commandContext));

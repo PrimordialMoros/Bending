@@ -169,7 +169,7 @@ public class FireBreath extends AbilityInstance {
       }
       Block above = block.getRelative(BlockFace.UP);
       if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {
-        TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(block);
+        TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(above);
       }
       return true;
     }

@@ -31,7 +31,6 @@ import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.minecraft.extras.MinecraftHelp.HelpColors;
 import me.moros.bending.Bending;
-import me.moros.bending.command.parser.AbilityDescriptionParser;
 import me.moros.bending.gui.ElementMenu;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
@@ -90,8 +89,7 @@ public final class BendingCommand {
       .withMin(0).withMax(9).asOptionalWithDefault(0);
     var userArg = manager.argumentBuilder(User.class, "target")
       .asOptionalWithDefault("me");
-    var abilityArg = manager.argumentBuilder(AbilityDescription.class, "ability")
-      .withParser(new AbilityDescriptionParser(false));
+    var abilityArg = manager.argumentBuilder(AbilityDescription.class, "ability");
     var helpArg = StringArgument.<CommandSender>newBuilder("query")
       .greedy().withSuggestionsProvider((c, s) -> CommandManager.combinedSuggestions(c.getSender())).asOptional();
 
@@ -206,7 +204,7 @@ public final class BendingCommand {
         }
       } else {
         AbilityDescription result = Registries.ABILITIES.ability(query);
-        if (result != null) {
+        if (result != null && !result.hidden() && sender.hasPermission(result.permission())) {
           onInfo(sender, result);
           return;
         }
@@ -354,16 +352,16 @@ public final class BendingCommand {
   }
 
   private static void onBind(BendingPlayer player, AbilityDescription ability, int slot) {
-    if (!player.hasElement(ability.element())) {
-      Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.displayName(), ability.element().displayName());
-      return;
-    }
     if (!ability.canBind()) {
       Message.ABILITY_BIND_FAIL.send(player, ability.displayName());
       return;
     }
     if (!player.hasPermission(ability)) {
       Message.ABILITY_BIND_NO_PERMISSION.send(player, ability.displayName());
+    }
+    if (!player.hasElement(ability.element())) {
+      Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.displayName(), ability.element().displayName());
+      return;
     }
     if (slot == 0) {
       slot = player.currentSlot();
