@@ -2,7 +2,7 @@ plugins {
     java
     signing
     `maven-publish`
-    id("com.github.johnrengelman.shadow").version("7.1.0")
+    id("com.github.johnrengelman.shadow").version("7.1.2")
     id("io.papermc.paperweight.userdev").version("1.3.3")
 }
 
@@ -23,11 +23,10 @@ repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
     maven("https://papermc.io/repo/repository/maven-public/")
-    maven("https://repo.aikar.co/content/groups/aikar/")
-    maven("https://maven.enginehub.org/repo/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    maven("https://ci.ender.zone/plugin/repository/everything/")
-    maven("https://jitpack.io")
+    maven("https://maven.enginehub.org/repo/") // WorldGuard
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
+    maven("https://ci.ender.zone/plugin/repository/everything/") // LWC
+    maven("https://jitpack.io") // GriefPrevention, Towny
 }
 
 dependencies {
@@ -36,28 +35,28 @@ dependencies {
         exclude(module = "checker-qual")
     }
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
-    implementation("org.jdbi", "jdbi3-core", "3.24.1") {
+    implementation("org.jdbi", "jdbi3-core", "3.26.1") {
         exclude(module = "caffeine")
     }
     implementation("com.zaxxer", "HikariCP", "5.0.0")
     implementation("org.postgresql", "postgresql", "42.3.1") {
         exclude(module = "checker-qual")
     }
-    implementation("com.h2database", "h2", "2.0.202")
+    implementation("com.h2database", "h2", "2.0.206")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
-    implementation("cloud.commandframework","cloud-paper", "1.6.0")
-    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.0") {
+    implementation("cloud.commandframework","cloud-paper", "1.6.1")
+    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.1") {
         exclude(group = "net.kyori")
     }
-    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.3")
+    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.4")
     paperDevBundle("1.18.1-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
-    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.3.0")
+    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.5.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0") {
         exclude(module = "bukkit")
     }
-    compileOnly("me.clip", "placeholderapi", "2.10.10")
+    compileOnly("me.clip", "placeholderapi", "2.11.1")
     compileOnly("net.luckperms", "api", "5.3")
     compileOnly("org.checkerframework", "checker-qual", "3.21.0")
 }
@@ -86,7 +85,7 @@ tasks {
         }
         //minimize()
     }
-    build {
+    assemble {
         dependsOn(reobfJar)
     }
     withType<Sign>().configureEach {
