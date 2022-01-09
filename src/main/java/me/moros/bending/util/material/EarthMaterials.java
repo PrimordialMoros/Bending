@@ -34,6 +34,7 @@ public final class EarthMaterials {
   public static final MaterialSetTag SAND_BENDABLE;
   public static final MaterialSetTag METAL_BENDABLE;
   public static final MaterialSetTag LAVA_BENDABLE;
+  public static final MaterialSetTag MUD_BENDABLE;
   public static final MaterialSetTag ALL;
 
   static {
@@ -57,9 +58,9 @@ public final class EarthMaterials {
       ).ensureSize("Earth", 113);
 
     SAND_BENDABLE = new MaterialSetTag(key)
-      .add(Material.SAND, Material.RED_SAND, Material.SOUL_SAND, Material.SOUL_SOIL)
+      .add(Material.SAND, Material.RED_SAND)
       .add(MaterialTags.SANDSTONES.getValues())
-      .add(MaterialTags.RED_SANDSTONES.getValues()).ensureSize("Sand", 12);
+      .add(MaterialTags.RED_SANDSTONES.getValues()).ensureSize("Sand", 10);
 
     METAL_BENDABLE = new MaterialSetTag(key).add(
       Material.IRON_BLOCK, Material.RAW_IRON_BLOCK,
@@ -70,11 +71,15 @@ public final class EarthMaterials {
 
     LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).ensureSize("Lava", 2);
 
+    MUD_BENDABLE = new MaterialSetTag(key).add(Material.SOUL_SAND, Material.SOUL_SOIL, Material.BROWN_TERRACOTTA)
+      .ensureSize("Mud", 3);
+
     ALL = new MaterialSetTag(key)
       .add(EARTH_BENDABLE.getValues())
       .add(SAND_BENDABLE.getValues())
       .add(METAL_BENDABLE.getValues())
       .add(LAVA_BENDABLE.getValues())
+      .add(MUD_BENDABLE.getValues())
       .ensureSize("All", 134);
   }
 
@@ -115,5 +120,9 @@ public final class EarthMaterials {
 
   public static boolean isLavaBendable(@NonNull Block block) {
     return LAVA_BENDABLE.isTagged(block);
+  }
+
+  public static boolean isMudBendable(@NonNull Block block) {
+    return MUD_BENDABLE.isTagged(block);
   }
 }

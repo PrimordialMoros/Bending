@@ -147,7 +147,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isTransparentOrWater(@NonNull Block block) {
-    return block.getType() == Material.WATER || TRANSPARENT.isTagged(block);
+    return TRANSPARENT.isTagged(block) || isWater(block);
   }
 
   public static boolean isContainer(@NonNull Block block) {

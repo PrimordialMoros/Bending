@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
@@ -47,6 +48,7 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -191,6 +193,13 @@ public class Torrent extends AbilityInstance {
     public void postRender() {
       if (shouldFreeze) {
         freeze();
+        return;
+      }
+      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+        Block head = stream.peekFirst();
+        if (head != null) {
+          SoundUtil.WATER.play(head.getLocation());
+        }
       }
     }
 

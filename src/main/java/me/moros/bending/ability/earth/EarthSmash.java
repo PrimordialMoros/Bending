@@ -525,7 +525,7 @@ public class EarthSmash extends AbilityInstance {
       return ShardType.SAND;
     } else if (WaterMaterials.ICE_BENDABLE.isTagged(material)) {
       return ShardType.ICE;
-    } else if (material == Material.SOUL_SAND || material == Material.SOUL_SOIL || material == Material.BROWN_TERRACOTTA) {
+    } else if (EarthMaterials.MUD_BENDABLE.isTagged(material)) {
       return ShardType.MUD;
     } else {
       return ShardType.ROCK;

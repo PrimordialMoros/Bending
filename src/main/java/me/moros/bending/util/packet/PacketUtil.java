@@ -53,13 +53,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
@@ -95,9 +94,8 @@ public final class PacketUtil {
 
   public static int createFallingBlock(World world, Vector3d center, BlockData data, Vector3d velocity, boolean gravity) {
     final int id = Entity.nextEntityId();
-    BlockState state = ((CraftBlockData) data).getState();
     Collection<Packet<?>> packets = new ArrayList<>();
-    packets.add(createFallingBlock(id, center, state));
+    packets.add(createFallingBlock(id, center, Block.getId(((CraftBlockData) data).getState())));
     if (!gravity) {
       packets.add(noGravity(id));
     }
@@ -133,12 +131,10 @@ public final class PacketUtil {
       return;
     }
     int distanceSq = dist * dist;
-    Location origin = center.toLocation(world);
-    Location loc = new Location(world, 0, 0, 0);
-    for (Player player : world.getPlayers()) {
-      if (player.getLocation(loc).distanceSquared(origin) <= distanceSq) {
+    for (var player : ((CraftWorld) world).getHandle().players()) {
+      if (new Vector3d(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
         for (var packet : packets) {
-          ((CraftPlayer) player).getHandle().connection.send(packet);
+          player.connection.send(packet);
         }
       }
     }
@@ -195,11 +191,11 @@ public final class PacketUtil {
     return new ClientboundAddMobPacket(packetByteBuffer);
   }
 
-  private static ClientboundAddEntityPacket createFallingBlock(int id, Vector3d center, BlockState state) {
+  private static ClientboundAddEntityPacket createFallingBlock(int id, Vector3d center, int blockId) {
     double x = center.getX();
     double y = center.getY();
     double z = center.getZ();
-    return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, EntityType.FALLING_BLOCK, Block.getId(state), Vec3.ZERO);
+    return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, EntityType.FALLING_BLOCK, blockId, Vec3.ZERO);
   }
 
   private static ClientboundSetEntityMotionPacket addVelocity(int id, Vector3d vel) {

@@ -268,7 +268,7 @@ public class Lightning extends AbilityInstance {
   }
 
   private void explode(Vector3d center, Block block) {
-    if (exploded || block.isLiquid()) {
+    if (exploded || block.isLiquid() || center.toBlock(user.world()).isLiquid()) {
       return;
     }
     exploded = true;

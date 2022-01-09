@@ -81,6 +81,7 @@ public class Shockwave extends AbilityInstance {
   private boolean released;
   private double range;
   private long startTime;
+  private int ticks;
 
   public Shockwave(@NonNull AbilityDescription desc) {
     super(desc);
@@ -138,7 +139,7 @@ public class Shockwave extends AbilityInstance {
       }
       return UpdateResult.CONTINUE;
     }
-    if (!blockBuffer.isEmpty()) {
+    if (++ticks % 4 == 0) {
       PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
       blockBuffer.clear();
     }
@@ -146,7 +147,6 @@ public class Shockwave extends AbilityInstance {
     if (!positions.isEmpty()) {
       CollisionUtil.handle(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
     }
-
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
@@ -223,9 +223,8 @@ public class Shockwave extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    if (!blockBuffer.isEmpty()) {
+    if (released) {
       PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
-      blockBuffer.clear();
     }
   }
 

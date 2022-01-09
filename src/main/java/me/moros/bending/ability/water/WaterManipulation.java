@@ -255,6 +255,13 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+        SoundUtil.WATER.play(center().toLocation(user.world()));
+      }
+    }
+
+    @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       if (isIce) {
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);

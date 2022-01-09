@@ -305,6 +305,16 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     @Override
+    public void postRender() {
+      if (ThreadLocalRandom.current().nextInt(5) == 0) {
+        Block head = stream.peekFirst();
+        if (head != null) {
+          SoundUtil.WATER.play(head.getLocation());
+        }
+      }
+    }
+
+    @Override
     public void onBlockHit(@NonNull Block block) {
       FragileStructure.tryDamageStructure(List.of(block), 3);
     }
