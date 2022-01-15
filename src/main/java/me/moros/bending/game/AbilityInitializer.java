@@ -46,6 +46,7 @@ import me.moros.bending.ability.earth.EarthGlove;
 import me.moros.bending.ability.earth.EarthLine;
 import me.moros.bending.ability.earth.EarthShot;
 import me.moros.bending.ability.earth.EarthSmash;
+import me.moros.bending.ability.earth.EarthSurf;
 import me.moros.bending.ability.earth.EarthTunnel;
 import me.moros.bending.ability.earth.LavaDisk;
 import me.moros.bending.ability.earth.MetalCable;
@@ -319,6 +320,9 @@ public final class AbilityInitializer {
     AbilityDescription shockwave = AbilityDescription.builder("Shockwave", Shockwave::new)
       .element(EARTH).activation(ATTACK, SNEAK, FALL).build();
     abilities.add(shockwave);
+
+    abilities.add(AbilityDescription.builder("EarthSurf", EarthSurf::new)
+      .element(EARTH).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
       .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());

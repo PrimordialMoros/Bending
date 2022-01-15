@@ -321,7 +321,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     private void imprisonTarget(LivingEntity entity) {
-      if (imprisoned || !entity.isValid() || EntityUtil.distanceAboveGround(entity) > 1.2) {
+      if (imprisoned || !entity.isValid() || EntityUtil.distanceAboveGround(entity, 2) > 1.2) {
         return;
       }
       Material material = null;

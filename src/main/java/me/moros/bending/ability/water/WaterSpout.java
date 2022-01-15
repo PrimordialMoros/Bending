@@ -78,7 +78,7 @@ public class WaterSpout extends AbilityInstance {
     loadConfig();
 
     double h = userConfig.height + 2;
-    if (EntityUtil.distanceAboveGround(user.entity()) > h) {
+    if (EntityUtil.distanceAboveGround(user.entity(), h + 1) > h) {
       return false;
     }
 
@@ -133,7 +133,7 @@ public class WaterSpout extends AbilityInstance {
     private Vector3i lastPosition;
     private final Vector3d g = new Vector3d(0, -0.1, 0); // Applied as extra gravity
 
-    public Spout() {
+    private Spout() {
       super(user, userConfig.height);
       validBlock = predicate;
     }

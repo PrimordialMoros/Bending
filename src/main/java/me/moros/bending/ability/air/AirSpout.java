@@ -69,7 +69,7 @@ public class AirSpout extends AbilityInstance {
     loadConfig();
 
     double h = userConfig.height + 2;
-    if (EntityUtil.distanceAboveGround(user.entity()) > h) {
+    if (EntityUtil.distanceAboveGround(user.entity(), h + 1) > h) {
       return false;
     }
     if (AbstractSpout.blockCast(user.locBlock(), h) == null) {
@@ -118,7 +118,7 @@ public class AirSpout extends AbilityInstance {
   private class Spout extends AbstractSpout {
     private long nextRenderTime;
 
-    public Spout() {
+    private Spout() {
       super(user, userConfig.height);
       nextRenderTime = 0;
     }

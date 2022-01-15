@@ -17,14 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.ability.air;
+package me.moros.bending.ability.earth;
 
-import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
-import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractRide;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempPacketEntity;
+import me.moros.bending.game.temporal.TempPacketEntity.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -34,53 +34,63 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.SoundUtil;
-import org.bukkit.Location;
+import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.material.EarthMaterials;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
-public class AirScooter extends AbilityInstance {
+public class EarthSurf extends AbilityInstance {
   private static final Config config = new Config();
 
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Scooter scooter;
+  private Wave wave;
 
-  public boolean canRender = true;
+  private boolean charging;
+  private long startTime;
 
-  public AirScooter(@NonNull AbilityDescription desc) {
+  public EarthSurf(@NonNull AbilityDescription desc) {
     super(desc);
   }
 
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirScooter.class)) {
-      return false;
-    }
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
+    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthSurf.class)) {
       return false;
     }
     this.user = user;
     loadConfig();
+    charging = true;
+    startTime = System.currentTimeMillis();
+    removalPolicy = Policies.builder()
+      .add(Policies.IN_LIQUID)
+      .add(SwappedSlotsRemovalPolicy.of(description()))
+      .build();
+    return true;
+  }
 
-    if (Policies.IN_LIQUID.test(user, description())) {
+  private boolean launch() {
+    double dist = EntityUtil.distanceAboveGround(user.entity(), 2.5);
+    if (dist > 2.25) {
       return false;
     }
-    double dist = EntityUtil.distanceAboveGround(user.entity(), 3.5);
-    if (dist < 0.5 || dist > 3.25) {
-      return false;
-    }
+    charging = false;
     removalPolicy = Policies.builder()
       .add(Policies.SNEAKING)
+      .add(Policies.IN_LIQUID)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
-    scooter = new Scooter();
+    wave = new Wave();
     return true;
   }
 
@@ -97,12 +107,27 @@ public class AirScooter extends AbilityInstance {
     if (!user.canBuild(user.locBlock())) {
       return UpdateResult.REMOVE;
     }
-    return scooter.update();
+    if (charging) {
+      if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
+        if (user.sneaking()) {
+          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          return UpdateResult.CONTINUE;
+        } else {
+          return launch() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+        }
+      } else if (user.sneaking()) {
+        return UpdateResult.CONTINUE;
+      }
+      return UpdateResult.REMOVE;
+    }
+    return wave.update();
   }
 
   @Override
   public void onDestroy() {
-    user.addCooldown(description(), userConfig.cooldown);
+    if (wave != null) {
+      user.addCooldown(description(), userConfig.cooldown);
+    }
   }
 
   @Override
@@ -110,39 +135,34 @@ public class AirScooter extends AbilityInstance {
     return user;
   }
 
-  private class Scooter extends AbstractRide {
-    private double verticalPosition = 0;
+  private class Wave extends AbstractRide {
+    private int tick = 0;
 
-    private Scooter() {
-      super(user, userConfig.speed, 3.25);
+    private Wave() {
+      super(user, userConfig.speed, 2.25);
+      predicate = b -> EarthMaterials.isEarthbendable(user, b);
     }
 
     @Override
     public void render() {
-      if (!canRender) {
+      if (++tick % 2 == 0) {
         return;
       }
-      verticalPosition += 0.25 * Math.PI;
-      Location location = user.entity().getLocation();
-      for (double theta = 0; theta < 2 * Math.PI * 2; theta += Math.PI / 5) {
-        double sin = Math.sin(verticalPosition);
-        double x = 0.6 * Math.cos(theta) * sin;
-        double y = 0.6 * Math.cos(verticalPosition);
-        double z = 0.6 * Math.sin(theta) * sin;
-        ParticleUtil.air(location.clone().add(x, y - 0.25, z)).spawn();
-      }
+      Builder builder = TempPacketEntity.builder(Material.DIRT.createBlockData())
+        .velocity(new Vector3d(0, 0.2, 0)).duration(500);
+      Vector3d center = user.location().add(Vector3d.MINUS_J);
+      VectorUtil.createArc(user.direction().setY(0), Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v ->
+        builder.buildFallingBlock(user.world(), center.add(v.multiply(0.6)))
+      );
     }
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        SoundUtil.AIR.play(user.entity().getLocation());
-      }
     }
 
     @Override
     protected void affect(@NonNull Vector3d velocity) {
-      EntityUtil.applyVelocity(AirScooter.this, user.entity(), velocity);
+      EntityUtil.applyVelocity(EarthSurf.this, user.entity(), velocity);
     }
   }
 
@@ -151,16 +171,19 @@ public class AirScooter extends AbilityInstance {
     public double speed;
     @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
+    @Modifiable(Attribute.CHARGE_TIME)
+    public long chargeTime;
     @Modifiable(Attribute.DURATION)
     public long duration;
 
     @Override
     public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
+      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsurf");
 
-      speed = abilityNode.node("speed").getDouble(0.7);
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      duration = abilityNode.node("duration").getLong(15000);
+      speed = abilityNode.node("speed").getDouble(0.5);
+      cooldown = abilityNode.node("cooldown").getLong(6000);
+      chargeTime = abilityNode.node("charge-time").getLong(1500);
+      duration = abilityNode.node("duration").getLong(0);
     }
   }
 }

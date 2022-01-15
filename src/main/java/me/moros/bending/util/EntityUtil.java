@@ -106,17 +106,26 @@ public final class EntityUtil {
   }
 
   /**
-   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
-   * By default it ignores all passable materials except liquids.
-   * @param entity the entity to check
-   * @return the distance in blocks between the entity and ground or the max world height.
+   * @return {@link #distanceAboveGround(Entity, double)} with maxHeight matching world height.
    */
   public static double distanceAboveGround(@NonNull Entity entity) {
     int minHeight = entity.getWorld().getMinHeight();
-    int deltaHeight = entity.getWorld().getMaxHeight() - minHeight;
-    AABB entityBounds = AABBUtil.entityBounds(entity).grow(new Vector3d(0, deltaHeight, 0));
+    int realMax = entity.getWorld().getMaxHeight() - minHeight;
+    return distanceAboveGround(entity, realMax);
+  }
+
+  /**
+   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
+   * By default it ignores all passable materials except liquids.
+   * @param entity the entity to check
+   * @param maxHeight the maximum height to check
+   * @return the distance in blocks between the entity and ground or the max world height.
+   */
+  public static double distanceAboveGround(@NonNull Entity entity, double maxHeight) {
+    int minHeight = entity.getWorld().getMinHeight();
+    AABB entityBounds = AABBUtil.entityBounds(entity).grow(new Vector3d(0, maxHeight, 0));
     Block origin = entity.getLocation().getBlock();
-    for (int i = 0; i < deltaHeight; i++) {
+    for (int i = 0; i < maxHeight; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
       if (check.getY() <= minHeight) {
         break;
@@ -126,7 +135,7 @@ public final class EntityUtil {
         return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.getY());
       }
     }
-    return deltaHeight;
+    return maxHeight;
   }
 
   /**

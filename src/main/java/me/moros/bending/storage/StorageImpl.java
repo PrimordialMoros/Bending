@@ -318,7 +318,7 @@ public final class StorageImpl implements BendingStorage {
     try {
       return DB.withHandle(handle -> {
         Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT.query()).bind(0, playerId);
-        return slotMapper(query.mapToMap());
+        return Arrays.asList(slotMapper(query.mapToMap()));
       });
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -349,7 +349,7 @@ public final class StorageImpl implements BendingStorage {
           String name = entry.getValue();
           if (id > 0) {
             Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT.query()).bind(0, id);
-            AbilityDescription[] abilities = slotMapper(query.mapToMap()).toArray(new AbilityDescription[0]);
+            AbilityDescription[] abilities = slotMapper(query.mapToMap());
             presets.add(new Preset(id, name, abilities));
           }
         }
@@ -373,14 +373,14 @@ public final class StorageImpl implements BendingStorage {
     return false;
   }
 
-  private List<AbilityDescription> slotMapper(Iterable<Map<String, Object>> results) {
+  private AbilityDescription[] slotMapper(Iterable<Map<String, Object>> results) {
     AbilityDescription[] abilities = new AbilityDescription[9];
     for (Map<String, Object> map : results) {
       int slot = (int) map.get("slot");
       String abilityName = getAbilityName((int) map.get("ability_id"));
       abilities[slot - 1] = Registries.ABILITIES.ability(abilityName);
     }
-    return Arrays.asList(abilities);
+    return abilities;
   }
 
   private boolean tableExists(String table) {
