@@ -67,6 +67,7 @@ permissions:
       bending.ability.EarthLine: true
       bending.ability.EarthShot: true
       bending.ability.EarthSmash: true
+      bending.ability.EarthSurf: true
       bending.ability.EarthTunnel: true
       bending.ability.LavaDisk: true
       bending.ability.MetalCable: true

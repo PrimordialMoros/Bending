@@ -30,6 +30,7 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractRide implements Updatable {
@@ -52,42 +53,30 @@ public abstract class AbstractRide implements Updatable {
   @Override
   public @NonNull UpdateResult update() {
     stuckCount = user.velocity().lengthSq() < 0.1 ? stuckCount + 1 : 0;
-    if (stuckCount > 10 || !move()) {
+    if (stuckCount > 10 || isColliding()) {
       return UpdateResult.REMOVE;
-    }
-    render();
-    postRender();
-    return UpdateResult.CONTINUE;
-  }
-
-  public abstract void render();
-
-  public abstract void postRender();
-
-  private boolean move() {
-    if (isColliding()) {
-      return false;
     }
     double height = EntityUtil.distanceAboveGround(user.entity(), 3.5);
     double smoothedHeight = smoother.add(height);
     if (user.locBlock().isLiquid()) {
       height = 0.5;
     } else if (smoothedHeight > targetHeight) {
-      return false;
+      return UpdateResult.REMOVE;
     }
     Block check = user.location().subtract(new Vector3d(0, height + 0.05, 0)).toBlock(user.world());
     if (!predicate.test(check)) {
-      return false;
+      return UpdateResult.REMOVE;
     }
     double delta = getPrediction() - height;
     double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
     Vector3d velocity = user.direction().setY(0).normalize().multiply(speed).setY(force);
     affect(velocity);
     user.entity().setFallDistance(0);
-    return true;
-  }
 
-  protected abstract void affect(@NonNull Vector3d velocity);
+    render(check.getBlockData());
+    postRender();
+    return UpdateResult.CONTINUE;
+  }
 
   private boolean isColliding() {
     double playerSpeed = user.velocity().setY(0).length();
@@ -107,6 +96,12 @@ public abstract class AbstractRide implements Updatable {
     }
     return Math.max(1.25, targetHeight - 2);
   }
+
+  protected abstract void render(@NonNull BlockData data);
+
+  protected abstract void postRender();
+
+  protected abstract void affect(@NonNull Vector3d velocity);
 
   private static final class HeightSmoother {
     private static final int LENGTH = 10;

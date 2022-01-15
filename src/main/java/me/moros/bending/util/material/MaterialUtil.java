@@ -230,6 +230,8 @@ public final class MaterialUtil {
     } else if (MaterialTags.CONCRETES.isTagged(data)) {
       Material material = Material.getMaterial(data.getMaterial().name() + "_POWDER");
       return Objects.requireNonNullElse(material, Material.GRAVEL).createBlockData();
+    } else if (ORES.containsKey(data.getMaterial())) {
+      return Material.GRAVEL.createBlockData();
     }
     return switch (data.getMaterial()) {
       case STONE, GRANITE, POLISHED_GRANITE, DIORITE, POLISHED_DIORITE, ANDESITE, POLISHED_ANDESITE,

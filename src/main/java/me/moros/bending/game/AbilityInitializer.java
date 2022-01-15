@@ -322,7 +322,7 @@ public final class AbilityInitializer {
     abilities.add(shockwave);
 
     abilities.add(AbilityDescription.builder("EarthSurf", EarthSurf::new)
-      .element(EARTH).activation(SNEAK).build());
+      .element(EARTH).activation(SNEAK, FALL).build());
 
     abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
       .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());

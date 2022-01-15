@@ -39,6 +39,7 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import org.bukkit.Location;
+import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -118,7 +119,7 @@ public class AirScooter extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(@NonNull BlockData data) {
       if (!canRender) {
         return;
       }
