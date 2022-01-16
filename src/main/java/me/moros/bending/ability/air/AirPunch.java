@@ -119,15 +119,14 @@ public class AirPunch extends AbilityInstance {
     @Override
     public void render() {
       VectorUtil.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
-        ParticleUtil.of(Particle.CLOUD, bukkitLocation().add(v.toBukkitVector()))
-          .count(0).offset(v.getX(), v.getY(), v.getZ()).extra(-0.04).spawn()
+        ParticleUtil.of(Particle.CLOUD, location.add(v)).count(0).offset(v).extra(-0.04).spawn(user.world())
       );
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR.play(bukkitLocation());
+        SoundUtil.AIR.play(user.world(), location);
       }
     }
 

@@ -62,7 +62,6 @@ import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
@@ -126,15 +125,15 @@ public class Lightning extends AbilityInstance {
     }
     if (user.sneaking()) {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.LIGHTNING_CHARGING.play(user.entity().getEyeLocation());
+        SoundUtil.LIGHTNING_CHARGING.play(user.world(), user.eyeLocation());
       }
       long deltaTime = System.currentTimeMillis() - startTime;
       if (deltaTime > userConfig.minChargeTime) {
-        Location spawnLoc = user.mainHandSide().toLocation(user.world());
+        Vector3d spawnLoc = user.mainHandSide();
         double offset = deltaTime / (3.0 * userConfig.duration);
-        ParticleUtil.rgb(spawnLoc, "01E1FF").offset(offset, offset, offset).spawn();
+        ParticleUtil.rgb(spawnLoc, "01E1FF").offset(offset).spawn(user.world());
         if (deltaTime > userConfig.maxChargeTime) {
-          ParticleUtil.of(Particle.END_ROD, spawnLoc).spawn();
+          ParticleUtil.of(Particle.END_ROD, spawnLoc).spawn(user.world());
         }
       }
     } else {
@@ -177,7 +176,7 @@ public class Lightning extends AbilityInstance {
         .type(Type.COMPOSITE).filter(this::isValidEntity).ignoreLiquids(true).raySize(0.3).result(user.world());
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
-          SoundUtil.LIGHTNING.play(segment.mid.toLocation(user.world()));
+          SoundUtil.LIGHTNING.play(user.world(), segment.mid);
         }
         counter += segment.length;
         Block block = result.block();
@@ -195,11 +194,10 @@ public class Lightning extends AbilityInstance {
 
   private boolean renderSegment(LineSegment segment) {
     for (Vector3d v : segment) {
-      Location loc = v.toLocation(user.world());
-      if (!user.canBuild(loc.getBlock())) {
+      if (!user.canBuild(v.toBlock(user.world()))) {
         return false;
       }
-      ParticleUtil.of(Particle.END_ROD, v.toLocation(user.world())).spawn();
+      ParticleUtil.of(Particle.END_ROD, v).spawn(user.world());
     }
     return true;
   }
@@ -292,7 +290,7 @@ public class Lightning extends AbilityInstance {
   @Override
   public void onDestroy() {
     if (!launched && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
-      SoundUtil.LIGHTNING.play(user.entity().getLocation(), 2, 0);
+      SoundUtil.LIGHTNING.play(user.world(), user.location(), 2, 0);
       user.addCooldown(description(), userConfig.cooldown);
       DamageUtil.damageEntity(user.entity(), user, userConfig.overchargeDamage, description());
     }

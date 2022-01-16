@@ -186,7 +186,7 @@ public class IceWall extends AbilityInstance {
       currentLength++;
       if (isValidBlock(currentIndex)) {
         wallBlocks.add(currentIndex);
-        SoundUtil.ICE.play(currentIndex.getLocation());
+        SoundUtil.ICE.play(currentIndex);
         TempBlock.ice().build(currentIndex);
         return UpdateResult.CONTINUE;
       }

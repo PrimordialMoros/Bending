@@ -198,7 +198,7 @@ public class Torrent extends AbilityInstance {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
         Block head = stream.peekFirst();
         if (head != null) {
-          SoundUtil.WATER.play(head.getLocation());
+          SoundUtil.WATER.play(head);
         }
       }
     }

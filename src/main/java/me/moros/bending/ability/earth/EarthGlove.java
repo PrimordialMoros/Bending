@@ -234,9 +234,9 @@ public class EarthGlove extends AbilityInstance {
     glove = buildGlove(gloveSpawnLocation);
 
     if (isMetal) {
-      SoundUtil.METAL.play(gloveSpawnLocation.toLocation(user.world()));
+      SoundUtil.METAL.play(user.world(), gloveSpawnLocation);
     } else {
-      SoundUtil.playSound(gloveSpawnLocation.toLocation(user.world()), Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+      SoundUtil.playSound(user.world(), gloveSpawnLocation, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
     }
 
     double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
@@ -288,10 +288,8 @@ public class EarthGlove extends AbilityInstance {
       return;
     }
     BlockData data = isMetal ? Material.IRON_BLOCK.createBlockData() : Material.STONE.createBlockData();
-    ParticleUtil.of(Particle.BLOCK_CRACK, glove.getLocation())
-      .count(3).offset(0.1, 0.1, 0.1).data(data).spawn();
-    ParticleUtil.of(Particle.BLOCK_DUST, glove.getLocation())
-      .count(2).offset(0.1, 0.1, 0.1).data(data).spawn();
+    ParticleUtil.of(Particle.BLOCK_CRACK, location).count(3).offset(0.1).data(data).spawn(user.world());
+    ParticleUtil.of(Particle.BLOCK_DUST, location).count(2).offset(0.1).data(data).spawn(user.world());
     onDestroy();
   }
 

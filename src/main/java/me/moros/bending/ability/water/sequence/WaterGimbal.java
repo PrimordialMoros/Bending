@@ -123,9 +123,7 @@ public class WaterGimbal extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(torrentDesc))
       .build();
 
-    Bending.game().abilityManager(user.world()).destroyInstanceType(user, Torrent.class);
-    Bending.game().abilityManager(user.world()).destroyInstanceType(user, WaterRing.class);
-
+    Bending.game().abilityManager(user.world()).destroyInstanceType(user, List.of(Torrent.class, WaterRing.class));
     return true;
   }
 
@@ -256,12 +254,12 @@ public class WaterGimbal extends AbilityInstance {
 
     private void render(Block block) {
       if (MaterialUtil.isWater(block)) {
-        ParticleUtil.bubble(block).spawn();
+        ParticleUtil.bubble(block).spawn(user.world());
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.water().duration(150).build(block);
       }
       if (ThreadLocalRandom.current().nextInt(10) == 0) {
-        SoundUtil.WATER.play(block.getLocation());
+        SoundUtil.WATER.play(block);
       }
     }
 
@@ -297,8 +295,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     protected void renderHead(@NonNull Block block) {
-      ParticleUtil.of(Particle.SNOW_SHOVEL, block.getLocation().add(0.5, 0.5, 0.5))
-        .count(6).offset(0.25, 0.25, 0.25).extra(0.05).spawn();
+      ParticleUtil.of(Particle.SNOW_SHOVEL, Vector3d.center(block)).count(6).offset(0.25).extra(0.05).spawn(user.world());
       if (!MaterialUtil.isWater(block)) {
         TempBlock.water().build(block);
       }
@@ -309,7 +306,7 @@ public class WaterGimbal extends AbilityInstance {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
         Block head = stream.peekFirst();
         if (head != null) {
-          SoundUtil.WATER.play(head.getLocation());
+          SoundUtil.WATER.play(head);
         }
       }
     }

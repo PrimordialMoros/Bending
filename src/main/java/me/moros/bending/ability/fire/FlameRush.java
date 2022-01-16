@@ -52,7 +52,6 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -114,9 +113,10 @@ public class FlameRush extends AbilityInstance {
 
     if (charging) {
       if (user.sneaking()) {
-        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        Vector3d spawnLoc = user.mainHandSide();
+        ParticleUtil.fire(user, spawnLoc).spawn(user.world());
         if (System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.of(Particle.SMOKE_NORMAL, spawnLoc).spawn(user.world());
         }
       } else {
         launch();
@@ -199,14 +199,14 @@ public class FlameRush extends AbilityInstance {
       double radius = 0.2 * factor + 0.6 * (distanceTravelled / maxRange);
       int amount = FastMath.ceil(12 * radius);
       double offset = 0.5 * radius;
-      ParticleUtil.fire(user, bukkitLocation()).count(amount).offset(offset, offset, offset).spawn();
+      ParticleUtil.fire(user, location).count(amount).offset(offset).spawn(user.world());
       Vector3d vec = new Rotation(streamDirection, currentPoint).applyTo(Vector3d.ONE.multiply(radius));
-      Location spiral1 = location.add(vec).toLocation(user.world());
-      Location spiral2 = location.subtract(vec).toLocation(user.world());
-      ParticleUtil.fire(user, spiral1).spawn();
-      ParticleUtil.fire(user, spiral2).spawn();
-      ParticleUtil.of(Particle.SMOKE_LARGE, spiral1).spawn();
-      ParticleUtil.of(Particle.SMOKE_LARGE, spiral2).spawn();
+      Vector3d spiral1 = location.add(vec);
+      Vector3d spiral2 = location.subtract(vec);
+      ParticleUtil.fire(user, spiral1).spawn(user.world());
+      ParticleUtil.fire(user, spiral2).spawn(user.world());
+      ParticleUtil.of(Particle.SMOKE_LARGE, spiral1).spawn(user.world());
+      ParticleUtil.of(Particle.SMOKE_LARGE, spiral2).spawn(user.world());
       collider = new Sphere(location, collisionRadius + 0.7 * radius);
     }
 
@@ -218,7 +218,7 @@ public class FlameRush extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation(), 2, 1);
+        SoundUtil.FIRE.play(user.world(), location, 2, 1);
       }
     }
 

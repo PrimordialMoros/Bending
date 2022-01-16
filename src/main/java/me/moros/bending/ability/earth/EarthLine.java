@@ -67,7 +67,6 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -232,7 +231,7 @@ public class EarthLine extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.EARTH.play(location.toLocation(user.world()));
+        SoundUtil.EARTH.play(user.world(), location);
       }
     }
 
@@ -284,8 +283,7 @@ public class EarthLine extends AbilityInstance {
 
     @Override
     protected void onCollision() {
-      Location center = location.toLocation(user.world());
-      FragileStructure.tryDamageStructure(List.of(center.getBlock()), mode == Mode.MAGMA ? 0 : 5);
+      FragileStructure.tryDamageStructure(List.of(location.toBlock(user.world())), mode == Mode.MAGMA ? 0 : 5);
       if (mode != Mode.MAGMA) {
         return;
       }
@@ -297,7 +295,7 @@ public class EarthLine extends AbilityInstance {
         .buildAndExplode(EarthLine.this, location);
 
       Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
-      List<Block> wall = WorldUtil.nearbyBlocks(center, userConfig.explosionRadius, predicate);
+      List<Block> wall = WorldUtil.nearbyBlocks(user.world(), location, userConfig.explosionRadius, predicate);
       wall.removeIf(b -> !user.canBuild(b));
       Collections.shuffle(wall);
       for (Block block : wall) {
@@ -329,8 +327,7 @@ public class EarthLine extends AbilityInstance {
       if (EarthMaterials.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first
         material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
       } else {
-        Location center = blockToCheck.getLocation().add(0.5, 0.5, 0.5);
-        for (Block block : WorldUtil.nearbyBlocks(center, 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
+        for (Block block : WorldUtil.nearbyBlocks(user.world(), Vector3d.center(blockToCheck), 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
           material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
         }
       }
@@ -394,10 +391,11 @@ public class EarthLine extends AbilityInstance {
       nextUpdateTime = time + DELAY;
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
       if (canMove(currentIndex)) {
-        ParticleUtil.of(Particle.BLOCK_DUST, currentIndex.getLocation().add(0.5, 0.5, 0.5)).count(24)
-          .offset(0.2, 0.2, 0.2).data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn();
+        Vector3d center = Vector3d.center(currentIndex);
+        ParticleUtil.of(Particle.BLOCK_DUST, center).count(24).offset(0.2)
+          .data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn(currentIndex.getWorld());
         TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(15000 - currentLength * DELAY).build(currentIndex);
-        SoundUtil.EARTH.play(currentIndex.getLocation());
+        SoundUtil.EARTH.play(currentIndex);
       } else {
         return UpdateResult.REMOVE;
       }

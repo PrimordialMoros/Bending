@@ -19,68 +19,119 @@
 
 package me.moros.bending.util;
 
-import com.destroystokyo.paper.ParticleBuilder;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.Color;
-import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to provide create and render {@link Particle}.
  * You should prefer this over using a custom ParticleBuilder to ensure uniform rendering across different abilities.
- * @see ParticleBuilder
  */
-public final class ParticleUtil extends ParticleBuilder {
+public final class ParticleUtil {
   public static final Color AIR = fromHex("EEEEEE");
 
-  private ParticleUtil(@NonNull Particle particle) {
-    super(particle);
+  private final Particle particle;
+  private Vector3d location;
+  private double offsetX = 0, offsetY = 0, offsetZ = 0;
+  private int count = 1;
+  private double extra = 0;
+  private Object data;
+
+  private ParticleUtil(Particle particle) {
+    this.particle = particle;
   }
 
-  public static @NonNull ParticleBuilder fire(@NonNull User user, @NonNull Location center) {
-    Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
-    return new ParticleUtil(effect).location(center).extra(0);
+  private ParticleUtil(Color color, float size) {
+    this.particle = Particle.REDSTONE;
+    data = new Particle.DustOptions(color, size);
   }
 
-  public static @NonNull ParticleBuilder air(@NonNull Location center) {
-    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(AIR, 1.8F);
-  }
-
-  public static @NonNull ParticleBuilder rgb(@NonNull Location center, @NonNull String hexVal) {
-    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(fromHex(hexVal));
-  }
-
-  public static @NonNull ParticleBuilder rgb(@NonNull Location center, @NonNull String hexVal, float size) {
-    return new ParticleUtil(Particle.REDSTONE).location(center).extra(0).color(fromHex(hexVal), size);
-  }
-
-  public static @NonNull ParticleBuilder of(@NonNull Particle effect, @NonNull Location center) {
-    return new ParticleUtil(effect).location(center).extra(0);
-  }
-
-  public static @NonNull ParticleBuilder bubble(@NonNull Block center) {
-    return new ParticleUtil(Particle.WATER_BUBBLE).location(center.getLocation().add(0.5, 0.5, 0.5)).extra(0)
-      .count(3).offset(0.25, 0.25, 0.25);
-  }
-
-  /**
-   * Asynchronously spawns and sends the given particle effect to its receivers.
-   * Make sure you have collected the receivers in a sync thread first.
-   */
-  public void drawAsync() {
-    if (hasReceivers()) {
-      Tasker.async(this::spawn);
+  public @NonNull ParticleUtil spawn(@NonNull World world) {
+    if (location == null) {
+      throw new IllegalStateException("Please specify location for this particle");
     }
+    world.spawnParticle(particle, null, null,
+      location.getX(), location.getY(), location.getZ(),
+      count, offsetX, offsetY, offsetZ, extra, data, true
+    );
+    return this;
   }
 
-  /**
-   * Convert a hex string into a {@link Color}.
-   * @param hexValue the string holding the hex value, needs to be in the format "RRGGBB"
-   * @return the color from the provided hex value or {@link Color#BLACK} if hex value was invalid
-   */
-  public static @NonNull Color fromHex(@NonNull String hexValue) {
+  public @NonNull ParticleUtil spawnAsync(@NonNull World world) {
+    Tasker.async(() -> spawn(world));
+    return this;
+  }
+
+  public @NonNull ParticleUtil location(@NonNull Vector3d location) {
+    this.location = location;
+    return this;
+  }
+
+  public @NonNull ParticleUtil location(double x, double y, double z) {
+    return location(new Vector3d(x, y, z));
+  }
+
+  public @NonNull ParticleUtil count(int count) {
+    this.count = count;
+    return this;
+  }
+
+  public @NonNull ParticleUtil offset(@NonNull Vector3d offset) {
+    return offset(offset.getX(), offset.getY(), offset.getZ());
+  }
+
+  public @NonNull ParticleUtil offset(double offset) {
+    return offset(offset, offset, offset);
+  }
+
+  public @NonNull ParticleUtil offset(double offsetX, double offsetY, double offsetZ) {
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+    this.offsetZ = offsetZ;
+    return this;
+  }
+
+  public @NonNull ParticleUtil extra(double extra) {
+    this.extra = extra;
+    return this;
+  }
+
+  public @NonNull <T> ParticleUtil data(@Nullable T data) {
+    this.data = data;
+    return this;
+  }
+
+  public static @NonNull ParticleUtil fire(@NonNull User user, @NonNull Vector3d center) {
+    Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
+    return new ParticleUtil(effect).location(center);
+  }
+
+  public static @NonNull ParticleUtil air(@NonNull Vector3d center) {
+    return new ParticleUtil(AIR, 1.8F).location(center);
+  }
+
+  public static @NonNull ParticleUtil rgb(@NonNull Vector3d center, @NonNull String hexVal) {
+    return rgb(center, hexVal, 1);
+  }
+
+  public static @NonNull ParticleUtil rgb(@NonNull Vector3d center, @NonNull String hexVal, float size) {
+    return new ParticleUtil(fromHex(hexVal), size).location(center);
+  }
+
+  public static @NonNull ParticleUtil of(@NonNull Particle effect, @NonNull Vector3d center) {
+    return new ParticleUtil(effect).location(center);
+  }
+
+  public static @NonNull ParticleUtil bubble(@NonNull Block center) {
+    return new ParticleUtil(Particle.WATER_BUBBLE).location(Vector3d.center(center)).count(3).offset(0.25);
+  }
+
+  private static Color fromHex(@NonNull String hexValue) {
     if (hexValue.length() < 6) {
       return Color.BLACK;
     }

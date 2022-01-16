@@ -130,13 +130,12 @@ public class EarthShards extends AbilityInstance {
     public ShardStream(Ray ray) {
       super(user, ray, userConfig.speed, 0.5);
       canCollide = Block::isLiquid;
-      SoundUtil.playSound(ray.origin.toLocation(user.world()), Sound.BLOCK_STONE_BREAK, 1, 2);
+      SoundUtil.playSound(user.world(), ray.origin, Sound.BLOCK_STONE_BREAK, 1, 2);
     }
 
     @Override
     public void render() {
-      ParticleUtil.rgb(bukkitLocation(), "555555", 0.8F)
-        .count(3).offset(0.1, 0.1, 0.1).spawn();
+      ParticleUtil.rgb(location, "555555", 0.8F).count(3).offset(0.1).spawn(user.world());
     }
 
     @Override

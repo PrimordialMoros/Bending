@@ -145,7 +145,7 @@ public class EarthBlast extends AbilityInstance {
       }
       if (EarthMaterials.isEarthbendable(user, source) && !source.isLiquid()) {
         blast = new Blast(source);
-        SoundUtil.EARTH.play(source.getLocation());
+        SoundUtil.EARTH.play(source);
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
         TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);

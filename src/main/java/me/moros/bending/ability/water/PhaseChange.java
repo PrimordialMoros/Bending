@@ -35,6 +35,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -42,7 +43,7 @@ import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -95,9 +96,8 @@ public class PhaseChange extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = RayTrace.of(user).range(userConfig.freezeRange).ignoreLiquids(false)
-      .result(user.world()).position().toLocation(user.world());
-    if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
+    Vector3d center = RayTrace.of(user).range(userConfig.freezeRange).ignoreLiquids(false).result(user.world()).position();
+    if (freeze.fillQueue(getShuffledBlocks(user.world(), center, userConfig.freezeRadius, MaterialUtil::isWater))) {
       user.addCooldown(description(), userConfig.freezeCooldown);
     }
   }
@@ -106,15 +106,14 @@ public class PhaseChange extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = user.compositeRayTrace(userConfig.meltRange)
-      .result(user.world()).position().toLocation(user.world());
-    if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
+    Vector3d center = user.compositeRayTrace(userConfig.meltRange).result(user.world()).position();
+    if (melt.fillQueue(getShuffledBlocks(user.world(), center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
       user.addCooldown(description(), 500);
     }
   }
 
-  private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
-    List<Block> newBlocks = WorldUtil.nearbyBlocks(center, radius, predicate);
+  private Collection<Block> getShuffledBlocks(World world, Vector3d center, double radius, Predicate<Block> predicate) {
+    List<Block> newBlocks = WorldUtil.nearbyBlocks(world, center, radius, predicate);
     newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;
@@ -148,7 +147,7 @@ public class PhaseChange extends AbilityInstance implements Ability {
       }
       TempBlock.ice().build(block);
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.ICE.play(block.getLocation());
+        SoundUtil.ICE.play(block);
       }
       return true;
     }

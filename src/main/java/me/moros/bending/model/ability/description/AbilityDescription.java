@@ -46,8 +46,9 @@ public class AbilityDescription {
   private final Function<AbilityDescription, ? extends Ability> constructor;
   private final Element element;
   private final EnumSet<Activation> activations;
-  private final boolean hidden;
+  private final Collection<String> requiredPermissions;
   private final boolean canBind;
+  private final boolean hidden;
   private final boolean sourcePlant;
   private final boolean bypassCooldown;
   private final int hashcode;
@@ -57,6 +58,7 @@ public class AbilityDescription {
     constructor = builder.constructor;
     element = builder.element;
     activations = builder.activations;
+    requiredPermissions = List.copyOf(builder.requiredPermissions);
     canBind = builder.canBind && !isActivatedBy(Activation.SEQUENCE);
     hidden = builder.hidden;
     sourcePlant = builder.sourcePlant;
@@ -103,6 +105,10 @@ public class AbilityDescription {
 
   public @NonNull String permission() {
     return "bending.ability." + name;
+  }
+
+  public @NonNull Collection<@NonNull String> permissions() {
+    return requiredPermissions;
   }
 
   public @NonNull Component meta() {
@@ -213,6 +219,7 @@ public class AbilityDescription {
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private Element element;
     private EnumSet<Activation> activations;
+    private Collection<String> requiredPermissions;
     private boolean canBind = true;
     private boolean hidden = false;
     private boolean sourcePlant = false;
@@ -221,6 +228,7 @@ public class AbilityDescription {
     public <T extends Ability> Builder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
       this.name = name;
       this.constructor = constructor;
+      this.requiredPermissions = List.of();
     }
 
     public @NonNull Builder element(@NonNull Element element) {
@@ -235,6 +243,16 @@ public class AbilityDescription {
       }
       c.add(method);
       activations = EnumSet.copyOf(c);
+      return this;
+    }
+
+    public @NonNull Builder require(@Nullable String... permissions) {
+      Collection<String> c = new ArrayList<>();
+      c.add("bending.ability." + name);
+      if (permissions != null) {
+        c.addAll(List.of(permissions));
+      }
+      requiredPermissions = c;
       return this;
     }
 

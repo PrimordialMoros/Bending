@@ -121,7 +121,7 @@ public interface User extends BukkitUser, ElementUser {
    * @see #hasPermission(String)
    */
   default boolean hasPermission(@NonNull AbilityDescription desc) {
-    return hasPermission(desc.permission());
+    return desc.permissions().stream().allMatch(this::hasPermission);
   }
 
   /**

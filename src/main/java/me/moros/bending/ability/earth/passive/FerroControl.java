@@ -72,7 +72,7 @@ public class FerroControl extends AbilityInstance implements Ability {
 
   @Override
   public @NonNull UpdateResult update() {
-    if (removalPolicy.test(user, description()) || !user.canBend(description()) || !user.hasPermission("bending.metal")) {
+    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       controlledEntity = null;
       return UpdateResult.CONTINUE;
     }
@@ -96,7 +96,7 @@ public class FerroControl extends AbilityInstance implements Ability {
   }
 
   private void act(Block block) {
-    if (!user.canBend(description()) || !user.hasPermission("bending.metal")) {
+    if (!user.canBend(description())) {
       return;
     }
     long time = System.currentTimeMillis();
@@ -116,7 +116,7 @@ public class FerroControl extends AbilityInstance implements Ability {
     } else {
       sound = openable.isOpen() ? Sound.BLOCK_IRON_TRAPDOOR_OPEN : Sound.BLOCK_IRON_TRAPDOOR_CLOSE;
     }
-    SoundUtil.playSound(block.getLocation(), sound, 0.5F, 0);
+    SoundUtil.playSound(block, sound, 0.5F, 0);
   }
 
   public static void act(@NonNull User user, @NonNull Block block) {

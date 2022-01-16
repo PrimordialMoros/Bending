@@ -28,10 +28,10 @@ import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.metadata.Metadata;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -91,11 +91,10 @@ public final class FragileStructure implements Iterable<Block> {
       BlockData blockData = block.getType().createBlockData();
       TempBlock.air().build(block);
       block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
-      Location center = block.getLocation().add(0.5, 0.5, 0.5);
-      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2)
-        .offset(0.3, 0.3, 0.3).data(blockData).spawn();
+      Vector3d center = Vector3d.center(block);
+      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.playSound(center, blockData.getSoundGroup().getBreakSound(), 2, 1);
+        SoundUtil.playSound(block, blockData.getSoundGroup().getBreakSound(), 2, 1);
       }
     }
   }

@@ -41,7 +41,6 @@ import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -151,10 +150,10 @@ public class Tornado extends AbilityInstance {
         double r = 2 + (radius - 2) * y / height;
         double x = r * Math.cos(y + offset);
         double z = r * Math.sin(y + offset);
-        Location loc = base.add(new Vector3d(x, y, z)).toLocation(user.world());
-        ParticleUtil.air(loc).spawn();
+        Vector3d loc = base.add(new Vector3d(x, y, z));
+        ParticleUtil.air(loc).spawn(user.world());
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
-          SoundUtil.AIR.play(loc);
+          SoundUtil.AIR.play(user.world(), loc);
         }
       }
     }

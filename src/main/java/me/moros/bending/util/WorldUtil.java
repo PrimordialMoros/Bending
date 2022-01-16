@@ -35,7 +35,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -60,43 +59,40 @@ public final class WorldUtil {
   }
 
   /**
-   * @return {@link #nearbyBlocks(Location, double, Predicate, int)} with predicate being always true and no block limit.
+   * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with predicate being always true and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius) {
-    return nearbyBlocks(location, radius, block -> true, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius) {
+    return nearbyBlocks(world, pos, radius, block -> true, 0);
   }
 
   /**
-   * @return {@link #nearbyBlocks(Location, double, Predicate, int)} with the given predicate and no block limit.
+   * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with the given predicate and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate) {
-    return nearbyBlocks(location, radius, predicate, 0);
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius, @NonNull Predicate<Block> predicate) {
+    return nearbyBlocks(world, pos, radius, predicate, 0);
   }
 
   /**
    * Collects all blocks in a sphere that satisfy the given predicate.
    * <p> Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
-   * @param location the center point
+   * @param world the world to check
+   * @param pos the center point
    * @param radius the radius of the sphere
    * @param predicate the predicate that needs to be satisfied for every block
    * @param limit the amount of blocks to collect
    * @return all collected blocks
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull Location location, double radius, @NonNull Predicate<Block> predicate, int limit) {
+  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius, @NonNull Predicate<Block> predicate, int limit) {
     int r = FastMath.ceil(radius) + 1;
-    double originX = location.getX();
-    double originY = location.getY();
-    double originZ = location.getZ();
-    Vector3d pos = new Vector3d(location);
     List<Block> blocks = new ArrayList<>();
-    for (double x = originX - r; x <= originX + r; x++) {
-      for (double y = originY - r; y <= originY + r; y++) {
-        for (double z = originZ - r; z <= originZ + r; z++) {
+    for (double x = pos.getX() - r; x <= pos.getX() + r; x++) {
+      for (double y = pos.getY() - r; y <= pos.getY() + r; y++) {
+        for (double z = pos.getZ() - r; z <= pos.getZ() + r; z++) {
           Vector3d loc = new Vector3d(x, y, z);
           if (pos.distanceSq(loc) > radius * radius) {
             continue;
           }
-          Block block = loc.toBlock(location.getWorld());
+          Block block = loc.toBlock(world);
           if (predicate.test(block)) {
             blocks.add(block);
             if (limit > 0 && blocks.size() >= limit) {
@@ -189,10 +185,9 @@ public final class WorldUtil {
    * @param block the block to play the effect at
    */
   public static void playLavaExtinguishEffect(@NonNull Block block) {
-    Location center = block.getLocation().add(0.5, 0.7, 0.5);
-    SoundUtil.LAVA_EXTINGUISH.play(center);
-    ParticleUtil.of(Particle.CLOUD, center).count(8)
-      .offset(0.3, 0.3, 0.3).spawn();
+    SoundUtil.LAVA_EXTINGUISH.play(block);
+    Vector3d center = Vector3d.center(block).add(new Vector3d(0, 0.2, 0));
+    ParticleUtil.of(Particle.CLOUD, center).count(8).offset(0.3).spawn(block.getWorld());
   }
 
   /**
@@ -228,7 +223,7 @@ public final class WorldUtil {
     if (MaterialUtil.isFire(block)) {
       block.setType(Material.AIR);
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        SoundUtil.FIRE_EXTINGUISH.play(block.getLocation());
+        SoundUtil.FIRE_EXTINGUISH.play(block);
       }
       return true;
     } else if (MaterialUtil.isCampfire(block)) {

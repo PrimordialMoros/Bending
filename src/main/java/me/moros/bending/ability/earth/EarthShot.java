@@ -54,7 +54,6 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -153,10 +152,10 @@ public class EarthShot extends AbilityInstance implements Explosive {
       solidData = MaterialUtil.solidType(source.getBlockData());
     }
     if (mode == Mode.METAL) {
-      SoundUtil.METAL.play(source.getLocation());
+      SoundUtil.METAL.play(source);
       canConvert = false;
     } else {
-      SoundUtil.EARTH.play(source.getLocation());
+      SoundUtil.EARTH.play(source);
     }
 
     projectile = TempFallingBlock.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
@@ -244,14 +243,14 @@ public class EarthShot extends AbilityInstance implements Explosive {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
         if (userConfig.chargeTime > 0) {
-          SoundUtil.LAVA.play(readySource.getLocation());
+          SoundUtil.LAVA.play(readySource);
         }
       }
-      Location spawnLoc = readySource.getLocation().add(0.5, 0.5, 0.5);
-      ParticleUtil.of(Particle.LAVA, spawnLoc).count(2).offset(0.5, 0.5, 0.5).spawn();
-      ParticleUtil.of(Particle.SMOKE_NORMAL, spawnLoc).count(2).offset(0.5, 0.5, 0.5).spawn();
-      ParticleUtil.rgb(spawnLoc, "FFA400").count(2).offset(0.5, 0.5, 0.5).spawn();
-      ParticleUtil.rgb(spawnLoc, "FF8C00").count(4).offset(0.5, 0.5, 0.5).spawn();
+      Vector3d spawnLoc = Vector3d.center(readySource);
+      ParticleUtil.of(Particle.LAVA, spawnLoc).count(2).offset(0.5).spawn(user.world());
+      ParticleUtil.of(Particle.SMOKE_NORMAL, spawnLoc).count(2).offset(0.5).spawn(user.world());
+      ParticleUtil.rgb(spawnLoc, "FFA400").count(2).offset(0.5).spawn(user.world());
+      ParticleUtil.rgb(spawnLoc, "FF8C00").count(4).offset(0.5).spawn(user.world());
       if (userConfig.chargeTime <= 0 || System.currentTimeMillis() > magmaStartTime + userConfig.chargeTime) {
         mode = Mode.MAGMA;
         TempBlock.builder(Material.MAGMA_BLOCK.createBlockData()).build(readySource);
@@ -332,9 +331,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
     }
     exploded = true;
     Vector3d center = projectile.center();
-    Location spawnLoc = center.toLocation(user.world());
-    ParticleUtil.of(Particle.SMOKE_LARGE, spawnLoc).count(12).offset(1, 1, 1).extra(0.05).spawn();
-    ParticleUtil.of(Particle.FIREWORKS_SPARK, spawnLoc).count(8).offset(1, 1, 1).extra(0.07).spawn();
+    ParticleUtil.of(Particle.SMOKE_LARGE, center).count(12).offset(1).extra(0.05).spawn(user.world());
+    ParticleUtil.of(Particle.FIREWORKS_SPARK, center).count(8).offset(1).extra(0.07).spawn(user.world());
     BendingExplosion.builder()
       .size(userConfig.explosionRadius)
       .damage(damage)
@@ -348,10 +346,10 @@ public class EarthShot extends AbilityInstance implements Explosive {
   public void onDestroy() {
     if (projectile != null) {
       if (launched) {
-        Location spawnLoc = projectile.center().toLocation(user.world());
+        Vector3d center = projectile.center();
         BlockData data = projectile.fallingBlock().getBlockData();
-        ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(6).offset(1, 1, 1).data(data).spawn();
-        ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(4).offset(1, 1, 1).data(data).spawn();
+        ParticleUtil.of(Particle.BLOCK_CRACK, center).count(6).offset(1).data(data).spawn(user.world());
+        ParticleUtil.of(Particle.BLOCK_DUST, center).count(4).offset(1).data(data).spawn(user.world());
         explode();
         Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
         FragileStructure.tryDamageStructure(List.of(projected), mode == Mode.MAGMA ? 6 : 4);

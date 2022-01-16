@@ -163,7 +163,7 @@ public class WaterSpout extends AbilityInstance {
         EntityUtil.applyVelocity(WaterSpout.this, user.entity(), user.velocity().add(g));
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundUtil.WATER.play(user.entity().getLocation());
+        SoundUtil.WATER.play(user.world(), user.location());
       }
     }
 

@@ -50,7 +50,6 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -209,11 +208,10 @@ public class FireShield extends AbilityInstance {
       double[] array = Vector3d.PLUS_J.cross(user.direction()).normalize().toArray();
       for (int i = 0; i < 18; i++) {
         for (double j = 0.2; j <= 1; j += 0.2) {
-          Location spawnLoc = location.add(new Vector3d(array).multiply(j * userConfig.diskRadius)).toLocation(user.world());
-          ParticleUtil.fire(user, spawnLoc)
-            .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
+          Vector3d spawnLoc = location.add(new Vector3d(array).multiply(j * userConfig.diskRadius));
+          ParticleUtil.fire(user, spawnLoc).offset(0.15).extra(0.01).spawn(user.world());
           if (rand.nextInt(12) == 0) {
-            SoundUtil.FIRE.play(spawnLoc);
+            SoundUtil.FIRE.play(user.world(), spawnLoc);
           }
         }
         rotation.applyTo(array, array);
@@ -258,11 +256,10 @@ public class FireShield extends AbilityInstance {
         }
         double x = radius * factor * Math.cos(i * currentPoint);
         double z = radius * factor * Math.sin(i * currentPoint);
-        Location spawnLoc = center.add(new Vector3d(x, y, z)).toLocation(user.world());
-        ParticleUtil.fire(user, spawnLoc)
-          .offset(0.1, 0.1, 0.1).extra(0.005).spawn();
+        Vector3d spawnLoc = center.add(new Vector3d(x, y, z));
+        ParticleUtil.fire(user, spawnLoc).offset(0.1).extra(0.005).spawn(user.world());
         if (rand.nextInt(12) == 0) {
-          SoundUtil.FIRE.play(spawnLoc);
+          SoundUtil.FIRE.play(user.world(), spawnLoc);
         }
       }
     }

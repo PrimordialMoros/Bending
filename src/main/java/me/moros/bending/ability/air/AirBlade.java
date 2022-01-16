@@ -130,7 +130,7 @@ public class AirBlade extends AbilityInstance {
         Vector3d rotateAxis = Vector3d.PLUS_J.cross(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
         VectorUtil.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
-          ParticleUtil.air(origin.add(v).toLocation(user.world())).spawn()
+          ParticleUtil.air(origin.add(v)).spawn(user.world())
         );
       } else if (!user.sneaking()) {
         launch();
@@ -191,14 +191,14 @@ public class AirBlade extends AbilityInstance {
     public void render() {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
       VectorUtil.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
-        ParticleUtil.air(location.add(v).toLocation(user.world())).spawn()
+        ParticleUtil.air(location.add(v)).spawn(user.world())
       );
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR.play(location.toLocation(user.world()));
+        SoundUtil.AIR.play(user.world(), location);
       }
     }
 

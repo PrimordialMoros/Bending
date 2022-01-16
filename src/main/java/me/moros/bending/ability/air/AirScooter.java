@@ -38,7 +38,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -124,20 +123,20 @@ public class AirScooter extends AbilityInstance {
         return;
       }
       verticalPosition += 0.25 * Math.PI;
-      Location location = user.entity().getLocation();
+      Vector3d location = user.location();
       for (double theta = 0; theta < 2 * Math.PI * 2; theta += Math.PI / 5) {
         double sin = Math.sin(verticalPosition);
         double x = 0.6 * Math.cos(theta) * sin;
         double y = 0.6 * Math.cos(verticalPosition);
         double z = 0.6 * Math.sin(theta) * sin;
-        ParticleUtil.air(location.clone().add(x, y - 0.25, z)).spawn();
+        ParticleUtil.air(location.add(new Vector3d(x, y - 0.25, z))).spawn(user.world());
       }
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        SoundUtil.AIR.play(user.entity().getLocation());
+        SoundUtil.AIR.play(user.world(), user.location());
       }
     }
 

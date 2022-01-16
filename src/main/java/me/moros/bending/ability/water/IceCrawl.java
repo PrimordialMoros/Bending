@@ -167,7 +167,7 @@ public class IceCrawl extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.ICE.play(location.toLocation(user.world()));
+        SoundUtil.ICE.play(user.world(), location);
       }
     }
 

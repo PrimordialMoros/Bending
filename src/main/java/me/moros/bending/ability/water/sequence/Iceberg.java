@@ -172,7 +172,7 @@ public class Iceberg extends AbilityInstance {
       tip = origin.add(direction.multiply(userConfig.length));
       Vector3d targetLocation = origin.add(direction.multiply(userConfig.length - 1)).snapToBlockCenter();
       double radius = FastMath.ceil(0.2 * userConfig.length);
-      for (Block block : WorldUtil.nearbyBlocks(origin.toLocation(user.world()), radius, WaterMaterials::isWaterOrIceBendable)) {
+      for (Block block : WorldUtil.nearbyBlocks(user.world(), origin, radius, WaterMaterials::isWaterOrIceBendable)) {
         if (!user.canBuild(block)) {
           continue;
         }

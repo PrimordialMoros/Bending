@@ -29,7 +29,6 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ParticleUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -122,9 +121,8 @@ public class SelectedSource implements State {
     if (user.eyeLocation().distanceSq(origin) > distanceSq) {
       return UpdateResult.REMOVE;
     }
-    Location loc = origin.toLocation(user.world());
     if (particles) {
-      ParticleUtil.of(Particle.SMOKE_NORMAL, loc.add(0, 0.5, 0)).spawn();
+      ParticleUtil.of(Particle.SMOKE_NORMAL, origin.add(new Vector3d(0, 0.5, 0))).spawn(user.world());
     }
     return UpdateResult.CONTINUE;
   }

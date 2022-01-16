@@ -50,6 +50,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
@@ -57,7 +58,6 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -93,10 +93,6 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (!user.hasPermission("bending.lava")) {
-      return false;
-    }
-
     if (Bending.game().abilityManager(user.world()).hasAbility(user, LavaDisk.class)) {
       return false;
     }
@@ -179,13 +175,10 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    Location center = location.toLocation(user.world());
-    ParticleUtil.of(Particle.BLOCK_CRACK, center)
-      .count(16).offset(0.1, 0.1, 0.1).extra(0.01)
-      .data(Material.MAGMA_BLOCK.createBlockData()).spawn();
-    ParticleUtil.of(Particle.LAVA, center)
-      .count(2).offset(0.1, 0.1, 0.1).extra(0.01).spawn();
-    SoundUtil.playSound(center, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+    ParticleUtil.of(Particle.BLOCK_CRACK, location).count(16).offset(0.1).extra(0.01)
+      .data(Material.MAGMA_BLOCK.createBlockData()).spawn(user.world());
+    ParticleUtil.of(Particle.LAVA, location).count(2).offset(0.1).extra(0.01).spawn(user.world());
+    SoundUtil.playSound(user.world(), location, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
     user.addCooldown(description(), userConfig.cooldown);
   }
 
@@ -205,8 +198,7 @@ public class LavaDisk extends AbilityInstance {
       BendingEffect.FIRE_TICK.apply(user, entity);
       DamageUtil.damageEntity(entity, user, damage, description());
       currentPower -= userConfig.powerDiminishPerEntity;
-      ParticleUtil.of(Particle.LAVA, entity.getLocation()).count(4)
-        .offset(0.5, 0.5, 0.5).extra(0.1).spawn();
+      ParticleUtil.of(Particle.LAVA, EntityUtil.entityCenter(entity)).count(4).offset(0.5).extra(0.1).spawn(user.world());
       return true;
     }
     return false;
@@ -228,11 +220,10 @@ public class LavaDisk extends AbilityInstance {
     if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
       TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
-      ParticleUtil.of(Particle.LAVA, block.getLocation())
-        .offset(0.5, 0.5, 0.5).extra(0.05).spawn();
+      Vector3d center = Vector3d.center(block);
+      ParticleUtil.of(Particle.LAVA, center).offset(0.5).extra(0.05).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        Location center = block.getLocation().add(0.5, 0.5, 0.5);
-        SoundUtil.playSound(center, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
+        SoundUtil.playSound(block, Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F);
       }
       return true;
     }
@@ -252,10 +243,10 @@ public class LavaDisk extends AbilityInstance {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
         Vector3d temp = new Vector3d(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
-        Location loc = location.add(VectorUtil.rotateAroundAxisY(temp, cos, sin)).toLocation(user.world());
-        ParticleUtil.rgb(loc, colors[index], size).spawn();
+        Vector3d loc = location.add(VectorUtil.rotateAroundAxisY(temp, cos, sin));
+        ParticleUtil.rgb(loc, colors[index], size).spawn(user.world());
         if (length > 0.5) {
-          damageBlock(loc.getBlock());
+          damageBlock(loc.toBlock(user.world()));
         }
       }
       offset += 4;

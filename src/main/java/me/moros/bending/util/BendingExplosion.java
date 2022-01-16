@@ -36,8 +36,8 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -72,41 +72,37 @@ public final class BendingExplosion {
     sizeFactor = Math.sqrt(size);
   }
 
-  private void playParticles(Location center) {
+  private void playParticles(World world, Vector3d center) {
     if (size <= 1.5) {
-      ParticleUtil.of(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size))
-        .offset(0.75, 0.75, 0.75).spawn();
+      ParticleUtil.of(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size)).offset(0.75).spawn(world);
     } else if (size <= 3) {
-      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size))
-        .offset(1.5, 1.5, 1.5).spawn();
+      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size)).offset(1.5).spawn(world);
     } else if (size <= 5) {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).spawn();
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).offset(2).spawn(world);
     } else {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5))
-        .offset(2.5, 2.5, 2.5).spawn();
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5)).offset(2.5).spawn(world);
     }
   }
 
   public boolean explode(@NonNull Ability source, @NonNull Vector3d center) {
     User user = source.user();
+    World world = user.world();
     AbilityDescription desc = source.description();
-    Location bukkitLoc = center.toLocation(user.world());
-
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = breakBlocks ? WorldUtil.nearbyBlocks(bukkitLoc, size, predicate) : new ArrayList<>();
+    Collection<Block> blocks = breakBlocks ? WorldUtil.nearbyBlocks(world, center, size, predicate) : new ArrayList<>();
 
-    if (Bending.eventBus().postExplosionEvent(user, bukkitLoc, blocks, size).isCancelled()) {
+    if (Bending.eventBus().postExplosionEvent(user, center, blocks, size).isCancelled()) {
       return false;
     }
 
     if (particles) {
-      playParticles(bukkitLoc);
+      playParticles(world, center);
     }
     if (sound != null) {
-      sound.play(bukkitLoc);
+      sound.play(world, center);
     }
 
-    if (breakBlocks && !blocks.isEmpty() && !bukkitLoc.getBlock().isLiquid()) {
+    if (breakBlocks && !blocks.isEmpty() && !center.toBlock(world).isLiquid()) {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       blocks.removeIf(b -> !user.canBuild(b));
       for (Block block : blocks) {

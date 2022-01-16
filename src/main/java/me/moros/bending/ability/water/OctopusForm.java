@@ -179,7 +179,7 @@ public class OctopusForm extends AbilityInstance {
       return;
     }
     if (MaterialUtil.isWater(block)) {
-      ParticleUtil.bubble(block).spawn();
+      ParticleUtil.bubble(block).spawn(user.world());
     } else if (MaterialUtil.isTransparent(block)) {
       TempBlock.water().duration(250).build(block).ifPresent(affectedBlocks::add);
     }

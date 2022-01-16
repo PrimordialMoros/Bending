@@ -121,14 +121,14 @@ public class FireWheel extends AbilityInstance {
     public void render() {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
       VectorUtil.circle(this.ray.direction.multiply(this.radius), rotateAxis, 36).forEach(v ->
-        ParticleUtil.fire(user, location.add(v).toLocation(user.world())).extra(0.01).spawn()
+        ParticleUtil.fire(user, location.add(v)).extra(0.01).spawn(user.world())
       );
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE.play(location.toLocation(user.world()));
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 

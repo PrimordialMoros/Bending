@@ -159,17 +159,17 @@ public class FireWall extends AbilityInstance {
         double speed = 1 - (h / (2 * currentHeight));
         if (MaterialUtil.isTransparent(block)) {
           if (h == 0) {
-            ParticleUtil.fire(user, pos.toLocation(user.world())).count(10)
-              .offset(0.5, 0.25, 0.5).extra(0.01).spawn();
+            ParticleUtil.fire(user, pos).count(10)
+              .offset(0.5, 0.25, 0.5).extra(0.01).spawn(user.world());
           } else {
             for (int i = 0; i < 2; i++) {
               Vector3d center = VectorUtil.gaussianOffset(pos, 0.4);
-              ParticleUtil.fire(user, center.toLocation(user.world())).count(0)
-                .offset(0, 1, 0).extra(0.07 * speed).spawn();
+              ParticleUtil.fire(user, center).count(0)
+                .offset(0, 1, 0).extra(0.07 * speed).spawn(user.world());
             }
           }
           if (ThreadLocalRandom.current().nextInt(15) == 0) {
-            SoundUtil.FIRE.play(pos.toLocation(user.world()));
+            SoundUtil.FIRE.play(user.world(), pos);
           }
         }
       }

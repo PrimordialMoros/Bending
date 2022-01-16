@@ -124,7 +124,7 @@ public class WaterBubble extends AbilityInstance {
 
   private void pushWater() {
     bubble.removeIf(this::checkBlockOutOfRange);
-    for (Block block : WorldUtil.nearbyBlocks(user.entity().getLocation(), radius, MaterialUtil::isWater)) {
+    for (Block block : WorldUtil.nearbyBlocks(user.world(), user.location(), radius, MaterialUtil::isWater)) {
       if (!user.canBuild(block)) {
         continue;
       }

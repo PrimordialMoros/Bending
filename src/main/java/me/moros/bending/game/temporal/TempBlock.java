@@ -174,6 +174,7 @@ public final class TempBlock implements Temporary {
 
   private void revertFully() {
     if (reverted || snapshots.isEmpty()) {
+      reverted = true;
       return;
     }
     revertToSnapshot(snapshots.pollFirst());

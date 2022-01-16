@@ -48,7 +48,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -152,15 +151,11 @@ public class Combustion extends AbilityInstance implements Explosive {
       return;
     }
     exploded = true;
-    Location loc = center.toLocation(user.world());
-    ParticleUtil.of(Particle.FLAME, loc).extra(0.2).count(20)
-      .offset(1, 1, 1).spawn();
-    ParticleUtil.of(Particle.SMOKE_LARGE, loc).extra(0.2).count(20)
-      .offset(1, 1, 1).spawn();
-    ParticleUtil.of(Particle.FIREWORKS_SPARK, loc).extra(0.2).count(20)
-      .offset(1, 1, 1).spawn();
+    ParticleUtil.of(Particle.FLAME, center).extra(0.2).count(20).offset(1).spawn(user.world());
+    ParticleUtil.of(Particle.SMOKE_LARGE, center).extra(0.2).count(20).offset(1).spawn(user.world());
+    ParticleUtil.of(Particle.FIREWORKS_SPARK, center).extra(0.2).count(20).offset(1).spawn(user.world());
 
-    FragileStructure.tryDamageStructure(WorldUtil.nearbyBlocks(loc, size, WaterMaterials::isIceBendable), 0);
+    FragileStructure.tryDamageStructure(WorldUtil.nearbyBlocks(user.world(), center, size, WaterMaterials::isIceBendable), 0);
 
     BendingExplosion.builder()
       .size(size)
@@ -188,9 +183,8 @@ public class Combustion extends AbilityInstance implements Explosive {
     public void render() {
       distanceTravelled += speed;
       renderRing();
-      Location bukkitLocation = bukkitLocation();
-      ParticleUtil.of(Particle.SMOKE_NORMAL, bukkitLocation).extra(0.06).spawn();
-      ParticleUtil.of(Particle.FIREWORKS_SPARK, bukkitLocation).extra(0.06).spawn();
+      ParticleUtil.of(Particle.SMOKE_NORMAL, location).extra(0.06).spawn(user.world());
+      ParticleUtil.of(Particle.FIREWORKS_SPARK, location).extra(0.06).spawn(user.world());
     }
 
     @Override
@@ -200,13 +194,13 @@ public class Combustion extends AbilityInstance implements Explosive {
 
     private void renderRing() {
       if (distanceTravelled >= randomBeamDistance) {
-        SoundUtil.COMBUSTION.play(bukkitLocation(), 1.5F, 0);
+        SoundUtil.COMBUSTION.play(user.world(), location, 1.5F, 0);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
           Vector3d velocity = v.multiply(radius);
-          ParticleUtil.of(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)).toLocation(user.world()))
-            .count(0).offset(velocity.getX(), velocity.getY(), velocity.getZ()).extra(0.09).spawn();
+          ParticleUtil.of(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)))
+            .count(0).offset(velocity).extra(0.09).spawn(user.world());
         });
       }
     }
@@ -214,7 +208,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.COMBUSTION.play(bukkitLocation());
+        SoundUtil.COMBUSTION.play(user.world(), location);
       }
     }
 

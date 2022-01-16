@@ -136,10 +136,9 @@ public class Catapult extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
 
     Vector3d origin = user.location().add(new Vector3d(0, 0.5, 0));
-    SoundUtil.EARTH.play(origin.toLocation(user.world()));
+    SoundUtil.EARTH.play(user.world(), origin);
     if (base != null) {
-      ParticleUtil.of(Particle.BLOCK_CRACK, origin.toLocation(user.world()))
-        .count(8).offset(0.4, 0.4, 0.4).data(base.getBlockData()).spawn();
+      ParticleUtil.of(Particle.BLOCK_CRACK, origin).count(8).offset(0.4).data(base.getBlockData()).spawn(user.world());
     }
 
     Vector3d direction = forceVertical ? Vector3d.PLUS_J : user.direction();

@@ -281,7 +281,7 @@ public final class AbilityInitializer {
       .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).build());
+      .element(EARTH).activation(PASSIVE).canBind(false).require("bending.metal").build());
 
     abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
       .element(EARTH).activation(SNEAK, ATTACK).bypassCooldown(true).build());
@@ -325,10 +325,10 @@ public final class AbilityInitializer {
       .element(EARTH).activation(SNEAK, FALL).build());
 
     abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
-      .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).build());
+      .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).require("bending.metal").build());
 
     abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
-      .element(EARTH).activation(SNEAK).build());
+      .element(EARTH).activation(SNEAK).require("bending.lava").build());
 
     Sequence bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
       .element(EARTH).activation(SEQUENCE).hidden(true).buildSequence(

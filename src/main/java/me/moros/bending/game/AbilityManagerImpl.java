@@ -100,15 +100,17 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
+  public boolean destroyInstanceType(@NonNull User user, @NonNull Collection<Class<? extends Ability>> types) {
     boolean destroyed = false;
     Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
     while (iterator.hasNext()) {
       Ability ability = iterator.next();
-      if (type.isInstance(ability)) {
-        iterator.remove();
-        ability.onDestroy();
-        destroyed = true;
+      for (var type : types) {
+        if (type.isInstance(ability)) {
+          iterator.remove();
+          ability.onDestroy();
+          destroyed = true;
+        }
       }
     }
     return destroyed;

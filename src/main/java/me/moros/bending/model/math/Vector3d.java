@@ -315,7 +315,10 @@ public class Vector3d {
   }
 
   public org.bukkit.util.@NonNull Vector clampVelocity() {
-    return min(MAX_VELOCITY).max(MIN_VELOCITY).toBukkitVector();
+    double clampedX = Math.min(MAX_VELOCITY.x, Math.max(MIN_VELOCITY.x, x));
+    double clampedY = Math.min(MAX_VELOCITY.y, Math.max(MIN_VELOCITY.y, y));
+    double clampedZ = Math.min(MAX_VELOCITY.z, Math.max(MIN_VELOCITY.z, z));
+    return new org.bukkit.util.Vector(clampedX, clampedY, clampedZ);
   }
 
   public org.bukkit.util.@NonNull Vector toBukkitVector() {

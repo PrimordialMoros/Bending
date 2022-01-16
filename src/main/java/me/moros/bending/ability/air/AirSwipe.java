@@ -115,7 +115,7 @@ public class AirSwipe extends AbilityInstance {
     }
     if (charging) {
       if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-        ParticleUtil.air(user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.air(user.mainHandSide()).spawn(user.world());
       } else if (!user.sneaking()) {
         launch();
       }
@@ -184,13 +184,13 @@ public class AirSwipe extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.air(bukkitLocation()).spawn();
+      ParticleUtil.air(location).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR.play(bukkitLocation());
+        SoundUtil.AIR.play(user.world(), location);
       }
     }
 

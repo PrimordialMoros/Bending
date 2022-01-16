@@ -55,7 +55,7 @@ public final class Game {
     sequenceManager = new SequenceManager();
     worldManager = new WorldManager();
 
-    activationController = new ActivationController();
+    activationController = new ActivationController(sequenceManager, worldManager);
     boardManager = new BoardManager();
 
     new AbilityInitializer();
@@ -124,10 +124,6 @@ public final class Game {
 
   public @NonNull FlightManager flightManager() {
     return flightManager;
-  }
-
-  public @NonNull SequenceManager sequenceManager() {
-    return sequenceManager;
   }
 
   public @NonNull AbilityManager abilityManager(@NonNull World world) {

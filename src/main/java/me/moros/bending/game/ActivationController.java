@@ -21,6 +21,7 @@ package me.moros.bending.game;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +34,7 @@ import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.earth.EarthArmor;
 import me.moros.bending.ability.earth.EarthLine;
 import me.moros.bending.ability.earth.EarthSmash;
+import me.moros.bending.ability.earth.EarthSurf;
 import me.moros.bending.ability.earth.passive.DensityShift;
 import me.moros.bending.ability.earth.passive.FerroControl;
 import me.moros.bending.ability.earth.sequence.EarthPillars;
@@ -47,7 +49,6 @@ import me.moros.bending.ability.water.sequence.Iceberg;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
@@ -73,9 +74,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class ActivationController {
   private final ControllerCache cache;
+  private final SequenceManager sequenceManager;
+  private final WorldManager worldManager;
 
-  ActivationController() {
+  ActivationController(SequenceManager sequenceManager, WorldManager worldManager) {
     this.cache = new ControllerCache();
+    this.sequenceManager = sequenceManager;
+    this.worldManager = worldManager;
   }
 
   public @Nullable Ability activateAbility(@NonNull User user, @NonNull Activation method) {
@@ -89,7 +94,7 @@ public final class ActivationController {
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
-      Bending.game().abilityManager(user.world()).addAbility(user, ability);
+      worldManager.instance(user.world()).addAbility(user, ability);
       return ability;
     }
     return null;
@@ -97,7 +102,7 @@ public final class ActivationController {
 
   public void onUserDeconstruct(@NonNull User user) {
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
-    Bending.game().abilityManager(user.world()).destroyUserInstances(user);
+    worldManager.instance(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
       Bending.game().storage().savePlayerAsync(bendingPlayer);
     }
@@ -112,8 +117,7 @@ public final class ActivationController {
     if (cache.ignoreSwing.contains(user.uuid())) {
       return;
     }
-    AbilityManager manager = Bending.game().abilityManager(user.world());
-    if (manager.destroyInstanceType(user, AirScooter.class) || manager.destroyInstanceType(user, AirWheel.class)) {
+    if (worldManager.instance(user.world()).destroyInstanceType(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
       return;
     }
     ignoreNextSwing(user);
@@ -124,11 +128,8 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    if (user.compositeRayTrace(3).result(user.world(), Type.ENTITY).hit()) {
-      Bending.game().sequenceManager().registerStep(user, Activation.ATTACK_ENTITY);
-    } else {
-      Bending.game().sequenceManager().registerStep(user, Activation.ATTACK);
-    }
+    boolean hit = user.compositeRayTrace(3).type(Type.ENTITY).result(user.world()).hit();
+    sequenceManager.registerStep(user, hit ? Activation.ATTACK_ENTITY : Activation.ATTACK);
     activateAbility(user, Activation.ATTACK);
   }
 
@@ -139,9 +140,8 @@ public final class ActivationController {
     }
 
     Activation action = sneaking ? Activation.SNEAK : Activation.SNEAK_RELEASE;
-    Bending.game().sequenceManager().registerStep(user, action);
+    sequenceManager.registerStep(user, action);
     activateAbility(user, action);
-    Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
   }
 
   public void onUserMove(@NonNull User user, @NonNull Vector3d velocity) {
@@ -160,7 +160,7 @@ public final class ActivationController {
   }
 
   public void onUserDamage(@NonNull User user) {
-    Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirScooter.class);
+    worldManager.instance(user.world()).destroyInstanceType(user, List.of(AirScooter.class, EarthSurf.class));
   }
 
   public double onEntityDamage(@NonNull LivingEntity entity, @NonNull DamageCause cause, double damage) {
@@ -185,7 +185,7 @@ public final class ActivationController {
   }
 
   private boolean onBurn(@NonNull User user) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
+    if (worldManager.instance(user.world()).hasAbility(user, FireJet.class)) {
       return false;
     }
     if (EarthArmor.hasArmor(user)) {
@@ -246,7 +246,7 @@ public final class ActivationController {
     }
     EarthLine.prisonMode(user);
 
-    Bending.game().sequenceManager().registerStep(user, method);
+    sequenceManager.registerStep(user, method);
     activateAbility(user, method);
   }
 
@@ -255,7 +255,7 @@ public final class ActivationController {
   }
 
   // Optimize player move events by caching instances every tick
-  private static final class ControllerCache {
+  private final class ControllerCache {
     private final Map<UUID, AirSpout> airSpoutCache;
     private final Map<UUID, WaterSpout> waterSpoutCache;
     private final Set<UUID> ignoreSwing;
@@ -267,13 +267,11 @@ public final class ActivationController {
     }
 
     private @Nullable AirSpout getAirSpout(@NonNull User user) {
-      UUID uuid = user.uuid();
-      return airSpoutCache.computeIfAbsent(uuid, u -> Bending.game().abilityManager(user.world()).firstInstance(user, AirSpout.class).orElse(null));
+      return airSpoutCache.computeIfAbsent(user.uuid(), u -> worldManager.instance(user.world()).firstInstance(user, AirSpout.class).orElse(null));
     }
 
     private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
-      UUID uuid = user.uuid();
-      return waterSpoutCache.computeIfAbsent(uuid, u -> Bending.game().abilityManager(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
+      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> worldManager.instance(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
     }
 
     private void clear() {

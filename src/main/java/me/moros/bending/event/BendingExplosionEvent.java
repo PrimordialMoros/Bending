@@ -22,8 +22,8 @@ package me.moros.bending.event;
 import java.util.Collection;
 import java.util.List;
 
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -31,8 +31,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class BendingExplosionEvent extends EntityExplodeEvent {
   private final User user;
 
-  BendingExplosionEvent(User user, Location location, Collection<Block> blocks, float yield) {
-    super(user.entity(), location, List.copyOf(blocks), yield);
+  BendingExplosionEvent(User user, Vector3d location, Collection<Block> blocks, float yield) {
+    super(user.entity(), location.toLocation(user.world()), List.copyOf(blocks), yield);
     this.user = user;
   }
 

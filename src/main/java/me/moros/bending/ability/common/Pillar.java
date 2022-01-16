@@ -150,7 +150,7 @@ public class Pillar implements Updatable, Iterable<Block> {
   }
 
   public void playSound(@NonNull Block block) {
-    SoundUtil.EARTH.play(block.getLocation());
+    SoundUtil.EARTH.play(block);
   }
 
   public boolean onEntityHit(@NonNull Entity entity) {

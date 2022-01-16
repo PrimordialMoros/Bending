@@ -119,7 +119,7 @@ public class AirBlast extends AbilityInstance {
       if (!description().equals(user.selectedAbility())) {
         return UpdateResult.REMOVE;
       }
-      ParticleUtil.air(origin.toLocation(user.world())).count(4).offset(0.5, 0.5, 0.5).spawn();
+      ParticleUtil.air(origin).count(4).offset(0.5).spawn(user.world());
     }
 
     return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -164,15 +164,13 @@ public class AirBlast extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.air(bukkitLocation()).count(6)
-        .offset(0.275, 0.275, 0.275)
-        .spawn();
+      ParticleUtil.air(location).count(6).offset(0.275).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.AIR.play(bukkitLocation());
+        SoundUtil.AIR.play(user.world(), location);
       }
 
       // Handle user separately from the general entity collision.

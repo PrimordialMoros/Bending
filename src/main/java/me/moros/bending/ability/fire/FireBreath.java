@@ -50,7 +50,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -138,17 +137,16 @@ public class FireBreath extends AbilityInstance {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = bukkitLocation();
       double offset = 0.2 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.fire(user, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
-        .offset(offset, offset, offset).extra(0.02).spawn();
+      ParticleUtil.fire(user, location).count(FastMath.ceil(0.75 * distanceTravelled))
+        .offset(offset).extra(0.02).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation());
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 

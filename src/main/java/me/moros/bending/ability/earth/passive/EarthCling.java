@@ -84,10 +84,10 @@ public class EarthCling extends AbilityInstance implements Ability {
           float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
           EntityUtil.applyVelocity(this, user.entity(), user.velocity().multiply(userConfig.speed));
           user.entity().setFallDistance(fallDistance);
-          ParticleUtil.of(Particle.CRIT, user.entity().getEyeLocation()).count(2)
-            .offset(0.05, 0.4, 0.05);
-          ParticleUtil.of(Particle.BLOCK_CRACK, user.entity().getEyeLocation()).count(3)
-            .offset(0.1, 0.4, 0.1).data(STONE);
+          ParticleUtil.of(Particle.CRIT, user.location()).count(2)
+            .offset(0.05, 0.4, 0.05).spawn(user.world());
+          ParticleUtil.of(Particle.BLOCK_CRACK, user.location()).count(3)
+            .offset(0.1, 0.4, 0.1).data(STONE).spawn(user.world());
         }
       }
     }

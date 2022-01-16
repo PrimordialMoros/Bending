@@ -19,11 +19,13 @@
 
 package me.moros.bending.util;
 
+import me.moros.bending.model.math.Vector3d;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Source;
 import net.kyori.adventure.sound.Sound.Type;
-import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,16 +59,28 @@ public final class SoundUtil {
   private SoundUtil() {
   }
 
-  public static void playSound(@NonNull Location center, @NonNull Sound sound) {
-    center.getWorld().playSound(sound, center.getX(), center.getY(), center.getZ());
+  public static void playSound(@NonNull Block block, @NonNull Sound sound) {
+    block.getWorld().playSound(sound, block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5);
   }
 
-  public static void playSound(@NonNull Location center, @NonNull Sound sound, float volume, float pitch) {
-    playSound(center, Sound.sound(sound.name(), sound.source(), volume, pitch));
+  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Sound sound) {
+    world.playSound(sound, center.getX(), center.getY(), center.getZ());
   }
 
-  public static void playSound(@NonNull Location center, Type sound, float volume, float pitch) {
-    of(sound, volume, pitch).play(center);
+  public static void playSound(@NonNull Block block, @NonNull Sound sound, float volume, float pitch) {
+    playSound(block, Sound.sound(sound.name(), sound.source(), volume, pitch));
+  }
+
+  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Sound sound, float volume, float pitch) {
+    playSound(world, center, Sound.sound(sound.name(), sound.source(), volume, pitch));
+  }
+
+  public static void playSound(@NonNull Block block, @NonNull Type sound, float volume, float pitch) {
+    of(sound, volume, pitch).play(block);
+  }
+
+  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Type sound, float volume, float pitch) {
+    of(sound, volume, pitch).play(world, center);
   }
 
   private static SoundEffect of(Type sound) {
@@ -92,12 +106,16 @@ public final class SoundUtil {
       this.sound = sound;
     }
 
-    public void play(@NonNull Location center) {
-      playSound(center, sound);
+    public void play(@NonNull Block block) {
+      playSound(block, sound);
     }
 
-    public void play(@NonNull Location center, float volume, float pitch) {
-      playSound(center, sound, volume, pitch);
+    public void play(@NonNull World world, @NonNull Vector3d center) {
+      playSound(world, center, sound);
+    }
+
+    public void play(@NonNull World world, @NonNull Vector3d center, float volume, float pitch) {
+      playSound(world, center, sound, volume, pitch);
     }
 
     @Override

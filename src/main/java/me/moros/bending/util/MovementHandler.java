@@ -35,6 +35,8 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.bossbar.BossBar.Color;
+import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -99,13 +101,17 @@ public class MovementHandler {
     return disableActions(c);
   }
 
+  private static MovementHandler dummy() {
+    if (DUMMY == null) {
+      DUMMY = new DummyMovementHandler();
+    }
+    return DUMMY;
+  }
+
   public static @NonNull MovementHandler restrictEntity(@NonNull User user, @NonNull LivingEntity entity, long duration) {
     BendingRestrictEvent event = Bending.eventBus().postRestrictEvent(user, entity, duration);
     if (event.isCancelled() || event.duration() <= 0) {
-      if (DUMMY == null) {
-        DUMMY = new DummyMovementHandler();
-      }
-      return DUMMY;
+      return dummy();
     }
     return instances.computeIfAbsent(entity.getUniqueId(), e -> new MovementHandler(entity, event.duration()));
   }
@@ -148,7 +154,7 @@ public class MovementHandler {
       this.duration = duration;
       endTime = System.currentTimeMillis() + duration;
       Component name = Component.text("Restricted");
-      bar = BossBar.bossBar(name, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+      bar = BossBar.bossBar(name, 1, Color.YELLOW, Overlay.PROGRESS);
       barTask = Tasker.repeat(this::updateBar, 1);
     }
 

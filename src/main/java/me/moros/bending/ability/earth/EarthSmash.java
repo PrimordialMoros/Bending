@@ -70,7 +70,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -243,11 +242,9 @@ public class EarthSmash extends AbilityInstance {
         TempFallingBlock projectile = TempFallingBlock.builder(blockData).velocity(velocity)
           .duration(5000).build(block);
         shards.put(projectile, shardType(blockData.getMaterial()));
-        Location spawnLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4)
-          .offset(0.5, 0.5, 0.5).data(blockData).spawn();
+        ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block)).count(4).offset(0.5).data(blockData).spawn(block.getWorld());
         if (ThreadLocalRandom.current().nextBoolean()) {
-          SoundUtil.playSound(spawnLoc, blockData.getSoundGroup().getBreakSound(), 1, 1);
+          SoundUtil.playSound(block, blockData.getSoundGroup().getBreakSound(), 1, 1);
         }
       }
       boulder.data.clear();
@@ -327,7 +324,7 @@ public class EarthSmash extends AbilityInstance {
     public @NonNull UpdateResult update() {
       if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
         if (user.sneaking()) {
-          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide()).spawn(user.world());
           return UpdateResult.CONTINUE;
         } else {
           return createBoulder() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -368,7 +365,7 @@ public class EarthSmash extends AbilityInstance {
       nextLiftTime = time + 70;
       cleanAll();
       boulder.center(boulder.center.add(Vector3d.PLUS_J).toBlock(boulder.world));
-      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
+      SoundUtil.EARTH.play(boulder.world, boulder.center);
       render();
       clearSourceArea();
       return UpdateResult.CONTINUE;
@@ -446,7 +443,7 @@ public class EarthSmash extends AbilityInstance {
       origin = new Vector3d(boulder.center.toArray());
       location = new Vector3d(origin.toArray());
       direction = user.direction();
-      SoundUtil.EARTH.play(boulder.center.toLocation(boulder.world));
+      SoundUtil.EARTH.play(boulder.world, boulder.center);
       buffer = speed;
     }
 

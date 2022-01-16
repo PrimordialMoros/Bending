@@ -42,12 +42,14 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.packet.PacketUtil;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -127,7 +129,7 @@ public class EarthSurf extends AbilityInstance {
     if (charging) {
       if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
         if (user.sneaking()) {
-          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide()).spawn(user.world());
           return UpdateResult.CONTINUE;
         } else {
           return launch() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
@@ -192,6 +194,9 @@ public class EarthSurf extends AbilityInstance {
     @Override
     public void postRender() {
       center = user.location().subtract(new Vector3d(0, 0.5, 0));
+      if (ticks % 4 == 0) {
+        SoundUtil.playSound(user.world(), center, Sound.BLOCK_ROOTED_DIRT_FALL, 0.6F, 0);
+      }
       CollisionUtil.handle(user, new Sphere(center, 1.2), this::onEntityHit, false);
     }
 

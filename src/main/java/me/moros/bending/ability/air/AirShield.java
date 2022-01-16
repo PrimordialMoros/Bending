@@ -107,14 +107,13 @@ public class AirShield extends AbilityInstance {
       double x = userConfig.radius * factor * Math.cos(i * currentPoint);
       double z = userConfig.radius * factor * Math.sin(i * currentPoint);
       Vector3d loc = center.add(new Vector3d(x, y, z));
-      ParticleUtil.air(loc.toLocation(user.world())).count(5)
-        .offset(0.2, 0.2, 0.2).spawn();
+      ParticleUtil.air(loc).count(5).offset(0.2).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.AIR.play(loc.toLocation(user.world()));
+        SoundUtil.AIR.play(user.world(), loc);
       }
     }
 
-    for (Block b : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isFire)) {
+    for (Block b : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, MaterialUtil::isFire)) {
       WorldUtil.tryCoolLava(user, b);
       WorldUtil.tryExtinguishFire(user, b);
     }
@@ -152,7 +151,7 @@ public class AirShield extends AbilityInstance {
   public void onCollision(@NonNull Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
-      for (Block block : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparentOrWater)) {
+      for (Block block : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, MaterialUtil::isTransparentOrWater)) {
         if (!user.canBuild(block)) {
           continue;
         }

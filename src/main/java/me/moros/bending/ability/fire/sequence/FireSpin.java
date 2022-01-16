@@ -108,13 +108,13 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.fire(user, bukkitLocation()).extra(0.01).spawn();
+      ParticleUtil.fire(user, location).extra(0.01).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation());
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 

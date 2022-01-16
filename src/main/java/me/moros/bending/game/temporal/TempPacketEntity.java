@@ -26,7 +26,6 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.packet.PacketUtil;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
@@ -119,16 +118,15 @@ public final class TempPacketEntity implements Temporary {
         case ARMOR_STAND -> PacketUtil.createArmorStand(world, center, data.getMaterial(), velocity, gravity);
       };
       if (particles) {
-        spawnParticles(center.add(armorStandOffset).toLocation(world));
+        spawnParticles(world, type == Type.ARMOR_STAND ? center.add(armorStandOffset) : center);
       }
       return new TempPacketEntity(id, duration);
     }
 
-    private void spawnParticles(Location spawnLoc) {
-      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(0.25, 0.125, 0.25)
-        .data(data).spawn();
-      ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(0.25, 0.125, 0.25)
-        .data(data).spawn();
+    private void spawnParticles(World world, Vector3d spawnLoc) {
+      Vector3d offset = new Vector3d(0.25, 0.125, 0.25);
+      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(offset).data(data).spawn(world);
+      ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(offset).data(data).spawn(world);
     }
   }
 }

@@ -128,7 +128,7 @@ public class Shockwave extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide()).spawn(user.world());
         if (!user.sneaking() && !release(false)) {
           return UpdateResult.REMOVE;
         }
@@ -259,10 +259,10 @@ public class Shockwave extends AbilityInstance {
       blockBuffer.add(below);
       BlockData data = below.getBlockData();
       TempPacketEntity.builder(data).velocity(velocity).duration(500).buildFallingBlock(user.world(), Vector3d.center(below));
-      ParticleUtil.of(Particle.BLOCK_CRACK, block.getLocation().add(0.5, 1.25, 0.5))
-        .count(5).offset(0.5, 0.25, 0.5).data(data).spawn();
+      ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(new Vector3d(0, 0.75, 0)))
+        .count(5).offset(0.5, 0.25, 0.5).data(data).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.EARTH.play(block.getLocation());
+        SoundUtil.EARTH.play(block);
       }
     }
   }

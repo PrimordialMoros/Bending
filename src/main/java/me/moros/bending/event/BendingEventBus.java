@@ -21,7 +21,6 @@ package me.moros.bending.event;
 
 import java.util.Collection;
 
-import me.moros.bending.Bending;
 import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -30,97 +29,80 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.plugin.PluginManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * The event bus is responsible for posting bending events.
  */
-public final class BendingEventBus {
-  private final PluginManager manager;
-
-  public BendingEventBus(@NonNull Bending plugin) {
-    manager = plugin.getServer().getPluginManager();
-  }
+public enum BendingEventBus {
+  INSTANCE;
 
   public void postPlayerLoadEvent(@NonNull BendingPlayer player) {
-    manager.callEvent(new BendingPlayerLoadEvent(player));
+    new BendingPlayerLoadEvent(player).callEvent();
   }
 
   /**
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postCooldownAddEvent(@NonNull User user, @NonNull AbilityDescription desc, long duration) {
-    CooldownAddEvent event = new CooldownAddEvent(user, desc, duration);
-    manager.callEvent(event);
-    return !event.isCancelled();
+    return new CooldownAddEvent(user, desc, duration).callEvent();
   }
 
   public void postCooldownRemoveEvent(@NonNull User user, @NonNull AbilityDescription desc) {
-    manager.callEvent(new CooldownRemoveEvent(user, desc));
+    new CooldownRemoveEvent(user, desc).callEvent();
   }
 
   /**
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postElementChangeEvent(@NonNull User user, @NonNull ElementAction type) {
-    ElementChangeEvent event = new ElementChangeEvent(user, type);
-    manager.callEvent(event);
-    return !event.isCancelled();
+    return new ElementChangeEvent(user, type).callEvent();
   }
 
   /**
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postBindChangeEvent(@NonNull User user, @NonNull BindType type) {
-    BindChangeEvent event = new BindChangeEvent(user, type);
-    manager.callEvent(event);
-    return !event.isCancelled();
+    return new BindChangeEvent(user, type).callEvent();
   }
 
   /**
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postPresetCreateEvent(@NonNull User user, @NonNull Preset preset) {
-    if (preset.isEmpty()) {
-      return false;
-    }
-    PresetCreateEvent event = new PresetCreateEvent(user, preset);
-    manager.callEvent(event);
-    return !event.isCancelled();
+    return !preset.isEmpty() && new PresetCreateEvent(user, preset).callEvent();
   }
 
   public @NonNull BendingTickEffectEvent postTickEffectEvent(@NonNull User source, @NonNull Entity target, int duration, @NonNull BendingEffect type) {
     BendingTickEffectEvent event = new BendingTickEffectEvent(source, target, duration, type);
-    manager.callEvent(event);
+    event.callEvent();
     return event;
   }
 
   public @NonNull BendingDamageEvent postAbilityDamageEvent(@NonNull User source, @NonNull Entity target, @NonNull AbilityDescription desc, double damage) {
     BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
-    manager.callEvent(event);
+    event.callEvent();
     return event;
   }
 
-  public @NonNull BendingExplosionEvent postExplosionEvent(@NonNull User source, @NonNull Location center, @NonNull Collection<@NonNull Block> blocks, double power) {
+  public @NonNull BendingExplosionEvent postExplosionEvent(@NonNull User source, @NonNull Vector3d center, @NonNull Collection<@NonNull Block> blocks, double power) {
     BendingExplosionEvent event = new BendingExplosionEvent(source, center, blocks, (float) power);
-    manager.callEvent(event);
+    event.callEvent();
     return event;
   }
 
   public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
     BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
-    manager.callEvent(event);
+    event.callEvent();
     return event;
   }
 
   public @NonNull BendingVelocityEvent postVelocityEvent(@NonNull User source, @NonNull LivingEntity target, @NonNull AbilityDescription desc, @NonNull Vector3d velocity) {
     BendingVelocityEvent event = new BendingVelocityEvent(source, target, desc, velocity);
-    manager.callEvent(event);
+    event.callEvent();
     return event;
   }
 }

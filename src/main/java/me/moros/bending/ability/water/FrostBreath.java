@@ -46,18 +46,17 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingProperties;
+import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -139,18 +138,17 @@ public class FrostBreath extends AbilityInstance {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      ParticleUtil.of(Particle.SNOW_SHOVEL, spawnLoc).count(FastMath.ceil(0.75 * distanceTravelled))
-        .offset(offset, offset, offset).extra(0.02).spawn();
-      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(FastMath.ceil(0.4 * distanceTravelled))
-        .offset(offset, offset, offset).extra(0.02).data(Material.ICE.createBlockData()).spawn();
+      ParticleUtil.of(Particle.SNOW_SHOVEL, location).count(FastMath.ceil(0.75 * distanceTravelled))
+        .offset(offset).extra(0.02).spawn(user.world());
+      ParticleUtil.of(Particle.BLOCK_CRACK, location).count(FastMath.ceil(0.4 * distanceTravelled))
+        .offset(offset).extra(0.02).data(Material.ICE.createBlockData()).spawn(user.world());
     }
 
     @Override
     public void postRender() {
-      for (Block block : WorldUtil.nearbyBlocks(bukkitLocation(), collider.radius)) {
+      for (Block block : WorldUtil.nearbyBlocks(user.world(), location, collider.radius)) {
         if (!user.canBuild(block)) {
           continue;
         }
@@ -163,8 +161,8 @@ public class FrostBreath extends AbilityInstance {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-        ParticleUtil.of(Particle.BLOCK_CRACK, ((LivingEntity) entity).getEyeLocation()).count(5)
-          .offset(0.5, 0.5, 0.5).data(Material.ICE.createBlockData()).spawn();
+        ParticleUtil.of(Particle.BLOCK_CRACK, EntityUtil.entityCenter(entity)).count(5)
+          .offset(0.5).data(Material.ICE.createBlockData()).spawn(user.world());
       }
       return false;
     }
@@ -175,7 +173,7 @@ public class FrostBreath extends AbilityInstance {
       if (MaterialUtil.isWater(block)) {
         TempBlock.ice().duration(duration).build(block);
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
-          SoundUtil.ICE.play(block.getLocation());
+          SoundUtil.ICE.play(block);
         }
       } else if (MaterialUtil.isTransparent(block)) {
         Block below = block.getRelative(BlockFace.DOWN);

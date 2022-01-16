@@ -37,7 +37,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
@@ -223,10 +222,6 @@ public final class RayTrace {
   }
 
   public @NonNull CompositeResult result(@NonNull World world) {
-    return result(world, type);
-  }
-
-  public @NonNull CompositeResult result(@NonNull World world, @NonNull Type type) {
     boolean checkEntities = type != Type.BLOCK;
 
     Vec3 startPos = new Vec3(origin.getX(), origin.getY(), origin.getZ());
@@ -242,8 +237,7 @@ public final class RayTrace {
 
     CompositeResult entityResult = new CompositeResult(endPoint, null, null);
     if (checkEntities) {
-      Location start = origin.toLocation(world);
-      RayTraceResult eResult = world.rayTraceEntities(start, direction.toBukkitVector(), blockHitDistance, raySize, entityPredicate);
+      RayTraceResult eResult = world.rayTraceEntities(origin.toLocation(world), direction.toBukkitVector(), blockHitDistance, raySize, entityPredicate);
       Vector3d pos = eResult == null ? endPoint : new Vector3d(eResult.getHitPosition());
       Entity entity = eResult == null ? null : eResult.getHitEntity();
       entityResult = new CompositeResult(pos, null, entity);

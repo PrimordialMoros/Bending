@@ -19,6 +19,8 @@
 
 package me.moros.bending.model;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -47,7 +49,11 @@ public interface AbilityManager {
   default void destroyInstance(@NonNull Ability ability) {
   }
 
-  default <T extends Ability> boolean destroyInstanceType(@NonNull User user, @NonNull Class<T> type) {
+  default boolean destroyInstanceType(@NonNull User user, @NonNull Class<? extends Ability> type) {
+    return destroyInstanceType(user, List.of(type));
+  }
+
+  default boolean destroyInstanceType(@NonNull User user, @NonNull Collection<@NonNull Class<? extends Ability>> types) {
     return true;
   }
 

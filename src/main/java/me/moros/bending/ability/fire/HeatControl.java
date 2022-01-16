@@ -35,6 +35,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
@@ -43,8 +44,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -94,7 +95,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       long time = System.currentTimeMillis();
       if (user.sneaking()) {
         if (isHoldingFood()) {
-          ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
+          ParticleUtil.fire(user, user.mainHandSide()).spawn(user.world());
           if (time > startTime + userConfig.cookInterval && cook()) {
             startTime = System.currentTimeMillis();
           }
@@ -143,12 +144,11 @@ public class HeatControl extends AbilityInstance implements Ability {
       return;
     }
     boolean acted = false;
-    Location center = user.compositeRayTrace(userConfig.range)
-      .result(user.world()).position().toLocation(user.world());
+    Vector3d center = user.compositeRayTrace(userConfig.range).result(user.world()).position();
     Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
-    for (Block block : WorldUtil.nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
+    for (Block block : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, predicate.and(safe))) {
       acted = true;
       if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block)) {
         WorldUtil.tryExtinguishFire(user, block);
@@ -169,9 +169,8 @@ public class HeatControl extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Location center = RayTrace.of(user).range(userConfig.solidifyRange)
-      .ignoreLiquids(false).result(user.world()).position().toLocation(user.world());
-    if (solidify.fillQueue(getShuffledBlocks(center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
+    Vector3d center = RayTrace.of(user).range(userConfig.solidifyRange).ignoreLiquids(false).result(user.world()).position();
+    if (solidify.fillQueue(getShuffledBlocks(user.world(), center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
       user.addCooldown(description(), userConfig.cooldown);
     }
   }
@@ -188,8 +187,8 @@ public class HeatControl extends AbilityInstance implements Ability {
     }
   }
 
-  private Collection<Block> getShuffledBlocks(Location center, double radius, Predicate<Block> predicate) {
-    List<Block> newBlocks = WorldUtil.nearbyBlocks(center, radius, predicate);
+  private Collection<Block> getShuffledBlocks(World world, Vector3d center, double radius, Predicate<Block> predicate) {
+    List<Block> newBlocks = WorldUtil.nearbyBlocks(world, center, radius, predicate);
     newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;

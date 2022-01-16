@@ -54,7 +54,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -109,7 +108,7 @@ public class FireBurst extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.fire(user, user.mainHandSide()).spawn(user.world());
         if (!user.sneaking()) {
           release(false);
         }
@@ -176,8 +175,7 @@ public class FireBurst extends AbilityInstance {
     public void render() {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
-        Location loc = bukkitLocation();
-        ParticleUtil.fire(user, loc).offset(0.2, 0.2, 0.2).extra(0.01).spawn();
+        ParticleUtil.fire(user, location).offset(0.2).extra(0.01).spawn(user.world());
         nextRenderTime = time + 75;
       }
     }
@@ -185,7 +183,7 @@ public class FireBurst extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation());
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 
@@ -203,11 +201,10 @@ public class FireBurst extends AbilityInstance {
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       Vector3d reverse = ray.direction.negate();
-      Location center = bukkitLocation();
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
       if (user.location().distanceSq(Vector3d.center(block)) > 4) {
-        for (Block b : WorldUtil.nearbyBlocks(center, igniteRadius)) {
+        for (Block b : WorldUtil.nearbyBlocks(user.world(), location, igniteRadius)) {
           if (!user.canBuild(b)) {
             continue;
           }

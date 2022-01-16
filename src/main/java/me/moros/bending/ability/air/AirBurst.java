@@ -107,7 +107,7 @@ public class AirBurst extends AbilityInstance {
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
-        ParticleUtil.air(user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.air(user.mainHandSide()).spawn(user.world());
         if (!user.sneaking()) {
           release(Mode.SPHERE);
         }
@@ -174,7 +174,7 @@ public class AirBurst extends AbilityInstance {
     public void render() {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
-        ParticleUtil.air(bukkitLocation()).offset(0.2, 0.2, 0.2).spawn();
+        ParticleUtil.air(location).offset(0.2).spawn(user.world());
         nextRenderTime = time + 75;
       }
     }
@@ -182,7 +182,7 @@ public class AirBurst extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundUtil.AIR.play(bukkitLocation());
+        SoundUtil.AIR.play(user.world(), location);
       }
     }
 

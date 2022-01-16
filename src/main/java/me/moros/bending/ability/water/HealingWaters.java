@@ -87,7 +87,7 @@ public class HealingWaters extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
     } else {
-      ParticleUtil.rgb(user.mainHandSide().toLocation(user.world()), "00ffff").spawn();
+      ParticleUtil.rgb(user.mainHandSide(), "00ffff").spawn(user.world());
     }
     return UpdateResult.CONTINUE;
   }
@@ -112,9 +112,7 @@ public class HealingWaters extends AbilityInstance {
     if (!MaterialUtil.isWater(target.getLocation().getBlock()) && !InventoryUtil.hasFullBottle(user)) {
       return false;
     }
-
-    ParticleUtil.rgb(EntityUtil.entityCenter(target).toLocation(user.world()), "00ffff")
-      .count(6).offset(0.35, 0.35, 0.35).spawn();
+    ParticleUtil.rgb(EntityUtil.entityCenter(target), "00ffff").count(6).offset(0.35).spawn(user.world());
     EntityUtil.removeNegativeEffects(target);
     AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
     if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {

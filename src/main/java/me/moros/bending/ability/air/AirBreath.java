@@ -47,7 +47,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -131,20 +130,20 @@ public class AirBreath extends AbilityInstance {
     @Override
     public void render() {
       distanceTravelled += speed;
-      Location spawnLoc = bukkitLocation();
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
-      if (MaterialUtil.isWater(spawnLoc.getBlock())) {
-        ParticleUtil.bubble(spawnLoc.getBlock()).spawn();
+      Block block = location.toBlock(user.world());
+      if (MaterialUtil.isWater(block)) {
+        ParticleUtil.bubble(block).spawn(user.world());
       } else {
-        ParticleUtil.air(spawnLoc).count(FastMath.ceil(distanceTravelled)).offset(offset, offset, offset).spawn();
+        ParticleUtil.air(location).count(FastMath.ceil(distanceTravelled)).offset(offset).spawn(user.world());
       }
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.AIR.play(bukkitLocation());
+        SoundUtil.AIR.play(user.world(), location);
       }
     }
 

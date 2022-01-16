@@ -128,8 +128,8 @@ public class IceSpike extends AbilityInstance {
       .noneMatch(p -> p.origin.getX() == base.getX() && p.origin.getZ() == base.getZ());
     if (WaterMaterials.isIceBendable(base)) {
       if (unique) {
-        ParticleUtil.of(Particle.BLOCK_DUST, entity.getLocation())
-          .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
+        ParticleUtil.of(Particle.BLOCK_DUST, EntityUtil.entityCenter(entity))
+          .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn(user.world());
         buildPillar(base);
       }
       return true;
@@ -221,7 +221,7 @@ public class IceSpike extends AbilityInstance {
         }
         Block block = pillarBlocks.pollFirst();
         clean(block);
-        SoundUtil.ICE.play(block.getLocation());
+        SoundUtil.ICE.play(block);
         return UpdateResult.CONTINUE;
       }
 
@@ -232,7 +232,7 @@ public class IceSpike extends AbilityInstance {
       if (canMove(currentIndex)) {
         pillarBlocks.offerFirst(currentIndex);
         TempBlock.builder(material.createBlockData()).build(currentIndex);
-        SoundUtil.ICE.play(currentIndex.getLocation());
+        SoundUtil.ICE.play(currentIndex);
       } else {
         reverting = true;
       }

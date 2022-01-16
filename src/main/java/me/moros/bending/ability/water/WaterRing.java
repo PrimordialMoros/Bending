@@ -245,7 +245,7 @@ public class WaterRing extends AbilityInstance {
     for (int i = 0; i < length; i++) {
       Block block = ring.get(i);
       if (MaterialUtil.isWater(block) && !TempBlock.MANAGER.isTemp(block)) {
-        ParticleUtil.bubble(block).spawn();
+        ParticleUtil.bubble(block).spawn(user.world());
       } else if (MaterialUtil.isTransparent(block)) {
         TempBlock.water().duration(250).build(block);
       }
@@ -352,14 +352,13 @@ public class WaterRing extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.of(Particle.SNOW_SHOVEL, bukkitLocation()).count(3)
-        .offset(0.25, 0.25, 0.25).spawn();
+      ParticleUtil.of(Particle.SNOW_SHOVEL, location).count(3).offset(0.25).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.ICE.play(bukkitLocation());
+        SoundUtil.ICE.play(user.world(), location);
       }
     }
 

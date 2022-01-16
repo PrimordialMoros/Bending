@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface BukkitUser extends ForwardingAudience.Single, Identity {
   @NonNull LivingEntity entity();
 
+  @Override
   default @NonNull UUID uuid() {
     return entity().getUniqueId();
   }
@@ -144,14 +145,14 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
   }
 
   /**
-   * @see #compositeRayTrace(double, Class)
+   * @return {@link #compositeRayTrace(double, Class)} with class matching LivingEntities
    */
   default RayTrace compositeRayTrace(double range) {
     return compositeRayTrace(range, LivingEntity.class);
   }
 
   /**
-   * Prepare a composite ray trace that targets LivingEntities.
+   * Prepare a composite ray trace matching the user's view and filtering the specified class type for entities.
    * @see RayTrace
    */
   default <T extends Entity> RayTrace compositeRayTrace(double range, @NonNull Class<T> type) {

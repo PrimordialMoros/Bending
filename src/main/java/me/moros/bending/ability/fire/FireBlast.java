@@ -54,7 +54,6 @@ import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -120,7 +119,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
         return UpdateResult.REMOVE;
       }
       if (user.sneaking() && System.currentTimeMillis() >= startTime + userConfig.maxChargeTime) {
-        ParticleUtil.fire(user, user.mainHandSide().toLocation(user.world())).spawn();
+        ParticleUtil.fire(user, user.mainHandSide()).spawn(user.world());
       } else if (!user.sneaking()) {
         launch();
       }
@@ -228,15 +227,13 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public void render() {
-      Location loc = bukkitLocation();
-      ParticleUtil.fire(user, loc)
-        .count(amount).offset(offset, offset, offset).extra(particleSpeed).spawn();
+      ParticleUtil.fire(user, location).count(amount).offset(offset).extra(particleSpeed).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (explosive || ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation());
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 
@@ -255,10 +252,9 @@ public class FireBlast extends AbilityInstance implements Explosive {
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       Vector3d reverse = ray.direction.negate();
-      Location center = bukkitLocation();
       WorldUtil.tryLightBlock(block);
       if (user.location().distanceSq(Vector3d.center(block)) > 4) {
-        for (Block b : WorldUtil.nearbyBlocks(center, userConfig.igniteRadius * factor)) {
+        for (Block b : WorldUtil.nearbyBlocks(user.world(), location, userConfig.igniteRadius * factor)) {
           if (!user.canBuild(b)) {
             continue;
           }

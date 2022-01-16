@@ -130,8 +130,7 @@ public class AirSpout extends AbilityInstance {
         return;
       }
       for (int i = 0; i < distance; i++) {
-        ParticleUtil.air(user.entity().getLocation().subtract(0, i, 0))
-          .count(3).offset(0.4, 0.4, 0.4).spawn();
+        ParticleUtil.air(user.location().subtract(new Vector3d(0, i, 0))).count(3).offset(0.4).spawn(user.world());
       }
       nextRenderTime = time + 100;
     }
@@ -139,7 +138,7 @@ public class AirSpout extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundUtil.AIR.play(user.entity().getLocation());
+        SoundUtil.AIR.play(user.world(), user.location());
       }
     }
   }

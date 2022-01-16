@@ -110,14 +110,13 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public void render() {
-      ParticleUtil.fire(user, bukkitLocation()).count(4)
-        .offset(0.15, 0.15, 0.15).extra(0.01).spawn();
+      ParticleUtil.fire(user, location).count(4).offset(0.15).extra(0.01).spawn(user.world());
     }
 
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE.play(bukkitLocation());
+        SoundUtil.FIRE.play(user.world(), location);
       }
     }
 

@@ -55,7 +55,6 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -95,14 +94,9 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (!user.hasPermission("bending.metal")) {
-      return false;
-    }
-
     if (method == Activation.SNEAK) {
-      Location center = user.entity().getEyeLocation();
       Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
-      for (Entity entity : center.getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
+      for (Entity entity : user.eyeLocation().toLocation(user.world()).getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
         MetalCable ability = (MetalCable) entity.getMetadata(Metadata.METAL_CABLE).get(0).value();
         if (ability != null && !entity.equals(ability.user().entity())) {
           ability.remove();
@@ -162,11 +156,10 @@ public class MetalCable extends AbilityInstance {
     if (ticks % 4 == 0) {
       if (CollisionUtil.handle(user, BOX.at(location), this::onProjectileHit)) {
         BlockData bd = projectile.fallingBlock().getBlockData();
-        Location bukkitLocation = location.toLocation(user.world());
-        ParticleUtil.of(Particle.BLOCK_CRACK, bukkitLocation).count(4)
-          .offset(0.25, 0.15, 0.25).data(bd).spawn();
-        ParticleUtil.of(Particle.BLOCK_DUST, bukkitLocation).count(6)
-          .offset(0.25, 0.15, 0.25).data(bd).spawn();
+        ParticleUtil.of(Particle.BLOCK_CRACK, location).count(4)
+          .offset(0.25, 0.15, 0.25).data(bd).spawn(user.world());
+        ParticleUtil.of(Particle.BLOCK_DUST, location).count(6)
+          .offset(0.25, 0.15, 0.25).data(bd).spawn(user.world());
         return UpdateResult.REMOVE;
       }
     }
@@ -208,11 +201,11 @@ public class MetalCable extends AbilityInstance {
       if (target.type == CableTarget.Type.ENTITY) {
         EntityUtil.applyVelocity(this, entityToMove, Vector3d.ZERO);
         if (target.entity instanceof FallingBlock fb) {
-          Location tempLocation = fb.getLocation().add(0, 0.5, 0);
+          Vector3d tempLocation = new Vector3d(fb.getLocation().add(0, 0.5, 0));
           ParticleUtil.of(Particle.BLOCK_CRACK, tempLocation).count(4)
-            .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
+            .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn(user.world());
           ParticleUtil.of(Particle.BLOCK_DUST, tempLocation).count(6)
-            .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn();
+            .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn(user.world());
           target.entity.remove();
         }
         return false;
@@ -248,7 +241,7 @@ public class MetalCable extends AbilityInstance {
     arrow.setMetadata(Metadata.METAL_CABLE, Metadata.of(this));
     cable = arrow;
     location = new Vector3d(cable.getLocation());
-    SoundUtil.METAL.play(arrow.getLocation());
+    SoundUtil.METAL.play(user.world(), origin);
 
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
@@ -276,7 +269,7 @@ public class MetalCable extends AbilityInstance {
         }
       }
       Vector3d spawnLoc = evenTicks ? temp : temp.add(offset2);
-      ParticleUtil.rgb(spawnLoc.toLocation(user.world()), "444444", 0.75F).spawn();
+      ParticleUtil.rgb(spawnLoc, "444444", 0.75F).spawn(user.world());
     }
     return true;
   }

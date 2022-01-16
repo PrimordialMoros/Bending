@@ -105,7 +105,7 @@ public class WaterWave extends AbilityInstance {
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);
     Collection<TempBlock> toRevert = new ArrayList<>();
-    for (Block block : WorldUtil.nearbyBlocks(center.toLocation(user.world()), userConfig.radius, MaterialUtil::isTransparent)) {
+    for (Block block : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, MaterialUtil::isTransparent)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         continue;
       }

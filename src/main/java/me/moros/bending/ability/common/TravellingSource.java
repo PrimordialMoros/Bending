@@ -26,7 +26,6 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -109,7 +108,7 @@ public class TravellingSource implements State {
   }
 
   private Block findPath(Block check) {
-    Location dest = user.headBlock().getLocation();
+    Vector3d dest = Vector3d.center(user.headBlock());
     Block result = null;
     double minDistance = Double.MAX_VALUE;
     for (BlockFace face : WorldUtil.SIDES) {
@@ -117,7 +116,7 @@ public class TravellingSource implements State {
       if (!isValid(block)) {
         continue;
       }
-      double d = block.getLocation().distanceSquared(dest);
+      double d = Vector3d.center(block).distanceSq(dest);
       if (d < minDistance) {
         minDistance = d;
         result = block;

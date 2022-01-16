@@ -45,7 +45,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -89,11 +88,11 @@ public class EarthArmor extends AbilityInstance {
     if (EarthMaterials.isMetalBendable(source)) {
       mode = source.getType() == Material.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
       resistance = userConfig.metalPower;
-      SoundUtil.METAL.play(source.getLocation());
+      SoundUtil.METAL.play(source);
     } else {
       mode = Mode.ROCK;
       resistance = userConfig.power;
-      SoundUtil.EARTH.play(source.getLocation());
+      SoundUtil.EARTH.play(source);
     }
     BlockData data = source.getBlockData();
     TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
@@ -160,18 +159,17 @@ public class EarthArmor extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    Location center;
+    Vector3d center;
     if (!formed && fallingBlock != null) {
-      center = fallingBlock.center().toLocation(user.world());
+      center = fallingBlock.center();
       fallingBlock.revert();
     } else {
-      center = user.entity().getEyeLocation();
+      center = user.eyeLocation();
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-    SoundUtil.playSound(center, fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1);
-    ParticleUtil.of(Particle.BLOCK_CRACK, center)
-      .count(8).offset(0.5, 0.5, 0.5)
-      .data(fallingBlock.fallingBlock().getBlockData()).spawn();
+    SoundUtil.playSound(user.world(), center, fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1);
+    ParticleUtil.of(Particle.BLOCK_CRACK, center).count(8).offset(0.5)
+      .data(fallingBlock.fallingBlock().getBlockData()).spawn(user.world());
   }
 
   @Override

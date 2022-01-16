@@ -39,6 +39,7 @@ import me.moros.bending.util.metadata.PersistentDataLayer;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 public class Bending extends JavaPlugin {
@@ -50,7 +51,6 @@ public class Bending extends JavaPlugin {
   private TranslationManager translationManager;
 
   private PersistentDataLayer dataLayer;
-  private BendingEventBus eventBus;
   private Game game;
 
   private String author;
@@ -68,7 +68,6 @@ public class Bending extends JavaPlugin {
 
     configManager = new ConfigManager(dir);
     translationManager = new TranslationManager(dir);
-    eventBus = new BendingEventBus(this);
     dataLayer = new PersistentDataLayer(this);
 
     BendingStorage storage = Objects.requireNonNull(StorageFactory.createInstance(), "Unable to connect to database!");
@@ -110,8 +109,8 @@ public class Bending extends JavaPlugin {
     }
   }
 
-  public static @MonotonicNonNull BendingEventBus eventBus() {
-    return plugin.eventBus;
+  public static @NonNull BendingEventBus eventBus() {
+    return BendingEventBus.INSTANCE;
   }
 
   public static @MonotonicNonNull Bending plugin() {

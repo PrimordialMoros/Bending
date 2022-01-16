@@ -125,8 +125,8 @@ public class EarthPillars extends AbilityInstance {
       .noneMatch(p -> p.origin().getX() == base.getX() && p.origin().getZ() == base.getZ());
     if (predicate.test(base)) {
       if (unique) {
-        ParticleUtil.of(Particle.BLOCK_DUST, entity.getLocation())
-          .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn();
+        ParticleUtil.of(Particle.BLOCK_DUST, EntityUtil.entityCenter(entity))
+          .count(8).offset(1, 0.1, 1).data(base.getBlockData()).spawn(user.world());
         int length = FastMath.floor(3 * factor);
         Pillar.builder(user, base, EarthPillar::new).predicate(predicate).build(length).ifPresent(pillars::add);
       }

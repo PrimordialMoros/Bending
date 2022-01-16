@@ -55,7 +55,6 @@ import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -136,17 +135,16 @@ public class WaterManipulation extends AbilityInstance {
     if (manip != null) {
       UpdateResult result = manip.update();
       if (result == UpdateResult.CONTINUE) {
+        Vector3d center = manip.center();
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
           SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
-          effect.play(manip.center().toLocation(user.world()));
+          effect.play(user.world(), center);
         }
 
         if (isIce) {
-          Location center = manip.center().toLocation(user.world());
-          ParticleUtil.of(Particle.ITEM_CRACK, center).count(4)
-            .offset(0.4, 0.4, 0.4).data(new ItemStack(Material.ICE)).spawn();
-          ParticleUtil.of(Particle.SNOW_SHOVEL, center).count(6)
-            .offset(0.4, 0.4, 0.4).spawn();
+          ItemStack data = new ItemStack(Material.ICE);
+          ParticleUtil.of(Particle.ITEM_CRACK, center).count(4).offset(0.4).data(data).spawn(user.world());
+          ParticleUtil.of(Particle.SNOW_SHOVEL, center).count(6).offset(0.4).spawn(user.world());
         } else {
           Block trail1 = manip.previousBlock();
           if (trail1 != null) {
@@ -257,7 +255,7 @@ public class WaterManipulation extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.WATER.play(center().toLocation(user.world()));
+        SoundUtil.WATER.play(user.world(), center());
       }
     }
 

@@ -135,7 +135,7 @@ public class AirWheel extends AbilityInstance {
   private void render() {
     Vector3d rotateAxis = Vector3d.PLUS_J.cross(user.direction().setY(0));
     VectorUtil.circle(user.direction().multiply(1.6), rotateAxis, 40).forEach(v ->
-      ParticleUtil.air(center.add(v).toLocation(user.world())).spawn()
+      ParticleUtil.air(center.add(v)).spawn(user.world())
     );
   }
 

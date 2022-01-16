@@ -143,7 +143,7 @@ public class Blaze extends AbilityInstance {
       }
       TempBlock.fire().duration(500).build(block);
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundUtil.FIRE.play(block.getLocation());
+        SoundUtil.FIRE.play(block);
       }
     }
   }

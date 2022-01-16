@@ -36,7 +36,6 @@ import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -122,10 +121,6 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
 
   public @NonNull Vector3d controlDirection() {
     return dir;
-  }
-
-  public @NonNull Location bukkitLocation() {
-    return location.toLocation(user.world());
   }
 
   @Override
