@@ -94,7 +94,7 @@ public final class FragileStructure implements Iterable<Block> {
       Vector3d center = Vector3d.center(block);
       ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.playSound(block, blockData.getSoundGroup().getBreakSound(), 2, 1);
+        SoundUtil.of(blockData.getSoundGroup().getBreakSound(), 2, 1).play(block);
       }
     }
   }

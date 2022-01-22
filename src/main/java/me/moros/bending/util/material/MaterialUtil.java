@@ -37,6 +37,8 @@ import org.bukkit.block.data.Waterlogged;
 import org.bukkit.inventory.InventoryHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import static java.util.Map.entry;
+
 public final class MaterialUtil {
   public static final Map<Material, Material> COOKABLE;
   public static final Map<Material, Material> ORES;
@@ -46,10 +48,6 @@ public final class MaterialUtil {
   public static final MaterialSetTag CONTAINERS;
   public static final MaterialSetTag UNBREAKABLES;
   public static final MaterialSetTag METAL_ARMOR;
-
-  private static <K, V> Map.Entry<K, V> entry(K key, V value) {
-    return Map.entry(key, value);
-  }
 
   static {
     COOKABLE = Map.ofEntries(

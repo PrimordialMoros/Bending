@@ -94,8 +94,8 @@ public enum BendingEventBus {
     return event;
   }
 
-  public @NonNull BendingRestrictEvent postRestrictEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
-    BendingRestrictEvent event = new BendingRestrictEvent(source, target, duration);
+  public @NonNull BendingLimitEvent postLimitEvent(@NonNull User source, @NonNull LivingEntity target, long duration) {
+    BendingLimitEvent event = new BendingLimitEvent(source, target, duration);
     event.callEvent();
     return event;
   }

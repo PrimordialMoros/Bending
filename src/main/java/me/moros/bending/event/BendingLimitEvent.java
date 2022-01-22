@@ -24,13 +24,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingRestrictEvent extends BendingUserEvent implements Cancellable {
+public class BendingLimitEvent extends BendingUserEvent implements Cancellable {
   private final LivingEntity target;
 
   private boolean cancelled = false;
   private long duration;
 
-  BendingRestrictEvent(User user, LivingEntity target, long duration) {
+  BendingLimitEvent(User user, LivingEntity target, long duration) {
     super(user);
     this.target = target;
     this.duration = duration;

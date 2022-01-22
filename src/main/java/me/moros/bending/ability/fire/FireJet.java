@@ -38,6 +38,7 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -48,6 +49,7 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class FireJet extends AbilityInstance {
   private static final Config config = new Config();
+  private static final SoundEffect LOUD_EXPLOSION = SoundUtil.EXPLOSION.with(10, 0);
 
   private User user;
   private Config userConfig;
@@ -112,7 +114,7 @@ public class FireJet extends AbilityInstance {
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
       ParticleUtil.fire(user, center.add(v.multiply(0.5))).count(0).offset(v).extra(0.09).spawn(user.world())
     );
-    SoundUtil.EXPLOSION.play(user.world(), user.location(), 10, 0);
+    LOUD_EXPLOSION.play(user.world(), user.location());
   }
 
   @Override

@@ -167,7 +167,7 @@ public class EarthArmor extends AbilityInstance {
       center = user.eyeLocation();
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-    SoundUtil.playSound(user.world(), center, fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1);
+    SoundUtil.of(fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1).play(user.world(), center);
     ParticleUtil.of(Particle.BLOCK_CRACK, center).count(8).offset(0.5)
       .data(fallingBlock.fallingBlock().getBlockData()).spawn(user.world());
   }

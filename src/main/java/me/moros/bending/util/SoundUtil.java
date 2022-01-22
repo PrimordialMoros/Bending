@@ -27,7 +27,6 @@ import net.kyori.adventure.sound.Sound.Type;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 import static org.bukkit.Sound.*;
 
@@ -54,45 +53,17 @@ public final class SoundUtil {
   public static final SoundEffect FIRE_EXTINGUISH = of(BLOCK_FIRE_EXTINGUISH, 0.5F, 1);
   public static final SoundEffect LAVA_EXTINGUISH = of(BLOCK_LAVA_EXTINGUISH);
 
-  public static final SoundEffect EXPLOSION = explosion(2, 0);
+  public static final SoundEffect EXPLOSION = of(ENTITY_GENERIC_EXPLODE, 2, 0);
 
   private SoundUtil() {
   }
 
-  public static void playSound(@NonNull Block block, @NonNull Sound sound) {
-    block.getWorld().playSound(sound, block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5);
-  }
-
-  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Sound sound) {
-    world.playSound(sound, center.getX(), center.getY(), center.getZ());
-  }
-
-  public static void playSound(@NonNull Block block, @NonNull Sound sound, float volume, float pitch) {
-    playSound(block, Sound.sound(sound.name(), sound.source(), volume, pitch));
-  }
-
-  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Sound sound, float volume, float pitch) {
-    playSound(world, center, Sound.sound(sound.name(), sound.source(), volume, pitch));
-  }
-
-  public static void playSound(@NonNull Block block, @NonNull Type sound, float volume, float pitch) {
-    of(sound, volume, pitch).play(block);
-  }
-
-  public static void playSound(@NonNull World world, @NonNull Vector3d center, @NonNull Type sound, float volume, float pitch) {
-    of(sound, volume, pitch).play(world, center);
-  }
-
-  private static SoundEffect of(Type sound) {
+  public static @NonNull SoundEffect of(@NonNull Type sound) {
     return of(sound, 1, 1);
   }
 
-  private static SoundEffect of(Type sound, float volume, float pitch) {
+  public static @NonNull SoundEffect of(@NonNull Type sound, float volume, float pitch) {
     return new SoundEffect(Sound.sound(sound, Source.MASTER, volume, pitch));
-  }
-
-  public static @NonNull SoundEffect explosion(float volume, float pitch) {
-    return of(ENTITY_GENERIC_EXPLODE, volume, pitch);
   }
 
   /**
@@ -107,19 +78,22 @@ public final class SoundUtil {
     }
 
     public void play(@NonNull Block block) {
-      playSound(block, sound);
+      block.getWorld().playSound(sound, block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5);
     }
 
     public void play(@NonNull World world, @NonNull Vector3d center) {
-      playSound(world, center, sound);
+      world.playSound(sound, center.getX(), center.getY(), center.getZ());
     }
 
-    public void play(@NonNull World world, @NonNull Vector3d center, float volume, float pitch) {
-      playSound(world, center, sound, volume, pitch);
+    public @NonNull SoundEffect with(float volume, float pitch) {
+      if (volume == sound.volume() && pitch == sound.pitch()) {
+        return this;
+      }
+      return new SoundEffect(Sound.sound(sound.name(), sound.source(), volume, pitch));
     }
 
     @Override
-    public @NotNull Key key() {
+    public @NonNull Key key() {
       return sound.name();
     }
   }

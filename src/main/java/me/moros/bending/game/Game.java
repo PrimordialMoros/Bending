@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import me.moros.bending.Bending;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
@@ -29,7 +30,6 @@ import me.moros.bending.model.AbilityManager;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -71,6 +71,7 @@ public final class Game {
   }
 
   private void update() {
+    ActionLimiter.MANAGER.tick();
     Cooldown.MANAGER.tick();
     TempArmor.MANAGER.tick();
     TempBlock.MANAGER.tick();
@@ -93,7 +94,6 @@ public final class Game {
     flightManager.removeAll();
     sequenceManager.clear();
     removeTemporary();
-    MovementHandler.resetAll();
 
     if (shutdown) {
       Registries.BENDERS.players().forEach(storage::savePlayerAsync);
@@ -103,6 +103,7 @@ public final class Game {
   }
 
   private void initTemporary() {
+    ActionLimiter.init();
     Cooldown.init();
     TempArmor.init();
     TempBlock.init();
@@ -111,6 +112,7 @@ public final class Game {
   }
 
   private void removeTemporary() {
+    ActionLimiter.MANAGER.removeAll();
     Cooldown.MANAGER.removeAll();
     TempArmor.MANAGER.removeAll();
     TempBlock.MANAGER.removeAll();

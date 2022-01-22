@@ -290,7 +290,7 @@ public class Lightning extends AbilityInstance {
   @Override
   public void onDestroy() {
     if (!launched && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
-      SoundUtil.LIGHTNING.play(user.world(), user.location(), 2, 0);
+      SoundUtil.LIGHTNING.play(user.world(), user.location());
       user.addCooldown(description(), userConfig.cooldown);
       DamageUtil.damageEntity(user.entity(), user, userConfig.overchargeDamage, description());
     }

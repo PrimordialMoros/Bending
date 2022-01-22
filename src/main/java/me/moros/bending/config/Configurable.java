@@ -38,7 +38,7 @@ public abstract class Configurable implements Cloneable {
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  protected Object clone() throws CloneNotSupportedException {
     return super.clone();
   }
 }

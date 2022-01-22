@@ -52,6 +52,7 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.SoundUtil.SoundEffect;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -178,6 +179,8 @@ public class FlameRush extends AbilityInstance {
   }
 
   private class FireStream extends ParticleStream {
+    private static final SoundEffect LOUD_FIRE = SoundUtil.FIRE.with(2, 1);
+
     private final double factor;
 
     private Vector3d streamDirection;
@@ -218,7 +221,7 @@ public class FlameRush extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.FIRE.play(user.world(), location, 2, 1);
+        LOUD_FIRE.play(user.world(), location);
       }
     }
 

@@ -244,7 +244,7 @@ public class EarthSmash extends AbilityInstance {
         shards.put(projectile, shardType(blockData.getMaterial()));
         ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block)).count(4).offset(0.5).data(blockData).spawn(block.getWorld());
         if (ThreadLocalRandom.current().nextBoolean()) {
-          SoundUtil.playSound(block, blockData.getSoundGroup().getBreakSound(), 1, 1);
+          SoundUtil.of(blockData.getSoundGroup().getBreakSound()).play(block);
         }
       }
       boulder.data.clear();

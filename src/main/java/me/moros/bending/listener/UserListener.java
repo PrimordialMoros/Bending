@@ -31,11 +31,13 @@ import java.util.concurrent.TimeoutException;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActionType;
@@ -46,7 +48,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.text.Component;
@@ -168,6 +169,7 @@ public class UserListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onUserDeath(EntityDeathEvent event) {
     LivingEntity entity = event.getEntity();
+    ActionLimiter.MANAGER.get(entity.getUniqueId()).ifPresent(ActionLimiter::revert);
     if (entity instanceof Player) {
       return;
     }
@@ -267,8 +269,15 @@ public class UserListener implements Listener {
     }
   }
 
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerMove(PlayerJumpEvent event) {
+    if (ActionLimiter.isLimited(event.getPlayer(), ActionType.MOVE)) {
+      event.setCancelled(true);
+    }
+  }
+
   private boolean handleMovement(EntityMoveEvent event) {
-    if (event.hasChangedBlock() && MovementHandler.isRestricted(event.getEntity(), ActionType.MOVE)) {
+    if (event.hasChangedBlock() && ActionLimiter.isLimited(event.getEntity(), ActionType.MOVE)) {
       return false;
     }
     User user = Registries.BENDERS.user(event.getEntity());
@@ -289,7 +298,7 @@ public class UserListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerInteractLow(PlayerInteractEvent event) {
-    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT)) {
+    if (ActionLimiter.isLimited(event.getPlayer(), ActionType.INTERACT)) {
       event.setCancelled(true);
     }
   }

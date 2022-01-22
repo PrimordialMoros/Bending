@@ -28,6 +28,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -46,7 +47,6 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
-import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -178,7 +178,7 @@ public class IceCrawl extends AbilityInstance {
         Vector3d spawnLoc = new Vector3d(entity.getLocation()).subtract(new Vector3d(0, 0.2, 0));
         TempPacketEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false)
           .duration(userConfig.freezeDuration).buildFallingBlock(user.world(), spawnLoc);
-        MovementHandler.restrictEntity(user, livingEntity, userConfig.freezeDuration).disableActions(ActionType.MOVE);
+        ActionLimiter.builder().limit(ActionType.MOVE).duration(userConfig.freezeDuration).build(user, livingEntity);
       }
       return true;
     }

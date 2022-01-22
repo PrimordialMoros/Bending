@@ -47,6 +47,7 @@ import me.moros.bending.ability.water.WaterWave;
 import me.moros.bending.ability.water.passive.HydroSink;
 import me.moros.bending.ability.water.sequence.Iceberg;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
@@ -101,6 +102,7 @@ public final class ActivationController {
   }
 
   public void onUserDeconstruct(@NonNull User user) {
+    ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
     worldManager.instance(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {

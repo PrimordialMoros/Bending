@@ -23,7 +23,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
 import me.moros.bending.registry.Registries;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BendingExpansion extends PlaceholderExpansion {
   private final PlaceholderProvider provider;
@@ -33,17 +33,17 @@ public class BendingExpansion extends PlaceholderExpansion {
   }
 
   @Override
-  public @NotNull String getAuthor() {
+  public @NonNull String getAuthor() {
     return Bending.author();
   }
 
   @Override
-  public @NotNull String getIdentifier() {
+  public @NonNull String getIdentifier() {
     return "bending";
   }
 
   @Override
-  public @NotNull String getVersion() {
+  public @NonNull String getVersion() {
     return Bending.version();
   }
 
@@ -53,7 +53,7 @@ public class BendingExpansion extends PlaceholderExpansion {
   }
 
   @Override
-  public String onPlaceholderRequest(Player player, @NotNull String params) {
+  public String onPlaceholderRequest(Player player, @NonNull String params) {
     if (player == null || !Registries.BENDERS.contains(player.getUniqueId())) {
       return "";
     }

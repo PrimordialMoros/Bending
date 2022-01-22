@@ -37,6 +37,7 @@ import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -209,7 +210,7 @@ public final class BendingExplosion {
     }
 
     public @NonNull Builder sound(float volume, float pitch) {
-      this.sound = SoundUtil.explosion(volume, pitch);
+      this.sound = SoundUtil.of(Sound.ENTITY_GENERIC_EXPLODE, volume, pitch);
       return this;
     }
 

@@ -116,7 +116,7 @@ public class FerroControl extends AbilityInstance implements Ability {
     } else {
       sound = openable.isOpen() ? Sound.BLOCK_IRON_TRAPDOOR_OPEN : Sound.BLOCK_IRON_TRAPDOOR_CLOSE;
     }
-    SoundUtil.playSound(block, sound, 0.5F, 0);
+    SoundUtil.of(sound, 0.5F, 0).play(block);
   }
 
   public static void act(@NonNull User user, @NonNull Block block) {

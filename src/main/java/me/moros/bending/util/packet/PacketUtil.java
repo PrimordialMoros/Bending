@@ -21,6 +21,7 @@ package me.moros.bending.util.packet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import io.papermc.paper.adventure.PaperAdventure;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.moros.bending.model.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
@@ -37,12 +40,14 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -53,6 +58,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -107,8 +113,7 @@ public final class PacketUtil {
   }
 
   public static void refreshBlocks(Collection<org.bukkit.block.Block> blocks, World world, Vector3d center) {
-    Collection<Packet<?>> updatePackets = blocks.stream().map(PacketUtil::refreshBlock).collect(Collectors.toList());
-    broadcast(updatePackets, world, center, (world.getViewDistance() + 1) << 4);
+    broadcast(refreshBlocks(blocks), world, center, (world.getViewDistance() + 1) << 4);
   }
 
   public static void destroy(int id) {
@@ -202,8 +207,26 @@ public final class PacketUtil {
     return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.getX(), vel.getY(), vel.getZ()));
   }
 
-  private static ClientboundBlockUpdatePacket refreshBlock(org.bukkit.block.Block b) {
-    return new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlock) b).getNMS());
+  private static Collection<Packet<?>> refreshBlocks(Collection<org.bukkit.block.Block> blocks) {
+    int size = blocks.size();
+    if (size == 0) {
+      return List.of();
+    } else if (size == 1) {
+      var b = blocks.iterator().next();
+      return List.of(new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlock) b).getNMS()));
+    } else {
+      Map<SectionPos, Short2ObjectMap<BlockState>> sectionMap = new HashMap<>();
+      for (org.bukkit.block.Block b : blocks) {
+        BlockState state = ((CraftBlock) b).getNMS();
+        BlockPos blockPos = new BlockPos(b.getX(), b.getY(), b.getZ());
+        SectionPos sectionPos = SectionPos.of(blockPos);
+        sectionMap.computeIfAbsent(sectionPos, key -> new Short2ObjectArrayMap<>())
+          .put(SectionPos.sectionRelativePos(blockPos), state);
+      }
+      return sectionMap.entrySet().stream()
+        .map(e -> new ClientboundSectionBlocksUpdatePacket(e.getKey(), e.getValue(), true))
+        .collect(Collectors.toList());
+    }
   }
 
   private static ClientboundSetEntityDataPacket noGravity(int id) {

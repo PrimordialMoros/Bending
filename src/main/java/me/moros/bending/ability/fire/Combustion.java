@@ -45,6 +45,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -169,6 +170,7 @@ public class Combustion extends AbilityInstance implements Explosive {
   }
 
   private class CombustBeam extends ParticleStream {
+    private static final SoundEffect LOUD_COMBUSTION = SoundUtil.COMBUSTION.with(2, 0);
     private double randomBeamDistance = 7;
     private double distanceTravelled = 0;
 
@@ -194,7 +196,7 @@ public class Combustion extends AbilityInstance implements Explosive {
 
     private void renderRing() {
       if (distanceTravelled >= randomBeamDistance) {
-        SoundUtil.COMBUSTION.play(user.world(), location, 1.5F, 0);
+        LOUD_COMBUSTION.play(user.world(), location);
         randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
         VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {

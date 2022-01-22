@@ -236,7 +236,7 @@ public class EarthGlove extends AbilityInstance {
     if (isMetal) {
       SoundUtil.METAL.play(user.world(), gloveSpawnLocation);
     } else {
-      SoundUtil.playSound(user.world(), gloveSpawnLocation, Sound.BLOCK_STONE_BREAK, 1, 1.5F);
+      SoundUtil.of(Sound.BLOCK_STONE_BREAK, 1, 1.5F).play(user.world(), gloveSpawnLocation);
     }
 
     double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;

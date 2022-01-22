@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -33,12 +32,12 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.game.temporal.TempPacketEntity.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
-import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -59,7 +58,6 @@ import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
@@ -346,7 +344,7 @@ public class EarthLine extends AbilityInstance {
         builder.buildArmorStand(user.world(), center.add(v));
         builder.buildArmorStand(user.world(), center.add(offset).add(v));
       });
-      MovementHandler.restrictEntity(user, entity, userConfig.prisonDuration).disableActions(EnumSet.allOf(ActionType.class));
+      ActionLimiter.builder().duration(userConfig.prisonDuration).build(user, entity);
     }
 
     public void controllable(boolean value) {

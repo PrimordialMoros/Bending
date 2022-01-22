@@ -20,13 +20,13 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.game.Game;
+import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.MovementHandler;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
@@ -87,7 +87,7 @@ public class BlockListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockPlace(BlockPlaceEvent event) {
-    if (MovementHandler.isRestricted(event.getPlayer(), ActionType.INTERACT_BLOCK)) {
+    if (ActionLimiter.isLimited(event.getPlayer(), ActionType.INTERACT_BLOCK)) {
       event.setCancelled(true);
       return;
     }
@@ -139,7 +139,7 @@ public class BlockListener implements Listener {
         tfb.revert();
       });
     } else {
-      if (MovementHandler.isRestricted(event.getEntity(), ActionType.INTERACT_BLOCK)) {
+      if (ActionLimiter.isLimited(event.getEntity(), ActionType.INTERACT_BLOCK)) {
         event.setCancelled(true);
       }
     }

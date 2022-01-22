@@ -130,7 +130,7 @@ public class EarthShards extends AbilityInstance {
     public ShardStream(Ray ray) {
       super(user, ray, userConfig.speed, 0.5);
       canCollide = Block::isLiquid;
-      SoundUtil.playSound(user.world(), ray.origin, Sound.BLOCK_STONE_BREAK, 1, 2);
+      SoundUtil.of(Sound.BLOCK_STONE_BREAK, 1, 2).play(user.world(), ray.origin);
     }
 
     @Override

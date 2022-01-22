@@ -149,31 +149,6 @@ public class AbilityDescription {
     return new Builder(name, constructor);
   }
 
-  private static Component generateInstructions(List<SequenceStep> actions) {
-    TextComponent.Builder builder = Component.text();
-    int size = actions.size();
-    for (int i = 0; i < size; i++) {
-      SequenceStep sequenceStep = actions.get(i);
-      if (i != 0) {
-        builder.append(Component.text(" > "));
-      }
-      AbilityDescription desc = sequenceStep.ability();
-      Activation action = sequenceStep.activation();
-      String actionKey = action.key();
-      if (action == Activation.SNEAK && i + 1 < actions.size()) {
-        // Check if the next instruction is to release sneak.
-        SequenceStep next = actions.get(i + 1);
-        if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
-          actionKey = "bending.activation.sneak-tap";
-          i++;
-        }
-      }
-      builder.append(Component.text(desc.name())).append(Component.text(" ("))
-        .append(Component.translatable(actionKey)).append(Component.text(")"));
-    }
-    return builder.build();
-  }
-
   /**
    * Immutable and thread-safe representation of a sequence
    */
@@ -192,9 +167,34 @@ public class AbilityDescription {
 
     public @NonNull Component instructions() {
       if (instructions == null) {
-        instructions = generateInstructions(steps);
+        instructions = generateInstructions();
       }
       return instructions;
+    }
+
+    private Component generateInstructions() {
+      TextComponent.Builder builder = Component.text();
+      int size = steps.size();
+      for (int i = 0; i < size; i++) {
+        SequenceStep sequenceStep = steps.get(i);
+        if (i != 0) {
+          builder.append(Component.text(" > "));
+        }
+        AbilityDescription desc = sequenceStep.ability();
+        Activation action = sequenceStep.activation();
+        String actionKey = action.key();
+        if (action == Activation.SNEAK && i + 1 < steps.size()) {
+          // Check if the next instruction is to release sneak.
+          SequenceStep next = steps.get(i + 1);
+          if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
+            actionKey = "bending.activation.sneak-tap";
+            i++;
+          }
+        }
+        builder.append(Component.text(desc.name())).append(Component.text(" ("))
+          .append(Component.translatable(actionKey)).append(Component.text(")"));
+      }
+      return builder.build();
     }
 
     public boolean matches(@NonNull List<@NonNull SequenceStep> otherSteps) {

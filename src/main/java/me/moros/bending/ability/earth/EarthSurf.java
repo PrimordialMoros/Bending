@@ -195,7 +195,7 @@ public class EarthSurf extends AbilityInstance {
     public void postRender() {
       center = user.location().subtract(new Vector3d(0, 0.5, 0));
       if (ticks % 4 == 0) {
-        SoundUtil.playSound(user.world(), center, Sound.BLOCK_ROOTED_DIRT_FALL, 0.6F, 0);
+        SoundUtil.of(Sound.BLOCK_ROOTED_DIRT_FALL, 0.6F, 0).play(user.world(), center);
       }
       CollisionUtil.handle(user, new Sphere(center, 1.2), this::onEntityHit, false);
     }

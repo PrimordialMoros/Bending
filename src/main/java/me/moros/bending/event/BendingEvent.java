@@ -21,13 +21,13 @@ package me.moros.bending.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BendingEvent extends Event {
   private static final HandlerList handlers = new HandlerList();
 
   @Override
-  public @NotNull HandlerList getHandlers() {
+  public @NonNull HandlerList getHandlers() {
     return handlers;
   }
 
