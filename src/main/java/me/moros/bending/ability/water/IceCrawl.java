@@ -45,7 +45,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
@@ -186,7 +185,7 @@ public class IceCrawl extends AbilityInstance {
     @Override
     public boolean onBlockHit(@NonNull Block block) {
       if (MaterialUtil.isWater(block)) {
-        TempBlock.ice().duration(BendingProperties.ICE_DURATION).build(block);
+        TempBlock.ice().duration(Bending.properties().iceRevertTime()).build(block);
       }
       return WorldUtil.tryCoolLava(user, block);
     }

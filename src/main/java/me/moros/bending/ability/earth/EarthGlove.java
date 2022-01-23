@@ -41,7 +41,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
@@ -143,7 +142,7 @@ public class EarthGlove extends AbilityInstance {
       shatterGlove();
       return UpdateResult.REMOVE;
     }
-    double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
+    double factor = isMetal ? Bending.properties().metalModifier() : 1;
     if (returning) {
       if (!user.sneaking()) {
         shatterGlove();
@@ -201,7 +200,7 @@ public class EarthGlove extends AbilityInstance {
     if (user.sneaking()) {
       return grabTarget((LivingEntity) entity);
     }
-    double damage = isMetal ? BendingProperties.METAL_MODIFIER * userConfig.damage : userConfig.damage;
+    double damage = isMetal ? Bending.properties().metalModifier(userConfig.damage) : userConfig.damage;
     DamageUtil.damageEntity(entity, user, damage, description());
     shatterGlove();
     return false;
@@ -239,7 +238,7 @@ public class EarthGlove extends AbilityInstance {
       SoundUtil.of(Sound.BLOCK_STONE_BREAK, 1, 1.5F).play(user.world(), gloveSpawnLocation);
     }
 
-    double factor = isMetal ? BendingProperties.METAL_MODIFIER : 1;
+    double factor = isMetal ? Bending.properties().metalModifier() : 1;
     Vector3d velocity = target.subtract(gloveSpawnLocation).normalize().multiply(GLOVE_SPEED * factor);
     updateGloveVelocity(velocity);
     location = new Vector3d(glove.getLocation());

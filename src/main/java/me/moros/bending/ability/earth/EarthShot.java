@@ -44,7 +44,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingExplosion;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -161,7 +160,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     projectile = TempFallingBlock.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
       .gravity(false).duration(6000).build(source);
     if (!MaterialUtil.isLava(source)) {
-      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
+      TempBlock.air().duration(Bending.properties().earthRevertTime()).build(source);
     }
     location = projectile.center();
     removalPolicy = Policies.builder()
@@ -310,12 +309,11 @@ public class EarthShot extends AbilityInstance implements Explosive {
 
     user.addCooldown(description(), userConfig.cooldown);
 
-    double dmgFactor = switch (mode) {
-      case METAL -> BendingProperties.METAL_MODIFIER;
-      case MAGMA -> BendingProperties.MAGMA_MODIFIER;
-      default -> 1;
+    damage = switch (mode) {
+      case METAL -> Bending.properties().metalModifier(userConfig.damage);
+      case MAGMA -> Bending.properties().magmaModifier(userConfig.damage);
+      default -> userConfig.damage;
     };
-    damage = userConfig.damage * dmgFactor;
     launched = true;
   }
 
@@ -357,7 +355,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       projectile.revert();
     }
     if (!launched) {
-      TempBlock.builder(data).bendable(true).duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
+      TempBlock.builder(data).bendable(true).duration(Bending.properties().earthRevertTime()).build(source);
       if (readySource != null) {
         TempBlock.air().build(readySource);
       }

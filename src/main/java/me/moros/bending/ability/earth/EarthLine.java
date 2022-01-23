@@ -54,7 +54,6 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -243,7 +242,7 @@ public class EarthLine extends AbilityInstance {
           return true;
         }
         case MAGMA -> {
-          damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
+          damage = Bending.properties().magmaModifier(userConfig.damage);
           BendingEffect.FIRE_TICK.apply(user, entity);
         }
       }
@@ -298,7 +297,7 @@ public class EarthLine extends AbilityInstance {
       Collections.shuffle(wall);
       for (Block block : wall) {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
-        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+        TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
         TempFallingBlock.builder(Material.MAGMA_BLOCK.createBlockData())
           .velocity(velocity)
           .duration(10000)

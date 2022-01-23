@@ -24,19 +24,22 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.papermc.paper.text.PaperComponents;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class PlaceholderProvider {
+  private static final LegacyComponentSerializer SERIALIZER = LegacyComponentSerializer
+    .legacyAmpersand().toBuilder().hexColors().build();
+
   private final Map<String, Placeholder> placeholders;
 
   PlaceholderProvider() {
@@ -46,14 +49,14 @@ public final class PlaceholderProvider {
   private static Map<String, Placeholder> setup() {
     Builder builder = new Builder();
     builder.addStatic("elements", player -> player.elements().stream().map(Element::displayName)
-      .map(PlaceholderProvider::toLegacy).collect(Collectors.joining(", ")));
+      .map(e -> toLegacy(player, e)).collect(Collectors.joining(", ")));
     builder.addStatic("element", PlaceholderProvider::findElement);
     builder.addStatic("element_color", player ->
       player.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
     );
     builder.addStatic("selected_ability", player -> {
       AbilityDescription desc = player.selectedAbility();
-      return desc == null ? "" : toLegacy(desc.displayName());
+      return desc == null ? "" : toLegacy(player, desc.displayName());
     });
     builder.addDynamic("has_element", (player, elementName) ->
       formatBoolean(Element.fromName(elementName).map(player::hasElement).orElse(false))
@@ -66,14 +69,14 @@ public final class PlaceholderProvider {
     return builder.build();
   }
 
-  private static @NonNull String findElement(User user) {
-    Collection<Element> userElements = user.elements();
+  private static @NonNull String findElement(BendingPlayer player) {
+    Collection<Element> userElements = player.elements();
     if (userElements.isEmpty()) {
       return org.bukkit.ChatColor.RESET + "NonBender";
     } else if (userElements.size() > 1) {
       return org.bukkit.ChatColor.DARK_PURPLE + "Avatar";
     } else {
-      return toLegacy(userElements.iterator().next().displayName());
+      return toLegacy(player, userElements.iterator().next().displayName());
     }
   }
 
@@ -81,8 +84,8 @@ public final class PlaceholderProvider {
     return value ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
   }
 
-  private static String toLegacy(Component component) {
-    return PaperComponents.legacySectionSerializer().serialize(component);
+  private static String toLegacy(BendingPlayer player, Component component) {
+    return SERIALIZER.serialize(GlobalTranslator.render(component, player.entity().locale()));
   }
 
   public @Nullable String onPlaceholderRequest(@NonNull BendingPlayer player, @NonNull String placeholder) {
@@ -123,11 +126,11 @@ public final class PlaceholderProvider {
 
   @FunctionalInterface
   private interface StaticPlaceholder extends Placeholder {
-    @NonNull String handle(User user);
+    @NonNull String handle(BendingPlayer player);
   }
 
   @FunctionalInterface
   private interface DynamicPlaceholder extends Placeholder {
-    @NonNull String handle(User user, String argument);
+    @NonNull String handle(BendingPlayer player, String argument);
   }
 }

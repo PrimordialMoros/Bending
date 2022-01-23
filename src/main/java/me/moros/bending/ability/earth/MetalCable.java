@@ -45,7 +45,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
@@ -168,11 +167,13 @@ public class MetalCable extends AbilityInstance {
 
   private boolean onProjectileHit(Entity entity) {
     Material mat = projectile.fallingBlock().getBlockData().getMaterial();
-    double damage = userConfig.damage;
+    double damage;
     if (EarthMaterials.METAL_BENDABLE.isTagged(mat)) {
-      damage *= BendingProperties.METAL_MODIFIER;
+      damage = Bending.properties().metalModifier(userConfig.damage);
     } else if (EarthMaterials.LAVA_BENDABLE.isTagged(mat)) {
-      damage *= BendingProperties.MAGMA_MODIFIER;
+      damage = Bending.properties().magmaModifier(userConfig.damage);
+    } else {
+      damage = userConfig.damage;
     }
     DamageUtil.damageEntity(entity, user, damage, description());
     return true;
@@ -284,7 +285,7 @@ public class MetalCable extends AbilityInstance {
     }
     if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockData data = block.getBlockData();
-      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+      TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
       Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
       projectile = TempFallingBlock.builder(data).velocity(velocity).build(user.world(), location);
       target = new CableTarget(projectile.fallingBlock());

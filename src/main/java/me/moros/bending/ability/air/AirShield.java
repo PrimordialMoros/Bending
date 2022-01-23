@@ -42,7 +42,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -157,7 +156,7 @@ public class AirShield extends AbilityInstance {
         }
         WorldUtil.tryBreakPlant(block);
         if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
-          long iceDuration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextInt(1500);
+          long iceDuration = Bending.properties().iceRevertTime() + ThreadLocalRandom.current().nextInt(1500);
           TempBlock.ice().duration(iceDuration).build(block);
         }
       }

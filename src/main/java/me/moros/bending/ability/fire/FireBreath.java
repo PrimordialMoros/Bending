@@ -45,7 +45,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -170,7 +169,7 @@ public class FireBreath extends AbilityInstance {
       }
       Block above = block.getRelative(BlockFace.UP);
       if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {
-        TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(above);
+        TempBlock.fire().duration(Bending.properties().fireRevertTime()).build(above);
       }
       return true;
     }

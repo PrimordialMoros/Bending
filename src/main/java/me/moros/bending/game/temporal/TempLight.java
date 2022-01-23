@@ -21,6 +21,7 @@ package me.moros.bending.game.temporal;
 
 import java.util.Optional;
 
+import me.moros.bending.config.Configurable;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
@@ -135,7 +136,7 @@ public final class TempLight extends TemporaryBase {
     }
 
     public Optional<TempLight> build(@NonNull Block block) {
-      if (!block.getType().isAir() || block.getLightLevel() >= level) {
+      if (!config.enabled || !block.getType().isAir() || block.getLightLevel() >= level) {
         return Optional.empty();
       }
       TempLight old = MANAGER.get(block).orElse(null);
@@ -147,6 +148,17 @@ public final class TempLight extends TemporaryBase {
         return Optional.of(old);
       }
       return Optional.of(new TempLight(block, level, rate, duration));
+    }
+  }
+
+  private static final Config config = new Config();
+
+  private static class Config extends Configurable {
+    private boolean enabled;
+
+    @Override
+    public void onConfigReload() {
+      enabled = config.node("properties", "generate-light").getBoolean(true);
     }
   }
 }

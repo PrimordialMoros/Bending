@@ -35,6 +35,7 @@ import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.storage.StorageFactory;
+import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.metadata.PersistentDataLayer;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,6 +49,7 @@ public class Bending extends JavaPlugin {
   private Logger logger;
 
   private ConfigManager configManager;
+  private BendingProperties properties;
   private TranslationManager translationManager;
 
   private PersistentDataLayer dataLayer;
@@ -67,6 +69,7 @@ public class Bending extends JavaPlugin {
     String dir = configFolder();
 
     configManager = new ConfigManager(dir);
+    properties = new BendingProperties();
     translationManager = new TranslationManager(dir);
     dataLayer = new PersistentDataLayer(this);
 
@@ -119,6 +122,10 @@ public class Bending extends JavaPlugin {
 
   public static @MonotonicNonNull ConfigManager configManager() {
     return plugin.configManager;
+  }
+
+  public static @MonotonicNonNull BendingProperties properties() {
+    return plugin.properties;
   }
 
   public static @MonotonicNonNull TranslationManager translationManager() {

@@ -45,7 +45,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -169,7 +168,7 @@ public class FrostBreath extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      long duration = BendingProperties.ICE_DURATION + ThreadLocalRandom.current().nextLong(2000);
+      long duration = Bending.properties().iceRevertTime() + ThreadLocalRandom.current().nextLong(2000);
       if (MaterialUtil.isWater(block)) {
         TempBlock.ice().duration(duration).build(block);
         if (ThreadLocalRandom.current().nextInt(6) == 0) {

@@ -58,7 +58,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -383,13 +382,13 @@ public class EarthSmash extends AbilityInstance {
             if ((Math.abs(x) + Math.abs(z)) % 2 != 0) {
               Block block = origin.add(new Vector3d(x, -1, z)).toBlock(boulder.world);
               if (EarthMaterials.isEarthNotLava(user, block)) {
-                TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+                TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
               }
             }
             // Remove top layer
             Block block = origin.add(new Vector3d(x, 0, z)).toBlock(boulder.world);
             if (EarthMaterials.isEarthNotLava(user, block)) {
-              TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+              TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
             }
           }
         }

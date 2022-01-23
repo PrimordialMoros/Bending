@@ -35,7 +35,6 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -103,7 +102,7 @@ public class FireJet extends AbilityInstance {
   }
 
   private void igniteBlock(Block block) {
-    TempBlock.fire().duration(BendingProperties.FIRE_REVERT_TIME).build(block);
+    TempBlock.fire().duration(Bending.properties().fireRevertTime()).build(block);
   }
 
   @Override

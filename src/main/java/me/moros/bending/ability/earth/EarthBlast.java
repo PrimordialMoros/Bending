@@ -43,7 +43,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.RayTrace;
@@ -148,7 +147,7 @@ public class EarthBlast extends AbilityInstance {
         SoundUtil.EARTH.play(source);
         removalPolicy = Policies.builder().build();
         user.addCooldown(description(), userConfig.cooldown);
-        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
+        TempBlock.air().duration(Bending.properties().earthRevertTime()).build(source);
       }
     }
   }
@@ -204,9 +203,9 @@ public class EarthBlast extends AbilityInstance {
     public Blast(Block block) {
       super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 20);
       if (EarthMaterials.isMetalBendable(block)) {
-        damage = userConfig.damage * BendingProperties.METAL_MODIFIER;
+        damage = Bending.properties().metalModifier(userConfig.damage);
       } else if (EarthMaterials.isLavaBendable(block)) {
-        damage = userConfig.damage * BendingProperties.MAGMA_MODIFIER;
+        damage = Bending.properties().magmaModifier(userConfig.damage);
       } else {
         damage = userConfig.damage;
       }

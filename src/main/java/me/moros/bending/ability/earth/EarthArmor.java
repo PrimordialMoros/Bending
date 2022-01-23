@@ -38,7 +38,6 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -95,7 +94,7 @@ public class EarthArmor extends AbilityInstance {
       SoundUtil.EARTH.play(source);
     }
     BlockData data = source.getBlockData();
-    TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(source);
+    TempBlock.air().duration(Bending.properties().earthRevertTime()).build(source);
     fallingBlock = TempFallingBlock.builder(data).velocity(new Vector3d(0, 0.2, 0))
       .gravity(false).duration(10000).build(source);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();

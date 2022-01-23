@@ -48,7 +48,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -114,7 +113,7 @@ public class LavaDisk extends AbilityInstance {
         return false;
       }
       if (!MaterialUtil.isLava(block)) {
-        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+        TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
       }
     }
     distance = location.distance(user.eyeLocation());
@@ -219,7 +218,7 @@ public class LavaDisk extends AbilityInstance {
     boolean tree = MaterialSetTag.LEAVES.isTagged(mat) || MaterialSetTag.LOGS_THAT_BURN.isTagged(mat);
     if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
-      TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(block);
+      TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
       Vector3d center = Vector3d.center(block);
       ParticleUtil.of(Particle.LAVA, center).offset(0.5).extra(0.05).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(4) == 0) {

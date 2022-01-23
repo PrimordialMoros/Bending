@@ -46,7 +46,6 @@ import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -215,8 +214,7 @@ public class FireBurst extends AbilityInstance {
             continue;
           }
           if (MaterialUtil.isIgnitable(b)) {
-            long delay = BendingProperties.FIRE_REVERT_TIME + ThreadLocalRandom.current().nextInt(1000);
-            TempBlock.fire().duration(delay).build(b);
+            TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(b);
           }
         }
       }

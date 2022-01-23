@@ -41,7 +41,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -157,7 +156,7 @@ public class OctopusForm extends AbilityInstance {
     for (Block block : base) {
       Block below = block.getRelative(BlockFace.DOWN);
       if (MaterialUtil.isWater(below) && TempBlock.isBendable(below)) {
-        TempBlock.ice().duration(BendingProperties.ICE_DURATION).build(below);
+        TempBlock.ice().duration(Bending.properties().iceRevertTime()).build(below);
       }
       renderWaterBlock(block);
     }

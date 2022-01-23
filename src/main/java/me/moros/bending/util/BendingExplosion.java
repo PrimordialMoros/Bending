@@ -107,14 +107,12 @@ public final class BendingExplosion {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       blocks.removeIf(b -> !user.canBuild(b));
       for (Block block : blocks) {
-        long delay = BendingProperties.EXPLOSION_REVERT_TIME + rand.nextInt(1000);
-        TempBlock.air().duration(delay).build(block);
+        TempBlock.air().duration(Bending.properties().explosionRevertTime(1000)).build(block);
       }
       if (placeFire) {
         for (Block block : blocks) {
           if (MaterialUtil.isIgnitable(block) && rand.nextInt(3) == 0) {
-            long delay = BendingProperties.FIRE_REVERT_TIME + rand.nextInt(1000);
-            TempBlock.fire().duration(delay).build(block);
+            TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(block);
           }
         }
       }
@@ -130,7 +128,7 @@ public final class BendingExplosion {
       } else {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
       }
-      double knockback = sizeFactor * distanceFactor * BendingProperties.EXPLOSION_KNOCKBACK;
+      double knockback = Bending.properties().explosionKnockback(sizeFactor * distanceFactor);
       if (entity.equals(user.entity())) {
         knockback *= selfKnockbackFactor;
       }

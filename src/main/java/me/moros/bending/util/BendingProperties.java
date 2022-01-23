@@ -19,20 +19,119 @@
 
 package me.moros.bending.util;
 
-public final class BendingProperties {
-  public static final long EARTHBENDING_REVERT_TIME = 300_000; // 5 minutes
-  public static final long FIRE_REVERT_TIME = 10_000; // 10 seconds
-  public static final long EXPLOSION_REVERT_TIME = 20_000; // 20 seconds
-  public static final long ICE_DURATION = 10_000; // 10 seconds
+import java.util.concurrent.ThreadLocalRandom;
 
-  public static final double EXPLOSION_KNOCKBACK = 0.8;
+import me.moros.bending.config.Configurable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 
-  public static final double METAL_MODIFIER = 1.25;
-  public static final double MAGMA_MODIFIER = 1.4;
+public final class BendingProperties extends Configurable {
+  private final ThreadLocalRandom rand;
 
-  public static final double WATER_NIGHT_MODIFIER = 1.25;
-  public static final double FIRE_DAY_MODIFIER = 1.25;
+  private long earthRevertTime;
+  private long fireRevertTime;
+  private long explosionRevertTime;
+  private long iceRevertTime;
 
-  private BendingProperties() {
+  private double explosionKnockback;
+
+  private double metalModifier;
+  private double magmaModifier;
+  private double moonModifier;
+  private double sunModifier;
+
+  public BendingProperties() {
+    rand = ThreadLocalRandom.current();
+  }
+
+  @Override
+  public void onConfigReload() {
+    CommentedConfigurationNode revertNode = config.node("properties", "revert-time");
+
+    earthRevertTime = revertNode.node("earth").getLong(300_000);
+    fireRevertTime = revertNode.node("fire").getLong(10_000);
+    explosionRevertTime = revertNode.node("explosion").getLong(20_000);
+    iceRevertTime = revertNode.node("ice").getLong(10_000);
+
+    explosionKnockback = config.node("properties", "explosion-knockback").getDouble(0.8);
+
+    CommentedConfigurationNode modifierNode = config.node("properties", "modifiers");
+
+    metalModifier = modifierNode.node("metal").getDouble(1.25);
+    magmaModifier = modifierNode.node("magma").getDouble(1.4);
+
+    moonModifier = modifierNode.node("moon").getDouble(1.25);
+    sunModifier = modifierNode.node("sun").getDouble(1.25);
+  }
+
+  public long earthRevertTime() {
+    return earthRevertTime;
+  }
+
+  public long earthRevertTime(long delay) {
+    return earthRevertTime + rand.nextLong(delay);
+  }
+
+  public long fireRevertTime() {
+    return fireRevertTime;
+  }
+
+  public long fireRevertTime(long delay) {
+    return fireRevertTime + rand.nextLong(delay);
+  }
+
+  public long explosionRevertTime() {
+    return explosionRevertTime;
+  }
+
+  public long explosionRevertTime(long delay) {
+    return explosionRevertTime + rand.nextLong(delay);
+  }
+
+  public long iceRevertTime() {
+    return iceRevertTime;
+  }
+
+  public long iceRevertTime(long delay) {
+    return iceRevertTime + rand.nextLong(delay);
+  }
+
+  public double explosionKnockback() {
+    return explosionKnockback;
+  }
+
+  public double explosionKnockback(double value) {
+    return value * explosionKnockback;
+  }
+
+  public double metalModifier() {
+    return metalModifier;
+  }
+
+  public double metalModifier(double value) {
+    return value * metalModifier;
+  }
+
+  public double magmaModifier() {
+    return magmaModifier;
+  }
+
+  public double magmaModifier(double value) {
+    return value * magmaModifier;
+  }
+
+  public double moonModifier() {
+    return moonModifier;
+  }
+
+  public double moonModifier(double value) {
+    return value * moonModifier;
+  }
+
+  public double sunModifier() {
+    return sunModifier;
+  }
+
+  public double sunModifier(double value) {
+    return value * sunModifier;
   }
 }

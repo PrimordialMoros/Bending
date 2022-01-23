@@ -28,12 +28,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -175,7 +175,7 @@ public class Pillar implements Updatable, Iterable<Block> {
     private int length;
     private int distance;
     private long interval = 125;
-    private long duration = BendingProperties.EARTHBENDING_REVERT_TIME;
+    private long duration = Bending.properties().earthRevertTime();
     private Predicate<Block> predicate = b -> true;
 
     public <T extends Pillar> Builder(@NonNull User user, @NonNull Block origin, @NonNull Function<Builder, T> constructor) {

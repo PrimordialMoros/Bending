@@ -34,7 +34,6 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.BendingProperties;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -107,7 +106,7 @@ public class EarthTunnel extends AbilityInstance {
         if (userConfig.extractOres) {
           extract(current);
         }
-        TempBlock.air().duration(BendingProperties.EARTHBENDING_REVERT_TIME).build(current);
+        TempBlock.air().duration(Bending.properties().earthRevertTime()).build(current);
       }
       if (angle >= 360) {
         angle = 0;
