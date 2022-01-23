@@ -31,6 +31,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.block.data.Waterlogged;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class TempLight extends TemporaryBase {
@@ -68,7 +69,6 @@ public final class TempLight extends TemporaryBase {
     this.level = level;
     this.rate = rate;
     MANAGER.addEntry(block, this, Temporary.toTicks(duration));
-    render();
   }
 
   @Override
@@ -77,19 +77,25 @@ public final class TempLight extends TemporaryBase {
       return false;
     }
     level -= rate;
-    if (level <= 0) {
+    Type type = isValid(block, level);
+    if (level <= 0 || type == Type.INVALID) {
       reverted = true;
       PacketUtil.fakeBlock(block.getWorld(), pos, block.getBlockData());
       MANAGER.removeEntry(block);
       return true;
     }
-    render();
+    render(type == Type.WATER);
     MANAGER.reschedule(block, 2);
     return false;
   }
 
-  private void render() {
-    PacketUtil.fakeBlock(block.getWorld(), pos, LIGHT_ARRAY[level - 1]);
+  private void render(boolean waterlogged) {
+    BlockData data = LIGHT_ARRAY[level - 1];
+    if (waterlogged) {
+      data = data.clone();
+      ((Waterlogged) data).setWaterlogged(true);
+    }
+    PacketUtil.fakeBlock(block.getWorld(), pos, data);
   }
 
   public @NonNull TempLight lock() {
@@ -111,9 +117,24 @@ public final class TempLight extends TemporaryBase {
     return level;
   }
 
+  private static Type isValid(Block block, int level) {
+    if (block.getLightLevel() < level) {
+      BlockData data = block.getBlockData();
+      Material mat = data.getMaterial();
+      if (mat.isAir()) {
+        return Type.NORMAL;
+      } else if (mat == Material.WATER && ((Levelled) data).getLevel() == 0) {
+        return Type.WATER;
+      }
+    }
+    return Type.INVALID;
+  }
+
   public static @NonNull Builder builder(int level) {
     return new Builder(Math.max(1, Math.min(LIGHT_ARRAY.length, level)));
   }
+
+  private enum Type {NORMAL, WATER, INVALID};
 
   public static final class Builder {
     private final int level;
@@ -136,18 +157,24 @@ public final class TempLight extends TemporaryBase {
     }
 
     public Optional<TempLight> build(@NonNull Block block) {
-      if (!config.enabled || !block.getType().isAir() || block.getLightLevel() >= level) {
+      if (!config.enabled) {
         return Optional.empty();
       }
-      TempLight old = MANAGER.get(block).orElse(null);
-      if (old != null) {
-        if (old.level < level) {
-          old.level = level;
-          old.render();
-        }
-        return Optional.of(old);
+      Type type = isValid(block, level);
+      if (type == Type.INVALID) {
+        return Optional.empty();
       }
-      return Optional.of(new TempLight(block, level, rate, duration));
+      TempLight light = MANAGER.get(block).orElse(null);
+      if (light != null) {
+        if (light.level < level) {
+          light.level = level;
+          light.render(type == Type.WATER);
+        }
+        return Optional.of(light);
+      }
+      light = new TempLight(block, level, rate, duration);
+      light.render(type == Type.WATER);
+      return Optional.of(light);
     }
   }
 
