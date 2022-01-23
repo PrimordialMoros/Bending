@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -58,6 +59,7 @@ public class FireJet extends AbilityInstance {
   private boolean jetBlast;
   private long duration;
   private long startTime;
+  private int ticks = 3;
 
   public FireJet(@NonNull AbilityDescription desc) {
     super(desc);
@@ -138,7 +140,7 @@ public class FireJet extends AbilityInstance {
       Vector3d v = target.subtract(center);
       ParticleUtil.fire(user, center).count(0).offset(v).extra(particleSpeed).spawn(user.world());
     }
-
+    TempLight.builder(++ticks).build(user.locBlock());
     if (ThreadLocalRandom.current().nextBoolean()) {
       SoundUtil.FIRE.play(user.world(), user.location());
     }

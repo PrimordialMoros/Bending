@@ -32,6 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -199,6 +200,7 @@ public class Lightning extends AbilityInstance {
       }
       ParticleUtil.of(Particle.END_ROD, v).spawn(user.world());
     }
+    TempLight.builder(15).build(segment.mid.toBlock(user.world()));
     return true;
   }
 
@@ -251,7 +253,7 @@ public class Lightning extends AbilityInstance {
       if (entity instanceof Creeper creeper) {
         creeper.setPowered(true);
       }
-      boolean hitWater = entity.isInWater();
+      boolean hitWater = entity.isInWaterOrBubbleColumn();
       boolean grounded = EntityUtil.isOnGround(entity);
       boolean hasMetalArmor = entity instanceof LivingEntity livingEntity && InventoryUtil.hasMetalArmor(livingEntity);
       double dmgFactor = hitWater ? 2 : (grounded && hasMetalArmor ? 0.5 : 1);

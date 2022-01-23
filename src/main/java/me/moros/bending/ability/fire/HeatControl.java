@@ -29,6 +29,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -63,6 +64,9 @@ public class HeatControl extends AbilityInstance implements Ability {
   private final Solidify solidify = new Solidify();
   private final Melt melt = new Melt();
 
+  private TempLight light;
+  private int ticks = 3;
+
   private long startTime;
 
   public HeatControl(@NonNull AbilityDescription desc) {
@@ -88,18 +92,19 @@ public class HeatControl extends AbilityInstance implements Ability {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       solidify.clear();
       melt.clear();
+      resetLight();
       return UpdateResult.CONTINUE;
     }
     melt.processQueue(1);
+    long time = System.currentTimeMillis();
     if (description().equals(user.selectedAbility())) {
-      long time = System.currentTimeMillis();
-      if (user.sneaking()) {
-        if (isHoldingFood()) {
-          ParticleUtil.fire(user, user.mainHandSide()).spawn(user.world());
-          if (time > startTime + userConfig.cookInterval && cook()) {
-            startTime = System.currentTimeMillis();
-          }
-          return UpdateResult.CONTINUE;
+      Vector3d origin = user.mainHandSide();
+      boolean cooking = user.sneaking() && isHoldingFood() && !MaterialUtil.isWater(origin.toBlock(user.world()));
+      if (cooking) {
+        if (startTime <= 0) {
+          startTime = time;
+        } else if (time > startTime + userConfig.cookInterval && cook()) {
+          startTime = System.currentTimeMillis();
         }
         int freezeTicks = user.entity().getFreezeTicks();
         if (freezeTicks > 1) {
@@ -108,10 +113,35 @@ public class HeatControl extends AbilityInstance implements Ability {
         solidify.processQueue(1);
       } else {
         solidify.clear();
+        startTime = 0;
       }
-      startTime = time;
+      Block head = user.headBlock();
+      if (cooking || head.getLightLevel() < 7) {
+        ParticleUtil.fire(user, origin).spawn(user.world());
+        createLight(head);
+      } else {
+        resetLight();
+      }
+    } else {
+      startTime = 0;
+      resetLight();
     }
     return UpdateResult.CONTINUE;
+  }
+
+  private void createLight(Block block) {
+    if (light != null && !block.equals(light.block())) {
+      light.unlockAndRevert();
+    }
+    light = TempLight.builder(++ticks).rate(2).duration(0).build(block).map(TempLight::lock).orElse(null);
+  }
+
+  private void resetLight() {
+    ticks = 3;
+    if (light != null) {
+      light.unlockAndRevert();
+      light = null;
+    }
   }
 
   private boolean isHoldingFood() {
@@ -200,6 +230,11 @@ public class HeatControl extends AbilityInstance implements Ability {
       return true;
     }
     return !selected.name().equals("HeatControl") || !user.canBend(selected);
+  }
+
+  @Override
+  public void onDestroy() {
+    resetLight();
   }
 
   @Override

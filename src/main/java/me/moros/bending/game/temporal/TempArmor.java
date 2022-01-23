@@ -24,11 +24,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -39,8 +41,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TempArmor implements Temporary {
-  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>();
+public final class TempArmor extends TemporaryBase {
+  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>("Armor");
 
   private final LivingEntity entity;
   private final ItemStack[] snapshot;
@@ -50,6 +52,7 @@ public final class TempArmor implements Temporary {
   }
 
   private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
+    super();
     EntityEquipment equipment = Objects.requireNonNull(entity.getEquipment());
     this.entity = entity;
     this.snapshot = copyFilteredArmor(equipment.getArmorContents());
@@ -136,10 +139,10 @@ public final class TempArmor implements Temporary {
       return this;
     }
 
-    public @Nullable TempArmor build(@NonNull User user) {
+    public Optional<TempArmor> build(@NonNull User user) {
       Objects.requireNonNull(user);
       if (MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
-        return null;
+        return Optional.empty();
       }
       ItemStack[] armorItems = new ItemStack[4];
       for (int i = 0; i < 4; i++) {
@@ -155,7 +158,7 @@ public final class TempArmor implements Temporary {
           armorItems[i] = item;
         }
       }
-      return new TempArmor(user.entity(), armorItems, duration);
+      return Optional.of(new TempArmor(user.entity(), armorItems, duration));
     }
   }
 

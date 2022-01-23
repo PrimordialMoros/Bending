@@ -27,6 +27,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -128,6 +129,7 @@ public class FireBreath extends AbilityInstance {
 
   private class FireStream extends ParticleStream {
     private double distanceTravelled = 0;
+    private int ticks = 3;
 
     public FireStream(Ray ray) {
       super(user, ray, 0.4, 0.5);
@@ -141,6 +143,7 @@ public class FireBreath extends AbilityInstance {
       collider = new Sphere(location, collisionRadius + offset);
       ParticleUtil.fire(user, location).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset).extra(0.02).spawn(user.world());
+      TempLight.builder(++ticks).build(location.toBlock(user.world()));
     }
 
     @Override

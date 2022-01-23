@@ -37,6 +37,7 @@ import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Updatable.UpdateResult;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.BendingBar;
 import me.moros.bending.model.user.User;
 import net.kyori.adventure.bossbar.BossBar;
@@ -49,10 +50,10 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class ActionLimiter implements Temporary {
+public final class ActionLimiter extends TemporaryBase {
   private static final Map<UUID, BendingBar> BARS = new HashMap<>();
 
-  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>() {
+  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>("Action Limiter") {
     public void tick() {
       super.tick();
       BARS.entrySet().removeIf(e -> e.getValue().update() == UpdateResult.REMOVE);
@@ -70,6 +71,7 @@ public final class ActionLimiter implements Temporary {
   private boolean reverted = false;
 
   private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, long duration) {
+    super();
     this.uuid = entity.getUniqueId();
     this.entity = entity;
     this.limitedActions = Collections.unmodifiableSet(EnumSet.copyOf(limitedActions));

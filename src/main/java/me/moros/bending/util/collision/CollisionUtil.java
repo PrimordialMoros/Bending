@@ -63,7 +63,7 @@ public final class CollisionUtil {
    * By default it ignores Spectators and invisible armor stands.
    * @param user the user (needed for self collision and to specify the world in which collisions are checked)
    * @param collider the collider to check
-   * @param callback the method to  be called for every hit entity
+   * @param callback the method to be called for every hit entity
    * @param livingOnly whether only LivingEntities should be checked
    * @param selfCollision whether the collider can collider with the user
    * @param earlyEscape if true it will return on the first valid collision callback without evaluating other entities

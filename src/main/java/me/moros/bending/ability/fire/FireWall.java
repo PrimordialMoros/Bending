@@ -21,11 +21,14 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -68,6 +71,8 @@ public class FireWall extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Collection<Vector3d> bases;
+  private final Map<Block, TempLight> lights = new HashMap<>();
+  private Collection<TempLight> oldLights;
   private final ExpiringSet<Entity> cachedEntities = new ExpiringSet<>(500);
   private final ExpiringSet<Entity> damagedEntities = new ExpiringSet<>(500);
   private OBB collider;
@@ -79,6 +84,8 @@ public class FireWall extends AbilityInstance {
   private double distanceTravelled = 0;
   private long lastSneakTime;
   private long nextRenderTime;
+
+  private int ticks = 5;
 
   public FireWall(@NonNull AbilityDescription desc) {
     super(desc);
@@ -142,7 +149,7 @@ public class FireWall extends AbilityInstance {
     } else {
       lastSneakTime = 0;
     }
-
+    ++ticks;
     if (time >= nextRenderTime) {
       nextRenderTime = time + 200;
       renderWall();
@@ -156,6 +163,8 @@ public class FireWall extends AbilityInstance {
       for (double h = 0; h <= currentHeight; h += 0.8) {
         Vector3d pos = base.add(new Vector3d(0, h, 0));
         Block block = pos.toBlock(user.world());
+        TempLight.builder(ticks).rate(1).duration(userConfig.duration).build(block)
+          .map(TempLight::lock).ifPresent(l -> lights.put(block, l));
         double speed = 1 - (h / (2 * currentHeight));
         if (MaterialUtil.isTransparent(block)) {
           if (h == 0) {
@@ -174,6 +183,7 @@ public class FireWall extends AbilityInstance {
         }
       }
     }
+    cleanupLight(oldLights);
   }
 
   private Vector3d getValidBase(double searchHeight) {
@@ -192,6 +202,8 @@ public class FireWall extends AbilityInstance {
   }
 
   private Collection<Vector3d> setupBases() {
+    oldLights = new ArrayList<>(lights.values());
+    lights.clear();
     double hw = userConfig.width / 2.0;
     Vector3d side = direction.cross(Vector3d.PLUS_J).normalize();
     Collection<Vector3d> possibleBases = new ArrayList<>();
@@ -260,6 +272,19 @@ public class FireWall extends AbilityInstance {
       }
     }
     return false;
+  }
+
+  private void cleanupLight(Collection<TempLight> collection) {
+    if (collection != null && !collection.isEmpty()) {
+      collection.forEach(TempLight::unlockAndRevert);
+      collection.clear();
+    }
+  }
+
+  @Override
+  public void onDestroy() {
+    cleanupLight(oldLights);
+    cleanupLight(lights.values());
   }
 
   @Override

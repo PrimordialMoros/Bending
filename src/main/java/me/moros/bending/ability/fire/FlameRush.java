@@ -30,6 +30,7 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.AbilityInitializer;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -187,6 +188,8 @@ public class FlameRush extends AbilityInstance {
     private double currentPoint = 0;
     private double distanceTravelled = 0;
 
+    private int ticks = 0;
+
     public FireStream(Ray ray, double factor) {
       super(user, ray, userConfig.speed / 3, 0.5);
       this.factor = factor;
@@ -211,6 +214,7 @@ public class FlameRush extends AbilityInstance {
       ParticleUtil.of(Particle.SMOKE_LARGE, spiral1).spawn(user.world());
       ParticleUtil.of(Particle.SMOKE_LARGE, spiral2).spawn(user.world());
       collider = new Sphere(location, collisionRadius + 0.7 * radius);
+      TempLight.builder(++ticks).build(location.toBlock(user.world()));
     }
 
     public @NonNull Vector3d controlDirection() {

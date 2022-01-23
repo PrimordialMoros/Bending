@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -49,10 +50,10 @@ import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TempBlock implements Temporary {
+public final class TempBlock extends TemporaryBase {
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
-  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>(TempBlock::revertFully);
+  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>("Block", TempBlock::revertFully);
 
   private final Deque<TempBlockState> snapshots;
   private final Block block;
@@ -68,6 +69,7 @@ public final class TempBlock implements Temporary {
   }
 
   private TempBlock(Block block, boolean bendable, int ticks) {
+    super();
     snapshots = new ArrayDeque<>();
     this.block = block;
     this.bendable = bendable;

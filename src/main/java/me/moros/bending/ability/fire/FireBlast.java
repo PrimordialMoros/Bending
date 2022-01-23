@@ -29,6 +29,7 @@ import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -215,6 +216,8 @@ public class FireBlast extends AbilityInstance implements Explosive {
     private final int amount;
     private final boolean explosive;
 
+    private int ticks = 3;
+
     public FireStream(Ray ray) {
       super(user, ray, userConfig.speed * factor, 0.8 + 0.5 * (factor - 1));
       canCollide = Block::isLiquid;
@@ -228,6 +231,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     @Override
     public void render() {
       ParticleUtil.fire(user, location).count(amount).offset(offset).extra(particleSpeed).spawn(user.world());
+      TempLight.builder(++ticks).build(location.toBlock(user.world()));
     }
 
     @Override

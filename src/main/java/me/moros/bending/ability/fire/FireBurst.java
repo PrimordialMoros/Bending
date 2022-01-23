@@ -31,6 +31,7 @@ import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -165,6 +166,7 @@ public class FireBurst extends AbilityInstance {
 
   private class FireStream extends ParticleStream {
     private long nextRenderTime;
+    private int ticks = 3;
 
     public FireStream(Ray ray) {
       super(user, ray, userConfig.speed, 1);
@@ -178,6 +180,7 @@ public class FireBurst extends AbilityInstance {
         ParticleUtil.fire(user, location).offset(0.2).extra(0.01).spawn(user.world());
         nextRenderTime = time + 75;
       }
+      TempLight.builder(++ticks).build(location.toBlock(user.world()));
     }
 
     @Override

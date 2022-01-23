@@ -177,7 +177,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * @return a vector which represents the user's specified hand location
    */
   default @NonNull Vector3d handSide(boolean right) {
-    Vector3d offset = direction().multiply(0.4).add(new Vector3d(0, 1.2, 0));
+    Vector3d offset = direction().multiply(0.4).add(new Vector3d(0, sneaking() ? 1.2 : 1.575, 0));
     return right ? rightSide().add(offset) : leftSide().add(offset);
   }
 

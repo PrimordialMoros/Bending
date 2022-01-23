@@ -19,25 +19,22 @@
 
 package me.moros.bending.model.temporal;
 
-final class TimerWheel<K, V extends Temporary> {
+final class TimerWheel {
   private static final int[] BUCKETS = {40, 30, 15, 4, 4}; // 2s, 1m, 15m, 1h, 4h
   private static final int[] SPANS = {40, 1200, 18000, 72000, 288000, 288000};
 
-  private final TemporalManager<K, V> manager;
-  private final Node<K, V>[][] wheel;
+  private final TemporaryBase[][] wheel;
   private final int[] index = {0, 0, 0, 0, 0};
   private final int length;
 
-  @SuppressWarnings("unchecked")
-  TimerWheel(TemporalManager<K, V> manager) {
-    this.manager = manager;
+  TimerWheel() {
     length = BUCKETS.length;
-    wheel = new Node[length][];
+    wheel = new TemporaryBase[length][];
     for (int i = 0; i < length; i++) {
       int innerLength = BUCKETS[i];
-      wheel[i] = new Node[innerLength];
+      wheel[i] = new TemporaryBase[innerLength];
       for (int j = 0; j < innerLength; j++) {
-        wheel[i][j] = new Node<>();
+        wheel[i][j] = TemporaryBase.EMPTY;
       }
     }
   }
@@ -52,19 +49,17 @@ final class TimerWheel<K, V extends Temporary> {
     }
   }
 
-  private void expire(Node<K, V> sentinel, int currentTick) {
-    Node<K, V> prev = sentinel.previous();
-    Node<K, V> node = sentinel.next();
+  private void expire(TemporaryBase sentinel, int currentTick) {
+    TemporaryBase prev = sentinel.previous();
+    TemporaryBase node = sentinel.next();
     sentinel.previous(sentinel);
     sentinel.next(sentinel);
     while (node != sentinel) {
-      Node<K, V> next = node.next();
+      TemporaryBase next = node.next();
       node.previous(null);
       node.next(null);
       try {
-        if (node.expirationTick() <= currentTick && node.value().revert()) {
-          manager.removeEntry(node.key());
-        } else {
+        if (node.expirationTick() > currentTick || !node.revert()) {
           schedule(node, currentTick);
         }
         node = next;
@@ -78,25 +73,25 @@ final class TimerWheel<K, V extends Temporary> {
     }
   }
 
-  void schedule(Node<K, V> node, int currentTick) {
-    Node<K, V> sentinel = findBucket(node.expirationTick() - currentTick);
-    Node.link(sentinel, node);
+  void schedule(TemporaryBase node, int currentTick) {
+    TemporaryBase sentinel = findBucket(node.expirationTick() - currentTick);
+    TemporaryBase.link(sentinel, node);
   }
 
-  void reschedule(Node<K, V> node, int currentTick) {
+  void reschedule(TemporaryBase node, int currentTick) {
     if (node.next() != null) {
-      Node.unlink(node);
+      TemporaryBase.unlink(node);
       schedule(node, currentTick);
     }
   }
 
-  void deschedule(Node<K, V> node) {
-    Node.unlink(node);
+  void deschedule(TemporaryBase node) {
+    TemporaryBase.unlink(node);
     node.next(null);
     node.previous(null);
   }
 
-  private Node<K, V> findBucket(int ticks) {
+  private TemporaryBase findBucket(int ticks) {
     for (int i = 0; i < length; i++) {
       int tickCapacity = SPANS[i + 1];
       if (ticks <= tickCapacity) {
@@ -106,7 +101,7 @@ final class TimerWheel<K, V extends Temporary> {
     return add(wheel.length - 1, Math.min(ticks, SPANS[SPANS.length - 1]));
   }
 
-  private Node<K, V> add(int idx, int ticks) {
+  private TemporaryBase add(int idx, int ticks) {
     return wheel[idx][(index[idx] + ticks % SPANS[idx]) % BUCKETS[idx]];
   }
 

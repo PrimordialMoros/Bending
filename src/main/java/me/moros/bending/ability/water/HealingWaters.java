@@ -29,11 +29,11 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
@@ -51,6 +51,7 @@ public class HealingWaters extends AbilityInstance {
 
   private LivingEntity target;
 
+  private boolean healed = false;
   private long nextTime;
 
   public HealingWaters(@NonNull AbilityDescription desc) {
@@ -64,7 +65,10 @@ public class HealingWaters extends AbilityInstance {
     }
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
+    removalPolicy = Policies.builder()
+      .add(Policies.NOT_SNEAKING)
+      .add(SwappedSlotsRemovalPolicy.of(description()))
+      .build();
     nextTime = System.currentTimeMillis();
     target = user.entity();
     return true;
@@ -109,18 +113,19 @@ public class HealingWaters extends AbilityInstance {
     if (!user.entity().equals(target) && !isValidEntity(target)) {
       target = user.entity();
     }
-    if (!MaterialUtil.isWater(target.getLocation().getBlock()) && !InventoryUtil.hasFullBottle(user)) {
+    if (!target.isInWaterOrRainOrBubbleColumn() && !InventoryUtil.hasFullBottle(user)) {
       return false;
     }
-    ParticleUtil.rgb(EntityUtil.entityCenter(target), "00ffff").count(6).offset(0.35).spawn(user.world());
     EntityUtil.removeNegativeEffects(target);
     AttributeInstance attributeInstance = target.getAttribute(healthAttribute);
     if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
+      ParticleUtil.rgb(EntityUtil.entityCenter(target), "00ffff").count(6).offset(0.35).spawn(user.world());
       int ticks = FastMath.floor(userConfig.duration / 50.0);
-      EntityUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power);
-      return true;
+      if (EntityUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power)) {
+        healed = true;
+      }
     }
-    return false;
+    return true;
   }
 
   public static void healTarget(@NonNull User user, @NonNull LivingEntity entity) {
@@ -138,7 +143,9 @@ public class HealingWaters extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    user.addCooldown(description(), userConfig.cooldown);
+    if (healed) {
+      user.addCooldown(description(), userConfig.cooldown);
+    }
   }
 
   @Override

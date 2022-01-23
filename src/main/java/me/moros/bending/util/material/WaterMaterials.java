@@ -46,11 +46,11 @@ public final class WaterMaterials {
       .add(MaterialTags.MUSHROOMS.getValues())
       .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
       .add(MaterialTags.PUMPKINS.getValues())
-      .ensureSize("Plants", 51);
+      .ensureSize("Plants", 51).lock();
 
-    ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4);
+    ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4).lock();
 
-    SNOW_BENDABLE = new MaterialSetTag(key).add(Material.SNOW, Material.SNOW_BLOCK).ensureSize("Snow", 2);
+    SNOW_BENDABLE = new MaterialSetTag(key).add(Material.SNOW, Material.SNOW_BLOCK).ensureSize("Snow", 2).lock();
 
     FULL_SOURCES = new MaterialSetTag(key)
       .add(Material.WATER, Material.CACTUS, Material.MELON, Material.SNOW_BLOCK)
@@ -58,13 +58,13 @@ public final class WaterMaterials {
       .add(Tag.LEAVES.getValues())
       .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
       .add(MaterialTags.PUMPKINS.getValues())
-      .ensureSize("Full Water Sources", 22);
+      .ensureSize("Full Water Sources", 22).lock();
 
     ALL = new MaterialSetTag(key)
       .add(PLANT_BENDABLE.getValues())
       .add(ICE_BENDABLE.getValues())
       .add(SNOW_BENDABLE.getValues())
-      .add(Material.WATER).ensureSize("Waterbendable", 58);
+      .add(Material.WATER).ensureSize("Waterbendable", 58).lock();
   }
 
   private WaterMaterials() {

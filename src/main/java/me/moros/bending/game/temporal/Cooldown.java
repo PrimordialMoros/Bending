@@ -21,16 +21,17 @@ package me.moros.bending.game.temporal;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class Cooldown implements Temporary {
-  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(c -> {
-  });
+public final class Cooldown extends TemporaryBase {
+  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>("Cooldown", Function.identity()::apply);
 
   public static void init() {
   }
@@ -42,6 +43,7 @@ public final class Cooldown implements Temporary {
   private final int hashCode;
 
   private Cooldown(User user, AbilityDescription desc, Runnable runnable) {
+    super();
     this.uuid = user.uuid();
     this.desc = desc;
     this.runnable = runnable;

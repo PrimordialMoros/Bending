@@ -32,9 +32,9 @@ public enum Policies implements RemovalPolicy {
   SNEAKING((u, d) -> u.sneaking()),
   NOT_SNEAKING((u, d) -> !u.sneaking()),
   FLYING((u, d) -> u.flying()),
-  IN_WATER((u, d) -> u.entity().isInWater()),
-  NOT_IN_WATER((u, d) -> !u.entity().isInWater()),
-  IN_LIQUID((u, d) -> u.entity().isInWater() || u.entity().isInLava());
+  IN_WATER((u, d) -> u.entity().isInWaterOrBubbleColumn()),
+  NOT_IN_WATER((u, d) -> !u.entity().isInWaterOrBubbleColumn()),
+  IN_LIQUID((u, d) -> u.entity().isInWaterOrBubbleColumn() || u.entity().isInLava());
 
   private final RemovalPolicy policy;
 

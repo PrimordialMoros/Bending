@@ -19,29 +19,20 @@
 
 package me.moros.bending.model.temporal;
 
-public final class Node<K, V> {
-  private Node<K, V> prev;
-  private Node<K, V> next;
-  private final K key;
-  private final V value;
+public abstract class TemporaryBase implements Temporary {
+  static TemporaryBase EMPTY = new TemporaryBase() {
+    @Override
+    public boolean revert() {
+      return false;
+    }
+  };
+
+  private TemporaryBase prev;
+  private TemporaryBase next;
   private int expirationTick;
 
-  Node() {
-    this(null, null);
-  }
-
-  Node(K key, V value) {
-    this.key = key;
-    this.value = value;
+  protected TemporaryBase() {
     prev = next = this;
-  }
-
-  K key() {
-    return key;
-  }
-
-  V value() {
-    return value;
   }
 
   int expirationTick() {
@@ -52,33 +43,33 @@ public final class Node<K, V> {
     this.expirationTick = expirationTick;
   }
 
-  Node<K, V> previous() {
+  TemporaryBase previous() {
     return prev;
   }
 
-  void previous(Node<K, V> prev) {
+  void previous(TemporaryBase prev) {
     this.prev = prev;
   }
 
-  Node<K, V> next() {
+  TemporaryBase next() {
     return next;
   }
 
-  void next(Node<K, V> next) {
+  void next(TemporaryBase next) {
     this.next = next;
   }
 
-  static <K, V> void link(Node<K, V> sentinel, Node<K, V> node) {
+  static void link(TemporaryBase sentinel, TemporaryBase node) {
     node.previous(sentinel.previous());
     node.next(sentinel);
     sentinel.previous().next(node);
     sentinel.previous(node);
   }
 
-  static <K, V> void unlink(Node<K, V> node) {
-    Node<K, V> next = node.next();
+  static void unlink(TemporaryBase node) {
+    TemporaryBase next = node.next();
     if (next != null) {
-      Node<K, V> prev = node.previous();
+      TemporaryBase prev = node.previous();
       next.previous(prev);
       prev.next(next);
     }

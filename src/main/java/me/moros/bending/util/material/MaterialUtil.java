@@ -87,7 +87,7 @@ public final class MaterialUtil {
 
     NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     WATER_PLANTS = new MaterialSetTag(key)
-      .add(Material.SEAGRASS, Material.TALL_SEAGRASS, Material.KELP, Material.KELP_PLANT).ensureSize("Water plants", 4);
+      .add(Material.SEAGRASS, Material.TALL_SEAGRASS, Material.KELP, Material.KELP_PLANT).ensureSize("Water plants", 4).lock();
 
     BREAKABLE_PLANTS = new MaterialSetTag(key)
       .add(WATER_PLANTS.getValues())
@@ -102,7 +102,7 @@ public final class MaterialUtil {
       .add(MaterialTags.CORAL_FANS.getValues())
       .add(Material.GRASS, Material.TALL_GRASS, Material.LARGE_FERN, Material.GLOW_LICHEN,
         Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT, Material.TWISTING_VINES, Material.TWISTING_VINES_PLANT,
-        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakable plants", 82);
+        Material.VINE, Material.FERN, Material.SUGAR_CANE, Material.DEAD_BUSH).ensureSize("Breakable plants", 82).lock();
 
     TRANSPARENT = new MaterialSetTag(key)
       .add(BREAKABLE_PLANTS.getValues())
@@ -110,8 +110,8 @@ public final class MaterialUtil {
       .add(Tag.FIRE.getValues())
       .add(Tag.CARPETS.getValues())
       .add(Tag.BUTTONS.getValues())
-      .add(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
-      .endsWith("TORCH").ensureSize("Transparent", 137);
+      .add(Material.LIGHT, Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
+      .endsWith("TORCH").ensureSize("Transparent", 138).lock();
 
     CONTAINERS = new MaterialSetTag(key).add(
       Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL,
@@ -119,18 +119,18 @@ public final class MaterialUtil {
       Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND,
       Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.BEACON,
       Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE, Material.JUKEBOX
-    ).ensureSize("Containers", 21);
+    ).ensureSize("Containers", 21).lock();
 
     UNBREAKABLES = new MaterialSetTag(key).add(
       Material.BARRIER, Material.BEDROCK, Material.OBSIDIAN, Material.CRYING_OBSIDIAN,
       Material.NETHER_PORTAL, Material.END_PORTAL, Material.END_PORTAL_FRAME, Material.END_GATEWAY
-    ).ensureSize("Unbreakables", 8);
+    ).ensureSize("Unbreakables", 8).lock();
 
     METAL_ARMOR = new MaterialSetTag(key).add(
       Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
       Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
       Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS
-    ).ensureSize("Metal Armor", 12);
+    ).ensureSize("Metal Armor", 12).lock();
   }
 
   private MaterialUtil() {

@@ -40,6 +40,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -73,6 +74,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public final class PacketUtil {
+  private static final int armorStandId = Registry.ENTITY_TYPE.getId(EntityType.ARMOR_STAND);
+
   private PacketUtil() {
   }
 
@@ -110,6 +113,10 @@ public final class PacketUtil {
     }
     broadcast(packets, world, center);
     return id;
+  }
+
+  public static void fakeBlock(World world, Vector3d center, BlockData data) {
+    broadcast(List.of(fakeBlock(center, data)), world, center, world.getViewDistance() << 4);
   }
 
   public static void refreshBlocks(Collection<org.bukkit.block.Block> blocks, World world, Vector3d center) {
@@ -174,7 +181,7 @@ public final class PacketUtil {
 
     packetByteBuffer.writeVarInt(id);
     packetByteBuffer.writeUUID(UUID.randomUUID());
-    packetByteBuffer.writeVarInt(1);
+    packetByteBuffer.writeVarInt(armorStandId);
 
     // Position
     packetByteBuffer.writeDouble(center.getX());
@@ -205,6 +212,10 @@ public final class PacketUtil {
 
   private static ClientboundSetEntityMotionPacket addVelocity(int id, Vector3d vel) {
     return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.getX(), vel.getY(), vel.getZ()));
+  }
+
+  private static ClientboundBlockUpdatePacket fakeBlock(Vector3d b, BlockData data) {
+    return new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlockData) data).getState());
   }
 
   private static Collection<Packet<?>> refreshBlocks(Collection<org.bukkit.block.Block> blocks) {

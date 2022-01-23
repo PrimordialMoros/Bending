@@ -24,6 +24,7 @@ import java.util.Objects;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.packet.PacketUtil;
 import org.bukkit.Particle;
@@ -31,8 +32,8 @@ import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class TempPacketEntity implements Temporary {
-  public static final TemporalManager<Integer, TempPacketEntity> MANAGER = new TemporalManager<>();
+public final class TempPacketEntity extends TemporaryBase {
+  public static final TemporalManager<Integer, TempPacketEntity> MANAGER = new TemporalManager<>("Packet Entity");
 
   private final int id;
   private boolean reverted = false;
@@ -41,6 +42,7 @@ public final class TempPacketEntity implements Temporary {
   }
 
   private TempPacketEntity(int id, long duration) {
+    super();
     this.id = id;
     MANAGER.addEntry(id, this, Temporary.toTicks(duration));
   }

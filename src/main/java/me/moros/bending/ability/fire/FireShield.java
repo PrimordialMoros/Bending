@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -50,6 +51,7 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -146,6 +148,12 @@ public class FireShield extends AbilityInstance {
   @Override
   public void onDestroy() {
     user.addCooldown(description(), sphere ? userConfig.shieldCooldown : userConfig.diskCooldown);
+    if (sphere) {
+      TempLight light = ((SphereShield) shield).light;
+      if (light != null) {
+        light.unlockAndRevert();
+      }
+    }
   }
 
   @Override
@@ -181,6 +189,7 @@ public class FireShield extends AbilityInstance {
     private Disk disk;
     private Vector3d location;
     private long nextRenderTime = 0;
+    private int ticks = 6;
 
     private DiskShield() {
       update();
@@ -199,6 +208,7 @@ public class FireShield extends AbilityInstance {
 
     @Override
     public void render() {
+      TempLight.builder(++ticks).rate(1).duration(200).build(location.toBlock(user.world()));
       long time = System.currentTimeMillis();
       if (time < nextRenderTime) {
         return;
@@ -227,6 +237,7 @@ public class FireShield extends AbilityInstance {
   private final class SphereShield implements Shield {
     private Sphere sphere;
     private int currentPoint = 0;
+    private TempLight light;
 
     private SphereShield() {
       update();
@@ -262,6 +273,18 @@ public class FireShield extends AbilityInstance {
           SoundUtil.FIRE.play(user.world(), spawnLoc);
         }
       }
+      Block block = center.toBlock(user.world());
+      if (light == null || currentPoint <= 10) {
+        createLight(block);
+      } else if (!block.equals(light.block())) {
+        light.unlockAndRevert();
+        createLight(block);
+      }
+    }
+
+    private void createLight(Block block) {
+      light = TempLight.builder(5 + currentPoint).rate(1)
+        .duration(userConfig.shieldDuration).build(block).map(TempLight::lock).orElse(null);
     }
 
     private Vector3d center() {

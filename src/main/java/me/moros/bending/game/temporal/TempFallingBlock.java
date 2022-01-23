@@ -24,15 +24,16 @@ import java.util.Objects;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
+import me.moros.bending.model.temporal.TemporaryBase;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class TempFallingBlock implements Temporary {
+public final class TempFallingBlock extends TemporaryBase {
   public static final Vector3d OFFSET = new Vector3d(0.5, 0, 0.5);
-  public static final TemporalManager<FallingBlock, TempFallingBlock> MANAGER = new TemporalManager<>();
+  public static final TemporalManager<FallingBlock, TempFallingBlock> MANAGER = new TemporalManager<>("Falling Block");
 
   private final FallingBlock fallingBlock;
   private boolean reverted = false;
@@ -41,6 +42,7 @@ public final class TempFallingBlock implements Temporary {
   }
 
   private TempFallingBlock(FallingBlock fallingBlock, long duration) {
+    super();
     this.fallingBlock = fallingBlock;
     MANAGER.addEntry(fallingBlock, this, Temporary.toTicks(duration));
   }

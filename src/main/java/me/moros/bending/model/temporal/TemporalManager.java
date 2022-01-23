@@ -30,19 +30,25 @@ import org.bukkit.Bukkit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TemporalManager<K, V extends Temporary> {
+public class TemporalManager<K, V extends TemporaryBase> {
   private final Consumer<V> consumer;
   private final Map<K, V> instances;
-  private final TimerWheel<K, V> wheel;
+  private final TimerWheel wheel;
+  private final String label;
 
-  public TemporalManager() {
-    this(Temporary::revert);
+  public TemporalManager(@NonNull String name) {
+    this(name, Temporary::revert);
   }
 
-  public TemporalManager(@NonNull Consumer<V> consumer) {
+  public TemporalManager(@NonNull String name, @NonNull Consumer<V> consumer) {
+    this.label = "Temporal " + name + " - tick";
     this.consumer = Objects.requireNonNull(consumer);
     this.instances = new ConcurrentHashMap<>();
-    this.wheel = new TimerWheel<>(this);
+    this.wheel = new TimerWheel();
+  }
+
+  public @NonNull String label() {
+    return label;
   }
 
   public void tick() {
@@ -68,10 +74,9 @@ public class TemporalManager<K, V extends Temporary> {
   public void reschedule(@NonNull K key, int tickDuration) {
     V value = instances.get(key);
     if (value != null) {
-      Node<K, V> node = new Node<>(key, value);
       int currentTick = Bukkit.getCurrentTick();
-      node.expirationTick(currentTick + tickDuration);
-      wheel.reschedule(node, currentTick);
+      value.expirationTick(currentTick + tickDuration);
+      wheel.reschedule(value, currentTick);
     }
   }
 
@@ -82,7 +87,7 @@ public class TemporalManager<K, V extends Temporary> {
   public boolean removeEntry(@NonNull K key) {
     V result = instances.remove(key);
     if (result != null) {
-      wheel.deschedule(new Node<>(key, result));
+      wheel.deschedule(result);
       return true;
     }
     return false;

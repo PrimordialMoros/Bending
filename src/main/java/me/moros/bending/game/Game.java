@@ -19,14 +19,21 @@
 
 package me.moros.bending.game;
 
+import java.util.Collection;
+import java.util.List;
+
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.model.AbilityManager;
+import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.BendingStorage;
 import me.moros.bending.util.BendingEffect;
@@ -48,6 +55,8 @@ public final class Game {
   private final ActivationController activationController;
   private final BoardManager boardManager;
 
+  private final Collection<TemporalManager<?, ?>> temporal;
+
   public Game(@NonNull BendingStorage storage) {
     this.storage = storage;
 
@@ -61,7 +70,7 @@ public final class Game {
     new AbilityInitializer();
     storage.createAbilities(Registries.ABILITIES);
 
-    initTemporary();
+    temporal = initTemporary();
 
     Registries.PROTECTIONS.init();
     Registries.BENDERS.init(storage);
@@ -71,13 +80,14 @@ public final class Game {
   }
 
   private void update() {
-    ActionLimiter.MANAGER.tick();
-    Cooldown.MANAGER.tick();
-    TempArmor.MANAGER.tick();
-    TempBlock.MANAGER.tick();
-    TempFallingBlock.MANAGER.tick();
-    TempPacketEntity.MANAGER.tick();
     activationController.clearCache();
+    for (var manager : temporal) {
+      try (Timing timing = Timings.of(Bending.plugin(), manager.label())) {
+        manager.tick();
+      } catch (Exception e) {
+        Bending.logger().warn(e.getMessage(), e);
+      }
+    }
     worldManager.update();
     flightManager.update();
   }
@@ -93,7 +103,7 @@ public final class Game {
     worldManager.destroyAllInstances();
     flightManager.removeAll();
     sequenceManager.clear();
-    removeTemporary();
+    temporal.forEach(TemporalManager::removeAll);
 
     if (shutdown) {
       Registries.BENDERS.players().forEach(storage::savePlayerAsync);
@@ -102,22 +112,9 @@ public final class Game {
     }
   }
 
-  private void initTemporary() {
-    ActionLimiter.init();
-    Cooldown.init();
-    TempArmor.init();
-    TempBlock.init();
-    TempFallingBlock.init();
-    TempPacketEntity.init();
-  }
-
-  private void removeTemporary() {
-    ActionLimiter.MANAGER.removeAll();
-    Cooldown.MANAGER.removeAll();
-    TempArmor.MANAGER.removeAll();
-    TempBlock.MANAGER.removeAll();
-    TempFallingBlock.MANAGER.removeAll();
-    TempPacketEntity.MANAGER.removeAll();
+  private Collection<TemporalManager<?, ?>> initTemporary() {
+    return List.of(Cooldown.MANAGER, TempLight.MANAGER, TempPacketEntity.MANAGER, ActionLimiter.MANAGER,
+      TempArmor.MANAGER, TempFallingBlock.MANAGER, TempBlock.MANAGER);
   }
 
   public @NonNull BendingStorage storage() {

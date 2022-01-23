@@ -96,20 +96,19 @@ public class Tornado extends AbilityInstance {
     }
 
     long time = System.currentTimeMillis();
-    double factor = Math.min(1, time - startTime / userConfig.growthTime);
+    double factor = Math.min(1, (time - startTime) / (double) userConfig.growthTime);
     double height = 2 + factor * (userConfig.height - 2);
     double radius = 2 + factor * (userConfig.radius - 2);
-
-    AABB box = new AABB(new Vector3d(-radius, 0, -radius), new Vector3d(radius, height, radius)).at(base);
+    double rBox = 0.6 * radius;
+    AABB box = new AABB(new Vector3d(-rBox, 0, -rBox), new Vector3d(rBox, height, rBox)).at(base);
     CollisionUtil.handle(user, box, entity -> {
       double dy = entity.getLocation().getY() - base.getY();
-      double r = 2 + (radius - 2) * dy;
+      double r = 0.5 + (radius - 0.5) * dy;
       Vector3d delta = EntityUtil.entityCenter(entity).subtract(base);
       double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
       if (distSq > r * r) {
         return false;
       }
-
       Vector3d velocity;
       if (entity.equals(user.entity())) {
         double velY;
@@ -124,7 +123,7 @@ public class Tornado extends AbilityInstance {
       } else {
         Vector3d normal = delta.setY(0).normalize();
         Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
-        velocity = ortho.add(normal).normalize().multiply(factor);
+        velocity = ortho.add(normal).normalize().add(new Vector3d(0, 0.5, 0)).multiply(factor);
       }
       EntityUtil.applyVelocity(this, entity, velocity);
       return false;
@@ -147,7 +146,7 @@ public class Tornado extends AbilityInstance {
     for (int i = 0; i < 3; i++) {
       double offset = currentAngle + i * 2 * Math.PI / 3.0;
       for (double y = yOffset; y < height; y += (height / amount)) {
-        double r = 2 + (radius - 2) * y / height;
+        double r = 0.5 + (radius - 0.5) * y / height;
         double x = r * Math.cos(y + offset);
         double z = r * Math.sin(y + offset);
         Vector3d loc = base.add(new Vector3d(x, y, z));
@@ -188,10 +187,10 @@ public class Tornado extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(4000);
       duration = abilityNode.node("duration").getLong(8000);
-      radius = abilityNode.node("radius").getDouble(10.0);
-      height = abilityNode.node("height").getDouble(15.0);
-      range = abilityNode.node("range").getDouble(25.0);
-      growthTime = abilityNode.node("growth-time").getLong(2000);
+      radius = abilityNode.node("radius").getDouble(8.0);
+      height = abilityNode.node("height").getDouble(12.0);
+      range = abilityNode.node("range").getDouble(16.0);
+      growthTime = abilityNode.node("growth-time").getLong(3000);
     }
   }
 }
