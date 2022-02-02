@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -71,10 +71,11 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   @Override
   public @NonNull UpdateResult update() {
     Vector3d vector = controlDirection();
+    int d = FastMath.ceil(speed * steps);
     for (int i = 0; i < steps; i++) {
       render();
       postRender();
-      if (steps <= 1 || i % FastMath.ceil(speed * steps) == 0) {
+      if (steps <= 1 || i % d == 0) {
         boolean hitEntity = CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
         if (hitEntity) {
           return UpdateResult.REMOVE;
@@ -119,7 +120,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     return false;
   }
 
-  public @NonNull Vector3d controlDirection() {
+  protected @NonNull Vector3d controlDirection() {
     return dir;
   }
 

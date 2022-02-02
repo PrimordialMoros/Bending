@@ -19,14 +19,10 @@
 
 package me.moros.bending.ability.earth.passive;
 
-import me.moros.bending.Bending;
-import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -37,16 +33,14 @@ import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthCling extends AbilityInstance implements Ability {
   private static final BlockData STONE = Material.STONE.createBlockData();
-  private static final Config config = new Config();
 
   private User user;
-  private Config userConfig;
   private RemovalPolicy removalPolicy;
 
   public EarthCling(@NonNull AbilityDescription desc) {
@@ -63,7 +57,6 @@ public class EarthCling extends AbilityInstance implements Ability {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
   }
 
   @Override
@@ -75,18 +68,16 @@ public class EarthCling extends AbilityInstance implements Ability {
       return UpdateResult.CONTINUE;
     }
     if (EntityUtil.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.isLiquid())) {
+      EntityUtil.tryAddPotion(user.entity(), PotionEffectType.SLOW_FALLING, 10, 0);
       //noinspection ConstantConditions
       if (!user.onCooldown(user.selectedAbility())) {
         EntityUtil.applyVelocity(this, user.entity(), Vector3d.ZERO);
         user.entity().setFallDistance(0);
       } else {
         if (user.velocity().getY() < 0) {
-          float fallDistance = Math.max(0, user.entity().getFallDistance() - (float) userConfig.speed);
-          EntityUtil.applyVelocity(this, user.entity(), user.velocity().multiply(userConfig.speed));
-          user.entity().setFallDistance(fallDistance);
-          ParticleUtil.of(Particle.CRIT, user.location()).count(2)
+          ParticleUtil.of(Particle.CRIT, user.eyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05).spawn(user.world());
-          ParticleUtil.of(Particle.BLOCK_CRACK, user.location()).count(3)
+          ParticleUtil.of(Particle.BLOCK_CRACK, user.eyeLocation()).count(3)
             .offset(0.1, 0.4, 0.1).data(STONE).spawn(user.world());
         }
       }
@@ -97,18 +88,6 @@ public class EarthCling extends AbilityInstance implements Ability {
   @Override
   public @MonotonicNonNull User user() {
     return user;
-  }
-
-  private static class Config extends Configurable {
-    @Modifiable(Attribute.SPEED)
-    public double speed;
-
-    @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "earthcling");
-
-      speed = abilityNode.node("speed").getDouble(0.5);
-    }
   }
 }
 

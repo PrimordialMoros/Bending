@@ -40,11 +40,14 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -55,6 +58,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class HeatControl extends AbilityInstance implements Ability {
+  private enum Light {ON, OFF}
+
   private static final Config config = new Config();
 
   private User user;
@@ -64,6 +69,7 @@ public class HeatControl extends AbilityInstance implements Ability {
   private final Solidify solidify = new Solidify();
   private final Melt melt = new Melt();
 
+  private boolean canLight = true;
   private TempLight light;
   private int ticks = 3;
 
@@ -116,7 +122,7 @@ public class HeatControl extends AbilityInstance implements Ability {
         startTime = 0;
       }
       Block head = user.headBlock();
-      if (cooking || head.getLightLevel() < 7) {
+      if (cooking || (canLight && head.getLightLevel() < 7)) {
         ParticleUtil.fire(user, origin).spawn(user.world());
         createLight(head);
       } else {
@@ -214,6 +220,17 @@ public class HeatControl extends AbilityInstance implements Ability {
   public static void onSneak(@NonNull User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
       Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
+    }
+  }
+
+  public static void toggleLight(@NonNull User user) {
+    if (user.selectedAbilityName().equals("HeatControl")) {
+      var key = DataKey.of("heatcontrol-light", Light.class);
+      if (user.store().canEdit(key)) {
+        Light light = user.store().merge(key, Light.OFF, (m1, m2) -> m1 == Light.OFF ? Light.ON : Light.OFF);
+        user.sendActionBar(Component.text("Light: " + light.name(), ColorPalette.TEXT_COLOR));
+        Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(h -> h.canLight = light == Light.ON);
+      }
     }
   }
 

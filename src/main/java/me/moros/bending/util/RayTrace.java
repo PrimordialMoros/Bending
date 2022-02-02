@@ -140,7 +140,7 @@ public final class RayTrace {
     return d0 <= d1 ? b0 : b1;
   }
 
-  private static final record BlockHit(Vector3d position, Vector3i blockPosition) {
+  private record BlockHit(Vector3d position, Vector3i blockPosition) {
     private BlockHit(BlockHitResult hitResult) {
       this(hitResult.getLocation(), hitResult.getBlockPos());
     }

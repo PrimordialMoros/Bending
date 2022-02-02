@@ -17,22 +17,25 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.ability;
+package me.moros.bending.model.user;
 
-import me.moros.bending.model.collision.geometry.Collider;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
+import java.util.function.BiFunction;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface SimpleAbility {
-  void render();
+public interface DataHolder {
+  <E> boolean containsKey(@NonNull DataKey<E> key);
 
-  default void postRender() {
-  }
+  <E> boolean canEdit(@NonNull DataKey<E> key);
 
-  boolean onEntityHit(@NonNull Entity entity);
+  <E> boolean offer(@NonNull DataKey<E> key, @NonNull E value);
 
-  boolean onBlockHit(@NonNull Block block);
+  <E> @Nullable E remove(@NonNull DataKey<E> key);
 
-  @NonNull Collider collider();
+  <E> @Nullable E get(@NonNull DataKey<E> key);
+
+  <E> @NonNull E getOrDefault(@NonNull DataKey<E> key, @NonNull E defaultValue);
+
+  <E> @NonNull E merge(@NonNull DataKey<E> key, @NonNull E value, @NonNull BiFunction<@NonNull ? super E, @NonNull ? super E, @NonNull ? extends E> remappingFunction);
 }

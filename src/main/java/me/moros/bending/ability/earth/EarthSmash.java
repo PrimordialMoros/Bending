@@ -47,9 +47,9 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
@@ -148,18 +148,21 @@ public class EarthSmash extends AbilityInstance {
     if (center == null) {
       return false;
     }
-
+    int radius = userConfig.radius;
+    if (radius % 2 == 0) {
+      radius++;
+    }
     // Check blocks above center
-    for (int i = 0; i <= userConfig.radius; i++) {
+    for (int i = 0; i <= radius; i++) {
       Block b = center.getRelative(BlockFace.UP, i + 1);
       if (!MaterialUtil.isTransparent(b) || !TempBlock.isBendable(b) || !user.canBuild(b)) {
         return false;
       }
     }
 
-    boulder = new Boulder(user, center, userConfig.radius, userConfig.maxDuration);
+    boulder = new Boulder(user, center, radius, userConfig.maxDuration);
 
-    int minRequired = FastMath.ceil(Math.pow(userConfig.radius, 3) * 0.375);
+    int minRequired = FastMath.ceil(Math.pow(radius, 3) * 0.375);
     if (boulder.data.size() < minRequired) {
       boulder = null;
       return false;
@@ -553,9 +556,9 @@ public class EarthSmash extends AbilityInstance {
         if (entity.isValid()) {
           switch (type) {
             case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-            case SAND -> EntityUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower);
+            case SAND -> EntityUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower - 1);
             case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-            case MUD -> EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower);
+            case MUD -> EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower - 1);
           }
           return true;
         }
@@ -737,14 +740,10 @@ public class EarthSmash extends AbilityInstance {
       shatterDamage = shatterNode.node("damage").getDouble(1.0);
       fireTicks = shatterNode.node("fire-ticks").getInt(25);
       freezeTicks = shatterNode.node("freeze-ticks").getInt(60);
-      mudPower = shatterNode.node("mud-power").getInt(2) - 1;
+      mudPower = shatterNode.node("mud-power").getInt(2);
       mudDuration = shatterNode.node("mud-duration").getLong(1500);
-      sandPower = shatterNode.node("sand-power").getInt(2) - 1;
+      sandPower = shatterNode.node("sand-power").getInt(2);
       sandDuration = shatterNode.node("sand-duration").getLong(1500);
-
-      if (radius % 2 == 0) {
-        radius++;
-      }
     }
   }
 }

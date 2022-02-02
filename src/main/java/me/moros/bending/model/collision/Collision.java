@@ -20,6 +20,7 @@
 package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.collision.geometry.Collider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

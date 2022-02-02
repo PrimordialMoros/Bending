@@ -186,7 +186,7 @@ public final class ElementMenu {
     };
   }
 
-  private static record DataWrapper(BendingPlayer player, Element element, ItemStack itemStack, Gui gui) {
+  private record DataWrapper(BendingPlayer player, Element element, ItemStack itemStack, Gui gui) {
   }
 
   private enum ActionType {

@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -27,17 +26,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider
  */
 public class Disk implements Collider {
-  private final Sphere sphere;
-  private final OBB obb;
+  public final Sphere sphere;
+  public final OBB obb;
 
   public Disk(@NonNull OBB obb, @NonNull Sphere sphere) {
     this.obb = obb;
     this.sphere = sphere;
-  }
-
-  @Override
-  public boolean intersects(@NonNull Collider collider) {
-    return sphere.intersects(collider) && obb.intersects(collider);
   }
 
   @Override

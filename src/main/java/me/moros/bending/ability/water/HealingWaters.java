@@ -30,11 +30,15 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -42,14 +46,14 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class HealingWaters extends AbilityInstance {
+  private enum Mode {SELF, OTHERS}
+
   private static final org.bukkit.attribute.Attribute healthAttribute = org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
   private static final Config config = new Config();
 
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
-
-  private LivingEntity target;
 
   private boolean healed = false;
   private long nextTime;
@@ -70,7 +74,6 @@ public class HealingWaters extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
     nextTime = System.currentTimeMillis();
-    target = user.entity();
     return true;
   }
 
@@ -96,22 +99,18 @@ public class HealingWaters extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private boolean isValidEntity(LivingEntity entity) {
-    if (entity == null || !entity.isValid()) {
-      return false;
-    }
-    if (!entity.getWorld().equals(user.world())) {
-      return false;
-    }
-    if (EntityUtil.entityCenter(entity).distanceSq(user.eyeLocation()) > userConfig.range * userConfig.range) {
-      return false;
-    }
-    return user.entity().hasLineOfSight(entity);
-  }
-
   private boolean tryHeal() {
-    if (!user.entity().equals(target) && !isValidEntity(target)) {
+    LivingEntity target;
+    Mode mode = user.store().getOrDefault(DataKey.of("healingwaters-mode", Mode.class), Mode.SELF);
+    if (mode == Mode.SELF) {
       target = user.entity();
+    } else {
+      Entity entity = user.compositeRayTrace(userConfig.range + 1).result(user.world()).entity();
+      if (entity instanceof LivingEntity && user.entity().hasLineOfSight(entity)) {
+        target = (LivingEntity) entity;
+      } else {
+        return false;
+      }
     }
     if (!target.isInWaterOrRainOrBubbleColumn() && !InventoryUtil.hasFullBottle(user)) {
       return false;
@@ -121,23 +120,20 @@ public class HealingWaters extends AbilityInstance {
     if (attributeInstance != null && target.getHealth() < attributeInstance.getValue()) {
       ParticleUtil.rgb(EntityUtil.entityCenter(target), "00ffff").count(6).offset(0.35).spawn(user.world());
       int ticks = FastMath.floor(userConfig.duration / 50.0);
-      if (EntityUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power)) {
+      if (EntityUtil.tryAddPotion(target, PotionEffectType.REGENERATION, ticks, userConfig.power - 1)) {
         healed = true;
       }
     }
     return true;
   }
 
-  public static void healTarget(@NonNull User user, @NonNull LivingEntity entity) {
+  public static void switchMode(@NonNull User user) {
     if (user.selectedAbilityName().equals("HealingWaters")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, HealingWaters.class)
-        .ifPresent(hw -> hw.healTarget(entity));
-    }
-  }
-
-  private void healTarget(LivingEntity entity) {
-    if (!target.equals(entity) && !user.entity().equals(entity) && isValidEntity(entity)) {
-      target = entity;
+      var key = DataKey.of("healingwaters-mode", Mode.class);
+      if (user.store().canEdit(key)) {
+        Mode mode = user.store().merge(key, Mode.OTHERS, (m1, m2) -> m1 == Mode.OTHERS ? Mode.SELF : Mode.OTHERS);
+        user.sendActionBar(Component.text("Healing: " + mode.name(), ColorPalette.TEXT_COLOR));
+      }
     }
   }
 
@@ -170,7 +166,7 @@ public class HealingWaters extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(3000);
       duration = abilityNode.node("duration").getLong(3000);
       range = abilityNode.node("range").getDouble(5.0);
-      power = abilityNode.node("power").getInt(2) - 1;
+      power = abilityNode.node("power").getInt(2);
     }
   }
 }

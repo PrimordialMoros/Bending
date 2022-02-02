@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import me.moros.bending.Bending;
+import me.moros.bending.ability.air.AirBlast;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.passive.GracefulDescent;
@@ -239,14 +240,14 @@ public final class ActivationController {
       return;
     }
     ignoreNextSwing(user);
-    if (entity instanceof LivingEntity livingEntity) {
-      HealingWaters.healTarget(user, livingEntity);
-    }
     if (block != null) {
       FerroControl.act(user, block);
       EarthSmash.tryDestroy(user, block);
     }
-    EarthLine.prisonMode(user);
+    AirBlast.switchMode(user);
+    EarthLine.switchMode(user);
+    HealingWaters.switchMode(user);
+    HeatControl.toggleLight(user);
 
     sequenceManager.registerStep(user, method);
     activateAbility(user, method);

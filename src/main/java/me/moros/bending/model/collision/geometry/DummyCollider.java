@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -38,11 +37,6 @@ public final class DummyCollider extends AABB {
 
   @Override
   public boolean intersects(@NonNull Collider collider) {
-    return false;
-  }
-
-  @Override
-  public boolean intersects(@NonNull Ray ray) {
     return false;
   }
 

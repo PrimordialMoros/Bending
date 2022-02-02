@@ -67,8 +67,8 @@ public class AirAgility extends AbilityInstance implements Ability {
       user.entity().removePotionEffect(PotionEffectType.SPEED);
       return UpdateResult.CONTINUE;
     }
-    handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier);
-    handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier);
+    handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier - 1);
+    handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier - 1);
     return UpdateResult.CONTINUE;
   }
 
@@ -100,8 +100,8 @@ public class AirAgility extends AbilityInstance implements Ability {
     public void onConfigReload() {
       CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
 
-      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2) - 1;
-      jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3) - 1;
+      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2);
+      jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3);
     }
   }
 }

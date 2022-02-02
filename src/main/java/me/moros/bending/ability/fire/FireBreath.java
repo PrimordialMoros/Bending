@@ -34,7 +34,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -127,7 +127,6 @@ public class FireBreath extends AbilityInstance {
   }
 
   private class FireStream extends ParticleStream {
-    private double distanceTravelled = 0;
     private int ticks = 3;
 
     public FireStream(Ray ray) {
@@ -137,7 +136,6 @@ public class FireBreath extends AbilityInstance {
 
     @Override
     public void render() {
-      distanceTravelled += speed;
       double offset = 0.2 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       ParticleUtil.fire(user, location).count(FastMath.ceil(0.75 * distanceTravelled))

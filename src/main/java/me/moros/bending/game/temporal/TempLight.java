@@ -134,7 +134,7 @@ public final class TempLight extends TemporaryBase {
     return new Builder(Math.max(1, Math.min(LIGHT_ARRAY.length, level)));
   }
 
-  private enum Type {NORMAL, WATER, INVALID};
+  private enum Type {NORMAL, WATER, INVALID}
 
   public static final class Builder {
     private final int level;

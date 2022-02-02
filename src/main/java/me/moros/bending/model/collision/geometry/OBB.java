@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -30,54 +29,38 @@ import static java.lang.Math.abs;
  * Oriented bounding box
  */
 public class OBB implements Collider {
-  private final Vector3d center;
-  private final Vector3d[] axes;
-  private final Vector3d e; // Half extents in local space.
+  public final Vector3d center;
+  public final Vector3d e; // Half extents in local space.
+  final Vector3d[] axes;
 
   private OBB(Vector3d center, Vector3d[] axes, Vector3d halfExtents) {
     this.center = center;
+    this.e = halfExtents;
     this.axes = new Vector3d[3];
     System.arraycopy(axes, 0, this.axes, 0, 3);
-    this.e = halfExtents;
   }
 
   public OBB(@NonNull AABB aabb) {
     this.center = aabb.position();
-    this.axes = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
     this.e = aabb.halfExtents();
+    this.axes = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
     this.center = rotation.applyTo(aabb.position());
+    this.e = aabb.halfExtents();
     double[][] m = rotation.getMatrix();
     this.axes = new Vector3d[3];
     for (int i = 0; i < 3; i++) {
       this.axes[i] = new Vector3d(m[i]);
     }
-    this.e = aabb.halfExtents();
   }
 
   public OBB(@NonNull AABB aabb, @NonNull Vector3d axis, double angle) {
     this(aabb, new Rotation(axis, angle));
   }
 
-  @Override
-  public boolean intersects(@NonNull Collider collider) {
-    if (collider instanceof DummyCollider) {
-      return false;
-    } else if (collider instanceof Sphere) {
-      return collider.intersects(this);
-    } else if (collider instanceof AABB aabb) {
-      return intersects(new OBB(aabb));
-    } else if (collider instanceof OBB obb) {
-      return intersects(obb);
-    } else if (collider instanceof Disk) {
-      return collider.intersects(this);
-    }
-    return false;
-  }
-
-  private boolean intersects(OBB other) {
+  boolean intersects(@NonNull OBB other) {
     final Vector3d pos = other.center.subtract(center);
     for (int i = 0; i < 3; i++) {
       if (getSeparatingPlane(pos, axes[i], other) || getSeparatingPlane(pos, other.axes[i], other)) {

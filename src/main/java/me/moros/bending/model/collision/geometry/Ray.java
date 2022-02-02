@@ -25,10 +25,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * Ray with origin and direction
  */
-public class Ray {
+public class Ray implements Collider {
   public final Vector3d origin;
   public final Vector3d direction;
   public final Vector3d invDir;
+
+  private Ray(Vector3d origin, Vector3d direction, Vector3d invDir) {
+    this.origin = origin;
+    this.direction = direction;
+    this.invDir = invDir;
+  }
 
   public Ray(@NonNull Vector3d origin, @NonNull Vector3d direction) {
     this.origin = origin;
@@ -37,5 +43,30 @@ public class Ray {
     double invY = direction.getY() == 0 ? Double.MAX_VALUE : 1 / direction.getY();
     double invZ = direction.getZ() == 0 ? Double.MAX_VALUE : 1 / direction.getZ();
     invDir = new Vector3d(invX, invY, invZ);
+  }
+
+  @Override
+  public @NonNull Vector3d position() {
+    return origin;
+  }
+
+  @Override
+  public @NonNull Collider at(@NonNull Vector3d point) {
+    return new Ray(point, direction, invDir);
+  }
+
+  @Override
+  public @NonNull Vector3d halfExtents() {
+    return direction.multiply(0.5);
+  }
+
+  @Override
+  public boolean contains(@NonNull Vector3d point) {
+    double lengthSq = direction.lengthSq();
+    if (lengthSq == 0) {
+      return origin.distanceSq(point) <= 0.01;
+    }
+    double t = Math.max(0, Math.min(1, point.subtract(origin).dot(direction) / lengthSq));
+    return origin.add(direction.multiply(t)).distanceSq(point) <= 0.01;
   }
 }

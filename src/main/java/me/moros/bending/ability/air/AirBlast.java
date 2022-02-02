@@ -31,14 +31,17 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
+import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
@@ -46,6 +49,7 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -53,6 +57,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class AirBlast extends AbilityInstance {
+  public enum Mode {PUSH, PULL}
+
   private static final Config config = new Config();
 
   private User user;
@@ -134,7 +140,7 @@ public class AirBlast extends AbilityInstance {
   private void launch() {
     launched = true;
     Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
-    if (user.sneaking()) {
+    if (user.store().getOrDefault(DataKey.of("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
       Vector3d temp = new Vector3d(origin.toArray());
       origin = new Vector3d(target.toArray());
       target = temp;
@@ -155,6 +161,16 @@ public class AirBlast extends AbilityInstance {
     return user;
   }
 
+  public static void switchMode(@NonNull User user) {
+    if (user.selectedAbilityName().equals("AirBlast")) {
+      var key = DataKey.of("airblast-mode", Mode.class);
+      if (user.store().canEdit(key)) {
+        Mode mode = user.store().merge(key, Mode.PULL, (m1, m2) -> m1 == Mode.PULL ? Mode.PUSH : Mode.PULL);
+        user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
+      }
+    }
+  }
+
   private class AirStream extends ParticleStream {
     public AirStream(Ray ray) {
       super(user, ray, userConfig.speed, 1.3);
@@ -172,10 +188,9 @@ public class AirBlast extends AbilityInstance {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.AIR.play(user.world(), location);
       }
-
       // Handle user separately from the general entity collision.
       if (selectedOrigin) {
-        if (AABBUtil.entityBounds(user.entity()).intersects(collider)) {
+        if (AABBUtil.entityBounds(user.entity()).intersects(new Sphere(location, 2))) {
           onEntityHit(user.entity());
         }
       }

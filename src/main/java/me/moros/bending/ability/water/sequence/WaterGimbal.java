@@ -42,7 +42,7 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;

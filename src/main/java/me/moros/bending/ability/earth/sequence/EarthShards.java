@@ -30,9 +30,10 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -59,7 +60,6 @@ public class EarthShards extends AbilityInstance {
   private final Collection<ShardStream> streams = new ArrayList<>();
 
   private int firedShots = 0;
-
   private long nextFireTime;
 
   public EarthShards(@NonNull AbilityDescription desc) {
@@ -85,29 +85,29 @@ public class EarthShards extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
     if (firedShots < userConfig.maxShots) {
       long time = System.currentTimeMillis();
       if (time >= nextFireTime) {
         nextFireTime = time + userConfig.interval;
-        Vector3d rightOrigin = user.handSide(true);
-        Vector3d leftOrigin = user.handSide(false);
-        Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).position();
-        double distance = target.distance(user.eyeLocation());
-        for (int i = 0; i < 2; i++) {
-          if (firedShots >= userConfig.maxShots) {
-            break;
-          }
-          firedShots++;
-          Vector3d origin = (i == 0) ? rightOrigin : leftOrigin;
-          Vector3d dir = VectorUtil.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
-          streams.add(new ShardStream(new Ray(origin, dir)));
-        }
+        launch(user.handSide(false), user.handSide(true));
       }
     }
-
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return (streams.isEmpty() && firedShots >= userConfig.maxShots) ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
+
+  private void launch(Vector3d left, Vector3d right) {
+    Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).position();
+    double distance = target.distance(user.eyeLocation());
+    for (int i = 0; i < 2; i++) {
+      if (firedShots >= userConfig.maxShots) {
+        break;
+      }
+      firedShots++;
+      Vector3d origin = (i == 0) ? right : left;
+      Vector3d dir = VectorUtil.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
+      streams.add(new ShardStream(new Ray(origin, dir)));
+    }
   }
 
   @Override
@@ -125,17 +125,24 @@ public class EarthShards extends AbilityInstance {
     return user;
   }
 
-
   private class ShardStream extends ParticleStream {
+    private final Vector3d smallDir;
+    private final int renderSteps;
+
     public ShardStream(Ray ray) {
-      super(user, ray, userConfig.speed, 0.5);
+      super(user, ray, userConfig.speed, 0.75);
       canCollide = Block::isLiquid;
+      renderSteps = FastMath.ceil(userConfig.speed / 0.05);
+      smallDir = ray.direction.normalize().multiply(0.05);
       SoundUtil.of(Sound.BLOCK_STONE_BREAK, 1, 2).play(user.world(), ray.origin);
     }
 
     @Override
     public void render() {
-      ParticleUtil.rgb(location, "555555", 0.8F).count(3).offset(0.1).spawn(user.world());
+      int max = distanceTravelled <= 0 ? 1 : renderSteps;
+      for (int i = 0; i < max; i++) {
+        ParticleUtil.rgb(location.subtract(smallDir.multiply(i)), "555555", 0.15F).spawn(user.world());
+      }
     }
 
     @Override
@@ -172,7 +179,7 @@ public class EarthShards extends AbilityInstance {
       damage = abilityNode.node("damage").getDouble(0.5);
       range = abilityNode.node("range").getDouble(16.0);
       speed = abilityNode.node("speed").getDouble(0.8);
-      spread = abilityNode.node("spread").getDouble(0.2);
+      spread = abilityNode.node("spread").getDouble(0.02);
       maxShots = abilityNode.node("max-shots").getInt(10);
       interval = abilityNode.node("interval").getLong(100);
 

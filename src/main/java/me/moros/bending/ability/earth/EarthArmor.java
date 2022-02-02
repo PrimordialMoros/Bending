@@ -54,6 +54,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class EarthArmor extends AbilityInstance {
+  private enum Mode {
+    ROCK(TempArmor::leather),
+    IRON(TempArmor::iron),
+    GOLD(TempArmor::gold);
+
+    private final Supplier<TempArmor.Builder> builder;
+
+    Mode(Supplier<Builder> builder) {
+      this.builder = builder;
+    }
+  }
+
   private static final Config config = new Config();
 
   private User user;
@@ -125,7 +137,7 @@ public class EarthArmor extends AbilityInstance {
     }
     mode.builder.get().duration(userConfig.duration).build(user);
     int duration = FastMath.round(userConfig.duration / 50.0);
-    EntityUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance);
+    EntityUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance - 1);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     user.addCooldown(description(), userConfig.cooldown);
     formed = true;
@@ -181,18 +193,6 @@ public class EarthArmor extends AbilityInstance {
       .map(e -> e.formed).orElse(false);
   }
 
-  private enum Mode {
-    ROCK(TempArmor::leather),
-    IRON(TempArmor::iron),
-    GOLD(TempArmor::gold);
-
-    private final Supplier<TempArmor.Builder> builder;
-
-    Mode(Supplier<Builder> builder) {
-      this.builder = builder;
-    }
-  }
-
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
@@ -212,8 +212,8 @@ public class EarthArmor extends AbilityInstance {
       cooldown = abilityNode.node("cooldown").getLong(20000);
       duration = abilityNode.node("duration").getLong(12000);
       selectRange = abilityNode.node("select-range").getDouble(8.0);
-      power = abilityNode.node("power").getInt(2) - 1;
-      metalPower = abilityNode.node("metal-power").getInt(3) - 1;
+      power = abilityNode.node("power").getInt(2);
+      metalPower = abilityNode.node("metal-power").getInt(3);
     }
   }
 }

@@ -37,8 +37,8 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -186,7 +186,6 @@ public class FlameRush extends AbilityInstance {
 
     private Vector3d streamDirection;
     private double currentPoint = 0;
-    private double distanceTravelled = 0;
 
     private int ticks = 0;
 
@@ -201,7 +200,6 @@ public class FlameRush extends AbilityInstance {
     @Override
     public void render() {
       currentPoint += Math.PI / 30;
-      distanceTravelled += speed;
       double radius = 0.2 * factor + 0.6 * (distanceTravelled / maxRange);
       int amount = FastMath.ceil(12 * radius);
       double offset = 0.5 * radius;
@@ -217,7 +215,8 @@ public class FlameRush extends AbilityInstance {
       TempLight.builder(++ticks).build(location.toBlock(user.world()));
     }
 
-    public @NonNull Vector3d controlDirection() {
+    @Override
+    protected @NonNull Vector3d controlDirection() {
       streamDirection = streamDirection.add(user.direction().multiply(0.08)).normalize().multiply(speed);
       return streamDirection;
     }

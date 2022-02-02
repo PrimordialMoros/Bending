@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import com.mojang.datafixers.util.Pair;
@@ -46,6 +47,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -117,6 +119,10 @@ public final class PacketUtil {
 
   public static void fakeBlock(World world, Vector3d center, BlockData data) {
     broadcast(List.of(fakeBlock(center, data)), world, center, world.getViewDistance() << 4);
+  }
+
+  public static void fakeBreak(World world, Vector3d center, byte progress) {
+    broadcast(List.of(fakeBreak(center, progress)), world, center, world.getViewDistance() << 4);
   }
 
   public static void refreshBlocks(Collection<org.bukkit.block.Block> blocks, World world, Vector3d center) {
@@ -216,6 +222,11 @@ public final class PacketUtil {
 
   private static ClientboundBlockUpdatePacket fakeBlock(Vector3d b, BlockData data) {
     return new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlockData) data).getState());
+  }
+
+  private static ClientboundBlockDestructionPacket fakeBreak(Vector3d b, byte progress) {
+    int id = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
+    return new ClientboundBlockDestructionPacket(id, new BlockPos(b.getX(), b.getY(), b.getZ()), progress);
   }
 
   private static Collection<Packet<?>> refreshBlocks(Collection<org.bukkit.block.Block> blocks) {

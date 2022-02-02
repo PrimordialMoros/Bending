@@ -22,7 +22,7 @@ package me.moros.bending.util.collision;
 import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempFallingBlock;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.GameMode;

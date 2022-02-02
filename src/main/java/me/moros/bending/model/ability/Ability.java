@@ -24,8 +24,8 @@ import java.util.List;
 
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;

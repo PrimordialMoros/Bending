@@ -31,7 +31,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -95,7 +95,7 @@ public class AirBreath extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
+    user.entity().setRemainingAir(Math.max(-20, user.entity().getRemainingAir() - 5));
     Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
@@ -119,8 +119,6 @@ public class AirBreath extends AbilityInstance {
   }
 
   private class AirStream extends ParticleStream {
-    private double distanceTravelled = 0;
-
     public AirStream(Ray ray) {
       super(user, ray, userConfig.speed, 0.5);
       canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
@@ -129,7 +127,6 @@ public class AirBreath extends AbilityInstance {
 
     @Override
     public void render() {
-      distanceTravelled += speed;
       double offset = 0.15 * distanceTravelled;
       collider = new Sphere(location, collisionRadius + offset);
       Block block = location.toBlock(user.world());
@@ -152,7 +149,7 @@ public class AirBreath extends AbilityInstance {
       EntityUtil.applyVelocity(AirBreath.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       BendingEffect.FIRE_TICK.reset(entity);
       if (entity instanceof LivingEntity livingEntity) {
-        livingEntity.setRemainingAir(livingEntity.getRemainingAir() + 1);
+        livingEntity.setRemainingAir(Math.min(livingEntity.getMaximumAir(), livingEntity.getRemainingAir() + 1));
       }
       return false;
     }

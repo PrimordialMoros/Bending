@@ -33,6 +33,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface User extends BukkitUser, ElementUser {
+  @NonNull DataHolder store();
+
   /**
    * Check if the user has the specified ability on cooldown.
    * @param desc the ability to check

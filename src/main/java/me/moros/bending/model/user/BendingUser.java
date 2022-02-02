@@ -41,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BendingUser implements User {
   private final LivingEntity entity;
+  private final DataHolder container;
   private final Set<Element> elements;
   private final AbilityDescription[] slots;
   private final CompositeBendingConditional bendingConditional;
@@ -50,6 +51,7 @@ public class BendingUser implements User {
   protected BendingUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     this.entity = entity;
     this.isPlayer = entity instanceof Player;
+    container = new DataContainer();
     slots = new AbilityDescription[9];
     int size = Math.min(data.slots().size(), 9);
     for (int i = 0; i < size; i++) {
@@ -59,6 +61,11 @@ public class BendingUser implements User {
     elements.addAll(data.elements());
     bendingConditional = BendingConditions.builder().build();
     validateSlots();
+  }
+
+  @Override
+  public @NonNull DataHolder store() {
+    return container;
   }
 
   @Override

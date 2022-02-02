@@ -20,10 +20,7 @@
 package me.moros.bending.ability.earth;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -32,7 +29,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
@@ -40,6 +37,7 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -63,11 +61,10 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 
 // TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance {
-  public enum Side {RIGHT, LEFT}
+  enum Side {RIGHT, LEFT}
 
   private static final Config config = new Config();
 
-  private static final Map<UUID, Side> lastUsedSide = new HashMap<>();
   private static final double GLOVE_SPEED = 1.2;
   private static final double GLOVE_GRABBED_SPEED = 0.6;
 
@@ -227,10 +224,11 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private boolean launchEarthGlove() {
-    Side side = lastUsedSide.merge(user.uuid(), Side.RIGHT, (s1, s2) -> s1 == Side.RIGHT ? Side.LEFT : Side.RIGHT);
+    var key = DataKey.of("glove-side", Side.class);
+    Side side = user.store().merge(key, Side.RIGHT, (s1, s2) -> s1 == Side.RIGHT ? Side.LEFT : Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
     Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
-    glove = buildGlove(gloveSpawnLocation);
+    glove = buildGlove(gloveSpawnLocation.subtract(new Vector3d(0, 0.2, 0)));
 
     if (isMetal) {
       SoundUtil.METAL.play(user.world(), gloveSpawnLocation);

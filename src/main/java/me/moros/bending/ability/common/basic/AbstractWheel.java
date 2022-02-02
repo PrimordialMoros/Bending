@@ -23,14 +23,15 @@ import java.util.Collection;
 
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -111,7 +112,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
           return false;
         }
         double resolution = blockBounds.max.getY() - bottomY;
-        if (resolution > radius + 0.1) {
+        if (Math.abs(resolution) > radius + 0.1) {
           return false;
         } else {
           location = location.add(new Vector3d(0, resolution, 0));
@@ -120,11 +121,13 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
       }
     }
     // Try to fall if the block below doesn't have a bounding box.
-    if (location.setY(bottomY).toBlock(user.world()).isPassable()) {
-      Vector3d offset = new Vector3d(0, 0.75, 0);
-      Disk tempCollider = collider.at(location.subtract(offset));
+    Vector3d offset = new Vector3d(0, radius - 0.125, 0);
+    Vector3d bottom = location.subtract(offset);
+    if (bottom.toBlock(user.world()).isPassable()) {
+      Vector3d pos = RayTrace.of(bottom, Vector3d.MINUS_J).range(0.75 * radius).result(user.world()).position().add(offset);
+      Disk tempCollider = collider.at(pos);
       if (nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(tempCollider::intersects)) {
-        location = location.subtract(offset);
+        location = pos;
         return true;
       }
     }

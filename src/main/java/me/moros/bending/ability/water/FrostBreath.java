@@ -34,7 +34,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -103,7 +103,7 @@ public class FrostBreath extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     affectedEntities.clear();
-    user.entity().setRemainingAir(user.entity().getRemainingAir() - 5);
+    user.entity().setRemainingAir(Math.max(-20, user.entity().getRemainingAir() - 5));
     Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FrostStream(ray));
@@ -127,8 +127,6 @@ public class FrostBreath extends AbilityInstance {
   }
 
   private class FrostStream extends ParticleStream {
-    private double distanceTravelled = 0;
-
     public FrostStream(Ray ray) {
       super(user, ray, 0.6, 0.5);
       canCollide = Block::isLiquid;

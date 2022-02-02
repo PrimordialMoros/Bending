@@ -28,7 +28,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
@@ -77,11 +77,11 @@ public final class BendingExplosion {
     if (size <= 1.5) {
       ParticleUtil.of(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size)).offset(0.75).spawn(world);
     } else if (size <= 3) {
-      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size)).offset(1.5).spawn(world);
+      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size)).offset(0.5).spawn(world);
     } else if (size <= 5) {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).offset(2).spawn(world);
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).spawn(world);
     } else {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5)).offset(2.5).spawn(world);
+      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5)).spawn(world);
     }
   }
 

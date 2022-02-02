@@ -31,10 +31,10 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
+import me.moros.bending.ability.earth.util.EarthSpike;
+import me.moros.bending.ability.earth.util.Fracture;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.game.temporal.TempPacketEntity;
 import me.moros.bending.game.temporal.TempPacketEntity.Builder;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -45,19 +45,19 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
@@ -65,7 +65,6 @@ import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -84,11 +83,8 @@ public class EarthLine extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<EarthSpike> spikes = new ArrayList<>();
-
   private StateChain states;
   private Line earthLine;
-  private Mode mode;
 
   public EarthLine(@NonNull AbilityDescription desc) {
     super(desc);
@@ -120,7 +116,6 @@ public class EarthLine extends AbilityInstance {
       }
       return false;
     }
-    mode = Mode.NORMAL;
     states = new StateChain()
       .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
       .start();
@@ -140,20 +135,12 @@ public class EarthLine extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     if (earthLine != null) {
-      if (earthLine.raisedSpikes) {
-        spikes.removeIf(p -> p.update() == UpdateResult.REMOVE);
-        return spikes.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-      }
       earthLine.controllable(user.sneaking());
-      UpdateResult result = earthLine.update();
-      // Handle case where spikes are raised on entity collision and line is removed
-      if (result == UpdateResult.REMOVE && earthLine.raisedSpikes) {
+      if (earthLine.update() == UpdateResult.CONTINUE) {
         return UpdateResult.CONTINUE;
       }
-      return result;
-    } else {
-      return states.update();
     }
+    return states.update();
   }
 
   private void launch() {
@@ -168,25 +155,21 @@ public class EarthLine extends AbilityInstance {
       if (source == null) {
         return;
       }
-      if (EarthMaterials.isLavaBendable(source)) {
-        mode = Mode.MAGMA;
-      }
-      earthLine = new Line(source);
+      var key = DataKey.of("earthline-mode", Mode.class);
+      Mode mode = EarthMaterials.isLavaBendable(source) ? Mode.MAGMA : user.store().getOrDefault(key, Mode.NORMAL);
+      earthLine = new Line(source, mode);
       removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
       user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
-  public static void prisonMode(@NonNull User user) {
+  public static void switchMode(@NonNull User user) {
     if (user.selectedAbilityName().equals("EarthLine")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::prisonMode);
-    }
-  }
-
-  private void prisonMode() {
-    if (mode == Mode.NORMAL) {
-      mode = Mode.PRISON;
-      user.sendActionBar(Component.text("*Prison Mode*", ColorPalette.TEXT_COLOR));
+      var key = DataKey.of("earthline-mode", Mode.class);
+      if (user.store().canEdit(key)) {
+        Mode mode = user.store().merge(key, Mode.PRISON, (m1, m2) -> m1 == Mode.PRISON ? Mode.NORMAL : Mode.PRISON);
+        user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
+      }
     }
   }
 
@@ -209,11 +192,13 @@ public class EarthLine extends AbilityInstance {
   }
 
   private class Line extends AbstractLine {
+    private final Mode mode;
     private boolean raisedSpikes = false;
     private boolean imprisoned = false;
 
-    public Line(Block source) {
+    public Line(Block source, Mode mode) {
       super(user, source, userConfig.range, mode == Mode.MAGMA ? 0.6 : 0.8, false);
+      this.mode = mode;
     }
 
     @Override
@@ -295,13 +280,10 @@ public class EarthLine extends AbilityInstance {
       List<Block> wall = WorldUtil.nearbyBlocks(user.world(), location, userConfig.explosionRadius, predicate);
       wall.removeIf(b -> !user.canBuild(b));
       Collections.shuffle(wall);
-      for (Block block : wall) {
-        Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
-        TempBlock.air().duration(Bending.properties().earthRevertTime()).build(block);
-        TempFallingBlock.builder(Material.MAGMA_BLOCK.createBlockData())
-          .velocity(velocity)
-          .duration(10000)
-          .build(block);
+      Updatable fracture = Fracture.of(wall);
+      if (fracture != null) {
+        states = new StateChain().addState(new StateWrapper(fracture)).start();
+        earthLine = null;
       }
     }
 
@@ -311,8 +293,12 @@ public class EarthLine extends AbilityInstance {
       }
       raisedSpikes = true;
       Vector3d loc = location.add(Vector3d.MINUS_J);
-      spikes.add(new EarthSpike(loc.toBlock(user.world()), 1, false));
-      spikes.add(new EarthSpike(loc.add(direction).toBlock(user.world()), 2, true));
+      StateWrapper state = new StateWrapper(
+        new EarthSpike(loc.toBlock(user.world()), 1, false),
+        new EarthSpike(loc.add(direction).toBlock(user.world()), 2, true)
+      );
+      states = new StateChain().addState(state).start();
+      earthLine = null;
     }
 
     private void imprisonTarget(LivingEntity entity) {
@@ -353,61 +339,41 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
-  private static final class EarthSpike implements Updatable {
-    private static final long DELAY = 80;
+  private static final class StateWrapper implements State {
+    private final Collection<Updatable> actions;
+    private StateChain chain;
+    private boolean started = false;
 
-    private final Block origin;
-
-    private final int length;
-
-    private int currentLength = 0;
-    private long nextUpdateTime;
-
-    private EarthSpike(@NonNull Block origin, int length, boolean delay) {
-      this.origin = origin;
-      this.length = length;
-      nextUpdateTime = delay ? System.currentTimeMillis() + DELAY : 0;
+    private StateWrapper(Updatable first, Updatable... rest) {
+      actions = new ArrayList<>();
+      this.actions.add(first);
+      if (rest != null) {
+        this.actions.addAll(List.of(rest));
+      }
     }
 
     @Override
     public @NonNull UpdateResult update() {
-      if (currentLength >= length) {
-        return UpdateResult.REMOVE;
-      }
-      long time = System.currentTimeMillis();
-      if (time < nextUpdateTime) {
-        return UpdateResult.CONTINUE;
-      }
-      if (currentLength == 0) {
-        if (!EarthMaterials.isEarthOrSand(origin)) {
-          return UpdateResult.REMOVE;
-        }
-        BlockData data = MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData());
-        TempBlock.builder(data).duration(15000).build(origin);
-      }
-      nextUpdateTime = time + DELAY;
-      Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
-      if (canMove(currentIndex)) {
-        Vector3d center = Vector3d.center(currentIndex);
-        ParticleUtil.of(Particle.BLOCK_DUST, center).count(24).offset(0.2)
-          .data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn(currentIndex.getWorld());
-        TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(15000 - currentLength * DELAY).build(currentIndex);
-        SoundUtil.EARTH.play(currentIndex);
-      } else {
-        return UpdateResult.REMOVE;
-      }
-      return UpdateResult.CONTINUE;
+      actions.removeIf(action -> action.update() == UpdateResult.REMOVE);
+      return actions.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
     }
 
-    private boolean canMove(Block newBlock) {
-      if (MaterialUtil.isLava(newBlock)) {
-        return false;
+    @Override
+    public void start(@NonNull StateChain chain) {
+      if (started) {
+        return;
       }
-      if (!MaterialUtil.isTransparent(newBlock)) {
-        return false;
+      this.chain = chain;
+      started = !actions.isEmpty();
+    }
+
+    @Override
+    public void complete() {
+      if (!started) {
+        return;
       }
-      WorldUtil.tryBreakPlant(newBlock);
-      return true;
+      chain.chainStore().clear();
+      chain.nextState();
     }
   }
 

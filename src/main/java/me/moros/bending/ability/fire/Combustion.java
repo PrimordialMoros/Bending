@@ -35,8 +35,8 @@ import me.moros.bending.model.ability.Explosive;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.collision.Collider;
 import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -105,9 +105,6 @@ public class Combustion extends AbilityInstance implements Explosive {
     if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (beam.distanceTravelled > userConfig.range) {
-      return UpdateResult.REMOVE;
-    }
     return beam.update();
   }
 
@@ -172,25 +169,23 @@ public class Combustion extends AbilityInstance implements Explosive {
   private class CombustBeam extends ParticleStream {
     private static final SoundEffect LOUD_COMBUSTION = SoundUtil.COMBUSTION.with(2, 0);
     private double randomBeamDistance = 7;
-    private double distanceTravelled = 0;
 
     public CombustBeam() {
-      super(user, user.ray(userConfig.range), 0.3, 1);
+      super(user, user.ray(userConfig.range), 0.2, 1);
       canCollide = Block::isLiquid;
       singleCollision = true;
-      steps = 4;
+      steps = 6;
     }
 
     @Override
     public void render() {
-      distanceTravelled += speed;
       renderRing();
-      ParticleUtil.of(Particle.SMOKE_NORMAL, location).extra(0.06).spawn(user.world());
-      ParticleUtil.of(Particle.FIREWORKS_SPARK, location).extra(0.06).spawn(user.world());
+      ParticleUtil.of(Particle.SMOKE_NORMAL, location).spawn(user.world());
+      ParticleUtil.of(Particle.FIREWORKS_SPARK, location).extra(0.005).spawn(user.world());
     }
 
     @Override
-    public @NonNull Vector3d controlDirection() {
+    protected @NonNull Vector3d controlDirection() {
       return user.direction().multiply(speed);
     }
 

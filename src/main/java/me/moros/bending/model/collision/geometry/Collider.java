@@ -17,13 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.collision;
+package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Collider {
-  boolean intersects(@NonNull Collider collider);
+  default boolean intersects(@NonNull Collider collider) {
+    return ColliderUtil.intersects(this, collider);
+  }
 
   @NonNull Vector3d position();
 
