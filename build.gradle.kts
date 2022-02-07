@@ -39,10 +39,10 @@ dependencies {
         exclude(module = "caffeine")
     }
     implementation("com.zaxxer", "HikariCP", "5.0.0")
-    implementation("org.postgresql", "postgresql", "42.3.1") {
+    implementation("org.postgresql", "postgresql", "42.3.2") {
         exclude(module = "checker-qual")
     }
-    implementation("com.h2database", "h2", "2.0.206")
+    implementation("com.h2database", "h2", "2.1.210")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("cloud.commandframework","cloud-paper", "1.6.1")
     implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.1") {

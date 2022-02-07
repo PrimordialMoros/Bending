@@ -77,21 +77,18 @@ public class FireBreath extends AbilityInstance {
       return false;
     }
 
-    if (Policies.IN_LIQUID.test(user, description())) {
-      return false;
-    }
-
     this.user = user;
     loadConfig();
 
     removalPolicy = Policies.builder()
       .add(Policies.NOT_SNEAKING)
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
-    return true;
+    return removalPolicy.test(user, description());
   }
 
   @Override

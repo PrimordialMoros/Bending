@@ -85,7 +85,7 @@ public class FrostBreath extends AbilityInstance {
 
     removalPolicy = Policies.builder()
       .add(Policies.NOT_SNEAKING)
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();

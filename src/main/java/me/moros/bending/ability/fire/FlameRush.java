@@ -90,16 +90,13 @@ public class FlameRush extends AbilityInstance {
     startTime = System.currentTimeMillis();
     charging = true;
 
-    if (Policies.IN_LIQUID.test(user, description())) {
-      return false;
-    }
-
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .build();
 
-    return true;
+    return removalPolicy.test(user, description());
   }
 
   @Override

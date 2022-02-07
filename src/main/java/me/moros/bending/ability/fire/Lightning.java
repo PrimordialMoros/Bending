@@ -60,6 +60,7 @@ import me.moros.bending.util.RayTrace.CompositeResult;
 import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.GameMode;
@@ -267,8 +268,19 @@ public class Lightning extends AbilityInstance {
     return false;
   }
 
+  private boolean touchLiquid(Vector3d center, Block block) {
+    Block centerBlock = center.toBlock(user.world());
+    if (block.isLiquid() || centerBlock.isLiquid()) {
+      return true;
+    }
+    if (WorldUtil.FACES.stream().map(block::getRelative).anyMatch(Block::isLiquid)) {
+      return true;
+    }
+    return !centerBlock.equals(block) && WorldUtil.FACES.stream().map(centerBlock::getRelative).anyMatch(Block::isLiquid);
+  }
+
   private void explode(Vector3d center, Block block) {
-    if (exploded || block.isLiquid() || center.toBlock(user.world()).isLiquid()) {
+    if (exploded || touchLiquid(center, block)) {
       return;
     }
     exploded = true;

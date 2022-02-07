@@ -69,19 +69,18 @@ public class AirScooter extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (Policies.IN_LIQUID.test(user, description())) {
-      return false;
-    }
     double dist = EntityUtil.distanceAboveGround(user.entity(), 3.5);
     if (dist < 0.5 || dist > 3.25) {
       return false;
     }
     removalPolicy = Policies.builder()
       .add(Policies.SNEAKING)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
     scooter = new Scooter();
-    return true;
+    return removalPolicy.test(user, description());
   }
 
   @Override

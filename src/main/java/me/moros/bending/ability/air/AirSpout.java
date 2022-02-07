@@ -61,7 +61,7 @@ public class AirSpout extends AbilityInstance {
     if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
       return false;
     }
-    if (Policies.IN_LIQUID.test(user, description())) {
+    if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
       return false;
     }
 

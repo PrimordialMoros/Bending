@@ -26,7 +26,7 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
-import me.moros.bending.util.packet.PacketUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;

@@ -22,8 +22,8 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.Configurable;
@@ -38,7 +38,6 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
@@ -49,8 +48,10 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
@@ -76,10 +77,9 @@ public class MetalCable extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Collection<Vector3d> pointLocations;
   private Vector3d location;
-  private Vector3d offset;
   private Arrow cable;
+  private int id = -1;
   private CableTarget target;
   private TempFallingBlock projectile;
 
@@ -138,13 +138,12 @@ public class MetalCable extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     location = new Vector3d(cable.getLocation());
-    double distance = user.location().distance(location);
     if (hasHit) {
-      if (!handleMovement(distance)) {
+      if (!handleMovement(user.location().distance(location))) {
         return UpdateResult.REMOVE;
       }
     }
-    return visualizeLine(distance) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+    return visualizeLine() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
   private UpdateResult updateProjectile() {
@@ -241,6 +240,8 @@ public class MetalCable extends AbilityInstance {
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
     arrow.setMetadata(Metadata.METAL_CABLE, Metadata.of(this));
     cable = arrow;
+    id = PacketUtil.createVex(user.world(), origin);
+    PacketUtil.leash(user.world(), origin, id, user.entity().getEntityId());
     location = new Vector3d(cable.getLocation());
     SoundUtil.METAL.play(user.world(), origin);
 
@@ -252,27 +253,14 @@ public class MetalCable extends AbilityInstance {
     return true;
   }
 
-  private boolean visualizeLine(double distance) {
-    boolean evenTicks = ticks % 2 == 0;
-    if (!evenTicks) {
-      int points = FastMath.ceil(distance * 2);
-      Vector3d origin = user.mainHandSide();
-      offset = location.subtract(origin).multiply(1.0 / points);
-      pointLocations = IntStream.rangeClosed(0, points - 1).mapToObj(i -> origin.add(offset.multiply(i))).toList();
+  private boolean visualizeLine() {
+    Vector3d origin = user.mainHandSide();
+    Vector3d dir = location.subtract(origin);
+    if (id > 0) {
+      PacketUtil.teleportEntity(id, user.world(), location.subtract(new Vector3d(0, 0.68, 0.16)));
     }
-    int counter = 0;
-    Vector3d offset2 = offset.multiply(0.5);
-    for (Vector3d temp : pointLocations) {
-      Block block = temp.toBlock(user.world());
-      if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
-        if (++counter > 2) {
-          return false;
-        }
-      }
-      Vector3d spawnLoc = evenTicks ? temp : temp.add(offset2);
-      ParticleUtil.rgb(spawnLoc, "444444", 0.75F).spawn(user.world());
-    }
-    return true;
+    Set<Block> ignored = target != null && target.block != null ? Set.of(target.block) : Set.of();
+    return !RayTrace.of(origin, dir).ignoreLiquids(false).ignore(ignored).result(user.world()).hit();
   }
 
   public void hitBlock(@NonNull Block block) {
@@ -344,6 +332,9 @@ public class MetalCable extends AbilityInstance {
   public void onDestroy() {
     if (cable != null) {
       cable.remove();
+    }
+    if (id > 0) {
+      PacketUtil.destroy(id);
     }
   }
 

@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.util.packet;
+package me.moros.bending.util.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,8 +52,10 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
@@ -77,6 +79,7 @@ import org.bukkit.inventory.ItemStack;
 
 public final class PacketUtil {
   private static final int armorStandId = Registry.ENTITY_TYPE.getId(EntityType.ARMOR_STAND);
+  private static final int vexId = Registry.ENTITY_TYPE.getId(EntityType.VEX);
 
   private PacketUtil() {
   }
@@ -91,9 +94,9 @@ public final class PacketUtil {
   public static int createArmorStand(World world, Vector3d center, Material material, Vector3d velocity, boolean gravity) {
     final int id = Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
-    packets.add(createArmorStand(id, center));
+    packets.add(createMob(id, armorStandId, center));
     if (!gravity) {
-      packets.add(makeInvisible(id));
+      packets.add(new EntityDataBuilder(id).invisible().marker().build());
     }
     if (velocity.lengthSq() > 0) {
       packets.add(addVelocity(id, velocity));
@@ -108,13 +111,32 @@ public final class PacketUtil {
     Collection<Packet<?>> packets = new ArrayList<>();
     packets.add(createFallingBlock(id, center, Block.getId(((CraftBlockData) data).getState())));
     if (!gravity) {
-      packets.add(noGravity(id));
+      packets.add(new EntityDataBuilder(id).noGravity().build());
     }
     if (velocity.lengthSq() > 0) {
       packets.add(addVelocity(id, velocity));
     }
     broadcast(packets, world, center);
     return id;
+  }
+
+  public static void leash(World world, Vector3d center, int id1, int id2) {
+    Collection<Packet<?>> packets = List.of(leash(id1, id2));
+    broadcast(packets, world, center, (world.getViewDistance() + 1) << 4);
+  }
+
+  public static int createVex(World world, Vector3d center) {
+    final int id = Entity.nextEntityId();
+    Collection<Packet<?>> packets = new ArrayList<>();
+    packets.add(createMob(id, vexId, center));
+    packets.add(new EntityDataBuilder(id).noGravity().invisible().build());
+    broadcast(packets, world, center);
+    return id;
+  }
+
+  public static void teleportEntity(int id, World world, Vector3d center) {
+    Collection<Packet<?>> packets = List.of(teleport(id, center));
+    broadcast(packets, world, center);
   }
 
   public static void fakeBlock(World world, Vector3d center, BlockData data) {
@@ -182,12 +204,41 @@ public final class PacketUtil {
     return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(id), Map.of());
   }
 
-  private static ClientboundAddMobPacket createArmorStand(int id, Vector3d center) {
+  private static ClientboundSetEntityLinkPacket leash(int id1, int id2) {
+    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
+
+    packetByteBuffer.writeInt(id1);
+    packetByteBuffer.writeInt(id2);
+
+    return new ClientboundSetEntityLinkPacket(packetByteBuffer);
+  }
+
+  private static ClientboundTeleportEntityPacket teleport(int id, Vector3d center) {
+    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
+
+    packetByteBuffer.writeVarInt(id);
+
+    // Position
+    packetByteBuffer.writeDouble(center.getX());
+    packetByteBuffer.writeDouble(center.getY());
+    packetByteBuffer.writeDouble(center.getZ());
+
+    // Rotation
+    packetByteBuffer.writeByte(0);
+    packetByteBuffer.writeByte(0);
+
+    // Grounded
+    packetByteBuffer.writeBoolean(false);
+
+    return new ClientboundTeleportEntityPacket(packetByteBuffer);
+  }
+
+  private static ClientboundAddMobPacket createMob(int id, int entityTypeId, Vector3d center) {
     PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
 
     packetByteBuffer.writeVarInt(id);
     packetByteBuffer.writeUUID(UUID.randomUUID());
-    packetByteBuffer.writeVarInt(armorStandId);
+    packetByteBuffer.writeVarInt(entityTypeId);
 
     // Position
     packetByteBuffer.writeDouble(center.getX());
@@ -251,23 +302,34 @@ public final class PacketUtil {
     }
   }
 
-  private static ClientboundSetEntityDataPacket noGravity(int id) {
-    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
-    packetByteBuffer.writeVarInt(id);
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.GRAVITY, true);
-    packetByteBuffer.writeDataWatcherEntriesEnd();
-    return new ClientboundSetEntityDataPacket(packetByteBuffer);
-  }
+  private static class EntityDataBuilder {
+    private final PacketByteBuffer packetByteBuffer;
 
-  private static ClientboundSetEntityDataPacket makeInvisible(int id) {
-    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
-    packetByteBuffer.writeVarInt(id);
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) 0x20); // Invisible
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ARMOR_STAND_STATUS, (byte) (0x02 | 0x08 | 0x10)); // no gravity, no base plate, marker
-    packetByteBuffer.writeDataWatcherEntriesEnd();
-    return new ClientboundSetEntityDataPacket(packetByteBuffer);
-  }
+    private EntityDataBuilder(int id) {
+      packetByteBuffer = new PacketByteBuffer();
+      packetByteBuffer.writeVarInt(id);
+    }
 
+    private EntityDataBuilder noGravity() {
+      packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.GRAVITY, true);
+      return this;
+    }
+
+    private EntityDataBuilder invisible() {
+      packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) 0x20); // Invisible
+      return this;
+    }
+
+    private EntityDataBuilder marker() {
+      packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ARMOR_STAND_STATUS, (byte) (0x02 | 0x08 | 0x10)); // no gravity, no base plate, marker
+      return this;
+    }
+
+    private ClientboundSetEntityDataPacket build() {
+      packetByteBuffer.writeDataWatcherEntriesEnd();
+      return new ClientboundSetEntityDataPacket(packetByteBuffer);
+    }
+  }
 
   private static ClientboundSetEquipmentPacket setupEquipment(int id, Material material) {
     return new ClientboundSetEquipmentPacket(id, List.of(new Pair<>(EquipmentSlot.HEAD, CraftItemStack.asNMSCopy(new ItemStack(material)))));

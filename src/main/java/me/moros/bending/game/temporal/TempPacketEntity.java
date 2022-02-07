@@ -26,7 +26,7 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.packet.PacketUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;

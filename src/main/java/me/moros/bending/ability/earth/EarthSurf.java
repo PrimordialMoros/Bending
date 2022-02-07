@@ -45,9 +45,9 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.packet.PacketUtil;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -90,7 +90,8 @@ public class EarthSurf extends AbilityInstance {
     }
     startTime = System.currentTimeMillis();
     removalPolicy = Policies.builder()
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
     return true;
@@ -105,7 +106,8 @@ public class EarthSurf extends AbilityInstance {
     charging = false;
     removalPolicy = Policies.builder()
       .add(Policies.SNEAKING)
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();

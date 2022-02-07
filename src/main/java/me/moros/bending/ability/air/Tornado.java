@@ -70,7 +70,8 @@ public class Tornado extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .add(Policies.NOT_SNEAKING)
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .build();
     startTime = System.currentTimeMillis();
     return true;

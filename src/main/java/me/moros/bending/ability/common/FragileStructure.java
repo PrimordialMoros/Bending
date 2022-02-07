@@ -85,6 +85,7 @@ public final class FragileStructure implements Iterable<Block> {
 
   public static void destroyStructure(@NonNull FragileStructure data) {
     for (Block block : data.fragileBlocks) {
+      block.removeMetadata(Metadata.DESTRUCTIBLE, Bending.plugin());
       if (!data.predicate.test(block)) {
         continue;
       }

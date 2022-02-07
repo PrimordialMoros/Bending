@@ -32,7 +32,7 @@ import me.moros.bending.game.temporal.TempFallingBlock;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.VectorUtil;
-import me.moros.bending.util.packet.PacketUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;

@@ -104,7 +104,8 @@ public class EarthGlove extends AbilityInstance {
 
     if (launchEarthGlove()) {
       removalPolicy = Policies.builder()
-        .add(Policies.IN_LIQUID)
+        .add(Policies.UNDER_WATER)
+        .add(Policies.UNDER_LAVA)
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
         .build();
@@ -214,7 +215,8 @@ public class EarthGlove extends AbilityInstance {
     grabbedTarget.setFallDistance(0);
     if (isMetal) {
       removalPolicy = Policies.builder()
-        .add(Policies.IN_LIQUID)
+        .add(Policies.UNDER_WATER)
+        .add(Policies.UNDER_LAVA)
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
         .add(ExpireRemovalPolicy.of(userConfig.grabDuration))

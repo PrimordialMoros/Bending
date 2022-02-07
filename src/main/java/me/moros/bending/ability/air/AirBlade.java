@@ -90,7 +90,8 @@ public class AirBlade extends AbilityInstance {
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .add(OutOfRangeRemovalPolicy.of(userConfig.prepareRange, () -> origin))
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .build();
 
     startTime = System.currentTimeMillis();

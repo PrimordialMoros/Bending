@@ -80,13 +80,14 @@ public class AirBlast extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (Policies.IN_LIQUID.test(user, description())) {
+    if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
       return false;
     }
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.selectRange * 2, () -> origin))
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .build();
 
     for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).toList()) {
@@ -132,7 +133,8 @@ public class AirBlast extends AbilityInstance {
   }
 
   private boolean selectOrigin() {
-    origin = RayTrace.of(user).range(userConfig.selectRange).result(user.world()).position().subtract(user.direction().multiply(0.5));
+    origin = RayTrace.of(user).range(userConfig.selectRange).ignoreLiquids(false).
+      result(user.world()).position().subtract(user.direction().multiply(0.5));
     selectedOrigin = true;
     return user.canBuild(origin.toBlock(user.world()));
   }

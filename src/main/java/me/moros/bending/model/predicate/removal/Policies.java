@@ -24,6 +24,7 @@ import java.util.Set;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.EntityUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum Policies implements RemovalPolicy {
@@ -32,9 +33,10 @@ public enum Policies implements RemovalPolicy {
   SNEAKING((u, d) -> u.sneaking()),
   NOT_SNEAKING((u, d) -> !u.sneaking()),
   FLYING((u, d) -> u.flying()),
-  IN_WATER((u, d) -> u.entity().isInWaterOrBubbleColumn()),
-  NOT_IN_WATER((u, d) -> !u.entity().isInWaterOrBubbleColumn()),
-  IN_LIQUID((u, d) -> u.entity().isInWaterOrBubbleColumn() || u.entity().isInLava());
+  UNDER_WATER((u, d) -> EntityUtil.underWater(u.entity())),
+  PARTIALLY_UNDER_WATER((u, d) -> u.entity().isInWaterOrBubbleColumn()),
+  UNDER_LAVA((u, d) -> EntityUtil.underLava(u.entity())),
+  PARTIALLY_UNDER_LAVA((u, d) -> u.entity().isInLava());
 
   private final RemovalPolicy policy;
 

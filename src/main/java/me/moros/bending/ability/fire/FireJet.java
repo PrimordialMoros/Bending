@@ -93,7 +93,8 @@ public class FireJet extends AbilityInstance {
     }
 
     removalPolicy = Policies.builder()
-      .add(Policies.IN_LIQUID)
+      .add(Policies.PARTIALLY_UNDER_WATER)
+      .add(Policies.PARTIALLY_UNDER_LAVA)
       .add(ExpireRemovalPolicy.of(duration))
       .build();
 

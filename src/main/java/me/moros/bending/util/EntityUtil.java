@@ -19,7 +19,6 @@
 
 package me.moros.bending.util;
 
-import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.Bending;
@@ -28,6 +27,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.collision.AABBUtil;
+import me.moros.bending.util.internal.NMSUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -36,6 +36,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionEffectType.Category;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -147,33 +148,22 @@ public final class EntityUtil {
     return new Vector3d(entity.getLocation()).add(new Vector3d(0, entity.getHeight() / 2, 0));
   }
 
-  // Potion effects
-  private static final Set<PotionEffectType> POSITIVE = Set.of(
-    PotionEffectType.ABSORPTION, PotionEffectType.DAMAGE_RESISTANCE, PotionEffectType.FAST_DIGGING,
-    PotionEffectType.FIRE_RESISTANCE, PotionEffectType.HEAL, PotionEffectType.HEALTH_BOOST,
-    PotionEffectType.INCREASE_DAMAGE, PotionEffectType.JUMP, PotionEffectType.NIGHT_VISION,
-    PotionEffectType.REGENERATION, PotionEffectType.SATURATION, PotionEffectType.SPEED,
-    PotionEffectType.WATER_BREATHING
-  );
+  public static boolean underWater(@NonNull Entity entity) {
+    return entity.isInWaterOrBubbleColumn() && NMSUtil.eyeInWater(entity);
+  }
 
-  private static final Set<PotionEffectType> NEUTRAL = Set.of(
-    PotionEffectType.INVISIBILITY
-  );
-
-  private static final Set<PotionEffectType> NEGATIVE = Set.of(
-    PotionEffectType.POISON, PotionEffectType.BLINDNESS, PotionEffectType.CONFUSION,
-    PotionEffectType.HARM, PotionEffectType.HUNGER, PotionEffectType.SLOW,
-    PotionEffectType.SLOW_DIGGING, PotionEffectType.WEAKNESS, PotionEffectType.WITHER
-  );
+  public static boolean underLava(@NonNull Entity entity) {
+    return entity.isInLava() && NMSUtil.eyeInLava(entity);
+  }
 
   public static void removeNegativeEffects(@NonNull LivingEntity entity) {
-    entity.getActivePotionEffects().stream().map(PotionEffect::getType).filter(NEGATIVE::contains)
-      .forEach(entity::removePotionEffect);
+    entity.getActivePotionEffects().stream().map(PotionEffect::getType)
+      .filter(t -> t.getEffectCategory() == Category.HARMFUL).forEach(entity::removePotionEffect);
   }
 
   public static boolean tryAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
     if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
-      int minDuration = POSITIVE.contains(type) ? 20 : duration;
+      int minDuration = type.getEffectCategory() == Category.BENEFICIAL ? 20 : duration;
       PotionEffect effect = livingEntity.getPotionEffect(type);
       if (effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < amplifier) {
         livingEntity.addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));

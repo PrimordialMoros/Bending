@@ -75,20 +75,17 @@ public class Combustion extends AbilityInstance implements Explosive {
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, Combustion.class).ifPresent(Combustion::explode);
+      Bending.game().abilityManager(user.world()).userInstances(user, Combustion.class).forEach(Combustion::explode);
       return false;
     }
-
     if (user.onCooldown(description())) {
       return false;
     }
-
-    this.user = user;
-    loadConfig();
-
-    if (Policies.IN_LIQUID.test(user, description()) || Bending.game().abilityManager(user.world()).hasAbility(user, Combustion.class)) {
+    if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
       return false;
     }
+    this.user = user;
+    loadConfig();
     beam = new CombustBeam();
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);

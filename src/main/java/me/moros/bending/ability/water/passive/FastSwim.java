@@ -43,7 +43,7 @@ public class FastSwim extends AbilityInstance implements Ability {
   @Override
   public boolean activate(@NonNull User user, @NonNull Activation method) {
     this.user = user;
-    removalPolicy = Policies.builder().add(Policies.NOT_IN_WATER).add(Policies.FLYING).build();
+    removalPolicy = Policies.builder().add((u, d) -> !u.entity().isInWaterOrBubbleColumn()).add(Policies.FLYING).build();
     return true;
   }
 

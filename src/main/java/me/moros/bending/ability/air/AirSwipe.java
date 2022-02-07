@@ -97,7 +97,8 @@ public class AirSwipe extends AbilityInstance {
     }
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
-      .add(Policies.IN_LIQUID)
+      .add(Policies.UNDER_WATER)
+      .add(Policies.UNDER_LAVA)
       .build();
 
     return true;

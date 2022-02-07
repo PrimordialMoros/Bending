@@ -49,7 +49,7 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ChatUtil;
 import me.moros.bending.util.ColorPalette;
-import me.moros.bending.util.packet.PacketUtil;
+import me.moros.bending.util.internal.PacketUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;

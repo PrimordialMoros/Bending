@@ -84,10 +84,6 @@ public class FireShield extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (Policies.IN_LIQUID.test(user, description())) {
-      return false;
-    }
-
     rand = ThreadLocalRandom.current();
     if (method == Activation.SNEAK) {
       sphere = true;
@@ -96,18 +92,20 @@ public class FireShield extends AbilityInstance {
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(ExpireRemovalPolicy.of(userConfig.shieldDuration))
         .add(Policies.NOT_SNEAKING)
-        .add(Policies.IN_LIQUID)
+        .add(Policies.PARTIALLY_UNDER_WATER)
+        .add(Policies.PARTIALLY_UNDER_LAVA)
         .build();
     } else {
       shield = new DiskShield();
       removalPolicy = Policies.builder()
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(ExpireRemovalPolicy.of(userConfig.diskDuration))
-        .add(Policies.IN_LIQUID)
+        .add(Policies.PARTIALLY_UNDER_WATER)
+        .add(Policies.PARTIALLY_UNDER_LAVA)
         .build();
     }
 
-    return true;
+    return removalPolicy.test(user, description());
   }
 
   @Override
