@@ -96,7 +96,7 @@ public class FlameRush extends AbilityInstance {
       .add(Policies.UNDER_LAVA)
       .build();
 
-    return removalPolicy.test(user, description());
+    return !removalPolicy.test(user, description());
   }
 
   @Override

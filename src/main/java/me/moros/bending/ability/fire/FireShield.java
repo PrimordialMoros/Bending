@@ -105,7 +105,7 @@ public class FireShield extends AbilityInstance {
         .build();
     }
 
-    return removalPolicy.test(user, description());
+    return !removalPolicy.test(user, description());
   }
 
   @Override

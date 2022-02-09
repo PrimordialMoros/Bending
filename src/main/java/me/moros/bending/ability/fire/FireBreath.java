@@ -88,7 +88,7 @@ public class FireBreath extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
-    return removalPolicy.test(user, description());
+    return !removalPolicy.test(user, description());
   }
 
   @Override

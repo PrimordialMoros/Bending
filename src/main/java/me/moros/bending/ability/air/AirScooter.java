@@ -80,7 +80,7 @@ public class AirScooter extends AbilityInstance {
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
     scooter = new Scooter();
-    return removalPolicy.test(user, description());
+    return !removalPolicy.test(user, description());
   }
 
   @Override
