@@ -45,7 +45,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     this.user = user;
     this.ray = ray;
     this.maxRange = ray.direction.length();
-    dir = ray.direction.setY(0).normalize();
+    dir = ray.direction.withY(0).normalize();
     this.location = ray.origin;
   }
 

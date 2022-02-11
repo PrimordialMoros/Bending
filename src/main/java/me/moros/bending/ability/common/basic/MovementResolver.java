@@ -55,7 +55,7 @@ public abstract class MovementResolver {
 
     int diagonalCollisions = 0;
     for (Vector3i v : VectorUtil.decomposeDiagonals(origin, direction)) {
-      Block block = original.getRelative(v.getX(), v.getY() + offset, v.getZ());
+      Block block = original.getRelative(v.x(), v.y() + offset, v.z());
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
           return null;

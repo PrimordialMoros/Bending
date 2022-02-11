@@ -69,7 +69,7 @@ public class FireWheel extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    Vector3d direction = user.direction().setY(0).normalize();
+    Vector3d direction = user.direction().withY(0).normalize();
     Vector3d location = user.location().add(direction);
     location = location.add(new Vector3d(0, userConfig.radius, 0));
     if (location.toBlock(user.world()).isLiquid()) {

@@ -82,7 +82,7 @@ public final class SoundUtil {
     }
 
     public void play(@NonNull World world, @NonNull Vector3d center) {
-      world.playSound(sound, center.getX(), center.getY(), center.getZ());
+      world.playSound(sound, center.x(), center.y(), center.z());
     }
 
     public @NonNull SoundEffect with(float volume, float pitch) {

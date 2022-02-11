@@ -103,7 +103,7 @@ public class FireWall extends AbilityInstance {
       return false;
     }
 
-    direction = user.direction().setY(0).normalize();
+    direction = user.direction().withY(0).normalize();
     bases = setupBases();
     if (bases.isEmpty()) {
       return false;
@@ -211,8 +211,8 @@ public class FireWall extends AbilityInstance {
       Vector3d check = center.add(side.multiply(i));
       Block block = check.toBlock(user.world());
       if (MaterialUtil.isTransparent(block) && user.canBuild(block)) {
-        double baseY = FastMath.floor(check.getY()) + 0.25;
-        possibleBases.add(check.setY(baseY));
+        double baseY = FastMath.floor(check.y()) + 0.25;
+        possibleBases.add(check.withY(baseY));
       }
     }
     return possibleBases;
@@ -240,7 +240,7 @@ public class FireWall extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    double requiredY = center.getY() + currentHeight;
+    double requiredY = center.y() + currentHeight;
     if (entity.getLocation().getY() > requiredY) {
       return false;
     }

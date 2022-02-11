@@ -179,7 +179,7 @@ public class EarthSurf extends AbilityInstance {
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       toRefresh(user.locBlock());
       toRefresh(center.toBlock(user.world()));
-      Vector3d dir = user.direction().setY(0).normalize(user.velocity().setY(0).normalize());
+      Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
         Vector3d point = center.add(v.multiply(0.6));
         toRefresh(point.toBlock(user.world()));
@@ -208,7 +208,7 @@ public class EarthSurf extends AbilityInstance {
     }
 
     private boolean onEntityHit(Entity entity) {
-      Vector3d velocity = EntityUtil.entityCenter(entity).subtract(center).setY(0.35).normalize();
+      Vector3d velocity = EntityUtil.entityCenter(entity).subtract(center).withY(0.35).normalize();
       EntityUtil.applyVelocity(EarthSurf.this, entity, velocity);
       return false;
     }

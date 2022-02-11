@@ -63,7 +63,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     target = result.entity();
     targetLocation = result.entityCenterOrPosition();
     locked = followTarget && target != null;
-    direction = targetLocation.subtract(location).setY(0).normalize();
+    direction = targetLocation.subtract(location).withY(0).normalize();
   }
 
   @Override
@@ -71,7 +71,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (locked) {
       if (isValidTarget()) {
         targetLocation = new Vector3d(target.getLocation());
-        direction = targetLocation.subtract(location).setY(0).normalize();
+        direction = targetLocation.subtract(location).withY(0).normalize();
       } else {
         locked = false;
       }
@@ -79,7 +79,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
 
     if (controllable) {
       targetLocation = user.compositeRayTrace(range).result(user.world()).entityCenterOrPosition();
-      direction = targetLocation.subtract(origin).setY(0).normalize();
+      direction = targetLocation.subtract(origin).withY(0).normalize();
     }
 
     if (onBlockHit(location.toBlock(user.world()).getRelative(BlockFace.DOWN))) {
@@ -106,8 +106,8 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     Block block = location.toBlock(user.world());
 
     if (skipVertical) { // Advance location vertically if possible to match target height
-      int y1 = FastMath.floor(targetLocation.getY());
-      int y2 = FastMath.floor(newLocation.getY());
+      int y1 = FastMath.floor(targetLocation.y());
+      int y2 = FastMath.floor(newLocation.y());
       if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
         location = newLocation.add(Vector3d.PLUS_J);
         block = block.getRelative(BlockFace.UP);

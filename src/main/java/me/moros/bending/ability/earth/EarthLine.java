@@ -232,7 +232,7 @@ public class EarthLine extends AbilityInstance {
         }
       }
       DamageUtil.damageEntity(entity, user, damage, description());
-      Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
+      Vector3d velocity = direction.withY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       EntityUtil.applyVelocity(EarthLine.this, entity, velocity);
       return true;
     }
@@ -276,7 +276,7 @@ public class EarthLine extends AbilityInstance {
         .sound(3, 0.5F)
         .buildAndExplode(EarthLine.this, location);
 
-      Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.getY()) && EarthMaterials.isEarthOrSand(b);
+      Predicate<Block> predicate = b -> b.getY() >= FastMath.floor(location.y()) && EarthMaterials.isEarthOrSand(b);
       List<Block> wall = WorldUtil.nearbyBlocks(user.world(), location, userConfig.explosionRadius, predicate);
       wall.removeIf(b -> !user.canBuild(b));
       Collections.shuffle(wall);

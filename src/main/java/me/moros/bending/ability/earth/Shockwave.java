@@ -178,7 +178,7 @@ public class Shockwave extends AbilityInstance {
       if (inRange) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
         double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
-        Vector3d push = loc.subtract(origin).normalize().setY(deltaY).multiply(userConfig.knockback);
+        Vector3d push = loc.subtract(origin).normalize().withY(deltaY).multiply(userConfig.knockback);
         EntityUtil.applyVelocity(this, entity, push);
         affectedEntities.add(entity);
       }
@@ -198,7 +198,7 @@ public class Shockwave extends AbilityInstance {
     range = cone ? userConfig.coneRange : userConfig.ringRange;
 
     origin = user.location().snapToBlockCenter();
-    Vector3d dir = user.direction().setY(0).normalize();
+    Vector3d dir = user.direction().withY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
       VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->

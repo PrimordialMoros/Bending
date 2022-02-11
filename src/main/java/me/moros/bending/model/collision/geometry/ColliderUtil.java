@@ -90,9 +90,9 @@ final class ColliderUtil {
     Vector3d min = aabb.min;
     Vector3d max = aabb.max;
     // Get the point closest to sphere center on the aabb.
-    double x = Math.max(min.getX(), Math.min(sphere.center.getX(), max.getX()));
-    double y = Math.max(min.getY(), Math.min(sphere.center.getY(), max.getY()));
-    double z = Math.max(min.getZ(), Math.min(sphere.center.getZ(), max.getZ()));
+    double x = Math.max(min.x(), Math.min(sphere.center.x(), max.x()));
+    double y = Math.max(min.y(), Math.min(sphere.center.y(), max.y()));
+    double z = Math.max(min.z(), Math.min(sphere.center.z(), max.z()));
     // Check if that point is inside the sphere.
     return sphere.contains(new Vector3d(x, y, z));
   }

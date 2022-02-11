@@ -219,9 +219,9 @@ public final class PacketUtil {
     packetByteBuffer.writeVarInt(id);
 
     // Position
-    packetByteBuffer.writeDouble(center.getX());
-    packetByteBuffer.writeDouble(center.getY());
-    packetByteBuffer.writeDouble(center.getZ());
+    packetByteBuffer.writeDouble(center.x());
+    packetByteBuffer.writeDouble(center.y());
+    packetByteBuffer.writeDouble(center.z());
 
     // Rotation
     packetByteBuffer.writeByte(0);
@@ -241,9 +241,9 @@ public final class PacketUtil {
     packetByteBuffer.writeVarInt(entityTypeId);
 
     // Position
-    packetByteBuffer.writeDouble(center.getX());
-    packetByteBuffer.writeDouble(center.getY());
-    packetByteBuffer.writeDouble(center.getZ());
+    packetByteBuffer.writeDouble(center.x());
+    packetByteBuffer.writeDouble(center.y());
+    packetByteBuffer.writeDouble(center.z());
 
     // Rotation
     packetByteBuffer.writeByte(0);
@@ -261,23 +261,23 @@ public final class PacketUtil {
   }
 
   private static ClientboundAddEntityPacket createFallingBlock(int id, Vector3d center, int blockId) {
-    double x = center.getX();
-    double y = center.getY();
-    double z = center.getZ();
+    double x = center.x();
+    double y = center.y();
+    double z = center.z();
     return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, EntityType.FALLING_BLOCK, blockId, Vec3.ZERO);
   }
 
   private static ClientboundSetEntityMotionPacket addVelocity(int id, Vector3d vel) {
-    return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.getX(), vel.getY(), vel.getZ()));
+    return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.x(), vel.y(), vel.z()));
   }
 
   private static ClientboundBlockUpdatePacket fakeBlock(Vector3d b, BlockData data) {
-    return new ClientboundBlockUpdatePacket(new BlockPos(b.getX(), b.getY(), b.getZ()), ((CraftBlockData) data).getState());
+    return new ClientboundBlockUpdatePacket(new BlockPos(b.x(), b.y(), b.z()), ((CraftBlockData) data).getState());
   }
 
   private static ClientboundBlockDestructionPacket fakeBreak(Vector3d b, byte progress) {
     int id = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
-    return new ClientboundBlockDestructionPacket(id, new BlockPos(b.getX(), b.getY(), b.getZ()), progress);
+    return new ClientboundBlockDestructionPacket(id, new BlockPos(b.x(), b.y(), b.z()), progress);
   }
 
   private static Collection<Packet<?>> refreshBlocks(Collection<org.bukkit.block.Block> blocks) {

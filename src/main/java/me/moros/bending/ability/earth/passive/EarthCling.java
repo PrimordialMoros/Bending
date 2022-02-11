@@ -74,7 +74,7 @@ public class EarthCling extends AbilityInstance implements Ability {
         EntityUtil.applyVelocity(this, user.entity(), Vector3d.ZERO);
         user.entity().setFallDistance(0);
       } else {
-        if (user.velocity().getY() < 0) {
+        if (user.velocity().y() < 0) {
           ParticleUtil.of(Particle.CRIT, user.eyeLocation()).count(2)
             .offset(0.05, 0.4, 0.05).spawn(user.world());
           ParticleUtil.of(Particle.BLOCK_CRACK, user.eyeLocation()).count(3)

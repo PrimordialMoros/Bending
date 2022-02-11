@@ -89,42 +89,42 @@ public class Vector3d {
   /**
    * @return the x coordinate
    */
-  public double getX() {
+  public double x() {
     return x;
   }
 
   /**
    * @return the y coordinate
    */
-  public double getY() {
+  public double y() {
     return y;
   }
 
   /**
    * @return the z coordinate
    */
-  public double getZ() {
+  public double z() {
     return z;
   }
 
   /**
    * @return a new vector copy with the given x coordinate
    */
-  public @NonNull Vector3d setX(double value) {
+  public @NonNull Vector3d withX(double value) {
     return new Vector3d(value, y, z);
   }
 
   /**
    * @return a new vector copy with the given y coordinate
    */
-  public @NonNull Vector3d setY(double value) {
+  public @NonNull Vector3d withY(double value) {
     return new Vector3d(x, value, z);
   }
 
   /**
    * @return a new vector copy with the given z coordinate
    */
-  public @NonNull Vector3d setZ(double value) {
+  public @NonNull Vector3d withZ(double value) {
     return new Vector3d(x, y, value);
   }
 

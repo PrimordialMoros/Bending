@@ -43,9 +43,9 @@ public class AABB implements Collider {
   }
 
   boolean intersects(@NonNull AABB other) {
-    return (max.getX() > other.min.getX() && min.getX() < other.max.getX() &&
-      max.getY() > other.min.getY() && min.getY() < other.max.getY() &&
-      max.getZ() > other.min.getZ() && min.getZ() < other.max.getZ());
+    return (max.x() > other.min.x() && min.x() < other.max.x() &&
+      max.y() > other.min.y() && min.y() < other.max.y() &&
+      max.z() > other.min.z() && min.z() < other.max.z());
   }
 
   @Override
@@ -66,8 +66,8 @@ public class AABB implements Collider {
 
   @Override
   public boolean contains(@NonNull Vector3d point) {
-    return (point.getX() >= min.getX() && point.getX() <= max.getX()) &&
-      (point.getY() >= min.getY() && point.getY() <= max.getY()) &&
-      (point.getZ() >= min.getZ() && point.getZ() <= max.getZ());
+    return (point.x() >= min.x() && point.x() <= max.x()) &&
+      (point.y() >= min.y() && point.y() <= max.y()) &&
+      (point.z() >= min.z() && point.z() <= max.z());
   }
 }

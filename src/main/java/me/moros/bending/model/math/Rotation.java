@@ -44,9 +44,9 @@ public class Rotation {
     double coeff = Math.sin(halfAngle) / norm;
 
     q0 = Math.cos(halfAngle);
-    q1 = coeff * axis.getX();
-    q2 = coeff * axis.getY();
-    q3 = coeff * axis.getZ();
+    q1 = coeff * axis.x();
+    q2 = coeff * axis.y();
+    q3 = coeff * axis.z();
   }
 
   /**
@@ -90,9 +90,9 @@ public class Rotation {
    * @return a new vector which is the image of u by the rotation
    */
   public @NonNull Vector3d applyTo(@NonNull Vector3d u) {
-    double x = u.getX();
-    double y = u.getY();
-    double z = u.getZ();
+    double x = u.x();
+    double y = u.y();
+    double z = u.z();
     double s = q1 * x + q2 * y + q3 * z;
     return new Vector3d(2 * (q0 * (x * q0 - (q2 * z - q3 * y)) + s * q1) - x,
       2 * (q0 * (y * q0 - (q3 * x - q1 * z)) + s * q2) - y,
@@ -122,9 +122,9 @@ public class Rotation {
    * @return a new vector which such that u is its image by the rotation
    */
   public @NonNull Vector3d applyInverseTo(@NonNull Vector3d u) {
-    double x = u.getX();
-    double y = u.getY();
-    double z = u.getZ();
+    double x = u.x();
+    double y = u.y();
+    double z = u.z();
 
     double s = q1 * x + q2 * y + q3 * z;
     double m0 = -q0;

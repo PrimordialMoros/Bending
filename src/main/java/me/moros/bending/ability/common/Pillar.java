@@ -130,9 +130,9 @@ public class Pillar implements Updatable, Iterable<Block> {
 
   protected @NonNull Vector3d normalizeVelocity(Vector3d velocity, double factor) {
     return switch (direction) {
-      case NORTH, SOUTH -> velocity.setX(direction.getModX() * factor);
-      case EAST, WEST -> velocity.setZ(direction.getModZ() * factor);
-      default -> velocity.setY(direction.getModY() * factor);
+      case NORTH, SOUTH -> velocity.withX(direction.getModX() * factor);
+      case EAST, WEST -> velocity.withZ(direction.getModZ() * factor);
+      default -> velocity.withY(direction.getModY() * factor);
     };
   }
 

@@ -205,7 +205,7 @@ public class WaterGimbal extends AbilityInstance {
         return;
       }
       if (center == null) {
-        center = user.location().add(Vector3d.PLUS_J).add(user.direction().setY(0).multiply(2)).toBlock(user.world());
+        center = user.location().add(Vector3d.PLUS_J).add(user.direction().withY(0).multiply(2)).toBlock(user.world());
         TempBlock.water().duration(50).build(center);
       }
       chain.chainStore().clear();
@@ -286,7 +286,7 @@ public class WaterGimbal extends AbilityInstance {
     public boolean onEntityHit(@NonNull Entity entity) {
       if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush));
+        Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.verticalPush));
         EntityUtil.applyVelocity(WaterGimbal.this, entity, velocity);
         affectedEntities.add(entity);
       }

@@ -39,9 +39,9 @@ public class Ray implements Collider {
   public Ray(@NonNull Vector3d origin, @NonNull Vector3d direction) {
     this.origin = origin;
     this.direction = direction;
-    double invX = direction.getX() == 0 ? Double.MAX_VALUE : 1 / direction.getX();
-    double invY = direction.getY() == 0 ? Double.MAX_VALUE : 1 / direction.getY();
-    double invZ = direction.getZ() == 0 ? Double.MAX_VALUE : 1 / direction.getZ();
+    double invX = direction.x() == 0 ? Double.MAX_VALUE : 1 / direction.x();
+    double invY = direction.y() == 0 ? Double.MAX_VALUE : 1 / direction.y();
+    double invZ = direction.z() == 0 ? Double.MAX_VALUE : 1 / direction.z();
     invDir = new Vector3d(invX, invY, invZ);
   }
 

@@ -77,12 +77,12 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
 
     redirect();
     settingUp = true;
-    int targetY = FastMath.floor(target.getY());
+    int targetY = FastMath.floor(target.y());
     int currentY = block.getY();
-    Vector3d dir = target.subtract(location).normalize().setY(0);
+    Vector3d dir = target.subtract(location).normalize().withY(0);
     boolean validAbove = block.getRelative(BlockFace.UP).isPassable();
     boolean validBelow = block.getRelative(BlockFace.DOWN).isPassable();
-    Vector3d fixedY = location.setY(targetY + 0.5);
+    Vector3d fixedY = location.withY(targetY + 0.5);
     if ((targetY > currentY && validAbove) || (targetY < currentY && validBelow)) {
       firstDestination = fixedY;
     } else if (location.add(dir).toBlock(user.world()).isPassable()) {
@@ -108,7 +108,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     buffer -= 20;
 
     clean();
-    if (Math.abs(location.getY() - firstDestination.getY()) < 0.5) {
+    if (Math.abs(location.y() - firstDestination.y()) < 0.5) {
       settingUp = false;
     }
     previousBlock = location.toBlock(user.world());
@@ -120,7 +120,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       direction = direction.multiply(2);
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-      Block diagonal = originBlock.getRelative(v.getX(), v.getY(), v.getZ());
+      Block diagonal = originBlock.getRelative(v.x(), v.y(), v.z());
       if (diagonalsPredicate.test(diagonal)) {
         onBlockHit(diagonal);
         return UpdateResult.REMOVE;

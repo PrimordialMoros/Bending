@@ -103,15 +103,15 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     Collection<Block> nearbyBlocks = WorldUtil.nearbyBlocks(user.world(), box.at(location));
     Collider checkCollider = collider();
     // Calculate top and bottom positions and add a small buffer
-    double topY = location.getY() + r;
-    double bottomY = location.getY() - r;
+    double topY = location.y() + r;
+    double bottomY = location.y() - r;
     for (Block block : nearbyBlocks) {
       AABB blockBounds = AABBUtil.blockBounds(block);
       if (blockBounds.intersects(checkCollider)) {
-        if (blockBounds.min.getY() > topY) { // Collision on the top part
+        if (blockBounds.min.y() > topY) { // Collision on the top part
           return false;
         }
-        double resolution = blockBounds.max.getY() - bottomY;
+        double resolution = blockBounds.max.y() - bottomY;
         if (Math.abs(resolution) > radius + 0.1) {
           return false;
         } else {

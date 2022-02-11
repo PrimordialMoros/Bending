@@ -127,7 +127,7 @@ public abstract class BlockStream implements State {
     if (current.distanceSq(user.eyeLocation()) <= range * range) {
       boolean canRender = true;
       for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-        Block b = originBlock.getRelative(v.getX(), v.getY(), v.getZ());
+        Block b = originBlock.getRelative(v.x(), v.y(), v.z());
         if (diagonalsPredicate.test(b)) {
           canRender = false;
           onBlockHit(b);

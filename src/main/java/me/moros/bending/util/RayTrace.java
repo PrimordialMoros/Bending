@@ -156,7 +156,7 @@ public final class RayTrace {
     BlockHit result = traverseBlocks(nmsWorld, clipContext, miss);
     if (result != null && !miss.equals(result)) {
       Vector3i bp = result.blockPosition();
-      Block block = world.getBlockAt(bp.getX(), bp.getY(), bp.getZ());
+      Block block = world.getBlockAt(bp.x(), bp.y(), bp.z());
       return new CompositeResult(result.position(), block, null);
     }
     return new CompositeResult(miss.position(), null, null);
@@ -224,9 +224,9 @@ public final class RayTrace {
   public @NonNull CompositeResult result(@NonNull World world) {
     boolean checkEntities = type != Type.BLOCK;
 
-    Vec3 startPos = new Vec3(origin.getX(), origin.getY(), origin.getZ());
+    Vec3 startPos = new Vec3(origin.x(), origin.y(), origin.z());
     Vector3d endPoint = origin.add(direction.multiply(range));
-    Vec3 endPos = new Vec3(endPoint.getX(), endPoint.getY(), endPoint.getZ());
+    Vec3 endPos = new Vec3(endPoint.x(), endPoint.y(), endPoint.z());
 
     ClipContext.Block ccb = ignorePassable ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
     ClipContext.Fluid ccf = ignoreLiquids ? Fluid.NONE : Fluid.ANY;

@@ -67,42 +67,42 @@ public class Vector3i {
   /**
    * @return the x coordinate
    */
-  public int getX() {
+  public int x() {
     return x;
   }
 
   /**
    * @return the y coordinate
    */
-  public int getY() {
+  public int y() {
     return y;
   }
 
   /**
    * @return the z coordinate
    */
-  public int getZ() {
+  public int z() {
     return z;
   }
 
   /**
    * @return a new vector copy with the given x coordinate
    */
-  public @NonNull Vector3i setX(int value) {
+  public @NonNull Vector3i withX(int value) {
     return new Vector3i(value, y, z);
   }
 
   /**
    * @return a new vector copy with the given y coordinate
    */
-  public @NonNull Vector3i setY(int value) {
+  public @NonNull Vector3i withY(int value) {
     return new Vector3i(x, value, z);
   }
 
   /**
    * @return a new vector copy with the given z coordinate
    */
-  public @NonNull Vector3i setZ(int value) {
+  public @NonNull Vector3i withZ(int value) {
     return new Vector3i(x, y, value);
   }
 

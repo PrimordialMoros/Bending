@@ -101,7 +101,7 @@ public class AirWheel extends AbilityInstance {
   @Override
   public @NonNull UpdateResult update() {
     long time = System.currentTimeMillis();
-    center = user.location().add(new Vector3d(0, 0.8, 0)).add(user.direction().setY(0).multiply(1.2));
+    center = user.location().add(new Vector3d(0, 0.8, 0)).add(user.direction().withY(0).multiply(1.2));
     collider = new Disk(new OBB(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
 
     if (time >= nextRenderTime) {
@@ -133,7 +133,7 @@ public class AirWheel extends AbilityInstance {
   }
 
   private void render() {
-    Vector3d rotateAxis = Vector3d.PLUS_J.cross(user.direction().setY(0));
+    Vector3d rotateAxis = Vector3d.PLUS_J.cross(user.direction().withY(0));
     VectorUtil.circle(user.direction().multiply(1.6), rotateAxis, 40).forEach(v ->
       ParticleUtil.air(center.add(v)).spawn(user.world())
     );

@@ -82,7 +82,7 @@ public class Blaze extends AbilityInstance {
     double range = cone ? userConfig.coneRange : userConfig.ringRange;
 
     Vector3d origin = user.location().snapToBlockCenter();
-    Vector3d dir = user.direction().setY(0).normalize();
+    Vector3d dir = user.direction().withY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
       VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 2)).forEach(v ->

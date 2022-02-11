@@ -80,12 +80,12 @@ public class OBB implements Collider {
   // check if there's a separating plane in between the selected axes
   private boolean getSeparatingPlane(Vector3d pos, Vector3d plane, OBB other) {
     final double dot = abs(pos.dot(plane));
-    final double x1 = abs((axes[0].multiply(e.getX())).dot(plane));
-    final double y1 = abs((axes[1].multiply(e.getY())).dot(plane));
-    final double z1 = abs((axes[2].multiply(e.getZ())).dot(plane));
-    final double x2 = abs((other.axes[0].multiply(other.e.getX())).dot(plane));
-    final double y2 = abs((other.axes[1].multiply(other.e.getY())).dot(plane));
-    final double z2 = abs((other.axes[2].multiply(other.e.getZ())).dot(plane));
+    final double x1 = abs((axes[0].multiply(e.x())).dot(plane));
+    final double y1 = abs((axes[1].multiply(e.y())).dot(plane));
+    final double z1 = abs((axes[2].multiply(e.z())).dot(plane));
+    final double x2 = abs((other.axes[0].multiply(other.e.x())).dot(plane));
+    final double y2 = abs((other.axes[1].multiply(other.e.y())).dot(plane));
+    final double z2 = abs((other.axes[2].multiply(other.e.z())).dot(plane));
     return dot > x1 + y1 + z1 + x2 + y2 + z2;
   }
 

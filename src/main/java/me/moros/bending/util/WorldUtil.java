@@ -85,9 +85,9 @@ public final class WorldUtil {
   public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius, @NonNull Predicate<Block> predicate, int limit) {
     int r = FastMath.ceil(radius) + 1;
     List<Block> blocks = new ArrayList<>();
-    for (double x = pos.getX() - r; x <= pos.getX() + r; x++) {
-      for (double y = pos.getY() - r; y <= pos.getY() + r; y++) {
-        for (double z = pos.getZ() - r; z <= pos.getZ() + r; z++) {
+    for (double x = pos.x() - r; x <= pos.x() + r; x++) {
+      for (double y = pos.y() - r; y <= pos.y() + r; y++) {
+        for (double z = pos.z() - r; z <= pos.z() + r; z++) {
           Vector3d loc = new Vector3d(x, y, z);
           if (pos.distanceSq(loc) > radius * radius) {
             continue;
@@ -133,9 +133,9 @@ public final class WorldUtil {
       return List.of();
     }
     List<Block> blocks = new ArrayList<>();
-    for (double x = box.min.getX(); x <= box.max.getX(); x++) {
-      for (double y = box.min.getY(); y <= box.max.getY(); y++) {
-        for (double z = box.min.getZ(); z <= box.max.getZ(); z++) {
+    for (double x = box.min.x(); x <= box.max.x(); x++) {
+      for (double y = box.min.y(); y <= box.max.y(); y++) {
+        for (double z = box.min.z(); z <= box.max.z(); z++) {
           Vector3d loc = new Vector3d(x, y, z);
           Block block = loc.toBlock(world);
           if (predicate.test(block)) {

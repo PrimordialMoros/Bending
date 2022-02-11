@@ -103,10 +103,10 @@ public class Tornado extends AbilityInstance {
     double rBox = 0.6 * radius;
     AABB box = new AABB(new Vector3d(-rBox, 0, -rBox), new Vector3d(rBox, height, rBox)).at(base);
     CollisionUtil.handle(user, box, entity -> {
-      double dy = entity.getLocation().getY() - base.getY();
+      double dy = entity.getLocation().getY() - base.y();
       double r = 0.5 + (radius - 0.5) * dy;
       Vector3d delta = EntityUtil.entityCenter(entity).subtract(base);
-      double distSq = delta.getX() * delta.getX() + delta.getZ() * delta.getZ();
+      double distSq = delta.x() * delta.x() + delta.z() * delta.z();
       if (distSq > r * r) {
         return false;
       }
@@ -120,9 +120,9 @@ public class Tornado extends AbilityInstance {
         } else {
           velY = 0.6;
         }
-        velocity = user.direction().setY(velY).multiply(factor);
+        velocity = user.direction().withY(velY).multiply(factor);
       } else {
-        Vector3d normal = delta.setY(0).normalize();
+        Vector3d normal = delta.withY(0).normalize();
         Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
         velocity = ortho.add(normal).normalize().add(new Vector3d(0, 0.5, 0)).multiply(factor);
       }

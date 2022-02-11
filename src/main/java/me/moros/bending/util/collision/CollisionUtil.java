@@ -74,7 +74,7 @@ public final class CollisionUtil {
     Vector3d pos = collider.position();
     boolean hit = false;
     Predicate<Entity> filter = entityPredicate(user.entity(), livingOnly, selfCollision);
-    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.getX(), extent.getY(), extent.getZ(), filter)) {
+    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.x(), extent.y(), extent.z(), filter)) {
       if (collider.intersects(AABBUtil.entityBounds(entity))) {
         if (!user.canBuild(entity.getLocation().getBlock())) {
           continue;

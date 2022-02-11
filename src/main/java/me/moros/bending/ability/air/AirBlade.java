@@ -83,7 +83,7 @@ public class AirBlade extends AbilityInstance {
     loadConfig();
 
     charging = true;
-    direction = user.direction().setY(0).normalize();
+    direction = user.direction().withY(0).normalize();
     double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
     origin = user.location().add(direction).add(new Vector3d(0, maxRadius, 0));
 
@@ -206,7 +206,7 @@ public class AirBlade extends AbilityInstance {
     @Override
     public boolean onEntityHit(@NonNull Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
-      Vector3d velocity = direction.setY(userConfig.knockup).normalize().multiply(userConfig.knockback);
+      Vector3d velocity = direction.withY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       EntityUtil.applyVelocity(AirBlade.this, entity, velocity);
       return true;
     }

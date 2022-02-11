@@ -159,7 +159,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   private Block getClosestRingBlock() {
-    Vector3d dir = user.direction().setY(0).normalize().multiply(radius);
+    Vector3d dir = user.direction().withY(0).normalize().multiply(radius);
     Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
     Block result = ring.get(0);
     Vector3d targetVector = new Vector3d(target);
@@ -178,7 +178,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   private int getDirectionIndex() {
-    Vector3d dir = user.direction().setY(0).normalize().multiply(radius);
+    Vector3d dir = user.direction().withY(0).normalize().multiply(radius);
     Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
     return Math.max(0, ring.indexOf(target));
   }
@@ -268,7 +268,7 @@ public class WaterRing extends AbilityInstance {
       AABB entityBounds = AABBUtil.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).setY(0).normalize();
+        Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).withY(0).normalize();
         EntityUtil.applyVelocity(WaterRing.this, entity, velocity.multiply(userConfig.knockback));
         affectedEntities.add(entity);
       }

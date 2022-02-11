@@ -189,7 +189,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       }
       if (user.sneaking()) {
         Vector3d dir = user.direction().multiply(0.2);
-        velocity = velocity.add(dir.setY(0));
+        velocity = velocity.add(dir.withY(0));
       }
       EntityUtil.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());

@@ -184,7 +184,7 @@ public class Torrent extends AbilityInstance {
           affectedEntities.add(entity);
         }
       }
-      Vector3d velocity = direction.setY(Math.min(direction.getY(), userConfig.verticalPush)).multiply(userConfig.knockback);
+      Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.verticalPush)).multiply(userConfig.knockback);
       EntityUtil.applyVelocity(Torrent.this, entity, velocity);
       return false;
     }

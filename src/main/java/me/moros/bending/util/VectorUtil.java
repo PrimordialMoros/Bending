@@ -118,7 +118,7 @@ public final class VectorUtil {
    * Get an orthogonal vector.
    */
   public static @NonNull Vector3d orthogonal(@NonNull Vector3d axis, double radians, double length) {
-    double[] arr = {axis.getY(), -axis.getX(), 0};
+    double[] arr = {axis.y(), -axis.x(), 0};
     Rotation rotation = new Rotation(axis, radians);
     return rotation.applyTo(new Vector3d(arr).normalize().multiply(length));
   }
@@ -133,7 +133,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
   public static @NonNull Vector3d rotateAroundAxisX(@NonNull Vector3d v, double cos, double sin) {
-    return new Vector3d(v.getX(), v.getY() * cos - v.getZ() * sin, v.getY() * sin + v.getZ() * cos);
+    return new Vector3d(v.x(), v.y() * cos - v.z() * sin, v.y() * sin + v.z() * cos);
   }
 
   /**
@@ -146,7 +146,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
   public static @NonNull Vector3d rotateAroundAxisY(@NonNull Vector3d v, double cos, double sin) {
-    return new Vector3d(v.getX() * cos + v.getZ() * sin, v.getY(), v.getX() * -sin + v.getZ() * cos);
+    return new Vector3d(v.x() * cos + v.z() * sin, v.y(), v.x() * -sin + v.z() * cos);
   }
 
   /**
@@ -159,7 +159,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisY(Vector3d, double, double)
    */
   public static @NonNull Vector3d rotateAroundAxisZ(@NonNull Vector3d v, double cos, double sin) {
-    return new Vector3d(v.getX() * cos - v.getY() * sin, v.getX() * sin + v.getY() * cos, v.getZ());
+    return new Vector3d(v.x() * cos - v.y() * sin, v.x() * sin + v.y() * cos, v.z());
   }
 
   /**

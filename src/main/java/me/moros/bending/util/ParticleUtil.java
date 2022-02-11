@@ -56,7 +56,7 @@ public final class ParticleUtil {
       throw new IllegalStateException("Please specify location for this particle");
     }
     world.spawnParticle(particle, null, null,
-      location.getX(), location.getY(), location.getZ(),
+      location.x(), location.y(), location.z(),
       count, offsetX, offsetY, offsetZ, extra, data, true
     );
     return this;
@@ -82,7 +82,7 @@ public final class ParticleUtil {
   }
 
   public @NonNull ParticleUtil offset(@NonNull Vector3d offset) {
-    return offset(offset.getX(), offset.getY(), offset.getZ());
+    return offset(offset.x(), offset.y(), offset.z());
   }
 
   public @NonNull ParticleUtil offset(double offset) {

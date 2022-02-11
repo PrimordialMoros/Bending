@@ -210,7 +210,7 @@ public class AirBlast extends AbilityInstance {
       Vector3d push = ray.direction.normalize();
       if (!isUser) {
         // Cap vertical push
-        push = push.setY(Math.max(-0.3, Math.min(0.3, push.getY())));
+        push = push.withY(Math.max(-0.3, Math.min(0.3, push.y())));
       }
 
       factor *= 1 - (distanceTravelled / (2 * maxRange));

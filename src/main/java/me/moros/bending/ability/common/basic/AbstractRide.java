@@ -69,7 +69,7 @@ public abstract class AbstractRide implements Updatable {
     }
     double delta = getPrediction() - height;
     double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
-    Vector3d velocity = user.direction().setY(0).normalize().multiply(speed).setY(force);
+    Vector3d velocity = user.direction().withY(0).normalize().multiply(speed).withY(force);
     affect(velocity);
     user.entity().setFallDistance(0);
 
@@ -79,8 +79,8 @@ public abstract class AbstractRide implements Updatable {
   }
 
   private boolean isColliding() {
-    double playerSpeed = user.velocity().setY(0).length();
-    Vector3d direction = user.direction().setY(0).normalize(Vector3d.ZERO);
+    double playerSpeed = user.velocity().withY(0).length();
+    Vector3d direction = user.direction().withY(0).normalize(Vector3d.ZERO);
     Vector3d front = user.eyeLocation().subtract(new Vector3d(0, 0.5, 0))
       .add(direction.multiply(Math.max(speed, playerSpeed)));
     Block block = front.toBlock(user.world());
@@ -88,8 +88,8 @@ public abstract class AbstractRide implements Updatable {
   }
 
   private double getPrediction() {
-    double playerSpeed = user.velocity().setY(0).length();
-    Vector3d offset = user.direction().setY(0).normalize().multiply(Math.max(speed, playerSpeed) * 3);
+    double playerSpeed = user.velocity().withY(0).length();
+    Vector3d offset = user.direction().withY(0).normalize().multiply(Math.max(speed, playerSpeed) * 3);
     AABB userBounds = AABBUtil.entityBounds(user.entity()).at(offset);
     if (!WorldUtil.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
       return targetHeight - 1;

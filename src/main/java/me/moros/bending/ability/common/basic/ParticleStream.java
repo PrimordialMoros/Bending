@@ -103,7 +103,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       toCheck.add(originalVector.add(directionVector.multiply(0.5)).toBlock(user.world()));
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, directionVector)) {
-      toCheck.add(originBlock.getRelative(v.getX(), v.getY(), v.getZ()));
+      toCheck.add(originBlock.getRelative(v.x(), v.y(), v.z()));
     }
     return toCheck.stream().noneMatch(this::testCollision);
   }
