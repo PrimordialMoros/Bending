@@ -32,9 +32,9 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.WorldUtil;
+import me.moros.bending.util.internal.NMSUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World.Environment;
@@ -45,8 +45,6 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -61,11 +59,6 @@ public final class TempBlock extends TemporaryBase {
   private boolean reverted = false;
 
   public static void init() {
-  }
-
-  private static boolean setBlockFast(Block block, BlockData data) {
-    BlockPos position = new BlockPos(block.getX(), block.getY(), block.getZ());
-    return ((CraftWorld) block.getWorld()).getHandle().setBlock(position, ((CraftBlockData) data).getState(), 2);
   }
 
   private TempBlock(Block block, boolean bendable, int ticks) {
@@ -101,7 +94,7 @@ public final class TempBlock extends TemporaryBase {
         tbs.weak = false;
       }
       this.bendable = bendable;
-      setBlockFast(block, data);
+      NMSUtil.setBlockFast(block, data);
       refreshGravityCache(block);
       MANAGER.reschedule(block, ticks);
     }
@@ -372,7 +365,7 @@ public final class TempBlock extends TemporaryBase {
         return Optional.of(tb);
       }
       TempBlock result = new TempBlock(block, bendable, ticks);
-      if (setBlockFast(block, newData)) {
+      if (NMSUtil.setBlockFast(block, newData)) {
         refreshGravityCache(block);
         MANAGER.addEntry(block, result, ticks);
         return Optional.of(result);

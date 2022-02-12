@@ -22,24 +22,12 @@ package me.moros.bending.util;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.ClipContext.Fluid;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import me.moros.bending.util.internal.NMSUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.RayTraceResult;
@@ -62,7 +50,7 @@ public final class RayTrace {
 
   private Type type = Type.BLOCK;
 
-  private Set<BlockPos> ignoreBlocks = Set.of();
+  private Set<Block> ignoreBlocks = Set.of();
   private Predicate<Entity> entityPredicate = x -> true;
 
   private RayTrace(Vector3d origin, Vector3d direction) {
@@ -71,9 +59,17 @@ public final class RayTrace {
     range(direction.length());
   }
 
+  public @NonNull Vector3d origin() {
+    return origin;
+  }
+
   public @NonNull RayTrace origin(@NonNull Vector3d origin) {
     this.origin = Objects.requireNonNull(origin);
     return this;
+  }
+
+  public @NonNull Vector3d end() {
+    return origin.add(direction.multiply(range));
   }
 
   public @NonNull RayTrace direction(@NonNull Vector3d direction) {
@@ -86,9 +82,17 @@ public final class RayTrace {
     return this;
   }
 
+  public boolean ignoreLiquids() {
+    return ignoreLiquids;
+  }
+
   public @NonNull RayTrace ignoreLiquids(boolean ignoreLiquids) {
     this.ignoreLiquids = ignoreLiquids;
     return this;
+  }
+
+  public boolean ignorePassable() {
+    return ignorePassable;
   }
 
   public @NonNull RayTrace ignorePassable(boolean ignorePassable) {
@@ -106,9 +110,12 @@ public final class RayTrace {
     return this;
   }
 
+  public @NonNull Set<@NonNull Block> ignored() {
+    return ignoreBlocks;
+  }
+
   public @NonNull RayTrace ignore(@NonNull Set<Block> ignoreBlocks) {
-    this.ignoreBlocks = Objects.requireNonNull(ignoreBlocks).stream()
-      .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
+    this.ignoreBlocks = Set.copyOf(ignoreBlocks);
     return this;
   }
 
@@ -117,122 +124,10 @@ public final class RayTrace {
     return this;
   }
 
-  private BlockHit checkBlockCollision(Level world, ClipContext context, BlockPos pos, BlockHit miss) {
-    if (ignoreBlocks.contains(pos)) {
-      return null;
-    }
-    BlockState iblockdata = world.getBlockStateIfLoaded(pos);
-    if (iblockdata == null) {
-      return miss;
-    }
-    if (iblockdata.isAir()) return null;
-    FluidState fluid = iblockdata.getFluidState();
-    Vec3 vec3d = context.getFrom();
-    Vec3 vec3d1 = context.getTo();
-    VoxelShape voxelshape = context.getBlockShape(iblockdata, world, pos);
-    BlockHitResult res0 = world.clipWithInteractionOverride(vec3d, vec3d1, pos, voxelshape, iblockdata);
-    VoxelShape voxelshape1 = context.getFluidShape(fluid, world, pos);
-    BlockHitResult res1 = voxelshape1.clip(vec3d, vec3d1, pos);
-    double d0 = res0 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res0.getLocation());
-    double d1 = res1 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res1.getLocation());
-    BlockHit b0 = res0 == null ? null : new BlockHit(res0);
-    BlockHit b1 = res1 == null ? null : new BlockHit(res1);
-    return d0 <= d1 ? b0 : b1;
-  }
-
-  private record BlockHit(Vector3d position, Vector3i blockPosition) {
-    private BlockHit(BlockHitResult hitResult) {
-      this(hitResult.getLocation(), hitResult.getBlockPos());
-    }
-
-    private BlockHit(Vec3 pos, BlockPos bp) {
-      this(new Vector3d(pos.x, pos.y, pos.z), new Vector3i(bp.getX(), bp.getY(), bp.getZ()));
-    }
-  }
-
-  private CompositeResult rayTraceBlocks(World world, ClipContext clipContext) {
-    Level nmsWorld = ((CraftWorld) world).getHandle();
-    BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()));
-    BlockHit result = traverseBlocks(nmsWorld, clipContext, miss);
-    if (result != null && !miss.equals(result)) {
-      Vector3i bp = result.blockPosition();
-      Block block = world.getBlockAt(bp.x(), bp.y(), bp.z());
-      return new CompositeResult(result.position(), block, null);
-    }
-    return new CompositeResult(miss.position(), null, null);
-  }
-
-  private BlockHit traverseBlocks(Level level, ClipContext context, BlockHit miss) {
-    Vec3 start = context.getFrom();
-    Vec3 end = context.getTo();
-    if (start.equals(end)) {
-      return miss;
-    } else {
-      double d0 = Mth.lerp(-1.0E-7D, end.x, start.x);
-      double d1 = Mth.lerp(-1.0E-7D, end.y, start.y);
-      double d2 = Mth.lerp(-1.0E-7D, end.z, start.z);
-      double d3 = Mth.lerp(-1.0E-7D, start.x, end.x);
-      double d4 = Mth.lerp(-1.0E-7D, start.y, end.y);
-      double d5 = Mth.lerp(-1.0E-7D, start.z, end.z);
-      int i = Mth.floor(d3);
-      int j = Mth.floor(d4);
-      int k = Mth.floor(d5);
-      BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, j, k);
-      BlockHit t0 = checkBlockCollision(level, context, mutableBlockPos, miss);
-      if (t0 != null) {
-        return t0;
-      } else {
-        double d6 = d0 - d3;
-        double d7 = d1 - d4;
-        double d8 = d2 - d5;
-        int l = Mth.sign(d6);
-        int i1 = Mth.sign(d7);
-        int j1 = Mth.sign(d8);
-        double d9 = l == 0 ? Double.MAX_VALUE : l / d6;
-        double d10 = i1 == 0 ? Double.MAX_VALUE : i1 / d7;
-        double d11 = j1 == 0 ? Double.MAX_VALUE : j1 / d8;
-        double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
-        double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
-        double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
-        BlockHit result;
-        do {
-          if (d12 > 1.0D && d13 > 1.0D && d14 > 1.0D) {
-            return miss;
-          }
-          if (d12 < d13) {
-            if (d12 < d14) {
-              i += l;
-              d12 += d9;
-            } else {
-              k += j1;
-              d14 += d11;
-            }
-          } else if (d13 < d14) {
-            j += i1;
-            d13 += d10;
-          } else {
-            k += j1;
-            d14 += d11;
-          }
-          result = checkBlockCollision(level, context, mutableBlockPos.set(i, j, k), miss);
-        } while (result == null);
-        return result;
-      }
-    }
-  }
-
   public @NonNull CompositeResult result(@NonNull World world) {
     boolean checkEntities = type != Type.BLOCK;
-
-    Vec3 startPos = new Vec3(origin.x(), origin.y(), origin.z());
     Vector3d endPoint = origin.add(direction.multiply(range));
-    Vec3 endPos = new Vec3(endPoint.x(), endPoint.y(), endPoint.z());
-
-    ClipContext.Block ccb = ignorePassable ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
-    ClipContext.Fluid ccf = ignoreLiquids ? Fluid.NONE : Fluid.ANY;
-    ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
-
-    CompositeResult blockResult = rayTraceBlocks(world, clipContext);
+    CompositeResult blockResult = NMSUtil.rayTraceBlocks(this, world);
     double blockHitDistance = blockResult.hit ? origin.distance(blockResult.position) : range;
 
     CompositeResult entityResult = new CompositeResult(endPoint, null, null);
@@ -272,7 +167,7 @@ public final class RayTrace {
 
     private final boolean hit;
 
-    private CompositeResult(Vector3d position, Block block, Entity entity) {
+    public CompositeResult(Vector3d position, Block block, Entity entity) {
       this.position = position;
       this.block = block;
       this.entity = entity;

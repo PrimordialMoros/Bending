@@ -55,6 +55,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -62,8 +63,7 @@ import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.RayTrace.Type;
-import me.moros.bending.util.material.EarthMaterials;
-import me.moros.bending.util.material.WaterMaterials;
+import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -178,11 +178,10 @@ public final class ActivationController {
         if (!onFall(user)) {
           return 0;
         }
-      } else if (cause == DamageCause.SUFFOCATION) {
-        if (!onSuffocation(user)) {
-          return 0;
-        }
       }
+    }
+    if (cause == DamageCause.SUFFOCATION && noSuffocate(entity)) {
+      return 0;
     }
     return damage;
   }
@@ -212,15 +211,14 @@ public final class ActivationController {
     return !Bending.game().flightManager().hasFlight(user);
   }
 
-  private boolean onSuffocation(@NonNull User user) {
-    Block block = user.headBlock();
-    if (EarthMaterials.isEarthbendable(user, block) && user.hasElement(Element.EARTH)) {
-      return false;
-    }
-    if (WaterMaterials.isWaterBendable(block) && user.hasElement(Element.WATER)) {
-      return false;
-    }
-    return !TempBlock.MANAGER.isTemp(block);
+  private boolean noSuffocate(LivingEntity e) {
+    double f = 0.4 * e.getWidth();
+    AABB box = new AABB(new Vector3d(-f, -0.01, -f), new Vector3d(f, 0.01, f)).at(new Vector3d(e.getEyeLocation()));
+    return WorldUtil.nearbyBlocks(e.getWorld(), box, this::canSuffocate, 1).isEmpty();
+  }
+
+  private boolean canSuffocate(Block block) {
+    return !block.isPassable() && !TempBlock.MANAGER.isTemp(block);
   }
 
   public void onUserInteract(@NonNull User user, @NonNull Activation method) {

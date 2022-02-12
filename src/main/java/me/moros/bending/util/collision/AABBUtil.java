@@ -22,6 +22,7 @@ package me.moros.bending.util.collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.DummyCollider;
 import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.util.internal.NMSUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -34,13 +35,26 @@ public final class AABBUtil {
 
   /**
    * @param block the block to check
-   * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block is passable
+   * @return the provided block's {@link AABB} in relative space or a {@link DummyCollider} if the block has no collider
+   */
+  public static @NonNull AABB blockDimensions(@NonNull Block block) {
+    return NMSUtil.dimensions(block, Vector3d.ZERO);
+  }
+
+  /**
+   * @param block the block to check
+   * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block has no collider
    */
   public static @NonNull AABB blockBounds(@NonNull Block block) {
-    if (block.isPassable()) {
-      return DUMMY_COLLIDER;
-    }
-    return new AABB(new Vector3d(block.getBoundingBox().getMin()), new Vector3d(block.getBoundingBox().getMax()));
+    return NMSUtil.dimensions(block, new Vector3d(block));
+  }
+
+  /**
+   * @param entity the entity to check
+   * @return the provided entity's {@link AABB} in relative space
+   */
+  public static @NonNull AABB entityDimensions(@NonNull Entity entity) {
+    return NMSUtil.dimensions(entity, Vector3d.ZERO);
   }
 
   /**
@@ -48,8 +62,6 @@ public final class AABBUtil {
    * @return the provided entity's {@link AABB}
    */
   public static @NonNull AABB entityBounds(@NonNull Entity entity) {
-    return new AABB(new Vector3d(entity.getBoundingBox().getMin()), new Vector3d(entity.getBoundingBox().getMax()));
+    return NMSUtil.dimensions(entity, new Vector3d(entity.getLocation()));
   }
-
-
 }
