@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.3.0-SNAPSHOT"
+version = "1.4.0-SNAPSHOT"
 
 java {
     toolchain {
