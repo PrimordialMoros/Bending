@@ -229,7 +229,7 @@ public class AirBurst extends AbilityInstance {
     @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
     @Modifiable(Attribute.CHARGE_TIME)
-    public int chargeTime;
+    public long chargeTime;
     @Modifiable(Attribute.SPEED)
     public double speed;
     @Modifiable(Attribute.STRENGTH)
@@ -245,7 +245,7 @@ public class AirBurst extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
-      chargeTime = abilityNode.node("charge-time").getInt(3500);
+      chargeTime = abilityNode.node("charge-time").getLong(2500);
       speed = abilityNode.node("speed").getDouble(1.2);
       power = abilityNode.node("knockback").getDouble(1.2);
       coneRange = abilityNode.node("cone-range").getDouble(16.0);

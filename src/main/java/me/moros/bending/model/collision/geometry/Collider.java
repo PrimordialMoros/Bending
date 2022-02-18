@@ -23,6 +23,8 @@ import me.moros.bending.model.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Collider {
+  double EPSILON = 0.01;
+
   default boolean intersects(@NonNull Collider collider) {
     return ColliderUtil.intersects(this, collider);
   }

@@ -84,7 +84,9 @@ public class FlameRush extends AbilityInstance {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, FlameRush.class)) {
       return false;
     }
-
+    if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
+      return false;
+    }
     this.user = user;
     loadConfig();
     startTime = System.currentTimeMillis();
@@ -96,7 +98,7 @@ public class FlameRush extends AbilityInstance {
       .add(Policies.UNDER_LAVA)
       .build();
 
-    return !removalPolicy.test(user, description());
+    return true;
   }
 
   @Override

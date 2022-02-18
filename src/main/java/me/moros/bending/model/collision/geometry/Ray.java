@@ -45,6 +45,15 @@ public class Ray implements Collider {
     invDir = new Vector3d(invX, invY, invZ);
   }
 
+  boolean intersects(@NonNull Ray other) {
+    Vector3d cross = direction.cross(other.direction);
+    if (cross.lengthSq() < EPSILON) {
+      return contains(other.origin) || other.contains(origin);
+    }
+    double planarFactor = other.origin.subtract(origin).dot(cross);
+    return Math.abs(planarFactor) < EPSILON;
+  }
+
   @Override
   public @NonNull Vector3d position() {
     return origin;
@@ -64,9 +73,9 @@ public class Ray implements Collider {
   public boolean contains(@NonNull Vector3d point) {
     double lengthSq = direction.lengthSq();
     if (lengthSq == 0) {
-      return origin.distanceSq(point) <= 0.01;
+      return origin.distanceSq(point) <= EPSILON;
     }
     double t = Math.max(0, Math.min(1, point.subtract(origin).dot(direction) / lengthSq));
-    return origin.add(direction.multiply(t)).distanceSq(point) <= 0.01;
+    return origin.add(direction.multiply(t)).distanceSq(point) <= EPSILON;
   }
 }

@@ -170,7 +170,7 @@ public class WaterBubble extends AbilityInstance {
     @Modifiable(Attribute.DURATION)
     public long duration;
     @Modifiable(Attribute.RADIUS)
-    public int radius;
+    public double radius;
     @Modifiable(Attribute.SPEED)
     public double speed;
 
@@ -180,7 +180,7 @@ public class WaterBubble extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(3000);
       duration = abilityNode.node("duration").getLong(15000);
-      radius = abilityNode.node("radius").getInt(5);
+      radius = abilityNode.node("radius").getDouble(5.0);
       speed = abilityNode.node("speed").getDouble(0.5);
     }
   }

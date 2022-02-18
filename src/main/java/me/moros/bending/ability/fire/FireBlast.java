@@ -256,17 +256,16 @@ public class FireBlast extends AbilityInstance implements Explosive {
     public boolean onBlockHit(@NonNull Block block) {
       Vector3d reverse = ray.direction.negate();
       WorldUtil.tryLightBlock(block);
-      if (user.location().distanceSq(Vector3d.center(block)) > 4) {
-        for (Block b : WorldUtil.nearbyBlocks(user.world(), location, userConfig.igniteRadius * factor)) {
-          if (!user.canBuild(b)) {
-            continue;
-          }
-          if (RayTrace.of(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).result(user.world()).hit()) {
-            continue;
-          }
-          if (MaterialUtil.isIgnitable(b)) {
-            TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(b);
-          }
+      Vector3d standing = user.location().add(new Vector3d(0, 0.5, 0));
+      for (Block b : WorldUtil.nearbyBlocks(user.world(), location, userConfig.igniteRadius * factor)) {
+        if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
+          continue;
+        }
+        if (RayTrace.of(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).result(user.world()).hit()) {
+          continue;
+        }
+        if (MaterialUtil.isIgnitable(b)) {
+          TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(b);
         }
       }
       FragileStructure.tryDamageStructure(List.of(block), FastMath.round(4 * factor));

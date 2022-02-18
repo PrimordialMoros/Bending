@@ -81,6 +81,10 @@ public class FireShield extends AbilityInstance {
       return false;
     }
 
+    if (Policies.PARTIALLY_UNDER_WATER.test(user, description()) || Policies.PARTIALLY_UNDER_LAVA.test(user, description())) {
+      return false;
+    }
+
     this.user = user;
     loadConfig();
 
@@ -105,7 +109,7 @@ public class FireShield extends AbilityInstance {
         .build();
     }
 
-    return !removalPolicy.test(user, description());
+    return true;
   }
 
   @Override
@@ -118,10 +122,8 @@ public class FireShield extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
     shield.render();
     CollisionUtil.handle(user, shield.collider(), this::onEntityHit, false);
-
     shield.update();
     return UpdateResult.CONTINUE;
   }

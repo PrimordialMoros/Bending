@@ -85,7 +85,7 @@ public class Blaze extends AbilityInstance {
     Vector3d dir = user.direction().withY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
-      VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 2)).forEach(v ->
+      VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
         streams.add(new FireStream(new Ray(origin, v.multiply(range))))
       );
     } else {

@@ -74,7 +74,7 @@ public final class NMSUtil {
   public static AABB dimensions(@NonNull Block block, @NonNull Vector3d point) {
     CraftBlock cb = (CraftBlock) block;
     VoxelShape shape = cb.getNMS().getShape(cb.getHandle(), cb.getPosition());
-    if (shape.isEmpty()) {
+    if (shape.isEmpty() || !cb.getNMS().getBlock().hasCollision) {
       return AABBUtil.DUMMY_COLLIDER;
     }
     net.minecraft.world.phys.AABB b = shape.bounds();

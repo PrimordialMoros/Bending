@@ -205,17 +205,16 @@ public class FireBurst extends AbilityInstance {
       Vector3d reverse = ray.direction.negate();
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
-      if (user.location().distanceSq(Vector3d.center(block)) > 4) {
-        for (Block b : WorldUtil.nearbyBlocks(user.world(), location, igniteRadius)) {
-          if (!user.canBuild(b)) {
-            continue;
-          }
-          if (RayTrace.of(Vector3d.center(b), reverse).range(igniteRadius + 2).result(user.world()).hit()) {
-            continue;
-          }
-          if (MaterialUtil.isIgnitable(b)) {
-            TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(b);
-          }
+      Vector3d standing = user.location().add(new Vector3d(0, 0.5, 0));
+      for (Block b : WorldUtil.nearbyBlocks(user.world(), location, igniteRadius)) {
+        if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
+          continue;
+        }
+        if (RayTrace.of(Vector3d.center(b), reverse).range(igniteRadius + 2).result(user.world()).hit()) {
+          continue;
+        }
+        if (MaterialUtil.isIgnitable(b)) {
+          TempBlock.fire().duration(Bending.properties().fireRevertTime(1000)).build(b);
         }
       }
       FragileStructure.tryDamageStructure(List.of(block), 4);
@@ -227,7 +226,7 @@ public class FireBurst extends AbilityInstance {
     @Modifiable(Attribute.COOLDOWN)
     public long cooldown;
     @Modifiable(Attribute.CHARGE_TIME)
-    public int chargeTime;
+    public long chargeTime;
     @Modifiable(Attribute.DAMAGE)
     public double damage;
     @Modifiable(Attribute.FIRE_TICKS)
@@ -245,7 +244,7 @@ public class FireBurst extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireburst");
 
       cooldown = abilityNode.node("cooldown").getLong(6000);
-      chargeTime = abilityNode.node("charge-time").getInt(3500);
+      chargeTime = abilityNode.node("charge-time").getLong(2500);
       damage = abilityNode.node("damage").getDouble(3.0);
       fireTicks = abilityNode.node("fire-ticks").getInt(35);
       speed = abilityNode.node("speed").getDouble(0.8);

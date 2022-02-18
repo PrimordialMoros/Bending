@@ -121,7 +121,7 @@ public final class BendingExplosion {
     return CollisionUtil.handle(user, new Sphere(center, size), entity -> {
       Vector3d entityCenter = EntityUtil.entityCenter(entity);
       double distance = center.distance(entityCenter);
-      double distanceFactor = (distance <= halfSize) ? 1 : 1 - ((distance - halfSize)) / size;
+      double distanceFactor = (distance <= halfSize) ? 1 : (1 - (distance - halfSize) / size);
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
         DamageUtil.damageEntity(entity, user, damage * distanceFactor, desc);
         BendingEffect.FIRE_TICK.apply(user, entity, fireTicks);

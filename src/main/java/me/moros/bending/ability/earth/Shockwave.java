@@ -22,7 +22,9 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
@@ -54,6 +56,7 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.internal.PacketUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -74,7 +77,7 @@ public class Shockwave extends AbilityInstance {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
-  private final Collection<Block> blockBuffer = new ArrayList<>();
+  private final Collection<DelayedBlockWrapper> blockBuffer = new ArrayList<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Vector3d origin;
 
@@ -140,8 +143,19 @@ public class Shockwave extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
     if (++ticks % 4 == 0) {
-      PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
-      blockBuffer.clear();
+      var it = blockBuffer.iterator();
+      int current = Bukkit.getCurrentTick();
+      Collection<Block> toClear = new ArrayList<>();
+      while (it.hasNext()) {
+        DelayedBlockWrapper wrapper = it.next();
+        if (wrapper.tick <= current) {
+          toClear.add(wrapper.block);
+          it.remove();
+        } else {
+          break;
+        }
+      }
+      PacketUtil.refreshBlocks(toClear, user.world(), origin);
     }
     Set<Block> positions = recentAffectedBlocks.snapshot();
     if (!positions.isEmpty()) {
@@ -224,7 +238,7 @@ public class Shockwave extends AbilityInstance {
   @Override
   public void onDestroy() {
     if (released) {
-      PacketUtil.refreshBlocks(blockBuffer, user.world(), origin);
+      PacketUtil.refreshBlocks(blockBuffer.stream().map(DelayedBlockWrapper::block).toList(), user.world(), origin);
     }
   }
 
@@ -256,7 +270,7 @@ public class Shockwave extends AbilityInstance {
       double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
       Vector3d velocity = new Vector3d(0, deltaY, 0);
       Block below = block.getRelative(BlockFace.DOWN);
-      blockBuffer.add(below);
+      blockBuffer.add(new DelayedBlockWrapper(below, Bukkit.getCurrentTick() + 3));
       BlockData data = below.getBlockData();
       TempPacketEntity.builder(data).velocity(velocity).duration(500).buildFallingBlock(user.world(), Vector3d.center(below));
       ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(new Vector3d(0, 0.75, 0)))
@@ -265,6 +279,9 @@ public class Shockwave extends AbilityInstance {
         SoundUtil.EARTH.play(block);
       }
     }
+  }
+
+  private record DelayedBlockWrapper(Block block, int tick) {
   }
 
   private static class Config extends Configurable {
@@ -287,7 +304,7 @@ public class Shockwave extends AbilityInstance {
       CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "shockwave");
 
       cooldown = abilityNode.node("cooldown").getLong(8000);
-      chargeTime = abilityNode.node("charge-time").getInt(2500);
+      chargeTime = abilityNode.node("charge-time").getLong(2500);
       damage = abilityNode.node("damage").getDouble(3.0);
       knockback = abilityNode.node("knockback").getDouble(1.2);
       coneRange = abilityNode.node("cone-range").getDouble(14.0);

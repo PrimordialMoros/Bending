@@ -32,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public enum BendingEffect {
   FROST_TICK(135, true, Entity::getMaxFreezeTicks, Entity::getFreezeTicks, Entity::setFreezeTicks),
-  FIRE_TICK(15, false, Entity::getMaxFireTicks, Entity::getFireTicks, Entity::setFireTicks);
+  FIRE_TICK(15, false, e -> 100, Entity::getFireTicks, Entity::setFireTicks);
 
   public static final int MAX_BLOCK_FIRE_TICKS = 100;
 
@@ -64,8 +64,8 @@ public enum BendingEffect {
     if (event.isCancelled()) {
       return;
     }
-    if (currentTicks.get(entity) < ticks) {
-      int current = Math.max(0, currentTicks.get(entity));
+    int current = Math.max(0, currentTicks.get(entity));
+    if (current < ticks) {
       handler.set(entity, Math.min(maxTicks.get(entity), cumulative ? current + ticks : ticks));
       trackEntity(entity, source);
     }
@@ -90,7 +90,7 @@ public enum BendingEffect {
 
   public static void cleanup() {
     for (BendingEffect tick : values()) {
-      tick.instances.keySet().removeIf(e -> !e.isValid() || e.getFireTicks() <= 0);
+      tick.instances.keySet().removeIf(e -> !e.isValid() || tick.currentTicks.get(e) <= 0);
     }
   }
 

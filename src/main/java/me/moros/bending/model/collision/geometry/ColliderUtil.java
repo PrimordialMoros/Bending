@@ -61,27 +61,33 @@ final class ColliderUtil {
         return intersects(obb1, sphere);
       } else if (second instanceof Disk disk) {
         return intersects(disk.sphere, obb1) && obb1.intersects(disk.obb);
+      } else if (second instanceof Ray ray) {
+        return intersects(obb1, ray);
       }
-      // Missing ray-obb check
     } else if (first instanceof Disk disk1) {
       if (second instanceof Disk disk2) {
         return disk1.sphere.intersects(disk2.sphere) && disk1.obb.intersects(disk2.obb);
-      }
-      if (second instanceof AABB aabb) {
+      } else if (second instanceof AABB aabb) {
         return intersects(aabb, disk1.sphere) && disk1.obb.intersects(new OBB(aabb));
       } else if (second instanceof OBB obb) {
         return intersects(disk1.sphere, obb) && obb.intersects(disk1.obb);
       } else if (second instanceof Sphere sphere) {
         return disk1.sphere.intersects(sphere) && intersects(disk1.obb, sphere);
+      } else if (second instanceof Ray ray) {
+        return intersects(disk1.sphere, ray) && intersects(disk1.obb, ray);
       }
-      // Missing ray-obb check
     } else if (first instanceof Ray ray1) {
-      if (second instanceof AABB aabb) {
+      if (second instanceof Ray ray2) {
+        return ray1.intersects(ray2);
+      } else if (second instanceof AABB aabb) {
         return intersects(ray1, aabb);
+      } else if (second instanceof OBB obb) {
+        return intersects(ray1, obb);
       } else if (second instanceof Sphere sphere) {
         return intersects(ray1, sphere);
+      } else if (second instanceof Disk disk) {
+        return intersects(disk.sphere, ray1) && intersects(disk.obb, ray1);
       }
-      // Missing ray-ray, ray-obb and ray-disk intersection
     }
     return false;
   }
@@ -100,6 +106,12 @@ final class ColliderUtil {
   private static boolean intersects(OBB obb, Sphere sphere) {
     Vector3d v = sphere.center.subtract(obb.closestPosition(sphere.center));
     return v.dot(v) <= sphere.radius * sphere.radius;
+  }
+
+  private static boolean intersects(OBB obb, Ray ray) {
+    Ray localRay = new Ray(obb.localSpace(ray.origin), obb.localSpace(ray.direction));
+    AABB localAABB = new AABB(obb.e.negate(), obb.e).at(obb.position());
+    return intersects(localRay, localAABB);
   }
 
   private static boolean intersects(Ray ray, Sphere sphere) {

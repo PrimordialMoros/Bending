@@ -33,11 +33,11 @@ public class OBB implements Collider {
   public final Vector3d e; // Half extents in local space.
   final Vector3d[] axes;
 
-  private OBB(Vector3d center, Vector3d[] axes, Vector3d halfExtents) {
+  private OBB(OBB obb, Vector3d center) {
     this.center = center;
-    this.e = halfExtents;
+    this.e = obb.e;
     this.axes = new Vector3d[3];
-    System.arraycopy(axes, 0, this.axes, 0, 3);
+    System.arraycopy(obb.axes, 0, axes, 0, 3);
   }
 
   public OBB(@NonNull AABB aabb) {
@@ -77,6 +77,14 @@ public class OBB implements Collider {
     return true;
   }
 
+  @NonNull Vector3d localSpace(@NonNull Vector3d dir) {
+    double[] out = new double[3];
+    for (int row = 0; row < 3; row++) {
+      out[row] = axes[row].dot(dir);
+    }
+    return new Vector3d(out);
+  }
+
   // check if there's a separating plane in between the selected axes
   private boolean getSeparatingPlane(Vector3d pos, Vector3d plane, OBB other) {
     final double dot = abs(pos.dot(plane));
@@ -110,19 +118,16 @@ public class OBB implements Collider {
 
   @Override
   public @NonNull OBB at(@NonNull Vector3d point) {
-    return new OBB(point, axes, e);
+    return new OBB(this, point);
   }
 
   @Override
   public @NonNull Vector3d halfExtents() {
-    double x = e.dot(Vector3d.PLUS_I);
-    double y = e.dot(Vector3d.PLUS_J);
-    double z = e.dot(Vector3d.PLUS_K);
-    return new Vector3d(x, y, z);
+    return localSpace(e).abs();
   }
 
   @Override
   public boolean contains(@NonNull Vector3d point) {
-    return closestPosition(point).distanceSq(point) <= 0.01;
+    return closestPosition(point).distanceSq(point) <= EPSILON;
   }
 }

@@ -223,7 +223,7 @@ public class AirSwipe extends AbilityInstance {
     @Modifiable(Attribute.DAMAGE)
     public double damage;
     @Modifiable(Attribute.RANGE)
-    public int range;
+    public double range;
     @Modifiable(Attribute.SPEED)
     public double speed;
     public int arc;
@@ -238,7 +238,7 @@ public class AirSwipe extends AbilityInstance {
 
       cooldown = abilityNode.node("cooldown").getLong(1500);
       damage = abilityNode.node("damage").getDouble(2.0);
-      range = abilityNode.node("range").getInt(9);
+      range = abilityNode.node("range").getDouble(9);
       speed = abilityNode.node("speed").getDouble(0.8);
       arc = abilityNode.node("arc").getInt(35);
 

@@ -114,9 +114,7 @@ public class FireWall extends AbilityInstance {
 
     AABB aabb = new AABB(new Vector3d(-hw, -0.5, -0.6), new Vector3d(hw, userConfig.maxHeight, 0.6));
     collider = new OBB(aabb, Vector3d.PLUS_J, Math.toRadians(user.yaw())).at(center);
-
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
-
     nextRenderTime = 0;
     user.addCooldown(description(), userConfig.cooldown);
     return true;
@@ -168,13 +166,13 @@ public class FireWall extends AbilityInstance {
         double speed = 1 - (h / (2 * currentHeight));
         if (MaterialUtil.isTransparent(block)) {
           if (h == 0) {
-            ParticleUtil.fire(user, pos).count(10)
-              .offset(0.5, 0.25, 0.5).extra(0.01).spawn(user.world());
+            ParticleUtil.fire(user, pos).count(6).offset(0.5, 0.25, 0.5)
+              .extra(0.01).spawn(user.world());
           } else {
             for (int i = 0; i < 2; i++) {
               Vector3d center = VectorUtil.gaussianOffset(pos, 0.4);
-              ParticleUtil.fire(user, center).count(0)
-                .offset(0, 1, 0).extra(0.07 * speed).spawn(user.world());
+              ParticleUtil.fire(user, center).count(0).offset(0, 1, 0)
+                .extra(0.07 * speed).spawn(user.world());
             }
           }
           if (ThreadLocalRandom.current().nextInt(15) == 0) {

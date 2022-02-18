@@ -76,7 +76,9 @@ public class FireBreath extends AbilityInstance {
     if (Bending.game().abilityManager(user.world()).hasAbility(user, FireBreath.class)) {
       return false;
     }
-
+    if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
+      return false;
+    }
     this.user = user;
     loadConfig();
 
@@ -88,7 +90,7 @@ public class FireBreath extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
-    return !removalPolicy.test(user, description());
+    return true;
   }
 
   @Override

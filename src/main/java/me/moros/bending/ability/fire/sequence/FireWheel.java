@@ -140,7 +140,7 @@ public class FireWheel extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(@NonNull Block block) {
-      if (MaterialUtil.isIgnitable(block) && user.canBuild(block)) {
+      if (userConfig.fireTrail && MaterialUtil.isIgnitable(block) && user.canBuild(block)) {
         TempBlock.fire().duration(Bending.properties().fireRevertTime()).build(block);
       }
       return true;
@@ -160,6 +160,7 @@ public class FireWheel extends AbilityInstance {
     public double range;
     @Modifiable(Attribute.SPEED)
     public double speed;
+    public boolean fireTrail;
 
     @Override
     public void onConfigReload() {
@@ -171,6 +172,7 @@ public class FireWheel extends AbilityInstance {
       fireTicks = abilityNode.node("fire-ticks").getInt(25);
       range = abilityNode.node("range").getDouble(20.0);
       speed = abilityNode.node("speed").getDouble(0.75);
+      fireTrail = abilityNode.node("fire-trail").getBoolean(true);
 
       abilityNode.node("speed").comment("How many blocks the wheel advances every tick.");
     }
