@@ -22,9 +22,7 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.Bending;
@@ -51,12 +49,12 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.internal.PacketUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -77,14 +75,12 @@ public class Shockwave extends AbilityInstance {
   private final Collection<Ripple> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
-  private final Collection<DelayedBlockWrapper> blockBuffer = new ArrayList<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Vector3d origin;
 
   private boolean released;
   private double range;
   private long startTime;
-  private int ticks;
 
   public Shockwave(@NonNull AbilityDescription desc) {
     super(desc);
@@ -141,21 +137,6 @@ public class Shockwave extends AbilityInstance {
         }
       }
       return UpdateResult.CONTINUE;
-    }
-    if (++ticks % 4 == 0) {
-      var it = blockBuffer.iterator();
-      int current = Bukkit.getCurrentTick();
-      Collection<Block> toClear = new ArrayList<>();
-      while (it.hasNext()) {
-        DelayedBlockWrapper wrapper = it.next();
-        if (wrapper.tick <= current) {
-          toClear.add(wrapper.block);
-          it.remove();
-        } else {
-          break;
-        }
-      }
-      PacketUtil.refreshBlocks(toClear, user.world(), origin);
     }
     Set<Block> positions = recentAffectedBlocks.snapshot();
     if (!positions.isEmpty()) {
@@ -236,13 +217,6 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public void onDestroy() {
-    if (released) {
-      PacketUtil.refreshBlocks(blockBuffer.stream().map(DelayedBlockWrapper::block).toList(), user.world(), origin);
-    }
-  }
-
-  @Override
   public @MonotonicNonNull User user() {
     return user;
   }
@@ -267,11 +241,14 @@ public class Shockwave extends AbilityInstance {
         return;
       }
       recentAffectedBlocks.add(block);
+      WorldUtil.tryBreakPlant(block);
+      if (MaterialUtil.isFire(block)) {
+        block.setType(Material.AIR);
+      }
       double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
       Vector3d velocity = new Vector3d(0, deltaY, 0);
       Block below = block.getRelative(BlockFace.DOWN);
-      blockBuffer.add(new DelayedBlockWrapper(below, Bukkit.getCurrentTick() + 3));
-      BlockData data = below.getBlockData();
+      BlockData data = mapData(below.getBlockData());
       TempPacketEntity.builder(data).velocity(velocity).duration(500).buildFallingBlock(user.world(), Vector3d.center(below));
       ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(new Vector3d(0, 0.75, 0)))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn(user.world());
@@ -281,7 +258,19 @@ public class Shockwave extends AbilityInstance {
     }
   }
 
-  private record DelayedBlockWrapper(Block block, int tick) {
+  // Use different block type due to https://bugs.mojang.com/browse/MC-114286
+  private static BlockData mapData(BlockData data) {
+    if (data.getMaterial() == Material.SAND) {
+      return Material.SANDSTONE.createBlockData();
+    } else if (data.getMaterial() == Material.RED_SAND) {
+      return Material.RED_SANDSTONE.createBlockData();
+    } else if (data.getMaterial() == Material.GRAVEL) {
+      return Material.STONE.createBlockData();
+    } else if (data.getMaterial() == Material.COARSE_DIRT) {
+      return Material.DIRT.createBlockData();
+    } else {
+      return MaterialUtil.softType(data);
+    }
   }
 
   private static class Config extends Configurable {

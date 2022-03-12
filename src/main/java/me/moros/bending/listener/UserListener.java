@@ -63,6 +63,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -287,6 +288,19 @@ public class UserListener implements Listener {
       game.activationController().onUserMove(user, new Vector3d(x, 0, z));
     }
     return true;
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onUserGlide(EntityToggleGlideEvent event) {
+    if (!event.isGliding() && event.getEntity() instanceof LivingEntity entity) {
+      if (ActionLimiter.isLimited(event.getEntity(), ActionType.MOVE)) {
+        return;
+      }
+      User user = Registries.BENDERS.user(entity);
+      if (user != null && game.activationController().onUserGlide(user)) {
+        event.setCancelled(true);
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

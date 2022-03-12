@@ -60,7 +60,7 @@ public class TranslationManager {
 
   public void reload() {
     if (registry != null) {
-      GlobalTranslator.get().removeSource(registry);
+      GlobalTranslator.translator().removeSource(registry);
       installed.clear();
     }
     registry = TranslationRegistry.create(Key.key("bending", "translations"));
@@ -70,7 +70,7 @@ public class TranslationManager {
 
     ResourceBundle bundle = ResourceBundle.getBundle("bending", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
     registry.registerAll(DEFAULT_LOCALE, bundle, false);
-    GlobalTranslator.get().addSource(registry);
+    GlobalTranslator.translator().addSource(registry);
   }
 
   private void loadCustom() {

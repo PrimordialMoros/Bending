@@ -136,6 +136,10 @@ public final class ActivationController {
     activateAbility(user, Activation.ATTACK);
   }
 
+  public boolean onUserGlide(@NonNull User user) {
+    return worldManager.instance(user.world()).hasAbility(user, FireJet.class);
+  }
+
   public void onUserSneak(@NonNull User user, boolean sneaking) {
     if (sneaking) {
       PhaseChange.melt(user);
@@ -176,6 +180,10 @@ public final class ActivationController {
         }
       } else if (cause == DamageCause.FALL) {
         if (!onFall(user)) {
+          return 0;
+        }
+      } else if (cause == DamageCause.FLY_INTO_WALL) {
+        if (onUserGlide(user)) {
           return 0;
         }
       }

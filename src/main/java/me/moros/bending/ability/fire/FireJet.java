@@ -56,6 +56,7 @@ public class FireJet extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private boolean jetBlast;
+  private boolean wasGliding;
   private long duration;
   private long startTime;
   private int ticks = 3;
@@ -91,6 +92,9 @@ public class FireJet extends AbilityInstance {
       jetBlast = false;
       duration = userConfig.duration;
     }
+
+    wasGliding = user.entity().isGliding();
+    user.entity().setGliding(true);
 
     removalPolicy = Policies.builder()
       .add(Policies.PARTIALLY_UNDER_WATER)
@@ -150,6 +154,7 @@ public class FireJet extends AbilityInstance {
   @Override
   public void onDestroy() {
     user.addCooldown(description(), jetBlast ? userConfig.jetBlastCooldown : userConfig.cooldown);
+    user.entity().setGliding(wasGliding);
   }
 
   @Override

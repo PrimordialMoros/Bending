@@ -3,11 +3,11 @@ plugins {
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.2")
-    id("io.papermc.paperweight.userdev").version("1.3.4")
+    id("io.papermc.paperweight.userdev").version("1.3.5")
 }
 
 group = "me.moros"
-version = "1.4.0-SNAPSHOT"
+version = "1.4.1-SNAPSHOT"
 
 java {
     toolchain {
@@ -26,7 +26,8 @@ repositories {
     maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
     maven("https://ci.ender.zone/plugin/repository/everything/") // LWC
-    maven("https://jitpack.io") // GriefPrevention, Towny
+    maven("https://repo.glaremasters.me/repository/towny/") // Towny
+    maven("https://jitpack.io") // GriefPrevention
 }
 
 dependencies {
@@ -38,31 +39,30 @@ dependencies {
     implementation("org.jdbi", "jdbi3-core", "3.26.1") {
         exclude(module = "caffeine")
     }
-    implementation("com.zaxxer", "HikariCP", "5.0.0")
-    implementation("org.postgresql", "postgresql", "42.3.2") {
+    implementation("com.zaxxer", "HikariCP", "5.0.1")
+    implementation("org.postgresql", "postgresql", "42.3.3") {
         exclude(module = "checker-qual")
     }
     implementation("com.h2database", "h2", "2.1.210")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
-    implementation("cloud.commandframework","cloud-paper", "1.6.1")
-    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.1") {
+    implementation("cloud.commandframework","cloud-paper", "1.6.2")
+    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.2") {
         exclude(group = "net.kyori")
     }
-    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.4")
-    paperDevBundle("1.18.1-R0.1-SNAPSHOT")
-    compileOnly("com.github.TechFortress", "GriefPrevention", "16.17.1")
-    compileOnly("com.github.TownyAdvanced", "Towny", "0.97.5.0")
+    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.5")
+    paperDevBundle("1.18.2-R0.1-SNAPSHOT")
+    compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.0.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
-    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.0") {
+    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.6") {
         exclude(module = "bukkit")
     }
     compileOnly("me.clip", "placeholderapi", "2.11.1")
-    compileOnly("net.luckperms", "api", "5.3")
-    compileOnly("org.checkerframework", "checker-qual", "3.21.0")
+    compileOnly("net.luckperms", "api", "5.4")
+    compileOnly("org.checkerframework", "checker-qual", "3.21.3")
 }
 
 configurations.implementation {
-    exclude(module = "slf4j-api")
     exclude(module = "error_prone_annotations")
 }
 

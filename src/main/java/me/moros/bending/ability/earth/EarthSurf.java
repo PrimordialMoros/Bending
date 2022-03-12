@@ -19,10 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-
-import java.util.Collection;
-import java.util.HashSet;
-
 import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractRide;
 import me.moros.bending.config.Configurable;
@@ -45,7 +41,6 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.internal.PacketUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Particle;
@@ -65,7 +60,6 @@ public class EarthSurf extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Wave wave;
-  private final Collection<Block> blockBuffer = new HashSet<>();
 
   private boolean charging;
   private long startTime;
@@ -148,7 +142,6 @@ public class EarthSurf extends AbilityInstance {
   public void onDestroy() {
     if (wave != null) {
       user.addCooldown(description(), userConfig.cooldown);
-      PacketUtil.refreshBlocks(blockBuffer, user.world(), user.location());
     }
   }
 
@@ -168,35 +161,19 @@ public class EarthSurf extends AbilityInstance {
 
     @Override
     public void render(@NonNull BlockData data) {
-      if (++ticks % 2 == 0) {
-        if (ticks % 4 == 0) {
-          PacketUtil.refreshBlocks(blockBuffer, user.world(), user.location());
-          blockBuffer.clear();
-        }
-        return;
-      }
       Builder builder = TempPacketEntity.builder(MaterialUtil.softType(data)).velocity(new Vector3d(0, 0.25, 0)).duration(500);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
-      toRefresh(user.locBlock());
-      toRefresh(center.toBlock(user.world()));
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
         Vector3d point = center.add(v.multiply(0.6));
-        toRefresh(point.toBlock(user.world()));
         builder.buildFallingBlock(user.world(), point);
       });
-    }
-
-    private void toRefresh(Block block) {
-      if (!MaterialUtil.isTransparent(block)) {
-        blockBuffer.add(block);
-      }
     }
 
     @Override
     public void postRender() {
       center = user.location().subtract(new Vector3d(0, 0.5, 0));
-      if (ticks % 4 == 0) {
+      if (++ticks % 4 == 0) {
         SoundUtil.of(Sound.BLOCK_ROOTED_DIRT_FALL, 0.6F, 0).play(user.world(), center);
       }
       CollisionUtil.handle(user, new Sphere(center, 1.2), this::onEntityHit, false);
