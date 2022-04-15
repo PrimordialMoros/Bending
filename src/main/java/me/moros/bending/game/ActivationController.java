@@ -30,6 +30,7 @@ import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirBlast;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
+import me.moros.bending.ability.air.Tornado;
 import me.moros.bending.ability.air.passive.GracefulDescent;
 import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.earth.EarthArmor;
@@ -250,6 +251,7 @@ public final class ActivationController {
       FerroControl.act(user, block);
       EarthSmash.tryDestroy(user, block);
     }
+    Tornado.switchMode(user);
     AirBlast.switchMode(user);
     EarthLine.switchMode(user);
     HealingWaters.switchMode(user);

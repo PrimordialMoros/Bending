@@ -86,4 +86,9 @@ public interface ColorPalette {
    * Dark red
    */
   TextColor FIRE = TextColor.color(195, 0, 0);
+
+  /**
+   * Dark purple
+   */
+  TextColor AVATAR = TextColor.color(128, 0, 128);
 }

@@ -29,6 +29,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -54,6 +55,7 @@ public final class PlaceholderProvider {
     builder.addStatic("element_color", player ->
       player.elements().stream().findFirst().map(Element::color).map(TextColor::asHexString).orElse("#ffffff")
     );
+    builder.addStatic("display_name", PlaceholderProvider::displayName);
     builder.addStatic("selected_ability", player -> {
       AbilityDescription desc = player.selectedAbility();
       return desc == null ? "" : toLegacy(player, desc.displayName());
@@ -67,6 +69,19 @@ public final class PlaceholderProvider {
       return formatBoolean(result);
     });
     return builder.build();
+  }
+
+  private static @NonNull String displayName(BendingPlayer player) {
+    Collection<Element> userElements = player.elements();
+    Component result;
+    if (userElements.isEmpty()) {
+      result = player.entity().displayName();
+    } else if (userElements.size() > 1) {
+      result = player.entity().displayName().colorIfAbsent(ColorPalette.AVATAR);
+    } else {
+      result = player.entity().displayName().colorIfAbsent(userElements.iterator().next().color());
+    }
+    return toLegacy(player, result);
   }
 
   private static @NonNull String findElement(BendingPlayer player) {

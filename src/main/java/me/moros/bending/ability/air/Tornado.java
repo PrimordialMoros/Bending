@@ -34,13 +34,16 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
+import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -48,11 +51,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Tornado extends AbilityInstance {
+  public enum Mode {PUSH, PULL}
+
   private static final Config config = new Config();
 
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
+
+  private Mode mode;
 
   private double yOffset = 0;
   private double currentAngle = 0;
@@ -73,6 +80,7 @@ public class Tornado extends AbilityInstance {
       .add(Policies.UNDER_WATER)
       .add(Policies.UNDER_LAVA)
       .build();
+    mode = user.store().getOrDefault(DataKey.of("tornado-mode", Mode.class), Mode.PUSH);
     startTime = System.currentTimeMillis();
     return true;
   }
@@ -122,9 +130,13 @@ public class Tornado extends AbilityInstance {
         }
         velocity = user.direction().withY(velY).multiply(factor);
       } else {
-        Vector3d normal = delta.withY(0).normalize();
-        Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
-        velocity = ortho.add(normal).normalize().add(new Vector3d(0, 0.5, 0)).multiply(factor);
+        if (mode == Mode.PUSH) {
+          Vector3d normal = delta.withY(0).normalize();
+          Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
+          velocity = ortho.add(normal).normalize().add(new Vector3d(0, 0.5, 0)).multiply(factor);
+        } else {
+          velocity = delta.add(new Vector3d(0, 0.75 * height, 0)).normalize().multiply(factor);
+        }
       }
       EntityUtil.applyVelocity(this, entity, velocity);
       return false;
@@ -167,6 +179,17 @@ public class Tornado extends AbilityInstance {
   @Override
   public @MonotonicNonNull User user() {
     return user;
+  }
+
+  public static void switchMode(@NonNull User user) {
+    if (user.selectedAbilityName().equals("Tornado")) {
+      var key = DataKey.of("tornado-mode", Mode.class);
+      if (user.store().canEdit(key)) {
+        Mode mode = user.store().merge(key, Mode.PULL, (m1, m2) -> m1 == Mode.PULL ? Mode.PUSH : Mode.PULL);
+        user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
+        Bending.game().abilityManager(user.world()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
+      }
+    }
   }
 
   private static class Config extends Configurable {
