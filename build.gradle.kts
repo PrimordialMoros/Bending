@@ -3,7 +3,7 @@ plugins {
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.2")
-    id("io.papermc.paperweight.userdev").version("1.3.5")
+    id("io.papermc.paperweight.userdev").version("1.3.6")
 }
 
 group = "me.moros"
@@ -32,18 +32,21 @@ repositories {
 
 dependencies {
     implementation("me.moros", "storage", "2.1.0")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5") {
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.6") {
         exclude(module = "checker-qual")
     }
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
-    implementation("org.jdbi", "jdbi3-core", "3.26.1") {
+    implementation("org.jdbi", "jdbi3-core", "3.28.0") {
         exclude(module = "caffeine")
+        exclude(module = "slf4j-api")
     }
-    implementation("com.zaxxer", "HikariCP", "5.0.1")
+    implementation("com.zaxxer", "HikariCP", "5.0.1") {
+        exclude(module = "slf4j-api")
+    }
     implementation("org.postgresql", "postgresql", "42.3.3") {
         exclude(module = "checker-qual")
     }
-    implementation("com.h2database", "h2", "2.1.210")
+    implementation("com.h2database", "h2", "2.1.212")
     implementation("org.bstats", "bstats-bukkit", "2.2.1")
     implementation("cloud.commandframework","cloud-paper", "1.6.2")
     implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.2") {
@@ -52,14 +55,14 @@ dependencies {
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.5")
     paperDevBundle("1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.0.0")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.1.0")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
-    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.6") {
+    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7") {
         exclude(module = "bukkit")
     }
     compileOnly("me.clip", "placeholderapi", "2.11.1")
     compileOnly("net.luckperms", "api", "5.4")
-    compileOnly("org.checkerframework", "checker-qual", "3.21.3")
+    compileOnly("org.checkerframework", "checker-qual", "3.21.4")
 }
 
 configurations.implementation {
@@ -76,7 +79,6 @@ tasks {
             relocate("com.zaxxer.hikari", "me.moros.bending.internal.hikari")
             relocate("io.leangen", "me.moros.bending.internal.leangen")
             relocate("me.moros.storage", "me.moros.bending.internal.storage")
-            relocate("org.antlr", "me.moros.bending.internal.antlr")
             relocate("org.bstats", "me.moros.bending.bstats")
             relocate("org.h2", "me.moros.bending.internal.h2")
             relocate("org.jdbi", "me.moros.bending.internal.jdbi")
