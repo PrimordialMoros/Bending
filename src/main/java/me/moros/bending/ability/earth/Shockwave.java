@@ -22,6 +22,7 @@ package me.moros.bending.ability.earth;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -36,6 +37,7 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
@@ -60,13 +62,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 public class Shockwave extends AbilityInstance {
   private static final Config config = new Config();
+  private static final Vector3d OFFSET = new Vector3d(0.4, 0.75, 0.4);
 
   private User user;
   private Config userConfig;
@@ -76,6 +78,7 @@ public class Shockwave extends AbilityInstance {
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
+  private Collection<Collider> colliders = List.of();
   private Vector3d origin;
 
   private boolean released;
@@ -138,44 +141,30 @@ public class Shockwave extends AbilityInstance {
       }
       return UpdateResult.CONTINUE;
     }
-    Set<Block> positions = recentAffectedBlocks.snapshot();
-    if (!positions.isEmpty()) {
-      CollisionUtil.handle(user, new Sphere(origin, range + 2), e -> onEntityHit(e, positions), false);
+
+    colliders = recentAffectedBlocks.snapshot().stream()
+      .map(b -> (Collider) AABB.BLOCK_BOUNDS.grow(OFFSET).at(new Vector3d(b.getX(), b.getY() + 0.5, b.getZ())))
+      .toList();
+    if (!colliders.isEmpty()) {
+      CollisionUtil.handle(user, new Sphere(origin, range + 2), this::onEntityHit, false);
     }
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
-  private boolean onEntityHit(Entity entity, Set<Block> positions) {
+  private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
-      boolean inRange = false;
-      if (positions.contains(entity.getLocation().getBlock())) {
-        inRange = true;
-      } else if (entity instanceof LivingEntity livingEntity) {
-        Block eyeBlock = livingEntity.getEyeLocation().getBlock();
-        if (positions.contains(eyeBlock)) {
-          inRange = true;
-        }
-      }
-
       Vector3d loc = new Vector3d(entity.getLocation());
-
-      if (!inRange) {
-        for (Block block : positions) {
-          AABB blockBounds = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.5, 1, 0.5)).at(new Vector3d(block));
-          if (blockBounds.intersects(AABBUtil.entityBounds(entity))) {
-            inRange = true;
-            break;
-          }
+      AABB entityCollider = AABBUtil.entityBounds(entity);
+      for (Collider aabb : colliders) {
+        if (aabb.intersects(entityCollider)) {
+          DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+          double deltaY = Math.min(0.8, 0.4 + loc.distance(origin) / (1.5 * range));
+          Vector3d push = loc.subtract(origin).normalize().withY(deltaY).multiply(userConfig.knockback);
+          EntityUtil.applyVelocity(this, entity, push);
+          affectedEntities.add(entity);
+          return true;
         }
-      }
-
-      if (inRange) {
-        DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        double deltaY = Math.min(0.9, 0.6 + loc.distance(origin) / (1.5 * range));
-        Vector3d push = loc.subtract(origin).normalize().withY(deltaY).multiply(userConfig.knockback);
-        EntityUtil.applyVelocity(this, entity, push);
-        affectedEntities.add(entity);
       }
     }
     return false;
@@ -219,6 +208,11 @@ public class Shockwave extends AbilityInstance {
   @Override
   public @MonotonicNonNull User user() {
     return user;
+  }
+
+  @Override
+  public @NonNull Collection<@NonNull Collider> colliders() {
+    return colliders;
   }
 
   private class Ripple extends BlockLine {

@@ -3,11 +3,11 @@ plugins {
     signing
     `maven-publish`
     id("com.github.johnrengelman.shadow").version("7.1.2")
-    id("io.papermc.paperweight.userdev").version("1.3.6")
+    id("io.papermc.paperweight.userdev").version("1.3.7")
 }
 
 group = "me.moros"
-version = "1.4.1-SNAPSHOT"
+version = "1.4.2-SNAPSHOT"
 
 java {
     toolchain {
@@ -22,7 +22,7 @@ java {
 repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
     maven("https://ci.ender.zone/plugin/repository/everything/") // LWC

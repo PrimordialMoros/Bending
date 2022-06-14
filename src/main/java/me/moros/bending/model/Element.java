@@ -19,7 +19,6 @@
 
 package me.moros.bending.model;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -73,7 +72,7 @@ public enum Element {
     if (value == null || value.isEmpty()) {
       return Optional.empty();
     }
-    return Arrays.stream(values()).filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
+    return VALUES.stream().filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
   }
 
   public static final Collection<Element> VALUES = List.of(values());
