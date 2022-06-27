@@ -52,4 +52,9 @@ public final class AbilityDescriptionParser implements ArgumentParser<CommandSen
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
     return CommandManager.abilityCompletions(commandContext.getSender(), true);
   }
+
+  @Override
+  public boolean isContextFree() {
+    return true;
+  }
 }

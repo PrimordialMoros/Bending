@@ -167,7 +167,7 @@ public final class RayTrace {
 
     private final boolean hit;
 
-    public CompositeResult(Vector3d position, Block block, Entity entity) {
+    public CompositeResult(@NonNull Vector3d position, @Nullable Block block, @Nullable Entity entity) {
       this.position = position;
       this.block = block;
       this.entity = entity;

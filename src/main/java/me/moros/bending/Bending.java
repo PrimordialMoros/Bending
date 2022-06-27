@@ -40,7 +40,6 @@ import me.moros.bending.util.metadata.PersistentDataLayer;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 public class Bending extends JavaPlugin {
@@ -112,7 +111,7 @@ public class Bending extends JavaPlugin {
     }
   }
 
-  public static @NonNull BendingEventBus eventBus() {
+  public static @MonotonicNonNull BendingEventBus eventBus() {
     return BendingEventBus.INSTANCE;
   }
 

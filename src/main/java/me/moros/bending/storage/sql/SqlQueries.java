@@ -59,12 +59,11 @@ public enum SqlQueries {
   }
 
   public static @NonNull String groupInsertAbilities(@NonNull StorageType type) {
-    String table = "bending_abilities";
     String column = "ability_name";
-    String tableWithColumn = table + " (" + column + ") ";
+    String table = "bending_abilities (" + column + ") ";
     return switch (type) {
-      case MYSQL, MARIADB -> "INSERT INTO " + tableWithColumn + "VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
-      case SQLITE, H2, POSTGRESQL -> "INSERT INTO " + tableWithColumn + "VALUES(?) ON CONFLICT DO NOTHING";
+      case MYSQL, MARIADB -> "INSERT INTO " + table + "VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
+      case SQLITE, H2, POSTGRESQL -> "INSERT INTO " + table + "VALUES(?) ON CONFLICT DO NOTHING";
     };
   }
 }

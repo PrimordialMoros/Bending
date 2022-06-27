@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -213,7 +214,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private void cleanAll() {
-    for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
+    for (var entry : boulder.data().entrySet()) {
       Block block = entry.getKey();
       if (block.getType() != entry.getValue().getMaterial()) {
         continue;
@@ -223,7 +224,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private void render() {
-    for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
+    for (var entry : boulder.data().entrySet()) {
       Block block = entry.getKey();
       if (!MaterialUtil.isTransparent(block)) {
         continue;
@@ -236,7 +237,7 @@ public class EarthSmash extends AbilityInstance {
   private void shatter() {
     if (boulder != null && !boulder.data.isEmpty()) {
       Map<TempFallingBlock, ShardType> shards = new HashMap<>();
-      for (Map.Entry<Block, BlockData> entry : boulder.data().entrySet()) {
+      for (var entry : boulder.data().entrySet()) {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
@@ -672,7 +673,7 @@ public class EarthSmash extends AbilityInstance {
 
     private Map<Block, BlockData> data() {
       return data.entrySet().stream()
-        .collect(Collectors.toMap(e -> center.add(e.getKey().toVector3d()).toBlock(world), Map.Entry::getValue));
+        .collect(Collectors.toMap(e -> center.add(e.getKey().toVector3d()).toBlock(world), Entry::getValue));
     }
   }
 

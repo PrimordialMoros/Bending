@@ -28,6 +28,7 @@ import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.bukkit.parsers.PlayerArgument.PlayerParseException;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
+import me.moros.bending.command.ContextKeys;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -44,8 +45,11 @@ public final class UserParser implements ArgumentParser<CommandSender, User> {
       return ArgumentParseResult.failure(new NoInputProvidedException(UserParser.class, commandContext));
     }
     inputQueue.remove();
-    if (input.equalsIgnoreCase("me") && commandContext.getSender() instanceof Player player) {
-      return ArgumentParseResult.success(Registries.BENDERS.user(player));
+    if (input.equalsIgnoreCase("me")) {
+      User user = commandContext.getOrDefault(ContextKeys.BENDING_PLAYER, null);
+      if (user != null) {
+        return ArgumentParseResult.success(user);
+      }
     }
     Player player = Bukkit.getPlayer(input);
     if (player == null) {

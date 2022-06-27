@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "me.moros"
-version = "1.4.2-SNAPSHOT"
+version = "1.4.3-SNAPSHOT"
 
 java {
     toolchain {
@@ -32,37 +32,37 @@ repositories {
 
 dependencies {
     implementation("me.moros", "storage", "2.1.0")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.6") {
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.1") {
         exclude(module = "checker-qual")
     }
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
-    implementation("org.jdbi", "jdbi3-core", "3.28.0") {
+    implementation("org.jdbi", "jdbi3-core", "3.30.0") {
         exclude(module = "caffeine")
         exclude(module = "slf4j-api")
     }
     implementation("com.zaxxer", "HikariCP", "5.0.1") {
         exclude(module = "slf4j-api")
     }
-    implementation("org.postgresql", "postgresql", "42.3.3") {
+    implementation("org.postgresql", "postgresql", "42.4.0") {
         exclude(module = "checker-qual")
     }
-    implementation("com.h2database", "h2", "2.1.212")
-    implementation("org.bstats", "bstats-bukkit", "2.2.1")
-    implementation("cloud.commandframework","cloud-paper", "1.6.2")
-    implementation("cloud.commandframework","cloud-minecraft-extras", "1.6.2") {
+    implementation("com.h2database", "h2", "2.1.214")
+    implementation("org.bstats", "bstats-bukkit", "3.0.0")
+    implementation("cloud.commandframework", "cloud-paper", "1.7.0")
+    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.0") {
         exclude(group = "net.kyori")
     }
-    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.5")
+    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.6")
     paperDevBundle("1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.1.0")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.2.6")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7") {
         exclude(module = "bukkit")
     }
     compileOnly("me.clip", "placeholderapi", "2.11.1")
     compileOnly("net.luckperms", "api", "5.4")
-    compileOnly("org.checkerframework", "checker-qual", "3.21.4")
+    compileOnly("org.checkerframework", "checker-qual", "3.22.1")
 }
 
 configurations.implementation {
@@ -103,7 +103,7 @@ tasks {
             expand("pluginVersion" to project.version)
         }
         from("LICENSE") {
-            rename { "${project.name.toUpperCase()}_${it}"}
+            rename { "${project.name.toUpperCase()}_${it}" }
         }
     }
 }

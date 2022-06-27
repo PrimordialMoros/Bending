@@ -55,4 +55,9 @@ public final class ModifyPolicyParser implements ArgumentParser<CommandSender, M
   public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
     return CommandManager.combinedSuggestions(commandContext.getSender());
   }
+
+  @Override
+  public boolean isContextFree() {
+    return true;
+  }
 }

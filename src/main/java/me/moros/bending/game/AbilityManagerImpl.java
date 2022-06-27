@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -43,7 +44,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AbilityManagerImpl implements AbilityManager {
   private final Multimap<UUID, Ability> globalInstances;
-  private final Collection<Map.Entry<UUID, Ability>> addQueue;
+  private final Collection<Entry<UUID, Ability>> addQueue;
 
   AbilityManagerImpl() {
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();

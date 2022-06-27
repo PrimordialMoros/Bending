@@ -21,7 +21,6 @@ package me.moros.bending.command;
 
 import cloud.commandframework.permission.CommandPermission;
 import cloud.commandframework.permission.Permission;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class CommandPermissions {
   private CommandPermissions() {
@@ -40,7 +39,7 @@ public final class CommandPermissions {
   public static final CommandPermission VERSION = create("version");
   public static final CommandPermission RELOAD = create("reload");
 
-  private static Permission create(@NonNull String node) {
+  private static Permission create(String node) {
     return Permission.of("bending.command." + node);
   }
 }

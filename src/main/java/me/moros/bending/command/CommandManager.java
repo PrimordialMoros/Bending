@@ -58,7 +58,7 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
     super(plugin, CommandExecutionCoordinator.simpleCoordinator(), Function.identity(), Function.identity());
     registerExceptionHandler();
     registerAsynchronousCompletions();
-    setCommandSuggestionProcessor(this::suggestionProvider);
+    commandSuggestionProcessor(this::suggestionProvider);
     registerCommandPreProcessor(this::preprocessor);
     registerParsers();
     new BendingCommand(this);
@@ -102,10 +102,10 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
   }
 
   private void registerParsers() {
-    getParserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser());
-    getParserRegistry().registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
-    getParserRegistry().registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
-    getParserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
+    parserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser());
+    parserRegistry().registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser());
+    parserRegistry().registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser());
+    parserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
   }
 
   public static @NonNull List<@NonNull String> abilityCompletions(@Nullable CommandSender sender, boolean validOnly) {

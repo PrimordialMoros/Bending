@@ -98,7 +98,7 @@ public final class NMSUtil {
       .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
 
     BlockHit result = traverseBlocks(world, clipContext, ignored, miss);
-    if (result != null && !miss.equals(result)) {
+    if (!miss.equals(result)) {
       Vector3i bp = result.blockPosition();
       Block block = world.getBlockAt(bp.x(), bp.y(), bp.z());
       return new CompositeResult(result.position(), block, null);

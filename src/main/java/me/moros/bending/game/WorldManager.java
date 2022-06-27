@@ -63,7 +63,7 @@ public final class WorldManager {
   }
 
   public void update() {
-    for (Map.Entry<World, ManagerPair> entry : worlds.entrySet()) {
+    for (var entry : worlds.entrySet()) {
       try (Timing timing = Timings.of(Bending.plugin(), entry.getKey().getName() + " - tick")) {
         entry.getValue().update();
       } catch (Exception e) {

@@ -22,6 +22,7 @@ package me.moros.bending.game;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import me.moros.bending.model.AbilityManager;
 import me.moros.bending.model.ability.Ability;
@@ -67,7 +68,7 @@ public final class CollisionManager {
           if (secondColliders.isEmpty()) {
             continue;
           }
-          Map.Entry<Collider, Collider> collisionResult = checkCollision(firstColliders, secondColliders);
+          Entry<Collider, Collider> collisionResult = checkCollision(firstColliders, secondColliders);
           if (collisionResult != null) {
             handleCollision(first, second, collisionResult.getKey(), collisionResult.getValue(), registeredCollision);
           }
@@ -76,7 +77,7 @@ public final class CollisionManager {
     }
   }
 
-  private Map.Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
+  private Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
     for (Collider firstCollider : firstColliders) {
       for (Collider secondCollider : secondColliders) {
         if (firstCollider.intersects(secondCollider)) {
