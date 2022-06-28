@@ -315,18 +315,18 @@ public final class BendingCommand {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
       Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
+      JoinConfiguration sep = JoinConfiguration.commas(true);
       if (!abilities.isEmpty()) {
         Message.ABILITIES.send(user);
-        user.sendMessage(Component.join(sep, abilities));
+        user.sendMessage(Component.join(sep, abilities).colorIfAbsent(ColorPalette.TEXT_COLOR));
       }
       if (!sequences.isEmpty()) {
         Message.SEQUENCES.send(user);
-        user.sendMessage(Component.join(sep, sequences));
+        user.sendMessage(Component.join(sep, sequences).colorIfAbsent(ColorPalette.TEXT_COLOR));
       }
       if (!passives.isEmpty()) {
         Message.PASSIVES.send(user);
-        user.sendMessage(Component.join(sep, passives));
+        user.sendMessage(Component.join(sep, passives).colorIfAbsent(ColorPalette.TEXT_COLOR));
       }
     }
   }
@@ -386,10 +386,10 @@ public final class BendingCommand {
     if (elements.isEmpty()) {
       hover = Message.NO_ELEMENTS.build();
     } else {
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
+      JoinConfiguration sep = JoinConfiguration.commas(true);
       hover = Component.join(sep, user.elements().stream().map(Element::displayName).toList());
     }
-    Message.BOUND_SLOTS.send(sender, user.entity().getName(), hover);
+    Message.BOUND_SLOTS.send(sender, user.entity().getName(), hover.colorIfAbsent(ColorPalette.TEXT_COLOR));
     user.createPresetFromSlots("").display().forEach(sender::sendMessage);
   }
 
@@ -399,8 +399,8 @@ public final class BendingCommand {
       Message.NO_PRESETS.send(player);
     } else {
       Message.PRESET_LIST_HEADER.send(player);
-      JoinConfiguration sep = JoinConfiguration.separator(Component.text(", ", ColorPalette.TEXT_COLOR));
-      player.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()));
+      JoinConfiguration sep = JoinConfiguration.commas(true);
+      player.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()).colorIfAbsent(ColorPalette.TEXT_COLOR));
     }
   }
 

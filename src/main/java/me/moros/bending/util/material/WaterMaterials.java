@@ -38,7 +38,7 @@ public final class WaterMaterials {
   static {
     NamespacedKey key = Bending.dataLayer().NSK_MATERIAL;
     PLANT_BENDABLE = new MaterialSetTag(key)
-      .add(Material.DEAD_BUSH, Material.CACTUS, Material.MELON, Material.VINE)
+      .add(Material.CACTUS, Material.MELON, Material.VINE)
       .add(Tag.FLOWERS.getValues())
       .add(Tag.SAPLINGS.getValues())
       .add(Tag.CROPS.getValues())
@@ -46,7 +46,7 @@ public final class WaterMaterials {
       .add(MaterialTags.MUSHROOMS.getValues())
       .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
       .add(MaterialTags.PUMPKINS.getValues())
-      .ensureSize("Plants", 51).lock();
+      .ensureSize("Plants", 50).lock();
 
     ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).ensureSize("Ice", 4).lock();
 
@@ -64,7 +64,7 @@ public final class WaterMaterials {
       .add(PLANT_BENDABLE.getValues())
       .add(ICE_BENDABLE.getValues())
       .add(SNOW_BENDABLE.getValues())
-      .add(Material.WATER).ensureSize("Waterbendable", 58).lock();
+      .add(Material.WATER).ensureSize("Waterbendable", 57).lock();
   }
 
   private WaterMaterials() {

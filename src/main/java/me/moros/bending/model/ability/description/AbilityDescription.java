@@ -47,6 +47,8 @@ public class AbilityDescription {
   private final Element element;
   private final EnumSet<Activation> activations;
   private final Collection<String> requiredPermissions;
+  private final Component displayName;
+  private final Component meta;
   private final boolean canBind;
   private final boolean hidden;
   private final boolean sourcePlant;
@@ -63,6 +65,8 @@ public class AbilityDescription {
     hidden = builder.hidden;
     sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
+    displayName = Component.text(name, element.color());
+    meta = createMeta(this);
     hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
     createAbility(); // Init config values
   }
@@ -72,7 +76,7 @@ public class AbilityDescription {
   }
 
   public @NonNull Component displayName() {
-    return Component.text(name, element.color());
+    return displayName;
   }
 
   public @NonNull Element element() {
@@ -112,20 +116,7 @@ public class AbilityDescription {
   }
 
   public @NonNull Component meta() {
-    String type = "ability";
-    if (isActivatedBy(Activation.PASSIVE)) {
-      type = "passive";
-    } else if (isActivatedBy(Activation.SEQUENCE)) {
-      type = "sequence";
-    }
-    Component details = Component.text()
-      .append(Component.text(element() + " " + type, element.color()))
-      .append(Component.newline())
-      .append(Component.text("Click to view info about this " + type + ".", ColorPalette.NEUTRAL)).build();
-
-    return displayName()
-      .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/bending help " + name()));
+    return meta;
   }
 
   @Override
@@ -143,6 +134,25 @@ public class AbilityDescription {
   @Override
   public int hashCode() {
     return hashcode;
+  }
+
+  private static Component createMeta(AbilityDescription desc) {
+    String type;
+    if (desc.isActivatedBy(Activation.PASSIVE)) {
+      type = "passive";
+    } else if (desc.isActivatedBy(Activation.SEQUENCE)) {
+      type = "sequence";
+    } else {
+      type = "ability";
+    }
+    Component details = Component.text()
+      .append(Component.text(desc.element() + " " + type, desc.element().color()))
+      .append(Component.newline())
+      .append(Component.text("Click to view info about this " + type + ".", ColorPalette.NEUTRAL)).build();
+
+    return desc.displayName()
+      .hoverEvent(HoverEvent.showText(details))
+      .clickEvent(ClickEvent.runCommand("/bending help " + desc.name()));
   }
 
   public static <T extends Ability> @NonNull Builder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {

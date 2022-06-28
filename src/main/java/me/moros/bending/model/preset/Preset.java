@@ -128,8 +128,7 @@ public final class Preset {
   }
 
   public @NonNull Component meta() {
-    JoinConfiguration sep = JoinConfiguration.separator(Component.newline());
-    Component details = Component.text().append(Component.join(sep, display()))
+    Component details = Component.text().append(Component.join(JoinConfiguration.newlines(), display()))
       .append(Component.newline()).append(Component.newline())
       .append(Component.text("Click to bind this preset.", ColorPalette.NEUTRAL)).build();
 
