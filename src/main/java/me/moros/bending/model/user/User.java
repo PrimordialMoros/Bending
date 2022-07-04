@@ -32,7 +32,7 @@ import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface User extends BukkitUser, ElementUser {
+public sealed interface User extends BukkitUser, ElementUser permits BendingUser {
   @NonNull DataHolder store();
 
   /**
@@ -74,7 +74,19 @@ public interface User extends BukkitUser, ElementUser {
   @Nullable AbilityDescription boundAbility(int slot);
 
   /**
-   * Retrives the currently selected ability for the user.
+   * @return a slot index in the 1-9 range (inclusive)
+   */
+  int currentSlot();
+
+  /**
+   * Changes the currently selected slot.
+   * <p> Note: This has no effect on players.
+   * @param slot the slot number in the range [1, 9] (inclusive)
+   */
+  void currentSlot(int slot);
+
+  /**
+   * Retrieves the currently selected ability for the user.
    * @return the ability in the currently selected slot for the user if found, null otherwise
    */
   @Nullable AbilityDescription selectedAbility();

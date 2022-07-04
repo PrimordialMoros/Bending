@@ -62,11 +62,13 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     return (Player) super.entity();
   }
 
-  /**
-   * @return a slot index in the 1-9 range (inclusive)
-   */
+  @Override
   public int currentSlot() {
     return entity().getInventory().getHeldItemSlot() + 1;
+  }
+
+  @Override
+  public void currentSlot(int slot) {
   }
 
   @Override
@@ -131,6 +133,16 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     return entity().getInventory();
   }
 
+  @Override
+  protected void updateBoard(AbilityDescription desc, boolean cooldown) {
+    Bending.game().boardManager().updateBoardSlot(this, desc, cooldown);
+  }
+
+  @Override
+  protected void updateBoard() {
+    Bending.game().boardManager().updateBoard(this);
+  }
+
   // Presets
   @Override
   public @NonNull Set<@NonNull Preset> presets() {
@@ -170,7 +182,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     return new PlayerProfile(internalId, board, data);
   }
 
-  public static Optional<BendingPlayer> createUser(@NonNull Player player, @NonNull PlayerProfile profile) {
+  public static Optional<User> createUser(@NonNull Player player, @NonNull PlayerProfile profile) {
     if (Registries.BENDERS.contains(player.getUniqueId())) {
       return Optional.empty();
     }

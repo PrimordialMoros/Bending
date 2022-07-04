@@ -47,7 +47,6 @@ import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -193,11 +192,14 @@ public class EarthShot extends AbilityInstance implements Explosive {
       }
       EntityUtil.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
       lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
-      Collider c = BOX.at(projectile.center());
+      location = projectile.center();
+      Collider c = BOX.at(location);
       boolean magma = mode == Mode.MAGMA;
       if (CollisionUtil.handle(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
+      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.fallingBlock().getLocation()))
+        .count(3).offset(0.25).data(projectile.fallingBlock().getBlockData()).spawn(user.world());
     } else {
       if (!ready) {
         handleSource();
@@ -230,6 +232,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
       ready = true;
     } else {
       location = projectile.center();
+      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.fallingBlock().getLocation()))
+        .count(3).offset(0.25).data(projectile.fallingBlock().getBlockData()).spawn(user.world());
     }
   }
 
@@ -237,7 +241,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (!canConvert) {
       return;
     }
-    Block check = RayTrace.of(user).range(userConfig.selectRange * 2).ignoreLiquids(false).result(user.world()).block();
+    Block check = user.rayTrace(userConfig.selectRange * 2).ignoreLiquids(false).blocks(user.world()).block();
     if (user.sneaking() && readySource.equals(check)) {
       if (magmaStartTime == 0) {
         magmaStartTime = System.currentTimeMillis();
@@ -318,8 +322,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   private Vector3d getTarget(Block source) {
-    return user.compositeRayTrace(userConfig.range).ignore(source == null ? Set.of() : Set.of(source))
-      .result(user.world()).entityCenterOrPosition();
+    return user.rayTrace(userConfig.range).ignore(source == null ? Set.of() : Set.of(source))
+      .entities(user.world()).entityCenterOrPosition();
   }
 
   @Override

@@ -165,7 +165,7 @@ public class Iceberg extends AbilityInstance {
         return;
       }
       Vector3d origin = Vector3d.center(src.get());
-      Vector3d target = user.compositeRayTrace(userConfig.selectRange + userConfig.length).result(user.world())
+      Vector3d target = user.rayTrace(userConfig.selectRange + userConfig.length).entities(user.world())
         .entityCenterOrPosition();
       Vector3d direction = target.subtract(origin).normalize();
       tip = origin.add(direction.multiply(userConfig.length));

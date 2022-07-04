@@ -229,7 +229,7 @@ public class EarthGlove extends AbilityInstance {
     var key = DataKey.of("glove-side", Side.class);
     Side side = user.store().merge(key, Side.RIGHT, (s1, s2) -> s1 == Side.RIGHT ? Side.LEFT : Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
-    Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
+    Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
     glove = buildGlove(gloveSpawnLocation.subtract(new Vector3d(0, 0.2, 0)));
 
     if (isMetal) {

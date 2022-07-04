@@ -105,7 +105,7 @@ public class HealingWaters extends AbilityInstance {
     if (mode == Mode.SELF) {
       target = user.entity();
     } else {
-      Entity entity = user.compositeRayTrace(userConfig.range + 1).result(user.world()).entity();
+      Entity entity = user.rayTrace(userConfig.range + 1).entities(user.world()).entity();
       if (entity instanceof LivingEntity && user.entity().hasLineOfSight(entity)) {
         target = (LivingEntity) entity;
       } else {

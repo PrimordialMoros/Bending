@@ -33,7 +33,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.Bending;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.storage.BendingStorage;
@@ -49,7 +48,7 @@ public final class BenderRegistry implements Registry<User> {
   private AsyncLoadingCache<UUID, PlayerProfile> cache;
   private final ExpiringSet<UUID> recentlyExpiredUsers;
   private final Map<UUID, BendingPlayer> players;
-  private final Map<UUID, BendingUser> entities;
+  private final Map<UUID, User> entities;
 
   BenderRegistry() {
     recentlyExpiredUsers = new ExpiringSet<>(100);
@@ -76,7 +75,7 @@ public final class BenderRegistry implements Registry<User> {
     return Objects.requireNonNull(players.get(player.getUniqueId()));
   }
 
-  public @Nullable BendingUser user(@NonNull LivingEntity entity) {
+  public @Nullable User user(@NonNull LivingEntity entity) {
     // This is needed because player attributes are updated one last time after logout (SPIGOT-924)
     if (recentlyExpiredUsers.contains(entity.getUniqueId())) {
       return null;
@@ -114,8 +113,8 @@ public final class BenderRegistry implements Registry<User> {
       players.put(uuid, bendingPlayer);
       Bending.game().boardManager().tryEnableBoard(bendingPlayer);
       Bending.eventBus().postPlayerLoadEvent(bendingPlayer);
-    } else if (user instanceof BendingUser bendingUser) {
-      entities.put(uuid, bendingUser);
+    } else {
+      entities.put(uuid, user);
     }
   }
 
@@ -132,7 +131,7 @@ public final class BenderRegistry implements Registry<User> {
     return new UserIterator(players.values().iterator(), entities.values().iterator());
   }
 
-  private record UserIterator(Iterator<BendingPlayer> first, Iterator<BendingUser> second) implements Iterator<User> {
+  private record UserIterator(Iterator<BendingPlayer> first, Iterator<User> second) implements Iterator<User> {
     @Override
     public boolean hasNext() {
       return first.hasNext() || second.hasNext();

@@ -49,7 +49,6 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.WorldUtil;
@@ -213,7 +212,7 @@ public class WaterManipulation extends AbilityInstance {
       if (selectSphere.intersects(user.ray(dist))) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
-        Block rayTraced = RayTrace.of(user.eyeLocation(), direction).range(range).ignoreLiquids(false).result(user.world()).block();
+        Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (center.toBlock(user.world()).equals(rayTraced)) {
           Bending.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();

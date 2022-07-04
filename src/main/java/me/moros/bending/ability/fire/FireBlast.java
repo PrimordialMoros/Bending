@@ -50,7 +50,6 @@ import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -261,7 +260,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
         if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
           continue;
         }
-        if (RayTrace.of(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).result(user.world()).hit()) {
+        if (user.rayTrace(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).blocks(user.world()).hit()) {
           continue;
         }
         if (MaterialUtil.isIgnitable(b)) {

@@ -44,7 +44,6 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
@@ -133,15 +132,15 @@ public class AirBlast extends AbilityInstance {
   }
 
   private boolean selectOrigin() {
-    origin = RayTrace.of(user).range(userConfig.selectRange).ignoreLiquids(false).
-      result(user.world()).position().subtract(user.direction().multiply(0.5));
+    Vector3d offset = user.direction().multiply(0.5);
+    origin = user.rayTrace(userConfig.selectRange).ignoreLiquids(false).entities(user.world()).position().subtract(offset);
     selectedOrigin = true;
     return user.canBuild(origin.toBlock(user.world()));
   }
 
   private void launch() {
     launched = true;
-    Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
+    Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
     if (user.store().getOrDefault(DataKey.of("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
       Vector3d temp = new Vector3d(origin.toArray());
       origin = new Vector3d(target.toArray());

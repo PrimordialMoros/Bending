@@ -25,10 +25,12 @@ import java.util.stream.Collectors;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
-import me.moros.bending.util.RayTrace;
-import me.moros.bending.util.RayTrace.CompositeResult;
+import me.moros.bending.raytrace.RayTrace.RayTraceContext;
+import me.moros.bending.raytrace.RayTraceResult;
+import me.moros.bending.raytrace.RayTraceResult.CompositeResult;
 import me.moros.bending.util.collision.AABBUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
@@ -41,6 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlock;
@@ -66,12 +69,12 @@ public final class NMSUtil {
     return ((CraftEntity) entity).getHandle().isEyeInFluid(FluidTags.LAVA);
   }
 
-  public static AABB dimensions(@NonNull Entity entity, @NonNull Vector3d point) {
+  public static @NonNull AABB dimensions(@NonNull Entity entity, @NonNull Vector3d point) {
     net.minecraft.world.phys.AABB b = ((CraftEntity) entity).getHandle().getBoundingBoxAt(point.x(), point.y(), point.z());
     return new AABB(new Vector3d(b.minX, b.minY, b.minZ), new Vector3d(b.maxX, b.maxY, b.maxZ));
   }
 
-  public static AABB dimensions(@NonNull Block block, @NonNull Vector3d point) {
+  public static @NonNull AABB dimensions(@NonNull Block block, @NonNull Vector3d point) {
     CraftBlock cb = (CraftBlock) block;
     VoxelShape shape = cb.getNMS().getShape(cb.getHandle(), cb.getPosition());
     if (shape.isEmpty() || !cb.getNMS().getBlock().hasCollision) {
@@ -83,27 +86,28 @@ public final class NMSUtil {
     return new AABB(min, max);
   }
 
-  public static @NonNull CompositeResult rayTraceBlocks(@NonNull RayTrace rt, @NonNull World world) {
-    Vector3d s = rt.origin();
-    Vector3d e = rt.end();
+  public static @NonNull CompositeResult rayTraceBlocks(@NonNull RayTraceContext context, @NonNull World world) {
+    Vector3d s = context.start();
+    Vector3d e = context.end();
     Vec3 startPos = new Vec3(s.x(), s.y(), s.z());
     Vec3 endPos = new Vec3(e.x(), e.y(), e.z());
 
-    ClipContext.Block ccb = rt.ignorePassable() ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
-    ClipContext.Fluid ccf = rt.ignoreLiquids() ? Fluid.NONE : Fluid.ANY;
+    ClipContext.Block ccb = context.ignorePassable() ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
+    ClipContext.Fluid ccf = context.ignoreLiquids() ? Fluid.NONE : Fluid.ANY;
     ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
 
-    BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()));
-    Set<BlockPos> ignored = rt.ignored().stream()
+    BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()), null);
+    Set<BlockPos> ignored = context.ignoreBlocks().stream()
       .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
 
     BlockHit result = traverseBlocks(world, clipContext, ignored, miss);
     if (!miss.equals(result)) {
       Vector3i bp = result.blockPosition();
       Block block = world.getBlockAt(bp.x(), bp.y(), bp.z());
-      return new CompositeResult(result.position(), block, null);
+      BlockFace face = CraftBlock.notchToBlockFace(result.direction());
+      return RayTraceResult.hit(result.position, block, face);
     }
-    return new CompositeResult(miss.position(), null, null);
+    return RayTraceResult.miss(miss.position());
   }
 
   private static BlockHit traverseBlocks(World world, ClipContext context, Set<BlockPos> ignored, BlockHit miss) {
@@ -189,13 +193,13 @@ public final class NMSUtil {
     return d0 <= d1 ? b0 : b1;
   }
 
-  private record BlockHit(Vector3d position, Vector3i blockPosition) {
+  private record BlockHit(Vector3d position, Vector3i blockPosition, Direction direction) {
     private BlockHit(BlockHitResult hitResult) {
-      this(hitResult.getLocation(), hitResult.getBlockPos());
+      this(hitResult.getLocation(), hitResult.getBlockPos(), hitResult.getDirection());
     }
 
-    private BlockHit(Vec3 pos, BlockPos bp) {
-      this(new Vector3d(pos.x, pos.y, pos.z), new Vector3i(bp.getX(), bp.getY(), bp.getZ()));
+    private BlockHit(Vec3 pos, BlockPos bp, Direction direction) {
+      this(new Vector3d(pos.x, pos.y, pos.z), new Vector3i(bp.getX(), bp.getY(), bp.getZ()), direction);
     }
   }
 }

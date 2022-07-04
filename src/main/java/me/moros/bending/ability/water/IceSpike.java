@@ -84,7 +84,7 @@ public class IceSpike extends AbilityInstance {
       CollisionUtil.handle(user, collider, this::createPillar, true);
     } else {
       Block source = null;
-      Entity entity = user.compositeRayTrace(userConfig.selectRange).result(user.world()).entity();
+      Entity entity = user.rayTrace(userConfig.selectRange).entities(user.world()).entity();
       if (entity != null) {
         Block base = entity.getLocation().getBlock().getRelative(BlockFace.DOWN);
         if (user.canBuild(base) && WaterMaterials.isIceBendable(base) && TempBlock.isBendable(base)) {

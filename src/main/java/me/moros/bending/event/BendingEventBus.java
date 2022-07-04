@@ -55,6 +55,10 @@ public enum BendingEventBus {
     new CooldownRemoveEvent(user, desc).callEvent();
   }
 
+  public void postAbilityActivationEvent(@NonNull User user, @NonNull AbilityDescription desc) {
+    new AbilityActivationEvent(user, desc).callEvent();
+  }
+
   /**
    * @return true if the event was executed and was not cancelled, false otherwise
    */

@@ -106,7 +106,7 @@ public abstract class BlockStream implements State {
     Block head = stream.getFirst();
     Vector3d current = Vector3d.center(head);
     if (controllable || direction == null) {
-      Vector3d targetLoc = user.compositeRayTrace(range).result(user.world()).entityEyeLevelOrPosition();
+      Vector3d targetLoc = user.rayTrace(range).entities(user.world()).entityEyeLevelOrPosition();
       // Improve targeting when near
       if (new Vector3d(head).distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());

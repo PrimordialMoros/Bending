@@ -63,7 +63,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -98,6 +97,7 @@ public final class ActivationController {
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
       worldManager.instance(user.world()).addAbility(user, ability);
+      Bending.eventBus().postAbilityActivationEvent(user, desc);
       return ability;
     }
     return null;
@@ -132,7 +132,7 @@ public final class ActivationController {
     WaterGimbal.launch(user);
     HeatControl.act(user);
 
-    boolean hit = user.compositeRayTrace(3).type(Type.ENTITY).result(user.world()).hit();
+    boolean hit = user.rayTrace(3).entities(user.world()).hit();
     sequenceManager.registerStep(user, hit ? Activation.ATTACK_ENTITY : Activation.ATTACK);
     activateAbility(user, Activation.ATTACK);
   }

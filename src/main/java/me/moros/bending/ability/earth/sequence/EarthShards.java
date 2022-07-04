@@ -97,7 +97,7 @@ public class EarthShards extends AbilityInstance {
   }
 
   private void launch(Vector3d left, Vector3d right) {
-    Vector3d target = user.compositeRayTrace(userConfig.range).result(user.world()).position();
+    Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).position();
     double distance = target.distance(user.eyeLocation());
     for (int i = 0; i < 2; i++) {
       if (firedShots >= userConfig.maxShots) {

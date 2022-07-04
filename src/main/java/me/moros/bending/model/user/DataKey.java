@@ -23,29 +23,28 @@ import me.moros.bending.Bending;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 public final class DataKey<E> implements Key {
   private final Key key;
   private final Class<E> clazz;
 
-  private DataKey(@NonNull String key, @NonNull Class<E> clazz) {
+  private DataKey(String key, Class<E> clazz) {
     this.key = Key.key("bending", key);
     this.clazz = clazz;
   }
 
   @Override
-  public @NotNull String namespace() {
+  public @NonNull String namespace() {
     return key.namespace();
   }
 
   @Override
-  public @NotNull String value() {
+  public @NonNull String value() {
     return key.value();
   }
 
   @Override
-  public @NotNull String asString() {
+  public @NonNull String asString() {
     return key.asString();
   }
 

@@ -164,7 +164,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void redirect() {
-    target = user.compositeRayTrace(range).ignore(Set.of(location.toBlock(user.world()))).result(user.world())
+    target = user.rayTrace(range).ignore(Set.of(location.toBlock(user.world()))).entities(user.world())
       .entityEyeLevelOrPosition().snapToBlockCenter();
     settingUp = false;
   }

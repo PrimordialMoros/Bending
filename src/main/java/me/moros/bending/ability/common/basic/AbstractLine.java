@@ -26,7 +26,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.RayTrace.CompositeResult;
+import me.moros.bending.raytrace.RayTraceResult.EntityRayTrace;
 import me.moros.bending.util.collision.CollisionUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -59,7 +59,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     this.origin = location;
     this.range = range;
     this.speed = speed;
-    CompositeResult result = user.compositeRayTrace(range).result(user.world());
+    EntityRayTrace result = user.rayTrace(range).entities(user.world());
     target = result.entity();
     targetLocation = result.entityCenterOrPosition();
     locked = followTarget && target != null;
@@ -78,7 +78,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     if (controllable) {
-      targetLocation = user.compositeRayTrace(range).result(user.world()).entityCenterOrPosition();
+      targetLocation = user.rayTrace(range).entities(user.world()).entityCenterOrPosition();
       direction = targetLocation.subtract(origin).withY(0).normalize();
     }
 

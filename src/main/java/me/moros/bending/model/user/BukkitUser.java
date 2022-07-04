@@ -23,9 +23,8 @@ import java.util.UUID;
 
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.raytrace.RayTrace;
 import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.RayTrace;
-import me.moros.bending.util.RayTrace.Type;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.identity.Identity;
@@ -145,19 +144,26 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
   }
 
   /**
-   * @return {@link #compositeRayTrace(double, Class)} with class matching LivingEntities
+   * @return {@link #rayTrace(double, Class)} with class matching LivingEntities
    */
-  default RayTrace compositeRayTrace(double range) {
-    return compositeRayTrace(range, LivingEntity.class);
+  default @NonNull RayTrace rayTrace(double range) {
+    return rayTrace(range, LivingEntity.class);
   }
 
   /**
    * Prepare a composite ray trace matching the user's view and filtering the specified class type for entities.
    * @see RayTrace
    */
-  default <T extends Entity> RayTrace compositeRayTrace(double range, @NonNull Class<T> type) {
-    return RayTrace.of(eyeLocation(), direction()).range(range)
-      .type(Type.COMPOSITE).filter(e -> type.isInstance(e) && !e.equals(entity()));
+  default <T extends Entity> @NonNull RayTrace rayTrace(double range, @NonNull Class<T> type) {
+    return RayTrace.of(eyeLocation(), direction()).range(range).filterForUser(entity(), type);
+  }
+
+  default @NonNull RayTrace rayTrace(@NonNull Vector3d origin, @NonNull Vector3d dir) {
+    return rayTrace(origin, dir, LivingEntity.class);
+  }
+
+  default <T extends Entity> @NonNull RayTrace rayTrace(@NonNull Vector3d origin, @NonNull Vector3d dir, @NonNull Class<T> type) {
+    return RayTrace.of(origin, dir).filterForUser(entity(), type);
   }
 
   /**

@@ -62,7 +62,6 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
@@ -183,7 +182,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private static boolean tryGrab(@NonNull User user) {
-    Block target = RayTrace.of(user).range(config.grabRange).result(user.world()).block();
+    Block target = user.rayTrace(config.grabRange).blocks(user.world()).block();
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;
@@ -557,9 +556,11 @@ public class EarthSmash extends AbilityInstance {
         if (entity.isValid()) {
           switch (type) {
             case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-            case SAND -> EntityUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower - 1);
+            case SAND ->
+              EntityUtil.tryAddPotion(entity, PotionEffectType.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower - 1);
             case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-            case MUD -> EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower - 1);
+            case MUD ->
+              EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower - 1);
           }
           return true;
         }

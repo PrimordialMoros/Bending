@@ -31,7 +31,7 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.RayTrace;
+import me.moros.bending.raytrace.RayTrace;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -124,7 +124,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     Vector3d offset = new Vector3d(0, radius - 0.125, 0);
     Vector3d bottom = location.subtract(offset);
     if (bottom.toBlock(user.world()).isPassable()) {
-      Vector3d pos = RayTrace.of(bottom, Vector3d.MINUS_J).range(0.75 * radius).result(user.world()).position().add(offset);
+      Vector3d pos = RayTrace.of(bottom, Vector3d.MINUS_J).range(0.75 * radius).blocks(user.world()).position().add(offset);
       Disk tempCollider = collider.at(pos);
       if (nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(tempCollider::intersects)) {
         location = pos;

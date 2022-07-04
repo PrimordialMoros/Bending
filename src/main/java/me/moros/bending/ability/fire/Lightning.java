@@ -47,29 +47,24 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.BendingUser;
 import me.moros.bending.model.user.User;
+import me.moros.bending.raytrace.RayTraceResult.CompositeResult;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
-import me.moros.bending.util.RayTrace.CompositeResult;
-import me.moros.bending.util.RayTrace.Type;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -174,8 +169,8 @@ public class Lightning extends AbilityInstance {
     double counter = 0;
     while (arcIterator.hasNext() && counter < userConfig.speed) {
       LineSegment segment = arcIterator.next();
-      CompositeResult result = RayTrace.of(segment.start, segment.direction).range(segment.length)
-        .type(Type.COMPOSITE).filter(this::isValidEntity).ignoreLiquids(true).raySize(0.3).result(user.world());
+      CompositeResult result = (CompositeResult) user.rayTrace(segment.start, segment.direction)
+        .ignoreLiquids(true).raySize(0.3).entities(user.world());
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.LIGHTNING.play(user.world(), segment.mid);
@@ -205,20 +200,10 @@ public class Lightning extends AbilityInstance {
     return true;
   }
 
-  private boolean isValidEntity(Entity entity) {
-    if (!(entity instanceof LivingEntity)) {
-      return false;
-    }
-    if (entity instanceof Player player && player.getGameMode() == GameMode.SPECTATOR) {
-      return false;
-    }
-    return !entity.equals(user.entity());
-  }
-
   private boolean handleRedirection(Iterable<Entity> entitiesToCheck) {
     for (Entity e : entitiesToCheck) {
       if (e instanceof LivingEntity livingEntity) {
-        BendingUser bendingUser = Registries.BENDERS.user(livingEntity);
+        User bendingUser = Registries.BENDERS.user(livingEntity);
         if (bendingUser != null) {
           Lightning other = Bending.game().abilityManager(user.world()).userInstances(bendingUser, Lightning.class)
             .filter(l -> !l.launched).findFirst().orElse(null);

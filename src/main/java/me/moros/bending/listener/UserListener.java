@@ -330,7 +330,8 @@ public class UserListener implements Listener {
       BendingPlayer player = Registries.BENDERS.user(event.getPlayer());
       switch (event.getAction()) {
         case RIGHT_CLICK_AIR -> game.activationController().onUserInteract(player, Activation.INTERACT);
-        case RIGHT_CLICK_BLOCK -> game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
+        case RIGHT_CLICK_BLOCK ->
+          game.activationController().onUserInteract(player, Activation.INTERACT_BLOCK, event.getClickedBlock());
         case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(player);
       }
     }

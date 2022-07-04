@@ -45,7 +45,6 @@ import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
@@ -166,7 +165,7 @@ public class EarthBlast extends AbilityInstance {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
         Block block = center.toBlock(user.world());
-        Block rayTraced = RayTrace.of(user.eyeLocation(), direction).range(range).ignoreLiquids(false).result(user.world()).block();
+        Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (block.equals(rayTraced)) {
           Bending.game().abilityManager(user.world()).destroyInstance(eb);
           return true;

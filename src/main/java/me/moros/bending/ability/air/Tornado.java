@@ -39,7 +39,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -95,7 +94,7 @@ public class Tornado extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    Vector3d base = RayTrace.of(user).range(userConfig.range).ignoreLiquids(false).result(user.world()).position();
+    Vector3d base = user.rayTrace(userConfig.range).ignoreLiquids(false).blocks(user.world()).position();
     Block baseBlock = base.toBlock(user.world());
     if (MaterialUtil.isTransparent(baseBlock.getRelative(BlockFace.DOWN))) {
       return UpdateResult.CONTINUE;

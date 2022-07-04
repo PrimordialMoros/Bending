@@ -39,18 +39,17 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BendingUser implements User {
+public sealed class BendingUser implements User permits BendingPlayer {
   private final LivingEntity entity;
   private final DataHolder container;
   private final Set<Element> elements;
   private final AbilityDescription[] slots;
   private final CompositeBendingConditional bendingConditional;
 
-  private final boolean isPlayer;
+  private int index = 1;
 
   protected BendingUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     this.entity = entity;
-    this.isPlayer = entity instanceof Player;
     container = new DataContainer();
     slots = new AbilityDescription[9];
     int size = Math.min(data.slots().size(), 9);
@@ -154,8 +153,20 @@ public class BendingUser implements User {
   }
 
   @Override
+  public int currentSlot() {
+    return index;
+  }
+
+  @Override
+  public void currentSlot(int slot) {
+    if (slot >= 1 && slot <= 9) {
+      index = slot;
+    }
+  }
+
+  @Override
   public @Nullable AbilityDescription selectedAbility() {
-    return null; // Non-player bending users don't have anything selected.
+    return slots[index];
   }
 
   @Override
@@ -185,16 +196,10 @@ public class BendingUser implements User {
     return bendingConditional;
   }
 
-  private void updateBoard(AbilityDescription desc, boolean cooldown) {
-    if (isPlayer) {
-      Bending.game().boardManager().updateBoardSlot((BendingPlayer) this, desc, cooldown);
-    }
+  protected void updateBoard(AbilityDescription desc, boolean cooldown) {
   }
 
-  private void updateBoard() {
-    if (isPlayer) {
-      Bending.game().boardManager().updateBoard((BendingPlayer) this);
-    }
+  protected void updateBoard() {
   }
 
   /**
@@ -222,7 +227,7 @@ public class BendingUser implements User {
     return entity.hashCode();
   }
 
-  public static Optional<BendingUser> createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
+  public static Optional<User> createUser(@NonNull LivingEntity entity, @NonNull BenderData data) {
     if (Registries.BENDERS.contains(entity.getUniqueId()) || entity instanceof Player) {
       return Optional.empty();
     }

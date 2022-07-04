@@ -48,7 +48,6 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.internal.PacketUtil;
@@ -226,7 +225,7 @@ public class MetalCable extends AbilityInstance {
       return false;
     }
 
-    Vector3d targetLocation = user.compositeRayTrace(userConfig.range).result(user.world()).entityCenterOrPosition();
+    Vector3d targetLocation = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
     if (targetLocation.toBlock(user.world()).isLiquid()) {
       return false;
     }
@@ -260,7 +259,7 @@ public class MetalCable extends AbilityInstance {
       PacketUtil.teleportEntity(id, user.world(), location.subtract(new Vector3d(0, 0.68, 0.16)));
     }
     Set<Block> ignored = target != null && target.block != null ? Set.of(target.block) : Set.of();
-    return !RayTrace.of(origin, dir).ignoreLiquids(false).ignore(ignored).result(user.world()).hit();
+    return !user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignored).blocks(user.world()).hit();
   }
 
   public void hitBlock(@NonNull Block block) {
@@ -313,7 +312,7 @@ public class MetalCable extends AbilityInstance {
     }
 
     launched = true;
-    Vector3d targetLocation = user.compositeRayTrace(userConfig.projectileRange).result(user.world()).entityCenterOrPosition();
+    Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).entities(user.world()).entityCenterOrPosition();
 
     Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
     EntityUtil.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));

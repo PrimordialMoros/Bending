@@ -78,7 +78,7 @@ public class FerroControl extends AbilityInstance implements Ability {
     }
 
     if (controlledEntity == null || !controlledEntity.isValid()) {
-      controlledEntity = (Minecart) user.compositeRayTrace(userConfig.entitySelectRange, Minecart.class).result(user.world()).entity();
+      controlledEntity = (Minecart) user.rayTrace(userConfig.entitySelectRange, Minecart.class).entities(user.world()).entity();
     }
 
     if (controlledEntity != null) {

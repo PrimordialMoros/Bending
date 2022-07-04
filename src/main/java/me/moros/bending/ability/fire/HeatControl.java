@@ -44,7 +44,6 @@ import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import net.kyori.adventure.text.Component;
@@ -180,7 +179,7 @@ public class HeatControl extends AbilityInstance implements Ability {
       return;
     }
     boolean acted = false;
-    Vector3d center = user.compositeRayTrace(userConfig.range).result(user.world()).position();
+    Vector3d center = user.rayTrace(userConfig.range).blocks(user.world()).position();
     Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
@@ -205,7 +204,7 @@ public class HeatControl extends AbilityInstance implements Ability {
     if (!user.canBend(description()) || user.onCooldown(description())) {
       return;
     }
-    Vector3d center = RayTrace.of(user).range(userConfig.solidifyRange).ignoreLiquids(false).result(user.world()).position();
+    Vector3d center = user.rayTrace(userConfig.solidifyRange).ignoreLiquids(false).blocks(user.world()).position();
     if (solidify.fillQueue(getShuffledBlocks(user.world(), center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
       user.addCooldown(description(), userConfig.cooldown);
     }

@@ -49,7 +49,6 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.RayTrace;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -185,7 +184,7 @@ public class FireWall extends AbilityInstance {
   }
 
   private Vector3d getValidBase(double searchHeight) {
-    Vector3d center = RayTrace.of(user).range(userConfig.range).ignoreLiquids(false).result(user.world()).position();
+    Vector3d center = user.rayTrace(userConfig.range).ignoreLiquids(false).blocks(user.world()).position();
     for (double i = 0; i <= searchHeight; i += 0.5) {
       Vector3d check = center.subtract(new Vector3d(0, i, 0));
       Block block = check.toBlock(user.world());
