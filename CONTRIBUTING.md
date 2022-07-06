@@ -26,7 +26,9 @@ Please fork this repository and contribute back using [pull requests](https://gi
 
 ## Project Layout
 
-The project currently has a single module, but it may be split into sub-modules (API and Implementation) in the future.
+The project is currently split into 2 main modules:
+- `bending-api` - Developer api module
+- `bending-paper` - Has several adapter modules which to support different nms versions
 
 `me.moros.bending` is the top level package.
 

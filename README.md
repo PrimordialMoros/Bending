@@ -33,6 +33,8 @@ See [Contributing](CONTRIBUTING.md).
 
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcome and appreciated.
 
+For information on how to use Bending in your own projects check the [Developer API Wiki](https://github.com/PrimordialMoros/Bending/wiki/Developer-API)
+
 ### Special thanks to
 
 [JProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) for their great Java profiler

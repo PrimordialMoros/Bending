@@ -1,0 +1,108 @@
+/*
+ * Copyright 2020-2022 Moros
+ *
+ * This file is part of Bending.
+ *
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.game;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
+import me.moros.bending.Bending;
+import me.moros.bending.model.manager.AbilityManager;
+import me.moros.bending.model.manager.DummyAbilityManager;
+import me.moros.bending.model.manager.WorldManager;
+import me.moros.bending.model.user.User;
+import me.moros.bending.util.metadata.Metadata;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.configurate.serialize.SerializationException;
+
+public final class WorldManagerImpl implements WorldManager {
+  private final Map<World, ManagerPair> worlds;
+
+  WorldManagerImpl() {
+    try {
+      for (String w : Bending.configManager().config().node("properties", "disabled-worlds").getList(String.class, List.of())) {
+        World world = Bukkit.getWorld(w);
+        if (world != null) {
+          world.setMetadata(Metadata.DISABLED, Metadata.of());
+        }
+      }
+    } catch (SerializationException ignore) {
+    }
+    worlds = Bukkit.getWorlds().stream().filter(this::isEnabled)
+      .collect(Collectors.toConcurrentMap(Function.identity(), w -> new ManagerPair()));
+  }
+
+  @Override
+  public @NonNull AbilityManager instance(@NonNull World world) {
+    return isEnabled(world) ? worlds.computeIfAbsent(world, w -> new ManagerPair()).abilities : DummyAbilityManager.DUMMY;
+  }
+
+  @Override
+  public @NonNull UpdateResult update() {
+    for (var entry : worlds.entrySet()) {
+      try (Timing timing = Timings.of(Bending.plugin(), entry.getKey().getName() + " - tick")) {
+        entry.getValue().update();
+      } catch (Exception e) {
+        Bending.logger().warn(e.getMessage(), e);
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
+
+  @Override
+  public void onWorldUnload(@NonNull World world) {
+    worlds.remove(world);
+  }
+
+  @Override
+  public void clear() {
+    worlds.clear();
+  }
+
+  @Override
+  public void destroyAllInstances() {
+    worlds.values().forEach(w -> w.abilities.destroyAllInstances());
+  }
+
+  @Override
+  public void createPassives(@NonNull User user) {
+    instance(user.world()).createPassives(user);
+  }
+
+  private static final class ManagerPair {
+    private final AbilityManager abilities;
+    private final CollisionManager collisions;
+
+    private ManagerPair() {
+      abilities = new AbilityManagerImpl();
+      collisions = new CollisionManager(abilities);
+    }
+
+    private void update() {
+      abilities.update();
+      collisions.update();
+    }
+  }
+}
