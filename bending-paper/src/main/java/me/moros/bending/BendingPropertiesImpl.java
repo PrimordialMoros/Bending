@@ -19,48 +19,34 @@
 
 package me.moros.bending;
 
+import java.util.List;
+
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.properties.BendingProperties;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+@ConfigSerializable
 final class BendingPropertiesImpl extends Configurable implements BendingProperties {
-  private long earthRevertTime;
-  private long fireRevertTime;
-  private long explosionRevertTime;
-  private long iceRevertTime;
+  private long earthRevertTime = BendingProperties.super.earthRevertTime();
+  private long fireRevertTime = BendingProperties.super.fireRevertTime();
+  private long explosionRevertTime = BendingProperties.super.explosionRevertTime();
+  private long iceRevertTime = BendingProperties.super.iceRevertTime();
 
-  private double explosionKnockback;
+  private double explosionKnockback = BendingProperties.super.explosionKnockback();
 
-  private double metalModifier;
-  private double magmaModifier;
-  private double moonModifier;
-  private double sunModifier;
+  private double metalModifier = BendingProperties.super.metalModifier();
+  private double magmaModifier = BendingProperties.super.magmaModifier();
+  private double moonModifier = BendingProperties.super.moonModifier();
+  private double sunModifier = BendingProperties.super.sunModifier();
 
-  private boolean generateLight;
+  private boolean generateLight = BendingProperties.super.canGenerateLight();
 
   BendingPropertiesImpl() {
   }
 
   @Override
-  public void onConfigReload() {
-    CommentedConfigurationNode revertNode = config.node("properties", "revert-time");
-
-    earthRevertTime = revertNode.node("earth").getLong(BendingProperties.super.earthRevertTime());
-    fireRevertTime = revertNode.node("fire").getLong(BendingProperties.super.fireRevertTime());
-    explosionRevertTime = revertNode.node("explosion").getLong(BendingProperties.super.explosionRevertTime());
-    iceRevertTime = revertNode.node("ice").getLong(BendingProperties.super.iceRevertTime());
-
-    explosionKnockback = config.node("properties", "explosion-knockback").getDouble(BendingProperties.super.explosionKnockback());
-
-    CommentedConfigurationNode modifierNode = config.node("properties", "modifiers");
-
-    metalModifier = modifierNode.node("metal").getDouble(BendingProperties.super.metalModifier());
-    magmaModifier = modifierNode.node("magma").getDouble(BendingProperties.super.magmaModifier());
-
-    moonModifier = modifierNode.node("moon").getDouble(BendingProperties.super.moonModifier());
-    sunModifier = modifierNode.node("sun").getDouble(BendingProperties.super.sunModifier());
-
-    generateLight = config.node("properties", "generate-light").getBoolean(BendingProperties.super.canGenerateLight());
+  public Iterable<String> path() {
+    return List.of("properties");
   }
 
   @Override

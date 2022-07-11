@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.attribute;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public enum Attribute {
   RANGE("Range"),
   SELECTION("Selection"),
@@ -42,7 +40,7 @@ public enum Attribute {
     this.value = value;
   }
 
-  public @NonNull String value() {
+  public String value() {
     return value;
   }
 }

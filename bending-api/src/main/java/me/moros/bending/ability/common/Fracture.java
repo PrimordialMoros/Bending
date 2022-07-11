@@ -26,19 +26,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import me.moros.bending.adapter.impl.NativeAdapter;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.util.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class Fracture implements Updatable {
+public final class Fracture implements Updatable {
   private final List<Block> wall;
   private final Map<Block, Integer> wallData;
 
@@ -48,7 +47,7 @@ public class Fracture implements Updatable {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     int counter = 0;
     while (!wall.isEmpty() && ++counter <= 6) {
       Block random = wall.get(ThreadLocalRandom.current().nextInt(wall.size()));
@@ -64,7 +63,7 @@ public class Fracture implements Updatable {
     //noinspection ConstantConditions
     int progress = wallData.computeIfPresent(block, (k, v) -> v + 1);
     if (progress <= 9) {
-      NativeAdapter.instance().packetAdapter().fakeBreak(block.getWorld(), Vector3d.center(block), (byte) progress);
+      NativeAdapter.instance().fakeBreak(block.getWorld(), Vector3d.center(block), (byte) progress);
       return false;
     }
     destroyBlock(block);
@@ -74,10 +73,10 @@ public class Fracture implements Updatable {
   private void destroyBlock(Block block) {
     Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
     TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
-    TempFallingBlock.builder(Material.MAGMA_BLOCK.createBlockData()).velocity(velocity).duration(10000).build(block);
+    TempEntity.builder(Material.MAGMA_BLOCK.createBlockData()).velocity(velocity).duration(10_000).build(block);
   }
 
-  public static @Nullable Fracture of(@NonNull List<@NonNull Block> wall) {
+  public static @Nullable Fracture of(List<Block> wall) {
     return wall.isEmpty() ? null : new Fracture(wall);
   }
 }

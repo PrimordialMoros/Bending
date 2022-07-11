@@ -24,13 +24,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempPacketEntity;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.TempEntityType;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
@@ -57,11 +58,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class IceCrawl extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -70,14 +70,14 @@ public class IceCrawl extends AbilityInstance {
   private StateChain states;
   private Line iceLine;
 
-  public IceCrawl(@NonNull AbilityDescription desc) {
+  public IceCrawl(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+      user.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
       return false;
     }
 
@@ -89,7 +89,7 @@ public class IceCrawl extends AbilityInstance {
       return false;
     }
 
-    Optional<IceCrawl> line = Bending.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class);
+    Optional<IceCrawl> line = user.game().abilityManager(user.world()).firstInstance(user, IceCrawl.class);
     if (method == Activation.SNEAK && line.isPresent()) {
       State state = line.get().states.current();
       if (state instanceof SelectedSource selectedSource) {
@@ -108,11 +108,11 @@ public class IceCrawl extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -145,7 +145,7 @@ public class IceCrawl extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return iceLine == null ? List.of() : List.of(iceLine.collider());
   }
 
@@ -160,8 +160,8 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      TempPacketEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false).particles(true).duration(1400)
-        .buildArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)));
+      TempEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false).particles(true).duration(1400)
+        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(new Vector3d(x, 2, z)));
     }
 
     @Override
@@ -172,19 +172,19 @@ public class IceCrawl extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
         Vector3d spawnLoc = new Vector3d(entity.getLocation()).subtract(new Vector3d(0, 0.2, 0));
-        TempPacketEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false)
-          .duration(userConfig.freezeDuration).buildFallingBlock(user.world(), spawnLoc);
+        TempEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false)
+          .duration(userConfig.freezeDuration).build(TempEntityType.FALLING_BLOCK, user.world(), spawnLoc);
         ActionLimiter.builder().limit(ActionType.MOVE).duration(userConfig.freezeDuration).build(user, livingEntity);
       }
       return true;
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (MaterialUtil.isWater(block)) {
         TempBlock.ice().duration(BendingProperties.instance().iceRevertTime()).build(block);
       }
@@ -192,7 +192,7 @@ public class IceCrawl extends AbilityInstance {
     }
 
     @Override
-    protected boolean isValidBlock(@NonNull Block block) {
+    protected boolean isValidBlock(Block block) {
       if (!MaterialUtil.isTransparentOrWater(block)) {
         return false;
       }
@@ -201,27 +201,22 @@ public class IceCrawl extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.DURATION)
-    public long freezeDuration;
+    private long freezeDuration = 1500;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 22;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 8;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icecrawl");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      freezeDuration = abilityNode.node("freeze-duration").getLong(1500);
-      range = abilityNode.node("range").getDouble(22.0);
-      selectRange = abilityNode.node("select-range").getDouble(8.0);
-      damage = abilityNode.node("damage").getDouble(2.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "icecrawl");
     }
   }
 }

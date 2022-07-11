@@ -21,10 +21,11 @@ package me.moros.bending.ability.earth;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -50,11 +51,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Catapult extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static final double ANGLE = Math.toRadians(60);
 
   private User user;
@@ -64,12 +65,12 @@ public class Catapult extends AbilityInstance {
 
   private long startTime;
 
-  public Catapult(@NonNull AbilityDescription desc) {
+  public Catapult(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -78,18 +79,18 @@ public class Catapult extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (System.currentTimeMillis() > startTime + 100) {
       return pillar == null ? UpdateResult.REMOVE : pillar.update();
     }
     return UpdateResult.CONTINUE;
   }
 
-  private Block getBase() {
+  private @Nullable Block getBase() {
     AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
     AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
     return WorldUtil.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtil.blockBounds(b))).stream()
@@ -172,40 +173,35 @@ public class Catapult extends AbilityInstance {
   }
 
   private static final class EarthPillar extends Pillar {
-    private EarthPillar(@NonNull Builder builder) {
+    private EarthPillar(Builder builder) {
       super(builder);
     }
 
     @Override
-    public void playSound(@NonNull Block block) {
+    public void playSound(Block block) {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 3000;
     @Modifiable(Attribute.STRENGTH)
-    public double sneakPower;
+    private double sneakPower = 2.65;
     @Modifiable(Attribute.STRENGTH)
-    public double clickPower;
+    private double clickPower = 1.8;
     @Modifiable(Attribute.STRENGTH)
-    public double horizontalFactor;
-    public int length;
+    private double horizontalFactor = 1.4;
+    private int length = 7;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "catapult");
-
-      cooldown = abilityNode.node("cooldown").getLong(3000);
-      sneakPower = abilityNode.node("sneak-power").getDouble(2.65);
-      clickPower = abilityNode.node("click-power").getDouble(1.8);
-      horizontalFactor = abilityNode.node("horizontal-factor").getDouble(1.4);
-      length = Math.max(1, abilityNode.node("length").getInt(7));
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "catapult");
     }
   }
 }

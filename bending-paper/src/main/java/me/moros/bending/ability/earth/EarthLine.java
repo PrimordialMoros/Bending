@@ -27,16 +27,17 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.EarthSpike;
 import me.moros.bending.ability.common.Fracture;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.AbstractLine;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempPacketEntity;
-import me.moros.bending.game.temporal.TempPacketEntity.Builder;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.Builder;
+import me.moros.bending.game.temporal.TempEntity.TempEntityType;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
@@ -46,13 +47,13 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.properties.BendingProperties;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
@@ -72,13 +73,13 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -87,14 +88,14 @@ public class EarthLine extends AbilityInstance {
   private StateChain states;
   private Line earthLine;
 
-  public EarthLine(@NonNull AbilityDescription desc) {
+  public EarthLine(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+      user.game().abilityManager(user.world()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
       return false;
     }
     if (user.onCooldown(description())) {
@@ -109,7 +110,7 @@ public class EarthLine extends AbilityInstance {
       return false;
     }
     BlockData fakeData = MaterialUtil.focusedType(source.getBlockData());
-    Optional<EarthLine> line = Bending.game().abilityManager(user.world()).firstInstance(user, EarthLine.class);
+    Optional<EarthLine> line = user.game().abilityManager(user.world()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
       State state = line.get().states.current();
       if (state instanceof SelectedSource selectedSource) {
@@ -127,11 +128,11 @@ public class EarthLine extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -156,16 +157,16 @@ public class EarthLine extends AbilityInstance {
       if (source == null) {
         return;
       }
-      Mode mode = user.store().getOrDefault(DataKey.of("earthline-mode", Mode.class), Mode.NORMAL);
+      Mode mode = user.store().getOrDefault(RegistryKey.create("earthline-mode", Mode.class), Mode.NORMAL);
       earthLine = new Line(source, mode, EarthMaterials.isLavaBendable(source));
       removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
       user.addCooldown(description(), userConfig.cooldown);
     }
   }
 
-  public static void switchMode(@NonNull User user) {
+  public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("EarthLine")) {
-      var key = DataKey.of("earthline-mode", Mode.class);
+      var key = RegistryKey.create("earthline-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.NORMAL);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
@@ -187,7 +188,7 @@ public class EarthLine extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return earthLine == null ? List.of() : List.of(earthLine.collider());
   }
 
@@ -208,8 +209,8 @@ public class EarthLine extends AbilityInstance {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       BlockData data = magma ? Material.MAGMA_BLOCK.createBlockData() : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getBlockData();
-      TempPacketEntity.builder(data).gravity(false).particles(true).duration(700)
-        .buildArmorStand(user.world(), location.subtract(new Vector3d(x, 2, z)));
+      TempEntity.builder(data).gravity(false).particles(true).duration(700)
+        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(new Vector3d(x, 2, z)));
     }
 
     @Override
@@ -220,7 +221,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       double damage = userConfig.damage;
       if (magma) {
         damage = BendingProperties.instance().magmaModifier(userConfig.damage);
@@ -241,7 +242,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (magma && MaterialUtil.isWater(block)) {
         WorldUtil.playLavaExtinguishEffect(block);
         return true;
@@ -250,7 +251,7 @@ public class EarthLine extends AbilityInstance {
     }
 
     @Override
-    protected boolean isValidBlock(@NonNull Block block) {
+    protected boolean isValidBlock(Block block) {
       if (!MaterialUtil.isTransparent(block)) {
         return false;
       }
@@ -294,7 +295,7 @@ public class EarthLine extends AbilityInstance {
       }
       raisedSpikes = true;
       Vector3d loc = location.add(Vector3d.MINUS_J);
-      StateWrapper state = new StateWrapper(
+      State state = new StateWrapper(
         new EarthSpike(loc.toBlock(user.world()), 1, false),
         new EarthSpike(loc.add(direction).toBlock(user.world()), 2, true)
       );
@@ -325,10 +326,10 @@ public class EarthLine extends AbilityInstance {
       BlockData data = material.createBlockData();
       Vector3d center = new Vector3d(entity.getLocation()).add(Vector3d.MINUS_J);
       Vector3d offset = new Vector3d(0, -0.6, 0);
-      Builder builder = TempPacketEntity.builder(data).gravity(false).duration(userConfig.prisonDuration);
+      Builder builder = TempEntity.builder(data).gravity(false).duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
-        builder.buildArmorStand(user.world(), center.add(v));
-        builder.buildArmorStand(user.world(), center.add(offset).add(v));
+        builder.build(TempEntityType.ARMOR_STAND, user.world(), center.add(v));
+        builder.build(TempEntityType.ARMOR_STAND, user.world(), center.add(offset).add(v));
       });
       ActionLimiter.builder().duration(userConfig.prisonDuration).build(user, entity);
     }
@@ -345,7 +346,7 @@ public class EarthLine extends AbilityInstance {
     private StateChain chain;
     private boolean started = false;
 
-    private StateWrapper(Updatable first, Updatable... rest) {
+    private StateWrapper(Updatable first, Updatable @Nullable ... rest) {
       actions = new ArrayList<>();
       this.actions.add(first);
       if (rest != null) {
@@ -354,13 +355,13 @@ public class EarthLine extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       actions.removeIf(action -> action.update() == UpdateResult.REMOVE);
       return actions.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
     }
 
     @Override
-    public void start(@NonNull StateChain chain) {
+    public void start(StateChain chain) {
       if (started) {
         return;
       }
@@ -378,39 +379,30 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 5000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 20;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 6;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1.1;
     @Modifiable(Attribute.STRENGTH)
-    public double knockup;
+    private double knockup = 0.55;
     @Modifiable(Attribute.RADIUS)
-    public double explosionRadius;
+    private double explosionRadius = 3.5;
     @Modifiable(Attribute.DAMAGE)
-    public double explosionDamage;
+    private double explosionDamage = 2.5;
     @Modifiable(Attribute.DURATION)
-    public long prisonDuration;
+    private long prisonDuration = 1500;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthline");
-
-      cooldown = abilityNode.node("cooldown").getLong(5000);
-      range = abilityNode.node("range").getDouble(20.0);
-      selectRange = abilityNode.node("select-range").getDouble(6.0);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      knockback = abilityNode.node("knockback").getDouble(1.1);
-      knockup = abilityNode.node("knockup").getDouble(0.55);
-      explosionRadius = abilityNode.node("explosion-radius").getDouble(3.5);
-      explosionDamage = abilityNode.node("explosion-damage").getDouble(2.5);
-      prisonDuration = abilityNode.node("prison-duration").getLong(1500);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthline");
     }
   }
 }

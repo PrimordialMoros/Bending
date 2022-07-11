@@ -20,7 +20,6 @@
 package me.moros.bending.storage.sql;
 
 import me.moros.storage.StorageType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum SqlQueries {
   PLAYER_INSERT("INSERT INTO bending_players (player_uuid) VALUES(?)"),
@@ -54,11 +53,11 @@ public enum SqlQueries {
   /**
    * @return The SQL query for this enumeration.
    */
-  public @NonNull String query() {
+  public String query() {
     return query;
   }
 
-  public static @NonNull String groupInsertAbilities(@NonNull StorageType type) {
+  public static String groupInsertAbilities(StorageType type) {
     String column = "ability_name";
     String table = "bending_abilities (" + column + ") ";
     return switch (type) {

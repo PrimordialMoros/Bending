@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.bending.adapter.impl.NativeAdapter;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.raytrace.BlockRayTrace;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
@@ -36,7 +36,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class RayTraceBuilder {
   public static final double MAX_RANGE = 100;
@@ -59,66 +58,63 @@ public final class RayTraceBuilder {
     range(direction.length());
   }
 
-  public @NonNull RayTraceBuilder origin(@NonNull Vector3d origin) {
+  public RayTraceBuilder origin(Vector3d origin) {
     this.origin = Objects.requireNonNull(origin);
     return this;
   }
 
-  public @NonNull RayTraceBuilder direction(@NonNull Vector3d direction) {
+  public RayTraceBuilder direction(Vector3d direction) {
     this.direction = direction.normalize();
     return this;
   }
 
-  public @NonNull Vector3d end() {
-    return origin.add(direction.multiply(range));
-  }
-
-  public @NonNull RayTraceBuilder range(double range) {
+  public RayTraceBuilder range(double range) {
     this.range = Math.min(MAX_RANGE, Math.max(0, range));
     return this;
   }
 
-  public @NonNull RayTraceBuilder raySize(double raySize) {
+  public RayTraceBuilder raySize(double raySize) {
     this.raySize = Math.max(0, raySize);
     return this;
   }
 
-  public @NonNull RayTraceBuilder ignoreLiquids(boolean ignoreLiquids) {
+  public RayTraceBuilder ignoreLiquids(boolean ignoreLiquids) {
     this.ignoreLiquids = ignoreLiquids;
     return this;
   }
 
-  public @NonNull RayTraceBuilder ignorePassable(boolean ignorePassable) {
+  public RayTraceBuilder ignorePassable(boolean ignorePassable) {
     this.ignorePassable = ignorePassable;
     return this;
   }
 
-  public @NonNull RayTraceBuilder ignore(@NonNull Set<@NonNull Block> ignoreBlocks) {
+  public RayTraceBuilder ignore(Set<Block> ignoreBlocks) {
     this.ignoreBlocks = Set.copyOf(ignoreBlocks);
     return this;
   }
 
-  public @NonNull RayTraceBuilder filter(@NonNull Predicate<Entity> entityPredicate) {
+  public RayTraceBuilder filter(Predicate<Entity> entityPredicate) {
     this.entityPredicate = Objects.requireNonNull(entityPredicate);
     return this;
   }
 
-  public <T extends Entity> @NonNull RayTraceBuilder filterForUser(@NonNull Entity source, @NonNull Class<T> type) {
+  public <T extends Entity> RayTraceBuilder filterForUser(Entity source, Class<T> type) {
     Objects.requireNonNull(source);
     Objects.requireNonNull(type);
     return filter(e -> userPredicate(e, source, type));
   }
 
-  public @NonNull BlockRayTrace blocks(@NonNull World world) {
+  public BlockRayTrace blocks(World world) {
     return result(world, false);
   }
 
-  public @NonNull EntityRayTrace entities(@NonNull World world) {
+  public EntityRayTrace entities(World world) {
     return result(world, true);
   }
 
   private CompositeRayTrace result(World world, boolean checkEntities) {
-    Vector3d endPoint = end();
+    Objects.requireNonNull(world);
+    Vector3d endPoint = origin.add(direction.multiply(range));
     RayTraceContext context = new RayTraceContext(origin, endPoint, ignoreLiquids, ignorePassable, ignoreBlocks);
     CompositeRayTrace blockResult = NativeAdapter.instance().rayTraceBlocks(context, world);
     double blockHitDistance = blockResult.hit() ? origin.distance(blockResult.position()) : range;
@@ -148,7 +144,7 @@ public final class RayTraceBuilder {
     return blockResult;
   }
 
-  public static @NonNull RayTraceBuilder of(@NonNull Vector3d origin, @NonNull Vector3d direction) {
+  public static RayTraceBuilder of(Vector3d origin, Vector3d direction) {
     Objects.requireNonNull(origin);
     Objects.requireNonNull(direction);
     return new RayTraceBuilder(origin, direction);

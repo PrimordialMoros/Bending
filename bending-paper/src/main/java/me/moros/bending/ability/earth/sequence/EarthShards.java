@@ -21,9 +21,10 @@ package me.moros.bending.ability.earth.sequence;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -46,12 +47,11 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 // TODO restrictions based on earthglove cooldown, add bleed effect
 public class EarthShards extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -62,12 +62,12 @@ public class EarthShards extends AbilityInstance {
   private int firedShots = 0;
   private long nextFireTime;
 
-  public EarthShards(@NonNull AbilityDescription desc) {
+  public EarthShards(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -77,11 +77,11 @@ public class EarthShards extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -111,12 +111,12 @@ public class EarthShards extends AbilityInstance {
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
-    Bending.game().abilityManager(user.world()).destroyInstance(this);
+  public void onCollision(Collision collision) {
+    user.game().abilityManager(user.world()).destroyInstance(this);
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -146,44 +146,35 @@ public class EarthShards extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       return true;
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 10000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 0.5;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 16;
     @Modifiable(Attribute.SPEED)
-    public double speed;
-
-    public double spread;
-    public int maxShots;
-    public long interval;
+    private double speed = 0.8;
+    @Modifiable(Attribute.AMOUNT)
+    private int maxShots = 10;
+    private double spread = 0.02;
+    private long interval = 100;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthshards");
-
-      cooldown = abilityNode.node("cooldown").getLong(10000);
-      damage = abilityNode.node("damage").getDouble(0.5);
-      range = abilityNode.node("range").getDouble(16.0);
-      speed = abilityNode.node("speed").getDouble(0.8);
-      spread = abilityNode.node("spread").getDouble(0.02);
-      maxShots = abilityNode.node("max-shots").getInt(10);
-      interval = abilityNode.node("interval").getLong(100);
-
-      abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "sequences", "earthshards");
     }
   }
 }

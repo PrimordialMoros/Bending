@@ -1,14 +1,13 @@
 plugins {
-    id("java")
-    id("com.github.johnrengelman.shadow").version("7.1.2")
+    id("org.checkerframework").version("0.6.13")
 }
 
 allprojects {
     group = "me.moros"
     version = "1.5.0-SNAPSHOT"
 
-    apply(plugin = "java-library")
-    apply(plugin = "com.github.johnrengelman.shadow")
+    apply(plugin = "java")
+    apply(plugin = "org.checkerframework")
 
     repositories {
         mavenCentral()
@@ -24,8 +23,5 @@ allprojects {
             options.compilerArgs.add("-Xlint:deprecation")
             options.encoding = "UTF-8"
         }
-    }
-    dependencies {
-        compileOnly("org.checkerframework", "checker-qual", "3.22.1")
     }
 }

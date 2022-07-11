@@ -19,9 +19,7 @@
 
 package me.moros.bending.model.user.profile;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-public record PlayerProfile(int id, boolean board, @NonNull BenderData benderData) {
+public record PlayerProfile(int id, boolean board, BenderData benderData) {
   public PlayerProfile(int id) {
     this(id, false, BenderData.EMPTY);
   }

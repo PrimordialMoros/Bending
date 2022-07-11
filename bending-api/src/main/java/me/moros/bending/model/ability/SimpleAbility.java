@@ -22,7 +22,6 @@ package me.moros.bending.model.ability;
 import me.moros.bending.model.collision.geometry.Collider;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface SimpleAbility {
   void render();
@@ -30,9 +29,9 @@ public interface SimpleAbility {
   default void postRender() {
   }
 
-  boolean onEntityHit(@NonNull Entity entity);
+  boolean onEntityHit(Entity entity);
 
-  boolean onBlockHit(@NonNull Block block);
+  boolean onBlockHit(Block block);
 
-  @NonNull Collider collider();
+  Collider collider();
 }

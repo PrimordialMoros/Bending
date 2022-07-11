@@ -23,39 +23,38 @@ import java.util.Set;
 
 import me.moros.bending.event.ElementChangeEvent;
 import me.moros.bending.model.Element;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface ElementUser {
   /**
    * @return a copy of this user's elements
    */
-  @NonNull Set<@NonNull Element> elements();
+  Set<Element> elements();
 
   /**
    * Check if the user has the specified element.
    * @param element the element to check
    * @return true the user has the specified element, false otherwise
    */
-  boolean hasElement(@NonNull Element element);
+  boolean hasElement(Element element);
 
   /**
    * Attempt to add the specified element to the user. Calls an {@link ElementChangeEvent}.
    * @param element the element to add
    * @return true if the element was added successfully, false otherwise
    */
-  boolean addElement(@NonNull Element element);
+  boolean addElement(Element element);
 
   /**
    * Attempt to remove the specified element from the user. Calls an {@link ElementChangeEvent}.
    * @param element the element to remove
    * @return true if the element was removed successfully, false otherwise
    */
-  boolean removeElement(@NonNull Element element);
+  boolean removeElement(Element element);
 
   /**
    * Attempt to choose the specified element. Calls an {@link ElementChangeEvent}.
    * @param element the element to choose
    * @return true if the element was chosen successfully, false otherwise
    */
-  boolean chooseElement(@NonNull Element element);
+  boolean chooseElement(Element element);
 }

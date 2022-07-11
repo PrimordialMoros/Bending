@@ -23,23 +23,27 @@ import java.util.function.Predicate;
 
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.protection.ProtectionCache;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public sealed interface User extends BukkitUser, ElementUser permits BendingUser {
-  @NonNull DataHolder store();
+public sealed interface User extends BukkitUser, ElementUser, AttributeUser permits BendingUser {
+  String NAMESPACE = "bending.user";
+
+  Game game();
+
+  DataHolder store();
 
   /**
    * Check if the user has the specified ability on cooldown.
    * @param desc the ability to check
    * @return true if the ability is on cooldown for this user, false otherwise
    */
-  boolean onCooldown(@NonNull AbilityDescription desc);
+  boolean onCooldown(AbilityDescription desc);
 
   /**
    * Attempts to put the specified ability on cooldown for the given duration.
@@ -47,16 +51,16 @@ public sealed interface User extends BukkitUser, ElementUser permits BendingUser
    * @param duration the duration of the cooldown
    * @return true if cooldown was added successfully, false otherwise
    */
-  boolean addCooldown(@NonNull AbilityDescription desc, long duration);
+  boolean addCooldown(AbilityDescription desc, long duration);
 
   /**
    * Makes a preset out of this user's current slots.
    * @param name the name of the preset to be created
    * @return the constructed preset
    */
-  @NonNull Preset createPresetFromSlots(@NonNull String name);
+  Preset createPresetFromSlots(String name);
 
-  boolean bindPreset(@NonNull Preset preset);
+  boolean bindPreset(Preset preset);
 
   /**
    * Assigns an ability to the specified slot.
@@ -93,7 +97,7 @@ public sealed interface User extends BukkitUser, ElementUser permits BendingUser
   /**
    * @return the ability's name or an empty string if no ability is bound to the currently selected slot
    */
-  default @NonNull String selectedAbilityName() {
+  default String selectedAbilityName() {
     AbilityDescription selected = selectedAbility();
     return selected == null ? "" : selected.name();
   }
@@ -111,7 +115,9 @@ public sealed interface User extends BukkitUser, ElementUser permits BendingUser
    * @param desc the ability to check
    * @return true if the user can bend the given ability, false otherwise
    */
-  boolean canBend(@NonNull AbilityDescription desc);
+  boolean canBend(AbilityDescription desc);
+
+  Board board();
 
   /**
    * Check if the user has the specified permission.
@@ -119,21 +125,21 @@ public sealed interface User extends BukkitUser, ElementUser permits BendingUser
    * @param permission the permission to check
    * @return true if the user has the given permission, false otherwise
    */
-  default boolean hasPermission(@NonNull String permission) {
+  default boolean hasPermission(String permission) {
     return true;
   }
 
   /**
    * @see #hasPermission(String)
    */
-  default boolean hasPermission(@NonNull AbilityDescription desc) {
+  default boolean hasPermission(AbilityDescription desc) {
     return desc.permissions().stream().allMatch(this::hasPermission);
   }
 
   /**
    * @see ProtectionCache#canBuild(User, Block)
    */
-  default boolean canBuild(@NonNull Block block) {
+  default boolean canBuild(Block block) {
     return ProtectionCache.INSTANCE.canBuild(this, block);
   }
 
@@ -143,7 +149,7 @@ public sealed interface User extends BukkitUser, ElementUser permits BendingUser
    * @param predicate the predicate to check
    * @return the source block if one was found, null otherwise
    */
-  default @Nullable Block find(double range, @NonNull Predicate<@NonNull Block> predicate) {
+  default @Nullable Block find(double range, Predicate<Block> predicate) {
     BlockIterator it = new BlockIterator(entity(), Math.min(100, FastMath.ceil(range)));
     while (it.hasNext()) {
       Block block = it.next();

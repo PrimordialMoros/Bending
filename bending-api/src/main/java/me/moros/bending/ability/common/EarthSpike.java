@@ -32,10 +32,10 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthSpike implements Updatable {
   private static final long DELAY = 80;
+  private static final long DURATION = 15_000;
 
   private final Block origin;
 
@@ -44,14 +44,14 @@ public class EarthSpike implements Updatable {
   private int currentLength = 0;
   private long nextUpdateTime;
 
-  public EarthSpike(@NonNull Block origin, int length, boolean delay) {
+  public EarthSpike(Block origin, int length, boolean delay) {
     this.origin = origin;
     this.length = length;
     nextUpdateTime = delay ? System.currentTimeMillis() + DELAY : 0;
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (currentLength >= length) {
       return UpdateResult.REMOVE;
     }
@@ -64,7 +64,7 @@ public class EarthSpike implements Updatable {
         return UpdateResult.REMOVE;
       }
       BlockData data = MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData());
-      TempBlock.builder(data).duration(15000).build(origin);
+      TempBlock.builder(data).duration(DURATION).build(origin);
     }
     nextUpdateTime = time + DELAY;
     Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
@@ -72,7 +72,7 @@ public class EarthSpike implements Updatable {
       Vector3d center = Vector3d.center(currentIndex);
       ParticleUtil.of(Particle.BLOCK_DUST, center).count(24).offset(0.2)
         .data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn(currentIndex.getWorld());
-      TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(15000 - currentLength * DELAY).build(currentIndex);
+      TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(DURATION - currentLength * DELAY).build(currentIndex);
       SoundUtil.EARTH.play(currentIndex);
     } else {
       return UpdateResult.REMOVE;

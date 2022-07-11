@@ -26,10 +26,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempBlock.Builder;
@@ -54,11 +54,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Torrent extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -67,17 +66,17 @@ public class Torrent extends AbilityInstance {
   private StateChain states;
   private WaterRing ring;
 
-  public Torrent(@NonNull AbilityDescription desc) {
+  public Torrent(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
-    Optional<Torrent> torrent = Bending.game().abilityManager(user.world()).firstInstance(user, Torrent.class);
+    Optional<Torrent> torrent = user.game().abilityManager(user.world()).firstInstance(user, Torrent.class);
     if (torrent.isPresent()) {
       torrent.get().launch();
       return false;
@@ -122,11 +121,11 @@ public class Torrent extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -156,7 +155,7 @@ public class Torrent extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     if (states != null && states.current() instanceof TorrentStream torrentStream) {
       return torrentStream.colliders();
     }
@@ -173,18 +172,18 @@ public class Torrent extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (entity instanceof LivingEntity) {
         if (clicked && !shouldFreeze) {
           shouldFreeze = true;
         }
         if (!affectedEntities.contains(entity)) {
-          double damage = shouldFreeze ? userConfig.damage : userConfig.damage + userConfig.freezeDamage;  // apply bonus damage on freeze
+          double damage = shouldFreeze ? userConfig.damage : userConfig.damage + userConfig.freezeBonusDamage;  // apply bonus damage on freeze
           DamageUtil.damageEntity(entity, user, damage, description());
           affectedEntities.add(entity);
         }
       }
-      Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.verticalPush)).multiply(userConfig.knockback);
+      Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.knockup)).multiply(userConfig.knockback);
       EntityUtil.applyVelocity(Torrent.this, entity, velocity);
       return false;
     }
@@ -219,7 +218,7 @@ public class Torrent extends AbilityInstance {
     }
 
     @Override
-    public void onBlockHit(@NonNull Block block) {
+    public void onBlockHit(Block block) {
       if (clicked) {
         if (freeze()) {
           FragileStructure.tryDamageStructure(List.of(block), 8);
@@ -230,33 +229,26 @@ public class Torrent extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 5000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 32;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.DAMAGE)
-    public double freezeDamage;
+    private double freezeBonusDamage = 2;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1;
     @Modifiable(Attribute.STRENGTH)
-    public double verticalPush;
+    private double knockup = 0.2;
     @Modifiable(Attribute.DURATION)
-    public long freezeDuration;
+    private long freezeDuration = 12500;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "torrent");
-
-      cooldown = abilityNode.node("cooldown").getLong(5000);
-      range = abilityNode.node("range").getDouble(32.0);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      freezeDamage = abilityNode.node("freeze-bonus-damage").getDouble(2.0);
-      knockback = abilityNode.node("knockback").getDouble(1.0);
-      verticalPush = abilityNode.node("vertical-push").getDouble(0.2);
-      freezeDuration = abilityNode.node("freeze-duration").getLong(12500);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "torrent");
     }
   }
 }

@@ -45,7 +45,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class Pillar implements Updatable, Iterable<Block> {
   private final User user;
@@ -63,7 +62,7 @@ public class Pillar implements Updatable, Iterable<Block> {
   private int currentDistance;
   private long nextUpdateTime;
 
-  protected Pillar(@NonNull Builder builder) {
+  protected Pillar(Builder builder) {
     this.user = builder.user;
     this.origin = builder.origin;
     this.direction = builder.direction;
@@ -79,7 +78,7 @@ public class Pillar implements Updatable, Iterable<Block> {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (currentDistance >= distance) {
       return UpdateResult.REMOVE;
     }
@@ -128,7 +127,7 @@ public class Pillar implements Updatable, Iterable<Block> {
     return true;
   }
 
-  protected @NonNull Vector3d normalizeVelocity(Vector3d velocity, double factor) {
+  protected Vector3d normalizeVelocity(Vector3d velocity, double factor) {
     return switch (direction) {
       case NORTH, SOUTH -> velocity.withX(direction.getModX() * factor);
       case EAST, WEST -> velocity.withZ(direction.getModZ() * factor);
@@ -137,33 +136,33 @@ public class Pillar implements Updatable, Iterable<Block> {
   }
 
   @Override
-  public @NonNull Iterator<Block> iterator() {
+  public Iterator<Block> iterator() {
     return Collections.unmodifiableCollection(pillarBlocks).iterator();
   }
 
-  public @NonNull Collection<@NonNull Block> pillarBlocks() {
+  public Collection<Block> pillarBlocks() {
     return List.copyOf(pillarBlocks);
   }
 
-  public @NonNull Block origin() {
+  public Block origin() {
     return origin;
   }
 
-  public void playSound(@NonNull Block block) {
+  public void playSound(Block block) {
     SoundUtil.EARTH.play(block);
   }
 
-  public boolean onEntityHit(@NonNull Entity entity) {
+  public boolean onEntityHit(Entity entity) {
     double factor = 0.75 * (length - 0.4 * currentDistance) / length;
     entity.setVelocity(normalizeVelocity(new Vector3d(entity.getVelocity()), factor).clampVelocity());
     return true;
   }
 
-  public static @NonNull Builder builder(@NonNull User user, @NonNull Block origin) {
+  public static Builder builder(User user, Block origin) {
     return builder(user, origin, Pillar::new);
   }
 
-  public static <T extends Pillar> @NonNull Builder builder(@NonNull User user, @NonNull Block origin, @NonNull Function<Builder, T> constructor) {
+  public static <T extends Pillar> Builder builder(User user, Block origin, Function<Builder, T> constructor) {
     return new Builder(user, origin, constructor);
   }
 
@@ -178,13 +177,13 @@ public class Pillar implements Updatable, Iterable<Block> {
     private long duration = BendingProperties.instance().earthRevertTime();
     private Predicate<Block> predicate = b -> true;
 
-    public <T extends Pillar> Builder(@NonNull User user, @NonNull Block origin, @NonNull Function<Builder, T> constructor) {
+    public <T extends Pillar> Builder(User user, Block origin, Function<Builder, T> constructor) {
       this.user = user;
       this.origin = origin;
       this.constructor = constructor;
     }
 
-    public @NonNull Builder direction(@NonNull BlockFace direction) {
+    public Builder direction(BlockFace direction) {
       if (!WorldUtil.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
@@ -192,17 +191,17 @@ public class Pillar implements Updatable, Iterable<Block> {
       return this;
     }
 
-    public @NonNull Builder interval(@NonNegative long interval) {
+    public Builder interval(@NonNegative long interval) {
       this.interval = interval;
       return this;
     }
 
-    public @NonNull Builder duration(@NonNegative long duration) {
+    public Builder duration(@NonNegative long duration) {
       this.duration = duration;
       return this;
     }
 
-    public @NonNull Builder predicate(@NonNull Predicate<Block> predicate) {
+    public Builder predicate(Predicate<Block> predicate) {
       this.predicate = predicate;
       return this;
     }

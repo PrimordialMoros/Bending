@@ -38,7 +38,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class BlockShot implements Updatable, SimpleAbility {
@@ -66,7 +65,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  protected BlockShot(@NonNull User user, @NonNull Block block, @NonNull Material material, double range, int speed) {
+  protected BlockShot(User user, Block block, Material material, double range, int speed) {
     this.user = user;
     this.material = material;
     this.location = Vector3d.center(block);
@@ -100,7 +99,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     buffer += speed;
     if (buffer < 20) {
       return UpdateResult.CONTINUE;
@@ -173,7 +172,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     return previousBlock;
   }
 
-  public @NonNull Vector3d center() {
+  public Vector3d center() {
     return location.floor().add(new Vector3d(0.5, 0.5, 0.5));
   }
 
@@ -182,11 +181,11 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull AABB collider() {
+  public AABB collider() {
     return collider;
   }
 
-  public boolean isValid(@NonNull Block block) {
+  public boolean isValid(Block block) {
     if (material == Material.WATER) {
       return MaterialUtil.isWater(block);
     }
@@ -199,13 +198,13 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     }
   }
 
-  public void clean(@NonNull Block block) {
+  public void clean(Block block) {
     if (isValid(block)) {
       TempBlock.air().build(block);
     }
   }
 
-  public void user(@NonNull User user) {
+  public void user(User user) {
     this.user = user;
   }
 }

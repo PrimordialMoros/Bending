@@ -20,7 +20,8 @@
 package me.moros.bending.command;
 
 import java.util.Collection;
-import java.util.Locale;
+import java.util.Iterator;
+import java.util.List;
 
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.arguments.standard.DoubleArgument;
@@ -31,7 +32,7 @@ import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.minecraft.extras.MinecraftHelp.HelpColors;
 import me.moros.bending.Bending;
-import me.moros.bending.adapter.impl.NativeAdapter;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.gui.ElementMenu;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
@@ -43,13 +44,14 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
+import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
-import me.moros.bending.util.ChatUtil;
 import me.moros.bending.util.ColorPalette;
+import me.moros.bending.util.TextUtil;
 import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -58,14 +60,18 @@ import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingCommand {
+  private final Bending plugin;
+  private final Game game;
   private final CommandManager manager;
   private final Builder<CommandSender> builder;
   private final MinecraftHelp<CommandSender> help;
 
-  BendingCommand(@NonNull CommandManager manager) {
+  BendingCommand(Bending plugin, Game game, CommandManager manager) {
+    this.plugin = plugin;
+    this.game = game;
     this.manager = manager;
     this.builder = manager.rootBuilder();
     this.help = MinecraftHelp.createNative("/bending help", manager);
@@ -127,7 +133,7 @@ public final class BendingCommand {
         .permission(CommandPermissions.BIND)
         .senderType(Player.class)
         .argument(slotArg.build())
-        .handler(c -> onClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
+        .handler(c -> onBindClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
       ).command(builder.literal("who", "w")
         .meta(CommandMeta.DESCRIPTION, "Show all bound abilities")
         .permission(CommandPermissions.HELP)
@@ -159,22 +165,22 @@ public final class BendingCommand {
       ).command(presetBase.literal("list", "ls")
         .meta(CommandMeta.DESCRIPTION, "List all available presets")
         .senderType(Player.class)
-        .handler(c -> onList(c.get(ContextKeys.BENDING_PLAYER)))
+        .handler(c -> onPresetList(c.get(ContextKeys.BENDING_PLAYER)))
       ).command(presetBase.literal("create", "save", "c")
         .meta(CommandMeta.DESCRIPTION, "Create a new preset")
         .senderType(Player.class)
         .argument(StringArgument.single("name"))
-        .handler(c -> onCreate(c.get(ContextKeys.BENDING_PLAYER), c.get("name")))
+        .handler(c -> onPresetCreate(c.get(ContextKeys.BENDING_PLAYER), c.get("name")))
       ).command(presetBase.literal("remove", "rm")
         .meta(CommandMeta.DESCRIPTION, "Remove an existing preset")
         .senderType(Player.class)
         .argument(manager.argumentBuilder(Preset.class, "preset"))
-        .handler(c -> onRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
+        .handler(c -> onPresetRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
       ).command(presetBase.literal("bind", "b")
         .meta(CommandMeta.DESCRIPTION, "Bind an existing preset")
         .senderType(Player.class)
         .argument(manager.argumentBuilder(Preset.class, "preset"))
-        .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
+        .handler(c -> onPresetBind(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
       ).command(modifierBase.literal("add", "a")
         .meta(CommandMeta.DESCRIPTION, "Add a new modifier to the specified user")
         .senderType(Player.class)
@@ -193,7 +199,7 @@ public final class BendingCommand {
       );
   }
 
-  private static void onHelp(MinecraftHelp<CommandSender> help, String rawQuery, CommandSender sender) {
+  private void onHelp(MinecraftHelp<CommandSender> help, String rawQuery, CommandSender sender) {
     if (!rawQuery.isEmpty()) {
       int index = rawQuery.indexOf(' ');
       String query = rawQuery.substring(0, index > 0 ? index : rawQuery.length());
@@ -204,8 +210,8 @@ public final class BendingCommand {
           return;
         }
       } else {
-        AbilityDescription result = Registries.ABILITIES.ability(query);
-        if (result != null && !result.hidden() && sender.hasPermission(result.permission())) {
+        AbilityDescription result = Registries.ABILITIES.fromString(query);
+        if (result != null && !result.hidden() && hasPermission(sender, result)) {
           onInfo(sender, result);
           return;
         }
@@ -214,20 +220,21 @@ public final class BendingCommand {
     help.queryCommands(rawQuery, sender);
   }
 
-  private static void onVersion(CommandSender sender) {
+  private void onVersion(CommandSender sender) {
     String link = "https://github.com/PrimordialMoros/Bending";
-    Component version = Component.text("Bending " + Bending.version(), ColorPalette.HEADER)
-      .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(Bending.author(), link)))
+    Component version = Component.text("Bending " + plugin.version(), ColorPalette.HEADER)
+      .hoverEvent(HoverEvent.showText(Message.VERSION_COMMAND_HOVER.build(plugin.author(), link)))
       .clickEvent(ClickEvent.openUrl(link));
     sender.sendMessage(version);
   }
 
-  private static void onReload(CommandSender sender) {
-    Bending.game().reload();
-    Message.CONFIG_RELOAD.send(sender);
+  private void onReload(CommandSender sender) {
+    game.reload();
+    plugin.translationManager().reload();
+    Message.RELOAD.send(sender);
   }
 
-  private static void onBoard(BendingPlayer player) {
+  private void onBoard(BendingPlayer player) {
     boolean hidden = player.entity().hasMetadata(Metadata.HIDDEN_BOARD);
     if (!player.board().isEnabled() && !hidden) {
       Message.BOARD_DISABLED.send(player);
@@ -237,45 +244,45 @@ public final class BendingCommand {
       Metadata.remove(player.entity(), Metadata.HIDDEN_BOARD);
       Message.BOARD_TOGGLED_ON.send(player);
     } else {
-      player.entity().setMetadata(Metadata.HIDDEN_BOARD, Metadata.of());
+      Metadata.add(player.entity(), Metadata.HIDDEN_BOARD);
       Message.BOARD_TOGGLED_OFF.send(player);
     }
     player.board();
   }
 
-  private static void onToggle(User user) {
+  private void onToggle(User user) {
     if (user.entity().hasMetadata(Metadata.DISABLED)) {
       Metadata.remove(user.entity(), Metadata.DISABLED);
       Message.TOGGLE_ON.send(user);
     } else {
-      user.entity().setMetadata(Metadata.DISABLED, Metadata.of());
+      Metadata.add(user.entity(), Metadata.DISABLED);
       Message.TOGGLE_OFF.send(user);
     }
   }
 
-  private static void onElementChooseOptional(BendingPlayer player, Element element) {
+  private void onElementChooseOptional(BendingPlayer player, @Nullable Element element) {
     if (element == null) {
-      new ElementMenu(player);
+      new ElementMenu(this, player);
     } else {
       onElementChoose(player, element);
     }
   }
 
-  private static void sendElementNotification(User user, Element element) {
+  private void sendElementNotification(User user, Element element) {
     if (user instanceof BendingPlayer player) {
       Component title = Component.text().append(Component.text("You can now bend", ColorPalette.TEXT_COLOR))
         .append(Component.space()).append(element.displayName()).build();
-      NativeAdapter.instance().packetAdapter().sendNotification(player.entity(), Material.NETHER_STAR, title);
+      NativeAdapter.instance().sendNotification(player.entity(), Material.NETHER_STAR, title);
     }
   }
 
-  public static void onElementChoose(@NonNull User user, @NonNull Element element) {
+  public void onElementChoose(User user, Element element) {
     if (!user.hasPermission("bending.command.choose." + element)) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }
     if (user.chooseElement(element)) {
-      Bending.game().abilityManager(user.world()).createPassives(user);
+      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_CHOOSE_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);
     } else {
@@ -283,13 +290,13 @@ public final class BendingCommand {
     }
   }
 
-  public static void onElementAdd(@NonNull User user, @NonNull Element element) {
+  public void onElementAdd(User user, Element element) {
     if (!user.hasPermission("bending.command.add." + element)) {
       Message.ELEMENT_ADD_NO_PERMISSION.send(user, element.displayName());
       return;
     }
     if (user.addElement(element)) {
-      Bending.game().abilityManager(user.world()).createPassives(user);
+      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_ADD_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);
     } else {
@@ -297,48 +304,36 @@ public final class BendingCommand {
     }
   }
 
-  public static void onElementRemove(@NonNull User user, @NonNull Element element) {
+  public void onElementRemove(User user, Element element) {
     if (user.removeElement(element)) {
-      Bending.game().abilityManager(user.world()).createPassives(user);
+      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_REMOVE_SUCCESS.send(user, element.displayName());
     } else {
       Message.ELEMENT_REMOVE_FAIL.send(user, element.displayName());
     }
   }
 
-  public static void onElementDisplay(@NonNull User user, @NonNull Element element) {
+  public void onElementDisplay(User user, Element element) {
     onElementDisplay(user.entity(), element);
   }
 
-  public static void onElementDisplay(@NonNull CommandSender user, @NonNull Element element) {
-    Collection<Component> abilities = collectAbilities(user, element);
-    Collection<Component> sequences = collectSequences(user, element);
-    Collection<Component> passives = collectPassives(user, element);
+  public void onElementDisplay(CommandSender user, Element element) {
+    AbilityDisplay abilities = collectAbilities(user, element);
+    AbilityDisplay sequences = collectSequences(user, element);
+    AbilityDisplay passives = collectPassives(user, element);
     if (abilities.isEmpty() && sequences.isEmpty() && passives.isEmpty()) {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
     } else {
       Message.ELEMENT_ABILITIES_HEADER.send(user, element.displayName(), element.description());
-      JoinConfiguration sep = JoinConfiguration.commas(true);
-      if (!abilities.isEmpty()) {
-        Message.ABILITIES.send(user);
-        user.sendMessage(Component.join(sep, abilities).colorIfAbsent(ColorPalette.TEXT_COLOR));
-      }
-      if (!sequences.isEmpty()) {
-        Message.SEQUENCES.send(user);
-        user.sendMessage(Component.join(sep, sequences).colorIfAbsent(ColorPalette.TEXT_COLOR));
-      }
-      if (!passives.isEmpty()) {
-        Message.PASSIVES.send(user);
-        user.sendMessage(Component.join(sep, passives).colorIfAbsent(ColorPalette.TEXT_COLOR));
-      }
+      abilities.forEach(user::sendMessage);
+      sequences.forEach(user::sendMessage);
+      passives.forEach(user::sendMessage);
     }
   }
 
-  private static void onInfo(CommandSender sender, AbilityDescription ability) {
-    String descKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".description";
-    String instKey = "bending.ability." + ability.name().toLowerCase(Locale.ROOT) + ".instructions";
-    Component description = Bending.translationManager().translate(descKey);
-    Component instructions = Bending.translationManager().translate(instKey);
+  private void onInfo(CommandSender sender, AbilityDescription ability) {
+    Component description = plugin.translationManager().translate(ability.key() + ".description");
+    Component instructions = plugin.translationManager().translate(ability.key() + ".instructions");
     if (instructions == null && ability instanceof Sequence sequence) {
       instructions = sequence.instructions();
     }
@@ -354,7 +349,7 @@ public final class BendingCommand {
     }
   }
 
-  private static void onBind(BendingPlayer player, AbilityDescription ability, int slot) {
+  private void onBind(BendingPlayer player, AbilityDescription ability, int slot) {
     if (!ability.canBind()) {
       Message.ABILITY_BIND_FAIL.send(player, ability.displayName());
       return;
@@ -373,17 +368,17 @@ public final class BendingCommand {
     Message.ABILITY_BIND_SUCCESS.send(player, ability.displayName(), slot);
   }
 
-  private static void onClear(BendingPlayer player, int slot) {
+  private void onBindClear(User user, int slot) {
     if (slot == 0) {
-      player.bindPreset(Preset.EMPTY);
-      Message.CLEAR_ALL_SLOTS.send(player);
+      user.bindPreset(Preset.EMPTY);
+      Message.CLEAR_ALL_SLOTS.send(user);
       return;
     }
-    player.clearSlot(slot);
-    Message.CLEAR_SLOT.send(player, slot);
+    user.clearSlot(slot);
+    Message.CLEAR_SLOT.send(user, slot);
   }
 
-  private static void onBindList(CommandSender sender, User user) {
+  private void onBindList(CommandSender sender, User user) {
     Collection<Element> elements = user.elements();
     Component hover;
     if (elements.isEmpty()) {
@@ -396,7 +391,7 @@ public final class BendingCommand {
     user.createPresetFromSlots("").display().forEach(sender::sendMessage);
   }
 
-  private static void onList(BendingPlayer player) {
+  private void onPresetList(BendingPlayer player) {
     Collection<Preset> presets = player.presets();
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(player);
@@ -407,8 +402,8 @@ public final class BendingCommand {
     }
   }
 
-  private static void onCreate(BendingPlayer player, String name) {
-    String input = ChatUtil.sanitizeInput(name);
+  private void onPresetCreate(BendingPlayer player, String name) {
+    String input = TextUtil.sanitizeInput(name);
     if (input.isEmpty()) {
       Message.INVALID_PRESET_NAME.send(player);
       return;
@@ -420,7 +415,7 @@ public final class BendingCommand {
     }
     PresetCreateResult createResult = player.addPreset(preset);
     if (createResult == PresetCreateResult.SUCCESS) {
-      Bending.game().storage().savePresetAsync(player.profileId(), preset).thenAccept(result -> {
+      player.game().storage().savePresetAsync(player.profileId(), preset).thenAccept(result -> {
         if (result) {
           PresetCreateResult.SUCCESS.message().send(player, input);
         } else {
@@ -432,61 +427,92 @@ public final class BendingCommand {
     }
   }
 
-  private static void onRemove(BendingPlayer player, Preset preset) {
+  private void onPresetRemove(BendingPlayer player, Preset preset) {
     if (player.removePreset(preset)) {
-      Bending.game().storage().deletePresetAsync(preset.id());
+      player.game().storage().deletePresetAsync(preset.id());
       Message.PRESET_REMOVE_SUCCESS.send(player, preset.name());
     } else {
       Message.PRESET_REMOVE_FAIL.send(player, preset.name());
     }
   }
 
-  private static void onBind(BendingPlayer player, Preset preset) {
-    if (player.bindPreset(preset)) {
-      Message.PRESET_BIND_SUCCESS.send(player, preset.name());
+  private void onPresetBind(User user, Preset preset) {
+    if (user.bindPreset(preset)) {
+      Message.PRESET_BIND_SUCCESS.send(user, preset.name());
     } else {
-      Message.PRESET_BIND_FAIL.send(player, preset.name());
+      Message.PRESET_BIND_FAIL.send(user, preset.name());
     }
   }
 
-  private static void onModifierAdd(User user, AttributeModifier modifier) {
-    Registries.ATTRIBUTES.add(user, modifier);
+  private void onModifierAdd(User user, AttributeModifier modifier) {
+    user.addAttribute(modifier);
     recalculate(user);
     Message.MODIFIER_ADD.send(user, user.entity().getName());
   }
 
-  private static void onModifierClear(User user) {
-    Registries.ATTRIBUTES.invalidate(user);
+  private void onModifierClear(User user) {
+    user.clearAttributes();
     recalculate(user);
     Message.MODIFIER_CLEAR.send(user, user.entity().getName());
   }
 
-  private static void recalculate(User user) {
-    Bending.game().abilityManager(user.world()).userInstances(user).forEach(Ability::loadConfig);
+  private void recalculate(User user) {
+    user.game().abilityManager(user.world()).userInstances(user).forEach(Ability::loadConfig);
   }
 
-  private static Collection<Component> collectAbilities(CommandSender user, Element element) {
-    return Registries.ABILITIES.stream()
+  private AbilityDisplay collectAbilities(CommandSender user, Element element) {
+    var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> user.hasPermission(desc.permission()))
+      .filter(desc -> hasPermission(user, desc))
       .map(AbilityDescription::meta)
       .toList();
+    return new AbilityDisplay(Message.ABILITIES.build(), components);
   }
 
-  private static Collection<Component> collectSequences(CommandSender user, Element element) {
-    return Registries.SEQUENCES.stream()
+  private AbilityDisplay collectSequences(CommandSender user, Element element) {
+    var components = Registries.SEQUENCES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> user.hasPermission(desc.permission()))
+      .filter(desc -> hasPermission(user, desc))
       .map(AbilityDescription::meta)
       .toList();
+    return new AbilityDisplay(Message.SEQUENCES.build(), components);
   }
 
-  private static Collection<Component> collectPassives(CommandSender user, Element element) {
-    return Registries.ABILITIES.stream()
+  private AbilityDisplay collectPassives(CommandSender user, Element element) {
+    var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> user.hasPermission(desc.permission()))
+      .filter(desc -> hasPermission(user, desc))
       .map(AbilityDescription::meta)
       .toList();
+    return new AbilityDisplay(Message.PASSIVES.build(), components);
+  }
+
+  private boolean hasPermission(CommandSender user, AbilityDescription desc) {
+    return desc.permissions().stream().allMatch(user::hasPermission);
+  }
+
+  private static final class AbilityDisplay implements Iterable<Component> {
+    private final Collection<Component> display;
+
+    private AbilityDisplay(Component header, Collection<Component> abilities) {
+      if (abilities.isEmpty()) {
+        display = List.of();
+      } else {
+        JoinConfiguration sep = JoinConfiguration.commas(true);
+        Component hover = Component.text("Click to view info about a specific ability.", ColorPalette.NEUTRAL);
+        Component component = Component.join(sep, abilities).colorIfAbsent(ColorPalette.TEXT_COLOR);
+        display = List.of(header, component.hoverEvent(HoverEvent.showText(hover)));
+      }
+    }
+
+    private boolean isEmpty() {
+      return display.isEmpty();
+    }
+
+    @Override
+    public Iterator<Component> iterator() {
+      return display.iterator();
+    }
   }
 }

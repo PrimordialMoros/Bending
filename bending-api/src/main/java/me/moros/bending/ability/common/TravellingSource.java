@@ -30,7 +30,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TravellingSource implements State {
   private final BlockData data;
@@ -42,7 +42,7 @@ public class TravellingSource implements State {
 
   private final double minDistanceSq, maxDistanceSq;
 
-  public TravellingSource(@NonNull User user, @NonNull BlockData data, double minDistance, double maxDistance) {
+  public TravellingSource(User user, BlockData data, double minDistance, double maxDistance) {
     this.user = user;
     this.data = data;
     this.minDistanceSq = minDistance * minDistance;
@@ -50,7 +50,7 @@ public class TravellingSource implements State {
   }
 
   @Override
-  public void start(@NonNull StateChain chain) {
+  public void start(StateChain chain) {
     if (started) {
       return;
     }
@@ -70,7 +70,7 @@ public class TravellingSource implements State {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (!started) {
       return UpdateResult.REMOVE;
     }
@@ -107,7 +107,7 @@ public class TravellingSource implements State {
     return UpdateResult.CONTINUE;
   }
 
-  private Block findPath(Block check) {
+  private @Nullable Block findPath(Block check) {
     Vector3d dest = Vector3d.center(user.headBlock());
     Block result = null;
     double minDistance = Double.MAX_VALUE;

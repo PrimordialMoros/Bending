@@ -21,7 +21,6 @@ package me.moros.bending.model.predicate.removal;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class ExpireRemovalPolicy implements RemovalPolicy {
   private final long expireTime;
@@ -33,11 +32,11 @@ public final class ExpireRemovalPolicy implements RemovalPolicy {
   }
 
   @Override
-  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
+  public boolean test(User user, AbilityDescription desc) {
     return valid && System.currentTimeMillis() > expireTime;
   }
 
-  public static @NonNull RemovalPolicy of(long duration) {
+  public static RemovalPolicy of(long duration) {
     if (duration <= 0) {
       return (u, d) -> false;
     }

@@ -21,11 +21,12 @@ package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -43,11 +44,10 @@ import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Collapse extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -58,12 +58,12 @@ public class Collapse extends AbilityInstance {
 
   private int height;
 
-  public Collapse(@NonNull AbilityDescription desc) {
+  public Collapse(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -106,7 +106,7 @@ public class Collapse extends AbilityInstance {
     return false;
   }
 
-  public boolean activate(@NonNull User user, @NonNull Collection<@NonNull Block> sources, int height) {
+  public boolean activate(User user, Collection<Block> sources, int height) {
     this.user = user;
     loadConfig();
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
@@ -123,11 +123,11 @@ public class Collapse extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -150,24 +150,20 @@ public class Collapse extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 18;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 6;
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 500;
     @Modifiable(Attribute.HEIGHT)
-    public int maxHeight;
+    private int maxHeight = 6;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "collapse");
-
-      selectRange = abilityNode.node("select-range").getDouble(18.0);
-      radius = abilityNode.node("radius").getDouble(6.0);
-      maxHeight = abilityNode.node("max-height").getInt(6);
-      cooldown = abilityNode.node("cooldown").getLong(500);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "collapse");
     }
   }
 }

@@ -29,7 +29,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A multi-layered cache used to check if a User can build in a specific block location.
@@ -49,7 +48,7 @@ public enum ProtectionCache {
    * Remove the block protection cache for the specified user.
    * @param user the user for which the cache will be invalidated
    */
-  public void invalidate(@NonNull User user) {
+  public void invalidate(User user) {
     cache.remove(user.uuid());
   }
 
@@ -62,7 +61,7 @@ public enum ProtectionCache {
    * @return the result.
    * @see #canBuildPostCache(User, Block)
    */
-  public boolean canBuild(@NonNull User user, @NonNull Block block) {
+  public boolean canBuild(User user, Block block) {
     UUID uuid = user.uuid();
     return cache.computeIfAbsent(uuid, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
   }
@@ -82,7 +81,7 @@ public enum ProtectionCache {
    * @return the created cache
    * @see Caffeine
    */
-  private static Cache<Block, Boolean> buildCache() {
+  private Cache<Block, Boolean> buildCache() {
     return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
   }
 }

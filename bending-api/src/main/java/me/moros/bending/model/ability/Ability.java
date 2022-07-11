@@ -28,7 +28,6 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Ability extends Updatable {
   /**
@@ -37,7 +36,7 @@ public interface Ability extends Updatable {
    * @param method the type of activation that is used
    * @return true if ability was successfully activated, false otherwise
    */
-  boolean activate(@NonNull User user, @NonNull Activation method);
+  boolean activate(User user, Activation method);
 
   /**
    * Load the config and apply any possible modifiers.
@@ -47,7 +46,7 @@ public interface Ability extends Updatable {
   /**
    * @return the type of this ability
    */
-  @NonNull AbilityDescription description();
+  AbilityDescription description();
 
   /**
    * @return the user that is currently controlling the ability
@@ -59,13 +58,13 @@ public interface Ability extends Updatable {
    * @param newUser the new user that controls the ability
    * @see AbilityManager#changeOwner(Ability, User)
    */
-  default void onUserChange(@NonNull User newUser) {
+  default void onUserChange(User newUser) {
   }
 
   /**
    * @return an immutable collection of this ability's colliders
    */
-  default @NonNull Collection<@NonNull Collider> colliders() {
+  default Collection<Collider> colliders() {
     return List.of();
   }
 
@@ -73,7 +72,7 @@ public interface Ability extends Updatable {
    * Called when a collision with another ability occurs.
    * @param collision the data regarding the collision that occured.
    */
-  default void onCollision(@NonNull Collision collision) {
+  default void onCollision(Collision collision) {
   }
 
   /**

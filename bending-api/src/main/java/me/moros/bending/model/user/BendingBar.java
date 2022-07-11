@@ -25,7 +25,6 @@ import me.moros.bending.model.ability.Updatable;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class BendingBar implements Updatable {
   private final BossBar bar;
@@ -42,7 +41,7 @@ public final class BendingBar implements Updatable {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     long time = System.currentTimeMillis();
     if (endTime == 0) {
       endTime = time + duration;
@@ -61,7 +60,7 @@ public final class BendingBar implements Updatable {
     audience.hideBossBar(bar);
   }
 
-  public static @NonNull BendingBar of(@NonNull BossBar bar, @NonNull Player target, long duration) {
+  public static BendingBar of(BossBar bar, Player target, long duration) {
     Objects.requireNonNull(bar);
     Objects.requireNonNull(target);
     return new BendingBar(bar, target, duration);

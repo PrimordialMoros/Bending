@@ -22,11 +22,12 @@ package me.moros.bending.ability.water;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -58,11 +59,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FrostBreath extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -71,13 +71,13 @@ public class FrostBreath extends AbilityInstance {
   private final Collection<FrostStream> streams = new ArrayList<>();
   private final Set<Entity> affectedEntities = new HashSet<>();
 
-  public FrostBreath(@NonNull AbilityDescription desc) {
+  public FrostBreath(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FrostBreath.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, FrostBreath.class)) {
       return false;
     }
 
@@ -95,11 +95,11 @@ public class FrostBreath extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -123,7 +123,7 @@ public class FrostBreath extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -155,7 +155,7 @@ public class FrostBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
@@ -166,7 +166,7 @@ public class FrostBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       long duration = BendingProperties.instance().iceRevertTime(2000);
       if (MaterialUtil.isWater(block)) {
         TempBlock.ice().duration(duration).build(block);
@@ -184,24 +184,20 @@ public class FrostBreath extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 10000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 7;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 1500;
     @Modifiable(Attribute.FREEZE_TICKS)
-    public int freezeTicks;
+    private int freezeTicks = 5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "frostbreath");
-
-      cooldown = abilityNode.node("cooldown").getLong(10000);
-      range = abilityNode.node("range").getDouble(7.0);
-      duration = abilityNode.node("duration").getLong(1500);
-      freezeTicks = abilityNode.node("freeze-ticks").getInt(5);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "frostbreath");
     }
   }
 }

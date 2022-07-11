@@ -55,7 +55,7 @@ dependencies {
     compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.2.6")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
-    compileOnly("me.clip", "placeholderapi", "2.11.1")
+    compileOnly("me.clip", "placeholderapi", "2.11.2")
     compileOnly("net.luckperms", "api", "5.4")
 }
 

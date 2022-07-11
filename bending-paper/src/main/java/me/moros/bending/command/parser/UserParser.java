@@ -35,11 +35,10 @@ import me.moros.bending.registry.Registries;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class UserParser implements ArgumentParser<CommandSender, User> {
   @Override
-  public @NonNull ArgumentParseResult<User> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull Queue<@NonNull String> inputQueue) {
+  public ArgumentParseResult<User> parse(CommandContext<CommandSender> commandContext, Queue<String> inputQueue) {
     String input = inputQueue.peek();
     if (input == null) {
       return ArgumentParseResult.failure(new NoInputProvidedException(UserParser.class, commandContext));
@@ -51,15 +50,21 @@ public final class UserParser implements ArgumentParser<CommandSender, User> {
         return ArgumentParseResult.success(user);
       }
     }
-    Player player = Bukkit.getPlayer(input);
-    if (player == null) {
+    User user = Registries.BENDERS.fromString(input);
+    if (user == null) {
+      Player player = Bukkit.getPlayer(input);
+      if (player != null) {
+        user = Registries.BENDERS.get(player.getUniqueId());
+      }
+    }
+    if (user == null) {
       return ArgumentParseResult.failure(new PlayerParseException(input, commandContext));
     }
-    return ArgumentParseResult.success(Registries.BENDERS.user(player));
+    return ArgumentParseResult.success(user);
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
+  public List<String> suggestions(final CommandContext<CommandSender> commandContext, final String input) {
     Predicate<BendingPlayer> canSee;
     if (commandContext.getSender() instanceof Player sender) {
       canSee = p -> sender.canSee(p.entity());

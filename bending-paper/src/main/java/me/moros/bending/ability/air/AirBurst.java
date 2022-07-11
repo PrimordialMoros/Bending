@@ -21,10 +21,11 @@ package me.moros.bending.ability.air;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -49,13 +50,12 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirBurst extends AbilityInstance {
   private enum Mode {CONE, SPHERE, FALL}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -66,15 +66,14 @@ public class AirBurst extends AbilityInstance {
   private boolean released;
   private long startTime;
 
-  public AirBurst(@NonNull AbilityDescription desc) {
+  public AirBurst(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, AirBurst.class)
-        .ifPresent(b -> b.release(Mode.CONE));
+      user.game().abilityManager(user.world()).firstInstance(user, AirBurst.class).ifPresent(b -> b.release(Mode.CONE));
       return false;
     }
 
@@ -95,11 +94,11 @@ public class AirBurst extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -129,12 +128,12 @@ public class AirBurst extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Collider collider = collision.colliderSelf();
     streams.removeIf(stream -> stream.collider().equals(collider));
     if (collision.removeSelf() && !streams.isEmpty()) {
@@ -187,8 +186,8 @@ public class AirBurst extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
-      double factor = userConfig.power;
+    public boolean onEntityHit(Entity entity) {
+      double factor = userConfig.knockback;
       BendingEffect.FIRE_TICK.reset(entity);
       if (factor == 0) {
         return false;
@@ -216,7 +215,7 @@ public class AirBurst extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
@@ -225,32 +224,25 @@ public class AirBurst extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 2500;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1.2;
     @Modifiable(Attribute.STRENGTH)
-    public double power;
+    private double knockback = 1.2;
     @Modifiable(Attribute.RANGE)
-    public double sphereRange;
+    private double sphereRange = 12;
     @Modifiable(Attribute.RANGE)
-    public double coneRange;
-    public double fallThreshold;
+    private double coneRange = 16;
+    private double fallThreshold = 14;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airburst");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      chargeTime = abilityNode.node("charge-time").getLong(2500);
-      speed = abilityNode.node("speed").getDouble(1.2);
-      power = abilityNode.node("knockback").getDouble(1.2);
-      coneRange = abilityNode.node("cone-range").getDouble(16.0);
-      sphereRange = abilityNode.node("sphere-range").getDouble(12.0);
-      fallThreshold = abilityNode.node("fall-threshold").getDouble(14.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airburst");
     }
   }
 }

@@ -22,11 +22,12 @@ package me.moros.bending.ability.earth.sequence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -51,11 +52,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthPillars extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private static AbilityDescription pillarsDesc;
 
@@ -69,12 +69,12 @@ public class EarthPillars extends AbilityInstance {
 
   private double factor;
 
-  public EarthPillars(@NonNull AbilityDescription desc) {
+  public EarthPillars(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -107,11 +107,11 @@ public class EarthPillars extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -138,9 +138,9 @@ public class EarthPillars extends AbilityInstance {
   public static void onFall(User user) {
     if (user.selectedAbilityName().equals("Catapult")) {
       if (pillarsDesc == null) {
-        pillarsDesc = Objects.requireNonNull(Registries.ABILITIES.ability("EarthPillars"));
+        pillarsDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("EarthPillars"));
       }
-      Bending.game().activationController().activateAbility(user, Activation.FALL, pillarsDesc);
+      user.game().activationController().activateAbility(user, Activation.FALL, pillarsDesc);
     }
   }
 
@@ -150,12 +150,12 @@ public class EarthPillars extends AbilityInstance {
   }
 
   private final class EarthPillar extends Pillar {
-    private EarthPillar(@NonNull Builder builder) {
+    private EarthPillar(Builder builder) {
       super(builder);
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (entity.equals(user.entity())) {
         return false;
       }
@@ -168,32 +168,23 @@ public class EarthPillars extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 10;
     @Modifiable(Attribute.DAMAGE)
-    private double damage;
+    private double damage = 2;
     @Modifiable(Attribute.STRENGTH)
-    private double knockup;
-
-    public double maxScaleFactor;
-    public double fallThreshold;
-    public double maxFallThreshold;
+    private double knockup = 0.8;
+    private double maxScaleFactor = 1.5;
+    private double fallThreshold = 12;
+    private double maxFallThreshold = 60;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "sequences", "earthpillars");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      radius = abilityNode.node("radius").getDouble(10.0);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      knockup = abilityNode.node("knock-up").getDouble(0.8);
-
-      maxScaleFactor = abilityNode.node("max-scale-factor").getDouble(1.5);
-      fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
-      maxFallThreshold = abilityNode.node("max-fall-threshold").getDouble(60.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "sequences", "earthpillars");
     }
   }
 }

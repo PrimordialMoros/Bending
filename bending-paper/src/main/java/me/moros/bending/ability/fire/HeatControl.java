@@ -25,8 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempLight;
@@ -35,11 +35,11 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.ParticleUtil;
@@ -52,13 +52,12 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HeatControl extends AbilityInstance {
   private enum Light {ON, OFF}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -73,12 +72,12 @@ public class HeatControl extends AbilityInstance {
 
   private long startTime;
 
-  public HeatControl(@NonNull AbilityDescription desc) {
+  public HeatControl(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -88,11 +87,11 @@ public class HeatControl extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       solidify.clear();
       melt.clear();
@@ -209,25 +208,25 @@ public class HeatControl extends AbilityInstance {
     }
   }
 
-  public static void act(@NonNull User user) {
+  public static void act(User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
     }
   }
 
-  public static void onSneak(@NonNull User user) {
+  public static void onSneak(User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
+      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
     }
   }
 
-  public static void toggleLight(@NonNull User user) {
+  public static void toggleLight(User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
-      var key = DataKey.of("heatcontrol-light", Light.class);
+      var key = RegistryKey.create("heatcontrol-light", Light.class);
       if (user.store().canEdit(key)) {
         Light light = user.store().toggle(key, Light.ON);
         user.sendActionBar(Component.text("Light: " + light.name(), ColorPalette.TEXT_COLOR));
-        Bending.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(h -> h.canLight = light == Light.ON);
+        user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(h -> h.canLight = light == Light.ON);
       }
     }
   }
@@ -239,7 +238,7 @@ public class HeatControl extends AbilityInstance {
     return newBlocks;
   }
 
-  public static boolean canBurn(@NonNull User user) {
+  public static boolean canBurn(User user) {
     AbilityDescription selected = user.selectedAbility();
     if (selected == null) {
       return true;
@@ -259,7 +258,7 @@ public class HeatControl extends AbilityInstance {
 
   private class Solidify extends PhaseTransformer {
     @Override
-    protected boolean processBlock(@NonNull Block block) {
+    protected boolean processBlock(Block block) {
       if (MaterialUtil.isLava(block) && TempBlock.isBendable(block)) {
         return WorldUtil.tryCoolLava(user, block);
       }
@@ -269,7 +268,7 @@ public class HeatControl extends AbilityInstance {
 
   private class Melt extends PhaseTransformer {
     @Override
-    protected boolean processBlock(@NonNull Block block) {
+    protected boolean processBlock(Block block) {
       if (!TempBlock.isBendable(block)) {
         return false;
       }
@@ -277,30 +276,24 @@ public class HeatControl extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 10;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 5;
     @Modifiable(Attribute.RANGE)
-    public double solidifyRange;
+    private double solidifyRange = 5;
     @Modifiable(Attribute.RADIUS)
-    public double solidifyRadius;
+    private double solidifyRadius = 6;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long cookInterval;
+    private long cookInterval = 2000;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "heatcontrol");
-
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      range = abilityNode.node("range").getDouble(10.0);
-      radius = abilityNode.node("radius").getDouble(5.0);
-      solidifyRange = abilityNode.node("solidify-range").getDouble(5.0);
-      solidifyRadius = abilityNode.node("solidify-radius").getDouble(6.0);
-      cookInterval = abilityNode.node("cook-interval").getLong(2000);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "heatcontrol");
     }
   }
 }

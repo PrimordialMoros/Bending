@@ -30,15 +30,14 @@ import me.moros.bending.command.CommandManager;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.registry.Registries;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AbilityDescriptionParser implements ArgumentParser<CommandSender, AbilityDescription> {
   @Override
-  public @NonNull ArgumentParseResult<AbilityDescription> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull Queue<@NonNull String> inputQueue) {
+  public ArgumentParseResult<AbilityDescription> parse(CommandContext<CommandSender> commandContext, Queue<String> inputQueue) {
     String input = inputQueue.peek();
     if (input != null) {
       inputQueue.remove();
-      AbilityDescription check = Registries.ABILITIES.ability(input);
+      AbilityDescription check = Registries.ABILITIES.fromString(input);
       if (check != null && !check.hidden()) {
         return ArgumentParseResult.success(check);
       } else {
@@ -49,7 +48,7 @@ public final class AbilityDescriptionParser implements ArgumentParser<CommandSen
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
+  public List<String> suggestions(final CommandContext<CommandSender> commandContext, final String input) {
     return CommandManager.abilityCompletions(commandContext.getSender(), true);
   }
 

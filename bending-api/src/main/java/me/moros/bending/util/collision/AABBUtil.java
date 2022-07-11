@@ -25,7 +25,6 @@ import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class AABBUtil {
   public static final AABB DUMMY_COLLIDER = new DummyCollider();
@@ -37,7 +36,7 @@ public final class AABBUtil {
    * @param block the block to check
    * @return the provided block's {@link AABB} in relative space or a {@link DummyCollider} if the block has no collider
    */
-  public static @NonNull AABB blockDimensions(@NonNull Block block) {
+  public static AABB blockDimensions(Block block) {
     return dimensions(block, Vector3d.ZERO);
   }
 
@@ -45,7 +44,7 @@ public final class AABBUtil {
    * @param block the block to check
    * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block has no collider
    */
-  public static @NonNull AABB blockBounds(@NonNull Block block) {
+  public static AABB blockBounds(Block block) {
     return dimensions(block, new Vector3d(block));
   }
 
@@ -53,7 +52,7 @@ public final class AABBUtil {
    * @param entity the entity to check
    * @return the provided entity's {@link AABB} in relative space
    */
-  public static @NonNull AABB entityDimensions(@NonNull Entity entity) {
+  public static AABB entityDimensions(Entity entity) {
     return dimensions(entity, Vector3d.ZERO);
   }
 
@@ -61,7 +60,7 @@ public final class AABBUtil {
    * @param entity the entity to check
    * @return the provided entity's {@link AABB}
    */
-  public static @NonNull AABB entityBounds(@NonNull Entity entity) {
+  public static AABB entityBounds(Entity entity) {
     return dimensions(entity, new Vector3d(entity.getLocation()));
   }
 

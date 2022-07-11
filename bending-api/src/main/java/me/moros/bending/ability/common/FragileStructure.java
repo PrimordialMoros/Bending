@@ -34,7 +34,6 @@ import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class FragileStructure implements Iterable<Block> {
@@ -46,7 +45,7 @@ public final class FragileStructure implements Iterable<Block> {
     this.fragileBlocks = fragileBlocks;
     this.predicate = predicate;
     this.health = health;
-    this.fragileBlocks.forEach(b -> b.setMetadata(Metadata.DESTRUCTIBLE, Metadata.of(this)));
+    this.fragileBlocks.forEach(b -> Metadata.add(b, Metadata.DESTRUCTIBLE, this));
   }
 
   public int health() {
@@ -69,7 +68,7 @@ public final class FragileStructure implements Iterable<Block> {
     return 0;
   }
 
-  public static boolean tryDamageStructure(@NonNull Iterable<@NonNull Block> blocks, int damage) {
+  public static boolean tryDamageStructure(Iterable<Block> blocks, int damage) {
     for (Block block : blocks) {
       if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
         FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
@@ -82,7 +81,7 @@ public final class FragileStructure implements Iterable<Block> {
     return false;
   }
 
-  public static void destroyStructure(@NonNull FragileStructure data) {
+  public static void destroyStructure(FragileStructure data) {
     for (Block block : data.fragileBlocks) {
       Metadata.remove(block, Metadata.DESTRUCTIBLE);
       if (!data.predicate.test(block)) {
@@ -98,12 +97,12 @@ public final class FragileStructure implements Iterable<Block> {
     }
   }
 
-  public static @NonNull Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
   @Override
-  public @NonNull Iterator<Block> iterator() {
+  public Iterator<Block> iterator() {
     return fragileBlocks.iterator();
   }
 
@@ -114,17 +113,17 @@ public final class FragileStructure implements Iterable<Block> {
     private Builder() {
     }
 
-    public @NonNull Builder health(int health) {
+    public Builder health(int health) {
       this.health = Math.max(1, health);
       return this;
     }
 
-    public @NonNull Builder predicate(@NonNull Predicate<Block> predicate) {
+    public Builder predicate(Predicate<Block> predicate) {
       this.predicate = Objects.requireNonNull(predicate);
       return this;
     }
 
-    public @Nullable FragileStructure build(@NonNull Collection<@NonNull Block> blocks) {
+    public @Nullable FragileStructure build(Collection<Block> blocks) {
       if (blocks.isEmpty()) {
         return null;
       }

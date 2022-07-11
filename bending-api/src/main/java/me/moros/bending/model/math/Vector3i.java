@@ -21,7 +21,7 @@ package me.moros.bending.model.math;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Immutable 3D Vector implementation with integer coordinates
@@ -45,7 +45,7 @@ public class Vector3i {
     this.z = z;
   }
 
-  public Vector3i(@NonNull Block b) {
+  public Vector3i(Block b) {
     this(b.getX(), b.getY(), b.getZ());
   }
 
@@ -88,21 +88,21 @@ public class Vector3i {
   /**
    * @return a new vector copy with the given x coordinate
    */
-  public @NonNull Vector3i withX(int value) {
+  public Vector3i withX(int value) {
     return new Vector3i(value, y, z);
   }
 
   /**
    * @return a new vector copy with the given y coordinate
    */
-  public @NonNull Vector3i withY(int value) {
+  public Vector3i withY(int value) {
     return new Vector3i(x, value, z);
   }
 
   /**
    * @return a new vector copy with the given z coordinate
    */
-  public @NonNull Vector3i withZ(int value) {
+  public Vector3i withZ(int value) {
     return new Vector3i(x, y, value);
   }
 
@@ -134,7 +134,7 @@ public class Vector3i {
    * @param v vector to add
    * @return a new vector
    */
-  public @NonNull Vector3i add(@NonNull Vector3i v) {
+  public Vector3i add(Vector3i v) {
     return new Vector3i(x + v.x, y + v.y, z + v.z);
   }
 
@@ -143,7 +143,7 @@ public class Vector3i {
    * @param v vector to subtract
    * @return a new vector
    */
-  public @NonNull Vector3i subtract(@NonNull Vector3i v) {
+  public Vector3i subtract(Vector3i v) {
     return new Vector3i(x - v.x, y - v.y, z - v.z);
   }
 
@@ -151,7 +151,7 @@ public class Vector3i {
    * Get the opposite of the instance.
    * @return a new vector which is opposite to the instance
    */
-  public @NonNull Vector3i negate() {
+  public Vector3i negate() {
     return new Vector3i(-x, -y, -z);
   }
 
@@ -160,33 +160,33 @@ public class Vector3i {
    * @param a scalar
    * @return a new vector
    */
-  public @NonNull Vector3i multiply(int a) {
+  public Vector3i multiply(int a) {
     return new Vector3i(a * x, a * y, a * z);
   }
 
-  public @NonNull Vector3i multiply(@NonNull Vector3i v) {
+  public Vector3i multiply(Vector3i v) {
     return new Vector3i(x * v.x, y * v.y, z * v.z);
   }
 
-  public int dot(@NonNull Vector3i v) {
+  public int dot(Vector3i v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
-  public @NonNull Vector3i cross(@NonNull Vector3i v) {
+  public Vector3i cross(Vector3i v) {
     int newX = y * v.z - v.y * z;
     int newY = z * v.x - v.z * x;
     int newZ = x * v.y - v.x * y;
     return new Vector3i(newX, newY, newZ);
   }
 
-  public double distance(@NonNull Vector3i v) {
+  public double distance(Vector3i v) {
     int dx = v.x - x;
     int dy = v.y - y;
     int dz = v.z - z;
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
-  public int distanceSq(@NonNull Vector3i v) {
+  public int distanceSq(Vector3i v) {
     int dx = v.x - x;
     int dy = v.y - y;
     int dz = v.z - z;
@@ -194,7 +194,7 @@ public class Vector3i {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (this == obj) {
       return true;
     }
@@ -217,11 +217,11 @@ public class Vector3i {
     return "[" + x + ", " + y + ", " + z + "]";
   }
 
-  public @NonNull Vector3d toVector3d() {
+  public Vector3d toVector3d() {
     return new Vector3d(x, y, z);
   }
 
-  public @NonNull Block toBlock(@NonNull World world) {
+  public Block toBlock(World world) {
     return world.getBlockAt(x, y, z);
   }
 }

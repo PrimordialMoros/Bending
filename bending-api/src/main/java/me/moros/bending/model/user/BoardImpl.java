@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.util.ChatUtil;
+import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -34,7 +34,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 final class BoardImpl implements Board {
   static final Board DUMMY = new DummyBoard();
@@ -108,7 +107,7 @@ final class BoardImpl implements Board {
   }
 
   @Override
-  public void updateMisc(@NonNull AbilityDescription desc, boolean show) {
+  public void updateMisc(AbilityDescription desc, boolean show) {
     if (show && misc.isEmpty()) {
       bendingSlots.getScore(SEP).setScore(-10);
     }
@@ -137,7 +136,7 @@ final class BoardImpl implements Board {
 
   private Team createTeam(int slot, String id) {
     Team team = bendingBoard.registerNewTeam(id);
-    String hidden = ChatUtil.generateInvisibleString(slot);
+    String hidden = TextUtil.generateInvisibleString(slot);
     team.addEntry(hidden);
     bendingSlots.getScore(hidden).setScore(-slot);
     return team;

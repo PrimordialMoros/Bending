@@ -19,26 +19,23 @@
 
 package me.moros.bending.config;
 
-import me.moros.bending.Bending;
+import java.io.Serializable;
+
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
-public abstract class Configurable implements Cloneable {
-  protected CommentedConfigurationNode config;
+public abstract class Configurable implements Serializable {
+  private transient CommentedConfigurationNode node;
 
   protected Configurable() {
-    Bending.configManager().add(this);
-    reload();
   }
 
-  public abstract void onConfigReload();
+  public abstract Iterable<String> path();
 
-  public void reload() {
-    config = Bending.configManager().config();
-    onConfigReload();
+  CommentedConfigurationNode node() {
+    return node;
   }
 
-  @Override
-  protected Object clone() throws CloneNotSupportedException {
-    return super.clone();
+  void setNode(CommentedConfigurationNode node) {
+    this.node = node;
   }
 }

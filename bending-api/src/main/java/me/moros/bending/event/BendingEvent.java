@@ -23,15 +23,21 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Base event for all bending events.
+ */
 public abstract class BendingEvent extends Event {
-  private static final HandlerList handlers = new HandlerList();
+  private static final HandlerList HANDLERS = new HandlerList();
+
+  protected BendingEvent() {
+  }
 
   @Override
   public @NonNull HandlerList getHandlers() {
-    return handlers;
+    return HANDLERS;
   }
 
   public static HandlerList getHandlerList() {
-    return handlers;
+    return HANDLERS;
   }
 }

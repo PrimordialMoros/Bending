@@ -26,24 +26,27 @@ import java.util.Queue;
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
+import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import me.moros.bending.command.CommandManager;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.registry.Registries;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class ModifyPolicyParser implements ArgumentParser<CommandSender, ModifyPolicy> {
   @Override
-  public @NonNull ArgumentParseResult<ModifyPolicy> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull Queue<@NonNull String> inputQueue) {
+  public ArgumentParseResult<ModifyPolicy> parse(CommandContext<CommandSender> commandContext, Queue<String> inputQueue) {
     String input = inputQueue.peek();
+    if (input == null) {
+      return ArgumentParseResult.failure(new NoInputProvidedException(ModifyPolicyParser.class, commandContext));
+    }
     Optional<Element> element = Element.fromName(input);
     if (element.isPresent()) {
       inputQueue.remove();
       return ArgumentParseResult.success(ModifyPolicy.of(element.get()));
     }
-    AbilityDescription desc = Registries.ABILITIES.ability(input);
+    AbilityDescription desc = Registries.ABILITIES.fromString(input);
     if (desc != null) {
       inputQueue.remove();
       return ArgumentParseResult.success(ModifyPolicy.of(desc));
@@ -52,7 +55,7 @@ public final class ModifyPolicyParser implements ArgumentParser<CommandSender, M
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
+  public List<String> suggestions(final CommandContext<CommandSender> commandContext, final String input) {
     return CommandManager.combinedSuggestions(commandContext.getSender());
   }
 

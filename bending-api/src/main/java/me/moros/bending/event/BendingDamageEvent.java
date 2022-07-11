@@ -26,24 +26,25 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 @SuppressWarnings("deprecation")
-public class BendingDamageEvent extends EntityDamageByEntityEvent {
+public class BendingDamageEvent extends EntityDamageByEntityEvent implements AbilityEvent {
   private final User user;
   private final AbilityDescription desc;
 
   BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
-    super(user.entity(), target, DamageCause.CUSTOM, new EnumMap<>(Map.of(DamageModifier.BASE, damage)), Map.of(DamageModifier.BASE, o -> -0.0));
+    super(user.entity(), target, DamageCause.CUSTOM, new EnumMap<>(Map.of(DamageModifier.BASE, damage)), Map.of(DamageModifier.BASE, o -> -0.0), false);
     this.user = user;
     this.desc = desc;
   }
 
-  public @NonNull User user() {
+  @Override
+  public User user() {
     return user;
   }
 
-  public @NonNull AbilityDescription ability() {
+  @Override
+  public AbilityDescription ability() {
     return desc;
   }
 }

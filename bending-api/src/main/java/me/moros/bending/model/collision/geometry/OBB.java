@@ -21,7 +21,6 @@ package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static java.lang.Math.abs;
 
@@ -40,13 +39,13 @@ public class OBB implements Collider {
     System.arraycopy(obb.axes, 0, axes, 0, 3);
   }
 
-  public OBB(@NonNull AABB aabb) {
+  public OBB(AABB aabb) {
     this.center = aabb.position();
     this.e = aabb.halfExtents();
     this.axes = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
   }
 
-  public OBB(@NonNull AABB aabb, @NonNull Rotation rotation) {
+  public OBB(AABB aabb, Rotation rotation) {
     this.center = rotation.applyTo(aabb.position());
     this.e = aabb.halfExtents();
     double[][] m = rotation.getMatrix();
@@ -56,11 +55,11 @@ public class OBB implements Collider {
     }
   }
 
-  public OBB(@NonNull AABB aabb, @NonNull Vector3d axis, double angle) {
+  public OBB(AABB aabb, Vector3d axis, double angle) {
     this(aabb, new Rotation(axis, angle));
   }
 
-  boolean intersects(@NonNull OBB other) {
+  boolean intersects(OBB other) {
     final Vector3d pos = other.center.subtract(center);
     for (int i = 0; i < 3; i++) {
       if (getSeparatingPlane(pos, axes[i], other) || getSeparatingPlane(pos, other.axes[i], other)) {
@@ -77,7 +76,7 @@ public class OBB implements Collider {
     return true;
   }
 
-  @NonNull Vector3d localSpace(@NonNull Vector3d dir) {
+  Vector3d localSpace(Vector3d dir) {
     double[] out = new double[3];
     for (int row = 0; row < 3; row++) {
       out[row] = axes[row].dot(dir);
@@ -98,7 +97,7 @@ public class OBB implements Collider {
   }
 
   // Returns the position closest to the target that lies on/in the OBB.
-  public @NonNull Vector3d closestPosition(@NonNull Vector3d target) {
+  public Vector3d closestPosition(Vector3d target) {
     Vector3d t = target.subtract(center);
     Vector3d closest = center;
     double[] extentArray = e.toArray();
@@ -112,22 +111,22 @@ public class OBB implements Collider {
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return center;
   }
 
   @Override
-  public @NonNull OBB at(@NonNull Vector3d point) {
+  public OBB at(Vector3d point) {
     return new OBB(this, point);
   }
 
   @Override
-  public @NonNull Vector3d halfExtents() {
+  public Vector3d halfExtents() {
     return localSpace(e).abs();
   }
 
   @Override
-  public boolean contains(@NonNull Vector3d point) {
+  public boolean contains(Vector3d point) {
     return closestPosition(point).distanceSq(point) <= EPSILON;
   }
 }

@@ -21,9 +21,9 @@ package me.moros.bending.util;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.adapter.impl.NativeAdapter;
-import me.moros.bending.event.BendingVelocityEvent;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.event.EventBus;
+import me.moros.bending.event.VelocityEvent;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
@@ -37,7 +37,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectType.Category;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class with useful {@link Entity} related methods. Note: This is not thread-safe.
@@ -47,15 +46,15 @@ public final class EntityUtil {
   }
 
   /**
-   * Set an entity's velocity and post a {@link BendingVelocityEvent} if it's a LivingEntity.
+   * Set an entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
    * @param ability the ability the causes this velocity change
    * @param entity the target entity
    * @param velocity the new velocity
    * @return whether the new velocity was successfully applied
    */
-  public static boolean applyVelocity(@NonNull Ability ability, @NonNull Entity entity, @NonNull Vector3d velocity) {
+  public static boolean applyVelocity(Ability ability, Entity entity, Vector3d velocity) {
     if (entity instanceof LivingEntity livingEntity) {
-      BendingVelocityEvent event = EventBus.INSTANCE.postVelocityEvent(ability.user(), livingEntity, ability.description(), velocity);
+      VelocityEvent event = EventBus.INSTANCE.postVelocityEvent(ability.user(), livingEntity, ability.description(), velocity);
       if (!event.isCancelled()) {
         entity.setVelocity(event.velocity().clampVelocity());
         return true;
@@ -73,7 +72,7 @@ public final class EntityUtil {
    * @param predicate the type of blocks to accept
    * @return whether the user is against a wall
    */
-  public static boolean isAgainstWall(@NonNull Entity entity, @NonNull Predicate<Block> predicate) {
+  public static boolean isAgainstWall(Entity entity, Predicate<Block> predicate) {
     Block origin = entity.getLocation().getBlock();
     for (BlockFace face : WorldUtil.SIDES) {
       Block relative = origin.getRelative(face);
@@ -92,7 +91,7 @@ public final class EntityUtil {
    * @param entity the entity to check
    * @return true if entity standing on ground, false otherwise
    */
-  public static boolean isOnGround(@NonNull Entity entity) {
+  public static boolean isOnGround(Entity entity) {
     if (!(entity instanceof Player)) {
       return entity.isOnGround();
     }
@@ -109,7 +108,7 @@ public final class EntityUtil {
   /**
    * @return {@link #distanceAboveGround(Entity, double)} with maxHeight matching world height.
    */
-  public static double distanceAboveGround(@NonNull Entity entity) {
+  public static double distanceAboveGround(Entity entity) {
     int minHeight = entity.getWorld().getMinHeight();
     int realMax = entity.getWorld().getMaxHeight() - minHeight;
     return distanceAboveGround(entity, realMax);
@@ -122,7 +121,7 @@ public final class EntityUtil {
    * @param maxHeight the maximum height to check
    * @return the distance in blocks between the entity and ground or the max world height.
    */
-  public static double distanceAboveGround(@NonNull Entity entity, double maxHeight) {
+  public static double distanceAboveGround(Entity entity, double maxHeight) {
     int minHeight = entity.getWorld().getMinHeight();
     AABB entityBounds = AABBUtil.entityBounds(entity).grow(new Vector3d(0, maxHeight, 0));
     Block origin = entity.getLocation().getBlock();
@@ -144,24 +143,24 @@ public final class EntityUtil {
    * @param entity the entity to get the vector for
    * @return the resulting vector
    */
-  public static @NonNull Vector3d entityCenter(@NonNull Entity entity) {
+  public static Vector3d entityCenter(Entity entity) {
     return new Vector3d(entity.getLocation()).add(new Vector3d(0, entity.getHeight() / 2, 0));
   }
 
-  public static boolean underWater(@NonNull Entity entity) {
+  public static boolean underWater(Entity entity) {
     return entity.isInWaterOrBubbleColumn() && NativeAdapter.instance().eyeInWater(entity);
   }
 
-  public static boolean underLava(@NonNull Entity entity) {
+  public static boolean underLava(Entity entity) {
     return entity.isInLava() && NativeAdapter.instance().eyeInLava(entity);
   }
 
-  public static void removeNegativeEffects(@NonNull LivingEntity entity) {
+  public static void removeNegativeEffects(LivingEntity entity) {
     entity.getActivePotionEffects().stream().map(PotionEffect::getType)
       .filter(t -> t.getEffectCategory() == Category.HARMFUL).forEach(entity::removePotionEffect);
   }
 
-  public static boolean tryAddPotion(@NonNull Entity entity, @NonNull PotionEffectType type, int duration, int amplifier) {
+  public static boolean tryAddPotion(Entity entity, PotionEffectType type, int duration, int amplifier) {
     if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
       int minDuration = type.getEffectCategory() == Category.BENEFICIAL ? 20 : duration;
       PotionEffect effect = livingEntity.getPotionEffect(type);

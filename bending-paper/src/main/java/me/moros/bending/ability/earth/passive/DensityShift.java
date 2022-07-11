@@ -19,9 +19,10 @@
 
 package me.moros.bending.ability.earth.passive;
 
+import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -37,21 +38,20 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class DensityShift extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
 
-  public DensityShift(@NonNull AbilityDescription desc) {
+  public DensityShift(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     return true;
@@ -59,11 +59,11 @@ public class DensityShift extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     return UpdateResult.CONTINUE;
   }
 
@@ -79,8 +79,8 @@ public class DensityShift extends AbilityInstance {
     return MaterialUtil.isTransparent(block);
   }
 
-  public static boolean isSoftened(@NonNull User user) {
-    return Bending.game().abilityManager(user.world()).firstInstance(user, DensityShift.class)
+  public static boolean isSoftened(User user) {
+    return user.game().abilityManager(user.world()).firstInstance(user, DensityShift.class)
       .map(DensityShift::isSoftened).orElse(false);
   }
 
@@ -101,18 +101,16 @@ public class DensityShift extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 6000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "densityshift");
-
-      duration = abilityNode.node("duration").getLong(6000);
-      radius = abilityNode.node("radius").getDouble(2.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "passives", "densityshift");
     }
   }
 }

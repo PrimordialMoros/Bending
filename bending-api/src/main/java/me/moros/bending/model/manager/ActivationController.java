@@ -30,46 +30,45 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles ability activation.
  */
 public interface ActivationController {
-  @Nullable Ability activateAbility(@NonNull User user, @NonNull Activation method);
+  @Nullable Ability activateAbility(User user, Activation method);
 
-  @Nullable Ability activateAbility(@NonNull User user, @NonNull Activation method, @NonNull AbilityDescription desc);
+  @Nullable Ability activateAbility(User user, Activation method, AbilityDescription desc);
 
-  void onUserDeconstruct(@NonNull User user);
+  void onUserDeconstruct(User user);
 
-  void onUserSwing(@NonNull User user);
+  void onUserSwing(User user);
 
-  boolean onUserGlide(@NonNull User user);
+  boolean onUserGlide(User user);
 
-  void onUserSneak(@NonNull User user, boolean sneaking);
+  void onUserSneak(User user, boolean sneaking);
 
-  void onUserMove(@NonNull User user, @NonNull Vector3d velocity);
+  void onUserMove(User user, Vector3d velocity);
 
-  void onUserDamage(@NonNull User user);
+  void onUserDamage(User user);
 
-  double onEntityDamage(@NonNull LivingEntity entity, @NonNull DamageCause cause, double damage);
+  double onEntityDamage(LivingEntity entity, DamageCause cause, double damage);
 
-  boolean onBurn(@NonNull User user);
+  boolean onBurn(User user);
 
-  boolean onFall(@NonNull User user);
+  boolean onFall(User user);
 
-  void onUserInteract(@NonNull User user, @NonNull Activation method);
+  void onUserInteract(User user, Activation method);
 
-  void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Entity entity);
+  void onUserInteract(User user, Activation method, @Nullable Entity entity);
 
-  void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Block block);
+  void onUserInteract(User user, Activation method, @Nullable Block block);
 
-  void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Entity entity, @Nullable Block block);
+  void onUserInteract(User user, Activation method, @Nullable Entity entity, @Nullable Block block);
 
-  void ignoreNextSwing(@NonNull User user);
+  void ignoreNextSwing(UUID uuid);
 
-  boolean hasSpout(@NonNull UUID uuid);
+  boolean hasSpout(UUID uuid);
 
   void clearCache();
 }

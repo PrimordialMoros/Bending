@@ -19,9 +19,10 @@
 
 package me.moros.bending.ability.fire;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempLight;
@@ -45,11 +46,10 @@ import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireJet extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static final SoundEffect LOUD_EXPLOSION = SoundUtil.EXPLOSION.with(10, 0);
 
   private User user;
@@ -62,13 +62,13 @@ public class FireJet extends AbilityInstance {
   private long startTime;
   private int ticks = 3;
 
-  public FireJet(@NonNull AbilityDescription desc) {
+  public FireJet(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, FireJet.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).destroyInstanceType(user, FireJet.class)) {
       return false;
     }
 
@@ -113,7 +113,7 @@ public class FireJet extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   private void jetBlastAnimation() {
@@ -125,7 +125,7 @@ public class FireJet extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -163,33 +163,24 @@ public class FireJet extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.85;
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 7000;
     @Modifiable(Attribute.DURATION)
-    private long duration;
+    private long duration = 2000;
     @Modifiable(Attribute.SPEED)
-    public double jetBlastSpeed;
+    private double jetBlastSpeed = 1.5;
     @Modifiable(Attribute.COOLDOWN)
-    public long jetBlastCooldown;
+    private long jetBlastCooldown = 10_000;
     @Modifiable(Attribute.DURATION)
-    public long jetBlastDuration;
+    private long jetBlastDuration = 2000;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firejet");
-
-      speed = abilityNode.node("speed").getDouble(0.85);
-      cooldown = abilityNode.node("cooldown").getLong(7000);
-      duration = abilityNode.node("duration").getLong(2000);
-
-      CommentedConfigurationNode boostedNode = abilityNode.node("boosted");
-
-      jetBlastSpeed = boostedNode.node("speed").getDouble(1.5);
-      jetBlastCooldown = boostedNode.node("cooldown").getLong(10000);
-      jetBlastDuration = boostedNode.node("duration").getLong(2000);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "firejet");
     }
   }
 }

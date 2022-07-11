@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -56,11 +57,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class IceSpike extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -69,18 +69,18 @@ public class IceSpike extends AbilityInstance {
   private final Collection<IcePillar> pillars = new ArrayList<>();
   private final Collection<Entity> affectedEntities = new HashSet<>();
 
-  public IceSpike(@NonNull AbilityDescription desc) {
+  public IceSpike(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
     boolean field = method == Activation.SNEAK;
     if (field) {
-      Collider collider = new Sphere(user.location(), userConfig.radius);
+      Collider collider = new Sphere(user.location(), userConfig.fieldRadius);
       CollisionUtil.handle(user, collider, this::createPillar, true);
     } else {
       Block source = null;
@@ -109,11 +109,11 @@ public class IceSpike extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -193,7 +193,7 @@ public class IceSpike extends AbilityInstance {
     private int currentLength = 0;
     private long nextUpdateTime = 0;
 
-    private IcePillar(@NonNull Block origin, int length) {
+    private IcePillar(Block origin, int length) {
       this.origin = origin;
       this.material = origin.getType();
       this.length = length;
@@ -201,7 +201,7 @@ public class IceSpike extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       if (reverting && pillarBlocks.isEmpty()) {
         return UpdateResult.REMOVE;
       }
@@ -251,7 +251,7 @@ public class IceSpike extends AbilityInstance {
       return true;
     }
 
-    private boolean onEntityHit(@NonNull Entity entity) {
+    private boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity) && !entity.equals(user.entity())) {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
@@ -263,42 +263,28 @@ public class IceSpike extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 10;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.STRENGTH)
-    public double knockup;
+    private double knockup = 0.8;
     @Modifiable(Attribute.FREEZE_TICKS)
-    public int freezeTicks;
-
+    private int freezeTicks = 80;
     @Modifiable(Attribute.COOLDOWN)
-    public long columnCooldown;
+    private long columnCooldown = 1500;
     @Modifiable(Attribute.HEIGHT)
-    public int columnMaxHeight;
+    private int columnMaxHeight = 5;
     @Modifiable(Attribute.COOLDOWN)
-    public long fieldCooldown;
+    private long fieldCooldown = 5;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double fieldRadius = 10;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icespike");
-
-      selectRange = abilityNode.node("select-range").getDouble(10.0);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      knockup = abilityNode.node("knock-up").getDouble(0.8);
-      freezeTicks = abilityNode.node("freeze-ticks").getInt(80);
-
-      CommentedConfigurationNode columnNode = abilityNode.node("column");
-      columnCooldown = columnNode.node("cooldown").getLong(1500);
-      columnMaxHeight = columnNode.node("max-height").getInt(5);
-
-      CommentedConfigurationNode fieldNode = abilityNode.node("field");
-
-      fieldCooldown = fieldNode.node("cooldown").getLong(5000);
-      radius = fieldNode.node("radius").getDouble(10.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "icespike");
     }
   }
 }

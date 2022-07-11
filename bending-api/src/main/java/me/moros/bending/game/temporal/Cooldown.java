@@ -28,7 +28,7 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class Cooldown extends TemporaryBase {
   public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>("Cooldown", Function.identity()::apply);
@@ -39,16 +39,16 @@ public final class Cooldown extends TemporaryBase {
   private boolean reverted = false;
   private final int hashCode;
 
-  private Cooldown(User user, AbilityDescription desc, Runnable runnable) {
+  private Cooldown(UUID uuid, AbilityDescription desc, @Nullable Runnable runnable) {
     super();
-    this.uuid = user.uuid();
+    this.uuid = uuid;
     this.desc = desc;
     this.runnable = runnable;
     this.hashCode = Objects.hash(this.uuid, this.desc);
   }
 
-  private Cooldown(User user, AbilityDescription desc, Runnable runnable, long duration) {
-    this(user, desc, runnable);
+  private Cooldown(UUID uuid, AbilityDescription desc, Runnable runnable, long duration) {
+    this(uuid, desc, runnable);
     MANAGER.addEntry(this, this, Temporary.toTicks(duration));
   }
 
@@ -75,11 +75,11 @@ public final class Cooldown extends TemporaryBase {
     return hashCode;
   }
 
-  public static @NonNull Cooldown of(@NonNull User user, @NonNull AbilityDescription desc) {
-    return new Cooldown(user, desc, null);
+  public static Cooldown of(User user, AbilityDescription desc) {
+    return new Cooldown(user.uuid(), desc, null);
   }
 
-  public static @NonNull Cooldown of(@NonNull User user, @NonNull AbilityDescription desc, @NonNull Runnable runnable, long duration) {
-    return new Cooldown(user, desc, runnable, duration);
+  public static Cooldown of(User user, AbilityDescription desc, Runnable runnable, long duration) {
+    return new Cooldown(user.uuid(), desc, runnable, duration);
   }
 }

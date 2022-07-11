@@ -19,10 +19,11 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -42,11 +43,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthTunnel extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -59,13 +59,13 @@ public class EarthTunnel extends AbilityInstance {
   private int radius = 0;
   private int angle = 0;
 
-  public EarthTunnel(@NonNull AbilityDescription desc) {
+  public EarthTunnel(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthTunnel.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, EarthTunnel.class)) {
       return false;
     }
 
@@ -86,11 +86,11 @@ public class EarthTunnel extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -184,23 +184,19 @@ public class EarthTunnel extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 10;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
-    public boolean extractOres;
+    private double radius = 1;
+    private boolean extractOres = true;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthtunnel");
-
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      range = abilityNode.node("range").getDouble(10.0);
-      radius = abilityNode.node("radius").getDouble(1.0);
-      extractOres = abilityNode.node("extract-ores").getBoolean(true);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthtunnel");
     }
   }
 }

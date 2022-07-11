@@ -21,10 +21,11 @@ package me.moros.bending.ability.air;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -51,11 +52,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirBreath extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -63,13 +63,13 @@ public class AirBreath extends AbilityInstance {
 
   private final Collection<AirStream> streams = new ArrayList<>();
 
-  public AirBreath(@NonNull AbilityDescription desc) {
+  public AirBreath(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirBreath.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, AirBreath.class)) {
       return false;
     }
 
@@ -87,11 +87,11 @@ public class AirBreath extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -114,7 +114,7 @@ public class AirBreath extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -145,7 +145,7 @@ public class AirBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       EntityUtil.applyVelocity(AirBreath.this, entity, ray.direction.normalize().multiply(userConfig.knockback));
       BendingEffect.FIRE_TICK.reset(entity);
       if (entity instanceof LivingEntity livingEntity) {
@@ -155,7 +155,7 @@ public class AirBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
@@ -168,27 +168,22 @@ public class AirBreath extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 5000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 7;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 1000;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 0.5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airbreath");
-
-      cooldown = abilityNode.node("cooldown").getLong(5000);
-      range = abilityNode.node("range").getDouble(7.0);
-      duration = abilityNode.node("duration").getLong(1000);
-      speed = abilityNode.node("speed").getDouble(1.0);
-      knockback = abilityNode.node("knockback").getDouble(0.5);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airbreath");
     }
   }
 }

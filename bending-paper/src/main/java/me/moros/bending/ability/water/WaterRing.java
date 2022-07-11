@@ -28,10 +28,10 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ExpiringSet;
@@ -67,21 +67,20 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterRing extends AbilityInstance {
-  public static final double RING_RADIUS = 2.8;
+  private static final double RING_RADIUS = 2.8;
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription ringDesc;
   private static AbilityDescription waveDesc;
 
   private User user;
   private Config userConfig;
-
   private RemovalPolicy removalPolicy;
+
   private Vector3i lastPosition;
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
@@ -98,20 +97,20 @@ public class WaterRing extends AbilityInstance {
   private long ringNextShrinkTime = 0;
   private long sneakStartTime = 0;
 
-  public WaterRing(@NonNull AbilityDescription desc) {
+  public WaterRing(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
-    Optional<WaterRing> ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class);
+    Optional<WaterRing> ring = user.game().abilityManager(user.world()).firstInstance(user, WaterRing.class);
     if (ring.isPresent()) {
       if (method == Activation.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
         if (user.sneaking()) {
-          Bending.game().abilityManager(user.world()).destroyInstance(ring.get());
+          user.game().abilityManager(user.world()).destroyInstance(ring.get());
         } else {
           ring.get().launchShard();
         }
@@ -134,7 +133,7 @@ public class WaterRing extends AbilityInstance {
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
 
     if (waveDesc == null) {
-      waveDesc = Objects.requireNonNull(Registries.ABILITIES.ability("WaterWave"));
+      waveDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("WaterWave"));
     }
 
     return true;
@@ -142,10 +141,10 @@ public class WaterRing extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
-  public @NonNull List<@NonNull Block> complete() {
+  public List<Block> complete() {
     if (!ready || completed) {
       return List.of();
     }
@@ -184,7 +183,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (completed || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -222,9 +221,9 @@ public class WaterRing extends AbilityInstance {
           radius(radius - 0.3);
           ringNextShrinkTime = time + 250;
         }
-        if (time > sneakStartTime + userConfig.chargeTime && !user.onCooldown(waveDesc)) {
+        if (time > sneakStartTime + userConfig.waveChargeTime && !user.onCooldown(waveDesc)) {
           if (!complete().isEmpty()) {
-            Bending.game().activationController().activateAbility(user, Activation.SNEAK, waveDesc);
+            user.game().activationController().activateAbility(user, Activation.SNEAK, waveDesc);
           }
           return UpdateResult.REMOVE;
         }
@@ -284,10 +283,6 @@ public class WaterRing extends AbilityInstance {
     return destroyed;
   }
 
-  public double radius() {
-    return radius;
-  }
-
   public void radius(double radius) {
     if (radius < 1 || radius > 8 || this.radius == radius) {
       return;
@@ -315,14 +310,14 @@ public class WaterRing extends AbilityInstance {
     return user;
   }
 
-  public static @Nullable WaterRing getOrCreateInstance(@NonNull User user) {
+  public static @Nullable WaterRing getOrCreateInstance(User user) {
     if (ringDesc == null) {
-      ringDesc = Objects.requireNonNull(Registries.ABILITIES.ability("WaterRing"));
+      ringDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("WaterRing"));
     }
-    WaterRing oldRing = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class)
+    WaterRing oldRing = user.game().abilityManager(user.world()).firstInstance(user, WaterRing.class)
       .orElse(null);
     if (oldRing == null) {
-      Ability newRing = Bending.game().activationController().activateAbility(user, Activation.ATTACK, ringDesc);
+      Ability newRing = user.game().activationController().activateAbility(user, Activation.ATTACK, ringDesc);
       if (newRing != null) {
         return (WaterRing) newRing;
       }
@@ -336,7 +331,7 @@ public class WaterRing extends AbilityInstance {
     }
     long time = System.currentTimeMillis();
     if (time >= nextShardTime) {
-      nextShardTime = time + userConfig.cooldown;
+      nextShardTime = time + userConfig.shardCooldown;
       Vector3d origin = new Vector3d(getClosestRingBlock());
       Vector3d lookingDir = user.direction().multiply(userConfig.shardRange + radius);
       shards.add(new IceShard(new Ray(origin, lookingDir)));
@@ -363,55 +358,42 @@ public class WaterRing extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.shardDamage, description());
       return true;
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       return WorldUtil.tryCoolLava(user, block);
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 30000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
-    public boolean affectEntities;
+    private double selectRange = 16;
+    private boolean affectEntities = true;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1;
     // Shards
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long shardCooldown = 1000;
     @Modifiable(Attribute.RANGE)
-    public double shardRange;
+    private double shardRange = 16;
     @Modifiable(Attribute.DAMAGE)
-    public double shardDamage;
+    private double shardDamage = 0.25;
     // Wave
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long waveChargeTime = 750;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring");
-
-      duration = abilityNode.node("duration").getLong(30000);
-      selectRange = abilityNode.node("select-range").getDouble(16.0);
-      affectEntities = abilityNode.node("affect-entities").getBoolean(true);
-      damage = abilityNode.node("damage").getDouble(1.0);
-      knockback = abilityNode.node("knockback").getDouble(1.0);
-
-      CommentedConfigurationNode shardsNode = abilityNode.node("shards");
-      cooldown = shardsNode.node("cooldown").getLong(1000);
-      shardRange = shardsNode.node("range").getDouble(16.0);
-      shardDamage = shardsNode.node("damage").getDouble(0.25);
-
-      CommentedConfigurationNode waveNode = abilityNode.node("waterwave");
-      chargeTime = waveNode.node("charge-time").getLong(750);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "waterring");
     }
   }
 }

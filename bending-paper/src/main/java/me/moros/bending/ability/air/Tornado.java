@@ -19,9 +19,10 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -29,12 +30,12 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
@@ -46,13 +47,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Tornado extends AbilityInstance {
   public enum Mode {PUSH, PULL}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -64,12 +64,12 @@ public class Tornado extends AbilityInstance {
   private double currentAngle = 0;
   private long startTime;
 
-  public Tornado(@NonNull AbilityDescription desc) {
+  public Tornado(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder()
@@ -79,18 +79,18 @@ public class Tornado extends AbilityInstance {
       .add(Policies.UNDER_WATER)
       .add(Policies.UNDER_LAVA)
       .build();
-    mode = user.store().getOrDefault(DataKey.of("tornado-mode", Mode.class), Mode.PUSH);
+    mode = user.store().getOrDefault(RegistryKey.create("tornado-mode", Mode.class), Mode.PUSH);
     startTime = System.currentTimeMillis();
     return true;
   }
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -180,40 +180,34 @@ public class Tornado extends AbilityInstance {
     return user;
   }
 
-  public static void switchMode(@NonNull User user) {
+  public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("Tornado")) {
-      var key = DataKey.of("tornado-mode", Mode.class);
+      var key = RegistryKey.create("tornado-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
-        Bending.game().abilityManager(user.world()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
+        user.game().abilityManager(user.world()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
       }
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 4000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 8000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 8;
     @Modifiable(Attribute.HEIGHT)
-    public double height;
+    private double height = 12;
     @Modifiable(Attribute.RANGE)
-    public double range;
-    public long growthTime;
+    private double range = 16;
+    private long growthTime = 3000;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "tornado");
-
-      cooldown = abilityNode.node("cooldown").getLong(4000);
-      duration = abilityNode.node("duration").getLong(8000);
-      radius = abilityNode.node("radius").getDouble(8.0);
-      height = abilityNode.node("height").getDouble(12.0);
-      range = abilityNode.node("range").getDouble(16.0);
-      growthTime = abilityNode.node("growth-time").getLong(3000);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "tornado");
     }
   }
 }

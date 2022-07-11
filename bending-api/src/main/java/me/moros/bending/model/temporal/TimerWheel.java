@@ -19,9 +19,10 @@
 
 package me.moros.bending.model.temporal;
 
+@SuppressWarnings("ConstantConditions")
 final class TimerWheel {
   private static final int[] BUCKETS = {40, 30, 15, 4, 4}; // 2s, 1m, 15m, 1h, 4h
-  private static final int[] SPANS = {40, 1200, 18000, 72000, 288000, 288000};
+  private static final int[] SPANS = {40, 1200, 18_000, 72_000, 288_000, 288_000};
 
   private final TemporaryBase[][] wheel;
   private final int[] index = {0, 0, 0, 0, 0};

@@ -31,7 +31,6 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractRide implements Updatable {
   private final User user;
@@ -43,7 +42,7 @@ public abstract class AbstractRide implements Updatable {
 
   protected Predicate<Block> predicate = x -> true;
 
-  protected AbstractRide(@NonNull User user, double speed, double targetHeight) {
+  protected AbstractRide(User user, double speed, double targetHeight) {
     this.user = user;
     this.speed = speed;
     this.targetHeight = targetHeight;
@@ -51,7 +50,7 @@ public abstract class AbstractRide implements Updatable {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     stuckCount = user.velocity().lengthSq() < 0.1 ? stuckCount + 1 : 0;
     if (stuckCount > 10 || isColliding()) {
       return UpdateResult.REMOVE;
@@ -97,11 +96,11 @@ public abstract class AbstractRide implements Updatable {
     return Math.max(1.25, targetHeight - 2);
   }
 
-  protected abstract void render(@NonNull BlockData data);
+  protected abstract void render(BlockData data);
 
   protected abstract void postRender();
 
-  protected abstract void affect(@NonNull Vector3d velocity);
+  protected abstract void affect(Vector3d velocity);
 
   private static final class HeightSmoother {
     private static final int LENGTH = 10;

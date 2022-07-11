@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
@@ -59,11 +59,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireWall extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -86,12 +86,12 @@ public class FireWall extends AbilityInstance {
 
   private int ticks = 5;
 
-  public FireWall(@NonNull AbilityDescription desc) {
+  public FireWall(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -111,7 +111,7 @@ public class FireWall extends AbilityInstance {
     height = userConfig.height;
     currentHeight = 1;
 
-    AABB aabb = new AABB(new Vector3d(-hw, -0.5, -0.6), new Vector3d(hw, userConfig.maxHeight, 0.6));
+    AABB aabb = new AABB(new Vector3d(-hw, -0.5, -0.6), new Vector3d(hw, userConfig.moveMaxHeight, 0.6));
     collider = new OBB(aabb, Vector3d.PLUS_J, Math.toRadians(user.yaw())).at(center);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     nextRenderTime = 0;
@@ -121,11 +121,11 @@ public class FireWall extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (bases.isEmpty() || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -183,7 +183,7 @@ public class FireWall extends AbilityInstance {
     cleanupLight(oldLights);
   }
 
-  private Vector3d getValidBase(double searchHeight) {
+  private @Nullable Vector3d getValidBase(double searchHeight) {
     Vector3d center = user.rayTrace(userConfig.range).ignoreLiquids(false).blocks(user.world()).position();
     for (double i = 0; i <= searchHeight; i += 0.5) {
       Vector3d check = center.subtract(new Vector3d(0, i, 0));
@@ -216,7 +216,7 @@ public class FireWall extends AbilityInstance {
   }
 
   private void move() {
-    if (distanceTravelled >= userConfig.maxRange) {
+    if (distanceTravelled >= userConfig.moveRange) {
       return;
     }
 
@@ -230,8 +230,8 @@ public class FireWall extends AbilityInstance {
     bases = setupBases();
     distanceTravelled += direction.length();
 
-    if (currentHeight < userConfig.maxHeight) {
-      double deltaHeight = (userConfig.maxHeight - userConfig.height) / userConfig.maxRange;
+    if (currentHeight < userConfig.moveMaxHeight) {
+      double deltaHeight = (userConfig.moveMaxHeight - userConfig.height) / userConfig.moveRange;
       currentHeight += deltaHeight;
     }
   }
@@ -253,7 +253,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!cachedEntities.contains(entity)) {
-      User entityUser = Registries.BENDERS.user((LivingEntity) entity);
+      User entityUser = Registries.BENDERS.get(entity.getUniqueId());
       if (entityUser == null || HeatControl.canBurn(entityUser)) {
         BendingEffect.FIRE_TICK.apply(user, entity);
         if (!damagedEntities.contains(entity)) {
@@ -271,7 +271,7 @@ public class FireWall extends AbilityInstance {
     return false;
   }
 
-  private void cleanupLight(Collection<TempLight> collection) {
+  private void cleanupLight(@Nullable Collection<TempLight> collection) {
     if (collection != null && !collection.isEmpty()) {
       collection.forEach(TempLight::unlockAndRevert);
       collection.clear();
@@ -290,45 +290,34 @@ public class FireWall extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(collider);
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 20_000;
     @Modifiable(Attribute.HEIGHT)
-    public double height;
+    private double height = 4;
     @Modifiable(Attribute.RADIUS)
-    public double width;
+    private double width = 6;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 3;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 0.5;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 0.33;
     @Modifiable(Attribute.DURATION)
-    public long duration;
-
+    private long duration = 8000;
     @Modifiable(Attribute.RANGE)
-    public double maxRange;
+    private double moveRange = 7;
     @Modifiable(Attribute.HEIGHT)
-    public double maxHeight;
+    private double moveMaxHeight = 8;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firewall");
-
-      cooldown = abilityNode.node("cooldown").getLong(20000);
-      height = abilityNode.node("height").getDouble(4);
-      width = abilityNode.node("width").getDouble(6.0);
-      range = abilityNode.node("range").getDouble(3.0);
-      damage = abilityNode.node("damage").getDouble(0.5);
-      knockback = abilityNode.node("knockback").getDouble(0.33);
-      duration = abilityNode.node("duration").getLong(8000);
-
-      maxRange = abilityNode.node("move-range").getDouble(7.0);
-      maxHeight = abilityNode.node("move-max-height").getDouble(8.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "firewall");
     }
   }
 }

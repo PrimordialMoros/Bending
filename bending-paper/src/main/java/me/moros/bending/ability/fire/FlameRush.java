@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.AbilityInitializer;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -58,11 +58,11 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FlameRush extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -75,13 +75,13 @@ public class FlameRush extends AbilityInstance {
   private boolean fullyCharged = false;
   private long startTime;
 
-  public FlameRush(@NonNull AbilityDescription desc) {
+  public FlameRush(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FlameRush.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, FlameRush.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
@@ -103,11 +103,11 @@ public class FlameRush extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -151,12 +151,12 @@ public class FlameRush extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return stream == null ? List.of() : List.of(stream.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (fullyCharged && collision.removeSelf()) {
       String name = collidedAbility.description().name();
@@ -215,7 +215,7 @@ public class FlameRush extends AbilityInstance {
     }
 
     @Override
-    protected @NonNull Vector3d controlDirection() {
+    protected Vector3d controlDirection() {
       streamDirection = streamDirection.add(user.direction().multiply(0.08)).normalize().multiply(speed);
       return streamDirection;
     }
@@ -228,7 +228,7 @@ public class FlameRush extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
@@ -239,40 +239,32 @@ public class FlameRush extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       FragileStructure.tryDamageStructure(List.of(block), FastMath.round(8 * factor));
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 10_000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 16;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1.2;
+    @Comment("How much the damage and range are multiplied by at full charge")
     @Modifiable(Attribute.STRENGTH)
-    public double chargeFactor;
+    private double chargeFactor = 2;
+    @Comment("How many milliseconds it takes to fully charge")
     @Modifiable(Attribute.CHARGE_TIME)
-    public long maxChargeTime;
+    private long maxChargeTime = 2500;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "flamerush");
-
-      cooldown = abilityNode.node("cooldown").getLong(10000);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      range = abilityNode.node("range").getDouble(16.0);
-      speed = abilityNode.node("speed").getDouble(1.2);
-
-      chargeFactor = Math.max(1, abilityNode.node("charge").node("factor").getDouble(2.0));
-      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2500);
-
-      abilityNode.node("charge").node("factor").comment("How much the damage and range are multiplied by at full charge");
-      abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "flamerush");
     }
   }
 }

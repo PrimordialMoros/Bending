@@ -23,9 +23,8 @@ import java.util.Set;
 
 import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-public record RayTraceContext(@NonNull Vector3d start, @NonNull Vector3d end,
+public record RayTraceContext(Vector3d start, Vector3d end,
                               boolean ignoreLiquids, boolean ignorePassable,
-                              @NonNull Set<@NonNull Block> ignoreBlocks) {
+                              Set<Block> ignoreBlocks) {
 }

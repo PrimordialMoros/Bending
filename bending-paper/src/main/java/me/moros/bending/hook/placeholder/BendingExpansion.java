@@ -19,22 +19,34 @@
 
 package me.moros.bending.hook.placeholder;
 
+import java.util.Locale;
+
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
+import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BendingExpansion extends PlaceholderExpansion {
+  private final Bending plugin;
   private final PlaceholderProvider provider;
+  private final LegacyComponentSerializer serializer;
 
-  public BendingExpansion() {
+  public BendingExpansion(Bending plugin) {
+    this.plugin = plugin;
     this.provider = new PlaceholderProvider();
+    this.serializer = LegacyComponentSerializer.legacyAmpersand().toBuilder().hexColors().build();
   }
 
   @Override
   public @NonNull String getAuthor() {
-    return Bending.author();
+    return plugin.author();
   }
 
   @Override
@@ -44,7 +56,7 @@ public class BendingExpansion extends PlaceholderExpansion {
 
   @Override
   public @NonNull String getVersion() {
-    return Bending.version();
+    return plugin.version();
   }
 
   @Override
@@ -53,10 +65,15 @@ public class BendingExpansion extends PlaceholderExpansion {
   }
 
   @Override
-  public String onPlaceholderRequest(Player player, @NonNull String params) {
-    if (player == null || !Registries.BENDERS.contains(player.getUniqueId())) {
-      return "";
+  public @Nullable String onPlaceholderRequest(@Nullable Player player, String params) {
+    User user = player == null ? null : Registries.BENDERS.get(player.getUniqueId());
+    if (user instanceof BendingPlayer bendingPlayer) {
+      return translate(provider.onPlaceholderRequest(bendingPlayer, params), player.locale());
     }
-    return provider.onPlaceholderRequest(Registries.BENDERS.user(player), params);
+    return null;
+  }
+
+  private @Nullable String translate(@Nullable Component component, Locale locale) {
+    return component == null ? null : serializer.serialize(GlobalTranslator.render(component, locale));
   }
 }

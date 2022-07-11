@@ -19,7 +19,9 @@
 
 package me.moros.bending.ability.earth.passive;
 
-import me.moros.bending.Bending;
+import java.util.List;
+
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -38,11 +40,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Openable;
 import org.bukkit.entity.Minecart;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FerroControl extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -52,12 +53,12 @@ public class FerroControl extends AbilityInstance {
 
   private long nextInteractTime;
 
-  public FerroControl(@NonNull AbilityDescription desc) {
+  public FerroControl(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
@@ -66,11 +67,11 @@ public class FerroControl extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       controlledEntity = null;
       return UpdateResult.CONTINUE;
@@ -118,9 +119,9 @@ public class FerroControl extends AbilityInstance {
     SoundUtil.of(sound, 0.5F, 0).play(block);
   }
 
-  public static void act(@NonNull User user, @NonNull Block block) {
+  public static void act(User user, Block block) {
     if (block.getType() == Material.IRON_DOOR || block.getType() == Material.IRON_TRAPDOOR) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, FerroControl.class)
+      user.game().abilityManager(user.world()).firstInstance(user, FerroControl.class)
         .ifPresent(ability -> ability.act(block));
     }
   }
@@ -130,27 +131,20 @@ public class FerroControl extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 500;
     @Modifiable(Attribute.SELECTION)
-    public double blockRange;
-    @Modifiable(Attribute.SELECTION)
-    public double entitySelectRange;
+    private double entitySelectRange = 14;
     @Modifiable(Attribute.RANGE)
-    public double entityRange;
+    private double entityRange = 8;
     @Modifiable(Attribute.SPEED)
-    public double controlSpeed;
+    private double controlSpeed = 0.8;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "passives", "ferrocontrol");
-
-      cooldown = abilityNode.node("cooldown").getLong(500);
-      blockRange = abilityNode.node("block-range").getDouble(6.0);
-      entitySelectRange = abilityNode.node("entity-select-range").getDouble(14.0);
-      entityRange = abilityNode.node("entity-control-range").getDouble(8.0);
-      controlSpeed = abilityNode.node("entity-control-speed").getDouble(0.8);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "passives", "ferrocontrol");
     }
   }
 }

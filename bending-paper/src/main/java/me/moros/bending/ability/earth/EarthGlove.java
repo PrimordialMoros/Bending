@@ -22,7 +22,7 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -31,6 +31,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
@@ -38,7 +39,6 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.properties.BendingProperties;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -57,14 +57,14 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 // TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance {
   enum Side {RIGHT, LEFT}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private static final double GLOVE_SPEED = 1.2;
   private static final double GLOVE_GRABBED_SPEED = 0.6;
@@ -85,18 +85,18 @@ public class EarthGlove extends AbilityInstance {
   private boolean returning = false;
   private boolean grabbed = false;
 
-  public EarthGlove(@NonNull AbilityDescription desc) {
+  public EarthGlove(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.SNEAK) {
       tryDestroy(user);
       return false;
     }
 
-    if (user.onCooldown(description()) || Bending.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count() >= 2) {
+    if (user.onCooldown(description()) || user.game().abilityManager(user.world()).userInstances(user, EarthGlove.class).count() >= 2) {
       return false;
     }
 
@@ -119,11 +119,11 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -227,7 +227,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private boolean launchEarthGlove() {
-    var key = DataKey.of("glove-side", Side.class);
+    var key = RegistryKey.create("glove-side", Side.class);
     Side side = user.store().toggle(key, Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
     Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
@@ -251,13 +251,13 @@ public class EarthGlove extends AbilityInstance {
     Item item = user.world().dropItem(spawnLocation.toLocation(user.world()), isMetal ? INGOT : STONE);
     item.setInvulnerable(true);
     item.setGravity(false);
-    item.setMetadata(Metadata.GLOVE_KEY, Metadata.of(this));
+    Metadata.add(item, Metadata.GLOVE_KEY, this);
     if (isMetal && InventoryUtil.removeItem(user, INGOT)) {
       return item;
     }
     item.setCanMobPickup(false);
     item.setCanPlayerPickup(false);
-    item.setMetadata(Metadata.NO_PICKUP, Metadata.of());
+    Metadata.add(item, Metadata.NO_PICKUP, this);
     return item;
   }
 
@@ -279,7 +279,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return (glove == null || returning) ? List.of() : List.of(new Sphere(location, 0.8));
   }
 
@@ -293,7 +293,7 @@ public class EarthGlove extends AbilityInstance {
     onDestroy();
   }
 
-  private static void tryDestroy(@NonNull User user) {
+  private static void tryDestroy(User user) {
     CollisionUtil.handle(user, new Sphere(user.eyeLocation(), 8), entity -> {
       if (entity instanceof Item && user.entity().hasLineOfSight(entity) && entity.hasMetadata(Metadata.GLOVE_KEY)) {
         EarthGlove ability = (EarthGlove) entity.getMetadata(Metadata.GLOVE_KEY).get(0).value();
@@ -305,26 +305,21 @@ public class EarthGlove extends AbilityInstance {
     }, false, false);
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 750;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 16;
+    @Comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips")
     @Modifiable(Attribute.DURATION)
-    public long grabDuration;
+    private long grabDuration = 4000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthglove");
-
-      cooldown = abilityNode.node("cooldown").getLong(750);
-      range = abilityNode.node("range").getDouble(16.0);
-      grabDuration = abilityNode.node("duration").getLong(4000);
-      damage = abilityNode.node("damage").getDouble(1.0);
-
-      abilityNode.node("duration").comment("The maximum amount of milliseconds that the target will be controlled when grabbed by metal clips.");
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthglove");
     }
   }
 }

@@ -25,8 +25,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ExpiringSet;
@@ -65,12 +65,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class LavaDisk extends AbilityInstance {
   private static final String[] colors = {"2F1600", "5E2C00", "8C4200", "B05300", "C45D00", "F05A00", "F0A000", "F0BE00"};
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -87,13 +86,13 @@ public class LavaDisk extends AbilityInstance {
   private double currentPower;
   private int rotationAngle = 0;
 
-  public LavaDisk(@NonNull AbilityDescription desc) {
+  public LavaDisk(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, LavaDisk.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, LavaDisk.class)) {
       return false;
     }
 
@@ -127,11 +126,11 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -188,7 +187,7 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(collider);
   }
 
@@ -264,35 +263,27 @@ public class LavaDisk extends AbilityInstance {
     return MaterialUtil.isTransparent(block) || damageBlock(block);
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 9000;
     @Modifiable(Attribute.DAMAGE)
-    public double minDamage;
+    private double minDamage = 1;
     @Modifiable(Attribute.DAMAGE)
-    public double maxDamage;
+    private double maxDamage = 4;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 18;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 6;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.75;
     @Modifiable(Attribute.STRENGTH)
-    public double power;
-    public double powerDiminishPerEntity;
+    private double power = 20;
+    private double powerDiminishPerEntity = 7.5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "lavadisk");
-
-      cooldown = abilityNode.node("cooldown").getLong(9000);
-      minDamage = abilityNode.node("min-damage").getDouble(1.0);
-      maxDamage = abilityNode.node("max-damage").getDouble(4.0);
-      range = abilityNode.node("range").getDouble(18.0);
-      selectRange = abilityNode.node("select-range").getDouble(6.0);
-      speed = abilityNode.node("speed").getDouble(0.75);
-      power = abilityNode.node("power").getDouble(20.0);
-      powerDiminishPerEntity = abilityNode.node("damage-entity-power-cost").getDouble(7.5);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "lavadisk");
     }
   }
 }

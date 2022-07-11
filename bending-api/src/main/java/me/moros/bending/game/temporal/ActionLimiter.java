@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import me.moros.bending.event.BendingLimitEvent;
+import me.moros.bending.event.ActionLimitEvent;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Updatable.UpdateResult;
@@ -47,7 +47,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActionLimiter extends TemporaryBase {
@@ -100,11 +99,11 @@ public final class ActionLimiter extends TemporaryBase {
     return true;
   }
 
-  public static boolean isLimited(@NonNull Entity entity) {
+  public static boolean isLimited(Entity entity) {
     return isLimited(entity, null);
   }
 
-  public static boolean isLimited(@NonNull Entity entity, @Nullable ActionType method) {
+  public static boolean isLimited(Entity entity, @Nullable ActionType method) {
     ActionLimiter limiter = MANAGER.get(entity.getUniqueId()).orElse(null);
     if (limiter == null) {
       return false;
@@ -112,7 +111,7 @@ public final class ActionLimiter extends TemporaryBase {
     return method == null || limiter.limitedActions.contains(method);
   }
 
-  public static @NonNull Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -123,12 +122,12 @@ public final class ActionLimiter extends TemporaryBase {
     private Builder() {
     }
 
-    public @NonNull Builder limit(@NonNull Collection<@NonNull ActionType> methods) {
+    public Builder limit(Collection<ActionType> methods) {
       limitedActions = EnumSet.copyOf(methods);
       return this;
     }
 
-    public @NonNull Builder limit(@NonNull ActionType method, @Nullable ActionType... methods) {
+    public Builder limit(ActionType method, ActionType @Nullable ... methods) {
       Collection<ActionType> c = new ArrayList<>();
       c.add(method);
       if (methods != null) {
@@ -137,18 +136,18 @@ public final class ActionLimiter extends TemporaryBase {
       return limit(c);
     }
 
-    public @NonNull Builder duration(long duration) {
+    public Builder duration(long duration) {
       this.duration = duration;
       return this;
     }
 
-    public Optional<ActionLimiter> build(@NonNull User source, @NonNull LivingEntity target) {
+    public Optional<ActionLimiter> build(User source, LivingEntity target) {
       Objects.requireNonNull(source);
       Objects.requireNonNull(target);
       if (isLimited(target)) {
         return Optional.empty();
       }
-      BendingLimitEvent event = EventBus.INSTANCE.postLimitEvent(source, target, duration);
+      ActionLimitEvent event = EventBus.INSTANCE.postActionLimitEvent(source, target, duration);
       if (event.isCancelled() || event.duration() <= 0) {
         return Optional.empty();
       }

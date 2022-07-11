@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempBlock.Builder;
@@ -50,11 +50,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.BubbleColumn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterSpout extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -64,13 +63,13 @@ public class WaterSpout extends AbilityInstance {
   private final Predicate<Block> predicate = WaterMaterials::isWaterNotPlant;
   private Spout spout;
 
-  public WaterSpout(@NonNull AbilityDescription desc) {
+  public WaterSpout(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, WaterSpout.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).destroyInstanceType(user, WaterSpout.class)) {
       return false;
     }
 
@@ -95,11 +94,11 @@ public class WaterSpout extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -121,20 +120,20 @@ public class WaterSpout extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(spout.collider());
   }
 
-  public void handleMovement(@NonNull Vector3d velocity) {
+  public void handleMovement(Vector3d velocity) {
     AbstractSpout.limitVelocity(user.entity(), velocity, userConfig.maxSpeed);
   }
 
-  private class Spout extends AbstractSpout {
+  private final class Spout extends AbstractSpout {
     private Vector3i lastPosition;
     private final Vector3d g = new Vector3d(0, -0.1, 0); // Applied as extra gravity
 
     private Spout() {
-      super(Bending.game().flightManager().get(user), userConfig.height);
+      super(user.game().flightManager().get(user), userConfig.height);
       validBlock = predicate;
     }
 
@@ -174,21 +173,18 @@ public class WaterSpout extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 0;
     @Modifiable(Attribute.HEIGHT)
-    public double height;
+    private double height = 14;
     @Modifiable(Attribute.SPEED)
-    public double maxSpeed;
+    private double maxSpeed = 0.2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterspout");
-
-      cooldown = abilityNode.node("cooldown").getLong(0);
-      height = abilityNode.node("height").getDouble(14.0);
-      maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "waterspout");
     }
   }
 }

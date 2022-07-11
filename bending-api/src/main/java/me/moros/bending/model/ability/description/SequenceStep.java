@@ -22,7 +22,6 @@ package me.moros.bending.model.ability.description;
 import java.util.Objects;
 
 import me.moros.bending.model.ability.Activation;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link Activation}
@@ -32,17 +31,17 @@ public final class SequenceStep {
   private final Activation action;
   private final int hashcode;
 
-  public SequenceStep(@NonNull AbilityDescription desc, @NonNull Activation action) {
+  public SequenceStep(AbilityDescription desc, Activation action) {
     this.desc = desc;
     this.action = action;
     hashcode = Objects.hash(desc, action);
   }
 
-  public @NonNull AbilityDescription ability() {
+  public AbilityDescription ability() {
     return desc;
   }
 
-  public @NonNull Activation activation() {
+  public Activation activation() {
     return action;
   }
 

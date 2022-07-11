@@ -21,26 +21,33 @@ package me.moros.bending.protection.plugin;
 
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.lwc.LWCPlugin;
+import me.moros.bending.model.key.Key;
 import me.moros.bending.protection.Protection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class LWCProtection implements Protection {
   private final LWC lwc;
+  private final Key key;
 
-  public LWCProtection(@NonNull Plugin plugin) {
+  public LWCProtection(Plugin plugin) {
     lwc = ((LWCPlugin) plugin).getLWC();
+    key = Key.create(NAMESPACE, plugin.getName());
   }
 
   @Override
-  public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
+  public boolean canBuild(LivingEntity entity, Block block) {
     if (entity instanceof Player player) {
       com.griefcraft.model.Protection protection = lwc.getProtectionCache().getProtection(block);
       return protection == null || lwc.canAccessProtection(player, protection);
     }
     return true;
+  }
+
+  @Override
+  public Key key() {
+    return key;
   }
 }

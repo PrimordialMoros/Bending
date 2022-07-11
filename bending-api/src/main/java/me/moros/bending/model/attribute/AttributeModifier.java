@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.attribute;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-public record AttributeModifier(@NonNull ModifyPolicy policy, @NonNull Attribute attribute,
-                                @NonNull ModifierOperation type, double value) {
+public record AttributeModifier(ModifyPolicy policy, Attribute attribute,
+                                ModifierOperation type, double value) {
 }

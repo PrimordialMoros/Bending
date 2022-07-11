@@ -26,14 +26,16 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Group and categorize all water bendable materials.
+ */
 public final class WaterMaterials {
   public static final MaterialSetTag PLANT_BENDABLE;
   public static final MaterialSetTag ICE_BENDABLE;
   public static final MaterialSetTag SNOW_BENDABLE;
   public static final MaterialSetTag FULL_SOURCES;
-  public static final MaterialSetTag ALL;
+  private static final MaterialSetTag ALL;
 
   static {
     NamespacedKey key = Metadata.NSK_MATERIAL;
@@ -70,31 +72,31 @@ public final class WaterMaterials {
   private WaterMaterials() {
   }
 
-  public static boolean isWaterBendable(@NonNull Block block) {
+  public static boolean isWaterBendable(Block block) {
     return MaterialUtil.isWater(block) || ALL.isTagged(block);
   }
 
-  public static boolean isWaterNotPlant(@NonNull Block block) {
+  public static boolean isWaterNotPlant(Block block) {
     return isWaterBendable(block) && !PLANT_BENDABLE.isTagged(block);
   }
 
-  public static boolean isIceBendable(@NonNull Block block) {
+  public static boolean isIceBendable(Block block) {
     return ICE_BENDABLE.isTagged(block);
   }
 
-  public static boolean isSnowBendable(@NonNull Block block) {
+  public static boolean isSnowBendable(Block block) {
     return SNOW_BENDABLE.isTagged(block);
   }
 
-  public static boolean isWaterOrIceBendable(@NonNull Block block) {
+  public static boolean isWaterOrIceBendable(Block block) {
     return MaterialUtil.isWater(block) || ICE_BENDABLE.isTagged(block);
   }
 
-  public static boolean isPlantBendable(@NonNull Block block) {
+  public static boolean isPlantBendable(Block block) {
     return PLANT_BENDABLE.isTagged(block);
   }
 
-  public static boolean isFullWaterSource(@NonNull Block block) {
+  public static boolean isFullWaterSource(Block block) {
     return FULL_SOURCES.isTagged(block) || MaterialUtil.isWaterPlant(block);
   }
 }

@@ -35,7 +35,6 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -53,7 +52,7 @@ public final class Preset {
    * Presets loaded from db have a positive id.
    * New presets must use a non positive id as they will acquire a real one when they get saved.
    */
-  public Preset(int id, @NonNull String name, @Nullable AbilityDescription @NonNull [] abilities) {
+  public Preset(int id, String name, @Nullable AbilityDescription[] abilities) {
     this.id = id;
     this.name = name;
     this.abilities = new AbilityDescription[9];
@@ -64,7 +63,7 @@ public final class Preset {
    * Creates a dummy preset with id 0 and an empty name.
    * @see #Preset(int, String, AbilityDescription[])
    */
-  public Preset(@Nullable AbilityDescription @NonNull [] abilities) {
+  public Preset(@Nullable AbilityDescription[] abilities) {
     this(0, "", abilities);
   }
 
@@ -72,11 +71,11 @@ public final class Preset {
     return id;
   }
 
-  public @NonNull String name() {
+  public String name() {
     return name;
   }
 
-  public @NonNull Component displayName() {
+  public Component displayName() {
     if (presetColor == null) {
       presetColor = dominantColor();
     }
@@ -86,7 +85,7 @@ public final class Preset {
   /**
    * @return a copy of the names of the abilities that this preset holds
    */
-  public @NonNull List<@Nullable AbilityDescription> abilities() {
+  public List<@Nullable AbilityDescription> abilities() {
     return Arrays.asList(abilities);
   }
 
@@ -99,7 +98,7 @@ public final class Preset {
     return true;
   }
 
-  public int compare(@NonNull Preset preset) {
+  public int compare(Preset preset) {
     int count = 0;
     for (int slot = 0; slot < 9; slot++) {
       if (!Objects.equals(abilities[slot], preset.abilities[slot])) {
@@ -109,14 +108,14 @@ public final class Preset {
     return count;
   }
 
-  public void copyTo(@Nullable AbilityDescription @NonNull [] destination) {
+  public void copyTo(@Nullable AbilityDescription[] destination) {
     if (destination.length != 9) {
       throw new IllegalArgumentException("Destination array must be of length 9!");
     }
     System.arraycopy(abilities, 0, destination, 0, 9);
   }
 
-  public @NonNull List<@NonNull Component> display() {
+  public List<Component> display() {
     List<Component> components = new ArrayList<>();
     for (int i = 0; i < 9; i++) {
       AbilityDescription desc = abilities[i];
@@ -127,11 +126,10 @@ public final class Preset {
     return components;
   }
 
-  public @NonNull Component meta() {
+  public Component meta() {
     Component details = Component.text().append(Component.join(JoinConfiguration.newlines(), display()))
       .append(Component.newline()).append(Component.newline())
       .append(Component.text("Click to bind this preset.", ColorPalette.NEUTRAL)).build();
-
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
       .clickEvent(ClickEvent.runCommand("/bending preset bind " + name()));

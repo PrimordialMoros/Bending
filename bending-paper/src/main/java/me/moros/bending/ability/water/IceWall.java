@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -45,11 +45,10 @@ import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class IceWall extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -60,12 +59,12 @@ public class IceWall extends AbilityInstance {
 
   private Block origin;
 
-  public IceWall(@NonNull AbilityDescription desc) {
+  public IceWall(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     Block targetBlock = user.rayTrace(config.selectRange).blocks(user.world()).block();
     if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
       return false;
@@ -92,11 +91,11 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -166,13 +165,13 @@ public class IceWall extends AbilityInstance {
     private int currentLength = 0;
     private long nextUpdateTime = 0;
 
-    private IceWallColumn(@NonNull Block origin, int length) {
+    private IceWallColumn(Block origin, int length) {
       this.origin = origin;
       this.length = length;
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       if (currentLength >= length) {
         return UpdateResult.REMOVE;
       }
@@ -201,27 +200,22 @@ public class IceWall extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 6;
     @Modifiable(Attribute.HEIGHT)
-    public int maxHeight;
+    private int maxHeight = 6;
     @Modifiable(Attribute.RADIUS)
-    public int width;
+    private int width = 5;
     @Modifiable(Attribute.STRENGTH)
-    public int wallHealth;
+    private int wallHealth = 12;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "icewall");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      selectRange = abilityNode.node("select-range").getDouble(6.0);
-      maxHeight = abilityNode.node("max-height").getInt(6);
-      width = abilityNode.node("width").getInt(5);
-      wallHealth = abilityNode.node("wall-durability").getInt(12);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "icewall");
     }
   }
 }

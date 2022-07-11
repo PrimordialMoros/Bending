@@ -23,20 +23,17 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface WorldManager extends Updatable {
-  @NonNull AbilityManager instance(@NonNull World world);
-
-  void onWorldUnload(@NonNull World world);
+  AbilityManager instance(World world);
 
   void clear();
 
   void destroyAllInstances();
 
-  void createPassives(@NonNull User user);
+  void createPassives(User user);
 
-  default boolean isEnabled(@NonNull World world) {
+  default boolean isEnabled(World world) {
     return !world.hasMetadata(Metadata.DISABLED);
   }
 }

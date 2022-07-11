@@ -46,7 +46,6 @@ import org.bukkit.block.Furnace;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
@@ -61,14 +60,14 @@ public final class WorldUtil {
   /**
    * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with predicate being always true and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius) {
+  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius) {
     return nearbyBlocks(world, pos, radius, block -> true, 0);
   }
 
   /**
    * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with the given predicate and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius, @NonNull Predicate<Block> predicate) {
+  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate) {
     return nearbyBlocks(world, pos, radius, predicate, 0);
   }
 
@@ -82,7 +81,7 @@ public final class WorldUtil {
    * @param limit the amount of blocks to collect
    * @return all collected blocks
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull Vector3d pos, double radius, @NonNull Predicate<Block> predicate, int limit) {
+  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate, int limit) {
     int r = FastMath.ceil(radius) + 1;
     List<Block> blocks = new ArrayList<>();
     for (double x = pos.x() - r; x <= pos.x() + r; x++) {
@@ -108,14 +107,14 @@ public final class WorldUtil {
   /**
    * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box) {
+  public static List<Block> nearbyBlocks(World world, AABB box) {
     return nearbyBlocks(world, box, block -> true, 0);
   }
 
   /**
    * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate) {
+  public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
     return nearbyBlocks(world, box, predicate, 0);
   }
 
@@ -128,7 +127,7 @@ public final class WorldUtil {
    * @param limit the amount of blocks to collect
    * @return all collected blocks
    */
-  public static @NonNull List<@NonNull Block> nearbyBlocks(@NonNull World world, @NonNull AABB box, @NonNull Predicate<Block> predicate, int limit) {
+  public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
     if (box == AABBUtil.DUMMY_COLLIDER) {
       return List.of();
     }
@@ -150,11 +149,11 @@ public final class WorldUtil {
     return blocks;
   }
 
-  public static boolean isDay(@NonNull World world) {
+  public static boolean isDay(World world) {
     return world.getEnvironment() == Environment.NORMAL && world.isDayTime();
   }
 
-  public static boolean isNight(@NonNull World world) {
+  public static boolean isNight(World world) {
     return world.getEnvironment() == Environment.NORMAL && !world.isDayTime();
   }
 
@@ -162,7 +161,7 @@ public final class WorldUtil {
    * Try to light a block if it's a furnace, smoker, blast furnace or campfire.
    * @param block the block to light
    */
-  public static void tryLightBlock(@NonNull Block block) {
+  public static void tryLightBlock(Block block) {
     BlockState state = block.getState(false);
     boolean light = false;
     if (state instanceof Furnace furnace) {
@@ -184,7 +183,7 @@ public final class WorldUtil {
    * Plays an extinguish particle and sound effect at the given block location.
    * @param block the block to play the effect at
    */
-  public static void playLavaExtinguishEffect(@NonNull Block block) {
+  public static void playLavaExtinguishEffect(Block block) {
     SoundUtil.LAVA_EXTINGUISH.play(block);
     Vector3d center = Vector3d.center(block).add(new Vector3d(0, 0.2, 0));
     ParticleUtil.of(Particle.CLOUD, center).count(8).offset(0.3).spawn(block.getWorld());
@@ -196,7 +195,7 @@ public final class WorldUtil {
    * @param block the block to check
    * @return true if lava was cooled down, false otherwise
    */
-  public static boolean tryCoolLava(@NonNull User user, @NonNull Block block) {
+  public static boolean tryCoolLava(User user, Block block) {
     if (!user.canBuild(block)) {
       return false;
     }
@@ -216,7 +215,7 @@ public final class WorldUtil {
    * @param block the block to check
    * @return true if fire was extinguished, false otherwise
    */
-  public static boolean tryExtinguishFire(@NonNull User user, @NonNull Block block) {
+  public static boolean tryExtinguishFire(User user, Block block) {
     if (!user.canBuild(block)) {
       return false;
     }
@@ -242,7 +241,7 @@ public final class WorldUtil {
    * @param block the block to check
    * @return true if snow or ice was melted, false otherwise
    */
-  public static boolean tryMelt(@NonNull User user, @NonNull Block block) {
+  public static boolean tryMelt(User user, Block block) {
     if (!user.canBuild(block)) {
       return false;
     }
@@ -273,7 +272,7 @@ public final class WorldUtil {
    * @param block the center block to check
    * @return true if there 2 or more water sources around the block
    */
-  public static boolean isInfiniteWater(@NonNull Block block) {
+  public static boolean isInfiniteWater(Block block) {
     int sources = 0;
     for (BlockFace face : SIDES) {
       Block adjacent = block.getRelative(face);
@@ -294,7 +293,7 @@ public final class WorldUtil {
    * @param radius the radius of the circle
    * @return a collection of blocks representing the ring
    */
-  public static @NonNull Collection<@NonNull Block> createBlockRing(@NonNull Block center, double radius) {
+  public static Collection<Block> createBlockRing(Block center, double radius) {
     Vector3d centerVector = Vector3d.center(center);
     int steps = FastMath.ceil(10 * radius);
     return VectorUtil.circle(Vector3d.PLUS_I.multiply(radius), Vector3d.PLUS_J, steps)
@@ -306,7 +305,7 @@ public final class WorldUtil {
    * @param block the block to break
    * @return true if the plant was broken, false otherwise
    */
-  public static boolean tryBreakPlant(@NonNull Block block) {
+  public static boolean tryBreakPlant(Block block) {
     if (MaterialUtil.BREAKABLE_PLANTS.isTagged(block)) {
       if (TempBlock.MANAGER.isTemp(block)) {
         return false;
@@ -317,7 +316,7 @@ public final class WorldUtil {
     return false;
   }
 
-  public static Optional<Block> findTopBlock(@NonNull Block block, int height, @NonNull Predicate<Block> predicate) {
+  public static Optional<Block> findTopBlock(Block block, int height, Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.UP, i);
       if (!predicate.test(check)) {
@@ -327,7 +326,7 @@ public final class WorldUtil {
     return Optional.empty();
   }
 
-  public static Optional<Block> findBottomBlock(Block block, int height, @NonNull Predicate<Block> predicate) {
+  public static Optional<Block> findBottomBlock(Block block, int height, Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.DOWN, i);
       if (!predicate.test(check)) {

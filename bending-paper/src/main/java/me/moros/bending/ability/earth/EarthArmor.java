@@ -19,14 +19,16 @@
 
 package me.moros.bending.ability.earth;
 
+import java.util.List;
 import java.util.function.Supplier;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempArmor;
 import me.moros.bending.game.temporal.TempArmor.Builder;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -51,8 +53,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthArmor extends AbilityInstance {
   private enum Mode {
@@ -67,25 +68,26 @@ public class EarthArmor extends AbilityInstance {
     }
   }
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
   private Mode mode;
-  private TempFallingBlock fallingBlock;
+  private TempFallingBlock temp;
+  private BlockData data;
 
   private boolean formed = false;
   private int resistance;
 
-  public EarthArmor(@NonNull AbilityDescription desc) {
+  public EarthArmor(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthArmor.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, EarthArmor.class)) {
       return false;
     }
 
@@ -106,9 +108,9 @@ public class EarthArmor extends AbilityInstance {
       resistance = userConfig.power;
       SoundUtil.EARTH.play(source);
     }
-    BlockData data = source.getBlockData();
+    data = source.getBlockData();
     TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(source);
-    fallingBlock = TempFallingBlock.builder(data).velocity(new Vector3d(0, 0.2, 0))
+    temp = TempEntity.builder(data).velocity(new Vector3d(0, 0.2, 0))
       .gravity(false).duration(10000).build(source);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;
@@ -116,19 +118,17 @@ public class EarthArmor extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
     if (formed) {
       return UpdateResult.CONTINUE;
     }
-
     return moveBlock() ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
@@ -145,10 +145,10 @@ public class EarthArmor extends AbilityInstance {
   }
 
   private boolean moveBlock() {
-    if (!fallingBlock.fallingBlock().isValid()) {
+    if (!temp.isValid()) {
       return false;
     }
-    Vector3d center = fallingBlock.center();
+    Vector3d center = temp.center();
 
     Block currentBlock = center.toBlock(user.world());
     WorldUtil.tryBreakPlant(currentBlock);
@@ -159,29 +159,29 @@ public class EarthArmor extends AbilityInstance {
     final double distanceSquared = user.eyeLocation().distanceSq(center);
     final double speedFactor = (distanceSquared > userConfig.selectRange * userConfig.selectRange) ? 1.5 : 0.8;
     if (distanceSquared < 0.5) {
-      fallingBlock.revert();
+      temp.revert();
       formArmor();
       return true;
     }
 
     Vector3d dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
-    EntityUtil.applyVelocity(this, fallingBlock.fallingBlock(), dir);
+    EntityUtil.applyVelocity(this, temp.entity(), dir);
     return true;
   }
 
   @Override
   public void onDestroy() {
     Vector3d center;
-    if (!formed && fallingBlock != null) {
-      center = fallingBlock.center();
-      fallingBlock.revert();
+    if (!formed && temp != null) {
+      center = temp.center();
+      temp.revert();
     } else {
       center = user.eyeLocation();
     }
     user.entity().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-    SoundUtil.of(fallingBlock.fallingBlock().getBlockData().getSoundGroup().getBreakSound(), 2, 1).play(user.world(), center);
+    SoundUtil.of(data.getSoundGroup().getBreakSound(), 2, 1).play(user.world(), center);
     ParticleUtil.of(Particle.BLOCK_CRACK, center).count(8).offset(0.5)
-      .data(fallingBlock.fallingBlock().getBlockData()).spawn(user.world());
+      .data(data).spawn(user.world());
   }
 
   @Override
@@ -189,32 +189,27 @@ public class EarthArmor extends AbilityInstance {
     return user;
   }
 
-  public static boolean hasArmor(@NonNull User user) {
-    return Bending.game().abilityManager(user.world()).firstInstance(user, EarthArmor.class)
+  public static boolean hasArmor(User user) {
+    return user.game().abilityManager(user.world()).firstInstance(user, EarthArmor.class)
       .map(e -> e.formed).orElse(false);
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 20_000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 12_000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 8;
     @Modifiable(Attribute.STRENGTH)
-    public int power;
+    private int power = 2;
     @Modifiable(Attribute.STRENGTH)
-    public int metalPower;
+    private int metalPower = 3;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor");
-
-      cooldown = abilityNode.node("cooldown").getLong(20000);
-      duration = abilityNode.node("duration").getLong(12000);
-      selectRange = abilityNode.node("select-range").getDouble(8.0);
-      power = abilityNode.node("power").getInt(2);
-      metalPower = abilityNode.node("metal-power").getInt(3);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "eartharmor");
     }
   }
 }

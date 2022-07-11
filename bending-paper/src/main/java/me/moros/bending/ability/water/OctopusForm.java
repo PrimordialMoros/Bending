@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ExpiringSet;
@@ -52,12 +52,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 // TODO make tentacle extension animation
 public class OctopusForm extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static final double RADIUS = 3.0;
   private static final AABB TENTACLE_BOX = new AABB(new Vector3d(-1, 0.0, -1), new Vector3d(1, 2.5, 1));
 
@@ -78,13 +77,13 @@ public class OctopusForm extends AbilityInstance {
   private boolean formed = false;
   private long nextTentacleFormTime = 0;
 
-  public OctopusForm(@NonNull AbilityDescription desc) {
+  public OctopusForm(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    OctopusForm octopusForm = Bending.game().abilityManager(user.world()).firstInstance(user, OctopusForm.class).orElse(null);
+  public boolean activate(User user, Activation method) {
+    OctopusForm octopusForm = user.game().abilityManager(user.world()).firstInstance(user, OctopusForm.class).orElse(null);
     if (octopusForm != null) {
       octopusForm.punch();
       return false;
@@ -99,11 +98,11 @@ public class OctopusForm extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -266,21 +265,18 @@ public class OctopusForm extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1.75;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "octopusform");
-
-      cooldown = abilityNode.node("cooldown").getLong(1000);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      knockback = abilityNode.node("knockback").getDouble(1.75);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "octopusform");
     }
   }
 }

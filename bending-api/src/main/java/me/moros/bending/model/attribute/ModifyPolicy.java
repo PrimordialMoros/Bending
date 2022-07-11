@@ -21,17 +21,16 @@ package me.moros.bending.model.attribute;
 
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface ModifyPolicy {
-  boolean shouldModify(@NonNull AbilityDescription desc);
+  boolean shouldModify(AbilityDescription desc);
 
-  static @NonNull ModifyPolicy of(@NonNull Element element) {
+  static ModifyPolicy of(Element element) {
     return desc -> desc.element() == element;
   }
 
-  static @NonNull ModifyPolicy of(@NonNull AbilityDescription desc) {
+  static ModifyPolicy of(AbilityDescription desc) {
     return desc::equals;
   }
 }

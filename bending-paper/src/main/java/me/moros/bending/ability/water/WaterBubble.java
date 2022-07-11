@@ -21,8 +21,9 @@ package me.moros.bending.ability.water;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -40,11 +41,10 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterBubble extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -56,13 +56,13 @@ public class WaterBubble extends AbilityInstance {
   private double radius = 1.5;
   private long nextUpdateTime = 0;
 
-  public WaterBubble(@NonNull AbilityDescription desc) {
+  public WaterBubble(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterBubble.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, WaterBubble.class)) {
       return false;
     }
     this.user = user;
@@ -80,11 +80,11 @@ public class WaterBubble extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -164,24 +164,20 @@ public class WaterBubble extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 3000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 15000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 5;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterbubble");
-
-      cooldown = abilityNode.node("cooldown").getLong(3000);
-      duration = abilityNode.node("duration").getLong(15000);
-      radius = abilityNode.node("radius").getDouble(5.0);
-      speed = abilityNode.node("speed").getDouble(0.5);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "waterbubble");
     }
   }
 }

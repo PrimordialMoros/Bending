@@ -25,22 +25,21 @@ import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface CompositeRayTrace extends EntityRayTrace, BlockRayTrace {
-  static @NonNull CompositeRayTrace miss(@NonNull Vector3d position) {
+  static CompositeRayTrace miss(Vector3d position) {
     Objects.requireNonNull(position);
     return new CompositeRayTraceImpl(position, null, null, null);
   }
 
-  static @NonNull CompositeRayTrace hit(@NonNull Vector3d position, @NonNull Block block, @NonNull BlockFace face) {
+  static CompositeRayTrace hit(Vector3d position, Block block, BlockFace face) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(block);
     Objects.requireNonNull(face);
     return new CompositeRayTraceImpl(position, block, face, null);
   }
 
-  static @NonNull CompositeRayTrace hit(@NonNull Vector3d position, @NonNull Entity entity) {
+  static CompositeRayTrace hit(Vector3d position, Entity entity) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(entity);
     return new CompositeRayTraceImpl(position, null, null, entity);

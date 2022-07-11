@@ -26,9 +26,8 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BendingExplosionEvent extends EntityExplodeEvent {
+public class BendingExplosionEvent extends EntityExplodeEvent implements UserEvent {
   private final User user;
 
   BendingExplosionEvent(User user, Vector3d location, Collection<Block> blocks, float yield) {
@@ -36,7 +35,8 @@ public class BendingExplosionEvent extends EntityExplodeEvent {
     this.user = user;
   }
 
-  public @NonNull User user() {
+  @Override
+  public User user() {
     return user;
   }
 }

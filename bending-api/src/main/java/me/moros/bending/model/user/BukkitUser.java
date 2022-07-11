@@ -41,34 +41,34 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 @FunctionalInterface
 public interface BukkitUser extends ForwardingAudience.Single, Identity {
-  @NonNull LivingEntity entity();
+  LivingEntity entity();
 
   @Override
   default @NonNull UUID uuid() {
     return entity().getUniqueId();
   }
 
-  default @NonNull Block headBlock() {
+  default Block headBlock() {
     return entity().getEyeLocation().getBlock();
   }
 
-  default @NonNull Block locBlock() {
+  default Block locBlock() {
     return entity().getLocation().getBlock();
   }
 
-  default @NonNull Vector3d location() {
+  default Vector3d location() {
     return new Vector3d(entity().getLocation());
   }
 
-  default @NonNull Vector3d eyeLocation() {
+  default Vector3d eyeLocation() {
     return new Vector3d(entity().getEyeLocation());
   }
 
-  default @NonNull Vector3d direction() {
+  default Vector3d direction() {
     return new Vector3d(entity().getLocation().getDirection());
   }
 
-  default @NonNull Vector3d velocity() {
+  default Vector3d velocity() {
     return new Vector3d(entity().getVelocity());
   }
 
@@ -80,15 +80,15 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
     return (int) entity().getLocation().getPitch();
   }
 
-  default @NonNull World world() {
+  default World world() {
     return entity().getWorld();
   }
 
-  default @NonNull Ray ray() {
+  default Ray ray() {
     return new Ray(eyeLocation(), direction());
   }
 
-  default @NonNull Ray ray(double range) {
+  default Ray ray(double range) {
     return new Ray(eyeLocation(), direction().multiply(range));
   }
 
@@ -146,7 +146,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
   /**
    * @return {@link #rayTrace(double, Class)} with class matching LivingEntities
    */
-  default @NonNull RayTraceBuilder rayTrace(double range) {
+  default RayTraceBuilder rayTrace(double range) {
     return rayTrace(range, LivingEntity.class);
   }
 
@@ -154,15 +154,15 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * Prepare a composite ray trace matching the user's view and filtering the specified class type for entities.
    * @see RayTraceBuilder
    */
-  default <T extends Entity> @NonNull RayTraceBuilder rayTrace(double range, @NonNull Class<T> type) {
+  default <T extends Entity> RayTraceBuilder rayTrace(double range, Class<T> type) {
     return RayTraceBuilder.of(eyeLocation(), direction()).range(range).filterForUser(entity(), type);
   }
 
-  default @NonNull RayTraceBuilder rayTrace(@NonNull Vector3d origin, @NonNull Vector3d dir) {
+  default RayTraceBuilder rayTrace(Vector3d origin, Vector3d dir) {
     return rayTrace(origin, dir, LivingEntity.class);
   }
 
-  default <T extends Entity> @NonNull RayTraceBuilder rayTrace(@NonNull Vector3d origin, @NonNull Vector3d dir, @NonNull Class<T> type) {
+  default <T extends Entity> RayTraceBuilder rayTrace(Vector3d origin, Vector3d dir, Class<T> type) {
     return RayTraceBuilder.of(origin, dir).filterForUser(entity(), type);
   }
 
@@ -172,7 +172,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * @see #rightSide()
    * @see #leftSide()
    */
-  default @NonNull Vector3d mainHandSide() {
+  default Vector3d mainHandSide() {
     Vector3d dir = direction().multiply(0.4);
     return entity() instanceof Player player ? handSide(player.getMainHand() == MainHand.RIGHT) : eyeLocation().add(dir);
   }
@@ -182,7 +182,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * @param right whether to get the right hand
    * @return a vector which represents the user's specified hand location
    */
-  default @NonNull Vector3d handSide(boolean right) {
+  default Vector3d handSide(boolean right) {
     Vector3d offset = direction().multiply(0.4).add(new Vector3d(0, sneaking() ? 1.2 : 1.575, 0));
     return right ? rightSide().add(offset) : leftSide().add(offset);
   }
@@ -191,7 +191,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * Gets the user's right side.
    * @return a vector which represents the user's right side
    */
-  default @NonNull Vector3d rightSide() {
+  default Vector3d rightSide() {
     double angle = Math.toRadians(yaw());
     return location().subtract(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
@@ -200,7 +200,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * Gets the user's left side.
    * @return a vector which represents the user's left side
    */
-  default @NonNull Vector3d leftSide() {
+  default Vector3d leftSide() {
     double angle = Math.toRadians(yaw());
     return location().add(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }

@@ -26,7 +26,6 @@ import java.util.Queue;
 
 import me.moros.bending.model.ability.Updatable;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class StateChain implements Updatable {
   private final Collection<Block> chainStore;
@@ -41,12 +40,12 @@ public class StateChain implements Updatable {
     chainQueue = new ArrayDeque<>();
   }
 
-  public StateChain(@NonNull Collection<@NonNull Block> store) {
+  public StateChain(Collection<Block> store) {
     this();
     chainStore.addAll(store);
   }
 
-  public @NonNull StateChain addState(@NonNull State state) {
+  public StateChain addState(State state) {
     if (started) {
       throw new RuntimeException("State is executing");
     }
@@ -54,7 +53,7 @@ public class StateChain implements Updatable {
     return this;
   }
 
-  public @NonNull StateChain start() {
+  public StateChain start() {
     if (started) {
       throw new RuntimeException("State is executing");
     }
@@ -66,7 +65,7 @@ public class StateChain implements Updatable {
     return this;
   }
 
-  public @NonNull State current() {
+  public State current() {
     return currentState;
   }
 
@@ -80,7 +79,7 @@ public class StateChain implements Updatable {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (!started || finished) {
       return UpdateResult.REMOVE;
     }
@@ -99,7 +98,7 @@ public class StateChain implements Updatable {
     return finished;
   }
 
-  public @NonNull Collection<@NonNull Block> chainStore() {
+  public Collection<Block> chainStore() {
     return chainStore;
   }
 }

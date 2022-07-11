@@ -27,9 +27,9 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.water.IceCrawl;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -52,11 +52,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Iceberg extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -70,16 +69,16 @@ public class Iceberg extends AbilityInstance {
 
   private boolean started = false;
 
-  public Iceberg(@NonNull AbilityDescription desc) {
+  public Iceberg(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, IceCrawl.class)) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, IceCrawl.class)) {
       return false;
     }
 
@@ -98,11 +97,11 @@ public class Iceberg extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -148,9 +147,9 @@ public class Iceberg extends AbilityInstance {
     TempBlock.builder(ice.createBlockData()).bendable(true).duration(BendingProperties.instance().iceRevertTime()).build(block);
   }
 
-  public static void launch(@NonNull User user) {
+  public static void launch(User user) {
     if (user.selectedAbilityName().equals("IceSpike")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
+      user.game().abilityManager(user.world()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
     }
   }
 
@@ -204,25 +203,20 @@ public class Iceberg extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 15000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
-
+    private double selectRange = 16;
     @Modifiable(Attribute.DURATION)
-    public long regenDelay;
+    private long regenDelay = 30000;
     @Modifiable(Attribute.HEIGHT)
-    public double length;
+    private double length = 16;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "iceberg");
-
-      cooldown = abilityNode.node("cooldown").getLong(15000);
-      selectRange = abilityNode.node("select-range").getDouble(16.0);
-      regenDelay = abilityNode.node("regen-delay").getLong(30000);
-      length = abilityNode.node("length").getDouble(16.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "sequences", "iceberg");
     }
   }
 }

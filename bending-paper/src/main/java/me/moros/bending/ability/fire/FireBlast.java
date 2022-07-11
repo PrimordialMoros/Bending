@@ -23,11 +23,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.AbilityInitializer;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
@@ -57,11 +57,11 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FireBlast extends AbilityInstance implements Explosive {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -75,12 +75,12 @@ public class FireBlast extends AbilityInstance implements Explosive {
   private double factor = 1.0;
   private long startTime;
 
-  public FireBlast(@NonNull AbilityDescription desc) {
+  public FireBlast(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     startTime = System.currentTimeMillis();
@@ -92,7 +92,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     removalPolicy = Policies.builder().add(Policies.UNDER_WATER).add(Policies.UNDER_LAVA).build();
 
-    for (FireBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, FireBlast.class).toList()) {
+    for (FireBlast blast : user.game().abilityManager(user.world()).userInstances(user, FireBlast.class).toList()) {
       if (blast.charging) {
         blast.launch();
         return false;
@@ -106,11 +106,11 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -130,27 +130,29 @@ public class FireBlast extends AbilityInstance implements Explosive {
   private void launch() {
     long deltaTime = System.currentTimeMillis() - startTime;
     factor = 1;
+    long cooldown = userConfig.cooldown;
     if (deltaTime >= userConfig.maxChargeTime) {
       factor = userConfig.chargeFactor;
+      cooldown = userConfig.chargedCooldown;
     } else if (deltaTime > 0.3 * userConfig.maxChargeTime) {
       double deltaFactor = (userConfig.chargeFactor - factor) * deltaTime / userConfig.maxChargeTime;
       factor += deltaFactor;
     }
     charging = false;
     removalPolicy = Policies.builder().build();
-    user.addCooldown(description(), userConfig.cooldown);
+    user.addCooldown(description(), cooldown);
     Vector3d origin = user.mainHandSide();
     Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
     stream = new FireStream(new Ray(origin, lookingDir));
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return stream == null ? List.of() : List.of(stream.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     boolean fullyCharged = factor == userConfig.chargeFactor;
     if (fullyCharged && collision.removeSelf()) {
@@ -241,7 +243,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (explosive) {
         explode();
         return true;
@@ -253,7 +255,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       Vector3d reverse = ray.direction.negate();
       WorldUtil.tryLightBlock(block);
       Vector3d standing = user.location().add(new Vector3d(0, 0.5, 0));
@@ -273,51 +275,39 @@ public class FireBlast extends AbilityInstance implements Explosive {
       return true;
     }
 
-    private @NonNull Vector3d location() {
+    private Vector3d location() {
       return location;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1500;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
     @Modifiable(Attribute.FIRE_TICKS)
-    public int fireTicks;
+    private int fireTicks = 25;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 18;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.8;
     @Modifiable(Attribute.RADIUS)
-    public double igniteRadius;
+    private double igniteRadius = 1.5;
     @Modifiable(Attribute.RADIUS)
-    public double explosionRadius;
+    private double explosionRadius = 2.5;
+    @Comment("How much the damage, radius, range and speed are multiplied by at full charge")
     @Modifiable(Attribute.STRENGTH)
-    public double chargeFactor;
+    private double chargeFactor = 1.5;
+    @Comment("How many milliseconds it takes to fully charge")
     @Modifiable(Attribute.CHARGE_TIME)
-    public long maxChargeTime;
+    private long maxChargeTime = 1500;
     @Modifiable(Attribute.COOLDOWN)
-    public long chargedCooldown;
+    private long chargedCooldown = 500;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireblast");
-
-      cooldown = abilityNode.node("cooldown").getLong(1500);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(25);
-      range = abilityNode.node("range").getDouble(18.0);
-      speed = abilityNode.node("speed").getDouble(0.8);
-      igniteRadius = abilityNode.node("ignite-radius").getDouble(1.5);
-      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.5);
-
-      chargeFactor = Math.max(1, abilityNode.node("charge").node("factor").getDouble(1.5));
-      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(1500);
-      chargedCooldown = abilityNode.node("charge").node("cooldown").getLong(500);
-
-      abilityNode.node("charge").node("factor").comment("How much the damage, radius, range and speed are multiplied by at full charge");
-      abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "fireblast");
     }
   }
 }

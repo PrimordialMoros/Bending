@@ -22,11 +22,12 @@ package me.moros.bending.ability.fire;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -45,11 +46,10 @@ import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Blaze extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -58,13 +58,13 @@ public class Blaze extends AbilityInstance {
   private final Collection<FireStream> streams = new ArrayList<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
 
-  public Blaze(@NonNull AbilityDescription desc) {
+  public Blaze(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, Blaze.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, Blaze.class)) {
       return false;
     }
 
@@ -75,7 +75,7 @@ public class Blaze extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   private boolean release(boolean cone) {
@@ -105,7 +105,7 @@ public class Blaze extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -132,12 +132,12 @@ public class Blaze extends AbilityInstance {
     }
 
     @Override
-    public boolean isValidBlock(@NonNull Block block) {
+    public boolean isValidBlock(Block block) {
       return MaterialUtil.isFire(block) || MaterialUtil.isIgnitable(block);
     }
 
     @Override
-    public void render(@NonNull Block block) {
+    public void render(Block block) {
       if (!affectedBlocks.add(block)) {
         return;
       }
@@ -148,21 +148,18 @@ public class Blaze extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1000;
     @Modifiable(Attribute.RANGE)
-    public double coneRange;
+    private double coneRange = 10;
     @Modifiable(Attribute.RANGE)
-    public double ringRange;
+    private double ringRange = 7;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "blaze");
-
-      cooldown = abilityNode.node("cooldown").getLong(1000);
-      coneRange = abilityNode.node("cone-range").getDouble(10.0);
-      ringRange = abilityNode.node("ring-range").getDouble(7.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "blaze");
     }
   }
 }

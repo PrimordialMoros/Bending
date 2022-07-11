@@ -20,7 +20,6 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Ray with origin and direction
@@ -36,7 +35,7 @@ public class Ray implements Collider {
     this.invDir = invDir;
   }
 
-  public Ray(@NonNull Vector3d origin, @NonNull Vector3d direction) {
+  public Ray(Vector3d origin, Vector3d direction) {
     this.origin = origin;
     this.direction = direction;
     double invX = direction.x() == 0 ? Double.MAX_VALUE : 1 / direction.x();
@@ -45,7 +44,7 @@ public class Ray implements Collider {
     invDir = new Vector3d(invX, invY, invZ);
   }
 
-  boolean intersects(@NonNull Ray other) {
+  boolean intersects(Ray other) {
     Vector3d cross = direction.cross(other.direction);
     if (cross.lengthSq() < EPSILON) {
       return contains(other.origin) || other.contains(origin);
@@ -55,22 +54,22 @@ public class Ray implements Collider {
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return origin;
   }
 
   @Override
-  public @NonNull Collider at(@NonNull Vector3d point) {
+  public Collider at(Vector3d point) {
     return new Ray(point, direction, invDir);
   }
 
   @Override
-  public @NonNull Vector3d halfExtents() {
+  public Vector3d halfExtents() {
     return direction.multiply(0.5);
   }
 
   @Override
-  public boolean contains(@NonNull Vector3d point) {
+  public boolean contains(Vector3d point) {
     double lengthSq = direction.lengthSq();
     if (lengthSq == 0) {
       return origin.distanceSq(point) <= EPSILON;

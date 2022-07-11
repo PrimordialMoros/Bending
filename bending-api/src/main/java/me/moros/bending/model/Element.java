@@ -27,7 +27,6 @@ import java.util.Optional;
 import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -56,15 +55,15 @@ public enum Element {
     return "bending.element." + elementName.toLowerCase(Locale.ROOT);
   }
 
-  public @NonNull Component displayName() {
+  public Component displayName() {
     return Component.translatable(key(), color);
   }
 
-  public @NonNull Component description() {
+  public Component description() {
     return Component.translatable(key() + ".description", color);
   }
 
-  public @NonNull TextColor color() {
+  public TextColor color() {
     return color;
   }
 

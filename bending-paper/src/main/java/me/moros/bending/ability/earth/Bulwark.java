@@ -21,9 +21,10 @@ package me.moros.bending.ability.earth;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -39,11 +40,10 @@ import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Bulwark extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -55,12 +55,12 @@ public class Bulwark extends AbilityInstance {
   private boolean collapsing = false;
   private long startTime;
 
-  public Bulwark(@NonNull AbilityDescription desc) {
+  public Bulwark(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -85,11 +85,11 @@ public class Bulwark extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -118,21 +118,18 @@ public class Bulwark extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long wallCooldown;
+    private long wallCooldown = 3000;
     @Modifiable(Attribute.DURATION)
-    public long wallDuration;
+    private long wallDuration = 2000;
     @Modifiable(Attribute.RANGE)
-    public double wallRange;
+    private double wallRange = 4.5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "eartharmor", "wall");
-
-      wallCooldown = abilityNode.node("cooldown").getLong(3000);
-      wallDuration = abilityNode.node("duration").getLong(2000);
-      wallRange = abilityNode.node("range").getDouble(4.5);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "eartharmor", "wall");
     }
   }
 }

@@ -21,7 +21,7 @@ package me.moros.bending.game.temporal;
 
 import java.util.Optional;
 
-import me.moros.bending.adapter.impl.NativeAdapter;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.temporal.TemporalManager;
@@ -32,7 +32,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class TempLight extends TemporaryBase {
   public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>("Light");
@@ -77,7 +76,7 @@ public final class TempLight extends TemporaryBase {
     Type type = isValid(block, level);
     if (level <= 0 || type == Type.INVALID) {
       reverted = true;
-      NativeAdapter.instance().packetAdapter().fakeBlock(block.getWorld(), pos, block.getBlockData());
+      NativeAdapter.instance().fakeBlock(block.getWorld(), pos, block.getBlockData());
       MANAGER.removeEntry(block);
       return true;
     }
@@ -92,21 +91,21 @@ public final class TempLight extends TemporaryBase {
       data = data.clone();
       ((Waterlogged) data).setWaterlogged(true);
     }
-    NativeAdapter.instance().packetAdapter().fakeBlock(block.getWorld(), pos, data);
+    NativeAdapter.instance().fakeBlock(block.getWorld(), pos, data);
   }
 
-  public @NonNull TempLight lock() {
+  public TempLight lock() {
     lock = true;
     return this;
   }
 
-  public @NonNull TempLight unlockAndRevert() {
+  public TempLight unlockAndRevert() {
     lock = false;
     revert();
     return this;
   }
 
-  public @NonNull Block block() {
+  public Block block() {
     return block;
   }
 
@@ -127,7 +126,7 @@ public final class TempLight extends TemporaryBase {
     return Type.INVALID;
   }
 
-  public static @NonNull Builder builder(int level) {
+  public static Builder builder(int level) {
     return new Builder(Math.max(1, Math.min(LIGHT_ARRAY.length, level)));
   }
 
@@ -143,18 +142,18 @@ public final class TempLight extends TemporaryBase {
       this.level = level;
     }
 
-    public @NonNull Builder rate(int rate) {
+    public Builder rate(int rate) {
       this.rate = Math.max(1, rate);
       return this;
     }
 
-    public @NonNull Builder duration(long duration) {
+    public Builder duration(long duration) {
       this.duration = duration;
       return this;
     }
 
-    public Optional<TempLight> build(@NonNull Block block) {
-      if (!BendingProperties.instance().canGenerateLight() || !NativeAdapter.instance().isNative()) {
+    public Optional<TempLight> build(Block block) {
+      if (!BendingProperties.instance().canGenerateLight() || !NativeAdapter.hasNativeSupport()) {
         return Optional.empty();
       }
       Type type = isValid(block, level);

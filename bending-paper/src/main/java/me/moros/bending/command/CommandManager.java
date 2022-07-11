@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -44,24 +45,24 @@ import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.ModifyPolicy;
+import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import net.kyori.adventure.identity.Identity;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class CommandManager extends PaperCommandManager<CommandSender> {
-  public CommandManager(@NonNull Bending plugin) throws Exception {
+  public CommandManager(Bending plugin, Game game) throws Exception {
     super(plugin, CommandExecutionCoordinator.simpleCoordinator(), Function.identity(), Function.identity());
     registerExceptionHandler();
     registerAsynchronousCompletions();
     commandSuggestionProcessor(this::suggestionProvider);
     registerCommandPreProcessor(this::preprocessor);
     registerParsers();
-    new BendingCommand(this);
+    new BendingCommand(plugin, game, this);
   }
 
   private void registerExceptionHandler() {
@@ -69,14 +70,9 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
       .apply(this, AudienceProvider.nativeAudience());
   }
 
-  public @NonNull Builder<@NonNull CommandSender> rootBuilder() {
+  public Builder<CommandSender> rootBuilder() {
     return commandBuilder("bending", "bend", "b", "avatar", "atla", "tla")
       .meta(CommandMeta.DESCRIPTION, "Base command for bending");
-  }
-
-  public static @NonNull List<@NonNull String> combinedSuggestions(@NonNull CommandSender sender) {
-    return Stream.of(CommandManager.abilityCompletions(sender, false), Element.NAMES)
-      .flatMap(Collection::stream).toList();
   }
 
   private List<String> suggestionProvider(CommandPreprocessingContext<CommandSender> context, List<String> strings) {
@@ -96,9 +92,11 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
   }
 
   private void preprocessor(CommandPreprocessingContext<CommandSender> context) {
-    if (context.getCommandContext().getSender() instanceof Player player) {
-      context.getCommandContext().store(ContextKeys.BENDING_PLAYER, Registries.BENDERS.user(player));
-    }
+    context.getCommandContext().getSender().get(Identity.UUID).ifPresent(uuid -> {
+      if (Registries.BENDERS.get(uuid) instanceof BendingPlayer bendingPlayer) {
+        context.getCommandContext().store(ContextKeys.BENDING_PLAYER, bendingPlayer);
+      }
+    });
   }
 
   private void registerParsers() {
@@ -108,16 +106,20 @@ public final class CommandManager extends PaperCommandManager<CommandSender> {
     parserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser());
   }
 
-  public static @NonNull List<@NonNull String> abilityCompletions(@Nullable CommandSender sender, boolean validOnly) {
+  public static List<String> combinedSuggestions(CommandSender sender) {
+    return Stream.of(Element.NAMES, abilityCompletions(sender, false)).flatMap(Collection::stream).toList();
+  }
+
+  public static List<String> abilityCompletions(@Nullable CommandSender sender, boolean validOnly) {
     Predicate<AbilityDescription> predicate = x -> true;
     if (validOnly) {
       predicate = AbilityDescription::canBind;
     }
     Predicate<AbilityDescription> hasPermission = x -> true;
     Predicate<AbilityDescription> hasElement = x -> true;
-    if (sender instanceof Player player) {
-      BendingPlayer bendingPlayer = Registries.BENDERS.user(player);
-      hasPermission = bendingPlayer::hasPermission;
+    UUID uuid = sender == null ? null : sender.getOrDefault(Identity.UUID, null);
+    if (uuid != null && Registries.BENDERS.get(uuid) instanceof BendingPlayer bendingPlayer) {
+      predicate = predicate.and(bendingPlayer::hasPermission);
       if (validOnly) {
         hasElement = d -> bendingPlayer.hasElement(d.element());
       }

@@ -19,18 +19,20 @@
 
 package me.moros.bending.ability.water;
 
-import me.moros.bending.Bending;
+import java.util.List;
+
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.EntityUtil;
@@ -42,14 +44,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HealingWaters extends AbilityInstance {
   private enum Mode {SELF, OTHERS}
 
   private static final org.bukkit.attribute.Attribute healthAttribute = org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -58,13 +59,13 @@ public class HealingWaters extends AbilityInstance {
   private boolean healed = false;
   private long nextTime;
 
-  public HealingWaters(@NonNull AbilityDescription desc) {
+  public HealingWaters(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, HealingWaters.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, HealingWaters.class)) {
       return false;
     }
     this.user = user;
@@ -79,11 +80,11 @@ public class HealingWaters extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -101,7 +102,7 @@ public class HealingWaters extends AbilityInstance {
 
   private boolean tryHeal() {
     LivingEntity target;
-    Mode mode = user.store().getOrDefault(DataKey.of("healingwaters-mode", Mode.class), Mode.SELF);
+    Mode mode = user.store().getOrDefault(RegistryKey.create("healingwaters-mode", Mode.class), Mode.SELF);
     if (mode == Mode.SELF) {
       target = user.entity();
     } else {
@@ -127,9 +128,9 @@ public class HealingWaters extends AbilityInstance {
     return true;
   }
 
-  public static void switchMode(@NonNull User user) {
+  public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("HealingWaters")) {
-      var key = DataKey.of("healingwaters-mode", Mode.class);
+      var key = RegistryKey.create("healingwaters-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.SELF);
         user.sendActionBar(Component.text("Healing: " + mode.name(), ColorPalette.TEXT_COLOR));
@@ -149,24 +150,20 @@ public class HealingWaters extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 3000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 3000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 5;
     @Modifiable(Attribute.STRENGTH)
-    public int power;
+    private int power = 2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "healingwaters");
-
-      cooldown = abilityNode.node("cooldown").getLong(3000);
-      duration = abilityNode.node("duration").getLong(3000);
-      range = abilityNode.node("range").getDouble(5.0);
-      power = abilityNode.node("power").getInt(2);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "healingwaters");
     }
   }
 }

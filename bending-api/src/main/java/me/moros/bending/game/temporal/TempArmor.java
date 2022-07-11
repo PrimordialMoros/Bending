@@ -38,7 +38,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class TempArmor extends TemporaryBase {
@@ -60,7 +59,7 @@ public final class TempArmor extends TemporaryBase {
   /**
    * @return an unmodifiable view of the snapshot
    */
-  public @NonNull Collection<@Nullable ItemStack> snapshot() {
+  public Collection<@Nullable ItemStack> snapshot() {
     return Collections.unmodifiableCollection(Arrays.asList(snapshot));
   }
 
@@ -75,11 +74,11 @@ public final class TempArmor extends TemporaryBase {
     return true;
   }
 
-  public static @NonNull Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
-  public static @NonNull Builder leather() {
+  public static Builder leather() {
     return builder()
       .head(Material.LEATHER_HELMET)
       .chest(Material.LEATHER_CHESTPLATE)
@@ -87,7 +86,7 @@ public final class TempArmor extends TemporaryBase {
       .boots(Material.LEATHER_BOOTS);
   }
 
-  public static @NonNull Builder iron() {
+  public static Builder iron() {
     return builder()
       .head(Material.IRON_HELMET)
       .chest(Material.IRON_CHESTPLATE)
@@ -95,7 +94,7 @@ public final class TempArmor extends TemporaryBase {
       .boots(Material.IRON_BOOTS);
   }
 
-  public static @NonNull Builder gold() {
+  public static Builder gold() {
     return builder()
       .head(Material.GOLDEN_HELMET)
       .chest(Material.GOLDEN_CHESTPLATE)
@@ -111,32 +110,32 @@ public final class TempArmor extends TemporaryBase {
       this.armor = new Material[4];
     }
 
-    public @NonNull Builder head(@Nullable Material material) {
+    public Builder head(@Nullable Material material) {
       armor[3] = material;
       return this;
     }
 
-    public @NonNull Builder chest(@Nullable Material material) {
+    public Builder chest(@Nullable Material material) {
       armor[2] = material;
       return this;
     }
 
-    public @NonNull Builder legs(@Nullable Material material) {
+    public Builder legs(@Nullable Material material) {
       armor[1] = material;
       return this;
     }
 
-    public @NonNull Builder boots(@Nullable Material material) {
+    public Builder boots(@Nullable Material material) {
       armor[0] = material;
       return this;
     }
 
-    public @NonNull Builder duration(long duration) {
+    public Builder duration(long duration) {
       this.duration = duration;
       return this;
     }
 
-    public Optional<TempArmor> build(@NonNull User user) {
+    public Optional<TempArmor> build(User user) {
       Objects.requireNonNull(user);
       if (MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
         return Optional.empty();

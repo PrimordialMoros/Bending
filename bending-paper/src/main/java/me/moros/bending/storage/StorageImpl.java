@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.zaxxer.hikari.HikariDataSource;
-import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
@@ -55,7 +54,7 @@ import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.util.Tasker;
 import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageType;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
@@ -75,7 +74,7 @@ public final class StorageImpl implements BendingStorage {
 
   private final BiMap<String, Integer> abilityMap;
 
-  StorageImpl(@NonNull StorageType type, @NonNull Logger logger, @NonNull HikariDataSource source) {
+  StorageImpl(StorageType type, Logger logger, HikariDataSource source) {
     this.type = type;
     this.logger = logger;
     this.source = source;
@@ -84,23 +83,23 @@ public final class StorageImpl implements BendingStorage {
       DB.registerArgument(new UUIDArgumentFactory());
     }
     abilityMap = HashBiMap.create(32);
-    if (!tableExists("bending_players")) {
-      init();
-    }
-  }
-
-  private void init() {
-    InputStream stream = Objects.requireNonNull(Bending.plugin().getResource(type.schemaPath()), "Null schema.");
-    Collection<String> statements = SqlStreamReader.parseQueries(stream);
-    DB.useHandle(handle -> {
-      Batch batch = handle.createBatch();
-      statements.forEach(batch::add);
-      batch.execute();
-    });
   }
 
   @Override
-  public @NonNull StorageType type() {
+  public void init(Plugin plugin) {
+    if (!tableExists("bending_players")) {
+      InputStream stream = Objects.requireNonNull(plugin.getResource(type.schemaPath()), "Null schema.");
+      Collection<String> statements = SqlStreamReader.parseQueries(stream);
+      DB.useHandle(handle -> {
+        Batch batch = handle.createBatch();
+        statements.forEach(batch::add);
+        batch.execute();
+      });
+    }
+  }
+
+  @Override
+  public StorageType type() {
     return type;
   }
 
@@ -109,11 +108,8 @@ public final class StorageImpl implements BendingStorage {
     source.close();
   }
 
-  /**
-   * Creates a new profile for the given uuid or returns an existing one if possible.
-   */
   @Override
-  public @NonNull PlayerProfile createProfile(@NonNull UUID uuid) {
+  public PlayerProfile createProfile(UUID uuid) {
     PlayerProfile profile = loadProfile(uuid);
     if (profile == null) {
       profile = DB.withHandle(handle -> {
@@ -125,23 +121,13 @@ public final class StorageImpl implements BendingStorage {
     return profile;
   }
 
-  /**
-   * This method will attempt to load a profile from the database.
-   * @param uuid the player's uuid
-   * @see #createProfile(UUID)
-   */
   @Override
-  public @NonNull CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(@NonNull UUID uuid) {
+  public CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid) {
     return Tasker.async(() -> loadProfile(uuid));
   }
 
-  /**
-   * Asynchronously saves the given bendingPlayer's data to the database.
-   * It updates the profile and stores the current elements and bound abilities.
-   * @param bendingPlayer the BendingPlayer to save
-   */
   @Override
-  public void savePlayerAsync(@NonNull BendingPlayer bendingPlayer) {
+  public void savePlayerAsync(BendingPlayer bendingPlayer) {
     PlayerProfile profileToSave = bendingPlayer.toProfile();
     Tasker.async(() -> {
       updateProfile(profileToSave);
@@ -150,17 +136,15 @@ public final class StorageImpl implements BendingStorage {
     });
   }
 
-  /**
-   * Adds all given abilities to the database
-   * @param abilities the abilities to add
-   */
   @Override
-  public boolean createAbilities(@NonNull Iterable<AbilityDescription> abilities) {
+  public boolean createAbilities(Iterable<AbilityDescription> abilities) {
     try {
       DB.useHandle(handle -> {
         PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
         for (AbilityDescription desc : abilities) {
-          batch.bind(0, desc.name()).add();
+          if (desc.canBind()) {
+            batch.bind(0, desc.name()).add();
+          }
         }
         batch.execute();
       });
@@ -177,7 +161,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   @Override
-  public @NonNull CompletableFuture<Boolean> savePresetAsync(int playerId, @NonNull Preset preset) {
+  public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
     return Tasker.async(() -> savePreset(playerId, preset));
   }
 
@@ -186,7 +170,7 @@ public final class StorageImpl implements BendingStorage {
     Tasker.async(() -> deletePreset(presetId));
   }
 
-  private PlayerProfile loadProfile(UUID uuid) {
+  private @Nullable PlayerProfile loadProfile(UUID uuid) {
     try {
       PlayerProfile temp = DB.withHandle(handle ->
         handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
@@ -304,7 +288,7 @@ public final class StorageImpl implements BendingStorage {
     return false;
   }
 
-  private int getAbilityId(AbilityDescription desc) {
+  private int getAbilityId(@Nullable AbilityDescription desc) {
     if (desc == null) {
       return 0;
     }
@@ -379,7 +363,7 @@ public final class StorageImpl implements BendingStorage {
     for (Map<String, Object> map : results) {
       int slot = (int) map.get("slot");
       String abilityName = getAbilityName((int) map.get("ability_id"));
-      abilities[slot - 1] = Registries.ABILITIES.ability(abilityName);
+      abilities[slot - 1] = Registries.ABILITIES.fromString(abilityName);
     }
     return abilities;
   }
@@ -397,7 +381,7 @@ public final class StorageImpl implements BendingStorage {
     return false;
   }
 
-  private PlayerProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
+  private @Nullable PlayerProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
     int id = rs.getInt("player_id");
     return id > 0 ? new PlayerProfile(id, rs.getBoolean("board")) : null;
   }

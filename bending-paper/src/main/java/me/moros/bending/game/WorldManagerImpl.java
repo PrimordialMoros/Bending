@@ -21,59 +21,55 @@ package me.moros.bending.game;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
 import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
+import me.moros.bending.config.Configurable;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.manager.DummyAbilityManager;
 import me.moros.bending.model.manager.WorldManager;
 import me.moros.bending.model.user.User;
+import me.moros.bending.util.TextUtil;
 import me.moros.bending.util.metadata.Metadata;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.serialize.SerializationException;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
+import org.slf4j.Logger;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
-public final class WorldManagerImpl implements WorldManager {
+public final class WorldManagerImpl implements WorldManager, Listener {
+  private final Logger logger;
+  private final Config config;
   private final Map<World, ManagerPair> worlds;
 
-  WorldManagerImpl() {
-    try {
-      for (String w : Bending.configManager().config().node("properties", "disabled-worlds").getList(String.class, List.of())) {
-        World world = Bukkit.getWorld(w);
-        if (world != null) {
-          world.setMetadata(Metadata.DISABLED, Metadata.of());
-        }
+  WorldManagerImpl(Bending plugin) {
+    this.logger = plugin.logger();
+    worlds = new ConcurrentHashMap<>();
+    config = ConfigManager.load(Config::new);
+    for (World world : plugin.getServer().getWorlds()) {
+      if (config.contains(world)) {
+        Metadata.add(world, Metadata.DISABLED);
+      } else {
+        worlds.put(world, new ManagerPair(logger));
       }
-    } catch (SerializationException ignore) {
     }
-    worlds = Bukkit.getWorlds().stream().filter(this::isEnabled)
-      .collect(Collectors.toConcurrentMap(Function.identity(), w -> new ManagerPair()));
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
   }
 
   @Override
-  public @NonNull AbilityManager instance(@NonNull World world) {
-    return isEnabled(world) ? worlds.computeIfAbsent(world, w -> new ManagerPair()).abilities : DummyAbilityManager.DUMMY;
+  public AbilityManager instance(World world) {
+    return isEnabled(world) ? worlds.computeIfAbsent(world, w -> new ManagerPair(logger)).abilities : DummyAbilityManager.DUMMY;
   }
 
   @Override
-  public @NonNull UpdateResult update() {
-    for (var entry : worlds.entrySet()) {
-      try (Timing timing = Timings.of(Bending.plugin(), entry.getKey().getName() + " - tick")) {
-        entry.getValue().update();
-      } catch (Exception e) {
-        Bending.logger().warn(e.getMessage(), e);
-      }
-    }
+  public UpdateResult update() {
+    worlds.values().forEach(ManagerPair::update);
     return UpdateResult.CONTINUE;
-  }
-
-  @Override
-  public void onWorldUnload(@NonNull World world) {
-    worlds.remove(world);
   }
 
   @Override
@@ -87,22 +83,58 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @Override
-  public void createPassives(@NonNull User user) {
+  public void createPassives(User user) {
     instance(user.world()).createPassives(user);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onWorldLoad(WorldLoadEvent event) {
+    World world = event.getWorld();
+    if (config.contains(event.getWorld())) {
+      Metadata.add(world, Metadata.DISABLED);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onWorldUnload(WorldUnloadEvent event) {
+    ManagerPair pair = worlds.remove(event.getWorld());
+    if (pair != null) {
+      pair.abilities.destroyAllInstances();
+    }
   }
 
   private static final class ManagerPair {
     private final AbilityManager abilities;
     private final CollisionManager collisions;
 
-    private ManagerPair() {
-      abilities = new AbilityManagerImpl();
+    private ManagerPair(Logger logger) {
+      abilities = new AbilityManagerImpl(logger);
       collisions = new CollisionManager(abilities);
     }
 
     private void update() {
       abilities.update();
       collisions.update();
+    }
+  }
+
+  @ConfigSerializable
+  private static class Config extends Configurable {
+    @Comment("You can specify worlds either by name or UUID")
+    private List<String> disabledWorlds;
+
+    private boolean contains(World world) {
+      for (String value : disabledWorlds) {
+        if (world.getName().equalsIgnoreCase(value) || world.getUID().equals(TextUtil.parseUUID(value))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    @Override
+    public Iterable<String> path() {
+      return List.of("properties", "disabled-worlds");
     }
   }
 }

@@ -21,10 +21,11 @@ package me.moros.bending.ability.fire;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempLight;
@@ -55,11 +56,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireBreath extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -68,13 +68,13 @@ public class FireBreath extends AbilityInstance {
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
   private final Collection<FireStream> streams = new ArrayList<>();
 
-  public FireBreath(@NonNull AbilityDescription desc) {
+  public FireBreath(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireBreath.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, FireBreath.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
@@ -96,11 +96,11 @@ public class FireBreath extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -122,7 +122,7 @@ public class FireBreath extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -151,7 +151,7 @@ public class FireBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       BendingEffect.FIRE_TICK.apply(user, entity);
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
@@ -161,7 +161,7 @@ public class FireBreath extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryMelt(user, block)) {
         return true;
       }
@@ -173,24 +173,20 @@ public class FireBreath extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 12_000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 9;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 2000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 0.75;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "firebreath");
-
-      cooldown = abilityNode.node("cooldown").getLong(12000);
-      range = abilityNode.node("range").getDouble(9.0);
-      duration = abilityNode.node("duration").getLong(2000);
-      damage = abilityNode.node("damage").getDouble(0.75);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "firebreath");
     }
   }
 }

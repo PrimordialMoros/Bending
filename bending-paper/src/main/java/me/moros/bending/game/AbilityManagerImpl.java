@@ -22,40 +22,40 @@ package me.moros.bending.game;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.Logger;
 
 public class AbilityManagerImpl implements AbilityManager {
+  private final Logger logger;
   private final Multimap<UUID, Ability> globalInstances;
   private final Collection<Entry<UUID, Ability>> addQueue;
 
-  AbilityManagerImpl() {
+  AbilityManagerImpl(Logger logger) {
+    this.logger = logger;
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
     addQueue = new ArrayList<>(16);
   }
 
   @Override
-  public void addAbility(@NonNull User user, @NonNull Ability instance) {
+  public void addAbility(User user, Ability instance) {
     addQueue.add(Map.entry(user.uuid(), instance));
   }
 
   @Override
-  public void changeOwner(@NonNull Ability ability, @NonNull User user) {
+  public void changeOwner(Ability ability, User user) {
     if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
       return;
     }
@@ -67,7 +67,7 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public void createPassives(@NonNull User user) {
+  public void createPassives(User user) {
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream()
       .filter(d -> d.isActivatedBy(Activation.PASSIVE)).toList();
     for (AbilityDescription passive : allPassives) {
@@ -87,14 +87,14 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public void destroyInstance(@NonNull Ability ability) {
+  public void destroyInstance(Ability ability) {
     if (globalInstances.remove(ability.user().uuid(), ability)) {
       ability.onDestroy();
     }
   }
 
   @Override
-  public boolean destroyInstanceType(@NonNull User user, @NonNull Collection<Class<? extends Ability>> types) {
+  public boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types) {
     boolean destroyed = false;
     Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
     while (iterator.hasNext()) {
@@ -111,17 +111,17 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public @NonNull Stream<Ability> userInstances(@NonNull User user) {
+  public Stream<Ability> userInstances(User user) {
     return globalInstances.get(user.uuid()).stream();
   }
 
   @Override
-  public @NonNull Stream<Ability> instances() {
+  public Stream<Ability> instances() {
     return globalInstances.values().stream();
   }
 
   @Override
-  public void destroyUserInstances(@NonNull User user) {
+  public void destroyUserInstances(User user) {
     globalInstances.removeAll(user.uuid()).forEach(Ability::onDestroy);
   }
 
@@ -132,24 +132,28 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     // Add any queued abilities to global instances
     addQueue.forEach(entry -> globalInstances.put(entry.getKey(), entry.getValue()));
     addQueue.clear();
     // Update all instances and remove invalid instances
     Iterator<Ability> globalIterator = globalInstances.values().iterator();
+    Collection<Exception> exceptions = new LinkedList<>();
     while (globalIterator.hasNext()) {
       Ability ability = globalIterator.next();
       UpdateResult result = UpdateResult.REMOVE;
-      try (Timing timing = Timings.of(Bending.plugin(), ability.description().name()).startTiming()) {
+      try {
         result = ability.update();
       } catch (Exception e) {
-        Bending.logger().warn(e.getMessage(), e);
+        exceptions.add(e);
       }
       if (result == UpdateResult.REMOVE) {
         globalIterator.remove();
         ability.onDestroy();
       }
+    }
+    for (Exception e : exceptions) {
+      logger.error(e.getMessage(), e);
     }
     return UpdateResult.CONTINUE;
   }

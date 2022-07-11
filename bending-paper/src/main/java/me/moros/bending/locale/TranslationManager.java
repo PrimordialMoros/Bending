@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import me.moros.bending.Bending;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -42,18 +41,22 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
 
 /**
+ * TranslationManager loads localized strings and adds them to a {@link TranslationRegistry} that can be used
+ * to create {@link TranslatableComponent}.
  * @see Message
  */
-public class TranslationManager {
+public final class TranslationManager {
+  private final Logger logger;
   private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
   private final Path translationsDirectory;
   private TranslationRegistry registry;
 
-  public TranslationManager(@NonNull String directory) {
+  public TranslationManager(Logger logger, String directory) {
+    this.logger = logger;
     translationsDirectory = Path.of(directory, "translations");
     reload();
   }
@@ -84,7 +87,7 @@ public class TranslationManager {
     int amount = installed.size();
     if (amount > 0) {
       String translations = installed.stream().map(Locale::getLanguage).collect(Collectors.joining(", ", "[", "]"));
-      Bending.logger().info("Loaded " + amount + " translations: " + translations);
+      logger.info("Loaded " + amount + " translations: " + translations);
     }
   }
 
@@ -92,14 +95,14 @@ public class TranslationManager {
     String localeString = removeFileExtension(path);
     Locale locale = Translator.parseLocale(localeString);
     if (locale == null) {
-      Bending.logger().warn("Unknown locale: " + localeString);
+      logger.warn("Unknown locale: " + localeString);
       return;
     }
     PropertyResourceBundle bundle;
     try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       bundle = new PropertyResourceBundle(reader);
     } catch (IOException e) {
-      Bending.logger().warn("Error loading locale file: " + localeString);
+      logger.warn("Error loading locale file: " + localeString);
       return;
     }
     registry.registerAll(locale, bundle, false);
@@ -115,7 +118,12 @@ public class TranslationManager {
     return fileName.substring(0, fileName.length() - ".properties".length());
   }
 
-  public @Nullable TranslatableComponent translate(@NonNull String key) {
+  /**
+   * Attempt to retrieve the translation for the specified key.
+   * @param key a translation key
+   * @return the translatable component for the given key or null if key is not registered
+   */
+  public @Nullable TranslatableComponent translate(String key) {
     return registry.contains(key) ? Component.translatable(key) : null;
   }
 }

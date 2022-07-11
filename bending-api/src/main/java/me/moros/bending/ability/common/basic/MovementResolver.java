@@ -28,18 +28,17 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class MovementResolver {
   private final World world;
   protected Predicate<Block> diagonalsPredicate = MaterialUtil::isTransparent;
 
-  protected MovementResolver(@NonNull World world) {
+  protected MovementResolver(World world) {
     this.world = world;
   }
 
-  protected @Nullable Vector3d resolve(@NonNull Vector3d origin, @NonNull Vector3d direction) {
+  protected @Nullable Vector3d resolve(Vector3d origin, Vector3d direction) {
     Block original = origin.toBlock(world);
     Block destination = origin.add(direction).toBlock(world);
     int offset = 0;
@@ -66,5 +65,5 @@ public abstract class MovementResolver {
     return origin.add(direction).add(new Vector3d(0, offset, 0));
   }
 
-  protected abstract boolean isValidBlock(@NonNull Block block);
+  protected abstract boolean isValidBlock(Block block);
 }

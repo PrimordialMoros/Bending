@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.ability;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public enum Activation {
   PASSIVE("bending.activation.passive"),
   ATTACK("bending.activation.attack"),
@@ -49,7 +47,7 @@ public enum Activation {
     return interact;
   }
 
-  public @NonNull String key() {
+  public String key() {
     return key;
   }
 }

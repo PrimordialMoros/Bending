@@ -24,7 +24,6 @@ import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BlockLine extends MovementResolver implements Updatable {
   private final User user;
@@ -40,7 +39,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
   protected double distanceTravelled = 0;
   private long nextUpdate = 0;
 
-  protected BlockLine(@NonNull User user, @NonNull Ray ray) {
+  protected BlockLine(User user, Ray ray) {
     super(user.world());
     this.user = user;
     this.ray = ray;
@@ -50,7 +49,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (interval >= 50) {
       long time = System.currentTimeMillis();
       if (time < nextUpdate) {
@@ -82,5 +81,5 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     return UpdateResult.CONTINUE;
   }
 
-  public abstract void render(@NonNull Block block);
+  public abstract void render(Block block);
 }

@@ -20,7 +20,7 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.ability.earth.MetalCable;
-import me.moros.bending.event.BendingTickEffectEvent;
+import me.moros.bending.event.TickEffectEvent;
 import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.ActionType;
@@ -48,12 +48,11 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.potion.PotionEffectType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntityListener implements Listener {
   private final Game game;
 
-  public EntityListener(@NonNull Game game) {
+  public EntityListener(Game game) {
     this.game = game;
   }
 
@@ -74,7 +73,7 @@ public class EntityListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onEntityFreeze(BendingTickEffectEvent event) {
+  public void onEntityFreeze(TickEffectEvent event) {
     if (event.type() == BendingEffect.FROST_TICK && event.target() instanceof LivingEntity entity) {
       int duration = event.duration();
       if (duration > 30) {

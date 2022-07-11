@@ -40,7 +40,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class BlockStream implements State {
   private StateChain chain;
@@ -64,7 +63,7 @@ public abstract class BlockStream implements State {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  protected BlockStream(@NonNull User user, @NonNull Material material, double range, int speed) {
+  protected BlockStream(User user, Material material, double range, int speed) {
     this.user = user;
     this.material = material;
     this.range = range;
@@ -73,7 +72,7 @@ public abstract class BlockStream implements State {
   }
 
   @Override
-  public void start(@NonNull StateChain chain) {
+  public void start(StateChain chain) {
     if (started) {
       return;
     }
@@ -92,7 +91,7 @@ public abstract class BlockStream implements State {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     buffer += speed;
     if (buffer < 20) {
       return UpdateResult.CONTINUE;
@@ -156,16 +155,16 @@ public abstract class BlockStream implements State {
   public void postRender() {
   }
 
-  public abstract boolean onEntityHit(@NonNull Entity entity);
+  public abstract boolean onEntityHit(Entity entity);
 
-  public void onBlockHit(@NonNull Block block) {
+  public void onBlockHit(Block block) {
   }
 
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return colliders;
   }
 
-  protected void renderHead(@NonNull Block block) {
+  protected void renderHead(Block block) {
     if (material == Material.WATER && MaterialUtil.isWater(block)) {
       ParticleUtil.bubble(block).spawn(user.world());
     } else {
@@ -173,7 +172,7 @@ public abstract class BlockStream implements State {
     }
   }
 
-  public boolean isValid(@NonNull Block block) {
+  public boolean isValid(Block block) {
     if (material == Material.WATER) {
       return MaterialUtil.isWater(block);
     }
@@ -184,7 +183,7 @@ public abstract class BlockStream implements State {
     stream.forEach(this::clean);
   }
 
-  private void clean(@NonNull Block block) {
+  private void clean(Block block) {
     if (isValid(block)) {
       TempBlock.air().build(block);
     }

@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirScooter;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -48,12 +48,11 @@ import me.moros.bending.util.collision.CollisionUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
   private static final AABB BOUNDS = new AABB(new Vector3d(-0.4, -2, -2), new Vector3d(0.4, 2, 2));
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription scooterDesc;
 
   private User user;
@@ -67,23 +66,22 @@ public class AirWheel extends AbilityInstance {
 
   private long nextRenderTime;
 
-  public AirWheel(@NonNull AbilityDescription desc) {
+  public AirWheel(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
       return false;
     }
     if (scooterDesc == null) {
-      scooterDesc = Objects.requireNonNull(Registries.ABILITIES.ability("AirScooter"));
+      scooterDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("AirScooter"));
     }
-    scooter = new AirScooter(scooterDesc);
+    scooter = new AirScooter(scooterDesc, false);
     if (user.onCooldown(scooterDesc) || !scooter.activate(user, Activation.ATTACK)) {
       return false;
     }
-    scooter.canRender = false;
 
     this.user = user;
     loadConfig();
@@ -95,11 +93,11 @@ public class AirWheel extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     long time = System.currentTimeMillis();
     center = user.location().add(new Vector3d(0, 0.8, 0)).add(user.direction().withY(0).multiply(1.2));
     collider = new Disk(new OBB(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
@@ -139,12 +137,12 @@ public class AirWheel extends AbilityInstance {
     );
   }
 
-  public @NonNull Vector3d center() {
+  public Vector3d center() {
     return center;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(collider);
   }
 
@@ -153,18 +151,16 @@ public class AirWheel extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 8000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "sequences", "airwheel");
-
-      cooldown = abilityNode.node("cooldown").getLong(8000);
-      damage = abilityNode.node("damage").getDouble(1.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "sequences", "airwheel");
     }
   }
 }

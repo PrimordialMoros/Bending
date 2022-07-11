@@ -22,10 +22,11 @@ package me.moros.bending.ability.water;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempBlock.Builder;
@@ -50,11 +51,10 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterWave extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -65,13 +65,13 @@ public class WaterWave extends AbilityInstance {
   private boolean ice = false;
   private long startTime;
 
-  public WaterWave(@NonNull AbilityDescription desc) {
+  public WaterWave(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterWave.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, WaterWave.class)) {
       return false;
     }
 
@@ -85,11 +85,11 @@ public class WaterWave extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -138,7 +138,7 @@ public class WaterWave extends AbilityInstance {
     if (!affectedEntities.contains(entity)) {
       affectedEntities.add(entity);
       BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-      DamageUtil.damageEntity(entity, user, userConfig.damage, description());
+      DamageUtil.damageEntity(entity, user, userConfig.iceDamage, description());
       return true;
     }
     return false;
@@ -148,9 +148,9 @@ public class WaterWave extends AbilityInstance {
     ice = true;
   }
 
-  public static void freeze(@NonNull User user) {
+  public static void freeze(User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
+      user.game().abilityManager(user.world()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
     }
   }
 
@@ -164,32 +164,24 @@ public class WaterWave extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 3500;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1.2;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
-
+    private double radius = 1.7;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double iceDamage = 2;
     @Modifiable(Attribute.FREEZE_TICKS)
-    public int freezeTicks;
+    private int freezeTicks = 100;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "waterring", "waterwave");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      duration = abilityNode.node("duration").getLong(3500);
-      speed = abilityNode.node("speed").getDouble(1.2);
-      radius = abilityNode.node("radius").getDouble(1.7);
-
-      damage = abilityNode.node("ice-damage").getDouble(2.0);
-      freezeTicks = abilityNode.node("ice-freeze-ticks").getInt(100);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "waterring", "waterwave");
     }
   }
 }

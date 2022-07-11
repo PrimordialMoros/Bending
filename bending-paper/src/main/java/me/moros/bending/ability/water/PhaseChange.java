@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.PhaseTransformer;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -44,11 +44,11 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class PhaseChange extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -57,12 +57,12 @@ public class PhaseChange extends AbilityInstance {
   private final Freeze freeze = new Freeze();
   private final Melt melt = new Melt();
 
-  public PhaseChange(@NonNull AbilityDescription desc) {
+  public PhaseChange(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -71,11 +71,11 @@ public class PhaseChange extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       freeze.clear();
       melt.clear();
@@ -117,15 +117,15 @@ public class PhaseChange extends AbilityInstance {
     return newBlocks;
   }
 
-  public static void freeze(@NonNull User user) {
+  public static void freeze(User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
     }
   }
 
-  public static void melt(@NonNull User user) {
+  public static void melt(User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
     }
   }
 
@@ -136,7 +136,7 @@ public class PhaseChange extends AbilityInstance {
 
   private class Freeze extends PhaseTransformer {
     @Override
-    protected boolean processBlock(@NonNull Block block) {
+    protected boolean processBlock(Block block) {
       if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
         return false;
       }
@@ -153,7 +153,7 @@ public class PhaseChange extends AbilityInstance {
 
   private class Melt extends PhaseTransformer {
     @Override
-    protected boolean processBlock(@NonNull Block block) {
+    protected boolean processBlock(Block block) {
       if (!TempBlock.isBendable(block)) {
         return false;
       }
@@ -161,38 +161,28 @@ public class PhaseChange extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SELECTION)
-    public double freezeRange;
+    private double freezeRange = 7;
     @Modifiable(Attribute.RADIUS)
-    public double freezeRadius;
+    private double freezeRadius = 3.5;
+    @Comment("How many blocks can be affected per tick")
     @Modifiable(Attribute.SPEED)
-    public int freezeSpeed;
+    private int freezeSpeed = 8;
     @Modifiable(Attribute.COOLDOWN)
-    public long freezeCooldown;
-
+    private long freezeCooldown = 2000;
     @Modifiable(Attribute.SELECTION)
-    public double meltRange;
+    private double meltRange = 7;
     @Modifiable(Attribute.RADIUS)
-    public double meltRadius;
+    private double meltRadius = 4.5;
+    @Comment("How many blocks can be affected per tick")
     @Modifiable(Attribute.SPEED)
-    public int meltSpeed;
+    private int meltSpeed = 8;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "phasechange");
-
-      freezeRange = abilityNode.node("freeze").node("range").getDouble(7.0);
-      freezeRadius = abilityNode.node("freeze").node("radius").getDouble(3.5);
-      freezeSpeed = abilityNode.node("freeze").node("speed").getInt(8);
-      freezeCooldown = abilityNode.node("freeze").node("cooldown").getLong(2000);
-
-      meltRange = abilityNode.node("melt").node("range").getDouble(7.0);
-      meltRadius = abilityNode.node("melt").node("radius").getDouble(4.5);
-      meltSpeed = abilityNode.node("melt").node("speed").getInt(8);
-
-      abilityNode.node("freeze", "speed").comment("How many blocks can be affected per tick.");
-      abilityNode.node("melt", "speed").comment("How many blocks can be affected per tick.");
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "phasechange");
     }
   }
 }

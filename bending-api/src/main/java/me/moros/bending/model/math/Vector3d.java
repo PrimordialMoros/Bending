@@ -22,7 +22,7 @@ package me.moros.bending.model.math;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Immutable 3D Vector implementation
@@ -74,15 +74,15 @@ public class Vector3d {
     this.z = v[2];
   }
 
-  public Vector3d(org.bukkit.util.@NonNull Vector v) {
+  public Vector3d(org.bukkit.util.Vector v) {
     this(v.getX(), v.getY(), v.getZ());
   }
 
-  public Vector3d(@NonNull Location l) {
+  public Vector3d(Location l) {
     this(l.getX(), l.getY(), l.getZ());
   }
 
-  public Vector3d(@NonNull Block b) {
+  public Vector3d(Block b) {
     this(b.getX(), b.getY(), b.getZ());
   }
 
@@ -110,21 +110,21 @@ public class Vector3d {
   /**
    * @return a new vector copy with the given x coordinate
    */
-  public @NonNull Vector3d withX(double value) {
+  public Vector3d withX(double value) {
     return new Vector3d(value, y, z);
   }
 
   /**
    * @return a new vector copy with the given y coordinate
    */
-  public @NonNull Vector3d withY(double value) {
+  public Vector3d withY(double value) {
     return new Vector3d(x, value, z);
   }
 
   /**
    * @return a new vector copy with the given z coordinate
    */
-  public @NonNull Vector3d withZ(double value) {
+  public Vector3d withZ(double value) {
     return new Vector3d(x, y, value);
   }
 
@@ -156,7 +156,7 @@ public class Vector3d {
    * @param v vector to add
    * @return a new vector
    */
-  public @NonNull Vector3d add(@NonNull Vector3d v) {
+  public Vector3d add(Vector3d v) {
     return new Vector3d(x + v.x, y + v.y, z + v.z);
   }
 
@@ -165,14 +165,14 @@ public class Vector3d {
    * @param v vector to subtract
    * @return a new vector
    */
-  public @NonNull Vector3d subtract(@NonNull Vector3d v) {
+  public Vector3d subtract(Vector3d v) {
     return new Vector3d(x - v.x, y - v.y, z - v.z);
   }
 
   /**
    * @return {@link #normalize(Vector3d)} with {@link #PLUS_I} as default.
    */
-  public @NonNull Vector3d normalize() {
+  public Vector3d normalize() {
     return normalize(Vector3d.PLUS_I);
   }
 
@@ -181,7 +181,7 @@ public class Vector3d {
    * @param def the default vector to return if norm is zero
    * @return a new normalized vector
    */
-  public @NonNull Vector3d normalize(@NonNull Vector3d def) {
+  public Vector3d normalize(Vector3d def) {
     double s = length();
     if (s == 0) {
       return def;
@@ -193,7 +193,7 @@ public class Vector3d {
    * Get the opposite of the instance.
    * @return a new vector which is opposite to the instance
    */
-  public @NonNull Vector3d negate() {
+  public Vector3d negate() {
     return new Vector3d(-x, -y, -z);
   }
 
@@ -202,11 +202,11 @@ public class Vector3d {
    * @param a scalar
    * @return a new vector
    */
-  public @NonNull Vector3d multiply(double a) {
+  public Vector3d multiply(double a) {
     return new Vector3d(a * x, a * y, a * z);
   }
 
-  public @NonNull Vector3d multiply(@NonNull Vector3d v) {
+  public Vector3d multiply(Vector3d v) {
     return new Vector3d(x * v.x, y * v.y, z * v.z);
   }
 
@@ -224,25 +224,25 @@ public class Vector3d {
     return !isNaN() && (Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z));
   }
 
-  public double dot(@NonNull Vector3d v) {
+  public double dot(Vector3d v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
-  public @NonNull Vector3d cross(@NonNull Vector3d v) {
+  public Vector3d cross(Vector3d v) {
     double newX = y * v.z - v.y * z;
     double newY = z * v.x - v.z * x;
     double newZ = x * v.y - v.x * y;
     return new Vector3d(newX, newY, newZ);
   }
 
-  public double distance(@NonNull Vector3d v) {
+  public double distance(Vector3d v) {
     double dx = v.x - x;
     double dy = v.y - y;
     double dz = v.z - z;
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
-  public double distanceSq(@NonNull Vector3d v) {
+  public double distanceSq(Vector3d v) {
     double dx = v.x - x;
     double dy = v.y - y;
     double dz = v.z - z;
@@ -254,7 +254,7 @@ public class Vector3d {
    * @param v the other vector
    * @return angular separation between this and v or zero if either vector has a null norm
    */
-  public double angle(@NonNull Vector3d v) {
+  public double angle(Vector3d v) {
     double normProduct = length() * v.length();
     if (normProduct == 0) {
       return 0;
@@ -263,20 +263,20 @@ public class Vector3d {
     return Math.acos(dot);
   }
 
-  public @NonNull Vector3d min(@NonNull Vector3d v) {
+  public Vector3d min(Vector3d v) {
     return new Vector3d(Math.min(x, v.x), Math.min(y, v.y), Math.min(z, v.z));
   }
 
-  public @NonNull Vector3d max(@NonNull Vector3d v) {
+  public Vector3d max(Vector3d v) {
     return new Vector3d(Math.max(x, v.x), Math.max(y, v.y), Math.max(z, v.z));
   }
 
-  public @NonNull Vector3d abs() {
+  public Vector3d abs() {
     return new Vector3d(Math.abs(x), Math.abs(y), Math.abs(z));
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (this == obj) {
       return true;
     }
@@ -299,52 +299,52 @@ public class Vector3d {
     return "[" + x + ", " + y + ", " + z + "]";
   }
 
-  public @NonNull Vector3d floor() {
+  public Vector3d floor() {
     return new Vector3d(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
-  public @NonNull Vector3d snapToBlockCenter() {
+  public Vector3d snapToBlockCenter() {
     double newX = FastMath.floor(x) + 0.5;
     double newY = FastMath.floor(y) + 0.5;
     double newZ = FastMath.floor(z) + 0.5;
     return new Vector3d(newX, newY, newZ);
   }
 
-  public @NonNull Vector3i toVector3i() {
+  public Vector3i toVector3i() {
     return new Vector3i(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
-  public org.bukkit.util.@NonNull Vector clampVelocity() {
+  public org.bukkit.util.Vector clampVelocity() {
     double clampedX = Math.min(MAX_VELOCITY.x, Math.max(MIN_VELOCITY.x, x));
     double clampedY = Math.min(MAX_VELOCITY.y, Math.max(MIN_VELOCITY.y, y));
     double clampedZ = Math.min(MAX_VELOCITY.z, Math.max(MIN_VELOCITY.z, z));
     return new org.bukkit.util.Vector(clampedX, clampedY, clampedZ);
   }
 
-  public org.bukkit.util.@NonNull Vector toBukkitVector() {
+  public org.bukkit.util.Vector toBukkitVector() {
     return new org.bukkit.util.Vector(x, y, z);
   }
 
-  public @NonNull Location toLocation(@NonNull World world) {
+  public Location toLocation(World world) {
     return new Location(world, x, y, z);
   }
 
-  public @NonNull Block toBlock(@NonNull World world) {
+  public Block toBlock(World world) {
     return world.getBlockAt(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
-  public static double minComponent(@NonNull Vector3d v) {
+  public static double minComponent(Vector3d v) {
     return Math.min(v.x, Math.min(v.y, v.z));
   }
 
-  public static double maxComponent(@NonNull Vector3d v) {
+  public static double maxComponent(Vector3d v) {
     return Math.max(v.x, Math.max(v.y, v.z));
   }
 
   /**
    * Create a vector at the center of a block position.
    */
-  public static @NonNull Vector3d center(@NonNull Block b) {
+  public static Vector3d center(Block b) {
     return new Vector3d(b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5);
   }
 

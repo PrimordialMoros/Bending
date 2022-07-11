@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.ability.state;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public final class DummyState implements State {
   public static final State INSTANCE = new DummyState();
 
@@ -28,7 +26,7 @@ public final class DummyState implements State {
   }
 
   @Override
-  public void start(@NonNull StateChain chain) {
+  public void start(StateChain chain) {
   }
 
   @Override
@@ -36,7 +34,7 @@ public final class DummyState implements State {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     return UpdateResult.REMOVE;
   }
 }

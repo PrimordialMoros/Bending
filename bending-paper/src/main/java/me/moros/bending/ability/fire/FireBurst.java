@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.game.temporal.TempLight;
@@ -57,11 +57,10 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireBurst extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -73,14 +72,14 @@ public class FireBurst extends AbilityInstance {
   private boolean released;
   private long startTime;
 
-  public FireBurst(@NonNull AbilityDescription desc) {
+  public FireBurst(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, FireBurst.class)
+      user.game().abilityManager(user.world()).firstInstance(user, FireBurst.class)
         .ifPresent(b -> b.release(true));
       return false;
     }
@@ -96,11 +95,11 @@ public class FireBurst extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -130,12 +129,12 @@ public class FireBurst extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Collider collider = collision.colliderSelf();
     streams.removeIf(stream -> stream.collider().equals(collider));
     if (collision.removeSelf() && !streams.isEmpty()) {
@@ -190,7 +189,7 @@ public class FireBurst extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
@@ -201,7 +200,7 @@ public class FireBurst extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       Vector3d reverse = ray.direction.negate();
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
@@ -222,35 +221,26 @@ public class FireBurst extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 2500;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.FIRE_TICKS)
-    public int fireTicks;
+    private int fireTicks = 35;
     @Modifiable(Attribute.SPEED)
-    public double speed;
-
+    private double speed = 0.8;
     @Modifiable(Attribute.RANGE)
-    public double sphereRange;
+    private double sphereRange = 7;
     @Modifiable(Attribute.RANGE)
-    public double coneRange;
+    private double coneRange = 11;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireburst");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      chargeTime = abilityNode.node("charge-time").getLong(2500);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(35);
-      speed = abilityNode.node("speed").getDouble(0.8);
-      coneRange = abilityNode.node("cone-range").getDouble(11.0);
-      sphereRange = abilityNode.node("sphere-range").getDouble(7.0);
-
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "fireburst");
     }
   }
 }

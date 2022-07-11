@@ -21,18 +21,24 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ElementChangeEvent extends BendingUserEvent implements Cancellable {
+public class ElementChangeEvent extends BendingEvent implements UserEvent, Cancellable {
+  private final User user;
   private final ElementAction action;
+
   private boolean cancelled = false;
 
   ElementChangeEvent(User user, ElementAction action) {
-    super(user);
+    this.user = user;
     this.action = action;
   }
 
-  public @NonNull ElementAction type() {
+  @Override
+  public User user() {
+    return user;
+  }
+
+  public ElementAction type() {
     return action;
   }
 

@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.model.ExpiringSet;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.bending.model.key.RegistryKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class DataContainer implements DataHolder {
-  private final Map<DataKey<?>, Object> data;
-  private final ExpiringSet<DataKey<?>> cooldowns;
+  private final Map<RegistryKey<?>, Object> data;
+  private final ExpiringSet<RegistryKey<?>> cooldowns;
 
   DataContainer() {
     data = new ConcurrentHashMap<>();
@@ -36,17 +36,17 @@ public class DataContainer implements DataHolder {
   }
 
   @Override
-  public <E> boolean containsKey(@NonNull DataKey<E> key) {
+  public <T> boolean containsKey(RegistryKey<T> key) {
     return data.containsKey(key);
   }
 
   @Override
-  public <E> boolean canEdit(@NonNull DataKey<E> key) {
+  public <T> boolean canEdit(RegistryKey<T> key) {
     return !cooldowns.contains(key);
   }
 
   @Override
-  public <E> boolean offer(@NonNull DataKey<E> key, @NonNull E value) {
+  public <T> boolean offer(RegistryKey<T> key, T value) {
     if (canEdit(key)) {
       put(key, value);
       return true;
@@ -55,38 +55,38 @@ public class DataContainer implements DataHolder {
   }
 
   @Override
-  public <E> @Nullable E remove(@NonNull DataKey<E> key) {
+  public <T> @Nullable T remove(RegistryKey<T> key) {
     return key.cast(data.remove(key));
   }
 
   @Override
-  public <E> @Nullable E get(@NonNull DataKey<E> key) {
+  public <T> @Nullable T get(RegistryKey<T> key) {
     return key.cast(data.get(key));
   }
 
   @Override
-  public <E> @NonNull E getOrDefault(@NonNull DataKey<E> key, @NonNull E defaultValue) {
-    E oldValue = get(key);
+  public <T> T getOrDefault(RegistryKey<T> key, T defaultValue) {
+    T oldValue = get(key);
     return oldValue != null ? oldValue : defaultValue;
   }
 
   @Override
-  public <E extends Enum<E>> @NonNull E toggle(@NonNull DataKey<E> key, @NonNull E defaultValue) {
-    E oldValue = key.cast(data.computeIfAbsent(key, k -> defaultValue));
+  public <T extends Enum<T>> T toggle(RegistryKey<T> key, T defaultValue) {
+    T oldValue = key.cast(data.computeIfAbsent(key, k -> defaultValue));
     if (oldValue != null && !canEdit(key)) {
       return oldValue;
     }
-    E newValue = toggle(oldValue == null ? defaultValue : oldValue);
+    T newValue = toggle(oldValue == null ? defaultValue : oldValue);
     return put(key, newValue);
   }
 
-  private <E extends Enum<E>> E toggle(E oldValue) {
-    E[] values = oldValue.getDeclaringClass().getEnumConstants();
+  private <T extends Enum<T>> T toggle(T oldValue) {
+    T[] values = oldValue.getDeclaringClass().getEnumConstants();
     int index = (oldValue.ordinal() + 1) % values.length;
     return values[index];
   }
 
-  private <E> E put(DataKey<E> key, E value) {
+  private <T> T put(RegistryKey<T> key, T value) {
     cooldowns.add(key);
     data.put(key, value);
     return value;

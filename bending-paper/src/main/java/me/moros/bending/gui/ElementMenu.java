@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 import cloud.commandframework.permission.CommandPermission;
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
@@ -40,7 +39,7 @@ import me.moros.bending.locale.Message.Args0;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.ChatUtil;
+import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -53,7 +52,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ElementMenu {
   private static final ChestGui BASE_GUI;
@@ -80,12 +79,14 @@ public final class ElementMenu {
     BASE_GUI.addPane(elementsPane);
   }
 
-  public ElementMenu(@NonNull BendingPlayer player) {
+  private final BendingCommand handler;
+
+  public ElementMenu(BendingCommand handler, BendingPlayer player) {
+    this.handler = handler;
     if (!player.hasPermission(CommandPermissions.HELP.toString())) {
       Message.GUI_NO_PERMISSION.send(player);
       return;
     }
-
     ChestGui gui = BASE_GUI.copy();
     OutlinePane pane = gui.getPanes().stream().filter(p -> p.getUUID().equals(innerPaneUUID) && p instanceof OutlinePane)
       .map(OutlinePane.class::cast).findAny().orElseThrow(() -> new RuntimeException("Gui cloning went wrong!"));
@@ -102,11 +103,11 @@ public final class ElementMenu {
     gui.show(player.entity());
   }
 
-  private static void handleClick(InventoryClickEvent event, DataWrapper meta) {
+  private void handleClick(InventoryClickEvent event, DataWrapper meta) {
     Player player = meta.player.entity();
     Element element = meta.element;
     ActionType type = mapType(event.getClick());
-    if (type != null && type.executeCommand(meta.player, element)) {
+    if (type != null && type.executeCommand(handler, meta.player, element)) {
       if (type.keepOpen()) {
         handleItemStackGlow(meta.player(), element, meta.itemStack);
         meta.gui.update();
@@ -117,7 +118,7 @@ public final class ElementMenu {
     }
   }
 
-  private static ActionType mapType(ClickType clickType) {
+  private static @Nullable ActionType mapType(ClickType clickType) {
     if (clickType.isShiftClick()) {
       if (clickType.isLeftClick()) {
         return ActionType.ADD;
@@ -159,7 +160,7 @@ public final class ElementMenu {
     Component base = GlobalTranslator.render(element.description(), player.locale());
     String raw = PlainTextComponentSerializer.plainText().serialize(base);
     List<Component> lore = new ArrayList<>();
-    for (String s : ChatUtil.wrap(raw, 36)) {
+    for (String s : TextUtil.wrap(raw, 36)) {
       lore.add(Component.text(s, element.color()));
     }
     return lore;
@@ -197,13 +198,13 @@ public final class ElementMenu {
 
     private final Args0 message;
     private final String permission;
-    private final BiConsumer<User, Element> commandConsumer;
+    private final MenuAction menuAction;
     private final boolean keepOpen;
 
-    ActionType(Args0 message, CommandPermission permission, BiConsumer<User, Element> commandConsumer, boolean keepOpen) {
+    ActionType(Args0 message, CommandPermission permission, MenuAction menuAction, boolean keepOpen) {
       this.message = message;
       this.permission = permission.toString();
-      this.commandConsumer = commandConsumer;
+      this.menuAction = menuAction;
       this.keepOpen = keepOpen;
     }
 
@@ -211,12 +212,12 @@ public final class ElementMenu {
       return keepOpen;
     }
 
-    private boolean executeCommand(User user, Element element) {
+    private boolean executeCommand(BendingCommand command, User user, Element element) {
       if (!user.hasPermission(permission)) {
         Message.GUI_NO_PERMISSION.send(user);
         return false;
       }
-      commandConsumer.accept(user, element);
+      menuAction.accept(command, user, element);
       return true;
     }
 
@@ -227,5 +228,9 @@ public final class ElementMenu {
     }
 
     private static final Collection<ActionType> VALUES = List.of(values());
+  }
+
+  private interface MenuAction {
+    void accept(BendingCommand command, User user, Element element);
   }
 }

@@ -29,24 +29,26 @@ import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import me.moros.bending.model.key.Key;
 import me.moros.bending.protection.Protection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class WorldGuardProtection implements Protection {
   private final WorldGuard worldGuard;
   private final StateFlag bendingFlag;
+  private final Key key;
 
-  public WorldGuardProtection(@NonNull Plugin plugin) {
+  public WorldGuardProtection(Plugin plugin) {
     worldGuard = WorldGuard.getInstance();
     bendingFlag = (StateFlag) worldGuard.getFlagRegistry().get("bending");
+    key = Key.create(NAMESPACE, plugin.getName());
   }
 
   @Override
-  public boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block) {
+  public boolean canBuild(LivingEntity entity, Block block) {
     RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
     Location location = BukkitAdapter.adapt(block.getLocation());
     StateFlag flagToCheck = bendingFlag == null ? Flags.BUILD : bendingFlag;
@@ -60,5 +62,10 @@ public final class WorldGuardProtection implements Protection {
     }
     // Query WorldGuard to see if a non-member (entity) can build in a region.
     return query.testState(location, list -> Association.NON_MEMBER, flagToCheck);
+  }
+
+  @Override
+  public Key key() {
+    return key;
   }
 }

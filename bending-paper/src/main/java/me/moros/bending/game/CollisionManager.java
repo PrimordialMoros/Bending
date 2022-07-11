@@ -28,32 +28,32 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collision;
-import me.moros.bending.model.collision.RegisteredCollision;
+import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.registry.Registries;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 // TODO implement BVH and profile
 public final class CollisionManager implements Updatable {
   private final AbilityManager manager;
 
-  CollisionManager(@NonNull AbilityManager manager) {
+  CollisionManager(AbilityManager manager) {
     this.manager = manager;
   }
 
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     Collection<Ability> instances = manager.instances().filter(ability -> !ability.colliders().isEmpty()).toList();
     if (instances.size() < 2) {
       return UpdateResult.CONTINUE;
     }
     Map<Ability, Collection<Collider>> colliderCache = new HashMap<>(instances.size());
     Map<AbilityDescription, Collection<Ability>> abilityCache = new HashMap<>(32);
-    for (RegisteredCollision registeredCollision : Registries.COLLISIONS) {
-      Collection<Ability> firstAbilities = abilityCache.computeIfAbsent(registeredCollision.first(), desc ->
+    for (CollisionPair collisionPair : Registries.COLLISIONS) {
+      Collection<Ability> firstAbilities = abilityCache.computeIfAbsent(collisionPair.first(), desc ->
         instances.stream().filter(ability -> ability.description().equals(desc)).toList()
       );
-      Collection<Ability> secondAbilities = abilityCache.computeIfAbsent(registeredCollision.second(), desc ->
+      Collection<Ability> secondAbilities = abilityCache.computeIfAbsent(collisionPair.second(), desc ->
         instances.stream().filter(ability -> ability.description().equals(desc)).toList()
       );
       for (Ability first : firstAbilities) {
@@ -71,7 +71,7 @@ public final class CollisionManager implements Updatable {
           }
           Entry<Collider, Collider> collisionResult = checkCollision(firstColliders, secondColliders);
           if (collisionResult != null) {
-            handleCollision(first, second, collisionResult.getKey(), collisionResult.getValue(), registeredCollision);
+            handleCollision(first, second, collisionResult.getKey(), collisionResult.getValue(), collisionPair);
           }
         }
       }
@@ -79,7 +79,7 @@ public final class CollisionManager implements Updatable {
     return UpdateResult.CONTINUE;
   }
 
-  private Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
+  private @Nullable Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
     for (Collider firstCollider : firstColliders) {
       for (Collider secondCollider : secondColliders) {
         if (firstCollider.intersects(secondCollider)) {
@@ -90,7 +90,7 @@ public final class CollisionManager implements Updatable {
     return null;
   }
 
-  private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, RegisteredCollision rc) {
+  private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, CollisionPair rc) {
     Collision.CollisionData data = new Collision.CollisionData(first, second, c1, c2, rc.removeFirst(), rc.removeSecond());
     first.onCollision(data.asCollision());
     second.onCollision(data.asInverseCollision());

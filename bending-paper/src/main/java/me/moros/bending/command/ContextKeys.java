@@ -26,8 +26,9 @@ import io.leangen.geantyref.TypeToken;
 import me.moros.bending.model.user.BendingPlayer;
 
 public final class ContextKeys {
-  public static final CloudKey<BendingPlayer> BENDING_PLAYER = SimpleCloudKey.of(
-    "bendingplayer",
-    TypeToken.get(BendingPlayer.class)
-  );
+  private static final TypeToken<BendingPlayer> TOKEN_KEY = TypeToken.get(BendingPlayer.class);
+  public static final CloudKey<BendingPlayer> BENDING_PLAYER = SimpleCloudKey.of("bendingplayer", TOKEN_KEY);
+
+  private ContextKeys() {
+  }
 }

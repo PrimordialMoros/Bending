@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.AbstractSpout;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -40,11 +40,10 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirSpout extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -52,13 +51,13 @@ public class AirSpout extends AbilityInstance {
 
   private AbstractSpout spout;
 
-  public AirSpout(@NonNull AbilityDescription desc) {
+  public AirSpout(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {
@@ -82,11 +81,11 @@ public class AirSpout extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || user.headBlock().isLiquid()) {
       return UpdateResult.REMOVE;
     }
@@ -107,19 +106,19 @@ public class AirSpout extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(spout.collider());
   }
 
-  public void handleMovement(@NonNull Vector3d velocity) {
+  public void handleMovement(Vector3d velocity) {
     AbstractSpout.limitVelocity(user.entity(), velocity, userConfig.maxSpeed);
   }
 
-  private class Spout extends AbstractSpout {
+  private final class Spout extends AbstractSpout {
     private long nextRenderTime;
 
     private Spout() {
-      super(Bending.game().flightManager().get(user), userConfig.height);
+      super(user.game().flightManager().get(user), userConfig.height);
       nextRenderTime = 0;
     }
 
@@ -143,21 +142,18 @@ public class AirSpout extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2000;
     @Modifiable(Attribute.HEIGHT)
-    public double height;
+    private double height = 11;
     @Modifiable(Attribute.SPEED)
-    public double maxSpeed;
+    private double maxSpeed = 0.2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airspout");
-
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      height = abilityNode.node("height").getDouble(11.0);
-      maxSpeed = abilityNode.node("max-speed").getDouble(0.2);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airspout");
     }
   }
 }

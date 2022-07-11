@@ -26,10 +26,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -66,13 +66,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -89,12 +88,12 @@ public class MetalCable extends AbilityInstance {
   private boolean launched = false;
   private int ticks;
 
-  public MetalCable(@NonNull AbilityDescription desc) {
+  public MetalCable(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.SNEAK) {
       Predicate<Entity> predicate = e -> e.hasMetadata(Metadata.METAL_CABLE);
       for (Entity entity : user.eyeLocation().toLocation(user.world()).getNearbyEntitiesByType(Arrow.class, 3, predicate)) {
@@ -105,7 +104,7 @@ public class MetalCable extends AbilityInstance {
       }
       return false;
     } else if (method == Activation.ATTACK) {
-      Optional<MetalCable> cable = Bending.game().abilityManager(user.world()).firstInstance(user, MetalCable.class);
+      Optional<MetalCable> cable = user.game().abilityManager(user.world()).firstInstance(user, MetalCable.class);
       if (cable.isPresent()) {
         cable.get().tryLaunchTarget();
         return false;
@@ -124,11 +123,11 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -150,13 +149,13 @@ public class MetalCable extends AbilityInstance {
   }
 
   private UpdateResult updateProjectile() {
-    if (projectile == null || !projectile.fallingBlock().isValid()) {
+    if (projectile == null || !projectile.entity().isValid()) {
       return UpdateResult.REMOVE;
     }
     location = projectile.center();
     if (ticks % 4 == 0) {
       if (CollisionUtil.handle(user, BOX.at(location), this::onProjectileHit)) {
-        BlockData bd = projectile.fallingBlock().getBlockData();
+        BlockData bd = projectile.entity().getBlockData();
         ParticleUtil.of(Particle.BLOCK_CRACK, location).count(4)
           .offset(0.25, 0.15, 0.25).data(bd).spawn(user.world());
         ParticleUtil.of(Particle.BLOCK_DUST, location).count(6)
@@ -168,7 +167,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   private boolean onProjectileHit(Entity entity) {
-    Material mat = projectile.fallingBlock().getBlockData().getMaterial();
+    Material mat = projectile.entity().getBlockData().getMaterial();
     double damage;
     if (EarthMaterials.METAL_BENDABLE.isTagged(mat)) {
       damage = BendingProperties.instance().metalModifier(userConfig.damage);
@@ -241,7 +240,7 @@ public class MetalCable extends AbilityInstance {
     arrow.setGravity(false);
     arrow.setInvulnerable(true);
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
-    arrow.setMetadata(Metadata.METAL_CABLE, Metadata.of(this));
+    Metadata.add(arrow, Metadata.METAL_CABLE, this);
     cable = arrow;
     location = new Vector3d(cable.getLocation());
     SoundUtil.METAL.play(user.world(), origin);
@@ -258,7 +257,7 @@ public class MetalCable extends AbilityInstance {
     Vector3d origin = user.mainHandSide();
     Vector3d dir = location.subtract(origin);
     Set<Block> ignored = target != null && target.block != null ? Set.of(target.block) : Set.of();
-    if (!user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignored).blocks(user.world()).hit()) {
+    if (dir.lengthSq() > 0.1 && user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignored).blocks(user.world()).hit()) {
       return false;
     }
     boolean evenTicks = ticks % 2 == 0;
@@ -274,7 +273,7 @@ public class MetalCable extends AbilityInstance {
     return true;
   }
 
-  public void hitBlock(@NonNull Block block) {
+  public void hitBlock(Block block) {
     if (target != null) {
       return;
     }
@@ -286,15 +285,15 @@ public class MetalCable extends AbilityInstance {
       BlockData data = block.getBlockData();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
       Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
-      projectile = TempFallingBlock.builder(data).velocity(velocity).build(user.world(), location);
-      target = new CableTarget(projectile.fallingBlock());
+      projectile = TempFallingBlock.builder(data).velocity(velocity).buildAt(block, location);
+      target = new CableTarget(projectile.entity());
     } else {
       target = new CableTarget(block);
     }
     hasHit = true;
   }
 
-  public void hitEntity(@NonNull Entity entity) {
+  public void hitEntity(Entity entity) {
     if (target != null) {
       return;
     }
@@ -352,7 +351,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     if (launched && projectile != null) {
       return List.of(BOX.at(projectile.center()));
     }
@@ -390,30 +389,24 @@ public class MetalCable extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 4500;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 20;
     @Modifiable(Attribute.RANGE)
-    public double projectileRange;
+    private double projectileRange = 48;
     @Modifiable(Attribute.DAMAGE)
-    private double damage;
+    private double damage = 2.5;
     @Modifiable(Attribute.SPEED)
-    private double pullSpeed;
+    private double pullSpeed = 0.9;
     @Modifiable(Attribute.SPEED)
-    private double launchSpeed;
+    private double launchSpeed = 1.6;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "metalcable");
-
-      cooldown = abilityNode.node("cooldown").getLong(4500);
-      range = abilityNode.node("range").getDouble(28.0);
-      projectileRange = abilityNode.node("projectile-range").getDouble(48.0);
-      damage = abilityNode.node("damage").getDouble(2.5);
-      pullSpeed = abilityNode.node("pull-speed").getDouble(0.9);
-      launchSpeed = abilityNode.node("launch-speed").getDouble(1.6);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "metalcable");
     }
   }
 }

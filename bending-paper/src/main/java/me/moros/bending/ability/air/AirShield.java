@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.water.FrostBreath;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
@@ -52,11 +52,10 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirShield extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -67,12 +66,12 @@ public class AirShield extends AbilityInstance {
   private long currentPoint = 0;
   private long startTime;
 
-  public AirShield(@NonNull AbilityDescription desc) {
+  public AirShield(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder()
@@ -87,11 +86,11 @@ public class AirShield extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBuild(user.headBlock())) {
       return UpdateResult.REMOVE;
     }
@@ -143,12 +142,12 @@ public class AirShield extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(new Sphere(center, userConfig.radius));
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
       for (Block block : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, MaterialUtil::isTransparentOrWater)) {
@@ -164,24 +163,20 @@ public class AirShield extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 4000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 10_000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 4;
     @Modifiable(Attribute.STRENGTH)
-    public double maxPush;
+    private double maxPush = 2.6;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airshield");
-
-      cooldown = abilityNode.node("cooldown").getLong(4000);
-      duration = abilityNode.node("duration").getLong(10000);
-      radius = abilityNode.node("radius").getDouble(4.0);
-      maxPush = abilityNode.node("max-push").getDouble(2.6);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airshield");
     }
   }
 }

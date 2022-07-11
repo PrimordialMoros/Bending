@@ -19,6 +19,8 @@
 
 package me.moros.bending.util;
 
+import java.util.Objects;
+
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -30,7 +32,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to handle bending damage and death messages.
@@ -39,7 +40,10 @@ public final class DamageUtil {
   private DamageUtil() {
   }
 
-  public static boolean damageEntity(@NonNull Entity target, @NonNull User source, double damage, @NonNull AbilityDescription desc) {
+  public static boolean damageEntity(Entity target, User source, double damage, AbilityDescription desc) {
+    Objects.requireNonNull(target);
+    Objects.requireNonNull(source);
+    Objects.requireNonNull(desc);
     if (damage <= 0 || !canDamage(target)) {
       return false;
     }

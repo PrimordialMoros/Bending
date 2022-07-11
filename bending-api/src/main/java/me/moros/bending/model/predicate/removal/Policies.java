@@ -25,7 +25,6 @@ import java.util.Set;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum Policies implements RemovalPolicy {
   DEAD((u, d) -> u.dead()),
@@ -45,14 +44,14 @@ public enum Policies implements RemovalPolicy {
   }
 
   @Override
-  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
+  public boolean test(User user, AbilityDescription desc) {
     return policy.test(user, desc);
   }
 
   /**
    * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
    */
-  public static @NonNull Builder builder() {
+  public static Builder builder() {
     return new Builder()
       .add(Policies.DEAD)
       .add(Policies.OFFLINE);
@@ -65,31 +64,18 @@ public enum Policies implements RemovalPolicy {
       policies = new HashSet<>();
     }
 
-    public @NonNull Builder add(@NonNull RemovalPolicy policy) {
+    public Builder add(RemovalPolicy policy) {
       policies.add(policy);
       return this;
     }
 
-    public @NonNull Builder remove(@NonNull RemovalPolicy policy) {
+    public Builder remove(RemovalPolicy policy) {
       policies.remove(policy);
       return this;
     }
 
-    public @NonNull RemovalPolicy build() {
-      return new CompositeRemovalPolicy(this);
-    }
-  }
-
-  private static final class CompositeRemovalPolicy implements RemovalPolicy {
-    private final Set<RemovalPolicy> policies;
-
-    private CompositeRemovalPolicy(@NonNull Builder builder) {
-      this.policies = Set.copyOf(builder.policies);
-    }
-
-    @Override
-    public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
-      return policies.stream().anyMatch(p -> p.test(user, desc));
+    public RemovalPolicy build() {
+      return policies.stream().reduce((u, d) -> false, RemovalPolicy::or);
     }
   }
 }

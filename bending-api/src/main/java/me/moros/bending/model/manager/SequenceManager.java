@@ -21,10 +21,7 @@ package me.moros.bending.model.manager;
 
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface SequenceManager {
-  void clear();
-
-  void registerStep(@NonNull User user, @NonNull Activation action);
+  void registerStep(User user, Activation action);
 }

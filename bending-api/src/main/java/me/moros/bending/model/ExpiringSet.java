@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ExpiringSet<E> {
   private final Cache<E, Boolean> cache;
@@ -34,22 +33,22 @@ public class ExpiringSet<E> {
     this(duration, TimeUnit.MILLISECONDS);
   }
 
-  public ExpiringSet(long duration, @NonNull TimeUnit unit) {
+  public ExpiringSet(long duration, TimeUnit unit) {
     cache = Caffeine.newBuilder()
       .expireAfterWrite(duration, unit)
       .scheduler(Scheduler.systemScheduler())
       .build();
   }
 
-  public void add(@NonNull E item) {
+  public void add(E item) {
     cache.put(item, false);
   }
 
-  public boolean contains(@NonNull E item) {
+  public boolean contains(E item) {
     return cache.getIfPresent(item) != null;
   }
 
-  public @NonNull Set<@NonNull E> snapshot() {
+  public Set<E> snapshot() {
     return Set.copyOf(cache.asMap().keySet());
   }
 }

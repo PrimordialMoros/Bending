@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.water.passive;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -31,17 +30,16 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class HydroSink extends AbilityInstance {
   private User user;
 
-  public HydroSink(@NonNull AbilityDescription desc) {
+  public HydroSink(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     return true;
@@ -52,17 +50,17 @@ public class HydroSink extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     return UpdateResult.CONTINUE;
   }
 
-  public static boolean canHydroSink(@NonNull User user) {
-    AbilityDescription desc = Registries.ABILITIES.ability("HydroSink");
+  public static boolean canHydroSink(User user) {
+    AbilityDescription desc = Registries.ABILITIES.fromString("HydroSink");
     if (desc == null || !user.canBend(desc)) {
       return false;
     }
 
-    if (!Bending.game().abilityManager(user.world()).hasAbility(user, HydroSink.class)) {
+    if (!user.game().abilityManager(user.world()).hasAbility(user, HydroSink.class)) {
       return false;
     }
 

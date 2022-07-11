@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.Pillar;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -45,11 +45,10 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class RaiseEarth extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -62,12 +61,12 @@ public class RaiseEarth extends AbilityInstance {
 
   private long interval = 100;
 
-  public RaiseEarth(@NonNull AbilityDescription desc) {
+  public RaiseEarth(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -93,7 +92,7 @@ public class RaiseEarth extends AbilityInstance {
     return false;
   }
 
-  public boolean activate(@NonNull User user, @NonNull Block source, int height, int width, long interval) {
+  public boolean activate(User user, Block source, int height, int width, long interval) {
     this.user = user;
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
     origin = source;
@@ -111,11 +110,11 @@ public class RaiseEarth extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -136,7 +135,7 @@ public class RaiseEarth extends AbilityInstance {
   }
 
   private void loadRaised() {
-    raisedCache = Bending.game().abilityManager(user.world()).instances(RaiseEarth.class)
+    raisedCache = user.game().abilityManager(user.world()).instances(RaiseEarth.class)
       .map(RaiseEarth::pillars).flatMap(Collection::stream)
       .map(Pillar::pillarBlocks).flatMap(Collection::stream)
       .collect(Collectors.toSet());
@@ -173,7 +172,7 @@ public class RaiseEarth extends AbilityInstance {
   /**
    * @return an unmodifiable view of the pillars
    */
-  public @NonNull Collection<@NonNull Pillar> pillars() {
+  public Collection<Pillar> pillars() {
     return List.copyOf(pillars);
   }
 
@@ -182,34 +181,24 @@ public class RaiseEarth extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 16;
     @Modifiable(Attribute.COOLDOWN)
-    public long columnCooldown;
+    private long columnCooldown = 500;
     @Modifiable(Attribute.HEIGHT)
-    public int columnMaxHeight;
+    private int columnMaxHeight = 6;
     @Modifiable(Attribute.COOLDOWN)
-    public long wallCooldown;
+    private long wallCooldown = 1500;
     @Modifiable(Attribute.HEIGHT)
-    public int wallMaxHeight;
+    private int wallMaxHeight = 6;
     @Modifiable(Attribute.RADIUS)
-    public int wallWidth;
+    private int wallWidth = 6;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "raiseearth");
-
-      selectRange = abilityNode.node("select-range").getDouble(16.0);
-
-      CommentedConfigurationNode columnNode = abilityNode.node("column");
-      columnCooldown = columnNode.node("cooldown").getLong(500);
-      columnMaxHeight = columnNode.node("max-height").getInt(6);
-
-      CommentedConfigurationNode wallNode = abilityNode.node("wall");
-      wallCooldown = wallNode.node("cooldown").getLong(1500);
-      wallMaxHeight = wallNode.node("max-height").getInt(6);
-      wallWidth = wallNode.node("width").getInt(6);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "raiseearth");
     }
   }
 }

@@ -22,12 +22,11 @@ package me.moros.bending.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.moros.bending.event.BendingTickEffectEvent;
 import me.moros.bending.event.EventBus;
+import me.moros.bending.event.TickEffectEvent;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public enum BendingEffect {
@@ -52,15 +51,15 @@ public enum BendingEffect {
     this.handler = setter;
   }
 
-  public void apply(@NonNull User source, @NonNull Entity entity) {
+  public void apply(User source, Entity entity) {
     apply(source, entity, visual);
   }
 
-  public void apply(@NonNull User source, @NonNull Entity entity, int ticks) {
+  public void apply(User source, Entity entity, int ticks) {
     if (ticks <= 0) {
       return;
     }
-    BendingTickEffectEvent event = EventBus.INSTANCE.postTickEffectEvent(source, entity, ticks, this);
+    TickEffectEvent event = EventBus.INSTANCE.postTickEffectEvent(source, entity, ticks, this);
     if (event.isCancelled()) {
       return;
     }
@@ -71,14 +70,14 @@ public enum BendingEffect {
     }
   }
 
-  public void reset(@NonNull Entity entity) {
+  public void reset(Entity entity) {
     handler.set(entity, -1);
     if (entity instanceof LivingEntity livingEntity) {
       instances.remove(livingEntity);
     }
   }
 
-  public @Nullable User tickSource(@NonNull LivingEntity entity) {
+  public @Nullable User tickSource(LivingEntity entity) {
     return instances.get(entity);
   }
 
@@ -94,7 +93,7 @@ public enum BendingEffect {
     }
   }
 
-  public static void resetAll(@NonNull Entity entity) {
+  public static void resetAll(Entity entity) {
     for (BendingEffect tick : values()) {
       tick.reset(entity);
     }

@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -34,11 +34,11 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
-import me.moros.bending.model.user.DataKey;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.ColorPalette;
@@ -52,13 +52,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirBlast extends AbilityInstance {
   public enum Mode {PUSH, PULL}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -70,12 +69,12 @@ public class AirBlast extends AbilityInstance {
   private boolean launched;
   private boolean selectedOrigin;
 
-  public AirBlast(@NonNull AbilityDescription desc) {
+  public AirBlast(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -89,11 +88,11 @@ public class AirBlast extends AbilityInstance {
       .add(Policies.UNDER_LAVA)
       .build();
 
-    for (AirBlast blast : Bending.game().abilityManager(user.world()).userInstances(user, AirBlast.class).toList()) {
+    for (AirBlast blast : user.game().abilityManager(user.world()).userInstances(user, AirBlast.class).toList()) {
       if (!blast.launched) {
         if (method == Activation.SNEAK_RELEASE) {
           if (!blast.selectOrigin()) {
-            Bending.game().abilityManager(user.world()).destroyInstance(blast);
+            user.game().abilityManager(user.world()).destroyInstance(blast);
           }
         } else {
           blast.launch();
@@ -112,11 +111,11 @@ public class AirBlast extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -141,7 +140,7 @@ public class AirBlast extends AbilityInstance {
   private void launch() {
     launched = true;
     Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
-    if (user.store().getOrDefault(DataKey.of("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
+    if (user.store().getOrDefault(RegistryKey.create("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
       Vector3d temp = new Vector3d(origin.toArray());
       origin = new Vector3d(target.toArray());
       target = temp;
@@ -153,7 +152,7 @@ public class AirBlast extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return stream == null ? List.of() : List.of(stream.collider());
   }
 
@@ -162,9 +161,9 @@ public class AirBlast extends AbilityInstance {
     return user;
   }
 
-  public static void switchMode(@NonNull User user) {
+  public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("AirBlast")) {
-      var key = DataKey.of("airblast-mode", Mode.class);
+      var key = RegistryKey.create("airblast-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
@@ -198,9 +197,9 @@ public class AirBlast extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       boolean isUser = entity.equals(user.entity());
-      double factor = isUser ? userConfig.self : userConfig.other;
+      double factor = isUser ? userConfig.powerSelf : userConfig.powerOther;
       BendingEffect.FIRE_TICK.reset(entity);
       if (factor == 0) {
         return false;
@@ -234,7 +233,7 @@ public class AirBlast extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
@@ -243,30 +242,24 @@ public class AirBlast extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1250;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 20.0;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1.2;
     @Modifiable(Attribute.STRENGTH)
-    public double self;
+    private double powerSelf = 2.1;
     @Modifiable(Attribute.STRENGTH)
-    public double other;
+    private double powerOther = 2.1;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 8.0;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airblast");
-
-      cooldown = abilityNode.node("cooldown").getLong(1250);
-      range = abilityNode.node("range").getDouble(20.0);
-      speed = abilityNode.node("speed").getDouble(1.2);
-      self = abilityNode.node("power-self").getDouble(2.1);
-      other = abilityNode.node("power-other").getDouble(2.1);
-      selectRange = abilityNode.node("select-range").getDouble(8.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airblast");
     }
   }
 }

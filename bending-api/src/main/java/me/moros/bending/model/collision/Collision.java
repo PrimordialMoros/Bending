@@ -21,7 +21,6 @@ package me.moros.bending.model.collision;
 
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.Collider;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a real collision between 2 abilities.
@@ -35,15 +34,15 @@ public final class Collision {
     this.inverse = inverse;
   }
 
-  public @NonNull Ability collidedAbility() {
+  public Ability collidedAbility() {
     return inverse ? collisionData.first : collisionData.second;
   }
 
-  public @NonNull Collider colliderSelf() {
+  public Collider colliderSelf() {
     return inverse ? collisionData.c2 : collisionData.c1;
   }
 
-  public @NonNull Collider colliderOther() {
+  public Collider colliderOther() {
     return inverse ? collisionData.c1 : collisionData.c2;
   }
 
@@ -76,7 +75,7 @@ public final class Collision {
     private final Collider c1, c2;
     private boolean removeFirst, removeSecond;
 
-    public CollisionData(@NonNull Ability first, @NonNull Ability second, @NonNull Collider c1, @NonNull Collider c2, boolean removeFirst, boolean removeSecond) {
+    public CollisionData(Ability first, Ability second, Collider c1, Collider c2, boolean removeFirst, boolean removeSecond) {
       this.first = first;
       this.second = second;
       this.c1 = c1;
@@ -93,11 +92,11 @@ public final class Collision {
       return removeSecond;
     }
 
-    public @NonNull Collision asCollision() {
+    public Collision asCollision() {
       return new Collision(this, false);
     }
 
-    public @NonNull Collision asInverseCollision() {
+    public Collision asInverseCollision() {
       return new Collision(this, true);
     }
   }

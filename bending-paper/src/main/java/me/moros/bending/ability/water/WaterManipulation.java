@@ -25,10 +25,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.BlockShot;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -60,11 +60,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class WaterManipulation extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -76,14 +77,14 @@ public class WaterManipulation extends AbilityInstance {
 
   private boolean isIce;
 
-  public WaterManipulation(@NonNull AbilityDescription desc) {
+  public WaterManipulation(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
+      Collection<WaterManipulation> manips = user.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
         .toList();
       redirectAny(user);
       for (WaterManipulation manip : manips) {
@@ -104,7 +105,7 @@ public class WaterManipulation extends AbilityInstance {
       return false;
     }
 
-    Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
+    Collection<WaterManipulation> manips = user.game().abilityManager(user.world()).userInstances(user, WaterManipulation.class)
       .filter(m -> m.manip == null).toList();
     for (WaterManipulation manip : manips) {
       State state = manip.states.current();
@@ -123,11 +124,11 @@ public class WaterManipulation extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -165,7 +166,7 @@ public class WaterManipulation extends AbilityInstance {
     }
   }
 
-  private void renderTrail(Block block, int level) {
+  private void renderTrail(@Nullable Block block, int level) {
     if (block == null) {
       return;
     }
@@ -199,22 +200,24 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   private static void redirectAny(User user) {
-    Collection<WaterManipulation> manips = Bending.game().abilityManager(user.world()).instances(WaterManipulation.class)
+    Collection<WaterManipulation> manips = user.game().abilityManager(user.world()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).toList();
+    double minSq = config.noRedirectRange * config.noRedirectRange;
+    double maxSq = config.maxRedirectRange * config.maxRedirectRange;
     for (WaterManipulation manip : manips) {
       Vector3d center = manip.manip.center();
       double dist = center.distanceSq(manip.user().eyeLocation());
       double dist2 = center.distanceSq(user.eyeLocation());
-      if (dist < config.rMin * config.rMin || dist2 > config.rMax * config.rMax) {
+      if (dist < minSq || dist2 > maxSq) {
         continue;
       }
-      Sphere selectSphere = new Sphere(center, config.redirectGrabRadius);
+      Collider selectSphere = new Sphere(center, config.redirectGrabRadius);
       if (selectSphere.intersects(user.ray(dist))) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (center.toBlock(user.world()).equals(rayTraced)) {
-          Bending.game().abilityManager(user.world()).changeOwner(manip, user);
+          user.game().abilityManager(user.world()).changeOwner(manip, user);
           manip.manip.redirect();
         }
       }
@@ -235,13 +238,13 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   @Override
-  public void onUserChange(@NonNull User newUser) {
+  public void onUserChange(User newUser) {
     this.user = newUser;
     manip.user(newUser);
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return manip == null ? List.of() : List.of(manip.collider());
   }
 
@@ -259,7 +262,7 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (isIce) {
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
       }
@@ -269,43 +272,32 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       FragileStructure.tryDamageStructure(List.of(block), 3);
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 24;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 12;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
     @Modifiable(Attribute.FREEZE_TICKS)
-    public int freezeTicks;
-
-    public double redirectGrabRadius;
-    public double rMin;
-    public double rMax;
+    private int freezeTicks = 60;
+    private double redirectGrabRadius = 2;
+    @Comment("Manips within that distance from the bender who controls them cannot be redirected")
+    private double noRedirectRange = 5;
+    private double maxRedirectRange = 20;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "watermanipulation");
-
-      cooldown = abilityNode.node("cooldown").getLong(1000);
-      range = abilityNode.node("range").getDouble(24.0);
-      selectRange = abilityNode.node("select-range").getDouble(12.0);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      freezeTicks = abilityNode.node("iceblast-freeze-ticks").getInt(60);
-
-      redirectGrabRadius = abilityNode.node("redirect-grab-radius").getDouble(2.0);
-      rMin = abilityNode.node("no-redirect-range").getDouble(5.0);
-      rMax = abilityNode.node("max-redirect-range").getDouble(20.0);
-
-      abilityNode.node("no-redirect-range").comment("Manips within that distance from the bender who controls them cannot be redirected.");
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "watermanipulation");
     }
   }
 }

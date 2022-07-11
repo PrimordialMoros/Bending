@@ -19,11 +19,14 @@
 
 package me.moros.bending.ability.earth;
 
-import me.moros.bending.Bending;
+import java.util.List;
+
 import me.moros.bending.ability.common.basic.AbstractRide;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempPacketEntity;
-import me.moros.bending.game.temporal.TempPacketEntity.Builder;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.Builder;
+import me.moros.bending.game.temporal.TempEntity.TempEntityType;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -49,11 +52,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSurf extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -64,13 +66,13 @@ public class EarthSurf extends AbilityInstance {
   private boolean charging;
   private long startTime;
 
-  public EarthSurf(@NonNull AbilityDescription desc) {
+  public EarthSurf(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, EarthSurf.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, EarthSurf.class)) {
       return false;
     }
     this.user = user;
@@ -111,11 +113,11 @@ public class EarthSurf extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -150,7 +152,7 @@ public class EarthSurf extends AbilityInstance {
     return user;
   }
 
-  private class Wave extends AbstractRide {
+  private final class Wave extends AbstractRide {
     private Vector3d center;
     private int ticks = 0;
 
@@ -160,13 +162,13 @@ public class EarthSurf extends AbilityInstance {
     }
 
     @Override
-    public void render(@NonNull BlockData data) {
-      Builder builder = TempPacketEntity.builder(MaterialUtil.softType(data)).velocity(new Vector3d(0, 0.25, 0)).duration(500);
+    public void render(BlockData data) {
+      Builder builder = TempEntity.builder(MaterialUtil.softType(data)).velocity(new Vector3d(0, 0.25, 0)).duration(500);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
         Vector3d point = center.add(v.multiply(0.6));
-        builder.buildFallingBlock(user.world(), point);
+        builder.build(TempEntityType.FALLING_BLOCK, user.world(), point);
       });
     }
 
@@ -180,7 +182,7 @@ public class EarthSurf extends AbilityInstance {
     }
 
     @Override
-    protected void affect(@NonNull Vector3d velocity) {
+    protected void affect(Vector3d velocity) {
       EntityUtil.applyVelocity(EarthSurf.this, user.entity(), velocity);
     }
 
@@ -191,26 +193,21 @@ public class EarthSurf extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.5;
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 1500;
     @Modifiable(Attribute.DURATION)
-    public long duration;
-    public double fallThreshold;
+    private long duration = 0;
+    private double fallThreshold = 12;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsurf");
-
-      speed = abilityNode.node("speed").getDouble(0.5);
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      chargeTime = abilityNode.node("charge-time").getLong(1500);
-      duration = abilityNode.node("duration").getLong(0);
-      fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthsurf");
     }
   }
 }

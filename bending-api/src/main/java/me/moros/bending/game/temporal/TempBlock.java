@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.moros.bending.adapter.impl.NativeAdapter;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
@@ -45,7 +45,6 @@ import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class TempBlock extends TemporaryBase {
@@ -113,7 +112,7 @@ public final class TempBlock extends TemporaryBase {
 
   private TempBlockState cleanStatesReverse() {
     int currentTick = Bukkit.getCurrentTick();
-    TempBlockState toRevert = snapshots.pollLast();
+    TempBlockState toRevert = Objects.requireNonNull(snapshots.pollLast());
     Iterator<TempBlockState> it = snapshots.descendingIterator();
     while (it.hasNext()) {
       TempBlockState next = it.next();
@@ -149,7 +148,7 @@ public final class TempBlock extends TemporaryBase {
     return false;
   }
 
-  public @NonNull Block block() {
+  public Block block() {
     return block;
   }
 
@@ -174,14 +173,14 @@ public final class TempBlock extends TemporaryBase {
     reverted = true;
   }
 
-  private void revertToSnapshot(@NonNull Snapshot snapshot) {
+  private void revertToSnapshot(Snapshot snapshot) {
     bendable = snapshot.bendable;
     BlockState state = snapshot.state;
     block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
     refreshGravityCache(block);
   }
 
-  public static void revertToSnapshot(@NonNull Block block, @Nullable Snapshot snapshot) {
+  public static void revertToSnapshot(Block block, @Nullable Snapshot snapshot) {
     TempBlock tb = MANAGER.get(block).orElse(null);
     if (snapshot == null) {
       if (tb != null) {
@@ -202,19 +201,19 @@ public final class TempBlock extends TemporaryBase {
     MANAGER.removeEntry(block);
   }
 
-  public @NonNull Snapshot snapshot() {
+  public Snapshot snapshot() {
     return new Snapshot(block.getState(), bendable);
   }
 
-  public static boolean isBendable(@NonNull Block block) {
+  public static boolean isBendable(Block block) {
     return MANAGER.get(block).map(tb -> tb.bendable).orElse(true);
   }
 
-  public static boolean shouldIgnorePhysics(@NonNull Block block) {
+  public static boolean shouldIgnorePhysics(Block block) {
     return GRAVITY_CACHE.contains(block);
   }
 
-  public static @NonNull BlockData getLastValidData(@NonNull Block block) {
+  public static BlockData getLastValidData(Block block) {
     TempBlock tb = MANAGER.get(block).orElse(null);
     if (tb != null) {
       TempBlockState tbs = tb.snapshots.peekLast();
@@ -253,35 +252,35 @@ public final class TempBlock extends TemporaryBase {
     }
   }
 
-  public static @NonNull Builder builder(@NonNull BlockData data) {
+  public static Builder builder(BlockData data) {
     return new Builder(Objects.requireNonNull(data));
   }
 
   /**
    * @return a {@link Builder} with bendable fire
    */
-  public static @NonNull Builder fire() {
+  public static Builder fire() {
     return builder(Material.FIRE.createBlockData()).bendable(true);
   }
 
   /**
    * @return a {@link Builder} with water
    */
-  public static @NonNull Builder water() {
+  public static Builder water() {
     return builder(Material.WATER.createBlockData());
   }
 
   /**
    * @return a {@link Builder} with bendable ice
    */
-  public static @NonNull Builder ice() {
+  public static Builder ice() {
     return builder(Material.ICE.createBlockData()).bendable(true);
   }
 
   /**
    * @return a {@link Builder} with bendable air
    */
-  public static @NonNull Builder air() {
+  public static Builder air() {
     return builder(Material.AIR.createBlockData()).bendable(true);
   }
 
@@ -297,17 +296,17 @@ public final class TempBlock extends TemporaryBase {
       fixWater = data.getMaterial().isAir();
     }
 
-    public @NonNull Builder fixWater(boolean fixWater) {
+    public Builder fixWater(boolean fixWater) {
       this.fixWater = fixWater;
       return this;
     }
 
-    public @NonNull Builder bendable(boolean bendable) {
+    public Builder bendable(boolean bendable) {
       this.bendable = bendable;
       return this;
     }
 
-    public @NonNull Builder duration(long duration) {
+    public Builder duration(long duration) {
       this.duration = duration;
       return this;
     }
@@ -341,7 +340,7 @@ public final class TempBlock extends TemporaryBase {
       return newData;
     }
 
-    public Optional<TempBlock> build(@NonNull Block block) {
+    public Optional<TempBlock> build(Block block) {
       if (block instanceof TileState) {
         return Optional.empty();
       }

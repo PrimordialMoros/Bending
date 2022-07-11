@@ -29,19 +29,21 @@ import java.util.function.Function;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.util.ColorPalette;
+import me.moros.bending.model.key.Key;
+import me.moros.bending.model.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * AbilityDescription is immutable and thread-safe.
  * Assume that all collections returning AbilityDescription are also immutable
  */
-public class AbilityDescription {
+public class AbilityDescription implements Keyed {
+  public static final String NAMESPACE = "bending.ability";
+
+  private final Key key;
   private final String name;
   private final Function<AbilityDescription, ? extends Ability> constructor;
   private final Element element;
@@ -66,20 +68,20 @@ public class AbilityDescription {
     sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
     displayName = Component.text(name, element.color());
-    meta = createMeta(this);
+    meta = displayName().clickEvent(ClickEvent.runCommand("/bending help " + name()));
     hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
-    createAbility(); // Init config values
+    key = Key.create(NAMESPACE, name);
   }
 
-  public @NonNull String name() {
+  public String name() {
     return name;
   }
 
-  public @NonNull Component displayName() {
+  public Component displayName() {
     return displayName;
   }
 
-  public @NonNull Element element() {
+  public Element element() {
     return element;
   }
 
@@ -99,23 +101,19 @@ public class AbilityDescription {
     return bypassCooldown;
   }
 
-  public boolean isActivatedBy(@NonNull Activation method) {
+  public boolean isActivatedBy(Activation method) {
     return activations.contains(method);
   }
 
-  public @NonNull Ability createAbility() {
+  public Ability createAbility() {
     return constructor.apply(this);
   }
 
-  public @NonNull String permission() {
-    return "bending.ability." + name;
-  }
-
-  public @NonNull Collection<@NonNull String> permissions() {
+  public Collection<String> permissions() {
     return requiredPermissions;
   }
 
-  public @NonNull Component meta() {
+  public Component meta() {
     return meta;
   }
 
@@ -136,27 +134,13 @@ public class AbilityDescription {
     return hashcode;
   }
 
-  private static Component createMeta(AbilityDescription desc) {
-    String type;
-    if (desc.isActivatedBy(Activation.PASSIVE)) {
-      type = "passive";
-    } else if (desc.isActivatedBy(Activation.SEQUENCE)) {
-      type = "sequence";
-    } else {
-      type = "ability";
-    }
-    Component details = Component.text()
-      .append(Component.text(desc.element() + " " + type, desc.element().color()))
-      .append(Component.newline())
-      .append(Component.text("Click to view info about this " + type + ".", ColorPalette.NEUTRAL)).build();
-
-    return desc.displayName()
-      .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/bending help " + desc.name()));
+  public static <T extends Ability> Builder builder(String name, Function<AbilityDescription, T> constructor) {
+    return new Builder(name, constructor);
   }
 
-  public static <T extends Ability> @NonNull Builder builder(@NonNull String name, @NonNull Function<AbilityDescription, T> constructor) {
-    return new Builder(name, constructor);
+  @Override
+  public Key key() {
+    return key;
   }
 
   /**
@@ -171,11 +155,11 @@ public class AbilityDescription {
       this.steps = List.copyOf(steps);
     }
 
-    public @NonNull List<@NonNull SequenceStep> steps() {
+    public List<SequenceStep> steps() {
       return steps;
     }
 
-    public @NonNull Component instructions() {
+    public Component instructions() {
       if (instructions == null) {
         instructions = generateInstructions();
       }
@@ -207,7 +191,7 @@ public class AbilityDescription {
       return builder.build();
     }
 
-    public boolean matches(@NonNull List<@NonNull SequenceStep> otherSteps) {
+    public boolean matches(List<SequenceStep> otherSteps) {
       int actionsLength = otherSteps.size() - 1;
       int sequenceLength = steps.size() - 1;
       if (actionsLength < sequenceLength) {
@@ -224,7 +208,7 @@ public class AbilityDescription {
     }
   }
 
-  public static class Builder {
+  public static final class Builder {
     private final String name;
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private Element element;
@@ -235,18 +219,18 @@ public class AbilityDescription {
     private boolean sourcePlant = false;
     private boolean bypassCooldown = false;
 
-    public <T extends Ability> Builder(@NonNull String name, @NonNull Function<@NonNull AbilityDescription, @NonNull T> constructor) {
+    private <T extends Ability> Builder(String name, Function<AbilityDescription, T> constructor) {
       this.name = name;
       this.constructor = constructor;
       this.requiredPermissions = List.of();
     }
 
-    public @NonNull Builder element(@NonNull Element element) {
+    public Builder element(Element element) {
       this.element = element;
       return this;
     }
 
-    public @NonNull Builder activation(@NonNull Activation method, @Nullable Activation... methods) {
+    public Builder activation(Activation method, Activation @Nullable ... methods) {
       Collection<Activation> c = new ArrayList<>();
       if (methods != null) {
         c.addAll(List.of(methods));
@@ -256,9 +240,9 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull Builder require(@Nullable String... permissions) {
+    public Builder require(String @Nullable ... permissions) {
       Collection<String> c = new ArrayList<>();
-      c.add("bending.ability." + name);
+      c.add(AbilityDescription.NAMESPACE + name);
       if (permissions != null) {
         c.addAll(List.of(permissions));
       }
@@ -266,27 +250,27 @@ public class AbilityDescription {
       return this;
     }
 
-    public @NonNull Builder canBind(boolean canBind) {
+    public Builder canBind(boolean canBind) {
       this.canBind = canBind;
       return this;
     }
 
-    public @NonNull Builder hidden(boolean hidden) {
+    public Builder hidden(boolean hidden) {
       this.hidden = hidden;
       return this;
     }
 
-    public @NonNull Builder sourcePlant(boolean sourcePlant) {
+    public Builder sourcePlant(boolean sourcePlant) {
       this.sourcePlant = sourcePlant;
       return this;
     }
 
-    public @NonNull Builder bypassCooldown(boolean bypassCooldown) {
+    public Builder bypassCooldown(boolean bypassCooldown) {
       this.bypassCooldown = bypassCooldown;
       return this;
     }
 
-    public @NonNull AbilityDescription build() {
+    public AbilityDescription build() {
       validate();
       if (activations.contains(Activation.SEQUENCE)) {
         throw new IllegalStateException("Can't build sequence");
@@ -294,7 +278,7 @@ public class AbilityDescription {
       return new AbilityDescription(this);
     }
 
-    public @NonNull Sequence buildSequence(@NonNull SequenceStep step1, @NonNull SequenceStep step2, @NonNull SequenceStep... steps) {
+    public Sequence buildSequence(SequenceStep step1, SequenceStep step2, SequenceStep @Nullable ... steps) {
       validate();
       if (!activations.contains(Activation.SEQUENCE)) {
         throw new IllegalStateException("Ability must be activated by sequence");

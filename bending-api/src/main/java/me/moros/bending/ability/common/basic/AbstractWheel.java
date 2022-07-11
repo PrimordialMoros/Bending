@@ -37,7 +37,6 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private final User user;
@@ -50,7 +49,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
 
   protected final double radius;
 
-  protected AbstractWheel(@NonNull User user, @NonNull Ray ray, double radius, double speed) {
+  protected AbstractWheel(User user, Ray ray, double radius, double speed) {
     this.user = user;
     this.ray = ray;
     this.location = ray.origin;
@@ -64,7 +63,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     location = location.add(dir);
     if (!user.canBuild(location.toBlock(user.world()))) {
       return UpdateResult.REMOVE;
@@ -84,16 +83,16 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   }
 
   @Override
-  public boolean onBlockHit(@NonNull Block block) {
+  public boolean onBlockHit(Block block) {
     return true;
   }
 
   @Override
-  public @NonNull Collider collider() {
+  public Collider collider() {
     return collider.at(location);
   }
 
-  public @NonNull Vector3d location() {
+  public Vector3d location() {
     return location;
   }
 

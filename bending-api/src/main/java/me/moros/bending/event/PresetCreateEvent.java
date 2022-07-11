@@ -22,18 +22,24 @@ package me.moros.bending.event;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class PresetCreateEvent extends BendingUserEvent implements Cancellable {
+public class PresetCreateEvent extends BendingEvent implements UserEvent, Cancellable {
+  private final User user;
   private final Preset preset;
+
   private boolean cancelled = false;
 
   PresetCreateEvent(User user, Preset preset) {
-    super(user);
+    this.user = user;
     this.preset = preset;
   }
 
-  public @NonNull Preset preset() {
+  @Override
+  public User user() {
+    return user;
+  }
+
+  public Preset preset() {
     return preset;
   }
 

@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -38,14 +38,13 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.bukkit.plugin.ServicesManager;
 
 public final class LuckPermsHook {
-  public LuckPermsHook(@NonNull Bending plugin) {
-    RegisteredServiceProvider<LuckPerms> provider = plugin.getServer().getServicesManager().getRegistration(LuckPerms.class);
+  public LuckPermsHook(ServicesManager manager) {
+    RegisteredServiceProvider<LuckPerms> provider = manager.getRegistration(LuckPerms.class);
     if (provider != null) {
       setupContexts(provider.getProvider().getContextManager());
-      Bending.logger().info("Successfully registered LuckPerms contexts!");
     }
   }
 
@@ -76,14 +75,15 @@ public final class LuckPermsHook {
     private ContextCalculator<Player> build(Function<User, Iterable<String>> mapper) {
       return new ContextCalculator<>() {
         @Override
-        public void calculate(@NonNull Player target, @NonNull ContextConsumer consumer) {
-          if (Registries.BENDERS.contains(target.getUniqueId())) {
-            consumer.accept(createContextSet(mapper.apply(Registries.BENDERS.user(target))));
+        public void calculate(Player target, ContextConsumer consumer) {
+          UUID uuid = target.getUniqueId();
+          if (Registries.BENDERS.containsKey(uuid)) {
+            consumer.accept(createContextSet(mapper.apply(Registries.BENDERS.get(uuid))));
           }
         }
 
         @Override
-        public @NonNull ContextSet estimatePotentialContexts() {
+        public ContextSet estimatePotentialContexts() {
           return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
         }
       };
@@ -92,14 +92,15 @@ public final class LuckPermsHook {
     private ContextCalculator<Player> buildWithPredicate(Predicate<User> predicate) {
       return new ContextCalculator<>() {
         @Override
-        public void calculate(@NonNull Player target, @NonNull ContextConsumer consumer) {
-          if (Registries.BENDERS.contains(target.getUniqueId())) {
-            consumer.accept(createContextSet(predicate.test(Registries.BENDERS.user(target))));
+        public void calculate(Player target, ContextConsumer consumer) {
+          UUID uuid = target.getUniqueId();
+          if (Registries.BENDERS.containsKey(uuid)) {
+            consumer.accept(createContextSet(predicate.test(Registries.BENDERS.get(uuid))));
           }
         }
 
         @Override
-        public @NonNull ContextSet estimatePotentialContexts() {
+        public ContextSet estimatePotentialContexts() {
           return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
         }
       };

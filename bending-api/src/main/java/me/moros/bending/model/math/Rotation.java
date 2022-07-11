@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.math;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public class Rotation {
   private final double q0;
   private final double q1;
@@ -34,7 +32,7 @@ public class Rotation {
     this.q3 = q3;
   }
 
-  public Rotation(@NonNull Vector3d axis, double angle) throws IllegalArgumentException {
+  public Rotation(Vector3d axis, double angle) throws IllegalArgumentException {
     double norm = axis.length();
     if (norm == 0) {
       throw new IllegalArgumentException();
@@ -89,7 +87,7 @@ public class Rotation {
    * @param u vector to apply the rotation to
    * @return a new vector which is the image of u by the rotation
    */
-  public @NonNull Vector3d applyTo(@NonNull Vector3d u) {
+  public Vector3d applyTo(Vector3d u) {
     double x = u.x();
     double y = u.y();
     double z = u.z();
@@ -121,7 +119,7 @@ public class Rotation {
    * @param u vector to apply the inverse of the rotation to
    * @return a new vector which such that u is its image by the rotation
    */
-  public @NonNull Vector3d applyInverseTo(@NonNull Vector3d u) {
+  public Vector3d applyInverseTo(Vector3d u) {
     double x = u.x();
     double y = u.y();
     double z = u.z();
@@ -152,14 +150,14 @@ public class Rotation {
     out[2] = 2 * (m0 * (z * m0 - (q1 * y - q2 * x)) + s * q3) - z;
   }
 
-  public @NonNull Rotation applyTo(@NonNull Rotation r) {
+  public Rotation applyTo(Rotation r) {
     return new Rotation(r.q0 * q0 - (r.q1 * q1 + r.q2 * q2 + r.q3 * q3),
       r.q1 * q0 + r.q0 * q1 + (r.q2 * q3 - r.q3 * q2),
       r.q2 * q0 + r.q0 * q2 + (r.q3 * q1 - r.q1 * q3),
       r.q3 * q0 + r.q0 * q3 + (r.q1 * q2 - r.q2 * q1));
   }
 
-  public @NonNull Rotation applyInverseTo(@NonNull Rotation r) {
+  public Rotation applyInverseTo(Rotation r) {
     return new Rotation(-r.q0 * q0 - (r.q1 * q1 + r.q2 * q2 + r.q3 * q3),
       -r.q1 * q0 + r.q0 * q1 + (r.q2 * q3 - r.q3 * q2),
       -r.q2 * q0 + r.q0 * q2 + (r.q3 * q1 - r.q1 * q3),

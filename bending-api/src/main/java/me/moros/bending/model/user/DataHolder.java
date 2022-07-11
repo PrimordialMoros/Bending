@@ -19,21 +19,21 @@
 
 package me.moros.bending.model.user;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.bending.model.key.RegistryKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DataHolder {
-  <E> boolean containsKey(@NonNull DataKey<E> key);
+  <T> boolean containsKey(RegistryKey<T> key);
 
-  <E> boolean canEdit(@NonNull DataKey<E> key);
+  <T> boolean canEdit(RegistryKey<T> key);
 
-  <E> boolean offer(@NonNull DataKey<E> key, @NonNull E value);
+  <T> boolean offer(RegistryKey<T> key, T value);
 
-  <E> @Nullable E remove(@NonNull DataKey<E> key);
+  <T> @Nullable T remove(RegistryKey<T> key);
 
-  <E> @Nullable E get(@NonNull DataKey<E> key);
+  <T> @Nullable T get(RegistryKey<T> key);
 
-  <E> @NonNull E getOrDefault(@NonNull DataKey<E> key, @NonNull E defaultValue);
+  <T> T getOrDefault(RegistryKey<T> key, T defaultValue);
 
-  <E extends Enum<E>> @NonNull E toggle(@NonNull DataKey<E> key, @NonNull E defaultValue);
+  <T extends Enum<T>> T toggle(RegistryKey<T> key, T defaultValue);
 }

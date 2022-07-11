@@ -27,12 +27,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.TravellingSource;
 import me.moros.bending.ability.common.basic.BlockStream;
 import me.moros.bending.ability.water.Torrent;
 import me.moros.bending.ability.water.WaterRing;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -63,11 +63,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterGimbal extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -77,20 +76,20 @@ public class WaterGimbal extends AbilityInstance {
 
   private boolean launched = false;
 
-  public WaterGimbal(@NonNull AbilityDescription desc) {
+  public WaterGimbal(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
     this.user = user;
     loadConfig();
 
-    WaterRing ring = Bending.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
+    WaterRing ring = user.game().abilityManager(user.world()).firstInstance(user, WaterRing.class).orElse(null);
     List<Block> sources = new ArrayList<>();
     if (ring != null && ring.isReady()) {
       sources.addAll(ring.complete());
@@ -123,26 +122,26 @@ public class WaterGimbal extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(torrentDesc))
       .build();
 
-    Bending.game().abilityManager(user.world()).destroyInstanceType(user, List.of(Torrent.class, WaterRing.class));
+    user.game().abilityManager(user.world()).destroyInstanceType(user, List.of(Torrent.class, WaterRing.class));
     return true;
   }
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     return states.update();
   }
 
-  public static void launch(@NonNull User user) {
+  public static void launch(User user) {
     if (user.selectedAbilityName().equals("Torrent")) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
+      user.game().abilityManager(user.world()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
     }
   }
 
@@ -173,7 +172,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return states.current() instanceof GimbalStream gimbalStream ? gimbalStream.colliders() : List.of();
   }
 
@@ -186,12 +185,12 @@ public class WaterGimbal extends AbilityInstance {
     private boolean started = false;
     private int angle = 0;
 
-    private Gimbal(@NonNull User user) {
+    private Gimbal(User user) {
       this.user = user;
     }
 
     @Override
-    public void start(@NonNull StateChain chain) {
+    public void start(StateChain chain) {
       if (started) {
         return;
       }
@@ -214,7 +213,7 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       if (!started) {
         return UpdateResult.REMOVE;
       }
@@ -283,10 +282,10 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.verticalPush));
+        Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.knockup)).multiply(userConfig.knockback);
         EntityUtil.applyVelocity(WaterGimbal.this, entity, velocity);
         affectedEntities.add(entity);
       }
@@ -294,7 +293,7 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     @Override
-    protected void renderHead(@NonNull Block block) {
+    protected void renderHead(Block block) {
       ParticleUtil.of(Particle.SNOW_SHOVEL, Vector3d.center(block)).count(6).offset(0.25).extra(0.05).spawn(user.world());
       if (!MaterialUtil.isWater(block)) {
         TempBlock.water().build(block);
@@ -312,35 +311,29 @@ public class WaterGimbal extends AbilityInstance {
     }
 
     @Override
-    public void onBlockHit(@NonNull Block block) {
+    public void onBlockHit(Block block) {
       FragileStructure.tryDamageStructure(List.of(block), 3);
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 10000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 8;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 24;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 6;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1.2;
     @Modifiable(Attribute.STRENGTH)
-    public double verticalPush;
+    private double knockup = 0.25;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "water", "sequences", "watergimbal");
-
-      cooldown = abilityNode.node("cooldown").getLong(10000);
-      selectRange = abilityNode.node("select-range").getDouble(8.0);
-      range = abilityNode.node("range").getDouble(24.0);
-      damage = abilityNode.node("damage").getDouble(6.0);
-      knockback = abilityNode.node("knockback").getDouble(1.2);
-      verticalPush = abilityNode.node("vertical-push").getDouble(0.25);
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "sequences", "watergimbal");
     }
   }
 }

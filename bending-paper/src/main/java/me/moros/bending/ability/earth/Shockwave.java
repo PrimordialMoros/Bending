@@ -26,10 +26,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.BlockLine;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempPacketEntity;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.TempEntityType;
 import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -63,11 +64,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Shockwave extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
   private static final Vector3d OFFSET = new Vector3d(0.4, 0.75, 0.4);
 
   private User user;
@@ -85,19 +85,19 @@ public class Shockwave extends AbilityInstance {
   private double range;
   private long startTime;
 
-  public Shockwave(@NonNull AbilityDescription desc) {
+  public Shockwave(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).firstInstance(user, Shockwave.class)
+      user.game().abilityManager(user.world()).firstInstance(user, Shockwave.class)
         .ifPresent(s -> s.release(true));
       return false;
     }
 
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, Shockwave.class)) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, Shockwave.class)) {
       return false;
     }
 
@@ -119,11 +119,11 @@ public class Shockwave extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -211,7 +211,7 @@ public class Shockwave extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return colliders;
   }
 
@@ -222,7 +222,7 @@ public class Shockwave extends AbilityInstance {
     }
 
     @Override
-    public boolean isValidBlock(@NonNull Block block) {
+    public boolean isValidBlock(Block block) {
       if (block.isLiquid() || !MaterialUtil.isTransparent(block)) {
         return false;
       }
@@ -230,7 +230,7 @@ public class Shockwave extends AbilityInstance {
     }
 
     @Override
-    public void render(@NonNull Block block) {
+    public void render(Block block) {
       if (!affectedBlocks.add(block)) {
         return;
       }
@@ -243,7 +243,8 @@ public class Shockwave extends AbilityInstance {
       Vector3d velocity = new Vector3d(0, deltaY, 0);
       Block below = block.getRelative(BlockFace.DOWN);
       BlockData data = mapData(below.getBlockData());
-      TempPacketEntity.builder(data).velocity(velocity).duration(500).buildFallingBlock(user.world(), Vector3d.center(below));
+      TempEntity.builder(data).velocity(velocity).duration(500)
+        .build(TempEntityType.FALLING_BLOCK, user.world(), Vector3d.center(below));
       ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(new Vector3d(0, 0.75, 0)))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
@@ -267,32 +268,25 @@ public class Shockwave extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 8000;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 2500;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1.2;
     @Modifiable(Attribute.RANGE)
-    public double coneRange;
+    private double coneRange = 14;
     @Modifiable(Attribute.RANGE)
-    public double ringRange;
-    public double fallThreshold;
+    private double ringRange = 9;
+    private double fallThreshold = 12;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "shockwave");
-
-      cooldown = abilityNode.node("cooldown").getLong(8000);
-      chargeTime = abilityNode.node("charge-time").getLong(2500);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      knockback = abilityNode.node("knockback").getDouble(1.2);
-      coneRange = abilityNode.node("cone-range").getDouble(14.0);
-      ringRange = abilityNode.node("ring-range").getDouble(9.0);
-      fallThreshold = abilityNode.node("fall-threshold").getDouble(12.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "shockwave");
     }
   }
 }

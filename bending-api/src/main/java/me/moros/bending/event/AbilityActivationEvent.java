@@ -22,9 +22,22 @@ package me.moros.bending.event;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 
-public class AbilityActivationEvent extends BendingAbilityEvent {
+public class AbilityActivationEvent extends BendingEvent implements AbilityEvent {
+  private final User user;
+  private final AbilityDescription desc;
 
   AbilityActivationEvent(User user, AbilityDescription desc) {
-    super(user, desc);
+    this.user = user;
+    this.desc = desc;
+  }
+
+  @Override
+  public User user() {
+    return user;
+  }
+
+  @Override
+  public AbilityDescription ability() {
+    return desc;
   }
 }

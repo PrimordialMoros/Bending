@@ -33,7 +33,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SelectedSource implements State {
@@ -52,22 +51,22 @@ public class SelectedSource implements State {
   private boolean started = false;
   private boolean forceRemove = false;
 
-  public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance, @Nullable BlockData data) {
+  public SelectedSource(User user, Block block, double maxDistance, @Nullable BlockData data) {
     this.user = user;
     this.distanceSq = 0.25 + maxDistance * maxDistance;
     particles = data == null;
     reselect(block, data);
   }
 
-  public SelectedSource(@NonNull User user, @NonNull Block block, double maxDistance) {
+  public SelectedSource(User user, Block block, double maxDistance) {
     this(user, block, maxDistance, null);
   }
 
-  public boolean reselect(@NonNull Block block) {
+  public boolean reselect(Block block) {
     return reselect(block, null);
   }
 
-  public boolean reselect(@NonNull Block block, @Nullable BlockData data) {
+  public boolean reselect(Block block, @Nullable BlockData data) {
     if (block.equals(this.block)) {
       return false;
     }
@@ -88,7 +87,7 @@ public class SelectedSource implements State {
   }
 
   @Override
-  public void start(@NonNull StateChain chain) {
+  public void start(StateChain chain) {
     if (started) {
       return;
     }
@@ -114,7 +113,7 @@ public class SelectedSource implements State {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (!started || forceRemove) {
       return UpdateResult.REMOVE;
     }
@@ -127,7 +126,7 @@ public class SelectedSource implements State {
     return UpdateResult.CONTINUE;
   }
 
-  public @NonNull Block selectedSource() {
+  public Block selectedSource() {
     return block;
   }
 
@@ -138,7 +137,7 @@ public class SelectedSource implements State {
     INSTANCES.remove(block);
   }
 
-  public static void tryRevertSource(@NonNull Block block) {
+  public static void tryRevertSource(Block block) {
     SelectedSource selectedSource = INSTANCES.get(block);
     if (selectedSource != null) {
       selectedSource.onDestroy();

@@ -33,13 +33,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.water.FrostBreath;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -79,11 +80,11 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSmash extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -93,13 +94,13 @@ public class EarthSmash extends AbilityInstance {
   private EarthSmashState state;
   private Boulder boulder;
 
-  public EarthSmash(@NonNull AbilityDescription desc) {
+  public EarthSmash(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    Optional<EarthSmash> grabbed = Bending.game().abilityManager(user.world()).userInstances(user, EarthSmash.class)
+  public boolean activate(User user, Activation method) {
+    Optional<EarthSmash> grabbed = user.game().abilityManager(user.world()).userInstances(user, EarthSmash.class)
       .filter(s -> s.state instanceof GrabState).findAny();
 
     if (method == Activation.SNEAK) {
@@ -127,11 +128,11 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -149,7 +150,7 @@ public class EarthSmash extends AbilityInstance {
     if (center == null) {
       return false;
     }
-    int radius = userConfig.radius;
+    int radius = Math.max(3, userConfig.radius);
     if (radius % 2 == 0) {
       radius++;
     }
@@ -182,18 +183,18 @@ public class EarthSmash extends AbilityInstance {
     state = new GrabState();
   }
 
-  private static boolean tryGrab(@NonNull User user) {
+  private static boolean tryGrab(User user) {
     Block target = user.rayTrace(config.grabRange).blocks(user.world()).block();
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {
       return false;
     }
-    Bending.game().abilityManager(user.world()).changeOwner(earthSmash, user);
+    user.game().abilityManager(user.world()).changeOwner(earthSmash, user);
     earthSmash.grabBoulder();
     return true;
   }
 
-  public static void tryDestroy(@NonNull User user, @NonNull Block block) {
+  public static void tryDestroy(User user, Block block) {
     if (user.sneaking() && user.selectedAbilityName().equals("EarthSmash")) {
       EarthSmash earthSmash = getInstance(user, block, x -> true);
       if (earthSmash != null) {
@@ -202,12 +203,12 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private static EarthSmash getInstance(User user, Block block, Predicate<EarthSmash> filter) {
+  private static @Nullable EarthSmash getInstance(User user, @Nullable Block block, Predicate<EarthSmash> filter) {
     if (block == null) {
       return null;
     }
     AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
-    return Bending.game().abilityManager(user.world()).instances(EarthSmash.class)
+    return user.game().abilityManager(user.world()).instances(EarthSmash.class)
       .filter(filter)
       .filter(s -> s.boulder != null && s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
       .findAny().orElse(null);
@@ -242,9 +243,8 @@ public class EarthSmash extends AbilityInstance {
         Block block = entry.getKey();
         BlockData blockData = entry.getValue();
         TempBlock.air().build(block);
-        TempFallingBlock projectile = TempFallingBlock.builder(blockData).velocity(velocity)
-          .duration(5000).build(block);
-        shards.put(projectile, shardType(blockData.getMaterial()));
+        TempFallingBlock projectile = TempEntity.builder(blockData).velocity(velocity).duration(5000).build(block);
+        shards.put(projectile, ShardType.from(blockData.getMaterial()));
         ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block)).count(4).offset(0.5).data(blockData).spawn(block.getWorld());
         if (ThreadLocalRandom.current().nextBoolean()) {
           SoundUtil.of(blockData.getSoundGroup().getBreakSound()).play(block);
@@ -271,18 +271,18 @@ public class EarthSmash extends AbilityInstance {
   }
 
   @Override
-  public void onUserChange(@NonNull User newUser) {
+  public void onUserChange(User newUser) {
     this.user = newUser;
     boulder.user = newUser;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return !state.canCollide() ? List.of() : List.of(boulder.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     boolean shatter = collision.removeSelf();
     if (collidedAbility instanceof FlameRush other && other.isFullyCharged()) {
@@ -324,7 +324,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       if (System.currentTimeMillis() >= startTime + userConfig.chargeTime) {
         if (user.sneaking()) {
           ParticleUtil.of(Particle.SMOKE_NORMAL, user.mainHandSide()).spawn(user.world());
@@ -354,7 +354,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
       CollisionUtil.handle(user, liftCollider, entity -> {
         Vector3d push = new Vector3d(entity.getVelocity()).withY(userConfig.raiseEntityPush);
@@ -413,7 +413,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       if (user.sneaking()) {
         Vector3d dir = user.direction().normalize().multiply(grabbedDistance);
         Block newCenter = user.eyeLocation().add(dir).toBlock(boulder.world);
@@ -451,7 +451,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       buffer += speed;
       if (buffer < 20) {
         return UpdateResult.CONTINUE;
@@ -501,7 +501,7 @@ public class EarthSmash extends AbilityInstance {
 
   private class IdleState implements EarthSmashState {
     @Override
-    public @NonNull UpdateResult update() {
+    public UpdateResult update() {
       return System.currentTimeMillis() > boulder.expireTime ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
     }
 
@@ -516,19 +516,21 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private enum ShardType {MAGMA, SAND, ICE, MUD, ROCK}
+  private enum ShardType {
+    MAGMA, SAND, ICE, MUD, ROCK;
 
-  private static ShardType shardType(Material material) {
-    if (EarthMaterials.LAVA_BENDABLE.isTagged(material)) {
-      return ShardType.MAGMA;
-    } else if (EarthMaterials.SAND_BENDABLE.isTagged(material)) {
-      return ShardType.SAND;
-    } else if (WaterMaterials.ICE_BENDABLE.isTagged(material)) {
-      return ShardType.ICE;
-    } else if (EarthMaterials.MUD_BENDABLE.isTagged(material)) {
-      return ShardType.MUD;
-    } else {
-      return ShardType.ROCK;
+    private static ShardType from(Material material) {
+      if (EarthMaterials.LAVA_BENDABLE.isTagged(material)) {
+        return ShardType.MAGMA;
+      } else if (EarthMaterials.SAND_BENDABLE.isTagged(material)) {
+        return ShardType.SAND;
+      } else if (WaterMaterials.ICE_BENDABLE.isTagged(material)) {
+        return ShardType.ICE;
+      } else if (EarthMaterials.MUD_BENDABLE.isTagged(material)) {
+        return ShardType.MUD;
+      } else {
+        return ShardType.ROCK;
+      }
     }
   }
 
@@ -542,12 +544,17 @@ public class EarthSmash extends AbilityInstance {
     }
 
     @Override
-    public @NonNull UpdateResult update() {
-      pieces.entrySet().removeIf(entry ->
-        entry.getKey().valid() &&
-          CollisionUtil.handle(user, AABB.BLOCK_BOUNDS.at(entry.getKey().center()), e -> onEntityHit(e, entry.getValue()))
-      );
+    public UpdateResult update() {
+      pieces.entrySet().removeIf(this::tryCollisions);
       return pieces.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    }
+
+    private boolean tryCollisions(Entry<TempFallingBlock, ShardType> entry) {
+      TempFallingBlock fb = entry.getKey();
+      if (!fb.isValid()) {
+        return true;
+      }
+      return CollisionUtil.handle(user, AABB.BLOCK_BOUNDS.at(fb.center()), e -> onEntityHit(e, entry.getValue()));
     }
 
     private boolean onEntityHit(Entity entity, ShardType type) {
@@ -679,74 +686,49 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 7000;
     @Modifiable(Attribute.RADIUS)
-    public int radius;
+    private int radius = 3;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 1250;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 10;
     @Modifiable(Attribute.DURATION)
-    public long maxDuration;
+    private long maxDuration = 45000;
     @Modifiable(Attribute.STRENGTH)
-    public double raiseEntityPush;
+    private double raiseEntityPush = 0.85;
     @Modifiable(Attribute.SELECTION)
-    public double grabRange;
+    private double grabRange = 10;
     @Modifiable(Attribute.RANGE)
-    public double shootRange;
+    private double shootRange = 16;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3.5;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 2.8;
     @Modifiable(Attribute.STRENGTH)
-    public double knockup;
-    @Modifiable(Attribute.SPEED)
-    public int speed;
-
-    public boolean shatterEffects;
-
+    private double knockup = 0.15;
+    private boolean shatterEffects = true;
     @Modifiable(Attribute.DAMAGE)
-    public double shatterDamage;
+    private double shatterDamage = 1;
     @Modifiable(Attribute.FIRE_TICKS)
-    public int fireTicks;
+    private int fireTicks = 25;
     @Modifiable(Attribute.FREEZE_TICKS)
-    public int freezeTicks;
+    private int freezeTicks = 60;
     @Modifiable(Attribute.STRENGTH)
-    public int mudPower;
+    private int mudPower = 2;
     @Modifiable(Attribute.DURATION)
-    public long mudDuration;
+    private long mudDuration = 1500;
     @Modifiable(Attribute.STRENGTH)
-    public int sandPower;
+    private int sandPower = 2;
     @Modifiable(Attribute.DURATION)
-    public long sandDuration;
+    private long sandDuration = 1500;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthsmash");
-
-      cooldown = abilityNode.node("cooldown").getLong(7000);
-      radius = Math.max(3, abilityNode.node("radius").getInt(3));
-      chargeTime = abilityNode.node("charge-time").getLong(1250);
-      selectRange = abilityNode.node("select-range").getDouble(10.0);
-      maxDuration = abilityNode.node("max-duration").getLong(45000);
-      raiseEntityPush = abilityNode.node("raise-entity-push").getDouble(0.85);
-      grabRange = abilityNode.node("grab-range").getDouble(10.0);
-      shootRange = abilityNode.node("range").getDouble(16.0);
-      damage = abilityNode.node("damage").getDouble(3.5);
-      knockback = abilityNode.node("knockback").getDouble(2.8);
-      knockup = abilityNode.node("knockup").getDouble(0.15);
-
-      CommentedConfigurationNode shatterNode = abilityNode.node("shatter-effects");
-      shatterEffects = shatterNode.node("enabled").getBoolean(true);
-      shatterDamage = shatterNode.node("damage").getDouble(1.0);
-      fireTicks = shatterNode.node("fire-ticks").getInt(25);
-      freezeTicks = shatterNode.node("freeze-ticks").getInt(60);
-      mudPower = shatterNode.node("mud-power").getInt(2);
-      mudDuration = shatterNode.node("mud-duration").getLong(1500);
-      sandPower = shatterNode.node("sand-power").getInt(2);
-      sandDuration = shatterNode.node("sand-duration").getLong(1500);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthsmash");
     }
   }
 }

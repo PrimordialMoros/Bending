@@ -20,7 +20,6 @@
 package me.moros.bending.model.user;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Board {
   String SEP = " -------------- ";
@@ -41,6 +40,6 @@ public interface Board {
   default void activeSlot(int oldSlot, int newSlot) {
   }
 
-  default void updateMisc(@NonNull AbilityDescription desc, boolean show) {
+  default void updateMisc(AbilityDescription desc, boolean show) {
   }
 }

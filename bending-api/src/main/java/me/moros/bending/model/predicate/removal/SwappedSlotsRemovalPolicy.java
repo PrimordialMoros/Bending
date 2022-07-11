@@ -22,7 +22,6 @@ package me.moros.bending.model.predicate.removal;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
   private final AbilityDescription expected;
@@ -32,11 +31,11 @@ public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
   }
 
   @Override
-  public boolean test(@NonNull User user, @NonNull AbilityDescription desc) {
+  public boolean test(User user, AbilityDescription desc) {
     return user instanceof BendingPlayer && !expected.equals(user.selectedAbility());
   }
 
-  public static @NonNull RemovalPolicy of(@NonNull AbilityDescription expected) {
+  public static RemovalPolicy of(AbilityDescription expected) {
     return new SwappedSlotsRemovalPolicy(expected);
   }
 }

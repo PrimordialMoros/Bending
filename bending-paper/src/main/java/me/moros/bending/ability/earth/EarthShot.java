@@ -24,11 +24,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity;
+import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Explosive;
@@ -60,15 +61,15 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthShot extends AbilityInstance implements Explosive {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
 
   private enum Mode {ROCK, METAL, MAGMA}
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -90,14 +91,14 @@ public class EarthShot extends AbilityInstance implements Explosive {
   private int targetY;
   private long magmaStartTime = 0;
 
-  public EarthShot(@NonNull AbilityDescription desc) {
+  public EarthShot(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class)
+      user.game().abilityManager(user.world()).userInstances(user, EarthShot.class)
         .filter(e -> !e.launched).forEach(EarthShot::launch);
       return false;
     }
@@ -105,7 +106,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     this.user = user;
     loadConfig();
 
-    long count = Bending.game().abilityManager(user.world()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
+    long count = user.game().abilityManager(user.world()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
     if (count >= userConfig.maxAmount) {
       return false;
     }
@@ -117,7 +118,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   private boolean prepare() {
@@ -157,7 +158,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       SoundUtil.EARTH.play(source);
     }
 
-    projectile = TempFallingBlock.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
+    projectile = TempEntity.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
       .gravity(false).duration(6000).build(source);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(source);
@@ -172,17 +173,17 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
 
     if (launched) {
-      if (projectile == null || !projectile.fallingBlock().isValid()) {
+      if (projectile == null || !projectile.entity().isValid()) {
         return UpdateResult.REMOVE;
       }
 
-      Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity());
+      Vector3d velocity = new Vector3d(projectile.entity().getVelocity());
       double minLength = userConfig.speed * 0.85;
       if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < minLength * minLength) {
         return UpdateResult.REMOVE;
@@ -191,16 +192,16 @@ public class EarthShot extends AbilityInstance implements Explosive {
         Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.withY(0));
       }
-      EntityUtil.applyVelocity(this, projectile.fallingBlock(), velocity.normalize().multiply(userConfig.speed));
-      lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
+      EntityUtil.applyVelocity(this, projectile.entity(), velocity.normalize().multiply(userConfig.speed));
+      lastVelocity = new Vector3d(projectile.entity().getVelocity());
       location = projectile.center();
       Collider c = BOX.at(location);
       boolean magma = mode == Mode.MAGMA;
       if (CollisionUtil.handle(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
-      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.fallingBlock().getLocation()))
-        .count(3).offset(0.25).data(projectile.fallingBlock().getBlockData()).spawn(user.world());
+      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.entity().getLocation()))
+        .count(3).offset(0.25).data(projectile.entity().getBlockData()).spawn(user.world());
     } else {
       if (!ready) {
         handleSource();
@@ -218,23 +219,23 @@ public class EarthShot extends AbilityInstance implements Explosive {
       return false;
     }
     DamageUtil.damageEntity(entity, user, damage, description());
-    Vector3d velocity = new Vector3d(projectile.fallingBlock().getVelocity()).normalize().multiply(0.4);
+    Vector3d velocity = new Vector3d(projectile.entity().getVelocity()).normalize().multiply(0.4);
     EntityUtil.applyVelocity(this, entity, velocity);
     return true;
   }
 
   private void handleSource() {
-    Block block = projectile.fallingBlock().getLocation().getBlock();
+    Block block = projectile.entity().getLocation().getBlock();
     if (block.getY() >= targetY) {
-      TempBlock.builder(projectile.fallingBlock().getBlockData()).build(block);
+      TempBlock.builder(projectile.entity().getBlockData()).build(block);
       projectile.revert();
       location = new Vector3d(block);
       readySource = block;
       ready = true;
     } else {
       location = projectile.center();
-      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.fallingBlock().getLocation()))
-        .count(3).offset(0.25).data(projectile.fallingBlock().getBlockData()).spawn(user.world());
+      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.entity().getLocation()))
+        .count(3).offset(0.25).data(projectile.entity().getBlockData()).spawn(user.world());
     }
   }
 
@@ -296,8 +297,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (prematureLaunch) {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile.fallingBlock().setGravity(true);
-      EntityUtil.applyVelocity(this, projectile.fallingBlock(), dir.add(new Vector3d(0, 0.2, 0)));
+      projectile.entity().setGravity(true);
+      EntityUtil.applyVelocity(this, projectile.entity(), dir.add(new Vector3d(0, 0.2, 0)));
     } else {
       origin = Vector3d.center(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
@@ -306,7 +307,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       TempBlock.air().build(readySource);
     }
     location = projectile.center();
-    lastVelocity = new Vector3d(projectile.fallingBlock().getVelocity());
+    lastVelocity = new Vector3d(projectile.entity().getVelocity());
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
@@ -322,7 +323,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     launched = true;
   }
 
-  private Vector3d getTarget(Block source) {
+  private Vector3d getTarget(@Nullable Block source) {
     return user.rayTrace(userConfig.range).ignore(source == null ? Set.of() : Set.of(source))
       .entities(user.world()).entityCenterOrPosition();
   }
@@ -350,7 +351,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (projectile != null) {
       if (launched) {
         Vector3d center = projectile.center();
-        BlockData data = projectile.fallingBlock().getBlockData();
+        BlockData data = projectile.entity().getBlockData();
         ParticleUtil.of(Particle.BLOCK_CRACK, center).count(6).offset(1).data(data).spawn(user.world());
         ParticleUtil.of(Particle.BLOCK_DUST, center).count(4).offset(1).data(data).spawn(user.world());
         explode();
@@ -373,49 +374,34 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return (!launched || projectile == null) ? List.of() : List.of(BOX.at(projectile.center()));
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2000;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 6;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 48;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long chargeTime;
+    private long chargeTime = 1000;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 1.6;
     @Modifiable(Attribute.AMOUNT)
-    public int maxAmount;
-
-    public boolean allowQuickLaunch;
-
-    public boolean allowConvertMagma;
+    private int maxAmount = 1;
+    private boolean allowQuickLaunch = true;
+    private boolean allowConvertMagma = true;
     @Modifiable(Attribute.RADIUS)
-    public double explosionRadius;
+    private double explosionRadius = 2.5;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthshot");
-
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      selectRange = abilityNode.node("select-range").getDouble(6.0);
-      range = abilityNode.node("range").getDouble(48.0);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      chargeTime = abilityNode.node("charge-time").getLong(1000);
-      speed = abilityNode.node("speed").getDouble(1.6);
-      maxAmount = abilityNode.node("max-sources").getInt(1);
-      allowQuickLaunch = abilityNode.node("allow-quick-launch").getBoolean(true);
-
-      CommentedConfigurationNode magmaNode = abilityNode.node("magma");
-
-      allowConvertMagma = magmaNode.node("allow-convert").getBoolean(true);
-      explosionRadius = magmaNode.node("explosion-radius").getDouble(2.5);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthshot");
     }
   }
 }

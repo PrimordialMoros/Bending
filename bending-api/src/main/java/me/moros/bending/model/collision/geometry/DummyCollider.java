@@ -20,7 +20,6 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Dummy {@link AABB} collider for passable blocks
@@ -31,32 +30,32 @@ public final class DummyCollider extends AABB {
   }
 
   @Override
-  public @NonNull AABB grow(@NonNull Vector3d diff) {
+  public AABB grow(Vector3d diff) {
     return this;
   }
 
   @Override
-  public boolean intersects(@NonNull Collider collider) {
+  public boolean intersects(Collider collider) {
     return false;
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return Vector3d.ZERO;
   }
 
   @Override
-  public @NonNull AABB at(@NonNull Vector3d point) {
+  public AABB at(Vector3d point) {
     return this;
   }
 
   @Override
-  public @NonNull Vector3d halfExtents() {
+  public Vector3d halfExtents() {
     return Vector3d.ZERO;
   }
 
   @Override
-  public boolean contains(@NonNull Vector3d point) {
+  public boolean contains(Vector3d point) {
     return false;
   }
 }

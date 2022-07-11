@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.AbilityInitializer;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.AbilityInitializer;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -54,11 +54,11 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirSwipe extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -71,12 +71,12 @@ public class AirSwipe extends AbilityInstance {
   private double factor = 1;
   private long startTime;
 
-  public AirSwipe(@NonNull AbilityDescription desc) {
+  public AirSwipe(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     startTime = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class AirSwipe extends AbilityInstance {
       return false;
     }
 
-    for (AirSwipe swipe : Bending.game().abilityManager(user.world()).userInstances(user, AirSwipe.class).toList()) {
+    for (AirSwipe swipe : user.game().abilityManager(user.world()).userInstances(user, AirSwipe.class).toList()) {
       if (swipe.charging) {
         swipe.launch();
         return false;
@@ -106,11 +106,11 @@ public class AirSwipe extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -149,7 +149,7 @@ public class AirSwipe extends AbilityInstance {
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (factor == userConfig.chargeFactor && collision.removeSelf()) {
       String name = collidedAbility.description().name();
@@ -167,7 +167,7 @@ public class AirSwipe extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -196,7 +196,7 @@ public class AirSwipe extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
         Vector3d velocity = EntityUtil.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
@@ -208,7 +208,7 @@ public class AirSwipe extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryBreakPlant(block) || WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
@@ -217,38 +217,27 @@ public class AirSwipe extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1500;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 2;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 9;
     @Modifiable(Attribute.SPEED)
-    public double speed;
-    public int arc;
+    private double speed = 0.8;
+    private int arc = 35;
+    @Comment("How many milliseconds it takes to fully charge")
     @Modifiable(Attribute.CHARGE_TIME)
-    public long maxChargeTime;
+    private long maxChargeTime = 2000;
+    @Comment("How much the damage, range and knockback are multiplied by at full charge")
     @Modifiable(Attribute.STRENGTH)
-    public double chargeFactor;
+    private double chargeFactor = 2;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airswipe");
-
-      cooldown = abilityNode.node("cooldown").getLong(1500);
-      damage = abilityNode.node("damage").getDouble(2.0);
-      range = abilityNode.node("range").getDouble(9);
-      speed = abilityNode.node("speed").getDouble(0.8);
-      arc = abilityNode.node("arc").getInt(35);
-
-      chargeFactor = abilityNode.node("charge").node("factor").getDouble(2.0);
-      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
-
-      abilityNode.node("arc").comment("How large the entire arc is in degrees");
-
-      abilityNode.node("charge").node("factor").comment("How much the damage, range and knockback are multiplied by at full charge");
-      abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airswipe");
     }
   }
 }

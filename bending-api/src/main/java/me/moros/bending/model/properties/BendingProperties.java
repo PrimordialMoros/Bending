@@ -19,21 +19,29 @@
 
 package me.moros.bending.model.properties;
 
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 public interface BendingProperties {
+  final class Holder {
+    private static final BendingProperties DEFAULTS = new BendingProperties() {
+    };
+    private static BendingProperties INSTANCE;
+
+    private Holder() {
+    }
+  }
+
   private ThreadLocalRandom rand() {
     return ThreadLocalRandom.current();
   }
 
-  static @NonNull BendingProperties instance() {
-    return DefaultBendingProperties.propertiesInstance();
+  static BendingProperties instance() {
+    return Holder.INSTANCE == null ? Holder.DEFAULTS : Holder.INSTANCE;
   }
 
-  static void inject(@NonNull BendingProperties properties) {
-    DefaultBendingProperties.init(properties);
+  static void inject(BendingProperties properties) {
+    Holder.INSTANCE = Objects.requireNonNull(properties);
   }
 
   default long earthRevertTime() {

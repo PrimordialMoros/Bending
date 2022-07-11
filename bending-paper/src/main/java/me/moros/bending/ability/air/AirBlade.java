@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractWheel;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -51,11 +51,11 @@ import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirBlade extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -69,13 +69,13 @@ public class AirBlade extends AbilityInstance {
   private double factor = 1;
   private long startTime;
 
-  public AirBlade(@NonNull AbilityDescription desc) {
+  public AirBlade(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirBlade.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, AirBlade.class)) {
       return false;
     }
 
@@ -96,7 +96,7 @@ public class AirBlade extends AbilityInstance {
 
     startTime = System.currentTimeMillis();
 
-    AirWheel wheel = Bending.game().abilityManager(user.world()).firstInstance(user, AirWheel.class).orElse(null);
+    AirWheel wheel = user.game().abilityManager(user.world()).firstInstance(user, AirWheel.class).orElse(null);
     if (wheel != null) {
       origin = wheel.center();
       factor = userConfig.chargeFactor;
@@ -105,18 +105,18 @@ public class AirBlade extends AbilityInstance {
       removalPolicy = Policies.builder()
         .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
       user.addCooldown(description(), userConfig.cooldown);
-      Bending.game().abilityManager(user.world()).destroyInstance(wheel);
+      user.game().abilityManager(user.world()).destroyInstance(wheel);
     }
     return true;
   }
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -164,12 +164,12 @@ public class AirBlade extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return blade == null ? List.of() : List.of(blade.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof AirBlade other) {
       if (factor - other.factor > 0.1) {
@@ -204,7 +204,7 @@ public class AirBlade extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3d velocity = direction.withY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       EntityUtil.applyVelocity(AirBlade.this, entity, velocity);
@@ -212,54 +212,41 @@ public class AirBlade extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       WorldUtil.tryExtinguishFire(user, block);
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 4000;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 1.2;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1.5;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 0.8;
     @Modifiable(Attribute.STRENGTH)
-    public double knockup;
+    private double knockup = 0.15;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 12;
     @Modifiable(Attribute.RANGE)
-    public double prepareRange;
+    private double prepareRange = 8;
+    @Comment("How many blocks the blade advances every tick")
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.8;
+    @Comment("How many milliseconds it takes to fully charge")
     @Modifiable(Attribute.CHARGE_TIME)
-    public long maxChargeTime;
+    private long maxChargeTime = 2000;
+    @Comment("How much the damage and range are multiplied by at full charge. Radius and speed are only affected by half that amount")
     @Modifiable(Attribute.STRENGTH)
-    public double chargeFactor;
+    private double chargeFactor = 3;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airblade");
-
-      cooldown = abilityNode.node("cooldown").getLong(4000);
-      radius = abilityNode.node("radius").getDouble(1.2);
-      damage = abilityNode.node("damage").getDouble(1.5);
-      knockback = abilityNode.node("knockback").getDouble(0.8);
-      knockup = abilityNode.node("knockup").getDouble(0.15);
-      range = abilityNode.node("range").getDouble(12.0);
-      prepareRange = abilityNode.node("prepare-range").getDouble(8.0);
-      speed = abilityNode.node("speed").getDouble(0.8);
-
-      chargeFactor = abilityNode.node("charge").node("factor").getDouble(3.0);
-      maxChargeTime = abilityNode.node("charge").node("max-time").getLong(2000);
-
-      abilityNode.node("speed").comment("How many blocks the blade advances every tick.");
-      abilityNode.node("charge").node("factor").comment("How much the damage and range are multiplied by at full charge. Radius and speed are only affected by half that amount.");
-      abilityNode.node("charge").node("max-time").comment("How many milliseconds it takes to fully charge");
-
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airblade");
     }
   }
 }

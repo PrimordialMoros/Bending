@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -49,11 +49,11 @@ import me.moros.bending.util.VectorUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FireSpin extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -61,12 +61,12 @@ public class FireSpin extends AbilityInstance {
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Collection<FireStream> streams = new ArrayList<>();
 
-  public FireSpin(@NonNull AbilityDescription desc) {
+  public FireSpin(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -81,17 +81,17 @@ public class FireSpin extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
     return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
@@ -123,7 +123,7 @@ public class FireSpin extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       if (!affectedEntities.contains(entity)) {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
@@ -134,35 +134,29 @@ public class FireSpin extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       FragileStructure.tryDamageStructure(List.of(block), 3);
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 6;
+    @Comment("How many blocks the streams advance with each tick")
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.5;
     @Modifiable(Attribute.STRENGTH)
-    public double knockback;
+    private double knockback = 1.8;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "sequences", "firespin");
-
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      damage = abilityNode.node("damage").getDouble(1.0);
-      range = abilityNode.node("range").getDouble(6.0);
-      speed = abilityNode.node("speed").getDouble(0.5);
-      knockback = abilityNode.node("knockback").getDouble(1.8);
-
-      abilityNode.node("speed").comment("How many blocks the streams advance with each tick.");
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "sequences", "firespin");
     }
   }
 }

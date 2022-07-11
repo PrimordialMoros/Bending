@@ -21,7 +21,6 @@ package me.moros.bending.model.preset;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args1;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public enum PresetCreateResult {
   SUCCESS(Message.PRESET_SUCCESS),
@@ -35,7 +34,7 @@ public enum PresetCreateResult {
     this.message = message;
   }
 
-  public @NonNull Args1<String> message() {
+  public Args1<String> message() {
     return message;
   }
 }

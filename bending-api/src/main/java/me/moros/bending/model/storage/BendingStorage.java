@@ -27,22 +27,50 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.storage.Storage;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles all Storage tasks and their concurrency
  */
 public interface BendingStorage extends Storage {
-  @NonNull PlayerProfile createProfile(@NonNull UUID uuid);
+  void init(Plugin plugin);
 
-  @NonNull CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(@NonNull UUID uuid);
+  /**
+   * Creates a new profile for the given uuid or returns an existing one if possible.
+   */
+  PlayerProfile createProfile(UUID uuid);
 
-  void savePlayerAsync(@NonNull BendingPlayer bendingPlayer);
+  /**
+   * This method will attempt to load a profile from the database.
+   * @param uuid the player's uuid
+   * @see #createProfile(UUID)
+   */
+  CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid);
 
-  boolean createAbilities(@NonNull Iterable<AbilityDescription> abilities);
+  /**
+   * Asynchronously saves the given bendingPlayer's data to the database.
+   * It updates the profile and stores the current elements and bound abilities.
+   * @param bendingPlayer the BendingPlayer to save
+   */
+  void savePlayerAsync(BendingPlayer bendingPlayer);
 
-  @NonNull CompletableFuture<@NonNull Boolean> savePresetAsync(int playerId, @NonNull Preset preset);
+  /**
+   * Adds all given abilities to the database
+   * @param abilities the abilities to add
+   */
+  boolean createAbilities(Iterable<AbilityDescription> abilities);
 
+  /**
+   * Asynchronously saves the given player's preset to the database.
+   * @param playerId the player's profile id
+   * @param preset the Preset to save
+   */
+  CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset);
+
+  /**
+   * Asynchronously deletes the specified preset.
+   * @param presetId the id of the preset to delete
+   */
   void deletePresetAsync(int presetId);
 }

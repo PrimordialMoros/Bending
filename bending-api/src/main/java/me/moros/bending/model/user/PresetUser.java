@@ -24,33 +24,32 @@ import java.util.Set;
 import me.moros.bending.event.PresetCreateEvent;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface PresetUser {
   /**
    * @return an immutable collection of this user's preset names
    */
-  @NonNull Set<@NonNull Preset> presets();
+  Set<Preset> presets();
 
   /**
    * Check if the user has the specified preset.
    * @param name the preset name to check
    * @return true the user has the specified preset, false otherwise
    */
-  @Nullable Preset presetByName(@NonNull String name);
+  @Nullable Preset presetByName(String name);
 
   /**
    * Attempt to add the specified preset to the user. Calls a {@link PresetCreateEvent}.
    * @param preset the preset to add
    * @return the result
    */
-  @NonNull PresetCreateResult addPreset(@NonNull Preset preset);
+  PresetCreateResult addPreset(Preset preset);
 
   /**
    * Attempt to remove the specified preset from the user.
    * @param preset the preset to remove
    * @return true if the preset was removed successfully, false otherwise
    */
-  boolean removePreset(@NonNull Preset preset);
+  boolean removePreset(Preset preset);
 }

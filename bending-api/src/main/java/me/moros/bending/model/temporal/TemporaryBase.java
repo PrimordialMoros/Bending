@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.temporal;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+@SuppressWarnings("ConstantConditions")
 public abstract class TemporaryBase implements Temporary {
   static final TemporaryBase EMPTY = new TemporaryBase() {
     @Override
@@ -47,7 +50,7 @@ public abstract class TemporaryBase implements Temporary {
     return prev;
   }
 
-  void previous(TemporaryBase prev) {
+  void previous(@Nullable TemporaryBase prev) {
     this.prev = prev;
   }
 
@@ -55,7 +58,7 @@ public abstract class TemporaryBase implements Temporary {
     return next;
   }
 
-  void next(TemporaryBase next) {
+  void next(@Nullable TemporaryBase next) {
     this.next = next;
   }
 

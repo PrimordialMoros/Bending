@@ -19,14 +19,26 @@
 
 package me.moros.bending.model.predicate.removal;
 
+import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
 public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-  boolean test(@NonNull User user, @NonNull AbilityDescription desc);
-}
+  default RemovalPolicy and(RemovalPolicy other) {
+    Objects.requireNonNull(other);
+    return (u, d) -> test(u, d) && other.test(u, d);
+  }
 
+  default RemovalPolicy or(RemovalPolicy other) {
+    Objects.requireNonNull(other);
+    return (u, d) -> test(u, d) || other.test(u, d);
+  }
+
+  @Override
+  default RemovalPolicy negate() {
+    return (u, d) -> !test(u, d);
+  }
+}

@@ -20,7 +20,6 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Simple sphere collider
@@ -33,34 +32,34 @@ public class Sphere implements Collider {
     this(Vector3d.ZERO, radius);
   }
 
-  public Sphere(@NonNull Vector3d center, double radius) {
+  public Sphere(Vector3d center, double radius) {
     this.center = center;
     this.radius = radius;
   }
 
-  boolean intersects(@NonNull Sphere other) {
+  boolean intersects(Sphere other) {
     // Spheres will be colliding if their distance apart is less than the sum of the radii.
     double sum = radius + other.radius;
     return other.center.distanceSq(center) <= sum * sum;
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return center;
   }
 
   @Override
-  public @NonNull Sphere at(@NonNull Vector3d point) {
+  public Sphere at(Vector3d point) {
     return new Sphere(point, radius);
   }
 
   @Override
-  public @NonNull Vector3d halfExtents() {
+  public Vector3d halfExtents() {
     return new Vector3d(radius, radius, radius);
   }
 
   @Override
-  public boolean contains(@NonNull Vector3d point) {
+  public boolean contains(Vector3d point) {
     double distSq = center.distanceSq(point);
     return distSq <= radius * radius;
   }

@@ -30,11 +30,10 @@ import me.moros.bending.command.ContextKeys;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class PresetParser implements ArgumentParser<CommandSender, Preset> {
   @Override
-  public @NonNull ArgumentParseResult<Preset> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull Queue<@NonNull String> inputQueue) {
+  public ArgumentParseResult<Preset> parse(CommandContext<CommandSender> commandContext, Queue<String> inputQueue) {
     String input = inputQueue.peek();
     if (input != null) {
       inputQueue.remove();
@@ -49,7 +48,7 @@ public final class PresetParser implements ArgumentParser<CommandSender, Preset>
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
+  public List<String> suggestions(final CommandContext<CommandSender> commandContext, final String input) {
     BendingPlayer player = commandContext.getOrDefault(ContextKeys.BENDING_PLAYER, null);
     return player == null ? List.of() : player.presets().stream().map(Preset::name).toList();
   }

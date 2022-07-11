@@ -32,7 +32,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbstractLine extends MovementResolver implements Updatable, SimpleAbility {
   private final User user;
@@ -52,7 +51,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   protected boolean controllable = false;
   protected boolean skipVertical = false;
 
-  protected AbstractLine(@NonNull User user, @NonNull Block source, double range, double speed, boolean followTarget) {
+  protected AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
     super(user.world());
     this.user = user;
     this.location = new Vector3d(source.getLocation().add(0.5, 1.25, 0.5));
@@ -67,7 +66,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (locked) {
       if (isValidTarget()) {
         targetLocation = new Vector3d(target.getLocation());
@@ -127,7 +126,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   }
 
   @Override
-  public @NonNull Collider collider() {
+  public Collider collider() {
     return collider;
   }
 

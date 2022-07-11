@@ -20,10 +20,9 @@
 package me.moros.bending.model.ability.state;
 
 import me.moros.bending.model.ability.Updatable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface State extends Updatable {
-  void start(@NonNull StateChain chain);
+  void start(StateChain chain);
 
   void complete();
 }

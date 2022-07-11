@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Deque;
 
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class PhaseTransformer {
   private final Deque<Block> queue;
@@ -33,7 +32,7 @@ public abstract class PhaseTransformer {
     queue = new ArrayDeque<>(32);
   }
 
-  public boolean fillQueue(@NonNull Collection<@NonNull Block> blocks) {
+  public boolean fillQueue(Collection<Block> blocks) {
     return queue.addAll(blocks);
   }
 
@@ -50,5 +49,5 @@ public abstract class PhaseTransformer {
     queue.clear();
   }
 
-  protected abstract boolean processBlock(@NonNull Block block);
+  protected abstract boolean processBlock(Block block);
 }

@@ -30,7 +30,6 @@ import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class with useful {@link Vector3d} related methods.
@@ -54,7 +53,7 @@ public final class VectorUtil {
    * @return a list comprising of all the directions for this arc
    * @see #rotateInverse(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3d> createArc(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int rays) {
+  public static Collection<Vector3d> createArc(Vector3d start, Vector3d axis, double angle, int rays) {
     Rotation rotation = new Rotation(axis, angle);
     rays = Math.max(3, rays);
     if (rays % 2 == 0) {
@@ -68,7 +67,7 @@ public final class VectorUtil {
     return arc;
   }
 
-  public static @NonNull Collection<@NonNull Vector3d> circle(@NonNull Vector3d start, @NonNull Vector3d axis, int times) {
+  public static Collection<Vector3d> circle(Vector3d start, Vector3d axis, int times) {
     double angle = 2 * Math.PI / times;
     return rotate(start, axis, angle, times);
   }
@@ -82,11 +81,11 @@ public final class VectorUtil {
    * @return a list comprising of all the directions for this arc
    * @see #rotateInverse(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3d> rotate(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int times) {
+  public static Collection<Vector3d> rotate(Vector3d start, Vector3d axis, double angle, int times) {
     return rotate(start, new Rotation(axis, angle), times);
   }
 
-  private static @NonNull Collection<@NonNull Vector3d> rotate(@NonNull Vector3d start, @NonNull Rotation rotation, int times) {
+  private static Collection<Vector3d> rotate(Vector3d start, Rotation rotation, int times) {
     Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
     for (int i = 0; i < times; i++) {
@@ -100,11 +99,11 @@ public final class VectorUtil {
    * Inversely repeat a rotation on a specific vector.
    * @see #rotate(Vector3d, Rotation, int)
    */
-  public static @NonNull Collection<@NonNull Vector3d> rotateInverse(@NonNull Vector3d start, @NonNull Vector3d axis, double angle, int times) {
+  public static Collection<Vector3d> rotateInverse(Vector3d start, Vector3d axis, double angle, int times) {
     return rotateInverse(start, new Rotation(axis, angle), times);
   }
 
-  private static @NonNull Collection<@NonNull Vector3d> rotateInverse(@NonNull Vector3d start, @NonNull Rotation rotation, int times) {
+  private static Collection<Vector3d> rotateInverse(Vector3d start, Rotation rotation, int times) {
     Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
     for (int i = 0; i < times; i++) {
@@ -117,7 +116,7 @@ public final class VectorUtil {
   /**
    * Get an orthogonal vector.
    */
-  public static @NonNull Vector3d orthogonal(@NonNull Vector3d axis, double radians, double length) {
+  public static Vector3d orthogonal(Vector3d axis, double radians, double length) {
     double[] arr = {axis.y(), -axis.x(), 0};
     Rotation rotation = new Rotation(axis, radians);
     return rotation.applyTo(new Vector3d(arr).normalize().multiply(length));
@@ -132,7 +131,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisY(Vector3d, double, double)
    * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
-  public static @NonNull Vector3d rotateAroundAxisX(@NonNull Vector3d v, double cos, double sin) {
+  public static Vector3d rotateAroundAxisX(Vector3d v, double cos, double sin) {
     return new Vector3d(v.x(), v.y() * cos - v.z() * sin, v.y() * sin + v.z() * cos);
   }
 
@@ -145,7 +144,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisX(Vector3d, double, double)
    * @see #rotateAroundAxisZ(Vector3d, double, double)
    */
-  public static @NonNull Vector3d rotateAroundAxisY(@NonNull Vector3d v, double cos, double sin) {
+  public static Vector3d rotateAroundAxisY(Vector3d v, double cos, double sin) {
     return new Vector3d(v.x() * cos + v.z() * sin, v.y(), v.x() * -sin + v.z() * cos);
   }
 
@@ -158,7 +157,7 @@ public final class VectorUtil {
    * @see #rotateAroundAxisX(Vector3d, double, double)
    * @see #rotateAroundAxisY(Vector3d, double, double)
    */
-  public static @NonNull Vector3d rotateAroundAxisZ(@NonNull Vector3d v, double cos, double sin) {
+  public static Vector3d rotateAroundAxisZ(Vector3d v, double cos, double sin) {
     return new Vector3d(v.x() * cos - v.y() * sin, v.x() * sin + v.y() * cos, v.z());
   }
 
@@ -169,7 +168,7 @@ public final class VectorUtil {
    * @param direction the direction to check
    * @return a collection of normalized vectors corresponding to cardinal block faces
    */
-  public static @NonNull Collection<@NonNull Vector3i> decomposeDiagonals(@NonNull Vector3d origin, @NonNull Vector3d direction) {
+  public static Collection<Vector3i> decomposeDiagonals(Vector3d origin, Vector3d direction) {
     double[] o = origin.toArray();
     double[] d = direction.toArray();
     Collection<Vector3i> possibleCollisions = new ArrayList<>(3);
@@ -189,30 +188,30 @@ public final class VectorUtil {
     return possibleCollisions;
   }
 
-  public static @NonNull Vector3d gaussianOffset(Vector3d target, double offset) {
+  public static Vector3d gaussianOffset(Vector3d target, double offset) {
     return gaussianOffset(target, offset, offset, offset);
   }
 
-  public static @NonNull Vector3d gaussianOffset(Vector3d target, double offsetX, double offsetY, double offsetZ) {
+  public static Vector3d gaussianOffset(Vector3d target, double offsetX, double offsetY, double offsetZ) {
     ThreadLocalRandom r = ThreadLocalRandom.current();
     double[] v = {r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ};
     return target.add(new Vector3d(v));
   }
 
-  public static @NonNull Collection<@NonNull Ray> cone(@NonNull User user, double range) {
+  public static Collection<Ray> cone(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, ANGLE);
   }
 
-  public static @NonNull Collection<@NonNull Ray> sphere(@NonNull User user, double range) {
+  public static Collection<Ray> sphere(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, 0);
   }
 
-  public static @NonNull Collection<@NonNull Ray> fall(@NonNull User user, double range) {
+  public static Collection<Ray> fall(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, -1);
   }
 
   // Negative angle for fall burst
-  public static @NonNull Collection<@NonNull Ray> createBurst(@NonNull User user, double range, double angleStep, double angle) {
+  public static Collection<Ray> createBurst(User user, double range, double angleStep, double angle) {
     Vector3d center = EntityUtil.entityCenter(user.entity());
     Vector3d userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();

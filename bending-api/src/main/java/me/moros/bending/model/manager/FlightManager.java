@@ -21,7 +21,6 @@ package me.moros.bending.model.manager;
 
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * FlightManager keeps track of flight references.
@@ -29,16 +28,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * If no references remain the user will lose flight.
  */
 public interface FlightManager extends Updatable {
-  boolean hasFlight(@NonNull User user);
+  boolean hasFlight(User user);
 
-  @NonNull Flight get(@NonNull User user);
+  Flight get(User user);
 
-  void remove(@NonNull User user);
+  void remove(User user);
 
   void removeAll();
 
   interface Flight {
-    @NonNull User user();
+    User user();
 
     void flying(boolean value);
 

@@ -20,7 +20,6 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider
@@ -29,28 +28,28 @@ public class Disk implements Collider {
   public final Sphere sphere;
   public final OBB obb;
 
-  public Disk(@NonNull OBB obb, @NonNull Sphere sphere) {
+  public Disk(OBB obb, Sphere sphere) {
     this.obb = obb;
     this.sphere = sphere;
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return sphere.center;
   }
 
   @Override
-  public @NonNull Disk at(@NonNull Vector3d point) {
+  public Disk at(Vector3d point) {
     return new Disk(obb.at(point), sphere.at(point));
   }
 
   @Override
-  public @NonNull Vector3d halfExtents() {
+  public Vector3d halfExtents() {
     return obb.halfExtents();
   }
 
   @Override
-  public boolean contains(@NonNull Vector3d point) {
+  public boolean contains(Vector3d point) {
     return sphere.contains(point) && obb.contains(point);
   }
 }

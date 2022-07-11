@@ -19,11 +19,9 @@
 
 package me.moros.bending.model.ability;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 @FunctionalInterface
 public interface Updatable {
-  @NonNull UpdateResult update();
+  UpdateResult update();
 
   enum UpdateResult {
     CONTINUE,

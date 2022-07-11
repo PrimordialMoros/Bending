@@ -28,19 +28,18 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FastSwim extends AbilityInstance {
 
   private User user;
   private RemovalPolicy removalPolicy;
 
-  public FastSwim(@NonNull AbilityDescription desc) {
+  public FastSwim(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     removalPolicy = Policies.builder().add((u, d) -> !u.entity().isInWaterOrBubbleColumn()).add(Policies.FLYING).build();
     return true;
@@ -51,7 +50,7 @@ public class FastSwim extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       user.entity().removePotionEffect(PotionEffectType.DOLPHINS_GRACE);
       return UpdateResult.CONTINUE;

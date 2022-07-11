@@ -29,8 +29,8 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -66,13 +66,13 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Lightning extends AbilityInstance {
   private static final double POINT_DISTANCE = 0.2;
 
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -87,19 +87,19 @@ public class Lightning extends AbilityInstance {
   private double factor;
   private long startTime;
 
-  public Lightning(@NonNull AbilityDescription desc) {
+  public Lightning(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).userInstances(user, Lightning.class).anyMatch(l -> !l.launched)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).userInstances(user, Lightning.class).anyMatch(l -> !l.launched)) {
       return false;
     }
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder()
-      .add(ExpireRemovalPolicy.of(userConfig.duration))
+      .add(ExpireRemovalPolicy.of(userConfig.overchargeTime))
       .add(SwappedSlotsRemovalPolicy.of(description()))
       .build();
 
@@ -109,11 +109,11 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || exploded) {
       return UpdateResult.REMOVE;
     }
@@ -127,7 +127,7 @@ public class Lightning extends AbilityInstance {
       long deltaTime = System.currentTimeMillis() - startTime;
       if (deltaTime > userConfig.minChargeTime) {
         Vector3d spawnLoc = user.mainHandSide();
-        double offset = deltaTime / (3.0 * userConfig.duration);
+        double offset = deltaTime / (3.0 * userConfig.overchargeTime);
         ParticleUtil.rgb(spawnLoc, "01E1FF").offset(offset).spawn(user.world());
         if (deltaTime > userConfig.maxChargeTime) {
           ParticleUtil.of(Particle.END_ROD, spawnLoc).spawn(user.world());
@@ -178,7 +178,7 @@ public class Lightning extends AbilityInstance {
         counter += segment.length;
         Block block = result.block();
         if (block != null) {
-          explode(result.position(), result.block());
+          explode(result.position(), block);
           return false;
         }
       }
@@ -202,22 +202,20 @@ public class Lightning extends AbilityInstance {
 
   private boolean handleRedirection(Iterable<Entity> entitiesToCheck) {
     for (Entity e : entitiesToCheck) {
-      if (e instanceof LivingEntity livingEntity) {
-        User bendingUser = Registries.BENDERS.user(livingEntity);
-        if (bendingUser != null) {
-          Lightning other = Bending.game().abilityManager(user.world()).userInstances(bendingUser, Lightning.class)
-            .filter(l -> !l.launched).findFirst().orElse(null);
-          if (other != null) {
-            other.startTime = 0;
-            return true;
-          }
+      User bendingUser = Registries.BENDERS.get(e.getUniqueId());
+      if (bendingUser != null) {
+        Lightning other = user.game().abilityManager(user.world()).userInstances(bendingUser, Lightning.class)
+          .filter(l -> !l.launched).findFirst().orElse(null);
+        if (other != null) {
+          other.startTime = 0;
+          return true;
         }
       }
     }
     return false;
   }
 
-  private boolean electrocuteAround(Entity entity) {
+  private boolean electrocuteAround(@Nullable Entity entity) {
     if (entity != null) {
       Collider collider = new Sphere(EntityUtil.entityCenter(entity), userConfig.radius);
       Collection<Entity> entities = new ArrayList<>();
@@ -288,7 +286,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    if (!launched && userConfig.duration > 0 && System.currentTimeMillis() > startTime + userConfig.duration) {
+    if (!launched && userConfig.overchargeTime > 0 && System.currentTimeMillis() > startTime + userConfig.overchargeTime) {
       SoundUtil.LIGHTNING.play(user.world(), user.location());
       user.addCooldown(description(), userConfig.cooldown);
       DamageUtil.damageEntity(user.entity(), user, userConfig.overchargeDamage, description());
@@ -351,7 +349,7 @@ public class Lightning extends AbilityInstance {
     }
 
     @Override
-    public @NonNull ListIterator<LineSegment> iterator() {
+    public ListIterator<LineSegment> iterator() {
       return segments.listIterator();
     }
   }
@@ -379,7 +377,7 @@ public class Lightning extends AbilityInstance {
     }
 
     @Override
-    public @NonNull Iterator<Vector3d> iterator() {
+    public Iterator<Vector3d> iterator() {
       return new Iterator<>() {
         private double f = 0;
 
@@ -400,51 +398,38 @@ public class Lightning extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 6000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 1.5;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 15;
     @Modifiable(Attribute.RADIUS)
-    public double radius;
+    private double radius = 1.5;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 2;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long minChargeTime;
+    private long minChargeTime = 1000;
     @Modifiable(Attribute.CHARGE_TIME)
-    public long maxChargeTime;
+    private long maxChargeTime = 3000;
     @Modifiable(Attribute.STRENGTH)
-    public double chargeFactor;
+    private double chargeFactor = 2;
 
     @Modifiable(Attribute.DAMAGE)
-    public double explosionDamage;
+    private double explosionDamage = 3;
     @Modifiable(Attribute.RADIUS)
-    public double explosionRadius;
+    private double explosionRadius = 2.5;
 
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long overchargeTime = 8000;
     @Modifiable(Attribute.DAMAGE)
-    public double overchargeDamage;
+    private double overchargeDamage = 4;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "lightning");
-      cooldown = abilityNode.node("cooldown").getLong(6000);
-      damage = abilityNode.node("damage").getDouble(1.5);
-      range = abilityNode.node("range").getDouble(15.0);
-      radius = abilityNode.node("radius").getDouble(1.5);
-      speed = abilityNode.node("speed").getDouble(2.0);
-      minChargeTime = abilityNode.node("min-charge-time").getLong(1000);
-      maxChargeTime = abilityNode.node("max-charge-time").getLong(3000);
-      chargeFactor = abilityNode.node("charge-factor").getDouble(2.0);
-
-      explosionRadius = abilityNode.node("explosion-radius").getDouble(2.5);
-      explosionDamage = abilityNode.node("explosion-damage").getDouble(3.0);
-
-      duration = abilityNode.node("overcharge-duration").getLong(8000);
-      overchargeDamage = abilityNode.node("overcharge-damage").getDouble(4.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "lightning");
     }
   }
 }

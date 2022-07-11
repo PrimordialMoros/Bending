@@ -41,7 +41,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingExplosion {
@@ -86,7 +85,7 @@ public final class BendingExplosion {
     }
   }
 
-  public boolean explode(@NonNull Ability source, @NonNull Vector3d center) {
+  public boolean explode(Ability source, Vector3d center) {
     User user = source.user();
     World world = user.world();
     AbilityDescription desc = source.description();
@@ -139,7 +138,7 @@ public final class BendingExplosion {
     }, livingOnly, true);
   }
 
-  public static @NonNull Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -158,69 +157,69 @@ public final class BendingExplosion {
     private Builder() {
     }
 
-    public @NonNull Builder size(double size) {
+    public Builder size(double size) {
       this.size = Math.abs(size);
       return this;
     }
 
-    public @NonNull Builder damage(double damage) {
+    public Builder damage(double damage) {
       this.damage = Math.abs(damage);
       return this;
     }
 
-    public @NonNull Builder selfKnockbackFactor(double selfKnockbackFactor) {
+    public Builder selfKnockbackFactor(double selfKnockbackFactor) {
       this.selfKnockbackFactor = Math.abs(selfKnockbackFactor);
       return this;
     }
 
-    public @NonNull Builder fireTicks(int fireTicks) {
+    public Builder fireTicks(int fireTicks) {
       this.fireTicks = Math.abs(fireTicks);
       return this;
     }
 
-    public @NonNull Builder livingOnly(boolean livingOnly) {
+    public Builder livingOnly(boolean livingOnly) {
       this.livingOnly = livingOnly;
       return this;
     }
 
-    public @NonNull Builder particles(boolean particles) {
+    public Builder particles(boolean particles) {
       this.particles = particles;
       return this;
     }
 
-    public @NonNull Builder breakBlocks(boolean breakBlocks) {
+    public Builder breakBlocks(boolean breakBlocks) {
       this.breakBlocks = breakBlocks;
       return this;
     }
 
-    public @NonNull Builder placeFire(boolean placeFire) {
+    public Builder placeFire(boolean placeFire) {
       this.placeFire = placeFire;
       return this;
     }
 
-    public @NonNull Builder ignoreInsideCollider(@Nullable Collider ignoreInside) {
+    public Builder ignoreInsideCollider(@Nullable Collider ignoreInside) {
       this.ignoreInside = ignoreInside;
       return this;
     }
 
-    public @NonNull Builder sound(@Nullable SoundEffect sound) {
+    public Builder sound(@Nullable SoundEffect sound) {
       this.sound = sound;
       return this;
     }
 
-    public @NonNull Builder sound(float volume, float pitch) {
+    public Builder sound(float volume, float pitch) {
       this.sound = SoundUtil.of(Sound.ENTITY_GENERIC_EXPLODE, volume, pitch);
       return this;
     }
 
-    public @NonNull BendingExplosion build() {
+    public BendingExplosion build() {
       if (size <= 0) {
         size = 2.0;
       }
       return new BendingExplosion(this);
     }
 
-    public boolean buildAndExplode(@NonNull Ability source, @NonNull Vector3d center) {
+    public boolean buildAndExplode(Ability source, Vector3d center) {
       return build().explode(source, center);
     }
   }

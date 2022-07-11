@@ -20,20 +20,19 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface Collider {
   double EPSILON = 0.01;
 
-  default boolean intersects(@NonNull Collider collider) {
+  default boolean intersects(Collider collider) {
     return ColliderUtil.intersects(this, collider);
   }
 
-  @NonNull Vector3d position();
+  Vector3d position();
 
-  @NonNull Collider at(@NonNull Vector3d point);
+  Collider at(Vector3d point);
 
-  @NonNull Vector3d halfExtents();
+  Vector3d halfExtents();
 
-  boolean contains(@NonNull Vector3d point);
+  boolean contains(Vector3d point);
 }

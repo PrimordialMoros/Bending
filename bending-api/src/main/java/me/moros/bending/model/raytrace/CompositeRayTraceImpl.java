@@ -23,7 +23,6 @@ import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class CompositeRayTraceImpl implements CompositeRayTrace {
@@ -33,7 +32,7 @@ public final class CompositeRayTraceImpl implements CompositeRayTrace {
   private final Entity entity;
   private final boolean hit;
 
-  CompositeRayTraceImpl(Vector3d position, Block block, BlockFace face, Entity entity) {
+  CompositeRayTraceImpl(Vector3d position, @Nullable Block block, @Nullable BlockFace face, @Nullable Entity entity) {
     this.position = position;
     this.block = block;
     this.face = face;
@@ -42,7 +41,7 @@ public final class CompositeRayTraceImpl implements CompositeRayTrace {
   }
 
   @Override
-  public @NonNull Vector3d position() {
+  public Vector3d position() {
     return position;
   }
 

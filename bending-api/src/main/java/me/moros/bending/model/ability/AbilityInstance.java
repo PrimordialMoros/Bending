@@ -20,17 +20,16 @@
 package me.moros.bending.model.ability;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class AbilityInstance implements Ability {
   private final AbilityDescription desc;
 
-  protected AbilityInstance(@NonNull AbilityDescription desc) {
+  protected AbilityInstance(AbilityDescription desc) {
     this.desc = desc;
   }
 
   @Override
-  public @NonNull AbilityDescription description() {
+  public AbilityDescription description() {
     return desc;
   }
 }

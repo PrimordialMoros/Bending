@@ -27,15 +27,17 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Group and categorize all earth bendable materials.
+ */
 public final class EarthMaterials {
   public static final MaterialSetTag EARTH_BENDABLE;
   public static final MaterialSetTag SAND_BENDABLE;
   public static final MaterialSetTag METAL_BENDABLE;
   public static final MaterialSetTag LAVA_BENDABLE;
   public static final MaterialSetTag MUD_BENDABLE;
-  public static final MaterialSetTag ALL;
+  private static final MaterialSetTag ALL;
 
   static {
     NamespacedKey key = Metadata.NSK_MATERIAL;
@@ -86,7 +88,7 @@ public final class EarthMaterials {
   private EarthMaterials() {
   }
 
-  public static boolean isEarthbendable(@NonNull User user, @NonNull Block block) {
+  public static boolean isEarthbendable(User user, Block block) {
     if (isMetalBendable(block) && !user.hasPermission("bending.metal")) {
       return false;
     }
@@ -96,7 +98,7 @@ public final class EarthMaterials {
     return ALL.isTagged(block);
   }
 
-  public static boolean isEarthNotLava(@NonNull User user, @NonNull Block block) {
+  public static boolean isEarthNotLava(User user, Block block) {
     if (isLavaBendable(block)) {
       return false;
     }
@@ -106,23 +108,23 @@ public final class EarthMaterials {
     return ALL.isTagged(block);
   }
 
-  public static boolean isEarthOrSand(@NonNull Block block) {
+  public static boolean isEarthOrSand(Block block) {
     return EARTH_BENDABLE.isTagged(block) || SAND_BENDABLE.isTagged(block);
   }
 
-  public static boolean isSandBendable(@NonNull Block block) {
+  public static boolean isSandBendable(Block block) {
     return SAND_BENDABLE.isTagged(block);
   }
 
-  public static boolean isMetalBendable(@NonNull Block block) {
+  public static boolean isMetalBendable(Block block) {
     return METAL_BENDABLE.isTagged(block);
   }
 
-  public static boolean isLavaBendable(@NonNull Block block) {
+  public static boolean isLavaBendable(Block block) {
     return LAVA_BENDABLE.isTagged(block);
   }
 
-  public static boolean isMudBendable(@NonNull Block block) {
+  public static boolean isMudBendable(Block block) {
     return MUD_BENDABLE.isTagged(block);
   }
 }

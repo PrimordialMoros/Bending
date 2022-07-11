@@ -19,16 +19,15 @@
 
 package me.moros.bending.util;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -44,8 +43,8 @@ public enum Tasker {
     executor = Executors.newCachedThreadPool();
   }
 
-  public void init(@NonNull Plugin plugin) {
-    this.plugin = plugin;
+  public void inject(Plugin plugin) {
+    this.plugin = Objects.requireNonNull(plugin);
   }
 
   public void shutdown() {
@@ -59,27 +58,31 @@ public enum Tasker {
     }
   }
 
-  public static @NonNull CompletableFuture<Void> async(@NonNull Runnable runnable) {
+  private boolean canExecute() {
+    return plugin != null && plugin.isEnabled();
+  }
+
+  private @Nullable BukkitTask task(Runnable runnable, long delay) {
+    return canExecute() ? plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delay) : null;
+  }
+
+  private @Nullable BukkitTask repeatingTask(Runnable runnable, long interval) {
+    return canExecute() ? plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, 1, interval) : null;
+  }
+
+  public static CompletableFuture<Void> async(Runnable runnable) {
     return CompletableFuture.runAsync(runnable, INSTANCE.executor);
   }
 
-  public static <T> @NonNull CompletableFuture<@Nullable T> async(@NonNull Supplier<@Nullable T> supplier) {
+  public static <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {
     return CompletableFuture.supplyAsync(supplier, INSTANCE.executor);
   }
 
-  public static @Nullable BukkitTask sync(@NonNull Runnable runnable, long delay) {
-    if (INSTANCE.plugin != null && INSTANCE.plugin.isEnabled()) {
-      return Bukkit.getScheduler().runTaskLater(INSTANCE.plugin, runnable, delay);
-    } else {
-      runnable.run();
-    }
-    return null;
+  public static @Nullable BukkitTask sync(Runnable runnable, long delay) {
+    return INSTANCE.task(runnable, delay);
   }
 
-  public static @Nullable BukkitTask repeat(@NonNull Runnable runnable, long interval) {
-    if (INSTANCE.plugin != null && INSTANCE.plugin.isEnabled()) {
-      return Bukkit.getScheduler().runTaskTimer(INSTANCE.plugin, runnable, 1, interval);
-    }
-    return null;
+  public static @Nullable BukkitTask repeat(Runnable runnable, long interval) {
+    return INSTANCE.repeatingTask(runnable, interval);
   }
 }

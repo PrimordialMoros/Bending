@@ -34,7 +34,6 @@ import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EarthCling extends AbilityInstance {
   private static final BlockData STONE = Material.STONE.createBlockData();
@@ -42,12 +41,12 @@ public class EarthCling extends AbilityInstance {
   private User user;
   private RemovalPolicy removalPolicy;
 
-  public EarthCling(@NonNull AbilityDescription desc) {
+  public EarthCling(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
@@ -59,7 +58,7 @@ public class EarthCling extends AbilityInstance {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || user.isOnGround()) {
       return UpdateResult.CONTINUE;
     }

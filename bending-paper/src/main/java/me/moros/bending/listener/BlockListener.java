@@ -21,17 +21,16 @@ package me.moros.bending.listener;
 
 import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempFallingBlock;
+import me.moros.bending.game.temporal.TempEntity;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.manager.Game;
-import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.block.Block;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -48,12 +47,11 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BlockListener implements Listener {
   private final Game game;
 
-  public BlockListener(@NonNull Game game) {
+  public BlockListener(Game game) {
     this.game = game;
   }
 
@@ -100,10 +98,10 @@ public class BlockListener implements Listener {
     if (TempBlock.MANAGER.isTemp(event.getBlock())) {
       event.setDropItems(false);
     } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
-      BendingPlayer player = Registries.BENDERS.user(event.getPlayer());
-      if (!player.entity().hasMetadata(Metadata.DISABLED)) {
-        AbilityDescription desc = player.selectedAbility();
-        if (desc != null && desc.sourcePlant() && !player.onCooldown(desc)) {
+      User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
+      if (user != null && !user.entity().hasMetadata(Metadata.DISABLED)) {
+        AbilityDescription desc = user.selectedAbility();
+        if (desc != null && desc.sourcePlant() && !user.onCooldown(desc)) {
           event.setCancelled(true);
           return;
         }
@@ -136,10 +134,10 @@ public class BlockListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockChange(EntityChangeBlockEvent event) {
-    if (event.getEntityType() == EntityType.FALLING_BLOCK) {
-      TempFallingBlock.MANAGER.get((FallingBlock) event.getEntity()).ifPresent(tfb -> {
+    if (event.getEntity() instanceof FallingBlock fallingBlock) {
+      TempEntity.MANAGER.get(fallingBlock.getEntityId()).ifPresent(temp -> {
         event.setCancelled(true);
-        tfb.revert();
+        temp.revert();
       });
     } else {
       if (ActionLimiter.isLimited(event.getEntity(), ActionType.INTERACT_BLOCK)) {

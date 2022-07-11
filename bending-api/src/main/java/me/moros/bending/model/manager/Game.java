@@ -21,7 +21,6 @@ package me.moros.bending.model.manager;
 
 import me.moros.bending.model.storage.BendingStorage;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Holds all the needed bending sub-systems.
@@ -31,13 +30,13 @@ public interface Game {
 
   void cleanup(boolean shutdown);
 
-  @NonNull BendingStorage storage();
+  BendingStorage storage();
 
-  @NonNull FlightManager flightManager();
+  FlightManager flightManager();
 
-  @NonNull AbilityManager abilityManager(@NonNull World world);
+  AbilityManager abilityManager(World world);
 
-  @NonNull WorldManager worldManager();
+  WorldManager worldManager();
 
-  @NonNull ActivationController activationController();
+  ActivationController activationController();
 }

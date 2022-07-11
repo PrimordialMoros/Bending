@@ -31,7 +31,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.command.ConsoleCommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static me.moros.bending.util.ColorPalette.*;
 import static net.kyori.adventure.text.Component.*;
@@ -75,7 +74,7 @@ public interface Message {
   Args0 TOGGLE_ON = () -> translatable("bending.command.toggle.on", SUCCESS);
   Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", FAIL);
 
-  Args0 CONFIG_RELOAD = () -> translatable("bending.command.config-reload", SUCCESS);
+  Args0 RELOAD = () -> translatable("bending.command.reload", SUCCESS);
 
   Args1<Component> ELEMENT_CHOOSE_NO_PERMISSION = element -> translatable("bending.command.element.choose-no-permission", FAIL)
     .args(element);
@@ -160,15 +159,15 @@ public interface Message {
   Args0 ELEMENTS_GUI_ADD = () -> translatable("bending.gui.elements.add", SUCCESS);
   Args0 ELEMENTS_GUI_REMOVE = () -> translatable("bending.gui.elements.remove", FAIL);
 
-  static @NonNull Component brand(@NonNull ComponentLike message) {
+  static Component brand(ComponentLike message) {
     return text().append(PREFIX).append(message).build();
   }
 
   @FunctionalInterface
   interface Args0 {
-    @NonNull Component build();
+    Component build();
 
-    default void send(@NonNull Audience audience) {
+    default void send(Audience audience) {
       if (audience instanceof ConsoleCommandSender) {
         audience.sendMessage(GlobalTranslator.render(build(), DEFAULT_LOCALE));
         return;
@@ -179,9 +178,9 @@ public interface Message {
 
   @FunctionalInterface
   interface Args1<A0> {
-    @NonNull Component build(@NonNull A0 arg0);
+    Component build(A0 arg0);
 
-    default void send(@NonNull Audience audience, @NonNull A0 arg0) {
+    default void send(Audience audience, A0 arg0) {
       if (audience instanceof ConsoleCommandSender) {
         audience.sendMessage(GlobalTranslator.render(build(arg0), DEFAULT_LOCALE));
         return;
@@ -192,9 +191,9 @@ public interface Message {
 
   @FunctionalInterface
   interface Args2<A0, A1> {
-    @NonNull Component build(@NonNull A0 arg0, @NonNull A1 arg1);
+    Component build(A0 arg0, A1 arg1);
 
-    default void send(@NonNull Audience audience, @NonNull A0 arg0, @NonNull A1 arg1) {
+    default void send(Audience audience, A0 arg0, A1 arg1) {
       if (audience instanceof ConsoleCommandSender) {
         audience.sendMessage(GlobalTranslator.render(build(arg0, arg1), DEFAULT_LOCALE));
         return;

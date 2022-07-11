@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.air.AirBlast;
 import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.ability.air.AirSpout;
@@ -59,7 +58,8 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.manager.ActivationController;
-import me.moros.bending.model.manager.WorldManager;
+import me.moros.bending.model.manager.Game;
+import me.moros.bending.model.manager.SequenceManager;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -71,34 +71,33 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActivationControllerImpl implements ActivationController {
   private final ControllerCache cache;
-  private final SequenceManagerImpl sequenceManager;
-  private final WorldManager worldManager;
+  private final Game game;
+  private final SequenceManager sequenceManager;
 
-  ActivationControllerImpl(SequenceManagerImpl sequenceManager, WorldManager worldManager) {
+  ActivationControllerImpl(Game game) {
     this.cache = new ControllerCache();
-    this.sequenceManager = sequenceManager;
-    this.worldManager = worldManager;
+    this.game = game;
+    this.sequenceManager = new SequenceManagerImpl(this);
   }
 
   @Override
-  public @Nullable Ability activateAbility(@NonNull User user, @NonNull Activation method) {
+  public @Nullable Ability activateAbility(User user, Activation method) {
     AbilityDescription desc = user.selectedAbility();
     return desc == null ? null : activateAbility(user, method, desc);
   }
 
   @Override
-  public @Nullable Ability activateAbility(@NonNull User user, @NonNull Activation method, @NonNull AbilityDescription desc) {
+  public @Nullable Ability activateAbility(User user, Activation method, AbilityDescription desc) {
     if (!desc.isActivatedBy(method) || !user.canBend(desc) || !user.canBuild(user.locBlock())) {
       return null;
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
-      worldManager.instance(user.world()).addAbility(user, ability);
+      game.abilityManager(user.world()).addAbility(user, ability);
       EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
       return ability;
     }
@@ -106,29 +105,28 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void onUserDeconstruct(@NonNull User user) {
+  public void onUserDeconstruct(User user) {
     ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
-    worldManager.instance(user.world()).destroyUserInstances(user);
+    game.abilityManager(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
-      Bending.game().storage().savePlayerAsync(bendingPlayer);
+      game.storage().savePlayerAsync(bendingPlayer);
       bendingPlayer.board().disableScoreboard();
     }
-    Bending.game().flightManager().remove(user);
-    Registries.ATTRIBUTES.invalidate(user);
-    Registries.BENDERS.invalidate(user);
+    game.flightManager().remove(user);
+    Registries.BENDERS.invalidateKey(user.uuid());
     ProtectionCache.INSTANCE.invalidate(user);
   }
 
   @Override
-  public void onUserSwing(@NonNull User user) {
+  public void onUserSwing(User user) {
     if (cache.ignoreSwing.contains(user.uuid())) {
       return;
     }
-    if (worldManager.instance(user.world()).destroyInstanceType(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
+    if (game.abilityManager(user.world()).destroyInstanceType(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
       return;
     }
-    ignoreNextSwing(user);
+    ignoreNextSwing(user.uuid());
 
     PhaseChange.freeze(user);
     WaterWave.freeze(user);
@@ -142,12 +140,12 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public boolean onUserGlide(@NonNull User user) {
-    return worldManager.instance(user.world()).hasAbility(user, FireJet.class);
+  public boolean onUserGlide(User user) {
+    return game.abilityManager(user.world()).hasAbility(user, FireJet.class);
   }
 
   @Override
-  public void onUserSneak(@NonNull User user, boolean sneaking) {
+  public void onUserSneak(User user, boolean sneaking) {
     if (sneaking) {
       PhaseChange.melt(user);
       HeatControl.onSneak(user);
@@ -159,7 +157,7 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void onUserMove(@NonNull User user, @NonNull Vector3d velocity) {
+  public void onUserMove(User user, Vector3d velocity) {
     if (user.hasElement(Element.AIR)) {
       AirSpout spout = cache.getAirSpout(user);
       if (spout != null) {
@@ -175,13 +173,13 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void onUserDamage(@NonNull User user) {
-    worldManager.instance(user.world()).destroyInstanceType(user, List.of(AirScooter.class, EarthSurf.class));
+  public void onUserDamage(User user) {
+    game.abilityManager(user.world()).destroyInstanceType(user, List.of(AirScooter.class, EarthSurf.class));
   }
 
   @Override
-  public double onEntityDamage(@NonNull LivingEntity entity, @NonNull DamageCause cause, double damage) {
-    User user = Registries.BENDERS.user(entity);
+  public double onEntityDamage(LivingEntity entity, DamageCause cause, double damage) {
+    User user = Registries.BENDERS.get(entity.getUniqueId());
     if (user != null) {
       if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK) {
         if (!onBurn(user)) {
@@ -205,8 +203,8 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public boolean onBurn(@NonNull User user) {
-    if (worldManager.instance(user.world()).hasAbility(user, FireJet.class)) {
+  public boolean onBurn(User user) {
+    if (game.abilityManager(user.world()).hasAbility(user, FireJet.class)) {
       return false;
     }
     if (EarthArmor.hasArmor(user)) {
@@ -216,7 +214,7 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public boolean onFall(@NonNull User user) {
+  public boolean onFall(User user) {
     EarthPillars.onFall(user);
     activateAbility(user, Activation.FALL);
     if (user.hasElement(Element.AIR) && GracefulDescent.isGraceful(user)) {
@@ -228,7 +226,7 @@ public final class ActivationControllerImpl implements ActivationController {
     if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
       return false;
     }
-    return !Bending.game().flightManager().hasFlight(user);
+    return !game.flightManager().hasFlight(user);
   }
 
   private boolean noSuffocate(LivingEntity e) {
@@ -242,26 +240,26 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void onUserInteract(@NonNull User user, @NonNull Activation method) {
+  public void onUserInteract(User user, Activation method) {
     onUserInteract(user, method, null, null);
   }
 
   @Override
-  public void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Entity entity) {
+  public void onUserInteract(User user, Activation method, @Nullable Entity entity) {
     onUserInteract(user, method, entity, null);
   }
 
   @Override
-  public void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Block block) {
+  public void onUserInteract(User user, Activation method, @Nullable Block block) {
     onUserInteract(user, method, null, block);
   }
 
   @Override
-  public void onUserInteract(@NonNull User user, @NonNull Activation method, @Nullable Entity entity, @Nullable Block block) {
+  public void onUserInteract(User user, Activation method, @Nullable Entity entity, @Nullable Block block) {
     if (!method.isInteract()) {
       return;
     }
-    ignoreNextSwing(user);
+    ignoreNextSwing(user.uuid());
     if (block != null) {
       FerroControl.act(user, block);
       EarthSmash.tryDestroy(user, block);
@@ -277,8 +275,8 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void ignoreNextSwing(@NonNull User user) {
-    cache.ignoreSwing.add(user.uuid());
+  public void ignoreNextSwing(UUID uuid) {
+    cache.ignoreSwing.add(uuid);
   }
 
   // Optimize player move events by caching instances every tick
@@ -293,12 +291,12 @@ public final class ActivationControllerImpl implements ActivationController {
       ignoreSwing = new HashSet<>();
     }
 
-    private @Nullable AirSpout getAirSpout(@NonNull User user) {
-      return airSpoutCache.computeIfAbsent(user.uuid(), u -> worldManager.instance(user.world()).firstInstance(user, AirSpout.class).orElse(null));
+    private @Nullable AirSpout getAirSpout(User user) {
+      return airSpoutCache.computeIfAbsent(user.uuid(), u -> game.abilityManager(user.world()).firstInstance(user, AirSpout.class).orElse(null));
     }
 
-    private @Nullable WaterSpout getWaterSpout(@NonNull User user) {
-      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> worldManager.instance(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
+    private @Nullable WaterSpout getWaterSpout(User user) {
+      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> game.abilityManager(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
     }
 
     private void clear() {
@@ -309,7 +307,7 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public boolean hasSpout(@NonNull UUID uuid) {
+  public boolean hasSpout(UUID uuid) {
     return cache.airSpoutCache.containsKey(uuid) || cache.waterSpoutCache.containsKey(uuid);
   }
 

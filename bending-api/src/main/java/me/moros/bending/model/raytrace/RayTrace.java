@@ -20,10 +20,9 @@
 package me.moros.bending.model.raytrace;
 
 import me.moros.bending.model.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface RayTrace {
-  @NonNull Vector3d position();
+  Vector3d position();
 
   boolean hit();
 }

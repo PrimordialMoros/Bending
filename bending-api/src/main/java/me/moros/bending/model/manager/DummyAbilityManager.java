@@ -24,24 +24,23 @@ import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class DummyAbilityManager implements AbilityManager {
+public final class DummyAbilityManager implements AbilityManager {
   public static final AbilityManager DUMMY = new DummyAbilityManager();
 
   private DummyAbilityManager() {
   }
 
   @Override
-  public void addAbility(@NonNull User user, @NonNull Ability instance) {
+  public void addAbility(User user, Ability instance) {
   }
 
   @Override
-  public void changeOwner(@NonNull Ability ability, @NonNull User user) {
+  public void changeOwner(Ability ability, User user) {
   }
 
   @Override
-  public void createPassives(@NonNull User user) {
+  public void createPassives(User user) {
   }
 
   @Override
@@ -50,26 +49,26 @@ public class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public void destroyInstance(@NonNull Ability ability) {
+  public void destroyInstance(Ability ability) {
   }
 
   @Override
-  public boolean destroyInstanceType(@NonNull User user, @NonNull Collection<@NonNull Class<? extends Ability>> types) {
+  public boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types) {
     return true;
   }
 
   @Override
-  public @NonNull Stream<Ability> userInstances(@NonNull User user) {
+  public Stream<Ability> userInstances(User user) {
     return Stream.empty();
   }
 
   @Override
-  public @NonNull Stream<Ability> instances() {
+  public Stream<Ability> instances() {
     return Stream.empty();
   }
 
   @Override
-  public void destroyUserInstances(@NonNull User user) {
+  public void destroyUserInstances(User user) {
   }
 
   @Override
@@ -77,7 +76,7 @@ public class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     return UpdateResult.REMOVE;
   }
 }

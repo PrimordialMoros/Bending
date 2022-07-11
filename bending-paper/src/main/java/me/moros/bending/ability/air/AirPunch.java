@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -48,11 +48,10 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirPunch extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -60,12 +59,12 @@ public class AirPunch extends AbilityInstance {
 
   private AirStream stream;
 
-  public AirPunch(@NonNull AbilityDescription desc) {
+  public AirPunch(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
 
@@ -86,11 +85,11 @@ public class AirPunch extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -98,7 +97,7 @@ public class AirPunch extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(stream.collider());
   }
 
@@ -131,7 +130,7 @@ public class AirPunch extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
       Vector3d velocity = EntityUtil.entityCenter(entity).subtract(ray.origin).normalize().multiply(factor);
       EntityUtil.applyVelocity(AirPunch.this, entity, velocity);
@@ -139,7 +138,7 @@ public class AirPunch extends AbilityInstance {
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       if (WorldUtil.tryExtinguishFire(user, block)) {
         return false;
       }
@@ -148,24 +147,20 @@ public class AirPunch extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2500;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 3;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 18;
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.8;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airpunch");
-
-      cooldown = abilityNode.node("cooldown").getLong(2500);
-      damage = abilityNode.node("damage").getDouble(3.0);
-      range = abilityNode.node("range").getDouble(18.0);
-      speed = abilityNode.node("speed").getDouble(0.8);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airpunch");
     }
   }
 }

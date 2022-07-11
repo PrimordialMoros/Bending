@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.manager.FlightManager;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class FlightManagerImpl implements FlightManager {
   private final Map<UUID, FlightImpl> instances;
@@ -36,19 +34,19 @@ public final class FlightManagerImpl implements FlightManager {
   }
 
   @Override
-  public boolean hasFlight(@NonNull User user) {
+  public boolean hasFlight(User user) {
     return instances.containsKey(user.uuid());
   }
 
   @Override
-  public @NonNull Flight get(@NonNull User user) {
-    FlightImpl flight = instances.computeIfAbsent(user.uuid(), u -> new FlightImpl(user));
+  public Flight get(User user) {
+    FlightImpl flight = instances.computeIfAbsent(user.uuid(), u -> new FlightImpl(this, user));
     flight.references++;
     return flight;
   }
 
   @Override
-  public void remove(@NonNull User user) {
+  public void remove(User user) {
     FlightImpl instance = instances.remove(user.uuid());
     if (instance != null) {
       instance.revert();
@@ -61,12 +59,13 @@ public final class FlightManagerImpl implements FlightManager {
     instances.clear();
   }
 
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     instances.values().forEach(FlightImpl::update);
     return UpdateResult.CONTINUE;
   }
 
   public static final class FlightImpl implements Flight {
+    private final FlightManager manager;
     private final User user;
 
     private final boolean couldFly;
@@ -76,14 +75,15 @@ public final class FlightManagerImpl implements FlightManager {
     private boolean changedFlying = false;
     private int references = 0;
 
-    private FlightImpl(User user) {
+    private FlightImpl(FlightManager manager, User user) {
+      this.manager = manager;
       this.user = user;
       couldFly = user.allowFlight();
       wasFlying = user.flying();
     }
 
     @Override
-    public @NonNull User user() {
+    public User user() {
       return user;
     }
 
@@ -98,7 +98,7 @@ public final class FlightManagerImpl implements FlightManager {
     @Override
     public void release() {
       if (--references < 1) {
-        Bending.game().flightManager().remove(user);
+        manager.remove(user);
       }
     }
 

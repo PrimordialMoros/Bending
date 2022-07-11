@@ -20,11 +20,13 @@
 package me.moros.bending.model.user;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.profile.BenderData;
@@ -34,7 +36,6 @@ import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class BendingPlayer extends BendingUser implements PresetUser {
@@ -43,8 +44,8 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   private Board board = BoardImpl.DUMMY;
 
-  private BendingPlayer(Player player, PlayerProfile profile) {
-    super(player, profile.benderData());
+  private BendingPlayer(Game game, Player player, PlayerProfile profile) {
+    super(game, player, profile.benderData());
     this.internalId = profile.id();
     presets = new HashSet<>(profile.benderData().presets());
     if (profile.board()) {
@@ -57,7 +58,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public @NonNull Player entity() {
+  public Player entity() {
     return (Player) super.entity();
   }
 
@@ -76,7 +77,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public boolean hasPermission(@NonNull String permission) {
+  public boolean hasPermission(String permission) {
     return entity().hasPermission(permission);
   }
 
@@ -128,12 +129,12 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public @NonNull PlayerInventory inventory() {
+  public PlayerInventory inventory() {
     return entity().getInventory();
   }
 
   @Override
-  public @NonNull Board board() {
+  public Board board() {
     if (world().hasMetadata(Metadata.DISABLED) || entity().hasMetadata(Metadata.HIDDEN_BOARD)) {
       board.disableScoreboard();
       board = BoardImpl.DUMMY;
@@ -145,17 +146,17 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   // Presets
   @Override
-  public @NonNull Set<@NonNull Preset> presets() {
+  public Set<Preset> presets() {
     return Set.copyOf(presets);
   }
 
   @Override
-  public @Nullable Preset presetByName(@NonNull String name) {
+  public @Nullable Preset presetByName(String name) {
     return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny().orElse(null);
   }
 
   @Override
-  public @NonNull PresetCreateResult addPreset(@NonNull Preset preset) {
+  public PresetCreateResult addPreset(Preset preset) {
     if (preset.id() > 0 || presets.contains(preset)) {
       return PresetCreateResult.EXISTS;
     }
@@ -167,24 +168,24 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public boolean removePreset(@NonNull Preset preset) {
+  public boolean removePreset(Preset preset) {
     if (preset.id() <= 0 || !presets.contains(preset)) {
       return false;
     }
     return presets.remove(preset);
   }
 
-  public @NonNull PlayerProfile toProfile() {
+  public PlayerProfile toProfile() {
     BenderData data = new BenderData(createPresetFromSlots("").abilities(), elements(), presets);
     boolean board = !entity().hasMetadata(Metadata.HIDDEN_BOARD);
     return new PlayerProfile(internalId, board, data);
   }
 
-  public static Optional<User> createUser(@NonNull Player player, @NonNull PlayerProfile profile) {
-    if (Registries.BENDERS.contains(player.getUniqueId())) {
+  public static Optional<User> createUser(Game game, Player player, PlayerProfile profile) {
+    Objects.requireNonNull(game);
+    if (Registries.BENDERS.containsKey(player.getUniqueId())) {
       return Optional.empty();
     }
-    BendingPlayer bendingPlayer = new BendingPlayer(player, profile);
-    return Optional.of(bendingPlayer);
+    return Optional.of(new BendingPlayer(game, player, profile));
   }
 }

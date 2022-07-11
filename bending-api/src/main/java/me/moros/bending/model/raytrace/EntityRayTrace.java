@@ -23,18 +23,17 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.EntityUtil;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EntityRayTrace extends RayTrace {
   @Nullable Entity entity();
 
-  default @NonNull Vector3d entityCenterOrPosition() {
+  default Vector3d entityCenterOrPosition() {
     Entity entity = entity();
     return entity == null ? position() : EntityUtil.entityCenter(entity);
   }
 
-  default @NonNull Vector3d entityEyeLevelOrPosition() {
+  default Vector3d entityEyeLevelOrPosition() {
     if (entity() instanceof LivingEntity livingEntity) {
       return new Vector3d(livingEntity.getEyeLocation());
     }

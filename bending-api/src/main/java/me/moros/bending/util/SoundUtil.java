@@ -58,11 +58,11 @@ public final class SoundUtil {
   private SoundUtil() {
   }
 
-  public static @NonNull SoundEffect of(@NonNull Type sound) {
+  public static SoundEffect of(Type sound) {
     return of(sound, 1, 1);
   }
 
-  public static @NonNull SoundEffect of(@NonNull Type sound, float volume, float pitch) {
+  public static SoundEffect of(Type sound, float volume, float pitch) {
     return new SoundEffect(Sound.sound(sound, Source.MASTER, volume, pitch));
   }
 
@@ -77,15 +77,15 @@ public final class SoundUtil {
       this.sound = sound;
     }
 
-    public void play(@NonNull Block block) {
+    public void play(Block block) {
       block.getWorld().playSound(sound, block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5);
     }
 
-    public void play(@NonNull World world, @NonNull Vector3d center) {
+    public void play(World world, Vector3d center) {
       world.playSound(sound, center.x(), center.y(), center.z());
     }
 
-    public @NonNull SoundEffect with(float volume, float pitch) {
+    public SoundEffect with(float volume, float pitch) {
       if (volume == sound.volume() && pitch == sound.pitch()) {
         return this;
       }

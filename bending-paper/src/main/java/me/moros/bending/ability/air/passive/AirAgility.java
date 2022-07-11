@@ -19,7 +19,9 @@
 
 package me.moros.bending.ability.air.passive;
 
-import me.moros.bending.Bending;
+import java.util.List;
+
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -32,22 +34,21 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirAgility extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  public AirAgility(@NonNull AbilityDescription desc) {
+  public AirAgility(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().add(Policies.FLYING).build();
@@ -56,11 +57,11 @@ public class AirAgility extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
       user.entity().removePotionEffect(PotionEffectType.JUMP);
       user.entity().removePotionEffect(PotionEffectType.SPEED);
@@ -89,18 +90,16 @@ public class AirAgility extends AbilityInstance {
     return user;
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.STRENGTH)
-    public int speedAmplifier;
+    private int speedAmplifier = 2;
     @Modifiable(Attribute.STRENGTH)
-    public int jumpAmplifier;
+    private int jumpAmplifier = 3;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "passives", "airagility");
-
-      speedAmplifier = abilityNode.node("speed-amplifier").getInt(2);
-      jumpAmplifier = abilityNode.node("jump-amplifier").getInt(3);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "passives", "airagility");
     }
   }
 }

@@ -28,32 +28,37 @@ import java.util.UUID;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import me.moros.bending.Bending;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
 import me.moros.bending.model.ability.description.SequenceStep;
+import me.moros.bending.model.manager.ActivationController;
 import me.moros.bending.model.manager.SequenceManager;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class SequenceManagerImpl implements SequenceManager {
+  private final ActivationController controller;
   private final LoadingCache<UUID, Deque<SequenceStep>> cache;
 
-  SequenceManagerImpl() {
+  SequenceManagerImpl(ActivationController controller) {
+    this.controller = controller;
     cache = Caffeine.newBuilder()
       .expireAfterAccess(Duration.ofSeconds(10))
       .build(u -> new ArrayDeque<>(16));
+    for (AbilityDescription desc : Registries.ABILITIES) {
+      if (desc instanceof Sequence sequence && isValid(sequence)) {
+        Registries.SEQUENCES.register(sequence);
+      }
+    }
+  }
+
+  private boolean isValid(Sequence sequence) {
+    return sequence.steps().stream().map(SequenceStep::ability).allMatch(Registries.ABILITIES::containsValue);
   }
 
   @Override
-  public void clear() {
-    cache.invalidateAll();
-  }
-
-  @Override
-  public void registerStep(@NonNull User user, @NonNull Activation action) {
+  public void registerStep(User user, Activation action) {
     AbilityDescription desc = user.selectedAbility();
     if (desc == null) {
       return;
@@ -66,7 +71,7 @@ public final class SequenceManagerImpl implements SequenceManager {
     List<SequenceStep> bufferSteps = new ArrayList<>(buffer);
     for (Sequence sequence : Registries.SEQUENCES) {
       if (sequence.matches(bufferSteps)) {
-        if (Bending.game().activationController().activateAbility(user, Activation.SEQUENCE, sequence) != null) {
+        if (controller.activateAbility(user, Activation.SEQUENCE, sequence) != null) {
           buffer.clear(); // Consume all actions in the buffer
           return;
         }

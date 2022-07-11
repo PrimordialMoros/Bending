@@ -34,7 +34,6 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class AbstractSpout implements Updatable, SimpleAbility {
@@ -49,7 +48,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   protected double distance;
 
-  protected AbstractSpout(@NonNull Flight flight, double height) {
+  protected AbstractSpout(Flight flight, double height) {
     this.flight = flight;
     this.user = flight.user();
     this.height = height;
@@ -57,7 +56,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     user.entity().setFallDistance(0);
     user.sprinting(false);
     double maxHeight = height + 2; // Buffer for safety
@@ -79,35 +78,35 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
   }
 
   @Override
-  public boolean onEntityHit(@NonNull Entity entity) {
+  public boolean onEntityHit(Entity entity) {
     return true;
   }
 
   @Override
-  public boolean onBlockHit(@NonNull Block block) {
+  public boolean onBlockHit(Block block) {
     return true;
   }
 
   @Override
-  public @NonNull Collider collider() {
+  public Collider collider() {
     return collider;
   }
 
-  public @NonNull Flight flight() {
+  public Flight flight() {
     return flight;
   }
 
-  public static void limitVelocity(@NonNull Entity entity, @NonNull Vector3d velocity, double speed) {
+  public static void limitVelocity(Entity entity, Vector3d velocity, double speed) {
     if (velocity.lengthSq() > speed * speed) {
       entity.setVelocity(velocity.normalize().multiply(speed).clampVelocity());
     }
   }
 
-  public static @Nullable Block blockCast(@NonNull Block origin, double distance) {
+  public static @Nullable Block blockCast(Block origin, double distance) {
     return blockCast(origin, distance, b -> false);
   }
 
-  public static @Nullable Block blockCast(@NonNull Block origin, double distance, @NonNull Predicate<Block> ignore) {
+  public static @Nullable Block blockCast(Block origin, double distance, Predicate<Block> ignore) {
     for (int i = 0; i < distance; i++) {
       Block check = origin.getRelative(BlockFace.DOWN, i);
       boolean isLiquid = check.isLiquid() || MaterialUtil.isWaterPlant(check);

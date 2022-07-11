@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
@@ -55,11 +55,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireShield extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -71,13 +70,13 @@ public class FireShield extends AbilityInstance {
 
   private boolean sphere = false;
 
-  public FireShield(@NonNull AbilityDescription desc) {
+  public FireShield(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, FireShield.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, FireShield.class)) {
       return false;
     }
 
@@ -114,11 +113,11 @@ public class FireShield extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -162,12 +161,12 @@ public class FireShield extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(shield.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     if (!sphere) {
       List<String> ignore = List.of("EarthBlast", "WaterManipulation");
       String collidedName = collision.collidedAbility().description().name();
@@ -292,8 +291,8 @@ public class FireShield extends AbilityInstance {
     }
   }
 
-  public static double shieldFromExplosion(@NonNull User user, @NonNull Entity source, double damage) {
-    FireShield shield = Bending.game().abilityManager(user.world()).userInstances(user, FireShield.class)
+  public static double shieldFromExplosion(User user, Entity source, double damage) {
+    FireShield shield = user.game().abilityManager(user.world()).userInstances(user, FireShield.class)
       .filter(FireShield::isSphere).findAny().orElse(null);
     if (shield == null) {
       return damage;
@@ -307,38 +306,29 @@ public class FireShield extends AbilityInstance {
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 0.5;
     @Modifiable(Attribute.COOLDOWN)
-    public long diskCooldown;
+    private long diskCooldown = 1000;
     @Modifiable(Attribute.DURATION)
-    public long diskDuration;
+    private long diskDuration = 1000;
     @Modifiable(Attribute.RADIUS)
-    public double diskRadius;
+    private double diskRadius = 2;
     @Modifiable(Attribute.RANGE)
-    public double diskRange;
+    private double diskRange = 1.5;
 
     @Modifiable(Attribute.COOLDOWN)
-    public long shieldCooldown;
+    private long shieldCooldown = 2000;
     @Modifiable(Attribute.DURATION)
-    public long shieldDuration;
+    private long shieldDuration = 10000;
     @Modifiable(Attribute.RADIUS)
-    public double shieldRadius;
+    private double shieldRadius = 3;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "fireshield");
-      damage = abilityNode.node("damage").getDouble(0.5);
-
-      diskCooldown = abilityNode.node("disk", "cooldown").getLong(1000);
-      diskDuration = abilityNode.node("disk", "duration").getLong(1000);
-      diskRadius = abilityNode.node("disk", "radius").getDouble(2.0);
-      diskRange = abilityNode.node("disk", "range").getDouble(1.5);
-
-      shieldCooldown = abilityNode.node("shield", "cooldown").getLong(2000);
-      shieldDuration = abilityNode.node("shield", "duration").getLong(10000);
-      shieldRadius = abilityNode.node("shield", "radius").getDouble(3.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "fireshield");
     }
   }
 }

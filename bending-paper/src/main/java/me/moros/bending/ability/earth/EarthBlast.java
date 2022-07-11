@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.SelectedSource;
 import me.moros.bending.ability.common.basic.BlockShot;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.AbilityInstance;
@@ -53,11 +53,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthBlast extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -66,16 +65,16 @@ public class EarthBlast extends AbilityInstance {
   private StateChain states;
   private Blast blast;
 
-  public EarthBlast(@NonNull AbilityDescription desc) {
+  public EarthBlast(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.SNEAK && tryDestroy(user)) {
       return false;
     } else if (method == Activation.ATTACK) {
-      Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
+      Collection<EarthBlast> eblasts = user.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
         .toList();
       for (EarthBlast eblast : eblasts) {
         if (eblast.blast == null) {
@@ -97,7 +96,7 @@ public class EarthBlast extends AbilityInstance {
     }
     BlockData fakeData = MaterialUtil.focusedType(source.getBlockData());
 
-    Collection<EarthBlast> eblasts = Bending.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
+    Collection<EarthBlast> eblasts = user.game().abilityManager(user.world()).userInstances(user, EarthBlast.class)
       .filter(eb -> eb.blast == null).toList();
     for (EarthBlast eblast : eblasts) {
       State state = eblast.states.current();
@@ -116,11 +115,11 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -153,7 +152,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   private static boolean tryDestroy(User user) {
-    Collection<EarthBlast> blasts = Bending.game().abilityManager(user.world()).instances(EarthBlast.class)
+    Collection<EarthBlast> blasts = user.game().abilityManager(user.world()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
     Ray ray = user.ray(config.shatterRange + 2);
     for (EarthBlast eb : blasts) {
@@ -168,7 +167,7 @@ public class EarthBlast extends AbilityInstance {
         Block block = center.toBlock(user.world());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (block.equals(rayTraced)) {
-          Bending.game().abilityManager(user.world()).destroyInstance(eb);
+          user.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }
       }
@@ -193,7 +192,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return blast == null ? List.of() : List.of(blast.collider());
   }
 
@@ -212,40 +211,34 @@ public class EarthBlast extends AbilityInstance {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, damage, description());
       EntityUtil.applyVelocity(EarthBlast.this, entity, direction.multiply(0.6));
       return true;
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       FragileStructure.tryDamageStructure(List.of(block), 4);
       return true;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 1000;
     @Modifiable(Attribute.RANGE)
-    public double range;
+    private double range = 24;
     @Modifiable(Attribute.SELECTION)
-    public double selectRange;
+    private double selectRange = 10;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
-
-    public double shatterRange;
+    private double damage = 2.25;
+    private double shatterRange = 14;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "earth", "earthblast");
-
-      cooldown = abilityNode.node("cooldown").getLong(1000);
-      range = abilityNode.node("range").getDouble(24.0);
-      selectRange = abilityNode.node("select-range").getDouble(10.0);
-      damage = abilityNode.node("damage").getDouble(2.25);
-      shatterRange = abilityNode.node("max-shatter-range").getDouble(14.0);
+    public Iterable<String> path() {
+      return List.of("abilities", "earth", "earthblast");
     }
   }
 }

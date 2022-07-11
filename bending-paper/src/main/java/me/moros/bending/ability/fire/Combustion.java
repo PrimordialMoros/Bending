@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.common.FragileStructure;
 import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
@@ -37,7 +37,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
@@ -53,11 +52,10 @@ import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Combustion extends AbilityInstance implements Explosive {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -68,14 +66,14 @@ public class Combustion extends AbilityInstance implements Explosive {
 
   private boolean exploded;
 
-  public Combustion(@NonNull AbilityDescription desc) {
+  public Combustion(AbilityDescription desc) {
     super(desc);
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
+  public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Bending.game().abilityManager(user.world()).userInstances(user, Combustion.class).forEach(Combustion::explode);
+      user.game().abilityManager(user.world()).userInstances(user, Combustion.class).forEach(Combustion::explode);
       return false;
     }
     if (user.onCooldown(description())) {
@@ -94,11 +92,11 @@ public class Combustion extends AbilityInstance implements Explosive {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (exploded || removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -111,12 +109,12 @@ public class Combustion extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @NonNull Collection<@NonNull Collider> colliders() {
+  public Collection<Collider> colliders() {
     return List.of(beam.collider());
   }
 
   @Override
-  public void onCollision(@NonNull Collision collision) {
+  public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FireShield fireShield) {
       if (fireShield.isSphere()) {
@@ -182,7 +180,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     @Override
-    protected @NonNull Vector3d controlDirection() {
+    protected Vector3d controlDirection() {
       return user.direction().multiply(speed);
     }
 
@@ -207,47 +205,38 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public boolean onEntityHit(@NonNull Entity entity) {
+    public boolean onEntityHit(Entity entity) {
       explode();
       return true;
     }
 
     @Override
-    public boolean onBlockHit(@NonNull Block block) {
+    public boolean onBlockHit(Block block) {
       explode();
       return true;
     }
 
-    private @NonNull Vector3d location() {
+    private Vector3d location() {
       return location;
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 12_000;
     @Modifiable(Attribute.DAMAGE)
-    public double damage;
+    private double damage = 4;
     @Modifiable(Attribute.FIRE_TICKS)
-    public int fireTicks;
+    private int fireTicks = 50;
     @Modifiable(Attribute.STRENGTH)
-    public double power;
+    private double power = 3.4;
     @Modifiable(Attribute.RANGE)
-    public double range;
-
-    public int particleRange;
+    private double range = 48;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "fire", "combustion");
-
-      cooldown = abilityNode.node("cooldown").getLong(12000);
-      damage = abilityNode.node("damage").getDouble(4.0);
-      fireTicks = abilityNode.node("fire-ticks").getInt(50);
-      power = abilityNode.node("power").getDouble(3.4);
-      range = abilityNode.node("range").getDouble(48.0);
-
-      particleRange = FastMath.ceil(range);
+    public Iterable<String> path() {
+      return List.of("abilities", "fire", "combustion");
     }
   }
 }

@@ -23,13 +23,26 @@ import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
 
-public class CooldownAddEvent extends BendingAbilityEvent implements Cancellable {
+public class CooldownAddEvent extends BendingEvent implements AbilityEvent, Cancellable {
+  private final User user;
+  private final AbilityDescription desc;
   private final long duration;
   private boolean cancelled = false;
 
   CooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    super(user, desc);
+    this.user = user;
+    this.desc = desc;
     this.duration = duration;
+  }
+
+  @Override
+  public User user() {
+    return user;
+  }
+
+  @Override
+  public AbilityDescription ability() {
+    return desc;
   }
 
   public long duration() {

@@ -19,11 +19,12 @@
 
 package me.moros.bending.ability.air;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.Bending;
 import me.moros.bending.ability.air.sequence.AirWheel;
 import me.moros.bending.ability.common.basic.AbstractRide;
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -40,11 +41,10 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirScooter extends AbilityInstance {
-  private static final Config config = new Config();
+  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;
@@ -52,18 +52,24 @@ public class AirScooter extends AbilityInstance {
 
   private Scooter scooter;
 
-  public boolean canRender = true;
+  private final boolean canRender;
 
-  public AirScooter(@NonNull AbilityDescription desc) {
+  public AirScooter(AbilityDescription desc) {
     super(desc);
+    this.canRender = true;
+  }
+
+  public AirScooter(AbilityDescription desc, boolean canRender) {
+    super(desc);
+    this.canRender = canRender;
   }
 
   @Override
-  public boolean activate(@NonNull User user, @NonNull Activation method) {
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirScooter.class)) {
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, AirScooter.class)) {
       return false;
     }
-    if (Bending.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, AirWheel.class)) {
       return false;
     }
     this.user = user;
@@ -85,11 +91,11 @@ public class AirScooter extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = Bending.configManager().calculate(this, config);
+    userConfig = ConfigManager.calculate(this, config);
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
@@ -109,7 +115,7 @@ public class AirScooter extends AbilityInstance {
     return user;
   }
 
-  private class Scooter extends AbstractRide {
+  private final class Scooter extends AbstractRide {
     private double verticalPosition = 0;
 
     private Scooter() {
@@ -117,7 +123,7 @@ public class AirScooter extends AbilityInstance {
     }
 
     @Override
-    public void render(@NonNull BlockData data) {
+    public void render(BlockData data) {
       if (!canRender) {
         return;
       }
@@ -140,26 +146,23 @@ public class AirScooter extends AbilityInstance {
     }
 
     @Override
-    protected void affect(@NonNull Vector3d velocity) {
+    protected void affect(Vector3d velocity) {
       EntityUtil.applyVelocity(AirScooter.this, user.entity(), velocity);
     }
   }
 
+  @ConfigSerializable
   private static class Config extends Configurable {
     @Modifiable(Attribute.SPEED)
-    public double speed;
+    private double speed = 0.7;
     @Modifiable(Attribute.COOLDOWN)
-    public long cooldown;
+    private long cooldown = 2000;
     @Modifiable(Attribute.DURATION)
-    public long duration;
+    private long duration = 15000;
 
     @Override
-    public void onConfigReload() {
-      CommentedConfigurationNode abilityNode = config.node("abilities", "air", "airscooter");
-
-      speed = abilityNode.node("speed").getDouble(0.7);
-      cooldown = abilityNode.node("cooldown").getLong(2000);
-      duration = abilityNode.node("duration").getLong(15000);
+    public Iterable<String> path() {
+      return List.of("abilities", "air", "airscooter");
     }
   }
 }

@@ -19,11 +19,16 @@
 
 package me.moros.bending.protection;
 
+import me.moros.bending.model.key.Keyed;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
-@FunctionalInterface
-public interface Protection {
-  boolean canBuild(@NonNull LivingEntity entity, @NonNull Block block);
+/**
+ * Utility for checking whether a {@link LivingEntity} can bend at the specified {@link Block} location.
+ * Protections can be registered in {@link me.moros.bending.registry.Registries#PROTECTIONS}.
+ */
+public interface Protection extends Keyed {
+  String NAMESPACE = "bending.protection";
+
+  boolean canBuild(LivingEntity entity, Block block);
 }

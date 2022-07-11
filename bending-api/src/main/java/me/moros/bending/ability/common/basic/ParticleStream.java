@@ -37,7 +37,6 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
   private final User user;
@@ -57,7 +56,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   protected final double maxRange;
   protected final double collisionRadius;
 
-  protected ParticleStream(@NonNull User user, @NonNull Ray ray, double speed, double collisionRadius) {
+  protected ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
     this.user = user;
     this.ray = ray;
     this.speed = speed;
@@ -69,7 +68,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   }
 
   @Override
-  public @NonNull UpdateResult update() {
+  public UpdateResult update() {
     Vector3d vector = controlDirection();
     int d = FastMath.ceil(speed * steps);
     for (int i = 0; i < steps; i++) {
@@ -120,12 +119,12 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     return false;
   }
 
-  protected @NonNull Vector3d controlDirection() {
+  protected Vector3d controlDirection() {
     return dir;
   }
 
   @Override
-  public @NonNull Collider collider() {
+  public Collider collider() {
     return collider;
   }
 }

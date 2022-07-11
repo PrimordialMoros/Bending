@@ -27,46 +27,45 @@ import java.util.stream.Stream;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface AbilityManager extends Updatable {
-  void addAbility(@NonNull User user, @NonNull Ability instance);
+  void addAbility(User user, Ability instance);
 
-  void changeOwner(@NonNull Ability ability, @NonNull User user);
+  void changeOwner(Ability ability, User user);
 
-  void createPassives(@NonNull User user);
+  void createPassives(User user);
 
   int size();
 
-  default <T extends Ability> boolean hasAbility(@NonNull User user, @NonNull Class<T> type) {
+  default <T extends Ability> boolean hasAbility(User user, Class<T> type) {
     return userInstances(user, type).findAny().isPresent();
   }
 
-  void destroyInstance(@NonNull Ability ability);
+  void destroyInstance(Ability ability);
 
-  default boolean destroyInstanceType(@NonNull User user, @NonNull Class<? extends Ability> type) {
+  default boolean destroyInstanceType(User user, Class<? extends Ability> type) {
     return destroyInstanceType(user, List.of(type));
   }
 
-  boolean destroyInstanceType(@NonNull User user, @NonNull Collection<@NonNull Class<? extends Ability>> types);
+  boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types);
 
-  @NonNull Stream<Ability> userInstances(@NonNull User user);
+  Stream<Ability> userInstances(User user);
 
-  default <T extends Ability> @NonNull Stream<T> userInstances(@NonNull User user, @NonNull Class<T> type) {
+  default <T extends Ability> Stream<T> userInstances(User user, Class<T> type) {
     return userInstances(user).filter(type::isInstance).map(type::cast);
   }
 
-  default <T extends Ability> Optional<T> firstInstance(@NonNull User user, @NonNull Class<T> type) {
+  default <T extends Ability> Optional<T> firstInstance(User user, Class<T> type) {
     return userInstances(user, type).findFirst();
   }
 
-  @NonNull Stream<Ability> instances();
+  Stream<Ability> instances();
 
-  default <T extends Ability> @NonNull Stream<T> instances(@NonNull Class<T> type) {
+  default <T extends Ability> Stream<T> instances(Class<T> type) {
     return instances().filter(type::isInstance).map(type::cast);
   }
 
-  void destroyUserInstances(@NonNull User user);
+  void destroyUserInstances(User user);
 
   void destroyAllInstances();
 }

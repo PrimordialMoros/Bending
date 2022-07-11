@@ -27,7 +27,6 @@ import org.bukkit.metadata.Metadatable;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -51,15 +50,15 @@ public final class Metadata {
 
   private static final byte VALUE = 0x1;
 
-  private static Plugin PLUGIN;
+  private static Plugin plugin;
 
   private Metadata() {
   }
 
-  public static void init(@NonNull Plugin plugin) {
+  public static void inject(Plugin plugin) {
     Objects.requireNonNull(plugin);
-    if (PLUGIN == null) {
-      PLUGIN = plugin;
+    if (Metadata.plugin == null) {
+      Metadata.plugin = plugin;
     }
   }
 
@@ -70,7 +69,7 @@ public final class Metadata {
     return dataHolder.getPersistentDataContainer().has(NSK_ARMOR, PersistentDataType.BYTE);
   }
 
-  public static boolean addArmorKey(@NonNull PersistentDataHolder dataHolder) {
+  public static boolean addArmorKey(PersistentDataHolder dataHolder) {
     if (!hasArmorKey(dataHolder)) {
       dataHolder.getPersistentDataContainer().set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
       return true;
@@ -78,15 +77,15 @@ public final class Metadata {
     return false;
   }
 
-  public static @NonNull FixedMetadataValue of() {
-    return of(null);
+  public static void add(Metadatable target, String key) {
+    add(target, key, null);
   }
 
-  public static @NonNull FixedMetadataValue of(@Nullable Object obj) {
-    return new FixedMetadataValue(PLUGIN, obj);
+  public static void add(Metadatable target, String key, @Nullable Object object) {
+    target.setMetadata(key, new FixedMetadataValue(plugin, object));
   }
 
-  public static void remove(@NonNull Metadatable target, @NonNull String key) {
-    target.removeMetadata(key, PLUGIN);
+  public static void remove(Metadatable target, String key) {
+    target.removeMetadata(key, plugin);
   }
 }
