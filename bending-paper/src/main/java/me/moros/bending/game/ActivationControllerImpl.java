@@ -58,7 +58,6 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.manager.ActivationController;
-import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.manager.SequenceManager;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
@@ -75,12 +74,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActivationControllerImpl implements ActivationController {
   private final ControllerCache cache;
-  private final Game game;
   private final SequenceManager sequenceManager;
 
-  ActivationControllerImpl(Game game) {
+  ActivationControllerImpl() {
     this.cache = new ControllerCache();
-    this.game = game;
     this.sequenceManager = new SequenceManagerImpl(this);
   }
 
@@ -97,7 +94,7 @@ public final class ActivationControllerImpl implements ActivationController {
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
-      game.abilityManager(user.world()).addAbility(user, ability);
+      user.game().abilityManager(user.world()).addAbility(user, ability);
       EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
       return ability;
     }
@@ -108,12 +105,12 @@ public final class ActivationControllerImpl implements ActivationController {
   public void onUserDeconstruct(User user) {
     ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
-    game.abilityManager(user.world()).destroyUserInstances(user);
+    user.game().abilityManager(user.world()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
-      game.storage().savePlayerAsync(bendingPlayer);
+      user.game().storage().saveProfileAsync(bendingPlayer.toProfile());
       bendingPlayer.board().disableScoreboard();
     }
-    game.flightManager().remove(user);
+    user.game().flightManager().remove(user);
     Registries.BENDERS.invalidateKey(user.uuid());
     ProtectionCache.INSTANCE.invalidate(user);
   }
@@ -123,7 +120,7 @@ public final class ActivationControllerImpl implements ActivationController {
     if (cache.ignoreSwing.contains(user.uuid())) {
       return;
     }
-    if (game.abilityManager(user.world()).destroyInstanceType(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
+    if (user.game().abilityManager(user.world()).destroyUserInstances(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
       return;
     }
     ignoreNextSwing(user.uuid());
@@ -141,7 +138,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public boolean onUserGlide(User user) {
-    return game.abilityManager(user.world()).hasAbility(user, FireJet.class);
+    return user.game().abilityManager(user.world()).hasAbility(user, FireJet.class);
   }
 
   @Override
@@ -174,7 +171,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserDamage(User user) {
-    game.abilityManager(user.world()).destroyInstanceType(user, List.of(AirScooter.class, EarthSurf.class));
+    user.game().abilityManager(user.world()).destroyUserInstances(user, List.of(AirScooter.class, EarthSurf.class));
   }
 
   @Override
@@ -204,7 +201,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public boolean onBurn(User user) {
-    if (game.abilityManager(user.world()).hasAbility(user, FireJet.class)) {
+    if (user.game().abilityManager(user.world()).hasAbility(user, FireJet.class)) {
       return false;
     }
     if (EarthArmor.hasArmor(user)) {
@@ -226,7 +223,7 @@ public final class ActivationControllerImpl implements ActivationController {
     if (user.hasElement(Element.EARTH) && DensityShift.isSoftened(user)) {
       return false;
     }
-    return !game.flightManager().hasFlight(user);
+    return !user.game().flightManager().hasFlight(user);
   }
 
   private boolean noSuffocate(LivingEntity e) {
@@ -292,11 +289,11 @@ public final class ActivationControllerImpl implements ActivationController {
     }
 
     private @Nullable AirSpout getAirSpout(User user) {
-      return airSpoutCache.computeIfAbsent(user.uuid(), u -> game.abilityManager(user.world()).firstInstance(user, AirSpout.class).orElse(null));
+      return airSpoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.world()).firstInstance(user, AirSpout.class).orElse(null));
     }
 
     private @Nullable WaterSpout getWaterSpout(User user) {
-      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> game.abilityManager(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
+      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.world()).firstInstance(user, WaterSpout.class).orElse(null));
     }
 
     private void clear() {

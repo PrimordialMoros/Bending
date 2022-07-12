@@ -21,7 +21,6 @@ package me.moros.bending.model.manager;
 
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.World;
 
 public interface WorldManager extends Updatable {
@@ -33,7 +32,5 @@ public interface WorldManager extends Updatable {
 
   void createPassives(User user);
 
-  default boolean isEnabled(World world) {
-    return !world.hasMetadata(Metadata.DISABLED);
-  }
+  boolean isEnabled(World world);
 }

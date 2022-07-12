@@ -30,7 +30,7 @@ import me.moros.bending.hook.LuckPermsHook;
 import me.moros.bending.hook.placeholder.BendingExpansion;
 import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.EntityListener;
-import me.moros.bending.listener.UserListener;
+import me.moros.bending.listener.PlayerListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.properties.BendingProperties;
@@ -77,7 +77,7 @@ public class Bending extends JavaPlugin {
 
     getServer().getPluginManager().registerEvents(new BlockListener(game), this);
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
-    getServer().getPluginManager().registerEvents(new UserListener(this, game), this);
+    getServer().getPluginManager().registerEvents(new PlayerListener(this, game), this);
 
     try {
       new CommandManager(this, game);

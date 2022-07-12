@@ -48,8 +48,8 @@ public final class KeyImpl implements Key {
     if (this == obj) {
       return true;
     }
-    if (obj instanceof Key key) {
-      return this.namespace.equals(key.namespace()) && this.value.equals(key.value());
+    if (obj instanceof Key other) {
+      return this.namespace.equals(other.namespace()) && this.value.equals(other.value());
     }
     return false;
   }

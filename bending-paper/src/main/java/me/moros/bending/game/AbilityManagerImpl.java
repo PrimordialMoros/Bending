@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Multimap;
@@ -49,6 +50,10 @@ public class AbilityManagerImpl implements AbilityManager {
     addQueue = new ArrayList<>(16);
   }
 
+  private boolean isPassive(AbilityDescription desc) {
+    return desc.isActivatedBy(Activation.PASSIVE);
+  }
+
   @Override
   public void addAbility(User user, Ability instance) {
     addQueue.add(Map.entry(user.uuid(), instance));
@@ -68,10 +73,9 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void createPassives(User user) {
-    Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream()
-      .filter(d -> d.isActivatedBy(Activation.PASSIVE)).toList();
+    Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(this::isPassive).toList();
     for (AbilityDescription passive : allPassives) {
-      destroyInstanceType(user, passive.createAbility().getClass());
+      destroyUserInstance(user, passive.createAbility().getClass());
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
         if (ability.activate(user, Activation.PASSIVE)) {
@@ -94,13 +98,13 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types) {
+  public boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
     boolean destroyed = false;
     Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
     while (iterator.hasNext()) {
       Ability ability = iterator.next();
-      for (var type : types) {
-        if (type.isInstance(ability)) {
+      for (var predicate : predicates) {
+        if (predicate.test(ability)) {
           iterator.remove();
           ability.onDestroy();
           destroyed = true;

@@ -19,12 +19,12 @@
 
 package me.moros.bending.model.storage;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.storage.Storage;
 import org.bukkit.plugin.Plugin;
@@ -49,11 +49,19 @@ public interface BendingStorage extends Storage {
   CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid);
 
   /**
-   * Asynchronously saves the given bendingPlayer's data to the database.
-   * It updates the profile and stores the current elements and bound abilities.
-   * @param bendingPlayer the BendingPlayer to save
+   * Asynchronously saves the given profile's data to the database.
+   * It updates the stored profile and saves the current elements and bound abilities.
+   * @param profile the PlayerProfile to save
    */
-  void savePlayerAsync(BendingPlayer bendingPlayer);
+  default void saveProfileAsync(PlayerProfile profile) {
+    saveProfilesAsync(List.of(profile));
+  }
+
+  /**
+   * Bulk version of {@link #saveProfileAsync}
+   * @param profiles the PlayerProfiles to save
+   */
+  void saveProfilesAsync(Iterable<PlayerProfile> profiles);
 
   /**
    * Adds all given abilities to the database

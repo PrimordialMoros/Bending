@@ -21,6 +21,8 @@ package me.moros.bending.game;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.Bending;
@@ -30,12 +32,13 @@ import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.manager.DummyAbilityManager;
 import me.moros.bending.model.manager.WorldManager;
 import me.moros.bending.model.user.User;
+import me.moros.bending.registry.Registries;
 import me.moros.bending.util.TextUtil;
-import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.slf4j.Logger;
@@ -46,14 +49,16 @@ public final class WorldManagerImpl implements WorldManager, Listener {
   private final Logger logger;
   private final Config config;
   private final Map<World, ManagerPair> worlds;
+  private final Set<UUID> disabled;
 
   WorldManagerImpl(Bending plugin) {
     this.logger = plugin.logger();
     worlds = new ConcurrentHashMap<>();
     config = ConfigManager.load(Config::new);
+    disabled = ConcurrentHashMap.newKeySet();
     for (World world : plugin.getServer().getWorlds()) {
       if (config.contains(world)) {
-        Metadata.add(world, Metadata.DISABLED);
+        disabled.add(world.getUID());
       } else {
         worlds.put(world, new ManagerPair(logger));
       }
@@ -87,11 +92,16 @@ public final class WorldManagerImpl implements WorldManager, Listener {
     instance(user.world()).createPassives(user);
   }
 
+  @Override
+  public boolean isEnabled(World world) {
+    return !disabled.contains(world.getUID());
+  }
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onWorldLoad(WorldLoadEvent event) {
     World world = event.getWorld();
-    if (config.contains(event.getWorld())) {
-      Metadata.add(world, Metadata.DISABLED);
+    if (config.contains(world)) {
+      disabled.add(world.getUID());
     }
   }
 
@@ -100,6 +110,19 @@ public final class WorldManagerImpl implements WorldManager, Listener {
     ManagerPair pair = worlds.remove(event.getWorld());
     if (pair != null) {
       pair.abilities.destroyAllInstances();
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+    World newWorld = event.getPlayer().getWorld();
+    if (isEnabled(newWorld)) {
+      User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
+      if (user != null) {
+        user.board().updateAll();
+        instance(event.getFrom()).destroyUserInstances(user);
+        instance(newWorld).createPassives(user);
+      }
     }
   }
 

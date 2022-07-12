@@ -122,7 +122,7 @@ public class WaterGimbal extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(torrentDesc))
       .build();
 
-    user.game().abilityManager(user.world()).destroyInstanceType(user, List.of(Torrent.class, WaterRing.class));
+    user.game().abilityManager(user.world()).destroyUserInstances(user, List.of(Torrent.class, WaterRing.class));
     return true;
   }
 

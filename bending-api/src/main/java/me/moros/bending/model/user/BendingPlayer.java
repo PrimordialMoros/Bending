@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.description.AbilityDescription;
@@ -51,10 +52,6 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     if (profile.board()) {
       board();
     }
-  }
-
-  public int profileId() {
-    return internalId;
   }
 
   @Override
@@ -135,7 +132,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public Board board() {
-    if (world().hasMetadata(Metadata.DISABLED) || entity().hasMetadata(Metadata.HIDDEN_BOARD)) {
+    if (!game().worldManager().isEnabled(world()) || entity().hasMetadata(Metadata.HIDDEN_BOARD)) {
       board.disableScoreboard();
       board = BoardImpl.DUMMY;
     } else if (!board.isEnabled()) {
@@ -156,15 +153,20 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public PresetCreateResult addPreset(Preset preset) {
+  public CompletableFuture<PresetCreateResult> addPreset(Preset preset) {
     if (preset.id() > 0 || presets.contains(preset)) {
-      return PresetCreateResult.EXISTS;
+      return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
     }
     if (!EventBus.INSTANCE.postPresetCreateEvent(this, preset)) {
-      return PresetCreateResult.CANCELLED;
+      return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
-    presets.add(preset);
-    return PresetCreateResult.SUCCESS;
+    return game().storage().savePresetAsync(internalId, preset).thenApply(success -> {
+      if (success) {
+        presets.add(preset);
+        return PresetCreateResult.SUCCESS;
+      }
+      return PresetCreateResult.FAIL;
+    });
   }
 
   @Override
@@ -172,7 +174,9 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     if (preset.id() <= 0 || !presets.contains(preset)) {
       return false;
     }
-    return presets.remove(preset);
+    presets.remove(preset);
+    game().storage().deletePresetAsync(preset.id());
+    return true;
   }
 
   public PlayerProfile toProfile() {

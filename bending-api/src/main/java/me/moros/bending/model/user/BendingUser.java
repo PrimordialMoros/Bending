@@ -33,6 +33,7 @@ import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.manager.Game;
@@ -53,6 +54,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private final AbilityDescription[] slots;
   private final BiPredicate<User, AbilityDescription> condition;
 
+  private boolean canBend = true;
   private int index = 1;
 
   protected BendingUser(Game game, LivingEntity entity, BenderData data) {
@@ -100,6 +102,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   public boolean addElement(Element element) {
     if (!hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.ADD)) {
       elements.add(element);
+      validatePassives();
       return true;
     }
     return false;
@@ -109,6 +112,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   public boolean removeElement(Element element) {
     if (hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.REMOVE)) {
       elements.remove(element);
+      validateAbilities();
       validateSlots();
       updateBoard();
       return true;
@@ -121,11 +125,21 @@ public sealed class BendingUser implements User permits BendingPlayer {
     if (EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.CHOOSE)) {
       elements.clear();
       elements.add(element);
+      validateAbilities();
       validateSlots();
       updateBoard();
       return true;
     }
     return false;
+  }
+
+  private void validateAbilities() {
+    game.abilityManager(world()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
+    validatePassives();
+  }
+
+  private void validatePassives() {
+    game.abilityManager(world()).createPassives(this);
   }
 
   @Override
@@ -207,6 +221,20 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public boolean canBend(AbilityDescription desc) {
     return condition.test(this, desc);
+  }
+
+  @Override
+  public boolean canBend() {
+    return canBend;
+  }
+
+  @Override
+  public boolean toggleBending() {
+    canBend ^= true;
+    if (!canBend) {
+      game.abilityManager(world()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+    }
+    return canBend;
   }
 
   @Override

@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.manager;
 
-import java.util.Collection;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.Ability;
@@ -53,7 +53,7 @@ public final class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types) {
+  public boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
     return true;
   }
 

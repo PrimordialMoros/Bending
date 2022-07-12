@@ -46,7 +46,6 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.storage.BendingStorage;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
@@ -72,7 +71,7 @@ public final class StorageImpl implements BendingStorage {
   private final Logger logger;
   private final Jdbi DB;
 
-  private final BiMap<String, Integer> abilityMap;
+  private final BiMap<AbilityDescription, Integer> abilityMap;
 
   StorageImpl(StorageType type, Logger logger, HikariDataSource source) {
     this.type = type;
@@ -123,123 +122,108 @@ public final class StorageImpl implements BendingStorage {
 
   @Override
   public CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid) {
-    return Tasker.async(() -> loadProfile(uuid));
-  }
-
-  @Override
-  public void savePlayerAsync(BendingPlayer bendingPlayer) {
-    PlayerProfile profileToSave = bendingPlayer.toProfile();
-    Tasker.async(() -> {
-      updateProfile(profileToSave);
-      saveElements(profileToSave);
-      saveSlots(profileToSave);
+    return Tasker.async(() -> loadProfile(uuid)).exceptionally(t -> {
+      logger.error(t.getMessage(), t);
+      return null;
     });
   }
 
   @Override
+  public void saveProfilesAsync(Iterable<PlayerProfile> profiles) {
+    Tasker.async(() -> {
+      for (var profileToSave : profiles) {
+        updateProfile(profileToSave);
+        saveElements(profileToSave);
+        saveSlots(profileToSave);
+      }
+    }).exceptionally(this::logError);
+  }
+
+  @Override
   public boolean createAbilities(Iterable<AbilityDescription> abilities) {
-    try {
-      DB.useHandle(handle -> {
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
-        for (AbilityDescription desc : abilities) {
-          if (desc.canBind()) {
-            batch.bind(0, desc.name()).add();
-          }
+    DB.useHandle(handle -> {
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
+      for (AbilityDescription desc : abilities) {
+        if (desc.canBind()) {
+          batch.bind(0, desc.name()).add();
         }
-        batch.execute();
-      });
-      List<Entry<String, Integer>> col = DB.withHandle(handle ->
-        handle.createQuery(SqlQueries.ABILITIES_SELECT.query())
-          .map(this::abilityRowMapper).list()
-      );
-      col.forEach(e -> abilityMap.forcePut(e.getKey().toLowerCase(Locale.ROOT), e.getValue()));
-      return true;
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
+      }
+      batch.execute();
+    });
+    List<Entry<String, Integer>> col = DB.withHandle(handle ->
+      handle.createQuery(SqlQueries.ABILITIES_SELECT.query())
+        .map(this::abilityRowMapper).list()
+    );
+    for (var entry : col) {
+      AbilityDescription desc = Registries.ABILITIES.fromString(entry.getKey());
+      if (desc != null) {
+        abilityMap.forcePut(desc, entry.getValue());
+      }
     }
-    return false;
+    return true;
   }
 
   @Override
   public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
-    return Tasker.async(() -> savePreset(playerId, preset));
+    return Tasker.async(() -> savePreset(playerId, preset)).exceptionally(t -> {
+      logger.error(t.getMessage(), t);
+      return false;
+    });
   }
 
   @Override
   public void deletePresetAsync(int presetId) {
-    Tasker.async(() -> deletePreset(presetId));
+    Tasker.async(() -> deletePresetExact(presetId)).exceptionally(this::logError);
   }
 
   private @Nullable PlayerProfile loadProfile(UUID uuid) {
-    try {
-      PlayerProfile temp = DB.withHandle(handle ->
-        handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
-          .bind(0, uuid).map(this::profileRowMapper).findOne().orElse(null)
-      );
-      if (temp != null && temp.id() > 0) {
-        int id = temp.id();
-        BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
-        return new PlayerProfile(id, temp.board(), data);
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
+    PlayerProfile temp = DB.withHandle(handle ->
+      handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
+        .bind(0, uuid).map(this::profileRowMapper).findOne().orElse(null)
+    );
+    if (temp != null && temp.id() > 0) {
+      int id = temp.id();
+      BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
+      return new PlayerProfile(id, temp.board(), data);
     }
     return null;
   }
 
-  private boolean updateProfile(PlayerProfile profile) {
-    try {
-      DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PLAYER_UPDATE_PROFILE.query())
-          .bind(0, profile.board()).bind(1, profile.id()).execute()
-      );
-      return true;
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-    }
-    return false;
+  private void updateProfile(PlayerProfile profile) {
+    DB.useHandle(handle ->
+      handle.createUpdate(SqlQueries.PLAYER_UPDATE_PROFILE.query())
+        .bind(0, profile.board()).bind(1, profile.id()).execute()
+    );
   }
 
-  private boolean saveElements(PlayerProfile profile) {
-    try {
-      DB.useHandle(handle -> {
-        int id = profile.id();
-        handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE.query()).bind(0, id).execute();
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT.query());
-        for (Element element : profile.benderData().elements()) {
-          batch.bind(0, id).bind(1, element.name().toLowerCase(Locale.ROOT)).add();
-        }
-        batch.execute();
-      });
-      return true;
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return false;
+  private void saveElements(PlayerProfile profile) {
+    DB.useHandle(handle -> {
+      int id = profile.id();
+      handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE.query()).bind(0, id).execute();
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT.query());
+      for (Element element : profile.benderData().elements()) {
+        batch.bind(0, id).bind(1, element.name().toLowerCase(Locale.ROOT)).add();
+      }
+      batch.execute();
+    });
   }
 
-  private boolean saveSlots(PlayerProfile profile) {
-    try {
-      DB.useHandle(handle -> {
-        int id = profile.id();
-        List<AbilityDescription> abilities = profile.benderData().slots();
-        handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE.query()).bind(0, id).execute();
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT.query());
-        int size = abilities.size();
-        for (int slot = 0; slot < size; slot++) {
-          int abilityId = getAbilityId(abilities.get(slot));
-          if (abilityId <= 0) {
-            continue;
-          }
-          batch.bind(0, id).bind(1, slot + 1).bind(2, abilityId).add();
+  private void saveSlots(PlayerProfile profile) {
+    DB.useHandle(handle -> {
+      int id = profile.id();
+      List<AbilityDescription> abilities = profile.benderData().slots();
+      handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE.query()).bind(0, id).execute();
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT.query());
+      int size = abilities.size();
+      for (int slot = 0; slot < size; slot++) {
+        int abilityId = getAbilityId(abilities.get(slot));
+        if (abilityId <= 0) {
+          continue;
         }
-        batch.execute();
-      });
-      return true;
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return false;
+        batch.bind(0, id).bind(1, slot + 1).bind(2, abilityId).add();
+      }
+      batch.execute();
+    });
   }
 
   private boolean savePreset(int playerId, Preset preset) {
@@ -247,123 +231,84 @@ public final class StorageImpl implements BendingStorage {
       return false;
     }
     List<AbilityDescription> abilities = preset.abilities();
-    try {
-      return DB.withHandle(handle -> {
-        int presetId = handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
-          .bind(0, playerId).bind(1, preset.name())
-          .executeAndReturnGeneratedKeys("preset_id")
-          .mapTo(int.class).findOne().orElse(0);
-        if (presetId <= 0) {
-          return false;
+    return DB.withHandle(handle -> {
+      int presetId = handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
+        .bind(0, playerId).bind(1, preset.name())
+        .executeAndReturnGeneratedKeys("preset_id")
+        .mapTo(int.class).findOne().orElse(0);
+      if (presetId <= 0) {
+        return false;
+      }
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
+      int size = abilities.size();
+      for (int slot = 0; slot < size; slot++) {
+        int abilityId = getAbilityId(abilities.get(slot));
+        if (abilityId > 0) {
+          batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
         }
-        PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
-        int size = abilities.size();
-        for (int slot = 0; slot < size; slot++) {
-          int abilityId = getAbilityId(abilities.get(slot));
-          if (abilityId > 0) {
-            batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
-          }
-        }
-        batch.execute();
-        return true;
-      });
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return false;
-  }
-
-  private boolean deletePreset(int presetId) {
-    if (presetId <= 0) {
-      return false; // It won't exist
-    }
-    try {
-      DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, presetId).execute()
-      );
+      }
+      batch.execute();
       return true;
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return false;
+    });
   }
 
   private int getAbilityId(@Nullable AbilityDescription desc) {
-    if (desc == null) {
-      return 0;
-    }
-    return abilityMap.getOrDefault(desc.name().toLowerCase(Locale.ROOT), 0);
-  }
-
-  private String getAbilityName(int id) {
-    return abilityMap.inverse().get(id);
+    return desc == null ? 0 : abilityMap.getOrDefault(desc, 0);
   }
 
   private List<AbilityDescription> getSlots(int playerId) {
-    try {
-      return DB.withHandle(handle -> {
-        Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT.query()).bind(0, playerId);
-        return Arrays.asList(slotMapper(query.mapToMap()));
-      });
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return List.of();
+    return DB.withHandle(handle -> {
+      Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT.query()).bind(0, playerId);
+      return Arrays.asList(slotMapper(query.mapToMap()));
+    });
   }
 
   private Set<Element> getElements(int playerId) {
-    try {
-      return DB.withHandle(handle ->
-        handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT.query()).bind(0, playerId)
-          .mapTo(String.class).stream().map(Element::fromName).flatMap(Optional::stream).collect(Collectors.toSet())
-      );
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return Set.of();
+    return DB.withHandle(handle ->
+      handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT.query()).bind(0, playerId)
+        .mapTo(String.class).stream().map(Element::fromName).flatMap(Optional::stream).collect(Collectors.toSet())
+    );
   }
 
   private Set<Preset> getPresets(int playerId) {
-    try {
-      Set<Preset> presets = new HashSet<>();
-      return DB.withHandle(handle -> {
-        List<Entry<Integer, String>> presetEntries = handle.createQuery(SqlQueries.PRESET_SELECT.query())
-          .bind(0, playerId).map(this::presetRowMapper).list();
-        for (var entry : presetEntries) {
-          int id = entry.getKey();
-          String name = entry.getValue();
-          if (id > 0) {
-            Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT.query()).bind(0, id);
-            AbilityDescription[] abilities = slotMapper(query.mapToMap());
-            presets.add(new Preset(id, name, abilities));
-          }
+    Set<Preset> presets = new HashSet<>();
+    return DB.withHandle(handle -> {
+      List<Entry<Integer, String>> presetEntries = handle.createQuery(SqlQueries.PRESET_SELECT.query())
+        .bind(0, playerId).map(this::presetRowMapper).list();
+      for (var entry : presetEntries) {
+        int id = entry.getKey();
+        String name = entry.getValue();
+        if (id > 0) {
+          Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT.query()).bind(0, id);
+          AbilityDescription[] abilities = slotMapper(query.mapToMap());
+          presets.add(new Preset(id, name, abilities));
         }
-        return presets;
-      });
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-    }
-    return Set.of();
+      }
+      return presets;
+    });
   }
 
   private boolean deletePreset(int playerId, String presetName) {
-    try {
+    DB.useHandle(handle ->
+      handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, playerId).bind(1, presetName)
+    );
+    return true;
+  }
+
+  private void deletePresetExact(int presetId) {
+    if (presetId > 0) {
       DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, playerId).bind(1, presetName)
+        handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, presetId).execute()
       );
-      return true;
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
     }
-    return false;
   }
 
   private AbilityDescription[] slotMapper(Iterable<Map<String, Object>> results) {
     AbilityDescription[] abilities = new AbilityDescription[9];
     for (Map<String, Object> map : results) {
       int slot = (int) map.get("slot");
-      String abilityName = getAbilityName((int) map.get("ability_id"));
-      abilities[slot - 1] = Registries.ABILITIES.fromString(abilityName);
+      int id = (int) map.get("ability_id");
+      abilities[slot - 1] = abilityMap.inverse().get(id);
     }
     return abilities;
   }
@@ -379,6 +324,11 @@ public final class StorageImpl implements BendingStorage {
       logger.warn(e.getMessage(), e);
     }
     return false;
+  }
+
+  private Void logError(Throwable t) {
+    logger.error(t.getMessage(), t);
+    return null;
   }
 
   private @Nullable PlayerProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {

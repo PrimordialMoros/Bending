@@ -46,7 +46,6 @@ import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.preset.PresetCreateResult;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -251,11 +250,9 @@ public final class BendingCommand {
   }
 
   private void onToggle(User user) {
-    if (user.entity().hasMetadata(Metadata.DISABLED)) {
-      Metadata.remove(user.entity(), Metadata.DISABLED);
+    if (user.toggleBending()) {
       Message.TOGGLE_ON.send(user);
     } else {
-      Metadata.add(user.entity(), Metadata.DISABLED);
       Message.TOGGLE_OFF.send(user);
     }
   }
@@ -282,7 +279,6 @@ public final class BendingCommand {
       return;
     }
     if (user.chooseElement(element)) {
-      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_CHOOSE_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);
     } else {
@@ -296,7 +292,6 @@ public final class BendingCommand {
       return;
     }
     if (user.addElement(element)) {
-      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_ADD_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);
     } else {
@@ -306,7 +301,6 @@ public final class BendingCommand {
 
   public void onElementRemove(User user, Element element) {
     if (user.removeElement(element)) {
-      user.game().abilityManager(user.world()).createPassives(user);
       Message.ELEMENT_REMOVE_SUCCESS.send(user, element.displayName());
     } else {
       Message.ELEMENT_REMOVE_FAIL.send(user, element.displayName());
@@ -413,23 +407,11 @@ public final class BendingCommand {
       Message.EMPTY_PRESET.send(player);
       return;
     }
-    PresetCreateResult createResult = player.addPreset(preset);
-    if (createResult == PresetCreateResult.SUCCESS) {
-      player.game().storage().savePresetAsync(player.profileId(), preset).thenAccept(result -> {
-        if (result) {
-          PresetCreateResult.SUCCESS.message().send(player, input);
-        } else {
-          PresetCreateResult.FAIL.message().send(player, input);
-        }
-      });
-    } else {
-      createResult.message().send(player, input);
-    }
+    player.addPreset(preset).thenAccept(result -> result.message().send(player, input));
   }
 
   private void onPresetRemove(BendingPlayer player, Preset preset) {
     if (player.removePreset(preset)) {
-      player.game().storage().deletePresetAsync(preset.id());
       Message.PRESET_REMOVE_SUCCESS.send(player, preset.name());
     } else {
       Message.PRESET_REMOVE_FAIL.send(player, preset.name());
@@ -457,7 +439,7 @@ public final class BendingCommand {
   }
 
   private void recalculate(User user) {
-    user.game().abilityManager(user.world()).userInstances(user).forEach(Ability::loadConfig);
+    game.abilityManager(user.world()).userInstances(user).forEach(Ability::loadConfig);
   }
 
   private AbilityDisplay collectAbilities(CommandSender user, Element element) {

@@ -117,6 +117,10 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
    */
   boolean canBend(AbilityDescription desc);
 
+  boolean canBend();
+
+  boolean toggleBending();
+
   Board board();
 
   /**

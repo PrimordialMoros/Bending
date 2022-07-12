@@ -38,7 +38,6 @@ public final class Metadata {
   public static final String GLOVE_KEY = "bending-earth-glove";
   public static final String METAL_CABLE = "bending-metal-cable";
   public static final String DESTRUCTIBLE = "bending-destructible";
-  public static final String DISABLED = "bending-disabled";
   public static final String HIDDEN_BOARD = "bending-hidden-board";
   public static final String NPC = "bending-npc";
 

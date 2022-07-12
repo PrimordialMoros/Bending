@@ -25,15 +25,14 @@ import java.util.function.BiPredicate;
 
 import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.metadata.Metadata;
 
 public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
   COOLDOWN((u, d) -> d.bypassCooldown() || !u.onCooldown(d)),
   ELEMENT((u, d) -> u.hasElement(d.element())),
   GAMEMODE((u, d) -> !u.spectator()),
   PERMISSION((u, d) -> u.hasPermission(d)),
-  DISABLED((u, d) -> !u.entity().hasMetadata(Metadata.DISABLED)),
-  WORLD((u, d) -> !u.world().hasMetadata(Metadata.DISABLED));
+  CAN_BEND((u, d) -> u.canBend()),
+  WORLD((u, d) -> u.game().worldManager().isEnabled(u.world()));
 
   private final BiPredicate<User, AbilityDescription> predicate;
 
@@ -54,7 +53,7 @@ public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
     conditions.add(BendingConditions.ELEMENT);
     conditions.add(BendingConditions.GAMEMODE);
     conditions.add(BendingConditions.WORLD);
-    conditions.add(BendingConditions.DISABLED);
+    conditions.add(BendingConditions.CAN_BEND);
     conditions.add(BendingConditions.PERMISSION);
     ALL = conditions.stream().reduce((u, d) -> true, BiPredicate::and);
   }

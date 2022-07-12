@@ -20,6 +20,7 @@
 package me.moros.bending.model.user;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.event.PresetCreateEvent;
 import me.moros.bending.model.preset.Preset;
@@ -42,9 +43,9 @@ public interface PresetUser {
   /**
    * Attempt to add the specified preset to the user. Calls a {@link PresetCreateEvent}.
    * @param preset the preset to add
-   * @return the result
+   * @return future with the result
    */
-  PresetCreateResult addPreset(Preset preset);
+  CompletableFuture<PresetCreateResult> addPreset(Preset preset);
 
   /**
    * Attempt to remove the specified preset from the user.

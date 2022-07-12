@@ -57,7 +57,7 @@ public class AirSpout extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.world()).destroyInstanceType(user, AirSpout.class)) {
+    if (user.game().abilityManager(user.world()).destroyUserInstance(user, AirSpout.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {

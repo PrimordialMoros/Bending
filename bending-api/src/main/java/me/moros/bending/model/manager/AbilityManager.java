@@ -22,6 +22,7 @@ package me.moros.bending.model.manager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.Ability;
@@ -43,11 +44,24 @@ public interface AbilityManager extends Updatable {
 
   void destroyInstance(Ability ability);
 
-  default boolean destroyInstanceType(User user, Class<? extends Ability> type) {
-    return destroyInstanceType(user, List.of(type));
+  private Predicate<Ability> isInstance(Class<? extends Ability> type) {
+    return type::isInstance;
   }
 
-  boolean destroyInstanceType(User user, Collection<Class<? extends Ability>> types);
+  default boolean destroyUserInstance(User user, Class<? extends Ability> type) {
+    return destroyUserInstances(user, isInstance(type));
+  }
+
+  default boolean destroyUserInstances(User user, Collection<Class<? extends Ability>> types) {
+    var predicates = types.stream().map(this::isInstance).toList();
+    return destroyUserInstances(user, predicates);
+  }
+
+  default boolean destroyUserInstances(User user, Predicate<Ability> predicate) {
+    return destroyUserInstances(user, List.of(predicate));
+  }
+
+  boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates);
 
   Stream<Ability> userInstances(User user);
 

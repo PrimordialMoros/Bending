@@ -20,15 +20,14 @@
 package me.moros.bending.model.key;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 public final class RegistryKey<T> implements Key {
   private final Key key;
-  private final Class<T> clazz;
+  private final Class<T> type;
 
-  private RegistryKey(Key key, Class<T> clazz) {
+  private RegistryKey(Key key, Class<T> type) {
     this.key = key;
-    this.clazz = clazz;
+    this.type = type;
   }
 
   @Override
@@ -41,21 +40,34 @@ public final class RegistryKey<T> implements Key {
     return key.value();
   }
 
-  @Override
-  public @NotNull Key key() {
-    return key;
-  }
-
   public Class<T> type() {
-    return clazz;
+    return type;
   }
 
   public @Nullable T cast(@Nullable Object value) {
     try {
-      return clazz.cast(value);
+      return type.cast(value);
     } catch (ClassCastException e) {
       return null;
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof RegistryKey other) {
+      return this.key.equals(other.key) && this.type == other.type;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = key.hashCode();
+    result = (31 * result) + type.hashCode();
+    return result;
   }
 
   public static <T> RegistryKey<T> create(String namespace, Class<T> clazz) {

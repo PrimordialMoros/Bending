@@ -40,6 +40,7 @@ import me.moros.bending.model.manager.WorldManager;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.model.temporal.TemporalManager;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.protection.Protection;
 import me.moros.bending.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.protection.plugin.LWCProtection;
@@ -71,7 +72,7 @@ public final class GameImpl implements Game {
     flightManager = new FlightManagerImpl();
     worldManager = new WorldManagerImpl(plugin);
 
-    activationController = new ActivationControllerImpl(this);
+    activationController = new ActivationControllerImpl();
     storage.createAbilities(Registries.ABILITIES);
     registerProtections();
 
@@ -128,7 +129,7 @@ public final class GameImpl implements Game {
     flightManager.removeAll();
     temporal.forEach(TemporalManager::removeAll);
     if (shutdown) {
-      Registries.BENDERS.players().forEach(storage::savePlayerAsync);
+      storage.saveProfilesAsync(Registries.BENDERS.players().map(BendingPlayer::toProfile).toList());
       Tasker.INSTANCE.shutdown();
       storage.close();
     }

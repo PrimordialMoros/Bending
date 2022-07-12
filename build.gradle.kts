@@ -1,5 +1,5 @@
 plugins {
-    id("org.checkerframework").version("0.6.13")
+    id("org.checkerframework").version("0.6.14")
 }
 
 allprojects {
