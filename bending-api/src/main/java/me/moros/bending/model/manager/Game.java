@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.manager;
 
+import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.model.storage.BendingStorage;
 import org.bukkit.World;
 
@@ -39,4 +40,6 @@ public interface Game {
   WorldManager worldManager();
 
   ActivationController activationController();
+
+  ConfigProcessor configProcessor();
 }

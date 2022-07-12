@@ -32,8 +32,11 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.attribute.ModifierOperation;
 import me.moros.bending.model.user.User;
 import org.slf4j.Logger;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-final class AttributeProcessor {
+public final class ConfigProcessor {
   private static final Map<Class<? extends Number>, AttributeConverter> CONVERTERS = Map.of(
     Double.class, AttributeConverter.DOUBLE,
     Integer.class, AttributeConverter.INT,
@@ -44,12 +47,32 @@ final class AttributeProcessor {
   );
 
   private final Logger logger;
+  private final ConfigurationReference<CommentedConfigurationNode> root;
 
-  AttributeProcessor(Logger logger) {
+  ConfigProcessor(Logger logger, ConfigurationReference<CommentedConfigurationNode> root) {
     this.logger = logger;
+    this.root = root;
   }
 
-  <T extends Configurable> T calculateModified(Ability ability, T copy) {
+  public <T extends Configurable> T calculate(Ability ability, T config) {
+    T copied = config.external() ? config : get(config);
+    return process(ability, copied);
+  }
+
+  @SuppressWarnings("unchecked")
+  <T extends Configurable> T get(T def) {
+    CommentedConfigurationNode node = root.node().node(def.path());
+    def.setNode(node);
+    try {
+      T result = (T) node.get(def.getClass(), def);
+      result.setNode(node);
+      return result;
+    } catch (SerializationException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private <T extends Configurable> T process(Ability ability, T copy) {
     User user = ability.user();
     AbilityDescription desc = ability.description();
     Collection<AttributeModifier> activeModifiers = user.attributes()

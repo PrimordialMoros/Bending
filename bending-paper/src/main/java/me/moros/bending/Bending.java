@@ -19,12 +19,12 @@
 
 package me.moros.bending;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.command.CommandManager;
 import me.moros.bending.config.ConfigManager;
-import me.moros.bending.event.EventBus;
 import me.moros.bending.game.GameImpl;
 import me.moros.bending.hook.LuckPermsHook;
 import me.moros.bending.hook.placeholder.BendingExpansion;
@@ -34,12 +34,12 @@ import me.moros.bending.listener.PlayerListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.properties.BendingProperties;
-import me.moros.bending.model.registry.Registry;
 import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
+import me.moros.bending.util.TextUtil;
 import me.moros.bending.util.VersionUtil;
 import me.moros.bending.util.metadata.Metadata;
 import org.bstats.bukkit.Metrics;
@@ -66,14 +66,11 @@ public class Bending extends JavaPlugin {
     Metadata.inject(this);
     Tasker.INSTANCE.inject(this);
 
+    new ProtectionInitializer(getServer().getPluginManager(), configManager);
     BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
-    game = new GameImpl(this, storage);
+    game = new GameImpl(this, configManager, storage);
 
-    int abilityAmount = Registries.ABILITIES.size();
-    int sequenceAmount = Registries.SEQUENCES.size();
-    int collisionAmount = Registries.COLLISIONS.size();
-    logger.info(String.format("Found %d registered abilities (%d Sequences)!", abilityAmount, sequenceAmount));
-    logger.info(String.format("Found %d registered collisions!", collisionAmount));
+    printInfo();
 
     getServer().getPluginManager().registerEvents(new BlockListener(game), this);
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
@@ -89,10 +86,6 @@ public class Bending extends JavaPlugin {
     configManager.save();
     getServer().getServicesManager().register(Game.class, game, this, ServicePriority.Normal);
     registerHooks();
-
-    var keys = Registries.keys().toList();
-    EventBus.INSTANCE.postRegistryLockEvent(keys);
-    keys.stream().map(Registries::get).forEach(Registry::lock);
   }
 
   @Override
@@ -120,6 +113,16 @@ public class Bending extends JavaPlugin {
     if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
       WorldGuardFlag.registerFlag();
     }
+  }
+
+  private void printInfo() {
+    int abilityAmount = Registries.ABILITIES.size();
+    int sequenceAmount = Registries.SEQUENCES.size();
+    int collisionAmount = Registries.COLLISIONS.size();
+    logger.info(String.format("Found %d registered abilities (%d Sequences)!", abilityAmount, sequenceAmount));
+    logger.info(String.format("Found %d registered collisions!", collisionAmount));
+    logger.info("Registered protection plugins: " + TextUtil.collect(Registries.PROTECTIONS));
+    logger.info("Registered translations: " + TextUtil.collect(translationManager, Locale::getLanguage));
   }
 
   private @Nullable NativeAdapter findAdapter(String className) {

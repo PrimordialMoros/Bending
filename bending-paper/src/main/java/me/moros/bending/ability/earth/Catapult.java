@@ -79,7 +79,7 @@ public class Catapult extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = ConfigManager.calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, config);
   }
 
   @Override
@@ -105,7 +105,6 @@ public class Catapult extends AbilityInstance {
     }
     return EarthMaterials.isEarthbendable(user, block);
   }
-
 
   private boolean launch(boolean sneak) {
     double angle = Vector3d.PLUS_J.angle(user.direction());

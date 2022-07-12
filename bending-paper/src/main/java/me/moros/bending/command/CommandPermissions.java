@@ -29,7 +29,6 @@ public final class CommandPermissions {
   public static final CommandPermission HELP = create("help");
   public static final CommandPermission TOGGLE = create("toggle");
   public static final CommandPermission BOARD = create("board");
-  public static final CommandPermission DISPLAY = create("display");
   public static final CommandPermission CHOOSE = create("choose");
   public static final CommandPermission ADD = create("add");
   public static final CommandPermission REMOVE = create("remove");

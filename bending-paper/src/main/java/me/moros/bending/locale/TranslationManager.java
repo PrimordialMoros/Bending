@@ -25,13 +25,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.kyori.adventure.key.Key;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  * to create {@link TranslatableComponent}.
  * @see Message
  */
-public final class TranslationManager {
+public final class TranslationManager implements Iterable<Locale> {
   private final Logger logger;
   private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
   private final Path translationsDirectory;
@@ -73,6 +74,7 @@ public final class TranslationManager {
 
     ResourceBundle bundle = ResourceBundle.getBundle("bending", Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
     registry.registerAll(Message.DEFAULT_LOCALE, bundle, false);
+    installed.add(Message.DEFAULT_LOCALE);
     GlobalTranslator.translator().addSource(registry);
   }
 
@@ -84,11 +86,6 @@ public final class TranslationManager {
       files = List.of();
     }
     files.forEach(this::loadTranslationFile);
-    int amount = installed.size();
-    if (amount > 0) {
-      String translations = installed.stream().map(Locale::getLanguage).collect(Collectors.joining(", ", "[", "]"));
-      logger.info("Loaded " + amount + " translations: " + translations);
-    }
   }
 
   private void loadTranslationFile(Path path) {
@@ -125,5 +122,10 @@ public final class TranslationManager {
    */
   public @Nullable TranslatableComponent translate(String key) {
     return registry.contains(key) ? Component.translatable(key) : null;
+  }
+
+  @Override
+  public Iterator<Locale> iterator() {
+    return Collections.unmodifiableSet(installed).iterator();
   }
 }

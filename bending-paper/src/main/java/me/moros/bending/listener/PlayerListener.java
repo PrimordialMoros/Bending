@@ -283,7 +283,7 @@ public class PlayerListener implements Listener {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
         user.board().updateAll();
-        game.abilityManager(user.world()).destroyUserInstances(user);
+        game.abilityManager(user.world()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
     }
   }

@@ -23,29 +23,27 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
-import me.moros.bending.model.ability.Ability;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 public final class ConfigManager {
   private static ConfigManager INSTANCE;
 
   private final Logger logger;
-  private final AttributeProcessor processor;
   private final WatchServiceListener listener;
   private final ConfigurationReference<CommentedConfigurationNode> reference;
+  private final ConfigProcessor processor;
 
   public ConfigManager(Logger logger, String directory) {
     this.logger = logger;
-    this.processor = new AttributeProcessor(logger);
     Path path = Path.of(directory, "bending.conf");
     try {
       listener = WatchServiceListener.create();
       reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
+      processor = new ConfigProcessor(logger, reference);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -72,29 +70,15 @@ public final class ConfigManager {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Configurable> T get(T def) {
-    CommentedConfigurationNode node = reference.node().node(def.path());
-    def.setNode(node);
-    try {
-      T result = (T) node.get(def.getClass(), def);
-      result.setNode(node);
-      return result;
-    } catch (SerializationException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public static <T extends Configurable> T calculate(Ability ability, T config) {
-    T copied = INSTANCE.get(config);
-    return INSTANCE.processor.calculateModified(ability, copied);
-  }
-
   public static <T extends Configurable> T load(Supplier<T> supplier) {
-    return INSTANCE.get(supplier.get());
+    return INSTANCE.processor.get(supplier.get());
   }
 
-  public static CommentedConfigurationNode config() {
+  public CommentedConfigurationNode config() {
     return INSTANCE.reference.node();
+  }
+
+  public ConfigProcessor processor() {
+    return processor;
   }
 }

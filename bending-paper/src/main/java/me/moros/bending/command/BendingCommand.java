@@ -311,7 +311,7 @@ public final class BendingCommand {
     onElementDisplay(user.entity(), element);
   }
 
-  public void onElementDisplay(CommandSender user, Element element) {
+  private void onElementDisplay(CommandSender user, Element element) {
     AbilityDisplay abilities = collectAbilities(user, element);
     AbilityDisplay sequences = collectSequences(user, element);
     AbilityDisplay passives = collectPassives(user, element);

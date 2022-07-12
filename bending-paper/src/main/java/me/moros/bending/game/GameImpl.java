@@ -21,10 +21,10 @@ package me.moros.bending.game;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
+import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.game.temporal.ActionLimiter;
 import me.moros.bending.game.temporal.Cooldown;
@@ -41,21 +41,15 @@ import me.moros.bending.model.registry.Registry;
 import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.protection.Protection;
-import me.moros.bending.protection.plugin.GriefPreventionProtection;
-import me.moros.bending.protection.plugin.LWCProtection;
-import me.moros.bending.protection.plugin.TownyProtection;
-import me.moros.bending.protection.plugin.WorldGuardProtection;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.Tasker;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.plugin.Plugin;
 import org.slf4j.Logger;
 
 public final class GameImpl implements Game {
   private final Logger logger;
+  private final ConfigProcessor configProcessor;
   private final BendingStorage storage;
 
   private final FlightManager flightManager;
@@ -65,43 +59,22 @@ public final class GameImpl implements Game {
 
   private final Collection<TemporalManager<?, ?>> temporal;
 
-  public GameImpl(Bending plugin, BendingStorage storage) {
+  public GameImpl(Bending plugin, ConfigManager configManager, BendingStorage storage) {
     this.logger = plugin.logger();
+    this.configProcessor = configManager.processor();
     this.storage = storage;
 
     flightManager = new FlightManagerImpl();
     worldManager = new WorldManagerImpl(plugin);
 
     activationController = new ActivationControllerImpl();
-    storage.createAbilities(Registries.ABILITIES);
-    registerProtections();
-
     temporal = initTemporary();
+
     lockRegistries();
+    storage.createAbilities(Registries.ABILITIES);
 
     Tasker.repeat(this::update, 1);
     Tasker.repeat(BendingEffect::cleanup, 5);
-  }
-
-  private void registerProtections() {
-    tryRegisterProtection("WorldGuard", WorldGuardProtection::new);
-    tryRegisterProtection("GriefPrevention", GriefPreventionProtection::new);
-    tryRegisterProtection("Towny", TownyProtection::new);
-    tryRegisterProtection("LWC", LWCProtection::new);
-  }
-
-  private void tryRegisterProtection(String name, Function<Plugin, Protection> factory) {
-    if (ConfigManager.config().node("protection", name).getBoolean(true)) {
-      Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
-      if (plugin != null && plugin.isEnabled()) {
-        Protection protection = factory.apply(plugin);
-        if (Registries.PROTECTIONS.register(protection)) {
-          logger.info("Registered bending protection for " + name);
-        } else {
-          logger.warn("Unable to register bending protection for " + name);
-        }
-      }
-    }
   }
 
   private void lockRegistries() {
@@ -163,5 +136,10 @@ public final class GameImpl implements Game {
   @Override
   public ActivationController activationController() {
     return activationController;
+  }
+
+  @Override
+  public ConfigProcessor configProcessor() {
+    return configProcessor;
   }
 }

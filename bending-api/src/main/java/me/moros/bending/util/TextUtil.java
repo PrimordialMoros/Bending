@@ -23,9 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import me.moros.bending.model.key.Key;
+import me.moros.bending.model.registry.Registry;
 import org.bukkit.ChatColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -115,5 +120,14 @@ public final class TextUtil {
     } catch (IllegalArgumentException exception) {
       return null;
     }
+  }
+
+  public static String collect(Registry<Key, ?> registry) {
+    return collect(registry.keys(), Key::value);
+  }
+
+  public static <T> String collect(Iterable<T> values, Function<T, String> function) {
+    return StreamSupport.stream(values.spliterator(), false)
+      .map(function).collect(Collectors.joining(", ", "[", "]"));
   }
 }

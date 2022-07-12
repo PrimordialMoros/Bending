@@ -85,7 +85,7 @@ public class Bulwark extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = ConfigManager.calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, config);
   }
 
   @Override

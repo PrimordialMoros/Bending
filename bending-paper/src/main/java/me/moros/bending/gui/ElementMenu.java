@@ -192,7 +192,7 @@ public final class ElementMenu {
 
   private enum ActionType {
     CHOOSE(Message.ELEMENTS_GUI_CHOOSE, CommandPermissions.CHOOSE, BendingCommand::onElementChoose, false),
-    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.DISPLAY, BendingCommand::onElementDisplay, false),
+    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.HELP, BendingCommand::onElementDisplay, false),
     ADD(Message.ELEMENTS_GUI_ADD, CommandPermissions.ADD, BendingCommand::onElementAdd, true),
     REMOVE(Message.ELEMENTS_GUI_REMOVE, CommandPermissions.REMOVE, BendingCommand::onElementRemove, true);
 

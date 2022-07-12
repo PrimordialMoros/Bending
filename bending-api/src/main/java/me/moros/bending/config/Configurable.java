@@ -31,6 +31,10 @@ public abstract class Configurable implements Serializable {
 
   public abstract Iterable<String> path();
 
+  public boolean external() {
+    return false;
+  }
+
   CommentedConfigurationNode node() {
     return node;
   }
