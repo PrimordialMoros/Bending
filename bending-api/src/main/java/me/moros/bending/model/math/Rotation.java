@@ -19,7 +19,10 @@
 
 package me.moros.bending.model.math;
 
-public class Rotation {
+/**
+ * Immutable implementation of rotation in 3D space.
+ */
+public final class Rotation {
   private final double q0;
   private final double q1;
   private final double q2;

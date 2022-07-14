@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import me.moros.bending.registry.Registries;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -74,8 +75,24 @@ public final class TranslationManager implements Iterable<Locale> {
 
     ResourceBundle bundle = ResourceBundle.getBundle("bending", Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
     registry.registerAll(Message.DEFAULT_LOCALE, bundle, false);
+
+    loadFromRegistry();
+
     installed.add(Message.DEFAULT_LOCALE);
     GlobalTranslator.translator().addSource(registry);
+  }
+
+  private void loadFromRegistry() {
+    for (Translation translation : Registries.TRANSLATIONS) {
+      Locale locale = translation.locale();
+      for (var entry : translation) {
+        String key = entry.getKey();
+        if (!registry.contains(key)) {
+          registry.register(key, locale, entry.getValue());
+        }
+      }
+      installed.add(locale);
+    }
   }
 
   private void loadCustom() {

@@ -23,13 +23,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.basic.AbstractWheel;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.AbstractWheel;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
@@ -38,8 +38,8 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -72,7 +72,7 @@ public class FireWheel extends AbilityInstance {
 
     Vector3d direction = user.direction().withY(0).normalize();
     Vector3d location = user.location().add(direction);
-    location = location.add(new Vector3d(0, userConfig.radius, 0));
+    location = location.add(0, userConfig.radius, 0);
     if (location.toBlock(user.world()).isLiquid()) {
       return false;
     }

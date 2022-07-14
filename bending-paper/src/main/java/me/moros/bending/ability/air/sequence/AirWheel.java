@@ -27,9 +27,9 @@ import me.moros.bending.ability.air.AirScooter;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -86,7 +86,7 @@ public class AirWheel extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    center = user.location().add(new Vector3d(0, 0.8, 0));
+    center = user.location().add(0, 0.8, 0);
     nextRenderTime = 0;
     return true;
   }
@@ -99,7 +99,7 @@ public class AirWheel extends AbilityInstance {
   @Override
   public UpdateResult update() {
     long time = System.currentTimeMillis();
-    center = user.location().add(new Vector3d(0, 0.8, 0)).add(user.direction().withY(0).multiply(1.2));
+    center = user.location().add(0, 0.8, 0).add(user.direction().withY(0).multiply(1.2));
     collider = new Disk(new OBB(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
 
     if (time >= nextRenderTime) {
@@ -107,7 +107,7 @@ public class AirWheel extends AbilityInstance {
       nextRenderTime = time + 100;
     }
 
-    Block base = center.subtract(new Vector3d(0, 1.6, 0)).toBlock(user.world());
+    Block base = center.subtract(0, 1.6, 0).toBlock(user.world());
     WorldUtil.tryCoolLava(user, base);
     WorldUtil.tryExtinguishFire(user, base);
 

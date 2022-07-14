@@ -18,6 +18,6 @@
  */
 
 /**
- * Utility classes for bendable and general purpose materials.
+ * Provides utility classes for bendable and general purpose materials.
  */
 package me.moros.bending.util.material;

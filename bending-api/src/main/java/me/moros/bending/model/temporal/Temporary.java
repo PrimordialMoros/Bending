@@ -21,6 +21,9 @@ package me.moros.bending.model.temporal;
 
 import me.moros.bending.model.math.FastMath;
 
+/**
+ * Temporaries revert to their original state when their duration ends or when {@link #revert()} is manually called.
+ */
 @FunctionalInterface
 public interface Temporary {
   long DEFAULT_REVERT = 600_000;

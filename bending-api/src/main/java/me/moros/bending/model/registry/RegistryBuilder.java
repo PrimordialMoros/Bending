@@ -25,6 +25,11 @@ import java.util.function.Function;
 import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.registry.SimpleRegistry.SimpleMutableRegistry;
 
+/**
+ * Utility class for building registries.
+ * @param <K> the key type
+ * @param <V> the value type
+ */
 public class RegistryBuilder<K, V> {
   protected final String namespace;
 

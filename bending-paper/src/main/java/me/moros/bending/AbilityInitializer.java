@@ -87,9 +87,9 @@ import me.moros.bending.ability.water.passive.FastSwim;
 import me.moros.bending.ability.water.passive.HydroSink;
 import me.moros.bending.ability.water.sequence.Iceberg;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
-import me.moros.bending.model.ability.description.SequenceStep;
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription.Sequence;
+import me.moros.bending.model.ability.SequenceStep;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.registry.Registries;
 
@@ -97,7 +97,7 @@ import static me.moros.bending.model.Element.*;
 import static me.moros.bending.model.ability.Activation.*;
 
 /**
- * Used to initialize all default ability descriptions, sequences and collisions
+ * Used to initialize all default ability descriptions, sequences and collisions.
  */
 public final class AbilityInitializer {
   public static final List<String> spouts = List.of("AirSpout", "WaterSpout");

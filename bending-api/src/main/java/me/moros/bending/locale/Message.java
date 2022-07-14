@@ -35,6 +35,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import static me.moros.bending.util.ColorPalette.*;
 import static net.kyori.adventure.text.Component.*;
 
+/**
+ * Provides formatted messages.
+ */
 public interface Message {
   Locale DEFAULT_LOCALE = Locale.ENGLISH;
 

@@ -22,11 +22,12 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
@@ -38,7 +39,6 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -231,7 +231,7 @@ public class EarthGlove extends AbilityInstance {
     Side side = user.store().toggle(key, Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
     Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
-    glove = buildGlove(gloveSpawnLocation.subtract(new Vector3d(0, 0.2, 0)));
+    glove = buildGlove(gloveSpawnLocation.subtract(0, 0.2, 0));
 
     if (isMetal) {
       SoundUtil.METAL.play(user.world(), gloveSpawnLocation);

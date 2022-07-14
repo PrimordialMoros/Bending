@@ -29,7 +29,7 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import me.moros.bending.command.CommandManager;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.registry.Registries;
 import org.bukkit.command.CommandSender;

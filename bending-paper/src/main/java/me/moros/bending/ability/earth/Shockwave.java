@@ -26,15 +26,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.basic.BlockLine;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.TempEntityType;
 import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.BlockLine;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -47,6 +45,8 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.TempEntityType;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -245,7 +245,7 @@ public class Shockwave extends AbilityInstance {
       BlockData data = mapData(below.getBlockData());
       TempEntity.builder(data).velocity(velocity).duration(500)
         .build(TempEntityType.FALLING_BLOCK, user.world(), Vector3d.center(below));
-      ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(new Vector3d(0, 0.75, 0)))
+      ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(0, 0.75, 0))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.EARTH.play(block);

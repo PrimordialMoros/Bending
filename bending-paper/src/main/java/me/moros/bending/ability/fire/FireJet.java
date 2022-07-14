@@ -22,21 +22,21 @@ package me.moros.bending.ability.fire;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempLight;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -117,7 +117,7 @@ public class FireJet extends AbilityInstance {
   }
 
   private void jetBlastAnimation() {
-    Vector3d center = user.location().add(new Vector3d(0, 0.2, 0));
+    Vector3d center = user.location().add(0, 0.2, 0);
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
       ParticleUtil.fire(user, center.add(v.multiply(0.5))).count(0).offset(v).extra(0.09).spawn(user.world())
     );

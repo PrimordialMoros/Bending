@@ -39,7 +39,6 @@ import org.bukkit.inventory.MainHand;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@FunctionalInterface
 public interface BukkitUser extends ForwardingAudience.Single, Identity {
   LivingEntity entity();
 
@@ -110,30 +109,21 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
     return false;
   }
 
-  default boolean sneaking() {
-    return true; // Non-players are always considered sneaking so they can charge abilities.
-  }
+  boolean sneaking();
 
-  default boolean sprinting() {
-    return true;
-  }
+  void sneaking(boolean sneaking);
 
-  default void sprinting(boolean sprinting) {
-  }
+  boolean sprinting();
 
-  default boolean allowFlight() {
-    return true;
-  }
+  void sprinting(boolean sprinting);
 
-  default void allowFlight(boolean allow) {
-  }
+  boolean allowFlight();
 
-  default boolean flying() {
-    return false;
-  }
+  void allowFlight(boolean allow);
 
-  default void flying(boolean flying) {
-  }
+  boolean flying();
+
+  void flying(boolean flying);
 
   default @Nullable Inventory inventory() {
     return entity() instanceof InventoryHolder holder ? holder.getInventory() : null;
@@ -183,7 +173,8 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    * @return a vector which represents the user's specified hand location
    */
   default Vector3d handSide(boolean right) {
-    Vector3d offset = direction().multiply(0.4).add(new Vector3d(0, sneaking() ? 1.2 : 1.575, 0));
+    double y = sneaking() ? 1.2 : 1.575;
+    Vector3d offset = direction().multiply(0.4).add(0, y, 0);
     return right ? rightSide().add(offset) : leftSide().add(offset);
   }
 

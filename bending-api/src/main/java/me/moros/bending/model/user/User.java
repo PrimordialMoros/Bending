@@ -21,12 +21,12 @@ package me.moros.bending.model.user;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.protection.ProtectionCache;
+import me.moros.bending.model.protection.ProtectionCache;
+import me.moros.bending.temporal.TempBlock;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.Nullable;

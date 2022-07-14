@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.ability.air.sequence.AirWheel;
-import me.moros.bending.ability.common.basic.AbstractRide;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.AbstractRide;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.Vector3d;
@@ -134,7 +134,7 @@ public class AirScooter extends AbilityInstance {
         double x = 0.6 * Math.cos(theta) * sin;
         double y = 0.6 * Math.cos(verticalPosition);
         double z = 0.6 * Math.sin(theta) * sin;
-        ParticleUtil.air(location.add(new Vector3d(x, y - 0.25, z))).spawn(user.world());
+        ParticleUtil.air(location.add(x, y - 0.25, z)).spawn(user.world());
       }
     }
 

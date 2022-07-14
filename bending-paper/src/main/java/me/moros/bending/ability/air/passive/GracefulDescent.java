@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.air.passive;
 
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

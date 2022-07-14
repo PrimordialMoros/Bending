@@ -23,9 +23,9 @@ import java.util.List;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.predicate.removal.Policies;

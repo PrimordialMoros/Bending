@@ -28,11 +28,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -45,6 +44,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -158,7 +158,7 @@ public class FireWall extends AbilityInstance {
   private void renderWall() {
     for (Vector3d base : bases) {
       for (double h = 0; h <= currentHeight; h += 0.8) {
-        Vector3d pos = base.add(new Vector3d(0, h, 0));
+        Vector3d pos = base.add(0, h, 0);
         Block block = pos.toBlock(user.world());
         TempLight.builder(ticks).rate(1).duration(userConfig.duration).build(block)
           .map(TempLight::lock).ifPresent(l -> lights.put(block, l));
@@ -186,7 +186,7 @@ public class FireWall extends AbilityInstance {
   private @Nullable Vector3d getValidBase(double searchHeight) {
     Vector3d center = user.rayTrace(userConfig.range).ignoreLiquids(false).blocks(user.world()).position();
     for (double i = 0; i <= searchHeight; i += 0.5) {
-      Vector3d check = center.subtract(new Vector3d(0, i, 0));
+      Vector3d check = center.subtract(0, i, 0);
       Block block = check.toBlock(user.world());
       if (!user.canBuild(block)) {
         continue;

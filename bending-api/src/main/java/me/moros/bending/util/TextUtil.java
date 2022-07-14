@@ -54,7 +54,7 @@ public final class TextUtil {
   }
 
   /**
-   * Strip input of all non alphabetical values and limit to 16 characters long.
+   * Strip input of all non-alphabetical values and limit to 16 characters long.
    * This is used for preset names mainly.
    * @param input input the input string to sanitize
    * @return the sanitized output string

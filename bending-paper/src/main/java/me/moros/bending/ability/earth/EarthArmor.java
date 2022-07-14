@@ -20,18 +20,13 @@
 package me.moros.bending.ability.earth;
 
 import java.util.List;
-import java.util.function.Supplier;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempArmor;
-import me.moros.bending.game.temporal.TempArmor.Builder;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.math.FastMath;
@@ -39,8 +34,11 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempArmor;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -56,17 +54,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthArmor extends AbilityInstance {
-  private enum Mode {
-    ROCK(TempArmor::leather),
-    IRON(TempArmor::iron),
-    GOLD(TempArmor::gold);
-
-    private final Supplier<TempArmor.Builder> builder;
-
-    Mode(Supplier<Builder> builder) {
-      this.builder = builder;
-    }
-  }
+  private enum Mode {ROCK, IRON, GOLD}
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -136,7 +124,12 @@ public class EarthArmor extends AbilityInstance {
     if (formed) {
       return;
     }
-    mode.builder.get().duration(userConfig.duration).build(user);
+    var armorBuilder = switch (mode) {
+      case ROCK -> TempArmor.leather();
+      case IRON -> TempArmor.iron();
+      case GOLD -> TempArmor.gold();
+    };
+    armorBuilder.duration(userConfig.duration).build(user);
     int duration = FastMath.round(userConfig.duration / 50.0);
     EntityUtil.tryAddPotion(user.entity(), PotionEffectType.DAMAGE_RESISTANCE, duration, resistance - 1);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();

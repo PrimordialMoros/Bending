@@ -19,7 +19,7 @@
 
 package me.moros.bending.event;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 
 public interface AbilityEvent extends UserEvent {
   AbilityDescription ability();

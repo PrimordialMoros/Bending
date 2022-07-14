@@ -24,16 +24,16 @@ import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.event.EventBus;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -103,14 +103,14 @@ public final class BendingExplosion {
       sound.play(world, center);
     }
 
-    if (breakBlocks && !blocks.isEmpty() && !center.toBlock(world).isLiquid()) {
+    if (breakBlocks && !center.toBlock(world).isLiquid()) {
+      Collection<Block> filteredBlocks = blocks.stream().filter(predicate).filter(user::canBuild).toList();
       ThreadLocalRandom rand = ThreadLocalRandom.current();
-      blocks.removeIf(b -> !user.canBuild(b));
-      for (Block block : blocks) {
+      for (Block block : filteredBlocks) {
         TempBlock.air().duration(BendingProperties.instance().explosionRevertTime(1000)).build(block);
       }
       if (placeFire) {
-        for (Block block : blocks) {
+        for (Block block : filteredBlocks) {
           if (MaterialUtil.isIgnitable(block) && rand.nextInt(3) == 0) {
             TempBlock.fire().duration(BendingProperties.instance().fireRevertTime(1000)).build(block);
           }

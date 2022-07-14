@@ -24,18 +24,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.basic.AbstractLine;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.TempEntityType;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.SelectedSource;
+import me.moros.bending.model.ability.common.basic.AbstractLine;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
@@ -45,8 +42,11 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.TempEntityType;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
@@ -161,7 +161,7 @@ public class IceCrawl extends AbilityInstance {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       TempEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false).particles(true).duration(1400)
-        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(new Vector3d(x, 2, z)));
+        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(x, 2, z));
     }
 
     @Override
@@ -175,7 +175,7 @@ public class IceCrawl extends AbilityInstance {
     public boolean onEntityHit(Entity entity) {
       DamageUtil.damageEntity(entity, user, userConfig.damage, description());
       if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
-        Vector3d spawnLoc = new Vector3d(entity.getLocation()).subtract(new Vector3d(0, 0.2, 0));
+        Vector3d spawnLoc = new Vector3d(entity.getLocation()).subtract(0, 0.2, 0);
         TempEntity.builder(Material.PACKED_ICE.createBlockData()).gravity(false)
           .duration(userConfig.freezeDuration).build(TempEntityType.FALLING_BLOCK, user.world(), spawnLoc);
         ActionLimiter.builder().limit(ActionType.MOVE).duration(userConfig.freezeDuration).build(user, livingEntity);

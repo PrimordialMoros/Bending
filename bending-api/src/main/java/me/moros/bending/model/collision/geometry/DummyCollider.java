@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3d;
 
 /**
- * Dummy {@link AABB} collider for passable blocks
+ * Dummy {@link AABB} collider for passable blocks.
  */
 public final class DummyCollider extends AABB {
   public DummyCollider() {

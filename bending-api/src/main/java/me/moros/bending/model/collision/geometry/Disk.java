@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3d;
 
 /**
- * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider
+ * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider.
  */
 public class Disk implements Collider {
   public final Sphere sphere;

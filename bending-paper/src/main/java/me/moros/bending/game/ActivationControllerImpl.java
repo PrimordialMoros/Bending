@@ -49,21 +49,21 @@ import me.moros.bending.ability.water.passive.HydroSink;
 import me.moros.bending.ability.water.sequence.Iceberg;
 import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.event.EventBus;
-import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempArmor;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.manager.ActivationController;
 import me.moros.bending.model.manager.SequenceManager;
 import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.protection.ProtectionCache;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.protection.ProtectionCache;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.TempArmor;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.WorldUtil;
 import org.bukkit.block.Block;
@@ -277,7 +277,7 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   // Optimize player move events by caching instances every tick
-  private final class ControllerCache {
+  private static final class ControllerCache {
     private final Map<UUID, AirSpout> airSpoutCache;
     private final Map<UUID, WaterSpout> waterSpoutCache;
     private final Set<UUID> ignoreSwing;

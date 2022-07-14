@@ -21,15 +21,12 @@ package me.moros.bending.ability.earth;
 
 import java.util.List;
 
-import me.moros.bending.ability.common.basic.AbstractRide;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.Builder;
-import me.moros.bending.game.temporal.TempEntity.TempEntityType;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.AbstractRide;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Sphere;
@@ -39,6 +36,9 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.Builder;
+import me.moros.bending.temporal.TempEntity.TempEntityType;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -95,7 +95,7 @@ public class EarthSurf extends AbilityInstance {
 
   private boolean launch() {
     double dist = EntityUtil.distanceAboveGround(user.entity(), 2.5);
-    Block check = user.location().subtract(new Vector3d(0, dist + 0.05, 0)).toBlock(user.world());
+    Block check = user.location().subtract(0, dist + 0.05, 0).toBlock(user.world());
     if (dist > 2.25 || !EarthMaterials.isEarthOrSand(check)) {
       return false;
     }
@@ -174,7 +174,7 @@ public class EarthSurf extends AbilityInstance {
 
     @Override
     public void postRender() {
-      center = user.location().subtract(new Vector3d(0, 0.5, 0));
+      center = user.location().subtract(0, 0.5, 0);
       if (++ticks % 4 == 0) {
         SoundUtil.of(Sound.BLOCK_ROOTED_DIRT_FALL, 0.6F, 0).play(user.world(), center);
       }

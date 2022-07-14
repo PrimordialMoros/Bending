@@ -33,7 +33,6 @@ import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.PlayerListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.protection.WorldGuardFlag;
 import me.moros.bending.registry.Registries;

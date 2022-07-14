@@ -43,7 +43,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.model.user.profile.BenderData;

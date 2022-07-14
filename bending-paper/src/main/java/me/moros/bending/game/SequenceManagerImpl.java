@@ -28,10 +28,10 @@ import java.util.UUID;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription.Sequence;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
-import me.moros.bending.model.ability.description.SequenceStep;
+import me.moros.bending.model.ability.SequenceStep;
 import me.moros.bending.model.manager.ActivationController;
 import me.moros.bending.model.manager.SequenceManager;
 import me.moros.bending.model.user.User;

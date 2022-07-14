@@ -21,12 +21,11 @@ package me.moros.bending.model.math;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Immutable 3D Vector implementation with integer coordinates
  */
-public class Vector3i {
+public final class Vector3i {
   public static final Vector3i ZERO = new Vector3i(0, 0, 0);
 
   private final int x;
@@ -194,7 +193,7 @@ public class Vector3i {
   }
 
   @Override
-  public boolean equals(@Nullable Object obj) {
+  public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }

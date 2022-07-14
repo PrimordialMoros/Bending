@@ -25,26 +25,27 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.basic.BlockShot;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.SelectedSource;
+import me.moros.bending.model.ability.common.basic.BlockShot;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -202,17 +203,17 @@ public class WaterManipulation extends AbilityInstance {
   private static void redirectAny(User user) {
     Collection<WaterManipulation> manips = user.game().abilityManager(user.world()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).toList();
+    Ray ray = user.ray(config.maxRedirectRange + 2);
     double minSq = config.noRedirectRange * config.noRedirectRange;
     double maxSq = config.maxRedirectRange * config.maxRedirectRange;
     for (WaterManipulation manip : manips) {
       Vector3d center = manip.manip.center();
-      double dist = center.distanceSq(manip.user().eyeLocation());
-      double dist2 = center.distanceSq(user.eyeLocation());
-      if (dist < minSq || dist2 > maxSq) {
+      double dist = center.distance(manip.user().eyeLocation());
+      if (dist * dist < minSq || center.distanceSq(user.eyeLocation()) > maxSq) {
         continue;
       }
       Collider selectSphere = new Sphere(center, config.redirectGrabRadius);
-      if (selectSphere.intersects(user.ray(dist))) {
+      if (selectSphere.intersects(ray)) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();

@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.math;
 
+/**
+ * Math utility for rounding numbers accoding to Minecraft's coordinate system.
+ */
 public final class FastMath {
   private FastMath() {
   }

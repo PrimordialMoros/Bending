@@ -18,7 +18,6 @@
  */
 
 /**
- * Contains the NMS interface {@link me.moros.bending.adapter.NativeAdapter} and its implementations.
+ * Defines adapters for utilizing NMS and packets.
  */
-
 package me.moros.bending.adapter;

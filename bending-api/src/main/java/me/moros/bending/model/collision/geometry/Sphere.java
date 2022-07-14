@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3d;
 
 /**
- * Simple sphere collider
+ * Simple sphere collider.
  */
 public class Sphere implements Collider {
   public final Vector3d center;

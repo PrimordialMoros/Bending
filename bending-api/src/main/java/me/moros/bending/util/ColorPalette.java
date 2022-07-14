@@ -21,6 +21,9 @@ package me.moros.bending.util;
 
 import net.kyori.adventure.text.format.TextColor;
 
+/**
+ * Provides default colors for Bending.
+ */
 public interface ColorPalette {
   /**
    * Wheat

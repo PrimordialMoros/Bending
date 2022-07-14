@@ -25,7 +25,7 @@ import me.moros.bending.model.math.Vector3d;
 import static java.lang.Math.abs;
 
 /**
- * Oriented bounding box
+ * Oriented bounding box.
  */
 public class OBB implements Collider {
   public final Vector3d center;

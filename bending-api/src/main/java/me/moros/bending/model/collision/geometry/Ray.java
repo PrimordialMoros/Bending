@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3d;
 
 /**
- * Ray with origin and direction
+ * Ray with origin and direction.
  */
 public class Ray implements Collider {
   public final Vector3d origin;

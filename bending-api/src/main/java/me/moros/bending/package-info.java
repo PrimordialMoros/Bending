@@ -22,7 +22,6 @@
  */
 @DefaultQualifier(value = NonNull.class, locations = TypeUseLocation.PARAMETER)
 @DefaultQualifier(value = NonNull.class, locations = TypeUseLocation.RETURN)
-
 package me.moros.bending;
 
 import org.checkerframework.checker.nullness.qual.NonNull;

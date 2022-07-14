@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.key.Key;
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.registry.Registries;

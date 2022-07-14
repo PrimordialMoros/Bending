@@ -19,9 +19,9 @@
 
 package me.moros.bending.ability.water.passive;
 
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;

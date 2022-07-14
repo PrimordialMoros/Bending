@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import me.moros.bending.config.ConfigManager;
-import me.moros.bending.protection.Protection;
+import me.moros.bending.model.protection.Protection;
 import me.moros.bending.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.protection.plugin.LWCProtection;
 import me.moros.bending.protection.plugin.TownyProtection;
@@ -34,7 +34,7 @@ import org.bukkit.plugin.PluginManager;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
 /**
- * Used to initialize all default protections
+ * Used to initialize all default protections.
  */
 public final class ProtectionInitializer {
   private final PluginManager manager;

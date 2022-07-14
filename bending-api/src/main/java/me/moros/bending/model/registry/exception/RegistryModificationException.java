@@ -20,8 +20,7 @@
 package me.moros.bending.model.registry.exception;
 
 /**
- * This exception may be thrown by methods that have detected illegal modification of a mutable
- * registry that has been locked.
+ * This exception may be thrown by methods that have detected illegal modification of a registry.
  */
 public class RegistryModificationException extends RuntimeException {
   /**

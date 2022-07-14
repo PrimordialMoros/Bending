@@ -23,7 +23,7 @@ import java.util.Collection;
 
 import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.math.Vector3d;

@@ -116,7 +116,7 @@ public final class EntityUtil {
 
   /**
    * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
-   * By default it ignores all passable materials except liquids.
+   * By default, it ignores all passable materials except liquids.
    * @param entity the entity to check
    * @param maxHeight the maximum height to check
    * @return the distance in blocks between the entity and ground or the max world height.
@@ -144,7 +144,7 @@ public final class EntityUtil {
    * @return the resulting vector
    */
   public static Vector3d entityCenter(Entity entity) {
-    return new Vector3d(entity.getLocation()).add(new Vector3d(0, entity.getHeight() / 2, 0));
+    return new Vector3d(entity.getLocation()).add(0, entity.getHeight() / 2, 0);
   }
 
   public static boolean underWater(Entity entity) {

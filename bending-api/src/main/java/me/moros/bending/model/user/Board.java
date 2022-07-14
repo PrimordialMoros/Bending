@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.user;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 
 public interface Board {
   String SEP = " -------------- ";

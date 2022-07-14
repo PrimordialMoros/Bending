@@ -26,13 +26,12 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -45,8 +44,9 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
@@ -326,7 +326,7 @@ public class MetalCable extends AbilityInstance {
     Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).entities(user.world()).entityCenterOrPosition();
 
     Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
-    EntityUtil.applyVelocity(this, target.entity, velocity.add(new Vector3d(0, 0.2, 0)));
+    EntityUtil.applyVelocity(this, target.entity, velocity.add(0, 0.2, 0));
     target.entity.setFallDistance(0);
     if (target.entity instanceof FallingBlock) {
       removalPolicy = Policies.builder()

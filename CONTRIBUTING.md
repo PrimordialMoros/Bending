@@ -32,18 +32,22 @@ The project is currently split into 2 main modules:
 
 `me.moros.bending` is the top level package.
 
-### Sub-packages
+### bending-api packages
 
-- `ability` - Contains all ability implementations
-- `command` - Contains all plugin commands
-- `event` - Contains all plugin provided events
-- `game` - Contains all data and controllers for the main logic of the game
-- `hook` - Contains all hooks that provide data to third-party plugins
-- `listener` - Contains all plugin listeners
-- `model` - Contains the model for the plugin's data and systems
-- `protection` - Contains all world/region protection systems
-- `registry` - Contains all registry systems
-- `storage` - Contains everything related to persistent storage (databases)
-- `util` - Contains all utility classes
+- `adapter` - Contains the interface for NMS adapters
+- `config` - Contains config interfaces
+- `event` - Contains bending related events
+- `model` - Contains models for bending systems and components
+- `registry` - Contains built-in registries
+- `temporal` - Contains temporal systems
+- `util` - Contains utility classes
 
-A more detailed diagram will be posted in the future to explain how systems interact with each other.
+### bending-paper packages
+
+- `ability` - Contains ability implementations
+- `command` - Contains plugin commands
+- `game` - Contains base systems for the main logic of the game
+- `hook` - Contains hooks that provide data to third-party plugins
+- `listener` - Contains plugin listeners
+- `protection` - Contains world/region protection systems
+- `storage` - Contains persistent storage (databases) implementations

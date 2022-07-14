@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.basic.ParticleStream;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempLight;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
@@ -44,8 +43,9 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -204,7 +204,7 @@ public class FireBurst extends AbilityInstance {
       Vector3d reverse = ray.direction.negate();
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
-      Vector3d standing = user.location().add(new Vector3d(0, 0.5, 0));
+      Vector3d standing = user.location().add(0, 0.5, 0);
       for (Block b : WorldUtil.nearbyBlocks(user.world(), location, igniteRadius)) {
         if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
           continue;

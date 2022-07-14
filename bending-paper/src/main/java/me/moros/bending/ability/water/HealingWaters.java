@@ -23,9 +23,9 @@ import java.util.List;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.key.RegistryKey;
@@ -103,15 +103,15 @@ public class HealingWaters extends AbilityInstance {
   private boolean tryHeal() {
     LivingEntity target;
     Mode mode = user.store().getOrDefault(RegistryKey.create("healingwaters-mode", Mode.class), Mode.SELF);
-    if (mode == Mode.SELF) {
-      target = user.entity();
-    } else {
+    if (mode == Mode.OTHERS) {
       Entity entity = user.rayTrace(userConfig.range + 1).entities(user.world()).entity();
       if (entity instanceof LivingEntity && user.entity().hasLineOfSight(entity)) {
         target = (LivingEntity) entity;
       } else {
         return false;
       }
+    } else {
+      target = user.entity();
     }
     if (!target.isInWaterOrRainOrBubbleColumn() && !InventoryUtil.hasFullBottle(user)) {
       return false;

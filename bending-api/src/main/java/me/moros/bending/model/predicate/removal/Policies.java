@@ -22,7 +22,7 @@ package me.moros.bending.model.predicate.removal;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 

@@ -21,10 +21,10 @@ package me.moros.bending.util.collision;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.game.temporal.TempEntity;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempEntity;
 import org.bukkit.GameMode;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -59,7 +59,7 @@ public final class CollisionUtil {
 
   /**
    * Checks a collider to see if it's hitting any entities near it.
-   * By default it ignores Spectators and invisible armor stands.
+   * By default, it ignores Spectators, Temporal entities and invisible armor stands.
    * @param user the user (needed for self collision and to specify the world in which collisions are checked)
    * @param collider the collider to check
    * @param callback the method to be called for every hit entity

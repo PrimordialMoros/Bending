@@ -24,16 +24,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Explosive;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -43,8 +41,10 @@ import me.moros.bending.model.predicate.removal.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -298,12 +298,12 @@ public class EarthShot extends AbilityInstance implements Explosive {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
       projectile.entity().setGravity(true);
-      EntityUtil.applyVelocity(this, projectile.entity(), dir.add(new Vector3d(0, 0.2, 0)));
+      EntityUtil.applyVelocity(this, projectile.entity(), dir.add(0, 0.2, 0));
     } else {
       origin = Vector3d.center(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
       projectile = TempFallingBlock.builder(readySource.getBlockData())
-        .velocity(dir.add(new Vector3d(0, 0.2, 0))).build(readySource);
+        .velocity(dir.add(0, 0.2, 0)).build(readySource);
       TempBlock.air().build(readySource);
     }
     location = projectile.center();

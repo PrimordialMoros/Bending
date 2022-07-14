@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ExpiringSet;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -40,8 +40,8 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -188,10 +188,10 @@ public class OctopusForm extends AbilityInstance {
     if (!formed) {
       return;
     }
-    Vector3d center = user.location().floor().add(new Vector3d(0.5, 0, 0.5));
+    Vector3d center = user.location().floor().add(0.5, 0, 0.5);
     double r = RADIUS + 0.5;
     for (double phi = 0; phi < Math.PI * 2; phi += Math.PI / 4) {
-      Vector3d tentacleBase = center.add(new Vector3d(Math.cos(phi) * r, 0, Math.sin(phi) * r));
+      Vector3d tentacleBase = center.add(Math.cos(phi) * r, 0, Math.sin(phi) * r);
       CollisionUtil.handle(user, TENTACLE_BOX.at(tentacleBase), this::onEntityHit, true);
     }
   }
@@ -255,12 +255,12 @@ public class OctopusForm extends AbilityInstance {
       double bottomOffset = ThreadLocalRandom.current().nextDouble(1);
       double xBottom = cos * (RADIUS + bottomOffset);
       double zBottom = sin * (RADIUS + bottomOffset);
-      blocks.add(center.add(new Vector3d(xBottom, 1, zBottom)).toBlock(user.world()));
+      blocks.add(center.add(xBottom, 1, zBottom).toBlock(user.world()));
       if (time > topFormTime) {
         double topOffset = ThreadLocalRandom.current().nextDouble(1);
         double xTop = cos * (RADIUS + topOffset);
         double zTop = sin * (RADIUS + topOffset);
-        blocks.add(center.add(new Vector3d(xTop, 2, zTop)).toBlock(user.world()));
+        blocks.add(center.add(xTop, 2, zTop).toBlock(user.world()));
       }
     }
   }

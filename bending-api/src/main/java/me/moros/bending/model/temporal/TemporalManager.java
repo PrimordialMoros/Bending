@@ -29,6 +29,11 @@ import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Base implementation for registering and managing {@link Temporary}.
+ * @param <K> the key type
+ * @param <V> the value type
+ */
 public class TemporalManager<K, V extends TemporaryBase> {
   private final Consumer<V> consumer;
   private final Map<K, V> instances;

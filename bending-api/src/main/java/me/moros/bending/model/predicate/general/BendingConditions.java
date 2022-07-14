@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 public enum BendingConditions implements BiPredicate<User, AbilityDescription> {

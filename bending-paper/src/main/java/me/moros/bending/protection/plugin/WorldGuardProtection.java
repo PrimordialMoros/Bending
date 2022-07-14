@@ -30,7 +30,7 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.moros.bending.model.key.Key;
-import me.moros.bending.protection.Protection;
+import me.moros.bending.model.protection.Protection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;

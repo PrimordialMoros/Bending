@@ -19,13 +19,13 @@
 
 package me.moros.bending.listener;
 
-import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.block.Block;

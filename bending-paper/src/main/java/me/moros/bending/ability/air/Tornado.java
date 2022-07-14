@@ -24,9 +24,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -50,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Tornado extends AbilityInstance {
-  public enum Mode {PUSH, PULL}
+  private enum Mode {PUSH, PULL}
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -129,12 +129,12 @@ public class Tornado extends AbilityInstance {
         }
         velocity = user.direction().withY(velY).multiply(factor);
       } else {
-        if (mode == Mode.PUSH) {
+        if (mode == Mode.PULL) {
+          velocity = delta.add(0, 0.75 * height, 0).normalize().multiply(factor);
+        } else {
           Vector3d normal = delta.withY(0).normalize();
           Vector3d ortho = normal.cross(Vector3d.PLUS_J).normalize();
-          velocity = ortho.add(normal).normalize().add(new Vector3d(0, 0.5, 0)).multiply(factor);
-        } else {
-          velocity = delta.add(new Vector3d(0, 0.75 * height, 0)).normalize().multiply(factor);
+          velocity = ortho.add(normal).normalize().add(0, 0.5, 0).multiply(factor);
         }
       }
       EntityUtil.applyVelocity(this, entity, velocity);
@@ -161,7 +161,7 @@ public class Tornado extends AbilityInstance {
         double r = 0.5 + (radius - 0.5) * y / height;
         double x = r * Math.cos(y + offset);
         double z = r * Math.sin(y + offset);
-        Vector3d loc = base.add(new Vector3d(x, y, z));
+        Vector3d loc = base.add(x, y, z);
         ParticleUtil.air(loc).spawn(user.world());
         if (ThreadLocalRandom.current().nextInt(20) == 0) {
           SoundUtil.AIR.play(user.world(), loc);

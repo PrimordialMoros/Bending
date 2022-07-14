@@ -22,12 +22,11 @@ package me.moros.bending.model.math;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Immutable 3D Vector implementation
  */
-public class Vector3d {
+public final class Vector3d {
   public static final Vector3d ZERO = new Vector3d(0, 0, 0);
   public static final Vector3d ONE = new Vector3d(1, 1, 1);
   public static final Vector3d PLUS_I = new Vector3d(1, 0, 0);
@@ -157,7 +156,11 @@ public class Vector3d {
    * @return a new vector
    */
   public Vector3d add(Vector3d v) {
-    return new Vector3d(x + v.x, y + v.y, z + v.z);
+    return add(v.x, v.y, v.z);
+  }
+
+  public Vector3d add(double dx, double dy, double dz) {
+    return new Vector3d(x + dx, y + dy, z + dz);
   }
 
   /**
@@ -166,7 +169,11 @@ public class Vector3d {
    * @return a new vector
    */
   public Vector3d subtract(Vector3d v) {
-    return new Vector3d(x - v.x, y - v.y, z - v.z);
+    return subtract(v.x, v.y, v.z);
+  }
+
+  public Vector3d subtract(double dx, double dy, double dz) {
+    return new Vector3d(x - dx, y - dy, z - dz);
   }
 
   /**
@@ -276,12 +283,12 @@ public class Vector3d {
   }
 
   @Override
-  public boolean equals(@Nullable Object obj) {
+  public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
     if (obj instanceof Vector3d v) {
-      return v.isNaN() ? this.isNaN() : (x == v.x) && (y == v.y) && (z == v.z);
+      return v.isNaN() ? this.isNaN() : (x == v.x && y == v.y && z == v.z);
     }
     return false;
   }

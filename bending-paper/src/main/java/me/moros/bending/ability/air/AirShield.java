@@ -23,14 +23,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import me.moros.bending.BendingProperties;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
@@ -41,8 +41,8 @@ import me.moros.bending.model.predicate.removal.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
@@ -105,7 +105,7 @@ public class AirShield extends AbilityInstance {
       }
       double x = userConfig.radius * factor * Math.cos(i * currentPoint);
       double z = userConfig.radius * factor * Math.sin(i * currentPoint);
-      Vector3d loc = center.add(new Vector3d(x, y, z));
+      Vector3d loc = center.add(x, y, z);
       ParticleUtil.air(loc).count(5).offset(0.2).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundUtil.AIR.play(user.world(), loc);

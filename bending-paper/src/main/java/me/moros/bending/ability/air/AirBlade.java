@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.ability.air.sequence.AirWheel;
-import me.moros.bending.ability.common.basic.AbstractWheel;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.AbstractWheel;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
@@ -85,7 +85,7 @@ public class AirBlade extends AbilityInstance {
     charging = true;
     direction = user.direction().withY(0).normalize();
     double maxRadius = userConfig.radius * userConfig.chargeFactor * 0.5;
-    origin = user.location().add(direction).add(new Vector3d(0, maxRadius, 0));
+    origin = user.location().add(direction).add(0, maxRadius, 0);
 
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))

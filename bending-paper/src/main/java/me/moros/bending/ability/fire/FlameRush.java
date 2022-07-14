@@ -26,15 +26,14 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.AbilityInitializer;
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
@@ -48,6 +47,7 @@ import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -144,7 +144,7 @@ public class FlameRush extends AbilityInstance {
     }
     charging = false;
     user.addCooldown(description(), userConfig.cooldown);
-    Vector3d origin = user.location().add(new Vector3d(0, 1.2, 0));
+    Vector3d origin = user.location().add(0, 1.2, 0);
     Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     stream = new FireStream(new Ray(origin, lookingDir), factor);

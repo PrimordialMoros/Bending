@@ -21,7 +21,7 @@ package me.moros.bending.event;
 
 import java.util.Objects;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.LivingEntity;

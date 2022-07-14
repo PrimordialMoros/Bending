@@ -24,13 +24,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.moros.bending.ability.common.Pillar;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.Pillar;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -38,6 +37,7 @@ import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -135,7 +135,7 @@ public class Catapult extends AbilityInstance {
     startTime = System.currentTimeMillis();
     user.addCooldown(description(), userConfig.cooldown);
 
-    Vector3d origin = user.location().add(new Vector3d(0, 0.5, 0));
+    Vector3d origin = user.location().add(0, 0.5, 0);
     SoundUtil.EARTH.play(user.world(), origin);
     if (base != null) {
       ParticleUtil.of(Particle.BLOCK_CRACK, origin).count(8).offset(0.4).data(base.getBlockData()).spawn(user.world());

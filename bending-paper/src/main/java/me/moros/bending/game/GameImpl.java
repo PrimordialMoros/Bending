@@ -26,12 +26,6 @@ import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.event.EventBus;
-import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.Cooldown;
-import me.moros.bending.game.temporal.TempArmor;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempLight;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.manager.ActivationController;
 import me.moros.bending.model.manager.FlightManager;
@@ -42,13 +36,17 @@ import me.moros.bending.model.storage.BendingStorage;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.Cooldown;
+import me.moros.bending.temporal.TempArmor;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.Tasker;
 import org.bukkit.World;
-import org.slf4j.Logger;
 
 public final class GameImpl implements Game {
-  private final Logger logger;
   private final ConfigProcessor configProcessor;
   private final BendingStorage storage;
 
@@ -60,7 +58,6 @@ public final class GameImpl implements Game {
   private final Collection<TemporalManager<?, ?>> temporal;
 
   public GameImpl(Bending plugin, ConfigManager configManager, BendingStorage storage) {
-    this.logger = plugin.logger();
     this.configProcessor = configManager.processor();
     this.storage = storage;
 

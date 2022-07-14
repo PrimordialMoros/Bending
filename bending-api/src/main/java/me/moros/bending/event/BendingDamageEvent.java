@@ -22,7 +22,7 @@ package me.moros.bending.event;
 import java.util.EnumMap;
 import java.util.Map;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;

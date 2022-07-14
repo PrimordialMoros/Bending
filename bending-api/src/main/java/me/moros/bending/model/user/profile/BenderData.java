@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

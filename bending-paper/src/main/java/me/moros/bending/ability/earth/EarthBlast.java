@@ -23,15 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.basic.BlockShot;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.SelectedSource;
+import me.moros.bending.model.ability.common.basic.BlockShot;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
@@ -42,8 +42,8 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.SoundUtil;
@@ -155,18 +155,14 @@ public class EarthBlast extends AbilityInstance {
     Collection<EarthBlast> blasts = user.game().abilityManager(user.world()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
     Ray ray = user.ray(config.shatterRange + 2);
+    double distSq = config.shatterRange * config.shatterRange;
     for (EarthBlast eb : blasts) {
       Vector3d center = eb.blast.center();
-      double dist = center.distanceSq(user.eyeLocation());
-      if (dist > config.shatterRange * config.shatterRange) {
-        continue;
-      }
-      if (eb.blast.collider().intersects(ray)) {
+      if (center.distanceSq(user.eyeLocation()) <= distSq && eb.blast.collider().intersects(ray)) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
-        Block block = center.toBlock(user.world());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
-        if (block.equals(rayTraced)) {
+        if (center.toBlock(user.world()).equals(rayTraced)) {
           user.game().abilityManager(user.world()).destroyInstance(eb);
           return true;
         }

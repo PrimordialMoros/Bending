@@ -27,13 +27,13 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.AbilityInitializer;
-import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;

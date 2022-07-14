@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.key.Namespaced;
+import me.moros.bending.model.registry.exception.RegistryModificationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -35,6 +36,7 @@ public interface Registry<K, V> extends Namespaced, Iterable<V> {
    * Registers a value if it doesn't exist.
    * @param value the value to register
    * @return true if value was registered, false otherwise
+   * @throws RegistryModificationException if registry is locked
    */
   boolean register(V value);
 

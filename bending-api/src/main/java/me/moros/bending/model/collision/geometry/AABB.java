@@ -22,7 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import me.moros.bending.model.math.Vector3d;
 
 /**
- * Axis aligned bounding box
+ * Axis aligned bounding box.
  */
 public class AABB implements Collider {
   public static final AABB PLAYER_BOUNDS = new AABB(new Vector3d(-0.3, 0.0, -0.3), new Vector3d(0.3, 1.8, 0.3));

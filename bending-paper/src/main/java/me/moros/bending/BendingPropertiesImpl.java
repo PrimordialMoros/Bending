@@ -22,7 +22,6 @@ package me.moros.bending;
 import java.util.List;
 
 import me.moros.bending.config.Configurable;
-import me.moros.bending.model.properties.BendingProperties;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable

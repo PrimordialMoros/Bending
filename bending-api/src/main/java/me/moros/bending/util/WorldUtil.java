@@ -27,11 +27,11 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.game.temporal.TempBlock;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -73,7 +73,7 @@ public final class WorldUtil {
 
   /**
    * Collects all blocks in a sphere that satisfy the given predicate.
-   * <p> Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+   * <p> Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
    * @param world the world to check
    * @param pos the center point
    * @param radius the radius of the sphere
@@ -120,7 +120,7 @@ public final class WorldUtil {
 
   /**
    * Collects all blocks inside a bounding box that satisfy the given predicate.
-   * <p> Note: Limit is only respected if positive. Otherwise all blocks that satisfy the given predicate are collected.
+   * <p> Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
    * @param world the world to check
    * @param box the bounding box to check
    * @param predicate the predicate that needs to be satisfied for every block
@@ -185,7 +185,7 @@ public final class WorldUtil {
    */
   public static void playLavaExtinguishEffect(Block block) {
     SoundUtil.LAVA_EXTINGUISH.play(block);
-    Vector3d center = Vector3d.center(block).add(new Vector3d(0, 0.2, 0));
+    Vector3d center = Vector3d.center(block).add(0, 0.2, 0);
     ParticleUtil.of(Particle.CLOUD, center).count(8).offset(0.3).spawn(block.getWorld());
   }
 
@@ -270,16 +270,13 @@ public final class WorldUtil {
   /**
    * Check surrounding blocks to see if an infinite water source can be created.
    * @param block the center block to check
-   * @return true if there 2 or more water sources around the block
+   * @return true if there are 2 or more water sources around the block
    */
   public static boolean isInfiniteWater(Block block) {
     int sources = 0;
     for (BlockFace face : SIDES) {
       Block adjacent = block.getRelative(face);
-      if (!TempBlock.isBendable(adjacent)) {
-        continue;
-      }
-      if (MaterialUtil.isWater(adjacent) && MaterialUtil.isSourceBlock(adjacent)) {
+      if (MaterialUtil.isWater(adjacent) && MaterialUtil.isSourceBlock(adjacent) && !TempBlock.MANAGER.isTemp(adjacent)) {
         sources++;
       }
     }

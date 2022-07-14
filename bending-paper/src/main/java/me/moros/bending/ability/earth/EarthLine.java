@@ -27,21 +27,18 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.ability.common.EarthSpike;
-import me.moros.bending.ability.common.Fracture;
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.SelectedSource;
-import me.moros.bending.ability.common.basic.AbstractLine;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.ActionLimiter;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.Builder;
-import me.moros.bending.game.temporal.TempEntity.TempEntityType;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.EarthSpike;
+import me.moros.bending.model.ability.common.Fracture;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.SelectedSource;
+import me.moros.bending.model.ability.common.basic.AbstractLine;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
@@ -53,8 +50,11 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.Builder;
+import me.moros.bending.temporal.TempEntity.TempEntityType;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.ColorPalette;
@@ -210,7 +210,7 @@ public class EarthLine extends AbilityInstance {
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       BlockData data = magma ? Material.MAGMA_BLOCK.createBlockData() : location.toBlock(user.world()).getRelative(BlockFace.DOWN).getBlockData();
       TempEntity.builder(data).gravity(false).particles(true).duration(700)
-        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(new Vector3d(x, 2, z)));
+        .build(TempEntityType.ARMOR_STAND, user.world(), location.subtract(x, 2, z));
     }
 
     @Override

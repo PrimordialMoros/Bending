@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.event.EventBus;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.EntityEffect;
 import org.bukkit.GameMode;
@@ -54,7 +54,7 @@ public final class DamageUtil {
       return false;
     }
 
-    // We only use base damage modifier so we have to manually calculate other modifiers
+    // We only use base damage modifier, so we have to manually calculate other modifiers
     dmg = calculateDamageAfterResistance(targetEntity, dmg);
     if (dmg > 0) {
       dmg = calculateDamageAfterAbsorption(targetEntity, dmg);

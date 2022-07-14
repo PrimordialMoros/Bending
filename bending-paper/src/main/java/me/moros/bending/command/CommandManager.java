@@ -43,7 +43,7 @@ import me.moros.bending.command.parser.PresetParser;
 import me.moros.bending.command.parser.UserParser;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.attribute.ModifyPolicy;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;

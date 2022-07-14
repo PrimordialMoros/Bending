@@ -22,7 +22,7 @@ package me.moros.bending.model.predicate.removal;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 
 @FunctionalInterface

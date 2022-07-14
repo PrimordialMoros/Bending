@@ -19,11 +19,14 @@
 
 package me.moros.bending.model.registry;
 
+import me.moros.bending.model.registry.exception.RegistryModificationException;
+
 public interface MutableRegistry<K, V> extends Registry<K, V> {
   /**
    * Invalidates a key if it exists.
    * @param key the key to invalidate
    * @return true if key was invalidated, false otherwise
+   * @throws RegistryModificationException if registry is locked
    */
   boolean invalidateKey(K key);
 
@@ -31,6 +34,7 @@ public interface MutableRegistry<K, V> extends Registry<K, V> {
    * Invalidates a value if it exists.
    * @param value the value to invalidate
    * @return true if value was invalidated, false otherwise
+   * @throws RegistryModificationException if registry is locked
    */
   boolean invalidateValue(V value);
 

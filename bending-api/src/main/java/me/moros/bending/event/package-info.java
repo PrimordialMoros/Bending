@@ -17,4 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * Defines adapters for utilizing NMS and packets.
+ */
 package me.moros.bending.event;

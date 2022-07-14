@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription.Sequence;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ColorPalette;

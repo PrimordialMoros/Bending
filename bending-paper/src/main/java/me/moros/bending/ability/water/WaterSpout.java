@@ -25,14 +25,12 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.ability.common.basic.AbstractSpout;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempBlock.Builder;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.basic.AbstractSpout;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
@@ -41,6 +39,8 @@ import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempBlock.Builder;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -166,7 +166,7 @@ public class WaterSpout extends AbilityInstance {
       }
     }
 
-    protected void clean(Block block) {
+    private void clean(Block block) {
       if (MaterialUtil.isWater(block)) {
         TempBlock.air().build(block);
       }

@@ -18,6 +18,6 @@
  */
 
 /**
- * Metadata keys and utilities.
+ * Provides Metadata keys and utilities.
  */
 package me.moros.bending.util.metadata;

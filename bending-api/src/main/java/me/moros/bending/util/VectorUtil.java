@@ -50,7 +50,7 @@ public final class VectorUtil {
    * @param axis the axis around which to rotate
    * @param angle the rotation angle
    * @param rays the amount of vectors to return, must be an odd number, minimum 3
-   * @return a list comprising of all the directions for this arc
+   * @return a list consisting of all the directions for this arc
    * @see #rotateInverse(Vector3d, Rotation, int)
    */
   public static Collection<Vector3d> createArc(Vector3d start, Vector3d axis, double angle, int rays) {
@@ -78,7 +78,7 @@ public final class VectorUtil {
    * @param axis the axis around which to rotate
    * @param angle the rotation angle
    * @param times the amount of times to repeat the rotation
-   * @return a list comprising of all the directions for this arc
+   * @return a list consisting of all the directions for this arc
    * @see #rotateInverse(Vector3d, Rotation, int)
    */
   public static Collection<Vector3d> rotate(Vector3d start, Vector3d axis, double angle, int times) {
@@ -162,7 +162,7 @@ public final class VectorUtil {
   }
 
   /**
-   * Decompose diagonal vectors into their cardinal components so they can be checked individually.
+   * Decompose diagonal vectors into their cardinal components, so they can be checked individually.
    * This is helpful for resolving collisions when moving blocks diagonally and need to consider all block faces.
    * @param origin the point of origin
    * @param direction the direction to check

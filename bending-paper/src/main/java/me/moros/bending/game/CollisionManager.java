@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.collision.geometry.Collider;

@@ -20,7 +20,7 @@
 package me.moros.bending.model.attribute;
 
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 
 @FunctionalInterface
 public interface ModifyPolicy {

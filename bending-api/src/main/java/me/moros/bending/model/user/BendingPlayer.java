@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.event.EventBus;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
@@ -91,6 +91,11 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   @Override
   public boolean sneaking() {
     return entity().isSneaking();
+  }
+
+  @Override
+  public void sneaking(boolean sneaking) {
+    entity().setSneaking(sneaking);
   }
 
   @Override

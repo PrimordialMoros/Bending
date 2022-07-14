@@ -26,20 +26,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.ability.common.FragileStructure;
-import me.moros.bending.ability.common.basic.ParticleStream;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempLight;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
+import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
@@ -70,7 +70,7 @@ public class FireKick extends AbilityInstance {
     loadConfig();
 
     double height = user.entity().getEyeHeight();
-    Vector3d direction = user.direction().multiply(userConfig.range).add(new Vector3d(0, height, 0)).normalize();
+    Vector3d direction = user.direction().multiply(userConfig.range).add(0, height, 0).normalize();
     Vector3d origin = user.location();
     Vector3d dir = user.direction();
     Vector3d rotateAxis = dir.cross(Vector3d.PLUS_J).normalize().cross(dir);

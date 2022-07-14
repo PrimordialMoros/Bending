@@ -19,7 +19,7 @@ Support and project discussion is available on [Discord](https://discord.gg/sjwn
 
 ## Download
 
-Currently, downloads are available in [Github Releases](https://github.com/PrimordialMoros/Bending/releases).
+Currently, downloads are available in [GitHub Releases](https://github.com/PrimordialMoros/Bending/releases).
 
 ## Building
 

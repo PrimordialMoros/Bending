@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import me.moros.bending.model.Element;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -50,7 +50,7 @@ public final class Preset {
 
   /**
    * Presets loaded from db have a positive id.
-   * New presets must use a non positive id as they will acquire a real one when they get saved.
+   * New presets must use a non-positive id as they will acquire a real one when they get saved.
    */
   public Preset(int id, String name, @Nullable AbilityDescription[] abilities) {
     this.id = id;

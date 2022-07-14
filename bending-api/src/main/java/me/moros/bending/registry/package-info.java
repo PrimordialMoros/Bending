@@ -18,7 +18,6 @@
  */
 
 /**
- * Registry classes for users, abilities, collisions etc.
+ * Provides default Registries.
  */
-
 package me.moros.bending.registry;

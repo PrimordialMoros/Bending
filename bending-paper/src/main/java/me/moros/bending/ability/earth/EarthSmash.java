@@ -33,20 +33,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.bending.ability.common.FragileStructure;
+import me.moros.bending.BendingProperties;
 import me.moros.bending.ability.fire.FlameRush;
 import me.moros.bending.ability.water.FrostBreath;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
-import me.moros.bending.game.temporal.TempBlock;
-import me.moros.bending.game.temporal.TempEntity;
-import me.moros.bending.game.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
@@ -58,8 +56,10 @@ import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.removal.Policies;
 import me.moros.bending.model.predicate.removal.RemovalPolicy;
 import me.moros.bending.model.predicate.removal.SwappedSlotsRemovalPolicy;
-import me.moros.bending.model.properties.BendingProperties;
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
@@ -384,13 +384,13 @@ public class EarthSmash extends AbilityInstance {
           for (int x = -half; x <= half; x++) {
             // Remove bottom layer
             if ((Math.abs(x) + Math.abs(z)) % 2 != 0) {
-              Block block = origin.add(new Vector3d(x, -1, z)).toBlock(boulder.world);
+              Block block = origin.add(x, -1, z).toBlock(boulder.world);
               if (EarthMaterials.isEarthNotLava(user, block)) {
                 TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
               }
             }
             // Remove top layer
-            Block block = origin.add(new Vector3d(x, 0, z)).toBlock(boulder.world);
+            Block block = origin.add(x, 0, z).toBlock(boulder.world);
             if (EarthMaterials.isEarthNotLava(user, block)) {
               TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
             }

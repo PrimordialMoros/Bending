@@ -32,6 +32,11 @@ import java.util.stream.Stream;
 import me.moros.bending.model.registry.exception.RegistryModificationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Simple registry implementation.
+ * @param <K> the key type
+ * @param <V> the value type
+ */
 public class SimpleRegistry<K, V> implements Registry<K, V> {
   private final String namespace;
 

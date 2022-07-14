@@ -71,7 +71,7 @@ public interface NativeAdapter {
 
   /**
    * Retrieve a native adapter if one was injected.
-   * If no adapter has been registered then it will fallback to a default adapter for compatibility.
+   * If no adapter has been registered then it will fall back to a default adapter for compatibility.
    * The default adapter might offer less accuracy and worse performance. Moreover, some features may not work at all.
    * @return the current NMS adapter
    * @see #hasNativeSupport()

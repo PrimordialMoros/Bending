@@ -27,17 +27,18 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import me.moros.bending.model.ability.description.AbilityDescription;
-import me.moros.bending.model.ability.description.AbilityDescription.Sequence;
+import me.moros.bending.locale.Translation;
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription.Sequence;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.key.Key;
 import me.moros.bending.model.key.KeyValidator;
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.model.key.Namespaced;
 import me.moros.bending.model.key.RegistryKey;
+import me.moros.bending.model.protection.Protection;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.model.registry.RegistryBuilder;
-import me.moros.bending.protection.Protection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("unchecked")
@@ -50,6 +51,7 @@ public final class Registries {
   public static final Registry<Key, Sequence> SEQUENCES = create(Sequence.NAMESPACE, Sequence.class);
   public static final Registry<Key, CollisionPair> COLLISIONS = create(CollisionPair.NAMESPACE, CollisionPair.class);
   public static final Registry<Key, Protection> PROTECTIONS = create(Protection.NAMESPACE, Protection.class);
+  public static final Registry<Key, Translation> TRANSLATIONS = create(Translation.NAMESPACE, Translation.class);
   public static final UserRegistry BENDERS = new UserRegistry();
 
   private Registries() {

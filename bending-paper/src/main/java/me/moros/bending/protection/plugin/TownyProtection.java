@@ -24,7 +24,7 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.moros.bending.model.key.Key;
-import me.moros.bending.protection.Protection;
+import me.moros.bending.model.protection.Protection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;

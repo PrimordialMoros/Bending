@@ -31,16 +31,16 @@ import java.util.stream.Stream;
 import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.event.EventBus;
-import me.moros.bending.game.temporal.Cooldown;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.predicate.general.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.registry.Registries;
+import me.moros.bending.temporal.Cooldown;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,6 +53,11 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private final Collection<AttributeModifier> attributes;
   private final AbilityDescription[] slots;
   private final BiPredicate<User, AbilityDescription> condition;
+
+  private boolean sneaking = false;
+  private boolean sprinting = false;
+  private boolean allowFlight = false;
+  private boolean flying = false;
 
   private boolean canBend = true;
   private int index = 1;
@@ -81,6 +86,46 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public LivingEntity entity() {
     return entity;
+  }
+
+  @Override
+  public boolean sneaking() {
+    return sneaking;
+  }
+
+  @Override
+  public void sneaking(boolean sneaking) {
+    this.sneaking = sneaking;
+  }
+
+  @Override
+  public boolean sprinting() {
+    return sprinting;
+  }
+
+  @Override
+  public void sprinting(boolean sprinting) {
+    this.sprinting = sprinting;
+  }
+
+  @Override
+  public boolean allowFlight() {
+    return allowFlight;
+  }
+
+  @Override
+  public void allowFlight(boolean allow) {
+    this.allowFlight = allow;
+  }
+
+  @Override
+  public boolean flying() {
+    return flying;
+  }
+
+  @Override
+  public void flying(boolean flying) {
+    this.flying = flying;
   }
 
   @Override

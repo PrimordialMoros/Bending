@@ -21,7 +21,9 @@ package me.moros.bending.model.temporal;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@SuppressWarnings("ConstantConditions")
+/**
+ * Abstract base for {@link Temporary}
+ */
 public abstract class TemporaryBase implements Temporary {
   static final TemporaryBase EMPTY = new TemporaryBase() {
     @Override
@@ -71,6 +73,7 @@ public abstract class TemporaryBase implements Temporary {
 
   static void unlink(TemporaryBase node) {
     TemporaryBase next = node.next();
+    //noinspection ConstantConditions
     if (next != null) {
       TemporaryBase prev = node.previous();
       next.previous(prev);

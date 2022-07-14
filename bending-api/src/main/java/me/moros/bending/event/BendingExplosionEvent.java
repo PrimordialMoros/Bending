@@ -19,8 +19,8 @@
 
 package me.moros.bending.event;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
@@ -31,7 +31,7 @@ public class BendingExplosionEvent extends EntityExplodeEvent implements UserEve
   private final User user;
 
   BendingExplosionEvent(User user, Vector3d location, Collection<Block> blocks, float yield) {
-    super(user.entity(), location.toLocation(user.world()), List.copyOf(blocks), yield);
+    super(user.entity(), location.toLocation(user.world()), new ArrayList<>(blocks), yield);
     this.user = user;
   }
 

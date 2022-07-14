@@ -20,7 +20,7 @@
 package me.moros.bending.protection.plugin;
 
 import me.moros.bending.model.key.Key;
-import me.moros.bending.protection.Protection;
+import me.moros.bending.model.protection.Protection;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.block.Block;

@@ -22,8 +22,8 @@ package me.moros.bending.model.manager;
 import java.util.UUID;
 
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
-import me.moros.bending.model.ability.description.AbilityDescription;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;

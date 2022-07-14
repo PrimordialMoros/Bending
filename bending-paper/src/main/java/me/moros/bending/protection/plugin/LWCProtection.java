@@ -22,7 +22,7 @@ package me.moros.bending.protection.plugin;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.lwc.LWCPlugin;
 import me.moros.bending.model.key.Key;
-import me.moros.bending.protection.Protection;
+import me.moros.bending.model.protection.Protection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;

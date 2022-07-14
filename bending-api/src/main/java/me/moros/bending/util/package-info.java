@@ -18,6 +18,6 @@
  */
 
 /**
- * Utility classes.
+ * Provides utility classes.
  */
 package me.moros.bending.util;

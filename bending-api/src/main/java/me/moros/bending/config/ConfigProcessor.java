@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.description.AbilityDescription;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.AttributeConverter;
 import me.moros.bending.model.attribute.AttributeModifier;
