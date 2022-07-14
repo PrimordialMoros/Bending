@@ -21,6 +21,9 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.user.BendingPlayer;
 
+/**
+ * Called when a player has successfully been registered.
+ */
 public class PlayerRegisterEvent extends BendingEvent implements UserEvent {
   private final BendingPlayer user;
 

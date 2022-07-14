@@ -17,12 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.removal;
+package me.moros.bending.model.predicate;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 
+/**
+ * Policy to remove ability when the user has changed slots.
+ */
 public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
   private final AbilityDescription expected;
 
@@ -35,6 +38,11 @@ public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
     return user instanceof BendingPlayer && !expected.equals(user.selectedAbility());
   }
 
+  /**
+   * Creates a {@link RemovalPolicy} that expects a specific ability to be selected.
+   * @param expected the expected ability
+   * @return the constructed policy
+   */
   public static RemovalPolicy of(AbilityDescription expected) {
     return new SwappedSlotsRemovalPolicy(expected);
   }

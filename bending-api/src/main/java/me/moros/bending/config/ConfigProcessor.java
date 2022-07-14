@@ -36,6 +36,9 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+/**
+ * Processes {@link Configurable}s by applying attribute modifiers.
+ */
 public final class ConfigProcessor {
   private static final Map<Class<? extends Number>, AttributeConverter> CONVERTERS = Map.of(
     Double.class, AttributeConverter.DOUBLE,
@@ -54,6 +57,17 @@ public final class ConfigProcessor {
     this.root = root;
   }
 
+  /**
+   * Calculates new values for the given config after applying {@link AttributeModifier}s.
+   * <p> Note: By default, this method will return a copy of the supplied object, that is loaded from the
+   * main configuration file. For abilities with external configs, they must override
+   * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
+   * that is supplied and you should make sure to always pass a fresh copy yourself.
+   * @param ability the ability the config belongs to
+   * @param config the config to process
+   * @param <T> the type of config
+   * @return the modified config
+   */
   public <T extends Configurable> T calculate(Ability ability, T config) {
     T copied = config.external() ? config : get(config);
     return process(ability, copied);

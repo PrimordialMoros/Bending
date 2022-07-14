@@ -20,9 +20,14 @@
 package me.moros.bending.event;
 
 import me.moros.bending.model.user.User;
+import me.moros.bending.temporal.ActionLimiter;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a user attempts to limit the actions of a target through bending.
+ * @see ActionLimiter
+ */
 public class ActionLimitEvent extends BendingEvent implements UserEvent, Cancellable {
   private final User user;
   private final LivingEntity target;
@@ -41,14 +46,26 @@ public class ActionLimitEvent extends BendingEvent implements UserEvent, Cancell
     return user;
   }
 
+  /**
+   * Provides the entity that is affected by the {@link ActionLimiter}
+   * @return the target entity
+   */
   public LivingEntity target() {
     return target;
   }
 
+  /**
+   * Provides the duration of the restriction in milliseconds.
+   * @return how long the action limit will last
+   */
   public long duration() {
     return duration;
   }
 
+  /**
+   * Sets the duration of the restriction in milliseconds.
+   * @param duration the new duration
+   */
   public void duration(long duration) {
     this.duration = duration;
   }

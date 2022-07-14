@@ -17,28 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.removal;
-
-import java.util.Objects;
-import java.util.function.BiPredicate;
-
-import me.moros.bending.model.ability.AbilityDescription;
-import me.moros.bending.model.user.User;
-
-@FunctionalInterface
-public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-  default RemovalPolicy and(RemovalPolicy other) {
-    Objects.requireNonNull(other);
-    return (u, d) -> test(u, d) && other.test(u, d);
-  }
-
-  default RemovalPolicy or(RemovalPolicy other) {
-    Objects.requireNonNull(other);
-    return (u, d) -> test(u, d) || other.test(u, d);
-  }
-
-  @Override
-  default RemovalPolicy negate() {
-    return (u, d) -> !test(u, d);
-  }
-}
+/**
+ * Provides classes and interfaces for built-in {@link java.util.function.BiPredicate}s used in abilities.
+ */
+package me.moros.bending.model.predicate;

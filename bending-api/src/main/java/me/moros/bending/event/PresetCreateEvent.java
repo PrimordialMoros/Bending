@@ -23,6 +23,9 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a user is attempting to create a {@link Preset}.
+ */
 public class PresetCreateEvent extends BendingEvent implements UserEvent, Cancellable {
   private final User user;
   private final Preset preset;
@@ -39,6 +42,10 @@ public class PresetCreateEvent extends BendingEvent implements UserEvent, Cancel
     return user;
   }
 
+  /**
+   * Provides the preset that is being created.
+   * @return the preset
+   */
   public Preset preset() {
     return preset;
   }

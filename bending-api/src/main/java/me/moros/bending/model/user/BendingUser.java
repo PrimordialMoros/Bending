@@ -36,7 +36,7 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.manager.Game;
-import me.moros.bending.model.predicate.general.BendingConditions;
+import me.moros.bending.model.predicate.BendingConditions;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.registry.Registries;

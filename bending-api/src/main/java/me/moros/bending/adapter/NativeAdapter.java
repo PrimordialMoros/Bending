@@ -81,7 +81,8 @@ public interface NativeAdapter {
   }
 
   /**
-   * @return whether a native adapter has been registered
+   * Check if a valid native adapter has been registered.
+   * @return the result
    */
   static boolean hasNativeSupport() {
     return Holder.INSTANCE != null;

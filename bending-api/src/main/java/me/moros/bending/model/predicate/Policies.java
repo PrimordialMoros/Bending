@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.removal;
+package me.moros.bending.model.predicate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,15 +26,45 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 
+/**
+ * Built-in policies to check whether an ability needs to be removed.
+ */
 public enum Policies implements RemovalPolicy {
+  /**
+   * Checks if the user is dead.
+   */
   DEAD((u, d) -> u.dead()),
+  /**
+   * Checks if the user is offline or invalid.
+   */
   OFFLINE((u, d) -> !u.valid()),
+  /**
+   * Checks if the user is sneaking.
+   */
   SNEAKING((u, d) -> u.sneaking()),
+  /**
+   * Checks if the user is NOT sneaking.
+   */
   NOT_SNEAKING((u, d) -> !u.sneaking()),
+  /**
+   * Checks if the user is flying.
+   */
   FLYING((u, d) -> u.flying()),
+  /**
+   * Checks if the user is submerged underwater.
+   */
   UNDER_WATER((u, d) -> EntityUtil.underWater(u.entity())),
+  /**
+   * Checks if the user is in water.
+   */
   PARTIALLY_UNDER_WATER((u, d) -> u.entity().isInWaterOrBubbleColumn()),
+  /**
+   * Checks if the user is submerged under lava.
+   */
   UNDER_LAVA((u, d) -> EntityUtil.underLava(u.entity())),
+  /**
+   * Checks if the user is in lava.
+   */
   PARTIALLY_UNDER_LAVA((u, d) -> u.entity().isInLava());
 
   private final RemovalPolicy policy;

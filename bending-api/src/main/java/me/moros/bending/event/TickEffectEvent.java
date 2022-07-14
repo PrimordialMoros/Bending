@@ -24,6 +24,9 @@ import me.moros.bending.util.BendingEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a {@link BendingEffect} is applied to a target.
+ */
 public class TickEffectEvent extends BendingEvent implements UserEvent, Cancellable {
   private final User user;
   private final Entity target;
@@ -44,20 +47,37 @@ public class TickEffectEvent extends BendingEvent implements UserEvent, Cancella
     return user;
   }
 
+  /**
+   * Provides the target this bending effect applies to.
+   * @return the target entity
+   */
   public Entity target() {
     return target;
   }
 
+  /**
+   * Provides the duration of the effect in ticks.
+   * @return how long the action limit will last
+   */
   public int duration() {
     return duration;
   }
 
+
+  /**
+   * Sets the duration of the effect in ticks.
+   * @param duration the new duration, must be positive
+   */
   public void duration(int duration) {
     if (duration > 0) {
       this.duration = duration;
     }
   }
 
+  /**
+   * Provides the type of bending effect that is being applied.
+   * @return the effect type
+   */
   public BendingEffect type() {
     return type;
   }

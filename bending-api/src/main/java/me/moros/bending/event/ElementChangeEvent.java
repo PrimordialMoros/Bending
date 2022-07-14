@@ -22,6 +22,9 @@ package me.moros.bending.event;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a user's elements are being changed.
+ */
 public class ElementChangeEvent extends BendingEvent implements UserEvent, Cancellable {
   private final User user;
   private final ElementAction action;
@@ -38,6 +41,10 @@ public class ElementChangeEvent extends BendingEvent implements UserEvent, Cance
     return user;
   }
 
+  /**
+   * Provides the type of change for this event.
+   * @return the type of element change
+   */
   public ElementAction type() {
     return action;
   }
@@ -52,7 +59,21 @@ public class ElementChangeEvent extends BendingEvent implements UserEvent, Cance
     this.cancelled = cancel;
   }
 
+  /**
+   * Represents a type of element change.
+   */
   public enum ElementAction {
-    CHOOSE, ADD, REMOVE, CLEAR
+    /**
+     * One element is selected and all others are removed.
+     */
+    CHOOSE,
+    /**
+     * An element is added.
+     */
+    ADD,
+    /**
+     * An element is removed.
+     */
+    REMOVE
   }
 }

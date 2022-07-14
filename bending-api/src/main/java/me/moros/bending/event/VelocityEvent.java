@@ -27,6 +27,9 @@ import me.moros.bending.model.user.User;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when an ability attempts to alter the velocity of a LivingEntity.
+ */
 public class VelocityEvent extends BendingEvent implements AbilityEvent, Cancellable {
   private final User user;
   private final AbilityDescription desc;
@@ -51,14 +54,26 @@ public class VelocityEvent extends BendingEvent implements AbilityEvent, Cancell
     return desc;
   }
 
+  /**
+   * Provides the target whose velocity is being changed.
+   * @return the LivingEntity target
+   */
   public LivingEntity target() {
     return target;
   }
 
+  /**
+   * Provides the new velocity that will be applied to the target.
+   * @return the new velocity
+   */
   public Vector3d velocity() {
     return velocity;
   }
 
+  /**
+   * Sets the new velocity that will be applied to the target.
+   * @param velocity the velocity to apply
+   */
   public void velocity(Vector3d velocity) {
     this.velocity = Objects.requireNonNull(velocity);
   }

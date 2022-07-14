@@ -27,6 +27,9 @@ import me.moros.bending.model.user.User;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+/**
+ * Called when a bending ability damages an entity.
+ */
 @SuppressWarnings("deprecation")
 public class BendingDamageEvent extends EntityDamageByEntityEvent implements AbilityEvent {
   private final User user;

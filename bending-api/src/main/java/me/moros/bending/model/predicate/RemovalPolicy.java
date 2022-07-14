@@ -17,29 +17,31 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.removal;
+package me.moros.bending.model.predicate;
+
+import java.util.Objects;
+import java.util.function.BiPredicate;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 
-public final class ExpireRemovalPolicy implements RemovalPolicy {
-  private final long expireTime;
-  private final boolean valid;
+/**
+ * BiPredicate to test whether a user's ability should be removed.
+ */
+@FunctionalInterface
+public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
+  default RemovalPolicy and(RemovalPolicy other) {
+    Objects.requireNonNull(other);
+    return (u, d) -> test(u, d) && other.test(u, d);
+  }
 
-  private ExpireRemovalPolicy(long duration) {
-    valid = duration > 0;
-    expireTime = System.currentTimeMillis() + duration;
+  default RemovalPolicy or(RemovalPolicy other) {
+    Objects.requireNonNull(other);
+    return (u, d) -> test(u, d) || other.test(u, d);
   }
 
   @Override
-  public boolean test(User user, AbilityDescription desc) {
-    return valid && System.currentTimeMillis() > expireTime;
-  }
-
-  public static RemovalPolicy of(long duration) {
-    if (duration <= 0) {
-      return (u, d) -> false;
-    }
-    return new ExpireRemovalPolicy(duration);
+  default RemovalPolicy negate() {
+    return (u, d) -> !test(u, d);
   }
 }

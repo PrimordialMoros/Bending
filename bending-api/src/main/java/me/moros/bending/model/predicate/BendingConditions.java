@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.predicate.general;
+package me.moros.bending.model.predicate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,12 +26,33 @@ import java.util.function.BiPredicate;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 
+/**
+ * Built-in conditions to check whether a User can create an ability instance.
+ */
 public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
+  /**
+   * Checks if ability is on cooldown.
+   */
   COOLDOWN((u, d) -> d.bypassCooldown() || !u.onCooldown(d)),
+  /**
+   * Checks if user has the required element.
+   */
   ELEMENT((u, d) -> u.hasElement(d.element())),
+  /**
+   * Checks if user is not a spectator.
+   */
   GAMEMODE((u, d) -> !u.spectator()),
+  /**
+   * Checks if user has all required permissions to use the ability.
+   */
   PERMISSION((u, d) -> u.hasPermission(d)),
+  /**
+   * Checks if user can bend (hasn't toggled bending off).
+   */
   CAN_BEND((u, d) -> u.canBend()),
+  /**
+   * Checks if the user is in a bending enabled world.
+   */
   WORLD((u, d) -> u.game().worldManager().isEnabled(u.world()));
 
   private final BiPredicate<User, AbilityDescription> predicate;
@@ -58,6 +79,10 @@ public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
     ALL = conditions.stream().reduce((u, d) -> true, BiPredicate::and);
   }
 
+  /**
+   * Convenience method to retrieve all BendingConditions.
+   * @return a composite BiPredicate that combines all available BendingConditions
+   */
   public static BiPredicate<User, AbilityDescription> all() {
     return ALL;
   }

@@ -27,6 +27,9 @@ import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
+/**
+ * Called when a bending ability causes an explosion.
+ */
 public class BendingExplosionEvent extends EntityExplodeEvent implements UserEvent {
   private final User user;
 

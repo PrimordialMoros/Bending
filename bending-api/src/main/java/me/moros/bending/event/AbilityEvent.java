@@ -21,6 +21,13 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.ability.AbilityDescription;
 
+/**
+ * Represents an event that that is relevant to a specific ability.
+ */
 public interface AbilityEvent extends UserEvent {
+  /**
+   * Provides the ability that this event is related to.
+   * @return the relevant ability
+   */
   AbilityDescription ability();
 }

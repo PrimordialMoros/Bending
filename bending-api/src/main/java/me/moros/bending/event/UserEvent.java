@@ -21,6 +21,13 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.user.User;
 
+/**
+ * Represents an event that that is relevant to a specific user.
+ */
 public interface UserEvent {
+  /**
+   * Provides the user that this event is related to.
+   * @return the relevant user
+   */
   User user();
 }

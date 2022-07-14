@@ -25,6 +25,9 @@ import java.util.List;
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.model.key.RegistryKey;
 
+/**
+ * Called during Bending's initialization, before registries are locked.
+ */
 public class RegistryLockEvent extends BendingEvent {
   private final Collection<RegistryKey<? extends Keyed>> keys;
 
@@ -32,6 +35,10 @@ public class RegistryLockEvent extends BendingEvent {
     this.keys = List.copyOf(keys);
   }
 
+  /**
+   * Provides the keys of the registries that are going to be locked.
+   * @return the collection of RegistryKeys
+   */
   public Collection<RegistryKey<? extends Keyed>> registryKeys() {
     return keys;
   }

@@ -19,9 +19,13 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a user attempts to bind an ability or {@link Preset}.
+ */
 public class BindChangeEvent extends BendingEvent implements UserEvent, Cancellable {
   private final User user;
   private final BindType type;
@@ -38,7 +42,11 @@ public class BindChangeEvent extends BendingEvent implements UserEvent, Cancella
     return user;
   }
 
-  public BindType result() {
+  /**
+   * Provides the type of binding
+   * @return the type
+   */
+  public BindType type() {
     return type;
   }
 
@@ -52,7 +60,18 @@ public class BindChangeEvent extends BendingEvent implements UserEvent, Cancella
     this.cancelled = cancel;
   }
 
+
+  /**
+   * Represents a type of bind change.
+   */
   public enum BindType {
-    SINGLE, MULTIPLE
+    /**
+     * Represents binding of a single ability.
+     */
+    SINGLE,
+    /**
+     * Represents binding of a preset.
+     */
+    MULTIPLE
   }
 }

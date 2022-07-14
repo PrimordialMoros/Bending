@@ -23,6 +23,9 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
 
+/**
+ * Called when a user's ability will go on cooldown.
+ */
 public class CooldownAddEvent extends BendingEvent implements AbilityEvent, Cancellable {
   private final User user;
   private final AbilityDescription desc;
@@ -45,6 +48,10 @@ public class CooldownAddEvent extends BendingEvent implements AbilityEvent, Canc
     return desc;
   }
 
+  /**
+   * Provides the cooldown duration.
+   * @return the cooldown's duration in milliseconds
+   */
   public long duration() {
     return duration;
   }
