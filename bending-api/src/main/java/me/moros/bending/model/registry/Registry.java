@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.key.Namespaced;
-import me.moros.bending.model.registry.exception.RegistryModificationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

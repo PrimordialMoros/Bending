@@ -40,6 +40,15 @@ public final class DamageUtil {
   private DamageUtil() {
   }
 
+  /**
+   * Attempt to damage the specified entity with certain parameters.
+   * This will fire a {@link BendingDamageEvent} and calculate damage ignoring armor.
+   * @param target the entity to damage
+   * @param source the user damaging the target
+   * @param damage the amount of damage to inflict
+   * @param desc the ability which causes the damage
+   * @return true if entity was successfully damaged, false otherwise
+   */
   public static boolean damageEntity(Entity target, User source, double damage, AbilityDescription desc) {
     Objects.requireNonNull(target);
     Objects.requireNonNull(source);

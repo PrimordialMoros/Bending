@@ -70,8 +70,8 @@ public final class GameImpl implements Game {
     lockRegistries();
     storage.createAbilities(Registries.ABILITIES);
 
-    Tasker.repeat(this::update, 1);
-    Tasker.repeat(BendingEffect::cleanup, 5);
+    Tasker.INSTANCE.repeat(this::update, 1);
+    Tasker.INSTANCE.repeat(BendingEffect::cleanup, 5);
   }
 
   private void lockRegistries() {

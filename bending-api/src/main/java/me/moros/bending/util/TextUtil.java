@@ -67,11 +67,22 @@ public final class TextUtil {
     return output.length() > 16 ? output.substring(0, 16) : output;
   }
 
-  public static String generateInvisibleString(int slot) {
+  /**
+   * Do not use legacy strings, this is only for scoreboards.
+   * @param slot the slot number
+   * @return a deterministic unique legacy code for the given slot
+   */
+  public static String generateInvisibleLegacyString(int slot) {
     String hidden = CHAT_CODES[slot % CHAT_CODES.length];
-    return slot <= CHAT_CODES.length ? hidden : hidden + generateInvisibleString(slot - CHAT_CODES.length);
+    return slot <= CHAT_CODES.length ? hidden : hidden + generateInvisibleLegacyString(slot - CHAT_CODES.length);
   }
 
+  /**
+   * Wrap long text by splitting it into lines, wrapping at words. This can be used for items lore.
+   * @param str the long string to split
+   * @param wrapLength the approximate number of characters per line
+   * @return the text split in lines
+   */
   public static List<String> wrap(String str, int wrapLength) {
     wrapLength = Math.max(1, wrapLength);
     final int length = str.length();
@@ -114,6 +125,11 @@ public final class TextUtil {
     return lines;
   }
 
+  /**
+   * Attempt to parse a UUID from text without throwing any exceptions.
+   * @param input the string to parse
+   * @return the UUID if parsed or null
+   */
   public static @Nullable UUID parseUUID(String input) {
     try {
       return UUID.fromString(input);
@@ -122,10 +138,21 @@ public final class TextUtil {
     }
   }
 
+  /**
+   * Collects all the values in a keyed registry and formats them as an array.
+   * @param registry the registry containing the values
+   * @return the array-like formatted string with the registry's values
+   */
   public static String collect(Registry<Key, ?> registry) {
     return collect(registry.keys(), Key::value);
   }
 
+  /**
+   * Collects all the provided values formats them as an array.
+   * @param values the values to collect
+   * @param function the function to transform each value into a string
+   * @return the array-like formatted string with the values
+   */
   public static <T> String collect(Iterable<T> values, Function<T, String> function) {
     return StreamSupport.stream(values.spliterator(), false)
       .map(function).collect(Collectors.joining(", ", "[", "]"));

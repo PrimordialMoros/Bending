@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import static org.bukkit.Sound.*;
 
 /**
- * Utility class to provide a list of pre-configured sounds.
+ * Utility class that also provides a list of pre-configured sounds.
  */
 public final class SoundUtil {
   public static final SoundEffect AIR = of(ENTITY_CREEPER_HURT, 1, 2);
@@ -58,10 +58,23 @@ public final class SoundUtil {
   private SoundUtil() {
   }
 
+  /**
+   * Create a new sound effect of the specified type with default volume and pitch.
+   * @param sound the sound type to use
+   * @return the new SoundEffect
+   * @see #of(Type, float, float)
+   */
   public static SoundEffect of(Type sound) {
     return of(sound, 1, 1);
   }
 
+  /**
+   * Create a new sound effect of the specified type, volume and pitch.
+   * @param sound the sound type to use
+   * @param volume the volume to use
+   * @param pitch the pitch to use
+   * @return the new SoundEffect
+   */
   public static SoundEffect of(Type sound, float volume, float pitch) {
     return new SoundEffect(Sound.sound(sound, Source.MASTER, volume, pitch));
   }
@@ -77,14 +90,30 @@ public final class SoundUtil {
       this.sound = sound;
     }
 
+    /**
+     * Play this sound effect at the center of the specified block.
+     * @param block to block to play the sound at
+     * @see #play(World, Vector3d)
+     */
     public void play(Block block) {
       block.getWorld().playSound(sound, block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5);
     }
 
+    /**
+     * Play this sound effect at the specified world and position.
+     * @param world the world to play the sound in
+     * @param center the center to play the sound at
+     */
     public void play(World world, Vector3d center) {
       world.playSound(sound, center.x(), center.y(), center.z());
     }
 
+    /**
+     * Create a modified sound effect with the specified volume and pitch.
+     * @param volume the new volume
+     * @param pitch the new pitch
+     * @return the new SoundEffect
+     */
     public SoundEffect with(float volume, float pitch) {
       if (volume == sound.volume() && pitch == sound.pitch()) {
         return this;

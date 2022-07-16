@@ -106,7 +106,11 @@ public final class EntityUtil {
   }
 
   /**
-   * @return {@link #distanceAboveGround(Entity, double)} with maxHeight matching world height.
+   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
+   * By default, it ignores all passable materials except liquids.
+   * @param entity the entity to check
+   * @return the distance in blocks between the entity and ground or the max world height.
+   * @see #distanceAboveGround(Entity, double)
    */
   public static double distanceAboveGround(Entity entity) {
     int minHeight = entity.getWorld().getMinHeight();
@@ -119,7 +123,7 @@ public final class EntityUtil {
    * By default, it ignores all passable materials except liquids.
    * @param entity the entity to check
    * @param maxHeight the maximum height to check
-   * @return the distance in blocks between the entity and ground or the max world height.
+   * @return the distance in blocks between the entity and ground or the max height.
    */
   public static double distanceAboveGround(Entity entity, double maxHeight) {
     int minHeight = entity.getWorld().getMinHeight();
@@ -147,19 +151,42 @@ public final class EntityUtil {
     return new Vector3d(entity.getLocation()).add(0, entity.getHeight() / 2, 0);
   }
 
+  /**
+   * Check if entity is submerged underwater.
+   * @param entity the entity to check
+   * @return the result
+   */
   public static boolean underWater(Entity entity) {
     return entity.isInWaterOrBubbleColumn() && NativeAdapter.instance().eyeInWater(entity);
   }
 
+  /**
+   * Check if entity is submerged under lava.
+   * @param entity the entity to check
+   * @return the result
+   */
   public static boolean underLava(Entity entity) {
     return entity.isInLava() && NativeAdapter.instance().eyeInLava(entity);
   }
 
+  /**
+   * Removes any negative potion effects the entity may have.
+   * @param entity the entity to process
+   */
   public static void removeNegativeEffects(LivingEntity entity) {
     entity.getActivePotionEffects().stream().map(PotionEffect::getType)
       .filter(t -> t.getEffectCategory() == Category.HARMFUL).forEach(entity::removePotionEffect);
   }
 
+  /**
+   * Attempt to add a potion effect of a specified duration and amplifier.
+   * The applied potion effect will only override an existing one if the duration or amplifier is bigger.
+   * @param entity the entity to process
+   * @param type the type of potion effect to apply
+   * @param duration the duration of the potion effect in ticks
+   * @param amplifier the potion effect amplifier starting from 0
+   * @return if a new potion effect was added, false otherwise
+   */
   public static boolean tryAddPotion(Entity entity, PotionEffectType type, int duration, int amplifier) {
     if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
       int minDuration = type.getEffectCategory() == Category.BENEFICIAL ? 20 : duration;

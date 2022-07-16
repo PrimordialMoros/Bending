@@ -58,14 +58,25 @@ public final class WorldUtil {
   }
 
   /**
-   * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with predicate being always true and no block limit.
+   * Collects all blocks in a sphere.
+   * @param world the world to check
+   * @param pos the center point
+   * @param radius the radius of the sphere
+   * @return all collected blocks
+   * @see #nearbyBlocks(World, AABB)
    */
   public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius) {
     return nearbyBlocks(world, pos, radius, block -> true, 0);
   }
 
   /**
-   * @return {@link #nearbyBlocks(World, Vector3d, double, Predicate, int)} with the given predicate and no block limit.
+   * Collects all blocks in a sphere that satisfy the given predicate.
+   * @param world the world to check
+   * @param pos the center point
+   * @param radius the radius of the sphere
+   * @param predicate the predicate that needs to be satisfied for every block
+   * @return all collected blocks
+   * @see #nearbyBlocks(World, AABB, Predicate)
    */
   public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate) {
     return nearbyBlocks(world, pos, radius, predicate, 0);
@@ -80,6 +91,7 @@ public final class WorldUtil {
    * @param predicate the predicate that needs to be satisfied for every block
    * @param limit the amount of blocks to collect
    * @return all collected blocks
+   * @see #nearbyBlocks(World, AABB, Predicate, int)
    */
   public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate, int limit) {
     int r = FastMath.ceil(radius) + 1;
@@ -105,14 +117,23 @@ public final class WorldUtil {
   }
 
   /**
-   * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with predicate being always true and no block limit.
+   * Collects all blocks inside a bounding box.
+   * @param world the world to check
+   * @param box the bounding box to check
+   * @return all collected blocks
+   * @see #nearbyBlocks(World, Vector3d, double)
    */
   public static List<Block> nearbyBlocks(World world, AABB box) {
     return nearbyBlocks(world, box, block -> true, 0);
   }
 
   /**
-   * @return {@link #nearbyBlocks(World, AABB, Predicate, int)} with the given predicate and no block limit.
+   * Collects all blocks inside a bounding box that satisfy the given predicate.
+   * @param world the world to check
+   * @param box the bounding box to check
+   * @param predicate the predicate that needs to be satisfied for every block
+   * @return all collected blocks
+   * @see #nearbyBlocks(World, Vector3d, double, Predicate)
    */
   public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
     return nearbyBlocks(world, box, predicate, 0);
@@ -126,6 +147,7 @@ public final class WorldUtil {
    * @param predicate the predicate that needs to be satisfied for every block
    * @param limit the amount of blocks to collect
    * @return all collected blocks
+   * @see #nearbyBlocks(World, Vector3d, double, Predicate, int)
    */
   public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
     if (box == AABBUtil.DUMMY_COLLIDER) {
@@ -149,10 +171,22 @@ public final class WorldUtil {
     return blocks;
   }
 
+  /**
+   * Check if it is daytime in the specified world. Only applicable in the Overworld.
+   * @param world the world to check
+   * @return true if it is daytime
+   * @see #isNight(World)
+   */
   public static boolean isDay(World world) {
     return world.getEnvironment() == Environment.NORMAL && world.isDayTime();
   }
 
+  /**
+   * Check if it is nighttime in the specified world. Only applicable in the Overworld.
+   * @param world the world to check
+   * @return true if it is nighttime
+   * @see #isDay(World)
+   */
   public static boolean isNight(World world) {
     return world.getEnvironment() == Environment.NORMAL && !world.isDayTime();
   }
@@ -313,6 +347,14 @@ public final class WorldUtil {
     return false;
   }
 
+  /**
+   * Search for the top block that satisfies the given predicate.
+   * @param block the block to search from
+   * @param height the max height to check relative to the block
+   * @param predicate the predicate to satisfy for every block
+   * @return the result if found
+   * @see #findBottomBlock(Block, int, Predicate)
+   */
   public static Optional<Block> findTopBlock(Block block, int height, Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.UP, i);
@@ -323,6 +365,14 @@ public final class WorldUtil {
     return Optional.empty();
   }
 
+  /**
+   * Search for the bottom block that satisfies the given predicate.
+   * @param block the block to search from
+   * @param height the max height to check relative to the block
+   * @param predicate the predicate to satisfy for every block
+   * @return the result if found
+   * @see #findTopBlock(Block, int, Predicate)
+   */
   public static Optional<Block> findBottomBlock(Block block, int height, Predicate<Block> predicate) {
     for (int i = 1; i <= height; i++) {
       Block check = block.getRelative(BlockFace.DOWN, i);

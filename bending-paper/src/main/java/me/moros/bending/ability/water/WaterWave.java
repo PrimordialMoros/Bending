@@ -122,7 +122,7 @@ public class WaterWave extends AbilityInstance {
   }
 
   private void scheduleRevert(Iterable<TempBlock> tempBlocks) {
-    Tasker.sync(() -> {
+    Tasker.INSTANCE.sync(() -> {
       final Consumer<TempBlock> consumer;
       if (ice) {
         Builder builder = TempBlock.ice().bendable(false).duration(1000);

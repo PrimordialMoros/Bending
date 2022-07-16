@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.registry.exception;
+package me.moros.bending.model.registry;
 
 /**
  * This exception may be thrown by methods that have detected illegal modification of a registry.

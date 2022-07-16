@@ -26,6 +26,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 
+/**
+ * Utility class to retrieve block and entity collision shapes.
+ */
 public final class AABBUtil {
   public static final AABB DUMMY_COLLIDER = new DummyCollider();
 
@@ -33,6 +36,7 @@ public final class AABBUtil {
   }
 
   /**
+   * Calculate the block's dimensions.
    * @param block the block to check
    * @return the provided block's {@link AABB} in relative space or a {@link DummyCollider} if the block has no collider
    */
@@ -41,6 +45,7 @@ public final class AABBUtil {
   }
 
   /**
+   * Calculate the block's dimensions at its current position.
    * @param block the block to check
    * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block has no collider
    */
@@ -49,6 +54,7 @@ public final class AABBUtil {
   }
 
   /**
+   * Calculate the entity's dimensions.
    * @param entity the entity to check
    * @return the provided entity's {@link AABB} in relative space
    */
@@ -57,6 +63,7 @@ public final class AABBUtil {
   }
 
   /**
+   * Calculate the entity's dimensions at its current position.
    * @param entity the entity to check
    * @return the provided entity's {@link AABB}
    */

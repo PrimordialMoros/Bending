@@ -136,7 +136,7 @@ final class BoardImpl implements Board {
 
   private Team createTeam(int slot, String id) {
     Team team = bendingBoard.registerNewTeam(id);
-    String hidden = TextUtil.generateInvisibleString(slot);
+    String hidden = TextUtil.generateInvisibleLegacyString(slot);
     team.addEntry(hidden);
     bendingSlots.getScore(hidden).setScore(-slot);
     return team;

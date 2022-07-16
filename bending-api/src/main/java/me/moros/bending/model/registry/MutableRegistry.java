@@ -19,8 +19,6 @@
 
 package me.moros.bending.model.registry;
 
-import me.moros.bending.model.registry.exception.RegistryModificationException;
-
 public interface MutableRegistry<K, V> extends Registry<K, V> {
   /**
    * Invalidates a key if it exists.

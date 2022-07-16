@@ -82,7 +82,7 @@ public class FireJet extends AbilityInstance {
     }
 
     if (ignitable) {
-      Tasker.sync(() -> igniteBlock(block), 1);
+      Tasker.INSTANCE.sync(() -> igniteBlock(block), 1);
     }
 
     if (user.sneaking()) {

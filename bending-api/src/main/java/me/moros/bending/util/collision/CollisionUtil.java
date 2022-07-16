@@ -32,33 +32,59 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+/**
+ * Utility class to handle detect and handle ability collisions with entities.
+ */
 public final class CollisionUtil {
   private CollisionUtil() {
   }
 
   /**
-   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with living entities only and selfCollision, earlyEscape disabled
+   * Executes the given callback for every entity intersecting with the given collider.
+   * By default, it ignores Spectators, Temporal entities and invisible armor stands.
+   * Will also ignore any non-living entities the user.
+   * @param user the user (needed for self collision and to specify the world in which collisions are checked)
+   * @param collider the collider to check
+   * @param callback the method to be called for every hit entity
+   * @return true if at least one entity was processed, false otherwise
+   * @see #handle(User, Collider, CollisionCallback, boolean, boolean, boolean)
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback) {
     return handle(user, collider, callback, true, false, false);
   }
 
   /**
-   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean)} with selfCollision and earlyEscape disabled
+   * Executes the given callback for every entity intersecting with the given collider.
+   * By default, it ignores Spectators, Temporal entities and invisible armor stands.
+   * Will also ignore the user.
+   * @param user the user (needed for self collision and to specify the world in which collisions are checked)
+   * @param collider the collider to check
+   * @param callback the method to be called for every hit entity
+   * @param livingOnly whether only LivingEntities should be checked
+   * @return true if at least one entity was processed, false otherwise
+   * @see #handle(User, Collider, CollisionCallback, boolean, boolean, boolean)
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly) {
     return handle(user, collider, callback, livingOnly, false, false);
   }
 
   /**
-   * @return {@link #handle(User, Collider, CollisionCallback, boolean, boolean, boolean)} with earlyEscape disabled
+   * Executes the given callback for every entity intersecting with the given collider.
+   * By default, it ignores Spectators, Temporal entities and invisible armor stands.
+   * @param user the user (needed for self collision and to specify the world in which collisions are checked)
+   * @param collider the collider to check
+   * @param callback the method to be called for every hit entity
+   * @param livingOnly whether only LivingEntities should be checked
+   * @param selfCollision whether the collider can collider with the user
+   * @return true if at least one entity was processed, false otherwise
+   * @see #handle(User, Collider, CollisionCallback, boolean, boolean, boolean)
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision) {
     return handle(user, collider, callback, livingOnly, selfCollision, false);
   }
 
   /**
-   * Checks a collider to see if it's hitting any entities near it.
+   * Executes the given callback for every entity intersecting with the given collider.
    * By default, it ignores Spectators, Temporal entities and invisible armor stands.
    * @param user the user (needed for self collision and to specify the world in which collisions are checked)
    * @param collider the collider to check
@@ -66,7 +92,7 @@ public final class CollisionUtil {
    * @param livingOnly whether only LivingEntities should be checked
    * @param selfCollision whether the collider can collider with the user
    * @param earlyEscape if true it will return on the first valid collision callback without evaluating other entities
-   * @return true if it hit at least one entity
+   * @return true if at least one entity was processed, false otherwise
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
     Vector3d extent = collider.halfExtents();
@@ -106,6 +132,9 @@ public final class CollisionUtil {
     return true;
   }
 
+  /**
+   * Represents the callback when handling entity collisions.
+   */
   @FunctionalInterface
   public interface CollisionCallback {
     boolean onCollision(Entity entity);

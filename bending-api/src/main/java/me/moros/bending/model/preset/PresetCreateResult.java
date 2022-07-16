@@ -28,7 +28,7 @@ public enum PresetCreateResult {
   CANCELLED(Message.PRESET_CANCELLED),
   FAIL(Message.PRESET_FAIL);
 
-  private final Message.Args1<String> message;
+  private final Args1<String> message;
 
   PresetCreateResult(Args1<String> message) {
     this.message = message;

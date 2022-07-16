@@ -52,6 +52,10 @@ public final class UserRegistry extends SimpleMutableRegistry<UUID, User> {
     return false;
   }
 
+  /**
+   * Provides a stream of the currently registered players.
+   * @return stream of online players
+   */
   public Stream<BendingPlayer> players() {
     return stream().filter(BendingPlayer.class::isInstance).map(BendingPlayer.class::cast);
   }

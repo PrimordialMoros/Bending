@@ -37,6 +37,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+/**
+ * Utility class to easily cast ray traces.
+ */
 public final class RayTraceBuilder {
   public static final double MAX_RANGE = 100;
 
@@ -58,56 +61,121 @@ public final class RayTraceBuilder {
     range(direction.length());
   }
 
+  /**
+   * Override the raytrace origin.
+   * @param origin the new origin
+   * @return the modified builder
+   */
   public RayTraceBuilder origin(Vector3d origin) {
     this.origin = Objects.requireNonNull(origin);
     return this;
   }
 
+  /**
+   * Override the raytrace direction.
+   * @param direction the new direction
+   * @return the modified builder
+   */
   public RayTraceBuilder direction(Vector3d direction) {
     this.direction = direction.normalize();
     return this;
   }
 
+  /**
+   * Override the raytrace range.
+   * <p>Note: range is clamped at [1, 100].
+   * @param range the new range
+   * @return the modified builder
+   */
   public RayTraceBuilder range(double range) {
-    this.range = Math.min(MAX_RANGE, Math.max(0, range));
+    this.range = Math.min(MAX_RANGE, Math.max(1, range));
     return this;
   }
 
+  /**
+   * Override the raytrace ray size.
+   * Ray size effectively grows the ray's collider when checked against entities.
+   * Default value is 0.
+   * @param raySize the new non-negative ray size
+   * @return the modified builder
+   */
   public RayTraceBuilder raySize(double raySize) {
     this.raySize = Math.max(0, raySize);
     return this;
   }
 
+  /**
+   * Override whether the raytrace should ignore liquids.
+   * Default value is true.
+   * @param ignoreLiquids the new value
+   * @return the modified builder
+   */
   public RayTraceBuilder ignoreLiquids(boolean ignoreLiquids) {
     this.ignoreLiquids = ignoreLiquids;
     return this;
   }
 
+  /**
+   * Override whether the raytrace should ignore passable blocks (blocks that the player can move through).
+   * Default value is true.
+   * @param ignorePassable the new value
+   * @return the modified builder
+   */
   public RayTraceBuilder ignorePassable(boolean ignorePassable) {
     this.ignorePassable = ignorePassable;
     return this;
   }
 
+  /**
+   * Define a set of specific blocks the raytrace should ignore.
+   * Default value is an empty set.
+   * @param ignoreBlocks the new set of blocks to ignore
+   * @return the modified builder
+   */
   public RayTraceBuilder ignore(Set<Block> ignoreBlocks) {
     this.ignoreBlocks = Set.copyOf(ignoreBlocks);
     return this;
   }
 
+  /**
+   * Define a predicate of entities to filter when casting the raytrace. All other entities will be ignored.
+   * Default value is colliding with all entities.
+   * @param entityPredicate the new predicate
+   * @return the modified builder
+   */
   public RayTraceBuilder filter(Predicate<Entity> entityPredicate) {
     this.entityPredicate = Objects.requireNonNull(entityPredicate);
     return this;
   }
 
+  /**
+   * Utility method to apply a complex entity {@link #filter(Predicate)}.
+   * When set, the raytrace will ignore  the specified user and only check entities that match the specified class type.
+   * Moreover, players in spectator mode will also be ignored.
+   * @param source the user to ignore
+   * @param type the type of entities to filter
+   * @return the modified builder
+   */
   public <T extends Entity> RayTraceBuilder filterForUser(Entity source, Class<T> type) {
     Objects.requireNonNull(source);
     Objects.requireNonNull(type);
     return filter(e -> userPredicate(e, source, type));
   }
 
+  /**
+   * Build and cast the raytrace checking only blocks.
+   * @param world the world to cast the raytrace in
+   * @return the result
+   */
   public BlockRayTrace blocks(World world) {
     return result(world, false);
   }
 
+  /**
+   * Build and cast the raytrace checking both blocks and entities.
+   * @param world the world to cast the raytrace in
+   * @return the result
+   */
   public EntityRayTrace entities(World world) {
     return result(world, true);
   }
@@ -144,6 +212,13 @@ public final class RayTraceBuilder {
     return blockResult;
   }
 
+  /**
+   * Create a new builder instance using the specified origin and direction.
+   * <p>Note: The range is calculated based on the length of the direction vector.
+   * @param origin the origin of the raytrace
+   * @param direction the direction of the raytrace
+   * @return a new builder instance
+   */
   public static RayTraceBuilder of(Vector3d origin, Vector3d direction) {
     Objects.requireNonNull(origin);
     Objects.requireNonNull(direction);

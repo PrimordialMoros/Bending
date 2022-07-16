@@ -110,7 +110,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
   }
 
   /**
-   * Create a translation from a map of localized Strings.
+   * Create a translation from a map of localized Strings using the default Bending Locale.
    * @param key a unique key to identify your translation when registering
    * @param translations a map with localized strings
    * @return the constructed translation

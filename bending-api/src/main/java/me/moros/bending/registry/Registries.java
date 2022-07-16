@@ -41,6 +41,9 @@ import me.moros.bending.model.registry.Registry;
 import me.moros.bending.model.registry.RegistryBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Holds all the built-in registries.
+ */
 @SuppressWarnings("unchecked")
 public final class Registries {
   private static final Map<RegistryKey<? extends Keyed>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_KEY = new HashMap<>();

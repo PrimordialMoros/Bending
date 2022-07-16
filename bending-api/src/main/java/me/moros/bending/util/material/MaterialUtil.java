@@ -38,6 +38,10 @@ import org.bukkit.inventory.InventoryHolder;
 
 import static java.util.Map.entry;
 
+/**
+ * Group and categorize all various common materials.
+ * Also provides utility methods to convert materials and block data to similar types.
+ */
 public final class MaterialUtil {
   public static final Map<Material, Material> COOKABLE;
   public static final Map<Material, Material> ORES;

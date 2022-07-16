@@ -39,7 +39,6 @@ import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.TextUtil;
-import me.moros.bending.util.VersionUtil;
 import me.moros.bending.util.metadata.Metadata;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.ServicePriority;
@@ -136,13 +135,15 @@ public class Bending extends JavaPlugin {
   }
 
   private void loadAdapter() {
-    String className = "me.moros.bending.adapter.impl." + VersionUtil.nmsVersion() + ".NativeAdapterImpl";
+    String fullName = getServer().getClass().getPackageName();
+    String nmsVersion = fullName.substring(1 + fullName.lastIndexOf("."));
+    String className = "me.moros.bending.adapter.impl." + nmsVersion + ".NativeAdapterImpl";
     NativeAdapter adapter = findAdapter(className);
     if (adapter != null) {
       NativeAdapter.inject(adapter);
     }
     if (NativeAdapter.hasNativeSupport()) {
-      logger.info("Successfully loaded native adapter for version " + VersionUtil.nmsVersion());
+      logger.info("Successfully loaded native adapter for version " + nmsVersion);
     } else {
       String s = String.format("""
                 
@@ -153,7 +154,7 @@ public class Bending extends JavaPlugin {
         * It is recommended you find a supported version.
         ****************************************************************
                 
-        """, VersionUtil.nmsVersion());
+        """, nmsVersion);
       logger.warn(s);
     }
   }

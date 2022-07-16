@@ -48,7 +48,6 @@ public class AbilityDescription implements Keyed {
   private final EnumSet<Activation> activations;
   private final Collection<String> requiredPermissions;
   private final Component displayName;
-  private final Component meta;
   private final boolean canBind;
   private final boolean hidden;
   private final boolean sourcePlant;
@@ -66,7 +65,6 @@ public class AbilityDescription implements Keyed {
     sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
     displayName = Component.text(name, element.color());
-    meta = displayName().clickEvent(ClickEvent.runCommand("/bending help " + name()));
     hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
     key = Key.create(NAMESPACE, name);
   }
@@ -112,7 +110,7 @@ public class AbilityDescription implements Keyed {
   }
 
   public Component meta() {
-    return meta;
+    return displayName().clickEvent(ClickEvent.runCommand("/bending help " + name()));
   }
 
   @Override
@@ -220,7 +218,7 @@ public class AbilityDescription implements Keyed {
     private <T extends Ability> Builder(String name, Function<AbilityDescription, T> constructor) {
       this.name = name;
       this.constructor = constructor;
-      this.requiredPermissions = List.of();
+      this.requiredPermissions = List.of(AbilityDescription.NAMESPACE + "." + name);
     }
 
     public Builder element(Element element) {
@@ -240,7 +238,7 @@ public class AbilityDescription implements Keyed {
 
     public Builder require(String @Nullable ... permissions) {
       Collection<String> c = new ArrayList<>();
-      c.add(AbilityDescription.NAMESPACE + name);
+      c.add(AbilityDescription.NAMESPACE + "." + name);
       if (permissions != null) {
         c.addAll(List.of(permissions));
       }

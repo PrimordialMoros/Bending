@@ -22,7 +22,13 @@ package me.moros.bending;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Provides various configurable bending properties.
+ */
 public interface BendingProperties {
+  /**
+   * Disregard, internal use only
+   */
   final class Holder {
     private static final BendingProperties DEFAULTS = new BendingProperties() {
     };

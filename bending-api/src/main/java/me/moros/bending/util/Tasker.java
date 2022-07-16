@@ -62,27 +62,41 @@ public enum Tasker {
     return plugin != null && plugin.isEnabled();
   }
 
-  private @Nullable BukkitTask task(Runnable runnable, long delay) {
+  /**
+   * Create a synchronous task and execute it after a delay.
+   * @param runnable the task to execute
+   * @param delay the delay in ticks
+   * @return the created task if scheduled, false otherwise
+   */
+  public @Nullable BukkitTask sync(Runnable runnable, long delay) {
     return canExecute() ? plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delay) : null;
   }
 
-  private @Nullable BukkitTask repeatingTask(Runnable runnable, long interval) {
+  /**
+   * Create a repeating synchronous tasks and execute it.
+   * @param runnable the task to execute
+   * @param interval the interval in ticks
+   * @return the created task if scheduled, false otherwise
+   */
+  public @Nullable BukkitTask repeat(Runnable runnable, long interval) {
     return canExecute() ? plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, 1, interval) : null;
   }
 
+  /**
+   * Create an asynchronous task using Bending's executor.
+   * @param runnable the task to execute
+   * @return a future
+   */
   public static CompletableFuture<Void> async(Runnable runnable) {
     return CompletableFuture.runAsync(runnable, INSTANCE.executor);
   }
 
+  /**
+   * Create an asynchronous task using Bending's executor.
+   * @param supplier the task to execute
+   * @return a future with the result
+   */
   public static <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {
     return CompletableFuture.supplyAsync(supplier, INSTANCE.executor);
-  }
-
-  public static @Nullable BukkitTask sync(Runnable runnable, long delay) {
-    return INSTANCE.task(runnable, delay);
-  }
-
-  public static @Nullable BukkitTask repeat(Runnable runnable, long interval) {
-    return INSTANCE.repeatingTask(runnable, interval);
   }
 }

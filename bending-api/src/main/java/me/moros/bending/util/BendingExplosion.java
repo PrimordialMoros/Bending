@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import me.moros.bending.BendingProperties;
+import me.moros.bending.event.BendingExplosionEvent;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
@@ -38,11 +39,13 @@ import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Represents an explosion with pre-configured parameters.
+ */
 public final class BendingExplosion {
   private final double size;
   private final double damage;
@@ -85,6 +88,13 @@ public final class BendingExplosion {
     }
   }
 
+  /**
+   * Apply this explosion from an ability.
+   * <p>Note: Calls a {@link BendingExplosionEvent}
+   * @param source the ability causing the explosion
+   * @param center the center of the explosion
+   * @return true if explosion was successful, false otherwise
+   */
   public boolean explode(Ability source, Vector3d center) {
     User user = source.user();
     World world = user.world();
@@ -138,10 +148,17 @@ public final class BendingExplosion {
     }, livingOnly, true);
   }
 
+  /**
+   * Create a new builder to configure an explosion.
+   * @return a new builder instance
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * A builder to configure explosions.
+   */
   public static final class Builder {
     private double size = 2.0;
     private double damage = 4.0;
@@ -157,61 +174,122 @@ public final class BendingExplosion {
     private Builder() {
     }
 
+    /**
+     * Set the size of the explosion.
+     * @param size the radius of the explosion
+     * @return the modified builder
+     */
     public Builder size(double size) {
       this.size = Math.abs(size);
       return this;
     }
 
+    /**
+     * Set the explosion damage to entities.
+     * @param damage the damage the explosion will apply
+     * @return the modified builder
+     */
     public Builder damage(double damage) {
       this.damage = Math.abs(damage);
       return this;
     }
 
+    /**
+     * Set the knockback factor for the user who caused the explosion
+     * @param selfKnockbackFactor the knockback multiplier
+     * @return the modified builder
+     */
     public Builder selfKnockbackFactor(double selfKnockbackFactor) {
       this.selfKnockbackFactor = Math.abs(selfKnockbackFactor);
       return this;
     }
 
+    /**
+     * Set the fire ticks of the explosion.
+     * @param fireTicks the duration of fire ticks the explosion will apply
+     * @return the modified builder
+     */
     public Builder fireTicks(int fireTicks) {
       this.fireTicks = Math.abs(fireTicks);
       return this;
     }
 
+    /**
+     * Set whether the explosion will only affect living entities.
+     * @param livingOnly the boolean value to set
+     * @return the modified builder
+     */
     public Builder livingOnly(boolean livingOnly) {
       this.livingOnly = livingOnly;
       return this;
     }
 
+    /**
+     * Set whether the explosion will emit particles.
+     * @param particles the boolean value to set
+     * @return the modified builder
+     */
     public Builder particles(boolean particles) {
       this.particles = particles;
       return this;
     }
 
+    /**
+     * Set whether the explosion can break blocks.
+     * @param breakBlocks the boolean value to set
+     * @return the modified builder
+     */
     public Builder breakBlocks(boolean breakBlocks) {
       this.breakBlocks = breakBlocks;
       return this;
     }
 
+    /**
+     * Set whether the explosion can place fires. Placing fire requires the explosion to be able to break blocks.
+     * @param placeFire the boolean value to set
+     * @return the modified builder
+     */
     public Builder placeFire(boolean placeFire) {
       this.placeFire = placeFire;
       return this;
     }
 
+    /**
+     * Sets the explosion to ignore all entities inside the specified area represented by the collider.
+     * @param ignoreInside the collider to use or null to disable this mechanic
+     * @return the modified builder
+     */
     public Builder ignoreInsideCollider(@Nullable Collider ignoreInside) {
       this.ignoreInside = ignoreInside;
       return this;
     }
 
+    /**
+     * Sets the explosion sound effect.
+     * @param sound the sound effect to play when the explosion occurs
+     * @return the modified builder
+     */
     public Builder sound(@Nullable SoundEffect sound) {
       this.sound = sound;
       return this;
     }
 
+    /**
+     * Sets the volume and pitch for the default explosion sound.
+     * @param volume the new volume
+     * @param pitch the new pitch
+     * @return the modified builder
+     */
     public Builder sound(float volume, float pitch) {
-      this.sound = SoundUtil.of(Sound.ENTITY_GENERIC_EXPLODE, volume, pitch);
+      this.sound = SoundUtil.EXPLOSION.with(volume, pitch);
       return this;
     }
 
+    /**
+     * Build an explosion with the current parameters.
+     * @return the created explosion
+     * @see #buildAndExplode(Ability, Vector3d)
+     */
     public BendingExplosion build() {
       if (size <= 0) {
         size = 2.0;
@@ -219,6 +297,13 @@ public final class BendingExplosion {
       return new BendingExplosion(this);
     }
 
+    /**
+     * Build an explosion with the current parameters and apply it.
+     * @param source the ability causing the explosion
+     * @param center the center of the explosion
+     * @return true if explosion was successful, false otherwise
+     * @see #explode(Ability, Vector3d)
+     */
     public boolean buildAndExplode(Ability source, Vector3d center) {
       return build().explode(source, center);
     }

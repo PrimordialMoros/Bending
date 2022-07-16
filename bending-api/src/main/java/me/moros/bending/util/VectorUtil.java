@@ -48,7 +48,7 @@ public final class VectorUtil {
    * Amount of rays will be rounded up to the nearest odd number. Minimum value is 3.
    * @param start the starting point
    * @param axis the axis around which to rotate
-   * @param angle the rotation angle
+   * @param angle the rotation angle in radians
    * @param rays the amount of vectors to return, must be an odd number, minimum 3
    * @return a list consisting of all the directions for this arc
    * @see #rotateInverse(Vector3d, Rotation, int)
@@ -67,24 +67,39 @@ public final class VectorUtil {
     return arc;
   }
 
+  /**
+   * Samples points around the perimeter of a circle around the specified axis.
+   * @param start the center point
+   * @param axis the axis perpendicular to the circle's plane
+   * @param times the sample size of points
+   * @return the points around the circle's perimeter
+   */
   public static Collection<Vector3d> circle(Vector3d start, Vector3d axis, int times) {
     double angle = 2 * Math.PI / times;
     return rotate(start, axis, angle, times);
   }
 
   /**
-   * Repeat a rotation on a specific vector.
+   * Repeat a rotation (clockwise) on a specific vector.
    * @param start the starting point
    * @param axis the axis around which to rotate
-   * @param angle the rotation angle
+   * @param angle the rotation angle in radians
    * @param times the amount of times to repeat the rotation
    * @return a list consisting of all the directions for this arc
-   * @see #rotateInverse(Vector3d, Rotation, int)
+   * @see #rotateInverse(Vector3d, Vector3d, double, int)
    */
   public static Collection<Vector3d> rotate(Vector3d start, Vector3d axis, double angle, int times) {
     return rotate(start, new Rotation(axis, angle), times);
   }
 
+  /**
+   * Repeat a rotation (clockwise) on a specific vector.
+   * @param start the starting point
+   * @param rotation the rotation delta
+   * @param times the amount of times to repeat the rotation
+   * @return a list consisting of all the directions for this arc
+   * @see #rotateInverse(Vector3d, Rotation, int)
+   */
   private static Collection<Vector3d> rotate(Vector3d start, Rotation rotation, int times) {
     Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
@@ -96,13 +111,26 @@ public final class VectorUtil {
   }
 
   /**
-   * Inversely repeat a rotation on a specific vector.
-   * @see #rotate(Vector3d, Rotation, int)
+   * Repeat a rotation (counter-clockwise) on a specific vector.
+   * @param start the starting point
+   * @param axis the axis around which to rotate
+   * @param angle the rotation angle in radians
+   * @param times the amount of times to repeat the rotation
+   * @return a list consisting of all the directions for this arc
+   * @see #rotate(Vector3d, Vector3d, double, int)
    */
   public static Collection<Vector3d> rotateInverse(Vector3d start, Vector3d axis, double angle, int times) {
     return rotateInverse(start, new Rotation(axis, angle), times);
   }
 
+  /**
+   * Repeat a rotation (counter-clockwise) on a specific vector.
+   * @param start the starting point
+   * @param rotation the rotation delta
+   * @param times the amount of times to repeat the rotation
+   * @return a list consisting of all the directions for this arc
+   * @see #rotate(Vector3d, Rotation, int)
+   */
   private static Collection<Vector3d> rotateInverse(Vector3d start, Rotation rotation, int times) {
     Collection<Vector3d> arc = new ArrayList<>();
     double[] vector = start.toArray();
@@ -113,8 +141,13 @@ public final class VectorUtil {
     return arc;
   }
 
+
   /**
-   * Get an orthogonal vector.
+   * Get the orthogonal vector for the specified parameters.
+   * @param axis the axis perpendicular to the plane
+   * @param radians the angle in radians
+   * @param length the length of the resulting vector
+   * @return an orthogonal vector at the specified angle and length
    */
   public static Vector3d orthogonal(Vector3d axis, double radians, double length) {
     double[] arr = {axis.y(), -axis.x(), 0};
@@ -188,28 +221,73 @@ public final class VectorUtil {
     return possibleCollisions;
   }
 
+  /**
+   * Returns a vector with a Gaussian distributed offset.
+   * @param target the base vector
+   * @param offset the standard deviation for the Gaussian distribution
+   * @return the resulting vector
+   * @see #gaussianOffset(Vector3d, double, double, double)
+   */
   public static Vector3d gaussianOffset(Vector3d target, double offset) {
     return gaussianOffset(target, offset, offset, offset);
   }
 
+  /**
+   * Returns a vector with a Gaussian distributed offset for each component.
+   * @param target the base vector
+   * @param offsetX the standard deviation for the Gaussian distribution in the x component
+   * @param offsetY the standard deviation for the Gaussian distribution in the y component
+   * @param offsetZ the standard deviation for the Gaussian distribution in the z component
+   * @return the resulting vector
+   */
   public static Vector3d gaussianOffset(Vector3d target, double offsetX, double offsetY, double offsetZ) {
     ThreadLocalRandom r = ThreadLocalRandom.current();
-    double[] v = {r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ};
-    return target.add(new Vector3d(v));
+    return target.add(new Vector3d(r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ));
   }
 
+  /**
+   * Create a burst of rays in the shape of a cone. The cone's tip is centered at the user.
+   * @param user the user creating the cone burst
+   * @param range the length of each ray
+   * @return the bursting rays
+   * @see #createBurst(User, double, double, double)
+   */
   public static Collection<Ray> cone(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, ANGLE);
   }
 
+  /**
+   * Create a burst of rays in the shape of a sphere. The sphere is centered around the user.
+   * @param user the user creating the sphere burst
+   * @param range the length of each ray
+   * @return the bursting rays
+   * @see #createBurst(User, double, double, double)
+   */
   public static Collection<Ray> sphere(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, 0);
   }
 
+  /**
+   * Create a burst of rays in a hybrid shape between a cone and a sphere. The burst is centered around the user.
+   * @param user the user creating the fall burst
+   * @param range the length of each ray
+   * @return the bursting rays
+   * @see #createBurst(User, double, double, double)
+   */
   public static Collection<Ray> fall(User user, double range) {
     return createBurst(user, range, ANGLE_STEP, -1);
   }
 
+  /**
+   * Create a burst of rays with the specified parameters.
+   * <p>Note: An angle of 0 makes the burst spherical while a negative angle makes the burst a hybrid between a sphere and a cone.
+   * @param user the user creating the burst
+   * @param range the length of each ray
+   * @param angleStep the delta angle between rays in radians
+   * @param angle the angle of the burst in radians
+   * @return the bursting rays
+   * @see #createBurst(User, double, double, double)
+   */
   // Negative angle for fall burst
   public static Collection<Ray> createBurst(User user, double range, double angleStep, double angle) {
     Vector3d center = EntityUtil.entityCenter(user.entity());

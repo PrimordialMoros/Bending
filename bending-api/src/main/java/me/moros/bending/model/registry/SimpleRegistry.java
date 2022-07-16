@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import me.moros.bending.model.registry.exception.RegistryModificationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
