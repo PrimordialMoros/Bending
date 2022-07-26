@@ -20,6 +20,7 @@
 package me.moros.bending.config;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
@@ -41,6 +42,7 @@ public final class ConfigManager {
     this.logger = logger;
     Path path = Path.of(directory, "bending.conf");
     try {
+      Files.createDirectories(path.getParent());
       listener = WatchServiceListener.create();
       reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
       processor = new ConfigProcessor(logger, reference);
@@ -75,7 +77,7 @@ public final class ConfigManager {
   }
 
   public CommentedConfigurationNode config() {
-    return INSTANCE.reference.node();
+    return reference.node();
   }
 
   public ConfigProcessor processor() {
