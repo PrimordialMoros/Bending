@@ -41,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable representation of slots.
  */
 public final class Preset {
-  public static final Preset EMPTY = new Preset(new AbilityDescription[9]);
+  public static final Preset EMPTY = new Preset(0 , "", new AbilityDescription[9]);
 
   private final int id;
   private final String name;
@@ -57,14 +57,6 @@ public final class Preset {
     this.name = name;
     this.abilities = new AbilityDescription[9];
     System.arraycopy(abilities, 0, this.abilities, 0, Math.min(9, abilities.length));
-  }
-
-  /**
-   * Creates a dummy preset with id 0 and an empty name.
-   * @see #Preset(int, String, AbilityDescription[])
-   */
-  public Preset(@Nullable AbilityDescription[] abilities) {
-    this(0, "", abilities);
   }
 
   public int id() {

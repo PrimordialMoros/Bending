@@ -87,8 +87,8 @@ public enum Tasker {
    * @param runnable the task to execute
    * @return a future
    */
-  public static CompletableFuture<Void> async(Runnable runnable) {
-    return CompletableFuture.runAsync(runnable, INSTANCE.executor);
+  public CompletableFuture<Void> async(Runnable runnable) {
+    return CompletableFuture.runAsync(runnable, executor);
   }
 
   /**
@@ -96,7 +96,7 @@ public enum Tasker {
    * @param supplier the task to execute
    * @return a future with the result
    */
-  public static <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {
-    return CompletableFuture.supplyAsync(supplier, INSTANCE.executor);
+  public <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {
+    return CompletableFuture.supplyAsync(supplier, executor);
   }
 }

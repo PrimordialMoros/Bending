@@ -122,7 +122,7 @@ public final class StorageImpl implements BendingStorage {
 
   @Override
   public CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid) {
-    return Tasker.async(() -> loadProfile(uuid)).exceptionally(t -> {
+    return Tasker.INSTANCE.async(() -> loadProfile(uuid)).exceptionally(t -> {
       logger.error(t.getMessage(), t);
       return null;
     });
@@ -130,7 +130,7 @@ public final class StorageImpl implements BendingStorage {
 
   @Override
   public void saveProfilesAsync(Iterable<PlayerProfile> profiles) {
-    Tasker.async(() -> {
+    Tasker.INSTANCE.async(() -> {
       for (var profileToSave : profiles) {
         updateProfile(profileToSave);
         saveElements(profileToSave);
@@ -165,7 +165,7 @@ public final class StorageImpl implements BendingStorage {
 
   @Override
   public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
-    return Tasker.async(() -> savePreset(playerId, preset)).exceptionally(t -> {
+    return Tasker.INSTANCE.async(() -> savePreset(playerId, preset)).exceptionally(t -> {
       logger.error(t.getMessage(), t);
       return false;
     });
@@ -173,7 +173,7 @@ public final class StorageImpl implements BendingStorage {
 
   @Override
   public void deletePresetAsync(int presetId) {
-    Tasker.async(() -> deletePresetExact(presetId)).exceptionally(this::logError);
+    Tasker.INSTANCE.async(() -> deletePresetExact(presetId)).exceptionally(this::logError);
   }
 
   private @Nullable PlayerProfile loadProfile(UUID uuid) {

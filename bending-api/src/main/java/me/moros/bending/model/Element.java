@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import me.moros.bending.model.key.Key;
+import me.moros.bending.model.key.Keyed;
 import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -32,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * An immutable and thread-safe object that represents a bending element
  */
-public enum Element {
+public enum Element implements Keyed {
   AIR("Air", ColorPalette.AIR),
   WATER("Water", ColorPalette.WATER),
   EARTH("Earth", ColorPalette.EARTH),
@@ -40,10 +42,12 @@ public enum Element {
 
   private final String elementName;
   private final TextColor color;
+  private final Key key;
 
   Element(String elementName, TextColor color) {
     this.elementName = elementName;
     this.color = color;
+    this.key = Key.create(NAMESPACE, elementName.toLowerCase(Locale.ROOT));
   }
 
   @Override
@@ -51,12 +55,12 @@ public enum Element {
     return elementName;
   }
 
-  private String key() {
-    return "bending.element." + elementName.toLowerCase(Locale.ROOT);
+  public Key key() {
+    return key;
   }
 
   public Component displayName() {
-    return Component.translatable(key(), color);
+    return Component.translatable(key().toString(), color);
   }
 
   public Component description() {
@@ -67,11 +71,14 @@ public enum Element {
     return color;
   }
 
+  public static final String NAMESPACE = "bending.element";
+
   public static Optional<Element> fromName(@Nullable String value) {
     if (value == null || value.isEmpty()) {
       return Optional.empty();
     }
-    return VALUES.stream().filter(e -> e.name().startsWith(value.toUpperCase(Locale.ROOT))).findAny();
+    String upper = value.toUpperCase(Locale.ROOT);
+    return VALUES.stream().filter(e -> e.name().startsWith(upper)).findAny();
   }
 
   public static final Collection<Element> VALUES = List.of(values());
