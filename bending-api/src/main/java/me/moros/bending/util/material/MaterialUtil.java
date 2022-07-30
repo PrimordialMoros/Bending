@@ -30,11 +30,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.Container;
+import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
-import org.bukkit.inventory.InventoryHolder;
 
 import static java.util.Map.entry;
 
@@ -153,11 +153,11 @@ public final class MaterialUtil {
   }
 
   public static boolean isContainer(Block block) {
-    return CONTAINERS.isTagged(block.getType()) || (block.getState() instanceof InventoryHolder);
+    return CONTAINERS.isTagged(block) || (block.getState(false) instanceof Container);
   }
 
   public static boolean isUnbreakable(Block block) {
-    return UNBREAKABLES.isTagged(block.getType()) || isContainer(block) || (block.getState() instanceof CreatureSpawner);
+    return UNBREAKABLES.isTagged(block) || isContainer(block) || (block.getState(false) instanceof TileState);
   }
 
   public static boolean isIgnitable(Block block) {
@@ -180,7 +180,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isWaterPlant(Block block) {
-    return WATER_PLANTS.isTagged(block.getType());
+    return WATER_PLANTS.isTagged(block);
   }
 
   public static boolean isWater(Block block) {

@@ -62,22 +62,7 @@ public final class TempBlock extends TemporaryBase {
     snapshots = new ArrayDeque<>();
     this.block = block;
     this.bendable = bendable;
-    snapshots.offerLast(new TempBlockState(block.getState(), bendable, ticks));
-  }
-
-  // Handle falling water
-  private static BlockData calculateWaterData(Block above) {
-    BlockData data = above.getBlockData();
-    int level;
-    if (data instanceof Levelled levelled) {
-      level = levelled.getLevel();
-      if (level <= 7) {
-        level += 8;
-      }
-    } else {
-      level = 8;
-    }
-    return MaterialUtil.waterData(level);
+    snapshots.offerLast(new TempBlockState(block, bendable, ticks));
   }
 
   private void addState(BlockData data, boolean bendable, int ticks) {
@@ -85,7 +70,7 @@ public final class TempBlock extends TemporaryBase {
     if (!snapshots.isEmpty()) {
       TempBlockState tbs = snapshots.peekLast();
       if (!tbs.weak) {
-        snapshots.offerLast(new TempBlockState(block.getState(false), bendable, ticks));
+        snapshots.offerLast(new TempBlockState(block, bendable, ticks));
       } else {
         tbs.weak = false;
       }
@@ -175,8 +160,7 @@ public final class TempBlock extends TemporaryBase {
 
   private void revertToSnapshot(Snapshot snapshot) {
     bendable = snapshot.bendable;
-    BlockState state = snapshot.state;
-    block.getWorld().getChunkAtAsync(block).thenRun(() -> state.update(true, false));
+    snapshot.revert();
     refreshGravityCache(block);
   }
 
@@ -191,7 +175,7 @@ public final class TempBlock extends TemporaryBase {
     if (tb != null) {
       tb.revertToSnapshot(snapshot);
     } else {
-      block.getWorld().getChunkAtAsync(block).thenRun(() -> snapshot.state.update(true, false));
+      snapshot.revert();
     }
   }
 
@@ -202,7 +186,7 @@ public final class TempBlock extends TemporaryBase {
   }
 
   public Snapshot snapshot() {
-    return new Snapshot(block.getState(), bendable);
+    return new Snapshot(block, bendable);
   }
 
   public static boolean isBendable(Block block) {
@@ -236,8 +220,8 @@ public final class TempBlock extends TemporaryBase {
     private final int expirationTicks;
     private boolean weak = false;
 
-    private TempBlockState(BlockState state, boolean bendable, int ticks) {
-      super(state, bendable);
+    private TempBlockState(Block block, boolean bendable, int ticks) {
+      super(block, bendable);
       this.expirationTicks = Bukkit.getCurrentTick() + ticks;
     }
   }
@@ -246,9 +230,14 @@ public final class TempBlock extends TemporaryBase {
     protected final BlockState state;
     protected final boolean bendable;
 
-    private Snapshot(BlockState state, boolean bendable) {
-      this.state = state;
+    private Snapshot(Block block, boolean bendable) {
+      this.state = block.getState(false);
       this.bendable = bendable;
+    }
+
+    private void revert() {
+      Block block = state.getBlock();
+      state.getWorld().getChunkAtAsync(block).thenRun(() -> NativeAdapter.instance().setBlockFast(block, state.getBlockData()));
     }
   }
 
@@ -319,34 +308,50 @@ public final class TempBlock extends TemporaryBase {
       return Temporary.toTicks(time);
     }
 
-    private BlockData fixWaterData(Block block) {
+    // Handle falling water
+    private BlockData calculateWaterData(Block above) {
+      int level;
+      if (above.getBlockData() instanceof Levelled levelled) {
+        level = levelled.getLevel();
+        if (level <= 7) {
+          level += 8;
+        }
+      } else {
+        level = 8;
+      }
+      return MaterialUtil.waterData(level);
+    }
+
+    private BlockData correctData(Block block) {
+      BlockData newData = data;
       if (fixWater) {
         Material mat = WorldUtil.isInfiniteWater(block) ? Material.WATER : Material.AIR;
         Block above = block.getRelative(BlockFace.UP);
-        return mat == Material.AIR && MaterialUtil.isWater(above) ? calculateWaterData(above) : mat.createBlockData();
+        if (mat == Material.AIR && MaterialUtil.isWater(above)) {
+          newData = calculateWaterData(above);
+        } else {
+          newData = mat.createBlockData();
+        }
       }
-      return data;
-    }
-
-    private BlockData validateWaterlogged(BlockData blockData, BlockData newData) {
-      if (blockData instanceof Waterlogged waterData) {
+      if (block.getBlockData() instanceof Waterlogged waterData) {
         if (waterData.isWaterlogged() && newData.getMaterial().isAir()) {
           waterData.setWaterlogged(false);
+          return waterData;
         } else if (!waterData.isWaterlogged() && newData.getMaterial() == Material.WATER) {
           waterData.setWaterlogged(true);
+          return waterData;
         }
-        return waterData;
       }
       return newData;
     }
 
     public Optional<TempBlock> build(Block block) {
-      if (block instanceof TileState) {
+      if (block.getState(false) instanceof TileState) {
         return Optional.empty();
       }
-      BlockData blockData = block.getBlockData();
-      BlockData newData = validateWaterlogged(blockData, fixWaterData(block));
-      if (blockData.matches(newData)) {
+      BlockData current = block.getBlockData();
+      BlockData newData = correctData(block);
+      if (current.matches(newData)) {
         return Optional.empty();
       }
       int ticks = validateDuration(block);

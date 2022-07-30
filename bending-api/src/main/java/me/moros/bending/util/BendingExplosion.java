@@ -124,7 +124,7 @@ public final class BendingExplosion {
       Collection<Block> filteredBlocks = blocks.stream().filter(predicate).filter(user::canBuild).toList();
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       for (Block block : filteredBlocks) {
-        TempBlock.air().duration(BendingProperties.instance().explosionRevertTime(1000)).build(block);
+        TempBlock.air().fixWater(false).duration(BendingProperties.instance().explosionRevertTime(1000)).build(block);
       }
       if (placeFire) {
         for (Block block : filteredBlocks) {
