@@ -163,6 +163,9 @@ public class EarthSurf extends AbilityInstance {
 
     @Override
     public void render(BlockData data) {
+      if (ticks % 3 == 0) {
+        return;
+      }
       Builder builder = TempEntity.builder(MaterialUtil.softType(data)).velocity(new Vector3d(0, 0.25, 0)).duration(500);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());

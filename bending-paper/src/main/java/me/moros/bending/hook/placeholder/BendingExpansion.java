@@ -19,8 +19,6 @@
 
 package me.moros.bending.hook.placeholder;
 
-import java.util.Locale;
-
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
 import me.moros.bending.model.user.BendingPlayer;
@@ -68,12 +66,11 @@ public class BendingExpansion extends PlaceholderExpansion {
   public @Nullable String onPlaceholderRequest(@Nullable Player player, String params) {
     User user = player == null ? null : Registries.BENDERS.get(player.getUniqueId());
     if (user instanceof BendingPlayer bendingPlayer) {
-      return translate(provider.onPlaceholderRequest(bendingPlayer, params), player.locale());
+      Component result = provider.onPlaceholderRequest(bendingPlayer, params);
+      if (result != null) {
+        return serializer.serialize(GlobalTranslator.render(result, player.locale()));
+      }
     }
     return null;
-  }
-
-  private @Nullable String translate(@Nullable Component component, Locale locale) {
-    return component == null ? null : serializer.serialize(GlobalTranslator.render(component, locale));
   }
 }

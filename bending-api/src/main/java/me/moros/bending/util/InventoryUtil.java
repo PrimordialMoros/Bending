@@ -33,6 +33,7 @@ import org.bukkit.potion.PotionType;
 /**
  * Utility class to handle inventory modification.
  */
+// TODO better item replacing
 public final class InventoryUtil {
   private static final ItemStack EMPTY_BOTTLE = new ItemStack(Material.POTION, 1);
   private static final ItemStack WATER_BOTTLE = new ItemStack(Material.POTION, 1);
@@ -90,7 +91,7 @@ public final class InventoryUtil {
       return false;
     }
     Inventory inventory = user.inventory();
-    return inventory != null && inventory.removeItem(itemStack).isEmpty();
+    return inventory != null && inventory.removeItemAnySlot(itemStack).isEmpty();
   }
 
   /**
@@ -104,7 +105,7 @@ public final class InventoryUtil {
       return false;
     }
     Inventory inventory = user.inventory();
-    return inventory != null && inventory.removeItem(EMPTY_BOTTLE).isEmpty() && inventory.addItem(WATER_BOTTLE).isEmpty();
+    return inventory != null && inventory.removeItemAnySlot(EMPTY_BOTTLE).isEmpty() && inventory.addItem(WATER_BOTTLE).isEmpty();
   }
 
   /**
@@ -118,7 +119,7 @@ public final class InventoryUtil {
       return false;
     }
     Inventory inventory = user.inventory();
-    return inventory != null && inventory.removeItem(WATER_BOTTLE).isEmpty() && inventory.addItem(EMPTY_BOTTLE).isEmpty();
+    return inventory != null && inventory.removeItemAnySlot(WATER_BOTTLE).isEmpty() && inventory.addItem(EMPTY_BOTTLE).isEmpty();
   }
 
   /**

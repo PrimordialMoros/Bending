@@ -39,6 +39,11 @@ public final class KeyImpl implements Key {
   }
 
   @Override
+  public String toString() {
+    return namespace + '.' + value;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
