@@ -62,7 +62,7 @@ public class Pillar implements Updatable, Iterable<Block> {
   private int currentDistance;
   private long nextUpdateTime;
 
-  protected Pillar(Builder builder) {
+  protected <T extends Pillar> Pillar(Builder<T> builder) {
     this.user = builder.user;
     this.origin = builder.origin;
     this.direction = builder.direction;
@@ -158,18 +158,18 @@ public class Pillar implements Updatable, Iterable<Block> {
     return true;
   }
 
-  public static Builder builder(User user, Block origin) {
+  public static Builder<Pillar> builder(User user, Block origin) {
     return builder(user, origin, Pillar::new);
   }
 
-  public static <T extends Pillar> Builder builder(User user, Block origin, Function<Builder, T> constructor) {
-    return new Builder(user, origin, constructor);
+  public static <T extends Pillar> Builder<T> builder(User user, Block origin, Function<Builder<T>, T> constructor) {
+    return new Builder<>(user, origin, constructor);
   }
 
-  public static class Builder {
+  public static final class Builder<T extends Pillar> {
     private final User user;
     private final Block origin;
-    private final Function<Builder, ? extends Pillar> constructor;
+    private final Function<Builder<T>, T> constructor;
     private BlockFace direction = BlockFace.UP;
     private int length;
     private int distance;
@@ -177,13 +177,13 @@ public class Pillar implements Updatable, Iterable<Block> {
     private long duration = BendingProperties.instance().earthRevertTime();
     private Predicate<Block> predicate = b -> true;
 
-    public <T extends Pillar> Builder(User user, Block origin, Function<Builder, T> constructor) {
+    private Builder(User user, Block origin, Function<Builder<T>, T> constructor) {
       this.user = user;
       this.origin = origin;
       this.constructor = constructor;
     }
 
-    public Builder direction(BlockFace direction) {
+    public Builder<T> direction(BlockFace direction) {
       if (!WorldUtil.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
@@ -191,26 +191,26 @@ public class Pillar implements Updatable, Iterable<Block> {
       return this;
     }
 
-    public Builder interval(@NonNegative long interval) {
+    public Builder<T> interval(@NonNegative long interval) {
       this.interval = interval;
       return this;
     }
 
-    public Builder duration(@NonNegative long duration) {
+    public Builder<T> duration(@NonNegative long duration) {
       this.duration = duration;
       return this;
     }
 
-    public Builder predicate(Predicate<Block> predicate) {
+    public Builder<T> predicate(Predicate<Block> predicate) {
       this.predicate = predicate;
       return this;
     }
 
-    public Optional<Pillar> build(@Positive int length) {
+    public Optional<T> build(@Positive int length) {
       return build(length, length);
     }
 
-    public Optional<Pillar> build(@Positive int length, @Positive int distance) {
+    public Optional<T> build(@Positive int length, @Positive int distance) {
       int maxLength = validateLength(length);
       if (maxLength < 1) {
         return Optional.empty();

@@ -63,6 +63,13 @@ public class PhaseChange extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
+    if (method == Activation.ATTACK) {
+      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+      return false;
+    } else if (method == Activation.SNEAK) {
+      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+      return false;
+    }
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -91,7 +98,7 @@ public class PhaseChange extends AbilityInstance {
   }
 
   public void freeze() {
-    if (!user.canBend(description()) || user.onCooldown(description())) {
+    if (user.onCooldown(description())) {
       return;
     }
     Vector3d center = user.rayTrace(userConfig.freezeRange).ignoreLiquids(false).blocks(user.world()).position();
@@ -101,7 +108,7 @@ public class PhaseChange extends AbilityInstance {
   }
 
   public void melt() {
-    if (!user.canBend(description()) || user.onCooldown(description())) {
+    if (user.onCooldown(description())) {
       return;
     }
     Vector3d center = user.rayTrace(userConfig.meltRange).blocks(user.world()).position();
@@ -115,18 +122,6 @@ public class PhaseChange extends AbilityInstance {
     newBlocks.removeIf(b -> !user.canBuild(b));
     Collections.shuffle(newBlocks);
     return newBlocks;
-  }
-
-  public static void freeze(User user) {
-    if (user.selectedAbilityName().equals("PhaseChange")) {
-      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
-    }
-  }
-
-  public static void melt(User user) {
-    if (user.selectedAbilityName().equals("PhaseChange")) {
-      user.game().abilityManager(user.world()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
-    }
   }
 
   @Override

@@ -19,27 +19,64 @@
 
 package me.moros.bending.model.ability;
 
-public enum Activation {
-  PASSIVE("bending.activation.passive"),
-  ATTACK("bending.activation.attack"),
-  ATTACK_ENTITY("bending.activation.attack-entity"),
-  INTERACT("bending.activation.interact", true),
-  INTERACT_ENTITY("bending.activation.interact-entity", true),
-  INTERACT_BLOCK("bending.activation.interact-block", true),
-  SNEAK("bending.activation.sneak"),
-  SNEAK_RELEASE("bending.activation.sneak-release"),
-  FALL("bending.activation.fall"),
-  SEQUENCE("bending.activation.sequence");
 
-  private final String key;
+import me.moros.bending.model.key.Key;
+import me.moros.bending.model.key.Keyed;
+
+/**
+ * Represents a type of ability activation.
+ */
+public enum Activation implements Keyed {
+  /**
+   * Passive abilities are always active.
+   */
+  PASSIVE("passive"),
+  /**
+   * Activation on click.
+   */
+  ATTACK("attack"),
+  /**
+   * Activation on attacking an entity.
+   */
+  ATTACK_ENTITY("attack-entity"),
+  /**
+   * Activation on interaction.
+   */
+  INTERACT("interact", true),
+  /**
+   * Activation on interaction with an entity.
+   */
+  INTERACT_ENTITY("interact-entity", true),
+  /**
+   * Activation on interaction with a block.
+   */
+  INTERACT_BLOCK("interact-block", true),
+  /**
+   * Activation on sneak.
+   */
+  SNEAK("sneak"),
+  /**
+   * Activation on sneak release.
+   */
+  SNEAK_RELEASE("sneak-release"),
+  /**
+   * Activations on fall damage.
+   */
+  FALL("fall"),
+  /**
+   * Activation by sequence.
+   */
+  SEQUENCE("sequence");
+
+  private final Key key;
   private final boolean interact;
 
-  Activation(String key) {
-    this(key, false);
+  Activation(String value) {
+    this(value, false);
   }
 
-  Activation(String key, boolean interact) {
-    this.key = key;
+  Activation(String value, boolean interact) {
+    this.key = Key.create(NAMESPACE, value);
     this.interact = interact;
   }
 
@@ -47,7 +84,10 @@ public enum Activation {
     return interact;
   }
 
-  public String key() {
+  @Override
+  public Key key() {
     return key;
   }
+
+  public static final String NAMESPACE = "bending.activation";
 }

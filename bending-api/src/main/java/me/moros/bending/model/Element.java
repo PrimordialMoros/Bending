@@ -22,7 +22,6 @@ package me.moros.bending.model;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import me.moros.bending.model.key.Key;
 import me.moros.bending.model.key.Keyed;
@@ -32,7 +31,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * An immutable and thread-safe object that represents a bending element
+ * An immutable and thread-safe object that represents a bending element.
  */
 public enum Element implements Keyed {
   AIR("Air", ColorPalette.AIR),
@@ -59,29 +58,48 @@ public enum Element implements Keyed {
     return key;
   }
 
+  /**
+   * Get the display name for this element.
+   * @return the display name
+   */
   public Component displayName() {
     return Component.translatable(key().toString(), color);
   }
 
+  /**
+   * Get the description for this element.
+   * @return the description
+   */
   public Component description() {
     return Component.translatable(key() + ".description", color);
   }
 
+  /**
+   * Get the color for this element.
+   * @return the color
+   */
   public TextColor color() {
     return color;
   }
 
-  public static final String NAMESPACE = "bending.element";
-
-  public static Optional<Element> fromName(@Nullable String value) {
-    if (value == null || value.isEmpty()) {
-      return Optional.empty();
+  /**
+   * Get the element matching the given name.
+   * @param value the element name to match
+   * @return the element if found, null otherwise
+   */
+  public static @Nullable Element fromName(String value) {
+    if (!value.isEmpty()) {
+      String upper = value.toUpperCase(Locale.ROOT);
+      for (Element element : VALUES) {
+        if (element.name().startsWith(upper)) {
+          return element;
+        }
+      }
     }
-    String upper = value.toUpperCase(Locale.ROOT);
-    return VALUES.stream().filter(e -> e.name().startsWith(upper)).findAny();
+    return null;
   }
 
+  public static final String NAMESPACE = "bending.element";
   public static final Collection<Element> VALUES = List.of(values());
-
   public static final Collection<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
 }

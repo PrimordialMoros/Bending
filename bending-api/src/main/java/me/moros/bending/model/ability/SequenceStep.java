@@ -19,45 +19,8 @@
 
 package me.moros.bending.model.ability;
 
-import java.util.Objects;
-
 /**
- * Immutable and thread-safe pair representation of {@link AbilityDescription} and {@link Activation}
+ * Pair representation of {@link AbilityDescription} and {@link Activation}.
  */
-public final class SequenceStep {
-  private final AbilityDescription desc;
-  private final Activation action;
-  private final int hashcode;
-
-  public SequenceStep(AbilityDescription desc, Activation action) {
-    this.desc = desc;
-    this.action = action;
-    hashcode = Objects.hash(desc, action);
-  }
-
-  public AbilityDescription ability() {
-    return desc;
-  }
-
-  public Activation activation() {
-    return action;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof SequenceStep otherAction) {
-      return action == otherAction.action && desc.equals(otherAction.desc);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return hashcode;
-  }
-
-  @Override
-  public String toString() {
-    return desc.name() + ": " + action.name();
-  }
+public record SequenceStep(AbilityDescription ability, Activation activation) {
 }

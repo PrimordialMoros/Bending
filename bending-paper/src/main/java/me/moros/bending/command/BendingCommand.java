@@ -203,7 +203,7 @@ public final class BendingCommand {
       int index = rawQuery.indexOf(' ');
       String query = rawQuery.substring(0, index > 0 ? index : rawQuery.length());
       if (query.length() <= 5) {
-        Element element = Element.fromName(query).orElse(null);
+        Element element = Element.fromName(query);
         if (element != null) {
           onElementDisplay(sender, element);
           return;

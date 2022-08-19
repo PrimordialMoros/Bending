@@ -32,7 +32,6 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityDescription.Sequence;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.key.Key;
-import me.moros.bending.model.key.KeyValidator;
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.model.key.Namespaced;
 import me.moros.bending.model.key.RegistryKey;
@@ -84,9 +83,6 @@ public final class Registries {
 
   private static Function<String, Key> stringToKey(Namespaced namespaced) {
     final String namespace = namespaced.namespace();
-    return input -> {
-      String lowerCaseKey = input.toLowerCase(Locale.ROOT);
-      return KeyValidator.isValidString(lowerCaseKey) ? Key.create(namespace, lowerCaseKey) : null;
-    };
+    return input -> Key.tryCreate(namespace, input.toLowerCase(Locale.ROOT));
   }
 }

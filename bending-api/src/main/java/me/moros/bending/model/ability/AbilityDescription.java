@@ -172,17 +172,17 @@ public class AbilityDescription implements Keyed {
         }
         AbilityDescription desc = sequenceStep.ability();
         Activation action = sequenceStep.activation();
-        String actionKey = action.key();
+        String key = action.key().toString();
         if (action == Activation.SNEAK && i + 1 < steps.size()) {
           // Check if the next instruction is to release sneak.
           SequenceStep next = steps.get(i + 1);
           if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
-            actionKey = "bending.activation.sneak-tap";
+            key = Activation.NAMESPACE + ".sneak-tap";
             i++;
           }
         }
         builder.append(Component.text(desc.name())).append(Component.text(" ("))
-          .append(Component.translatable(actionKey)).append(Component.text(")"));
+          .append(Component.translatable(key)).append(Component.text(")"));
       }
       return builder.build();
     }

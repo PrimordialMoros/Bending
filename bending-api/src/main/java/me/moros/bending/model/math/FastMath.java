@@ -20,23 +20,38 @@
 package me.moros.bending.model.math;
 
 /**
- * Math utility for rounding numbers accoding to Minecraft's coordinate system.
+ * Math utility for rounding numbers according to Minecraft's coordinate system.
  */
 public final class FastMath {
   private FastMath() {
   }
 
-  public static int floor(double num) {
-    int y = (int) num;
-    return num < y ? y - 1 : y;
+  /**
+   * Floor the given value.
+   * @param value the value to floor
+   * @return the rounded down value
+   */
+  public static int floor(double value) {
+    int y = (int) value;
+    return value < y ? y - 1 : y;
   }
 
-  public static int ceil(double num) {
-    int y = (int) num;
-    return num > y ? y + 1 : y;
+  /**
+   * Ceil the given value.
+   * @param value the value to ceil
+   * @return the rounded up value
+   */
+  public static int ceil(double value) {
+    int y = (int) value;
+    return value > y ? y + 1 : y;
   }
 
-  public static int round(double num) {
-    return floor(num + 0.5);
+  /**
+   * Round up the given value.
+   * @param value the value to round
+   * @return the rounded up value
+   */
+  public static int round(double value) {
+    return floor(value + 0.5);
   }
 }

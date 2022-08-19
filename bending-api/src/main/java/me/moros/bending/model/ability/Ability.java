@@ -28,6 +28,9 @@ import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.user.User;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+/**
+ * Represents an ability that can be instantiated.
+ */
 public interface Ability extends Updatable {
   /**
    * Attempt to initialize and activate this ability.

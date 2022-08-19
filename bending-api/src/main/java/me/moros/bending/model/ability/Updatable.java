@@ -19,12 +19,28 @@
 
 package me.moros.bending.model.ability;
 
+/**
+ * Represents something that can be updated (usually every tick).
+ */
 @FunctionalInterface
 public interface Updatable {
+  /**
+   * Update this instance.
+   * @return the result of the update
+   */
   UpdateResult update();
 
+  /**
+   * The result of the update process.
+   */
   enum UpdateResult {
+    /**
+     * Denotes that updating can continue.
+     */
     CONTINUE,
+    /**
+     * Denotes that updating can no longer continue and instance must be stopped/removed.
+     */
     REMOVE
   }
 }

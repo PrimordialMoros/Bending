@@ -23,6 +23,9 @@ import me.moros.bending.model.collision.geometry.Collider;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
+/**
+ * Represents a simple ability
+ */
 public interface SimpleAbility {
   void render();
 

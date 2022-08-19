@@ -172,7 +172,7 @@ public class Catapult extends AbilityInstance {
   }
 
   private static final class EarthPillar extends Pillar {
-    private EarthPillar(Builder builder) {
+    private EarthPillar(Builder<EarthPillar> builder) {
       super(builder);
     }
 

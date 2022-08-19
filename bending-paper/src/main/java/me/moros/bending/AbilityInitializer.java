@@ -232,7 +232,7 @@ public final class AbilityInitializer {
     abilities.add(torrent);
 
     AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange::new)
-      .element(WATER).activation(PASSIVE).bypassCooldown(true).build();
+      .element(WATER).activation(PASSIVE, ATTACK, SNEAK).bypassCooldown(true).build();
     abilities.add(phaseChange);
 
     AbilityDescription iceCrawl = AbilityDescription.builder("IceCrawl", IceCrawl::new)
@@ -363,7 +363,7 @@ public final class AbilityInitializer {
       .element(FIRE).activation(SNEAK).build());
 
     AbilityDescription heatControl = AbilityDescription.builder("HeatControl", HeatControl::new)
-      .element(FIRE).activation(PASSIVE).bypassCooldown(true).build();
+      .element(FIRE).activation(PASSIVE, ATTACK, SNEAK).bypassCooldown(true).build();
     abilities.add(heatControl);
 
     abilities.add(AbilityDescription.builder("Blaze", Blaze::new)

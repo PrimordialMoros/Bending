@@ -29,8 +29,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.translation.GlobalTranslator;
-import org.bukkit.command.ConsoleCommandSender;
 
 import static me.moros.bending.util.ColorPalette.*;
 import static net.kyori.adventure.text.Component.*;
@@ -171,10 +169,6 @@ public interface Message {
     Component build();
 
     default void send(Audience audience) {
-      if (audience instanceof ConsoleCommandSender) {
-        audience.sendMessage(GlobalTranslator.render(build(), DEFAULT_LOCALE));
-        return;
-      }
       audience.sendMessage(build());
     }
   }
@@ -184,10 +178,6 @@ public interface Message {
     Component build(A0 arg0);
 
     default void send(Audience audience, A0 arg0) {
-      if (audience instanceof ConsoleCommandSender) {
-        audience.sendMessage(GlobalTranslator.render(build(arg0), DEFAULT_LOCALE));
-        return;
-      }
       audience.sendMessage(build(arg0));
     }
   }
@@ -197,10 +187,6 @@ public interface Message {
     Component build(A0 arg0, A1 arg1);
 
     default void send(Audience audience, A0 arg0, A1 arg1) {
-      if (audience instanceof ConsoleCommandSender) {
-        audience.sendMessage(GlobalTranslator.render(build(arg0, arg1), DEFAULT_LOCALE));
-        return;
-      }
       audience.sendMessage(build(arg0, arg1));
     }
   }

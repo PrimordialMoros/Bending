@@ -153,6 +153,11 @@ public final class Rotation {
     out[2] = 2 * (m0 * (z * m0 - (q1 * y - q2 * x)) + s * q3) - z;
   }
 
+  /**
+   * Apply the instance to another rotation.
+   * @param r rotation to apply the rotation to
+   * @return a new rotation which is the composition of r by the instance
+   */
   public Rotation applyTo(Rotation r) {
     return new Rotation(r.q0 * q0 - (r.q1 * q1 + r.q2 * q2 + r.q3 * q3),
       r.q1 * q0 + r.q0 * q1 + (r.q2 * q3 - r.q3 * q2),
@@ -160,6 +165,11 @@ public final class Rotation {
       r.q3 * q0 + r.q0 * q3 + (r.q1 * q2 - r.q2 * q1));
   }
 
+  /**
+   * Apply the inverse of the instance to another rotation.
+   * @param r rotation to apply the rotation to
+   * @return a new rotation which is the composition of r by the inverse of the instance
+   */
   public Rotation applyInverseTo(Rotation r) {
     return new Rotation(-r.q0 * q0 - (r.q1 * q1 + r.q2 * q2 + r.q3 * q3),
       -r.q1 * q0 + r.q0 * q1 + (r.q2 * q3 - r.q3 * q2),

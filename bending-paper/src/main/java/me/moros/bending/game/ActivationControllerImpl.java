@@ -42,7 +42,6 @@ import me.moros.bending.ability.earth.sequence.EarthPillars;
 import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.water.HealingWaters;
-import me.moros.bending.ability.water.PhaseChange;
 import me.moros.bending.ability.water.WaterSpout;
 import me.moros.bending.ability.water.WaterWave;
 import me.moros.bending.ability.water.passive.HydroSink;
@@ -125,11 +124,9 @@ public final class ActivationControllerImpl implements ActivationController {
     }
     ignoreNextSwing(user.uuid());
 
-    PhaseChange.freeze(user);
     WaterWave.freeze(user);
     Iceberg.launch(user);
     WaterGimbal.launch(user);
-    HeatControl.act(user);
 
     boolean hit = user.rayTrace(3).entities(user.world()).hit();
     sequenceManager.registerStep(user, hit ? Activation.ATTACK_ENTITY : Activation.ATTACK);
@@ -143,11 +140,6 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserSneak(User user, boolean sneaking) {
-    if (sneaking) {
-      PhaseChange.melt(user);
-      HeatControl.onSneak(user);
-    }
-
     Activation action = sneaking ? Activation.SNEAK : Activation.SNEAK_RELEASE;
     sequenceManager.registerStep(user, action);
     activateAbility(user, action);

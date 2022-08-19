@@ -20,15 +20,22 @@
 package me.moros.bending.model.protection;
 
 import me.moros.bending.model.key.Keyed;
+import me.moros.bending.registry.Registries;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 
 /**
  * Utility for checking whether a {@link LivingEntity} can bend at the specified {@link Block} location.
- * Protections can be registered in {@link me.moros.bending.registry.Registries#PROTECTIONS}.
+ * Protections can be registered in {@link Registries#PROTECTIONS}.
  */
 public interface Protection extends Keyed {
   String NAMESPACE = "bending.protection";
 
+  /**
+   * Test if a user can build at the specified block location.
+   * @param entity the entity to check
+   * @param block the block to check
+   * @return the result
+   */
   boolean canBuild(LivingEntity entity, Block block);
 }

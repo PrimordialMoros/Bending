@@ -78,6 +78,13 @@ public class HeatControl extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
+    if (method == Activation.ATTACK) {
+      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+      return false;
+    } else if (method == Activation.SNEAK) {
+      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::solidify);
+      return false;
+    }
     this.user = user;
     loadConfig();
     removalPolicy = Policies.builder().build();
@@ -173,7 +180,7 @@ public class HeatControl extends AbilityInstance {
   }
 
   private void act() {
-    if (!user.canBend(description()) || user.onCooldown(description())) {
+    if (user.onCooldown(description())) {
       return;
     }
     boolean acted = false;
@@ -198,25 +205,13 @@ public class HeatControl extends AbilityInstance {
     }
   }
 
-  private void onSneak() {
-    if (!user.canBend(description()) || user.onCooldown(description())) {
+  private void solidify() {
+    if (user.onCooldown(description())) {
       return;
     }
     Vector3d center = user.rayTrace(userConfig.solidifyRange).ignoreLiquids(false).blocks(user.world()).position();
     if (solidify.fillQueue(getShuffledBlocks(user.world(), center, userConfig.solidifyRadius, MaterialUtil::isLava))) {
       user.addCooldown(description(), userConfig.cooldown);
-    }
-  }
-
-  public static void act(User user) {
-    if (user.selectedAbilityName().equals("HeatControl")) {
-      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
-    }
-  }
-
-  public static void onSneak(User user) {
-    if (user.selectedAbilityName().equals("HeatControl")) {
-      user.game().abilityManager(user.world()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::onSneak);
     }
   }
 

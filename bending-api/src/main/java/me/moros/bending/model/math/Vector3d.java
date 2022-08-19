@@ -24,7 +24,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 /**
- * Immutable 3D Vector implementation
+ * Immutable 3D Vector implementation.
  */
 public final class Vector3d {
   public static final Vector3d ZERO = new Vector3d(0, 0, 0);
@@ -37,7 +37,7 @@ public final class Vector3d {
   public static final Vector3d MINUS_K = new Vector3d(0, 0, -1);
 
   /**
-   * Min and max bukkit velocity vectors
+   * Min and max bukkit velocity vectors.
    */
   public static final Vector3d MIN_VELOCITY = new Vector3d(-4, -4, -4);
   public static final Vector3d MAX_VELOCITY = new Vector3d(4, 4, 4);
@@ -86,6 +86,7 @@ public final class Vector3d {
   }
 
   /**
+   * Get the x coordinate.
    * @return the x coordinate
    */
   public double x() {
@@ -93,6 +94,7 @@ public final class Vector3d {
   }
 
   /**
+   * Get the y coordinate.
    * @return the y coordinate
    */
   public double y() {
@@ -100,6 +102,7 @@ public final class Vector3d {
   }
 
   /**
+   * Get the z coordinate.
    * @return the z coordinate
    */
   public double z() {
@@ -107,21 +110,27 @@ public final class Vector3d {
   }
 
   /**
-   * @return a new vector copy with the given x coordinate
+   * Compute a vector from this instance with x coordinate set to value.
+   * @param value the value to set to x coordinate
+   * @return a new vector with the given x coordinate
    */
   public Vector3d withX(double value) {
     return new Vector3d(value, y, z);
   }
 
   /**
-   * @return a new vector copy with the given y coordinate
+   * Compute a vector from this instance with y coordinate set to value.
+   * @param value the value to set to y coordinate
+   * @return a new vector with the given y coordinate
    */
   public Vector3d withY(double value) {
     return new Vector3d(x, value, z);
   }
 
   /**
-   * @return a new vector copy with the given z coordinate
+   * Compute a vector from this instance with z coordinate set to value.
+   * @param value the value to set to z coordinate
+   * @return a new vector with the given z coordinate
    */
   public Vector3d withZ(double value) {
     return new Vector3d(x, y, value);
@@ -137,13 +146,15 @@ public final class Vector3d {
   }
 
   /**
+   * Get the norm for this instance.
    * @return Euclidean norm for the vector
    */
   public double length() {
-    return Math.sqrt(x * x + y * y + z * z);
+    return Math.sqrt(lengthSq());
   }
 
   /**
+   * Get the square of the norm for this instance.
    * @return square of the Euclidean norm for the vector
    */
   public double lengthSq() {
@@ -159,6 +170,13 @@ public final class Vector3d {
     return add(v.x, v.y, v.z);
   }
 
+  /**
+   * Add values to the instance.
+   * @param dx the amount to add for the x coordinate
+   * @param dy the amount to add for the y coordinate
+   * @param dz the amount to add for the z coordinate
+   * @return a new vector
+   */
   public Vector3d add(double dx, double dy, double dz) {
     return new Vector3d(x + dx, y + dy, z + dz);
   }
@@ -172,12 +190,20 @@ public final class Vector3d {
     return subtract(v.x, v.y, v.z);
   }
 
+  /**
+   * Subtract values from the instance.
+   * @param dx the amount to subtract for the x coordinate
+   * @param dy the amount to subtract for the y coordinate
+   * @param dz the amount to subtract for the z coordinate
+   * @return a new vector
+   */
   public Vector3d subtract(double dx, double dy, double dz) {
     return new Vector3d(x - dx, y - dy, z - dz);
   }
 
   /**
-   * @return {@link #normalize(Vector3d)} with {@link #PLUS_I} as default.
+   * Get a normalized vector aligned with the instance. If norm is zero it will default to {@link #PLUS_I}
+   * @return a new normalized vector
    */
   public Vector3d normalize() {
     return normalize(Vector3d.PLUS_I);
@@ -213,11 +239,17 @@ public final class Vector3d {
     return new Vector3d(a * x, a * y, a * z);
   }
 
+  /**
+   * Multiply this instance by the components of the given vector.
+   * @param v the vector to multiply by
+   * @return a new vector
+   */
   public Vector3d multiply(Vector3d v) {
     return new Vector3d(x * v.x, y * v.y, z * v.z);
   }
 
   /**
+   * Check if this vector has NaN components.
    * @return true if any coordinate of this point is NaN, false otherwise
    */
   public boolean isNaN() {
@@ -225,16 +257,27 @@ public final class Vector3d {
   }
 
   /**
+   * Check if this vector has infinite components.
    * @return true if any coordinate of this vector is infinite and none are NaN, false otherwise
    */
   public boolean isInfinite() {
     return !isNaN() && (Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z));
   }
 
+  /**
+   * Compute the dot-product of this instance with the given vector.
+   * @param v the other vector
+   * @return the dot product
+   */
   public double dot(Vector3d v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
+  /**
+   * Compute the cross-product of this instance with the given vector.
+   * @param v the other vector
+   * @return the cross product this.v
+   */
   public Vector3d cross(Vector3d v) {
     double newX = y * v.z - v.y * z;
     double newY = z * v.x - v.z * x;
@@ -242,13 +285,20 @@ public final class Vector3d {
     return new Vector3d(newX, newY, newZ);
   }
 
+  /**
+   * Compute the distance between the instance and another vector.
+   * @param v second vector
+   * @return the distance between the instance and p
+   */
   public double distance(Vector3d v) {
-    double dx = v.x - x;
-    double dy = v.y - y;
-    double dz = v.z - z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    return Math.sqrt(distanceSq(v));
   }
 
+  /**
+   * Compute the square of the distance between the instance and another vector.
+   * @param v second vector
+   * @return the square of the distance between the instance and p
+   */
   public double distanceSq(Vector3d v) {
     double dx = v.x - x;
     double dy = v.y - y;
@@ -270,14 +320,28 @@ public final class Vector3d {
     return Math.acos(dot);
   }
 
+  /**
+   * Compute a new vector using the minimum components of this instance and another vector.
+   * @param v the other vector
+   * @return a new vector
+   */
   public Vector3d min(Vector3d v) {
     return new Vector3d(Math.min(x, v.x), Math.min(y, v.y), Math.min(z, v.z));
   }
 
+  /**
+   * Compute a new vector using the maximum components of this instance and another vector.
+   * @param v the other vector
+   * @return a new vector
+   */
   public Vector3d max(Vector3d v) {
     return new Vector3d(Math.max(x, v.x), Math.max(y, v.y), Math.max(z, v.z));
   }
 
+  /**
+   * Compute a new vector using the absolute value for each component of the instance.
+   * @return a new vector
+   */
   public Vector3d abs() {
     return new Vector3d(Math.abs(x), Math.abs(y), Math.abs(z));
   }
@@ -306,21 +370,30 @@ public final class Vector3d {
     return "[" + x + ", " + y + ", " + z + "]";
   }
 
+  /**
+   * Compute a new vector using the floored value for each component of the instance.
+   * @return a new vector
+   */
   public Vector3d floor() {
     return new Vector3d(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
   public Vector3d snapToBlockCenter() {
-    double newX = FastMath.floor(x) + 0.5;
-    double newY = FastMath.floor(y) + 0.5;
-    double newZ = FastMath.floor(z) + 0.5;
-    return new Vector3d(newX, newY, newZ);
+    return new Vector3d(FastMath.floor(x) + 0.5, FastMath.floor(y) + 0.5, FastMath.floor(z) + 0.5);
   }
 
+  /**
+   * Create an integer vector from this instance.
+   * @return a new vector
+   */
   public Vector3i toVector3i() {
     return new Vector3i(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
+  /**
+   * Create a bukkit vector with clamped components to be used for velocity purposes.
+   * @return the clamped velocity vector
+   */
   public org.bukkit.util.Vector clampVelocity() {
     double clampedX = Math.min(MAX_VELOCITY.x, Math.max(MIN_VELOCITY.x, x));
     double clampedY = Math.min(MAX_VELOCITY.y, Math.max(MIN_VELOCITY.y, y));
@@ -328,28 +401,54 @@ public final class Vector3d {
     return new org.bukkit.util.Vector(clampedX, clampedY, clampedZ);
   }
 
+  /**
+   * Create a bukkit vector from this instance.
+   * @return the bukkit vector
+   */
   public org.bukkit.util.Vector toBukkitVector() {
     return new org.bukkit.util.Vector(x, y, z);
   }
 
+  /**
+   * Create a location from this instance
+   * @param world the world for the location
+   * @return the bukkit location
+   */
   public Location toLocation(World world) {
     return new Location(world, x, y, z);
   }
 
+  /**
+   * Get the block at the point of this vector for the given world
+   * @param world the world to check
+   * @return the block
+   */
   public Block toBlock(World world) {
     return world.getBlockAt(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
   }
 
+  /**
+   * Get the minimum component of the given vector.
+   * @param v the vector to check
+   * @return the minimum component
+   */
   public static double minComponent(Vector3d v) {
     return Math.min(v.x, Math.min(v.y, v.z));
   }
 
+  /**
+   * Get the maximum component of the given vector.
+   * @param v the vector to check
+   * @return the maximum component
+   */
   public static double maxComponent(Vector3d v) {
     return Math.max(v.x, Math.max(v.y, v.z));
   }
 
   /**
    * Create a vector at the center of a block position.
+   * @param b the block to use as origin
+   * @return a new vector
    */
   public static Vector3d center(Block b) {
     return new Vector3d(b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5);

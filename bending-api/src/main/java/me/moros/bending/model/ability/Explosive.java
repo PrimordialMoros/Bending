@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.ability;
 
+/**
+ * Represents an explosive function.
+ */
 @FunctionalInterface
 public interface Explosive {
   void explode();

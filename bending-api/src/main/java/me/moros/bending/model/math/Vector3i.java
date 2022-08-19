@@ -23,7 +23,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 /**
- * Immutable 3D Vector implementation with integer coordinates
+ * Immutable 3D Vector implementation with integer coordinates.
  */
 public final class Vector3i {
   public static final Vector3i ZERO = new Vector3i(0, 0, 0);
@@ -64,6 +64,7 @@ public final class Vector3i {
   }
 
   /**
+   * Get the x coordinate.
    * @return the x coordinate
    */
   public int x() {
@@ -71,6 +72,7 @@ public final class Vector3i {
   }
 
   /**
+   * Get the y coordinate.
    * @return the y coordinate
    */
   public int y() {
@@ -78,6 +80,7 @@ public final class Vector3i {
   }
 
   /**
+   * Get the z coordinate.
    * @return the z coordinate
    */
   public int z() {
@@ -85,21 +88,27 @@ public final class Vector3i {
   }
 
   /**
-   * @return a new vector copy with the given x coordinate
+   * Compute a vector from this instance with x coordinate set to value.
+   * @param value the value to set to x coordinate
+   * @return a new vector with the given x coordinate
    */
   public Vector3i withX(int value) {
     return new Vector3i(value, y, z);
   }
 
   /**
-   * @return a new vector copy with the given y coordinate
+   * Compute a vector from this instance with y coordinate set to value.
+   * @param value the value to set to y coordinate
+   * @return a new vector with the given y coordinate
    */
   public Vector3i withY(int value) {
     return new Vector3i(x, value, z);
   }
 
   /**
-   * @return a new vector copy with the given z coordinate
+   * Compute a vector from this instance with z coordinate set to value.
+   * @param value the value to set to z coordinate
+   * @return a new vector with the given z coordinate
    */
   public Vector3i withZ(int value) {
     return new Vector3i(x, y, value);
@@ -115,13 +124,15 @@ public final class Vector3i {
   }
 
   /**
+   * Get the norm for this instance.
    * @return Euclidean norm for the vector
    */
   public double length() {
-    return Math.sqrt(x * x + y * y + z * z);
+    return Math.sqrt(lengthSq());
   }
 
   /**
+   * Get the square of the norm for this instance.
    * @return square of the Euclidean norm for the vector
    */
   public int lengthSq() {
@@ -138,12 +149,34 @@ public final class Vector3i {
   }
 
   /**
+   * Add values to the instance.
+   * @param dx the amount to add for the x coordinate
+   * @param dy the amount to add for the y coordinate
+   * @param dz the amount to add for the z coordinate
+   * @return a new vector
+   */
+  public Vector3i add(int dx, int dy, int dz) {
+    return new Vector3i(x + dx, y + dy, z + dz);
+  }
+
+  /**
    * Subtract a vector from the instance.
    * @param v vector to subtract
    * @return a new vector
    */
   public Vector3i subtract(Vector3i v) {
     return new Vector3i(x - v.x, y - v.y, z - v.z);
+  }
+
+  /**
+   * Subtract values from the instance.
+   * @param dx the amount to subtract for the x coordinate
+   * @param dy the amount to subtract for the y coordinate
+   * @param dz the amount to subtract for the z coordinate
+   * @return a new vector
+   */
+  public Vector3i subtract(int dx, int dy, int dz) {
+    return new Vector3i(x - dx, y - dy, z - dz);
   }
 
   /**
@@ -163,14 +196,29 @@ public final class Vector3i {
     return new Vector3i(a * x, a * y, a * z);
   }
 
+  /**
+   * Multiply this instance by the components of the given vector.
+   * @param v the vector to multiply by
+   * @return a new vector
+   */
   public Vector3i multiply(Vector3i v) {
     return new Vector3i(x * v.x, y * v.y, z * v.z);
   }
 
+  /**
+   * Compute the dot-product of this instance with the given vector.
+   * @param v the other vector
+   * @return the dot product
+   */
   public int dot(Vector3i v) {
     return x * v.x + y * v.y + z * v.z;
   }
 
+  /**
+   * Compute the cross-product of this instance with the given vector.
+   * @param v the other vector
+   * @return the cross product this.v
+   */
   public Vector3i cross(Vector3i v) {
     int newX = y * v.z - v.y * z;
     int newY = z * v.x - v.z * x;
@@ -178,13 +226,20 @@ public final class Vector3i {
     return new Vector3i(newX, newY, newZ);
   }
 
+  /**
+   * Compute the distance between the instance and another vector.
+   * @param v second vector
+   * @return the distance between the instance and p
+   */
   public double distance(Vector3i v) {
-    int dx = v.x - x;
-    int dy = v.y - y;
-    int dz = v.z - z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    return Math.sqrt(distanceSq(v));
   }
 
+  /**
+   * Compute the square of the distance between the instance and another vector.
+   * @param v second vector
+   * @return the square of the distance between the instance and p
+   */
   public int distanceSq(Vector3i v) {
     int dx = v.x - x;
     int dy = v.y - y;
@@ -216,10 +271,19 @@ public final class Vector3i {
     return "[" + x + ", " + y + ", " + z + "]";
   }
 
+  /**
+   * Create a double vector from this instance.
+   * @return a new vector
+   */
   public Vector3d toVector3d() {
     return new Vector3d(x, y, z);
   }
 
+  /**
+   * Get the block at the point of this vector for the given world
+   * @param world the world to check
+   * @return the block
+   */
   public Block toBlock(World world) {
     return world.getBlockAt(x, y, z);
   }

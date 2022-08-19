@@ -20,7 +20,6 @@
 package me.moros.bending.command.parser;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
@@ -41,10 +40,10 @@ public final class ModifyPolicyParser implements ArgumentParser<CommandSender, M
     if (input == null) {
       return ArgumentParseResult.failure(new NoInputProvidedException(ModifyPolicyParser.class, commandContext));
     }
-    Optional<Element> element = Element.fromName(input);
-    if (element.isPresent()) {
+    Element element = Element.fromName(input);
+    if (element != null) {
       inputQueue.remove();
-      return ArgumentParseResult.success(ModifyPolicy.of(element.get()));
+      return ArgumentParseResult.success(ModifyPolicy.of(element));
     }
     AbilityDescription desc = Registries.ABILITIES.fromString(input);
     if (desc != null) {
