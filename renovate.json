@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "schedule": [
+    "after 6pm on the 6th day of the month"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "excludePackageNames": ["gradle"],
+      "groupName": "patch-release dependency changes"
+    },
+    {
+      "matchManagers": ["gradle-wrapper", "github-actions"],
+      "groupName": "gradle and github actions"
+    },
+    {
+      "matchDepTypes": ["plugin"],
+      "groupName": "gradle and github actions"
+    }
+  ],
+  "prHourlyLimit": 4,
+  "semanticCommitType": "build"
+}
