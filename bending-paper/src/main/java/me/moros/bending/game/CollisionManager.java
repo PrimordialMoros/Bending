@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.collision.Collision;
+import me.moros.bending.model.collision.Collision.CollisionData;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.manager.AbilityManager;
@@ -91,7 +91,7 @@ public final class CollisionManager implements Updatable {
   }
 
   private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, CollisionPair rc) {
-    Collision.CollisionData data = new Collision.CollisionData(first, second, c1, c2, rc.removeFirst(), rc.removeSecond());
+    CollisionData data = new CollisionData(first, second, c1, c2, rc.removeFirst(), rc.removeSecond());
     first.onCollision(data.asCollision());
     second.onCollision(data.asInverseCollision());
     if (data.removeFirst()) {

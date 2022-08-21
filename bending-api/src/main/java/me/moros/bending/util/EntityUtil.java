@@ -67,7 +67,7 @@ public final class EntityUtil {
 
   /**
    * Check if a user is against a wall made of blocks matching the given predicate.
-   * <p> Note: Passable blocks and barriers are ignored.
+   * <p>Note: Passable blocks and barriers are ignored.
    * @param entity the entity to check
    * @param predicate the type of blocks to accept
    * @return whether the user is against a wall

@@ -25,6 +25,7 @@ import me.moros.bending.model.math.Vector3d;
  * Axis aligned bounding box.
  */
 public class AABB implements Collider {
+  public static final AABB DUMMY_COLLIDER = new DummyCollider();
   public static final AABB PLAYER_BOUNDS = new AABB(new Vector3d(-0.3, 0.0, -0.3), new Vector3d(0.3, 1.8, 0.3));
   public static final AABB BLOCK_BOUNDS = new AABB(Vector3d.ZERO, Vector3d.ONE);
   public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(new Vector3d(0.4, 0.4, 0.4));
@@ -37,6 +38,13 @@ public class AABB implements Collider {
     this.max = max;
   }
 
+  /**
+   * Calculate an AABB by expanding this instance by the given amount in each component.
+   * The expansion is uniform and will affect both the min and max points.
+   * For example, expanding {@link #BLOCK_BOUNDS} (1x1x1 box) by {@link Vector3d#ONE} will result in a 3x3x3 box.
+   * @param diff the amount to expand
+   * @return the expanded AABB
+   */
   public AABB grow(Vector3d diff) {
     return new AABB(min.subtract(diff), max.add(diff));
   }
@@ -68,5 +76,49 @@ public class AABB implements Collider {
     return (point.x() >= min.x() && point.x() <= max.x()) &&
       (point.y() >= min.y() && point.y() <= max.y()) &&
       (point.z() >= min.z() && point.z() <= max.z());
+  }
+
+  /**
+   * Get a dummy AABB collider.
+   * @return a dummy collider
+   */
+  public static AABB dummy() {
+    return DUMMY_COLLIDER;
+  }
+
+  private static final class DummyCollider extends AABB {
+    private DummyCollider() {
+      super(Vector3d.ZERO, Vector3d.ZERO);
+    }
+
+    @Override
+    public AABB grow(Vector3d diff) {
+      return this;
+    }
+
+    @Override
+    public boolean intersects(Collider other) {
+      return false;
+    }
+
+    @Override
+    public Vector3d position() {
+      return Vector3d.ZERO;
+    }
+
+    @Override
+    public AABB at(Vector3d point) {
+      return this;
+    }
+
+    @Override
+    public Vector3d halfExtents() {
+      return Vector3d.ZERO;
+    }
+
+    @Override
+    public boolean contains(Vector3d point) {
+      return false;
+    }
   }
 }

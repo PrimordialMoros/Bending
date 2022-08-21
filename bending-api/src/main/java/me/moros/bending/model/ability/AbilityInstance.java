@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.ability;
 
+/**
+ * Represents a base ability instance.
+ */
 public abstract class AbilityInstance implements Ability {
   private final AbilityDescription desc;
 

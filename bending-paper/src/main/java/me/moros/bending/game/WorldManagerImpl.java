@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import me.moros.bending.Bending;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.manager.AbilityManager;
-import me.moros.bending.model.manager.DummyAbilityManager;
 import me.moros.bending.model.manager.WorldManager;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -57,10 +57,11 @@ public final class WorldManagerImpl implements WorldManager, Listener {
     config = ConfigManager.load(Config::new);
     disabled = ConcurrentHashMap.newKeySet();
     for (World world : plugin.getServer().getWorlds()) {
+      UUID uuid = world.getUID();
       if (config.contains(world)) {
-        disabled.add(world.getUID());
+        disabled.add(uuid);
       } else {
-        worlds.put(world, new ManagerPair(logger));
+        worlds.put(world, new ManagerPair(logger, uuid));
       }
     }
     plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -68,7 +69,11 @@ public final class WorldManagerImpl implements WorldManager, Listener {
 
   @Override
   public AbilityManager instance(World world) {
-    return isEnabled(world) ? worlds.computeIfAbsent(world, w -> new ManagerPair(logger)).abilities : DummyAbilityManager.DUMMY;
+    return isEnabled(world) ? computePair(world).abilities : AbilityManager.dummy();
+  }
+
+  private ManagerPair computePair(World world) {
+    return worlds.computeIfAbsent(world, w -> new ManagerPair(logger, world.getUID()));
   }
 
   @Override
@@ -83,18 +88,15 @@ public final class WorldManagerImpl implements WorldManager, Listener {
   }
 
   @Override
-  public void destroyAllInstances() {
-    worlds.values().forEach(w -> w.abilities.destroyAllInstances());
-  }
-
-  @Override
-  public void createPassives(User user) {
-    instance(user.world()).createPassives(user);
-  }
-
-  @Override
   public boolean isEnabled(World world) {
     return !disabled.contains(world.getUID());
+  }
+
+  @Override
+  public void forEach(Consumer<AbilityManager> consumer) {
+    for (ManagerPair pair : worlds.values()) {
+      consumer.accept(pair.abilities);
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -130,8 +132,8 @@ public final class WorldManagerImpl implements WorldManager, Listener {
     private final AbilityManager abilities;
     private final CollisionManager collisions;
 
-    private ManagerPair(Logger logger) {
-      abilities = new AbilityManagerImpl(logger);
+    private ManagerPair(Logger logger, UUID world) {
+      abilities = new AbilityManagerImpl(logger, world);
       collisions = new CollisionManager(abilities);
     }
 

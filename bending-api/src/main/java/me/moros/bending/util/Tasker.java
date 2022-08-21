@@ -66,7 +66,7 @@ public enum Tasker {
    * Create a synchronous task and execute it after a delay.
    * @param runnable the task to execute
    * @param delay the delay in ticks
-   * @return the created task if scheduled, false otherwise
+   * @return the created task if scheduled, null otherwise
    */
   public @Nullable BukkitTask sync(Runnable runnable, long delay) {
     return canExecute() ? plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delay) : null;
@@ -76,7 +76,7 @@ public enum Tasker {
    * Create a repeating synchronous tasks and execute it.
    * @param runnable the task to execute
    * @param interval the interval in ticks
-   * @return the created task if scheduled, false otherwise
+   * @return the created task if scheduled, null otherwise
    */
   public @Nullable BukkitTask repeat(Runnable runnable, long interval) {
     return canExecute() ? plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, 1, interval) : null;

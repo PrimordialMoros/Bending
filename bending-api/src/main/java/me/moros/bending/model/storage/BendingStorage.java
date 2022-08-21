@@ -31,7 +31,7 @@ import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Handles all Storage tasks and their concurrency
+ * Handles all Storage tasks and their concurrency.
  */
 public interface BendingStorage extends Storage {
   void init(Plugin plugin);

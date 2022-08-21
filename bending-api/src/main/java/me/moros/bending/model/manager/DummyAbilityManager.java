@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.user.User;
 
-public final class DummyAbilityManager implements AbilityManager {
-  public static final AbilityManager DUMMY = new DummyAbilityManager();
+final class DummyAbilityManager implements AbilityManager {
+  static final AbilityManager INSTANCE = new DummyAbilityManager();
 
   private DummyAbilityManager() {
   }

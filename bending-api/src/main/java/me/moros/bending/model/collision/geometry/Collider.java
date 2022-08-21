@@ -21,18 +21,44 @@ package me.moros.bending.model.collision.geometry;
 
 import me.moros.bending.model.math.Vector3d;
 
+/**
+ * Represents a collider.
+ */
 public interface Collider {
   double EPSILON = 0.01;
 
-  default boolean intersects(Collider collider) {
-    return ColliderUtil.intersects(this, collider);
+  /**
+   * Check if this collider intersects with another.
+   * @param other the other collider to check
+   * @return true if the two colliders intersect, false otherwise
+   */
+  default boolean intersects(Collider other) {
+    return ColliderUtil.intersects(this, other);
   }
 
+  /**
+   * Get the center position for this collider.
+   * @return the center position
+   */
   Vector3d position();
 
+  /**
+   * Calculate a new collider as if this instance was moved.
+   * @param point the new center position
+   * @return the new collider
+   */
   Collider at(Vector3d point);
 
+  /**
+   * Calculate the half extents for this collider.
+   * @return this half extents for this collider
+   */
   Vector3d halfExtents();
 
+  /**
+   * Check if the given point is within the space of this collider.
+   * @param point the point to check
+   * @return true if point is contained in this collider
+   */
   boolean contains(Vector3d point);
 }

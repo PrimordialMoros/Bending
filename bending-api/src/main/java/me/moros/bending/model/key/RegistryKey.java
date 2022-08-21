@@ -19,8 +19,10 @@
 
 package me.moros.bending.model.key;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
+/**
+ * Key implementation that also holds the type of data that can be associated with it.
+ * @param <T> the type of data
+ */
 public final class RegistryKey<T> implements Key {
   private final Key key;
   private final Class<T> type;
@@ -40,16 +42,12 @@ public final class RegistryKey<T> implements Key {
     return key.value();
   }
 
+  /**
+   * Get the type of data this key can be associated with.
+   * @return the type of data
+   */
   public Class<T> type() {
     return type;
-  }
-
-  public @Nullable T cast(@Nullable Object value) {
-    try {
-      return type.cast(value);
-    } catch (ClassCastException e) {
-      return null;
-    }
   }
 
   @Override
@@ -70,6 +68,13 @@ public final class RegistryKey<T> implements Key {
     return result;
   }
 
+  /**
+   * Create a new key.
+   * @param namespace the namespace for the key
+   * @param clazz the type
+   * @param <T> the type of data
+   * @return the key
+   */
   public static <T> RegistryKey<T> create(String namespace, Class<T> clazz) {
     return new RegistryKey<>(Key.create(namespace, "registry"), clazz);
   }

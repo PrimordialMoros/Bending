@@ -24,5 +24,9 @@ package me.moros.bending.model.ability;
  */
 @FunctionalInterface
 public interface Explosive {
+  /**
+   * Attempt to explode.
+   * <p>Implementations must take care to check if instance has already exploded and allows subsequent explosions.
+   */
   void explode();
 }

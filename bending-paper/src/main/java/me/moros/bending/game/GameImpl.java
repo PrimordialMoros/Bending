@@ -90,12 +90,12 @@ public final class GameImpl implements Game {
   @Override
   public void reload() {
     cleanup(false);
-    Registries.BENDERS.forEach(worldManager::createPassives);
+    Registries.BENDERS.forEach(u -> worldManager.instance(u.world()).createPassives(u));
   }
 
   @Override
   public void cleanup(boolean shutdown) {
-    worldManager.destroyAllInstances();
+    worldManager.forEach(AbilityManager::destroyAllInstances);
     flightManager.removeAll();
     temporal.forEach(TemporalManager::removeAll);
     if (shutdown) {

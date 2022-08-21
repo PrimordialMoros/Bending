@@ -19,19 +19,61 @@
 
 package me.moros.bending.model.attribute;
 
+/**
+ * Represents an attribute that can be associated with an ability.
+ */
 public enum Attribute {
+  /**
+   * Associated with ability range.
+   */
   RANGE("Range"),
+  /**
+   * Associated with ability selection range.
+   */
   SELECTION("Selection"),
+  /**
+   * Associated with ability cooldown duration.
+   */
   COOLDOWN("Cooldown"),
+  /**
+   * Associated with ability travel speed.
+   */
   SPEED("Speed"),
+  /**
+   * Associated with ability power modifier.
+   */
   STRENGTH("Strength"),
+  /**
+   * Associated with ability damage.
+   */
   DAMAGE("Damage"),
+  /**
+   * Associated with ability charge time duration.
+   */
   CHARGE_TIME("ChargeTime"),
+  /**
+   * Associated with ability duration.
+   */
   DURATION("Duration"),
+  /**
+   * Associated with ability radius.
+   */
   RADIUS("Radius"),
+  /**
+   * Associated with ability height.
+   */
   HEIGHT("Height"),
+  /**
+   * Associated with an amount created by an ability.
+   */
   AMOUNT("Amount"),
+  /**
+   * Associated with ability fire tick duration.
+   */
   FIRE_TICKS("FireTicks"),
+  /**
+   * Associated with ability freeze tick duration.
+   */
   FREEZE_TICKS("FreezeTicks");
 
   private final String value;

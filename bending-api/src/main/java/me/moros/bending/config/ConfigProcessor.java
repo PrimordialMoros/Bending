@@ -22,11 +22,11 @@ package me.moros.bending.config;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.DoubleFunction;
 
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.attribute.Attribute;
-import me.moros.bending.model.attribute.AttributeConverter;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.attribute.ModifierOperation;
@@ -40,13 +40,13 @@ import org.spongepowered.configurate.serialize.SerializationException;
  * Processes {@link Configurable}s by applying attribute modifiers.
  */
 public final class ConfigProcessor {
-  private static final Map<Class<? extends Number>, AttributeConverter> CONVERTERS = Map.of(
-    Double.class, AttributeConverter.DOUBLE,
-    Integer.class, AttributeConverter.INT,
-    Long.class, AttributeConverter.LONG,
-    double.class, AttributeConverter.DOUBLE,
-    int.class, AttributeConverter.INT,
-    long.class, AttributeConverter.LONG
+  private static final Map<Class<? extends Number>, DoubleFunction<Number>> CONVERTERS = Map.of(
+    Double.class, x -> x,
+    Integer.class, x -> (int) x,
+    Long.class, x -> (long) x,
+    double.class, x -> x,
+    int.class, x -> (int) x,
+    long.class, x -> (long) x
   );
 
   private final Logger logger;
@@ -59,7 +59,7 @@ public final class ConfigProcessor {
 
   /**
    * Calculates new values for the given config after applying {@link AttributeModifier}s.
-   * <p> Note: By default, this method will return a copy of the supplied object, that is loaded from the
+   * <p>Note: By default, this method will return a copy of the supplied object, that is loaded from the
    * main configuration file. For abilities with external configs, they must override
    * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
    * that is supplied, so you should make sure to always pass a fresh copy yourself.
@@ -128,7 +128,7 @@ public final class ConfigProcessor {
     }
     value = (value + operations[0]) * operations[1] * operations[2];
     try {
-      field.set(config, CONVERTERS.getOrDefault(field.getType(), AttributeConverter.DOUBLE).apply(value));
+      field.set(config, CONVERTERS.getOrDefault(field.getType(), x -> x).apply(value));
     } catch (IllegalAccessException e) {
       logger.warn(e.getMessage(), e);
     }

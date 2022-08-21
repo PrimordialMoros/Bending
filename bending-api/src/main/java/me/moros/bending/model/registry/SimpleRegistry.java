@@ -132,6 +132,11 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
     return Collections.unmodifiableCollection(values()).iterator();
   }
 
+  /**
+   * Simple mutable registry implementation.
+   * @param <K> the key type
+   * @param <V> the value type
+   */
   public static class SimpleMutableRegistry<K, V> extends SimpleRegistry<K, V> implements MutableRegistry<K, V> {
     protected SimpleMutableRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper) {
       super(namespace, inverseMapper, keyMapper);

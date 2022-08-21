@@ -20,21 +20,34 @@
 package me.moros.bending.model.ability;
 
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.util.collision.CollisionUtil.CollisionCallback;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 
 /**
- * Represents a simple ability
+ * Represents a simple ability.
  */
-public interface SimpleAbility {
+public interface SimpleAbility extends CollisionCallback {
+  /**
+   * Render the ability, called when ability is updated.
+   */
   void render();
 
+  /**
+   * Handle ability after rendering is completed, typically used for playing sounds and extra calculations.
+   */
   default void postRender() {
   }
 
-  boolean onEntityHit(Entity entity);
-
+  /**
+   * Called when a collision with a block has been detected.
+   * @param block the block that collided.
+   * @return true if the block was hit, false otherwise
+   */
   boolean onBlockHit(Block block);
 
+  /**
+   * Get the collider for this ability.
+   * @return this instance's collider
+   */
   Collider collider();
 }

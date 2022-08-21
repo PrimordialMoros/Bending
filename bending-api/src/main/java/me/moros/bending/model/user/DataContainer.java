@@ -26,6 +26,9 @@ import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.key.RegistryKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Base implementation for {@link DataHolder}.
+ */
 public class DataContainer implements DataHolder {
   private final Map<RegistryKey<?>, Object> data;
   private final ExpiringSet<RegistryKey<?>> cooldowns;
@@ -56,12 +59,12 @@ public class DataContainer implements DataHolder {
 
   @Override
   public <T> @Nullable T remove(RegistryKey<T> key) {
-    return key.cast(data.remove(key));
+    return cast(key.type(), data.remove(key));
   }
 
   @Override
   public <T> @Nullable T get(RegistryKey<T> key) {
-    return key.cast(data.get(key));
+    return cast(key.type(), data.get(key));
   }
 
   @Override
@@ -72,7 +75,7 @@ public class DataContainer implements DataHolder {
 
   @Override
   public <T extends Enum<T>> T toggle(RegistryKey<T> key, T defaultValue) {
-    T oldValue = key.cast(data.computeIfAbsent(key, k -> defaultValue));
+    T oldValue = cast(key.type(), data.computeIfAbsent(key, k -> defaultValue));
     if (oldValue != null && !canEdit(key)) {
       return oldValue;
     }
@@ -90,5 +93,13 @@ public class DataContainer implements DataHolder {
     cooldowns.add(key);
     data.put(key, value);
     return value;
+  }
+
+  private <T> @Nullable T cast(Class<T> type, Object value) {
+    try {
+      return type.cast(value);
+    } catch (ClassCastException e) {
+      return null;
+    }
   }
 }

@@ -19,18 +19,37 @@
 
 package me.moros.bending.model.manager;
 
+import java.util.function.Consumer;
+
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.user.User;
 import org.bukkit.World;
 
+/**
+ * Responsible for updating per-world managers.
+ */
 public interface WorldManager extends Updatable {
+  /**
+   * Get the ability manager for the specified world.
+   * @param world the world to check
+   * @return the ability manager instance for that world
+   */
   AbilityManager instance(World world);
 
+  /**
+   * Clear all per-world managers this instance is responsible for.
+   */
   void clear();
 
-  void destroyAllInstances();
-
-  void createPassives(User user);
-
+  /**
+   * Check if bending is enabled for the specified world.
+   * @param world the world to check
+   * @return true if bending is enabled for the given world, false otherwise
+   */
   boolean isEnabled(World world);
+
+  /**
+   * Perform an action for every ability manager handled by this instance.
+   * @param consumer the action to perform
+   */
+  void forEach(Consumer<AbilityManager> consumer);
 }

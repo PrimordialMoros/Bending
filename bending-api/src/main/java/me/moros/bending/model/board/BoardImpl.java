@@ -17,14 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user;
+package me.moros.bending.model.board;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -36,8 +36,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 final class BoardImpl implements Board {
-  static final Board DUMMY = new DummyBoard();
-
   private final Map<AbilityDescription, Team> misc = new ConcurrentHashMap<>(); // Used for combos and misc abilities
   private final BendingPlayer player;
 
@@ -52,8 +50,8 @@ final class BoardImpl implements Board {
     bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
     bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
     player.entity().setScoreboard(bendingBoard);
-    for (int slot = 1; slot <= 9; slot++) { // init slots
-      updateSlot(slot);
+    updateAll();
+    for (int slot = 1; slot <= 9; slot++) { // init slot prefixes
       getOrCreateTeam(slot).prefix(Component.text(slot == selectedSlot ? ">" : "  "));
     }
   }
@@ -72,23 +70,20 @@ final class BoardImpl implements Board {
   }
 
   @Override
-  public void updateSlot(int slot) {
-    AbilityDescription desc = player.boundAbility(slot);
-    Component suffix;
-    if (desc == null) {
-      suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(String.valueOf(slot));
-    } else {
-      suffix = desc.displayName();
-      if (player.onCooldown(desc)) {
-        suffix = suffix.decorate(TextDecoration.STRIKETHROUGH);
-      }
-    }
-    getOrCreateTeam(slot).suffix(suffix);
-  }
-
-  @Override
   public void updateAll() {
-    IntStream.rangeClosed(1, 9).forEach(this::updateSlot);
+    for (int slot = 1; slot <= 9; slot++) {
+      AbilityDescription desc = player.boundAbility(slot);
+      Component suffix;
+      if (desc == null) {
+        suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(String.valueOf(slot));
+      } else {
+        suffix = desc.displayName();
+        if (player.onCooldown(desc)) {
+          suffix = suffix.decorate(TextDecoration.STRIKETHROUGH);
+        }
+      }
+      getOrCreateTeam(slot).suffix(suffix);
+    }
   }
 
   @Override
@@ -142,8 +137,31 @@ final class BoardImpl implements Board {
     return team;
   }
 
-  private static final class DummyBoard implements Board {
+  static final class DummyBoard implements Board {
+    static final Board INSTANCE = new DummyBoard();
+
     private DummyBoard() {
+    }
+
+    @Override
+    public boolean isEnabled() {
+      return false;
+    }
+
+    @Override
+    public void disableScoreboard() {
+    }
+
+    @Override
+    public void updateAll() {
+    }
+
+    @Override
+    public void activeSlot(int oldSlot, int newSlot) {
+    }
+
+    @Override
+    public void updateMisc(AbilityDescription desc, boolean show) {
     }
   }
 }

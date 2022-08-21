@@ -104,7 +104,7 @@ public final class CollisionUtil {
         if (!user.canBuild(entity.getLocation().getBlock())) {
           continue;
         }
-        boolean result = callback.onCollision(entity);
+        boolean result = callback.onEntityHit(entity);
         if (earlyEscape && result) {
           return true;
         }
@@ -137,6 +137,11 @@ public final class CollisionUtil {
    */
   @FunctionalInterface
   public interface CollisionCallback {
-    boolean onCollision(Entity entity);
+    /**
+     * Called when a collision with an entity has been detected.
+     * @param entity the entity that collided.
+     * @return true if the entity was hit, false otherwise
+     */
+    boolean onEntityHit(Entity entity);
   }
 }

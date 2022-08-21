@@ -19,6 +19,12 @@
 
 package me.moros.bending.model.user.profile;
 
+/**
+ * A record of player profile data.
+ * @param id the internal id for the player profile
+ * @param board whether this user has board enabled
+ * @param benderData the bender data associated with this player profile
+ */
 public record PlayerProfile(int id, boolean board, BenderData benderData) {
   public PlayerProfile(int id) {
     this(id, false, BenderData.EMPTY);

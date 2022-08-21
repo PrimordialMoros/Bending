@@ -32,7 +32,6 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Material;
@@ -84,7 +83,7 @@ public final class WorldUtil {
 
   /**
    * Collects all blocks in a sphere that satisfy the given predicate.
-   * <p> Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
+   * <p>Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
    * @param world the world to check
    * @param pos the center point
    * @param radius the radius of the sphere
@@ -141,7 +140,7 @@ public final class WorldUtil {
 
   /**
    * Collects all blocks inside a bounding box that satisfy the given predicate.
-   * <p> Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
+   * <p>Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
    * @param world the world to check
    * @param box the bounding box to check
    * @param predicate the predicate that needs to be satisfied for every block
@@ -150,7 +149,7 @@ public final class WorldUtil {
    * @see #nearbyBlocks(World, Vector3d, double, Predicate, int)
    */
   public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
-    if (box == AABBUtil.DUMMY_COLLIDER) {
+    if (box.equals(AABB.dummy())) {
       return List.of();
     }
     List<Block> blocks = new ArrayList<>();

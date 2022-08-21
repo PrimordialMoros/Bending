@@ -26,7 +26,7 @@ final class ColliderUtil {
   }
 
   static boolean intersects(Collider first, Collider second) {
-    if (first instanceof DummyCollider || second instanceof DummyCollider) {
+    if (first.equals(AABB.dummy()) || second.equals(AABB.dummy())) {
       return false;
     } else if (first instanceof Sphere sphere1) {
       if (second instanceof Sphere sphere2) {

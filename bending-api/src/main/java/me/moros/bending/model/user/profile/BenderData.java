@@ -28,8 +28,12 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+
 /**
- * Holds data from the database that are needed to construct the BendingProfile object
+ * A record of bender data stored or to be stored in the database.
+ * @param slots the bender's bound abilities
+ * @param elements the bender's elements
+ * @param presets the bender's presets
  */
 public record BenderData(List<@Nullable AbilityDescription> slots, Set<Element> elements, Set<Preset> presets) {
   public static final BenderData EMPTY = new BenderData(List.of(), Set.of(), Set.of());

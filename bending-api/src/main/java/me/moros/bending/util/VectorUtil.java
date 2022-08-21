@@ -286,7 +286,6 @@ public final class VectorUtil {
    * @param angleStep the delta angle between rays in radians
    * @param angle the angle of the burst in radians
    * @return the bursting rays
-   * @see #createBurst(User, double, double, double)
    */
   // Negative angle for fall burst
   public static Collection<Ray> createBurst(User user, double range, double angleStep, double angle) {

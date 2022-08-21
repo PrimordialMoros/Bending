@@ -33,8 +33,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public interface Ability extends Updatable {
   /**
-   * Attempt to initialize and activate this ability.
-   * @param user the user that controls the ability
+   * Attempt to initialize and activate this ability instance.
+   * @param user the user that controls this ability
    * @param method the type of activation that is used
    * @return true if ability was successfully activated, false otherwise
    */
@@ -46,24 +46,27 @@ public interface Ability extends Updatable {
   void loadConfig();
 
   /**
+   * Get the ability description associated with this ability instance.
    * @return the type of this ability
    */
   AbilityDescription description();
 
   /**
-   * @return the user that is currently controlling the ability
+   * Get the user that is currently controlling this ability instance.
+   * @return the user for this ability
    */
   @MonotonicNonNull User user();
 
   /**
    * Called when the user of the ability instance is changed.
-   * @param newUser the new user that controls the ability
+   * @param newUser the new user that controls this ability
    * @see AbilityManager#changeOwner(Ability, User)
    */
   default void onUserChange(User newUser) {
   }
 
   /**
+   * Get the colliders for this ability instance.
    * @return an immutable collection of this ability's colliders
    */
   default Collection<Collider> colliders() {
@@ -71,8 +74,8 @@ public interface Ability extends Updatable {
   }
 
   /**
-   * Called when a collision with another ability occurs.
-   * @param collision the data regarding the collision that occured.
+   * Called when a collision with another ability instance occurs.
+   * @param collision the data regarding the collision that occurred.
    */
   default void onCollision(Collision collision) {
   }

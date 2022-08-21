@@ -55,10 +55,9 @@ public enum ProtectionCache {
   /**
    * Checks if a user can build at a block location. First it queries the cache.
    * If no result is found it computes it and adds it to the cache before returning the result.
-   * Harmless actions are automatically allowed if allowHarmless is configured
    * @param user the user to check
    * @param block the block to check
-   * @return the result.
+   * @return the result
    * @see #canBuildPostCache(User, Block)
    */
   public boolean canBuild(User user, Block block) {

@@ -151,10 +151,18 @@ public class AbilityDescription implements Keyed {
       this.steps = List.copyOf(steps);
     }
 
+    /**
+     * Get the steps required to activate this sequence.
+     * @return an immutable collection of this sequence's steps
+     */
     public List<SequenceStep> steps() {
       return steps;
     }
 
+    /**
+     * Get the instructions for this sequence.
+     * @return the instructions
+     */
     public Component instructions() {
       if (instructions == null) {
         instructions = generateInstructions();
@@ -187,6 +195,12 @@ public class AbilityDescription implements Keyed {
       return builder.build();
     }
 
+    /**
+     * Check if this sequence can be activated by the provided sequence steps.
+     * This method will try to match the sequence steps and fail-fast.
+     * @param otherSteps the steps to match
+     * @return true if this sequence can be activated by the given steps, false otherwise
+     */
     public boolean matches(List<SequenceStep> otherSteps) {
       int actionsLength = otherSteps.size() - 1;
       int sequenceLength = steps.size() - 1;
@@ -204,6 +218,9 @@ public class AbilityDescription implements Keyed {
     }
   }
 
+  /**
+   * Builder to create {@link AbilityDescription}.
+   */
   public static final class Builder {
     private final String name;
     private final Function<AbilityDescription, ? extends Ability> constructor;

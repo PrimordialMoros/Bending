@@ -29,6 +29,9 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
 
+/**
+ * Handles active {@link Ability} instances.
+ */
 public interface AbilityManager extends Updatable {
   void addAbility(User user, Ability instance);
 
@@ -82,4 +85,8 @@ public interface AbilityManager extends Updatable {
   void destroyUserInstances(User user);
 
   void destroyAllInstances();
+
+  static AbilityManager dummy() {
+    return DummyAbilityManager.INSTANCE;
+  }
 }

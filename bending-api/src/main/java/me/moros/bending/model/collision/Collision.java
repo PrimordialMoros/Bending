@@ -23,7 +23,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.Collider;
 
 /**
- * Represents a real collision between 2 abilities.
+ * Represents a real collision between two ability instances.
  */
 public final class Collision {
   private final CollisionData collisionData;
@@ -70,6 +70,9 @@ public final class Collision {
     }
   }
 
+  /**
+   * Holds the data for a collision between two ability instances.
+   */
   public static class CollisionData {
     private final Ability first, second;
     private final Collider c1, c2;

@@ -26,6 +26,9 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.entity.Player;
 
+/**
+ * Represents a {@link BossBar} for bending purposes.
+ */
 public final class BendingBar implements Updatable {
   private final BossBar bar;
   private final Audience audience;

@@ -35,6 +35,7 @@ import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.AttributeModifier;
+import me.moros.bending.model.board.Board;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.predicate.BendingConditions;
 import me.moros.bending.model.preset.Preset;
@@ -45,6 +46,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Base {@link User} implementation for all living entities.
+ */
 public sealed class BendingUser implements User permits BendingPlayer {
   private final Game game;
   private final LivingEntity entity;
@@ -159,7 +163,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
       elements.remove(element);
       validateAbilities();
       validateSlots();
-      updateBoard();
+      board().updateAll();
       return true;
     }
     return false;
@@ -172,7 +176,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
       elements.add(element);
       validateAbilities();
       validateSlots();
-      updateBoard();
+      board().updateAll();
       return true;
     }
     return false;
@@ -198,7 +202,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
       Preset oldBinds = createPresetFromSlots("");
       preset.copyTo(slots);
       validateSlots();
-      updateBoard();
+      board().updateAll();
       Preset newBinds = createPresetFromSlots("");
       return oldBinds.compare(newBinds) > 0;
     }
@@ -220,7 +224,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     }
     if (EventBus.INSTANCE.postBindChangeEvent(this, BindType.SINGLE)) {
       slots[slot - 1] = desc;
-      updateBoard();
+      board().updateAll();
     }
   }
 
@@ -284,7 +288,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public Board board() {
-    return BoardImpl.DUMMY;
+    return Board.dummy();
   }
 
   @Override
@@ -302,16 +306,12 @@ public sealed class BendingUser implements User permits BendingPlayer {
     return attributes.stream();
   }
 
-  protected void updateBoard(@Nullable AbilityDescription desc, boolean cooldown) {
+  private void updateBoard(@Nullable AbilityDescription desc, boolean cooldown) {
     if (desc != null && !desc.canBind()) {
       board().updateMisc(desc, cooldown);
     } else {
       board().updateAll();
     }
-  }
-
-  protected void updateBoard() {
-    board().updateAll();
   }
 
   /**

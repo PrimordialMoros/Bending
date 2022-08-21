@@ -19,6 +19,12 @@
 
 package me.moros.bending.model.attribute;
 
-public record AttributeModifier(ModifyPolicy policy, Attribute attribute,
-                                ModifierOperation type, double value) {
+/**
+ * A record that describes a modifier for an attribute.
+ * @param policy the policy for the attribute modifier
+ * @param attribute the attribute to modify
+ * @param type the type of operation used for modification
+ * @param value the modifier value
+ */
+public record AttributeModifier(ModifyPolicy policy, Attribute attribute, ModifierOperation type, double value) {
 }

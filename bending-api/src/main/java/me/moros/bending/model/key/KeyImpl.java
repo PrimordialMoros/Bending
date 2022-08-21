@@ -19,45 +19,9 @@
 
 package me.moros.bending.model.key;
 
-public final class KeyImpl implements Key {
-  private final String namespace;
-  private final String value;
-
-  KeyImpl(String namespace, String value) {
-    this.namespace = namespace;
-    this.value = value;
-  }
-
-  @Override
-  public String namespace() {
-    return namespace;
-  }
-
-  @Override
-  public String value() {
-    return value;
-  }
-
+record KeyImpl(String namespace, String value) implements Key {
   @Override
   public String toString() {
     return namespace + '.' + value;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj instanceof Key other) {
-      return this.namespace.equals(other.namespace()) && this.value.equals(other.value());
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = namespace.hashCode();
-    result = (31 * result) + value.hashCode();
-    return result;
   }
 }

@@ -47,6 +47,10 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
     this.formats = Map.copyOf(formats);
   }
 
+  /**
+   * Get the locale for this translation.
+   * @return the locale
+   */
   public Locale locale() {
     return locale;
   }

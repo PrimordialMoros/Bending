@@ -22,7 +22,7 @@ package me.moros.bending.model.temporal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Abstract base for {@link Temporary}
+ * Abstract base for {@link Temporary}.
  */
 public abstract class TemporaryBase implements Temporary {
   static final TemporaryBase EMPTY = new TemporaryBase() {

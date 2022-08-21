@@ -41,11 +41,13 @@ import org.slf4j.Logger;
 
 public class AbilityManagerImpl implements AbilityManager {
   private final Logger logger;
+  private final UUID world;
   private final Multimap<UUID, Ability> globalInstances;
   private final Collection<Entry<UUID, Ability>> addQueue;
 
-  AbilityManagerImpl(Logger logger) {
+  AbilityManagerImpl(Logger logger, UUID world) {
     this.logger = logger;
+    this.world = world;
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
     addQueue = new ArrayList<>(16);
   }
@@ -56,12 +58,14 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void addAbility(User user, Ability instance) {
-    addQueue.add(Map.entry(user.uuid(), instance));
+    if (world.equals(user.world().getUID())) {
+      addQueue.add(Map.entry(user.uuid(), instance));
+    }
   }
 
   @Override
   public void changeOwner(Ability ability, User user) {
-    if (ability.user().equals(user) || !ability.user().world().equals(user.world())) {
+    if (ability.user().equals(user) || !ability.user().world().equals(user.world()) || !world.equals(user.world().getUID())) {
       return;
     }
     if (globalInstances.remove(ability.user().uuid(), ability)) {
@@ -73,6 +77,9 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void createPassives(User user) {
+    if (!world.equals(user.world().getUID())) {
+      return;
+    }
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(this::isPassive).toList();
     for (AbilityDescription passive : allPassives) {
       destroyUserInstance(user, passive.createAbility().getClass());

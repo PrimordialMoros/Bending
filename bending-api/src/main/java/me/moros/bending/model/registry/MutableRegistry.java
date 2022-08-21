@@ -19,6 +19,12 @@
 
 package me.moros.bending.model.registry;
 
+/**
+ * Common interface for mutable bending registries.
+ * Mutable registries can have objects removed from them.
+ * @param <K> the type of keys for this registry
+ * @param <V> the type of values for this registry
+ */
 public interface MutableRegistry<K, V> extends Registry<K, V> {
   /**
    * Invalidates a key if it exists.

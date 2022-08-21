@@ -20,7 +20,6 @@
 package me.moros.bending.util.collision;
 
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.collision.geometry.DummyCollider;
 import me.moros.bending.model.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -30,15 +29,13 @@ import org.bukkit.util.BoundingBox;
  * Utility class to retrieve block and entity collision shapes.
  */
 public final class AABBUtil {
-  public static final AABB DUMMY_COLLIDER = new DummyCollider();
-
   private AABBUtil() {
   }
 
   /**
    * Calculate the block's dimensions.
    * @param block the block to check
-   * @return the provided block's {@link AABB} in relative space or a {@link DummyCollider} if the block has no collider
+   * @return the provided block's {@link AABB} in relative space
    */
   public static AABB blockDimensions(Block block) {
     return dimensions(block, Vector3d.ZERO);
@@ -47,7 +44,7 @@ public final class AABBUtil {
   /**
    * Calculate the block's dimensions at its current position.
    * @param block the block to check
-   * @return the provided block's {@link AABB} or a {@link DummyCollider} if the block has no collider
+   * @return the provided block's {@link AABB}
    */
   public static AABB blockBounds(Block block) {
     return dimensions(block, new Vector3d(block));
@@ -74,7 +71,7 @@ public final class AABBUtil {
   private static AABB dimensions(Block block, Vector3d point) {
     BoundingBox box = block.getBoundingBox();
     if (box.getVolume() == 0 || !block.isCollidable()) {
-      return DUMMY_COLLIDER;
+      return AABB.dummy();
     }
     double dx = point.x() - block.getX();
     double dy = point.y() - block.getY();

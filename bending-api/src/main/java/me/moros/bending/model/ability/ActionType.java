@@ -19,11 +19,32 @@
 
 package me.moros.bending.model.ability;
 
+/**
+ * Represents actions that can be blocked by bending.
+ */
 public enum ActionType {
+  /**
+   * Activating an ability.
+   */
   ABILITY_ACTIVATION,
+  /**
+   * Damaging an entity.
+   */
   DAMAGE,
+  /**
+   * Shooting a bow.
+   */
   SHOOT,
+  /**
+   * Interacting with a block.
+   */
   INTERACT_BLOCK,
+  /**
+   * Interacting with an entity or item.
+   */
   INTERACT,
+  /**
+   * Moving (rotating is ignored).
+   */
   MOVE
 }

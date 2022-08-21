@@ -24,8 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Decorates a config ability value that is associated with a {@link Attribute}
+ * and can be modified by {@link AttributeModifier}.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Modifiable {
+  /**
+   * Get the attribute that can be modified.
+   * @return the attribute
+   */
   Attribute value();
 }

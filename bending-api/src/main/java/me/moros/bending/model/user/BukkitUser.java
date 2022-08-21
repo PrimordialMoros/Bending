@@ -39,6 +39,9 @@ import org.bukkit.inventory.MainHand;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Represents a bukkit entity.
+ */
 public interface BukkitUser extends ForwardingAudience.Single, Identity {
   LivingEntity entity();
 

@@ -27,9 +27,13 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Represents a user that has a set of {@link Preset}.
+ */
 public interface PresetUser {
   /**
-   * @return an immutable collection of this user's preset names
+   * Get a copy of this user's presets.
+   * @return a copy of this user's presets
    */
   Set<Preset> presets();
 

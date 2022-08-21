@@ -19,6 +19,9 @@
 
 package me.moros.bending.model.attribute;
 
+/**
+ * The type of operation used by an attribute modifier.
+ */
 public enum ModifierOperation {
   /**
    * Directly adds to the base value.

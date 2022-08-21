@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.board.Board;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
@@ -39,11 +40,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * {@link User} implementation for players.
+ */
 public final class BendingPlayer extends BendingUser implements PresetUser {
   private final Set<Preset> presets;
   private final int internalId;
 
-  private Board board = BoardImpl.DUMMY;
+  private Board board = Board.dummy();
 
   private BendingPlayer(Game game, Player player, PlayerProfile profile) {
     super(game, player, profile.benderData());
@@ -139,9 +143,9 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   public Board board() {
     if (!game().worldManager().isEnabled(world()) || entity().hasMetadata(Metadata.HIDDEN_BOARD)) {
       board.disableScoreboard();
-      board = BoardImpl.DUMMY;
+      board = Board.dummy();
     } else if (!board.isEnabled()) {
-      board = new BoardImpl(this);
+      board = Board.create(this);
     }
     return board;
   }

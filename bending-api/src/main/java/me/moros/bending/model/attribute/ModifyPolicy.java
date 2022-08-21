@@ -22,6 +22,9 @@ package me.moros.bending.model.attribute;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 
+/**
+ * Represents a policy that determines which abilities or elements can be modified by an attribute modifier.
+ */
 @FunctionalInterface
 public interface ModifyPolicy {
   boolean shouldModify(AbilityDescription desc);

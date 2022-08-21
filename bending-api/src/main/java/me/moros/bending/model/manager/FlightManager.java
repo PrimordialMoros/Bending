@@ -36,6 +36,9 @@ public interface FlightManager extends Updatable {
 
   void removeAll();
 
+  /**
+   * Represents a flight reference.
+   */
   interface Flight {
     User user();
 

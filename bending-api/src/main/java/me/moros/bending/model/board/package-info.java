@@ -17,23 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.attribute;
-
-import java.util.function.DoubleFunction;
-
-public enum AttributeConverter implements DoubleFunction<Number> {
-  DOUBLE(x -> x),
-  INT(x -> (int) x),
-  LONG(x -> (long) x);
-
-  private final DoubleFunction<Number> converter;
-
-  AttributeConverter(DoubleFunction<Number> converter) {
-    this.converter = converter;
-  }
-
-  @Override
-  public Number apply(double value) {
-    return converter.apply(value);
-  }
-}
+/**
+ * Provides classes and interfaces for modelling the bending board.
+ */
+package me.moros.bending.model.board;

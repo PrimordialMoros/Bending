@@ -87,6 +87,9 @@ public enum Policies implements RemovalPolicy {
       .add(Policies.OFFLINE);
   }
 
+  /**
+   * Builder to create complex {@link RemovalPolicy}.
+   */
   public static final class Builder {
     private final Set<RemovalPolicy> policies;
 

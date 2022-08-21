@@ -24,8 +24,12 @@ import java.util.Set;
 import me.moros.bending.event.ElementChangeEvent;
 import me.moros.bending.model.Element;
 
+/**
+ * Represents a user that has a set of {@link Element}.
+ */
 public interface ElementUser {
   /**
+   * Get a copy of this user's elements.
    * @return a copy of this user's elements
    */
   Set<Element> elements();
