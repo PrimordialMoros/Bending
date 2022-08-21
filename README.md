@@ -6,12 +6,14 @@
 
 Bending is a free and open source Minecraft plugin that brings the universe of _Avatar: The Last Airbender_ to your server.
 
-This project is a modern implementation of bending with the following key aspects:
-- Transparent development process
+#### Main Features:
+- Bend the 4 elements (Air, Water, Earth, Fire)
+- Built-in bending board
+- Dynamic ability interactions
+- Accurate collision system
+- Support for custom translations and [Localization](https://github.com/PrimordialMoros/Bending/wiki/Localization)
+- Support for bending mobs
 - Robust, flexible API
-- Supports custom translations
-- Accurate collision detection system
-- Balanced pvp and pve experience, extremely configurable
 
 For more information check the [Wiki](https://github.com/PrimordialMoros/Bending/wiki/Home).
 

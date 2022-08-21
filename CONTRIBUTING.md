@@ -37,6 +37,7 @@ The project is currently split into 2 main modules:
 - `adapter` - Contains the interface for NMS adapters
 - `config` - Contains config interfaces
 - `event` - Contains bending related events
+- `locale` - Contains locale interfaces
 - `model` - Contains models for bending systems and components
 - `registry` - Contains built-in registries
 - `temporal` - Contains temporal systems
