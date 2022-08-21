@@ -40,7 +40,7 @@ dependencies {
     implementation("com.zaxxer", "HikariCP", "5.0.1") {
         exclude(module = "slf4j-api")
     }
-    implementation("org.postgresql", "postgresql", "42.4.0") {
+    implementation("org.postgresql", "postgresql", "42.4.2") {
         exclude(module = "checker-qual")
     }
     implementation("com.h2database", "h2", "2.1.214")
@@ -49,10 +49,10 @@ dependencies {
     implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.0") {
         exclude(group = "net.kyori")
     }
-    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.6")
+    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.2.6")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.5")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
     compileOnly("me.clip", "placeholderapi", "2.11.2")
