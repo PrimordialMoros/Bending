@@ -230,13 +230,13 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public int currentSlot() {
-    return index;
+    return index + 1;
   }
 
   @Override
   public void currentSlot(int slot) {
     if (slot >= 1 && slot <= 9) {
-      index = slot;
+      index = slot - 1;
     }
   }
 
