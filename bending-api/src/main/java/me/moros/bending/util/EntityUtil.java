@@ -39,7 +39,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectType.Category;
 
 /**
- * Utility class with useful {@link Entity} related methods. Note: This is not thread-safe.
+ * Utility class with useful {@link Entity} related methods.
+ * <p>Note: This is not thread-safe.
  */
 public final class EntityUtil {
   private EntityUtil() {

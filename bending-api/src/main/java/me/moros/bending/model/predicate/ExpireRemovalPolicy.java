@@ -39,7 +39,7 @@ public final class ExpireRemovalPolicy implements RemovalPolicy {
 
   /**
    * Creates a {@link RemovalPolicy} with a maximum duration.
-   * Note: a non-positive duration will be ignored and policy will always test negative.
+   * <p>Note: A non-positive duration will be ignored and policy will always test negative.
    * @param duration the maximum duration
    * @return the constructed policy
    */

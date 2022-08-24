@@ -21,6 +21,7 @@ package me.moros.bending.model.user;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +43,7 @@ import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.temporal.Cooldown;
+import net.kyori.adventure.util.TriState;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -54,6 +56,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private final LivingEntity entity;
   private final DataHolder container;
   private final Set<Element> elements;
+  private final Map<String, TriState> virtualPermissions;
   private final Collection<AttributeModifier> attributes;
   private final AbilityDescription[] slots;
   private final BiPredicate<User, AbilityDescription> condition;
@@ -70,6 +73,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     this.game = game;
     this.entity = entity;
     container = new DataContainer();
+    virtualPermissions = new ConcurrentHashMap<>();
     attributes = ConcurrentHashMap.newKeySet();
     slots = new AbilityDescription[9];
     int size = Math.min(data.slots().size(), 9);
@@ -289,6 +293,22 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public Board board() {
     return Board.dummy();
+  }
+
+  @Override
+  public boolean hasPermission(String permission) {
+    return virtualPermissions.get(permission) != TriState.FALSE;
+  }
+
+  @Override
+  public TriState setPermission(String permission, TriState state) {
+    TriState prev;
+    if (state == TriState.NOT_SET) {
+      prev = virtualPermissions.remove(permission);
+    } else {
+      prev = virtualPermissions.put(permission, state);
+    }
+    return prev == null ? TriState.NOT_SET : prev;
   }
 
   @Override

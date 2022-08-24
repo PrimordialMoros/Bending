@@ -83,7 +83,7 @@ public final class RayTraceBuilder {
 
   /**
    * Override the raytrace range.
-   * <p>Note: range is clamped at [1, 100].
+   * <p>Note: Range is clamped at [1, 100].
    * @param range the new range
    * @return the modified builder
    */

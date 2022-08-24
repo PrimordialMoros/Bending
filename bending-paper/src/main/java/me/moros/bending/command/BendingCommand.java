@@ -274,7 +274,7 @@ public final class BendingCommand {
   }
 
   public void onElementChoose(User user, Element element) {
-    if (!user.hasPermission("bending.command.choose." + element)) {
+    if (!user.hasPermission(CommandPermissions.CHOOSE + "." + element)) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }
@@ -287,7 +287,7 @@ public final class BendingCommand {
   }
 
   public void onElementAdd(User user, Element element) {
-    if (!user.hasPermission("bending.command.add." + element)) {
+    if (!user.hasPermission(CommandPermissions.ADD + "." + element)) {
       Message.ELEMENT_ADD_NO_PERMISSION.send(user, element.displayName());
       return;
     }

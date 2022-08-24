@@ -28,6 +28,7 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.protection.ProtectionCache;
 import me.moros.bending.temporal.TempBlock;
+import net.kyori.adventure.util.TriState;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -155,16 +156,6 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
   Board board();
 
   /**
-   * Check if the user has the specified permission.
-   * This will always return true if the user is a non-player.
-   * @param permission the permission to check
-   * @return true if the user has the given permission, false otherwise
-   */
-  default boolean hasPermission(String permission) {
-    return true;
-  }
-
-  /**
    * Check if the user has all required permissions for the specified ability.
    * @param desc the ability to check
    * @return true if the user has all permissions for the ability, false otherwise
@@ -173,6 +164,24 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
   default boolean hasPermission(AbilityDescription desc) {
     return desc.permissions().stream().allMatch(this::hasPermission);
   }
+
+  /**
+   * Check if the user has the specified permission.
+   * If the user is a non-player, this will return true unless a virtual node is set.
+   * @param permission the permission to check
+   * @return true if the user has the given permission, false otherwise
+   * @see #setPermission(String, TriState)
+   */
+  boolean hasPermission(String permission);
+
+  /**
+   * Set a virtual permission node (in memory) for a user.
+   * <p>Note: This has no effect if the user is a player.
+   * @param permission the permission node
+   * @param state the permission state
+   * @return the previous state of the permission node
+   */
+  TriState setPermission(String permission, TriState state);
 
   /**
    * Checks if the user can build at a block location.

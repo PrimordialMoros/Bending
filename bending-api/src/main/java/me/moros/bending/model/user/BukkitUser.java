@@ -160,7 +160,8 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
   }
 
   /**
-   * Note: The returned value includes an offset and is ideal for showing charging particles.
+   * Get the user's main hand side.
+   * <p>Note: The returned value includes an offset and is ideal for showing charging particles.
    * @return a vector which represents the user's main hand location
    * @see #rightSide()
    * @see #leftSide()

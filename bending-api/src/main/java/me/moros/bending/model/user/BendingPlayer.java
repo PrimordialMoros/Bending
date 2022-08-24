@@ -35,6 +35,7 @@ import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.metadata.Metadata;
+import net.kyori.adventure.util.TriState;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -80,6 +81,11 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   @Override
   public boolean hasPermission(String permission) {
     return entity().hasPermission(permission);
+  }
+
+  @Override
+  public TriState setPermission(String permission, TriState state) {
+    return TriState.NOT_SET;
   }
 
   @Override

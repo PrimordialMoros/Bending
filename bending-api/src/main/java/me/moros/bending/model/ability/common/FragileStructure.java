@@ -55,7 +55,7 @@ public final class FragileStructure implements Iterable<Block> {
   /**
    * Try to subtract the specified amount of damage from this structure's health.
    * If health drops at zero or below then the structure will shatter.
-   * Note: Provide a non-positive damage value to instantly destroy the structure.
+   * <p>Note: Provide a non-positive damage value to instantly destroy the structure.
    * @param damage the amount of damage to inflict
    * @return the remaining structure health
    */

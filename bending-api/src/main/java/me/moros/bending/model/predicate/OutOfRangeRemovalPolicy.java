@@ -47,7 +47,7 @@ public final class OutOfRangeRemovalPolicy implements RemovalPolicy {
 
   /**
    * Creates a {@link RemovalPolicy} with a max range that checks the distance from {@link User#eyeLocation()}.
-   * Note: a range of 0 will be ignored and policy will always test negative.
+   * <p>Note: A range of 0 will be ignored and policy will always test negative.
    * @param range the maximum range of the ability
    * @param supplier supplier of location to measure distance to
    * @return the constructed policy
@@ -58,7 +58,7 @@ public final class OutOfRangeRemovalPolicy implements RemovalPolicy {
 
   /**
    * Creates a {@link RemovalPolicy} with a max range that checks the distance from given origin point.
-   * Note: a range of 0 will be ignored and policy will always test negative.
+   * <p>Note: A range of 0 will be ignored and policy will always test negative.
    * @param range the maximum range of the ability
    * @param origin the origin point to measure distance from, if null the policy will use the {@link User#eyeLocation()}
    * @param supplier supplier of location to measure distance to

@@ -47,7 +47,8 @@ import org.bukkit.block.data.type.Snow;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Utility class with useful {@link World} related methods. Note: This is not thread-safe.
+ * Utility class with useful {@link World} related methods.
+ * <p>Note: This is not thread-safe.
  */
 public final class WorldUtil {
   public static final Set<BlockFace> FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
@@ -318,7 +319,7 @@ public final class WorldUtil {
 
   /**
    * Calculate and collect a ring of blocks.
-   * Note: ring blocks are in clockwise order and are unique.
+   * <p>Note: Ring blocks are in clockwise order and are unique.
    * @param center the center block
    * @param radius the radius of the circle
    * @return a collection of blocks representing the ring
