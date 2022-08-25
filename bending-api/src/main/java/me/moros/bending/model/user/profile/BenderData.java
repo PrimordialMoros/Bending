@@ -28,7 +28,6 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-
 /**
  * A record of bender data stored or to be stored in the database.
  * @param slots the bender's bound abilities

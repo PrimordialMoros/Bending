@@ -19,7 +19,6 @@
 
 package me.moros.bending.command;
 
-
 import cloud.commandframework.keys.CloudKey;
 import cloud.commandframework.keys.SimpleCloudKey;
 import io.leangen.geantyref.TypeToken;

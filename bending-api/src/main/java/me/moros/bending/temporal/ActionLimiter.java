@@ -83,7 +83,6 @@ public final class ActionLimiter extends TemporaryBase {
     MANAGER.addEntry(uuid, this, Temporary.toTicks(duration));
   }
 
-
   @Override
   public boolean revert() {
     if (reverted) {

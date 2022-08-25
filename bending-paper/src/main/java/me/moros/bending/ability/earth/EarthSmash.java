@@ -291,11 +291,11 @@ public class EarthSmash extends AbilityInstance {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? Material.ICE.createBlockData() : Material.PACKED_ICE.createBlockData());
       shatter = true;
-    } else if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
-      boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
-      shatter = true;
     }
     if (shatter) {
+      if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
+        boulder.data.replaceAll((k, v) -> Material.MAGMA_BLOCK.createBlockData());
+      }
       collision.removeSelf(false);
       shatter();
     }

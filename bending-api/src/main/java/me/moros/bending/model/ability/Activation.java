@@ -19,7 +19,6 @@
 
 package me.moros.bending.model.ability;
 
-
 import me.moros.bending.model.key.Key;
 import me.moros.bending.model.key.Keyed;
 

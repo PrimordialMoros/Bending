@@ -62,20 +62,19 @@ public final class DamageUtil {
     if (event.isCancelled() || dmg <= 0) {
       return false;
     }
-
+    targetEntity.playEffect(EntityEffect.HURT);
     // We only use base damage modifier, so we have to manually calculate other modifiers
     dmg = calculateDamageAfterResistance(targetEntity, dmg);
     if (dmg > 0) {
       dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
       if (dmg > 0) {
+        targetEntity.setLastDamageCause(event);
+        targetEntity.setLastDamage(dmg);
         double previousHealth = targetEntity.getHealth();
         double newHealth = Math.max(0, previousHealth - dmg);
         targetEntity.setHealth(newHealth);
       }
     }
-    targetEntity.playEffect(EntityEffect.HURT);
-    targetEntity.setLastDamageCause(event);
-    targetEntity.setLastDamage(dmg);
     return true;
   }
 

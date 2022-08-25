@@ -25,6 +25,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
@@ -46,15 +47,17 @@ import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.metadata.Metadata;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -75,6 +78,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 
 public class PlayerListener implements Listener {
   private final Bending plugin;
@@ -137,20 +143,41 @@ public class PlayerListener implements Listener {
     profileCache.synchronous().invalidate(uuid);
   }
 
-
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
-    EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
-    if (lastDamageCause instanceof BendingDamageEvent cause) {
-      AbilityDescription ability = cause.ability();
-      TranslatableComponent msg = plugin.translationManager().translate(ability.key() + ".death");
-      if (msg == null) {
-        msg = Component.translatable("bending.ability.generic.death");
+    Player player = event.getEntity();
+    if (player.getLastDamageCause() instanceof BendingDamageEvent cause) {
+      Boolean showMessage = player.getWorld().getGameRuleValue(GameRule.SHOW_DEATH_MESSAGES);
+      if (showMessage != null && showMessage) {
+        Predicate<Audience> predicate = x -> true;
+        Team team = player.getScoreboard().getPlayerTeam(player);
+        if (team != null) {
+          OptionStatus status = team.getOption(Option.DEATH_MESSAGE_VISIBILITY);
+          predicate = u -> canSend(status, team, u);
+        }
+        AbilityDescription ability = cause.ability();
+        TranslatableComponent msg = plugin.translationManager().translate(ability.key() + ".death");
+        if (msg == null) {
+          msg = Component.translatable("bending.ability.generic.death");
+        }
+        Component message = msg.args(player.name(), cause.user().entity().name(), ability.displayName());
+        // Client isn't aware of custom death message translations, so we have to manually broadcast
+        Bukkit.getServer().filterAudience(predicate).sendMessage(message);
+        event.deathMessage(Component.empty());
       }
-      Component target = Component.text(event.getEntity().getName());
-      Component source = Component.text(cause.user().entity().getName());
-      event.deathMessage(msg.args(target, source, ability.displayName()));
     }
+  }
+
+  private boolean canSend(OptionStatus status, Team team, Audience other) {
+    if (other instanceof Player player) {
+      return switch (status) {
+        case ALWAYS -> true;
+        case NEVER -> false;
+        case FOR_OTHER_TEAMS -> team.equals(player.getScoreboard().getPlayerTeam(player));
+        case FOR_OWN_TEAM -> !team.equals(player.getScoreboard().getPlayerTeam(player));
+      };
+    }
+    return false;
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

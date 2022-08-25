@@ -63,7 +63,6 @@ public class TickEffectEvent extends BendingEvent implements UserEvent, Cancella
     return duration;
   }
 
-
   /**
    * Sets the duration of the effect in ticks.
    * @param duration the new duration, must be positive

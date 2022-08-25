@@ -141,7 +141,6 @@ public final class VectorUtil {
     return arc;
   }
 
-
   /**
    * Get the orthogonal vector for the specified parameters.
    * @param axis the axis perpendicular to the plane

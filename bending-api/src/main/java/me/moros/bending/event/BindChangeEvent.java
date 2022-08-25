@@ -60,7 +60,6 @@ public class BindChangeEvent extends BendingEvent implements UserEvent, Cancella
     this.cancelled = cancel;
   }
 
-
   /**
    * Represents a type of bind change.
    */
