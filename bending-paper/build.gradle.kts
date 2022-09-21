@@ -45,14 +45,14 @@ dependencies {
     }
     implementation("com.h2database", "h2", "2.1.214")
     implementation("org.bstats", "bstats-bukkit", "3.0.0")
-    implementation("cloud.commandframework", "cloud-paper", "1.7.0")
-    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.0") {
+    implementation("cloud.commandframework", "cloud-paper", "1.7.1")
+    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1") {
         exclude(group = "net.kyori")
     }
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.5")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.9")
     compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
     compileOnly("me.clip", "placeholderapi", "2.11.2")
