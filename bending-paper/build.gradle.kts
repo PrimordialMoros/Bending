@@ -40,7 +40,7 @@ dependencies {
     implementation("com.zaxxer", "HikariCP", "5.0.1") {
         exclude(module = "slf4j-api")
     }
-    implementation("org.postgresql", "postgresql", "42.4.2") {
+    implementation("org.postgresql", "postgresql", "42.5.0") {
         exclude(module = "checker-qual")
     }
     implementation("com.h2database", "h2", "2.1.214")
