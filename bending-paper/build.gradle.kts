@@ -33,7 +33,7 @@ dependencies {
         exclude(module = "checker-qual")
     }
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
-    implementation("org.jdbi", "jdbi3-core", "3.32.0") {
+    implementation("org.jdbi", "jdbi3-core", "3.34.0") {
         exclude(module = "caffeine")
         exclude(module = "slf4j-api")
     }
