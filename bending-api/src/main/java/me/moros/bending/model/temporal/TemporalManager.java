@@ -40,6 +40,8 @@ public class TemporalManager<K, V extends TemporaryBase> {
   private final TimerWheel wheel;
   private final String label;
 
+  private int currentTick;
+
   public TemporalManager(String name) {
     this(name, Temporary::revert);
   }
@@ -56,7 +58,12 @@ public class TemporalManager<K, V extends TemporaryBase> {
   }
 
   public void tick() {
-    wheel.advance(Bukkit.getCurrentTick());
+    currentTick = Bukkit.getCurrentTick();
+    wheel.advance(currentTick);
+  }
+
+  public int currentTick() {
+    return currentTick;
   }
 
   public boolean isTemp(@Nullable K key) {
@@ -78,7 +85,6 @@ public class TemporalManager<K, V extends TemporaryBase> {
   public void reschedule(K key, int tickDuration) {
     V value = instances.get(key);
     if (value != null) {
-      int currentTick = Bukkit.getCurrentTick();
       value.expirationTick(currentTick + tickDuration);
       wheel.reschedule(value, currentTick);
     }

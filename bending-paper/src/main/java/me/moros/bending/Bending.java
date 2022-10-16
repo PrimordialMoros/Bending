@@ -58,6 +58,25 @@ public class Bending extends JavaPlugin {
   private Game game;
 
   @Override
+  public void onLoad() {
+    logger = getSLF4JLogger();
+    author = getDescription().getAuthors().get(0);
+    version = getDescription().getVersion();
+
+    String dir = getDataFolder().toString();
+    configManager = new ConfigManager(logger, dir);
+    translationManager = new TranslationManager(logger, dir);
+
+    storage = StorageFactory.createInstance(logger, dir);
+    Objects.requireNonNull(storage, "Unable to establish database connection!").init(this);
+    new AbilityInitializer();
+
+    if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
+      WorldGuardFlag.registerFlag();
+    }
+  }
+
+  @Override
   public void onEnable() {
     new Metrics(this, 8717);
     loadAdapter();
@@ -94,25 +113,6 @@ public class Bending extends JavaPlugin {
     configManager.close();
   }
 
-  @Override
-  public void onLoad() {
-    logger = getSLF4JLogger();
-    author = getDescription().getAuthors().get(0);
-    version = getDescription().getVersion();
-
-    String dir = getDataFolder().toString();
-    configManager = new ConfigManager(logger, dir);
-    translationManager = new TranslationManager(logger, dir);
-
-    storage = StorageFactory.createInstance(logger, dir);
-    Objects.requireNonNull(storage, "Unable to establish database connection!").init(this);
-    new AbilityInitializer();
-
-    if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-      WorldGuardFlag.registerFlag();
-    }
-  }
-
   private void printInfo() {
     int abilityAmount = Registries.ABILITIES.size();
     int sequenceAmount = Registries.SEQUENCES.size();
@@ -135,6 +135,10 @@ public class Bending extends JavaPlugin {
   }
 
   private void loadAdapter() {
+    if (NativeAdapter.hasNativeSupport()) {
+      logger.info("A native adapter has already been registered.");
+      return;
+    }
     String fullName = getServer().getClass().getPackageName();
     String nmsVersion = fullName.substring(1 + fullName.lastIndexOf("."));
     String className = "me.moros.bending.adapter.impl." + nmsVersion + ".NativeAdapterImpl";

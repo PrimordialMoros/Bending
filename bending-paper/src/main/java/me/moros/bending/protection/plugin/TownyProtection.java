@@ -23,21 +23,19 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.protection.Protection;
+import me.moros.bending.model.protection.AbstractProtection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public final class TownyProtection implements Protection {
+public final class TownyProtection extends AbstractProtection {
   private final TownyAPI api;
-  private final Key key;
 
   public TownyProtection(Plugin plugin) {
+    super(plugin);
     api = TownyAPI.getInstance();
-    key = Key.create(NAMESPACE, plugin.getName());
   }
 
   @Override
@@ -47,10 +45,5 @@ public final class TownyProtection implements Protection {
     }
     TownBlock townBlock = api.getTownBlock(block.getLocation());
     return townBlock == null || !townBlock.hasTown();
-  }
-
-  @Override
-  public Key key() {
-    return key;
   }
 }

@@ -56,7 +56,6 @@ public final class ConfigManager {
 
   public void save() {
     try {
-      logger.info("Saving bending config");
       reference.save();
     } catch (IOException e) {
       logger.warn(e.getMessage(), e);

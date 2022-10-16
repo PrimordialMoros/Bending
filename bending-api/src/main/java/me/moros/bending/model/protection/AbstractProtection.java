@@ -19,23 +19,21 @@
 
 package me.moros.bending.model.protection;
 
-import me.moros.bending.model.key.Keyed;
-import me.moros.bending.registry.Registries;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
+import me.moros.bending.model.key.Key;
+import org.bukkit.plugin.Plugin;
 
 /**
- * Interface that models a region/block protection plugin.
- * Protections can be registered in {@link Registries#PROTECTIONS}.
+ * Base class for {@link Protection}.
  */
-public interface Protection extends Keyed {
-  String NAMESPACE = "bending.protection";
+public abstract class AbstractProtection implements Protection {
+  private final Key key;
 
-  /**
-   * Test if a user can build at the specified block location.
-   * @param entity the entity to check
-   * @param block the block to check
-   * @return the result
-   */
-  boolean canBuild(LivingEntity entity, Block block);
+  protected AbstractProtection(Plugin plugin) {
+    key = Key.create(NAMESPACE, plugin.getName());
+  }
+
+  @Override
+  public Key key() {
+    return key;
+  }
 }

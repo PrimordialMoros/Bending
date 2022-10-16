@@ -50,7 +50,6 @@ import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
@@ -162,7 +161,7 @@ public class PlayerListener implements Listener {
         }
         Component message = msg.args(player.name(), cause.user().entity().name(), ability.displayName());
         // Client isn't aware of custom death message translations, so we have to manually broadcast
-        Bukkit.getServer().filterAudience(predicate).sendMessage(message);
+        plugin.getServer().filterAudience(predicate).sendMessage(message);
         event.deathMessage(Component.empty());
       }
     }

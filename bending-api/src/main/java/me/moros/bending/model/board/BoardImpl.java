@@ -28,7 +28,6 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
@@ -46,7 +45,7 @@ final class BoardImpl implements Board {
   BoardImpl(BendingPlayer player) {
     this.player = player;
     selectedSlot = player.inventory().getHeldItemSlot() + 1;
-    bendingBoard = Bukkit.getScoreboardManager().getNewScoreboard();
+    bendingBoard = player.entity().getServer().getScoreboardManager().getNewScoreboard();
     bendingSlots = bendingBoard.registerNewObjective("BendingBoard", "dummy", Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
     bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
     player.entity().setScoreboard(bendingBoard);
@@ -66,7 +65,7 @@ final class BoardImpl implements Board {
     bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
     bendingBoard.getTeams().forEach(Team::unregister);
     bendingSlots.unregister();
-    player.entity().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+    player.entity().setScoreboard(player.entity().getServer().getScoreboardManager().getMainScoreboard());
   }
 
   @Override

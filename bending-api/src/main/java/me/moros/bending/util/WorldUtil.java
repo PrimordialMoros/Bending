@@ -43,7 +43,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.data.Lightable;
+import org.bukkit.block.data.type.LightningRod;
 import org.bukkit.block.data.type.Snow;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -211,6 +213,43 @@ public final class WorldUtil {
         block.setBlockData(data);
       }
     }
+  }
+
+  /**
+   * Try to power a block if it's a lightning rod.
+   * @param block the block to power
+   */
+  public static boolean tryPowerLightningRod(Block block) {
+    if (handleLightning(block)) {
+      Tasker.INSTANCE.sync(() -> handleLightning(block), 8);
+      return true;
+    }
+    return false;
+  }
+
+  private static boolean handleLightning(Block block) {
+    if (block.getBlockData() instanceof LightningRod state) {
+      boolean powered = state.isPowered();
+      int oldCurrent = powered ? 15 : 0;
+      int newCurrent = 15 - oldCurrent;
+      BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, newCurrent);
+      event.callEvent();
+      boolean eventState;
+      if (event.getNewCurrent() >= 15) {
+        eventState = true;
+      } else if (event.getNewCurrent() <= 0) {
+        eventState = false;
+      } else {
+        return false;
+      }
+      if (eventState == powered) {
+        return false;
+      }
+      state.setPowered(eventState);
+      block.setBlockData(state);
+      return true;
+    }
+    return false;
   }
 
   /**

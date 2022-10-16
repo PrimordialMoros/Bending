@@ -55,7 +55,7 @@ public final class RegistryKey<T> implements Key {
     if (this == obj) {
       return true;
     }
-    if (obj instanceof RegistryKey other) {
+    if (obj instanceof RegistryKey<?> other) {
       return this.key.equals(other.key) && this.type == other.type;
     }
     return false;

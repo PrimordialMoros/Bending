@@ -35,7 +35,6 @@ import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
@@ -84,11 +83,10 @@ public final class TempBlock extends TemporaryBase {
   // Cleans up previous states that have already expired
   private void cleanStates() {
     if (snapshots.size() > 1) {
-      int currentTick = Bukkit.getCurrentTick();
       Iterator<TempBlockState> it = snapshots.iterator();
       it.next(); // ignore original snapshot
       while (it.hasNext()) {
-        if (currentTick > it.next().expirationTicks) {
+        if (MANAGER.currentTick() > it.next().expirationTicks) {
           it.remove();
         }
       }
@@ -96,12 +94,11 @@ public final class TempBlock extends TemporaryBase {
   }
 
   private TempBlockState cleanStatesReverse() {
-    int currentTick = Bukkit.getCurrentTick();
     TempBlockState toRevert = Objects.requireNonNull(snapshots.pollLast());
     Iterator<TempBlockState> it = snapshots.descendingIterator();
     while (it.hasNext()) {
       TempBlockState next = it.next();
-      if (currentTick >= next.expirationTicks) {
+      if (MANAGER.currentTick() >= next.expirationTicks) {
         it.remove();
         toRevert = next;
       } else {
@@ -125,7 +122,7 @@ public final class TempBlock extends TemporaryBase {
     revertToSnapshot(toRevert);
     TempBlockState nextState = snapshots.peekLast();
     if (nextState != null) {
-      int deltaTicks = nextState.expirationTicks - Bukkit.getCurrentTick();
+      int deltaTicks = nextState.expirationTicks - MANAGER.currentTick();
       if (deltaTicks > 0) {
         MANAGER.reschedule(block, deltaTicks);
       }
@@ -222,7 +219,7 @@ public final class TempBlock extends TemporaryBase {
 
     private TempBlockState(Block block, boolean bendable, int ticks) {
       super(block, bendable);
-      this.expirationTicks = Bukkit.getCurrentTick() + ticks;
+      this.expirationTicks = MANAGER.currentTick() + ticks;
     }
   }
 

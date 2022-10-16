@@ -193,6 +193,18 @@ public final class VectorUtil {
     return new Vector3d(v.x() * cos - v.y() * sin, v.x() * sin + v.y() * cos, v.z());
   }
 
+  public static Vector3d closestPoint(Vector3d start, Vector3d end, Vector3d target) {
+    Vector3d toEnd = end.subtract(start);
+    double t = target.subtract(start).dot(toEnd) / toEnd.dot(toEnd);
+    t = Math.max(0, Math.min(t, 1));
+    return start.add(toEnd.multiply(t));
+  }
+
+  public static double distanceFromLine(Vector3d line, Vector3d pointOnLine, Vector3d point) {
+    Vector3d temp = point.subtract(pointOnLine);
+    return temp.cross(line).length() / line.length();
+  }
+
   /**
    * Decompose diagonal vectors into their cardinal components, so they can be checked individually.
    * This is helpful for resolving collisions when moving blocks diagonally and need to consider all block faces.

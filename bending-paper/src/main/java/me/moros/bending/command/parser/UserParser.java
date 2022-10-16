@@ -32,7 +32,6 @@ import me.moros.bending.command.ContextKeys;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -52,7 +51,7 @@ public final class UserParser implements ArgumentParser<CommandSender, User> {
     }
     User user = Registries.BENDERS.fromString(input);
     if (user == null) {
-      Player player = Bukkit.getPlayer(input);
+      Player player = commandContext.getSender().getServer().getPlayer(input);
       if (player != null) {
         user = Registries.BENDERS.get(player.getUniqueId());
       }

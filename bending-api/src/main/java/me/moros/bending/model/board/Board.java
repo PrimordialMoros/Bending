@@ -65,7 +65,7 @@ public interface Board {
    * @return a new board instance.
    */
   static Board create(BendingPlayer player) {
-    return new BoardImpl(player);
+    return player.hasPermission("bending.board") ? new BoardImpl(player) : dummy();
   }
 
   /**

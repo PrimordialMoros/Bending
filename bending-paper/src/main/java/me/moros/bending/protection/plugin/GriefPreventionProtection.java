@@ -19,8 +19,7 @@
 
 package me.moros.bending.protection.plugin;
 
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.protection.Protection;
+import me.moros.bending.model.protection.AbstractProtection;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.block.Block;
@@ -28,13 +27,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public final class GriefPreventionProtection implements Protection {
+public final class GriefPreventionProtection extends AbstractProtection {
   private final GriefPrevention griefPrevention;
-  private final Key key;
 
   public GriefPreventionProtection(Plugin plugin) {
+    super(plugin);
     griefPrevention = (GriefPrevention) plugin;
-    key = Key.create(NAMESPACE, plugin.getName());
   }
 
   @Override
@@ -45,10 +43,5 @@ public final class GriefPreventionProtection implements Protection {
       return reason == null || claim == null || claim.siegeData != null;
     }
     return true;
-  }
-
-  @Override
-  public Key key() {
-    return key;
   }
 }

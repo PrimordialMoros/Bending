@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
@@ -39,7 +40,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
@@ -47,6 +47,7 @@ import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
+import me.moros.bending.model.raytrace.RayTrace;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.temporal.TempLight;
@@ -157,9 +158,15 @@ public class Lightning extends AbilityInstance {
       return;
     }
 
+    double distance = userConfig.range * factor;
     Vector3d origin = user.eyeLocation();
-    Vector3d target = origin.add(user.direction().multiply(userConfig.range * factor));
-    arcIterator = new Arc(origin, target).iterator();
+    Vector3d target = origin.add(user.direction().multiply(distance));
+    RayTrace rayTrace = user.rayTrace(distance).raySize(1.5).entities(user.world());
+    Vector3d point = null;
+    if (rayTrace.hit()) {
+      point = rayTrace.position();
+    }
+    arcIterator = new Arc(origin, target, point).iterator();
     user.addCooldown(description(), userConfig.cooldown);
     removalPolicy = Policies.builder().build();
     launched = true;
@@ -178,6 +185,9 @@ public class Lightning extends AbilityInstance {
         counter += segment.length;
         Block block = result.block();
         if (block != null) {
+          if (WorldUtil.tryPowerLightningRod(block)) {
+            return false;
+          }
           explode(result.position(), block);
           return false;
         }
@@ -301,14 +311,15 @@ public class Lightning extends AbilityInstance {
     private static final double OFFSET = 1.6;
     private static final double FORK_CHANCE = 0.5;
 
-    private Arc(Vector3d start, Vector3d end) {
+    private Arc(Vector3d start, Vector3d end, @Nullable Vector3d target) {
       this.start = start;
-      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), 0.75 * OFFSET, 0));
-      segments = generateRecursively(OFFSET, startingSegments, 2, FastMath.ceil(4 * start.distance(end)));
+      Function<LineSegment, Vector3d> f = target == null ?  ls -> randomOffset(ls, 0.75 * OFFSET) : ls -> target;
+      List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), f, 0));
+      segments = generateRecursively(OFFSET, startingSegments, 0.25);
     }
 
-    private List<LineSegment> displaceMidpoint(LineSegment segment, double maxOffset, double forkChance) {
-      Vector3d offsetPoint = randomOffset(segment, maxOffset);
+    private List<LineSegment> displaceMidpoint(LineSegment segment, Function<LineSegment, Vector3d> function, double forkChance) {
+      Vector3d offsetPoint = function.apply(segment);
       LineSegment first = new LineSegment(segment.start, offsetPoint, segment.isFork);
       LineSegment second = new LineSegment(offsetPoint, segment.end, segment.isFork);
       if (forkChance > 0 && rand.nextDouble() < forkChance) {
@@ -318,19 +329,20 @@ public class Lightning extends AbilityInstance {
       return List.of(first, second);
     }
 
-    private List<LineSegment> generateRecursively(double maxOffset, List<LineSegment> lines, int counter, int maxAmount) {
-      if (counter < maxAmount) {
-        ListIterator<LineSegment> it = lines.listIterator();
-        while (it.hasNext()) {
-          LineSegment toSplit = it.next();
-          if (toSplit.isFork && toSplit.length < 0.1) {
-            continue;
-          }
-          List<LineSegment> split = displaceMidpoint(toSplit, maxOffset, FORK_CHANCE);
-          it.remove();
-          split.forEach(it::add);
+    private List<LineSegment> generateRecursively(double maxOffset, List<LineSegment> lines, double maxSegmentLength) {
+      int size = lines.size();
+      ListIterator<LineSegment> it = lines.listIterator();
+      while (it.hasNext()) {
+        LineSegment toSplit = it.next();
+        if ((toSplit.isFork && toSplit.length < 0.1) || (!toSplit.isFork && toSplit.length < maxSegmentLength)) {
+          continue;
         }
-        return generateRecursively(maxOffset * 0.5, lines, 2 * counter, maxAmount);
+        List<LineSegment> split = displaceMidpoint(toSplit, ls -> randomOffset(ls, maxOffset), FORK_CHANCE);
+        it.remove();
+        split.forEach(it::add);
+      }
+      if (size != lines.size()) {
+        return generateRecursively(maxOffset * 0.5, lines, maxSegmentLength);
       }
       return List.copyOf(lines);
     }
