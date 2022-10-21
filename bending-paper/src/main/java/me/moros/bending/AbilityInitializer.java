@@ -133,7 +133,7 @@ public final class AbilityInitializer {
       .layer(layer3)
       .add(spouts, layer1, true, false)
       .add(spouts, List.of("LavaDisk", "EarthSmash", "FlameRush"), true, false)
-      .add(shieldCollisions, List.of("AirShield", "WallOfFire"), true, false)
+      .add(shieldCollisions, List.of("AirShield", "FireWall"), true, false)
       .add("Shockwave", blasts, false, true)
       .add("FireShield", blasts, false, true)
       .add("FireShield", "Combustion", true, true)
