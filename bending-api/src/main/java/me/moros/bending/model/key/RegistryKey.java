@@ -61,11 +61,14 @@ public final class RegistryKey<T> implements Key {
     return false;
   }
 
+  private int hashcode;
+
   @Override
   public int hashCode() {
-    int result = key.hashCode();
-    result = (31 * result) + type.hashCode();
-    return result;
+    if (hashcode == 0) {
+      hashcode = (31 * key.hashCode()) + type.hashCode();
+    }
+    return hashcode;
   }
 
   /**

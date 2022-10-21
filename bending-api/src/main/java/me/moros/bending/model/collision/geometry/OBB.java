@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.collision.geometry;
 
+import java.util.Arrays;
+
 import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
 
@@ -30,18 +32,21 @@ import static java.lang.Math.abs;
 public class OBB implements Collider {
   public final Vector3d center;
   public final Vector3d e; // Half extents in local space.
+  final AABB outer;
   final Vector3d[] axes;
 
   private OBB(OBB obb, Vector3d center) {
     this.center = center;
     this.e = obb.e;
     this.axes = new Vector3d[3];
+    this.outer = obb.outer.at(center);
     System.arraycopy(obb.axes, 0, axes, 0, 3);
   }
 
   public OBB(AABB aabb) {
     this.center = aabb.position();
     this.e = aabb.halfExtents();
+    this.outer = aabb;
     this.axes = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
   }
 
@@ -53,13 +58,18 @@ public class OBB implements Collider {
     for (int i = 0; i < 3; i++) {
       this.axes[i] = new Vector3d(m[i]);
     }
+    Vector3d halfExtents = halfExtents();
+    this.outer = new AABB(center.subtract(halfExtents), center.add(halfExtents));
   }
 
   public OBB(AABB aabb, Vector3d axis, double angle) {
     this(aabb, new Rotation(axis, angle));
   }
 
-  boolean intersects(OBB other) {
+  boolean _intersects(OBB other) {
+    if (!outer._intersects(other.outer)) {
+      return false;
+    }
     final Vector3d pos = other.center.subtract(center);
     for (int i = 0; i < 3; i++) {
       if (getSeparatingPlane(pos, axes[i], other) || getSeparatingPlane(pos, other.axes[i], other)) {
@@ -128,5 +138,25 @@ public class OBB implements Collider {
   @Override
   public boolean contains(Vector3d point) {
     return closestPosition(point).distanceSq(point) <= EPSILON;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    OBB other = (OBB) obj;
+    return center.equals(other.center) && e.equals(other.e) && Arrays.equals(axes, other.axes);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = center.hashCode();
+    result = 31 * result + e.hashCode();
+    result = 31 * result + Arrays.hashCode(axes);
+    return result;
   }
 }

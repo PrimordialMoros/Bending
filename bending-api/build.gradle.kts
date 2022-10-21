@@ -1,6 +1,7 @@
 plugins {
     signing
     `maven-publish`
+    id("me.champeau.jmh").version("0.6.8")
 }
 
 dependencies {

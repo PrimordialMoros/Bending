@@ -19,13 +19,14 @@
 
 package me.moros.bending.game;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.Collision.CollisionData;
 import me.moros.bending.model.collision.CollisionPair;
@@ -34,7 +35,6 @@ import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.registry.Registries;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO implement BVH and profile
 public final class CollisionManager implements Updatable {
   private final AbilityManager manager;
 
@@ -43,40 +43,51 @@ public final class CollisionManager implements Updatable {
   }
 
   public UpdateResult update() {
-    Collection<Ability> instances = manager.instances().filter(ability -> !ability.colliders().isEmpty()).toList();
-    if (instances.size() < 2) {
+    CachedAbility[] instances = filterAndCollect();
+    if (instances.length < 2) {
       return UpdateResult.CONTINUE;
     }
-    Map<Ability, Collection<Collider>> colliderCache = new HashMap<>(instances.size());
-    Map<AbilityDescription, Collection<Ability>> abilityCache = new HashMap<>(32);
-    for (CollisionPair collisionPair : Registries.COLLISIONS) {
-      Collection<Ability> firstAbilities = abilityCache.computeIfAbsent(collisionPair.first(), desc ->
-        instances.stream().filter(ability -> ability.description().equals(desc)).toList()
-      );
-      Collection<Ability> secondAbilities = abilityCache.computeIfAbsent(collisionPair.second(), desc ->
-        instances.stream().filter(ability -> ability.description().equals(desc)).toList()
-      );
-      for (Ability first : firstAbilities) {
-        Collection<Collider> firstColliders = colliderCache.computeIfAbsent(first, Ability::colliders);
-        if (firstColliders.isEmpty()) {
+    Collection<CachedAbility> pruned = Collections.newSetFromMap(new IdentityHashMap<>(instances.length));
+    for (CachedAbility firstEntry : instances) {
+      if (pruned.contains(firstEntry)) {
+        continue;
+      }
+      Ability first = firstEntry.ability();
+      for (var secondEntry : instances) {
+        Ability second = secondEntry.ability();
+        if (first.user().equals(second.user()) || pruned.contains(secondEntry)) {
           continue;
         }
-        for (Ability second : secondAbilities) {
-          if (first.user().equals(second.user())) {
-            continue;
-          }
-          Collection<Collider> secondColliders = colliderCache.computeIfAbsent(second, Ability::colliders);
-          if (secondColliders.isEmpty()) {
-            continue;
-          }
-          Entry<Collider, Collider> collisionResult = checkCollision(firstColliders, secondColliders);
-          if (collisionResult != null) {
-            handleCollision(first, second, collisionResult.getKey(), collisionResult.getValue(), collisionPair);
+        CollisionPair pair = Registries.COLLISIONS.get(CollisionPair.createKey(first.description(), second.description()));
+        if (pair != null) {
+          Entry<Collider, Collider> collision = checkCollision(firstEntry.colliders(), secondEntry.colliders());
+          if (collision != null) {
+            CollisionData result = handleCollision(first, second, collision.getKey(), collision.getValue(), pair);
+            if (result.removeFirst()) {
+              manager.destroyInstance(first);
+              pruned.add(firstEntry);
+              break;
+            }
+            if (result.removeSecond()) {
+              manager.destroyInstance(second);
+              pruned.add(secondEntry);
+            }
           }
         }
       }
     }
     return UpdateResult.CONTINUE;
+  }
+
+  private CachedAbility[] filterAndCollect() {
+    Collection<CachedAbility> instances = new ArrayList<>(manager.size());
+    for (Ability ability : manager) {
+      Collection<Collider> colliders = ability.colliders();
+      if (!colliders.isEmpty()) {
+        instances.add(new CachedAbility(ability, colliders));
+      }
+    }
+    return instances.toArray(CachedAbility[]::new);
   }
 
   private @Nullable Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
@@ -90,15 +101,13 @@ public final class CollisionManager implements Updatable {
     return null;
   }
 
-  private void handleCollision(Ability first, Ability second, Collider c1, Collider c2, CollisionPair rc) {
-    CollisionData data = new CollisionData(first, second, c1, c2, rc.removeFirst(), rc.removeSecond());
+  private CollisionData handleCollision(Ability first, Ability second, Collider c1, Collider c2, CollisionPair pair) {
+    CollisionData data = new CollisionData(first, second, c1, c2, pair.removeFirst(), pair.removeSecond());
     first.onCollision(data.asCollision());
     second.onCollision(data.asInverseCollision());
-    if (data.removeFirst()) {
-      manager.destroyInstance(first);
-    }
-    if (data.removeSecond()) {
-      manager.destroyInstance(second);
-    }
+    return data;
+  }
+
+  private record CachedAbility(Ability ability, Collection<Collider> colliders) {
   }
 }

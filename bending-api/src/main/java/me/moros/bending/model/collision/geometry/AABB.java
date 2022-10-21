@@ -26,7 +26,6 @@ import me.moros.bending.model.math.Vector3d;
  */
 public class AABB implements Collider {
   public static final AABB DUMMY_COLLIDER = new DummyCollider();
-  public static final AABB PLAYER_BOUNDS = new AABB(new Vector3d(-0.3, 0.0, -0.3), new Vector3d(0.3, 1.8, 0.3));
   public static final AABB BLOCK_BOUNDS = new AABB(Vector3d.ZERO, Vector3d.ONE);
   public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(new Vector3d(0.4, 0.4, 0.4));
 
@@ -49,7 +48,7 @@ public class AABB implements Collider {
     return new AABB(min.subtract(diff), max.add(diff));
   }
 
-  boolean intersects(AABB other) {
+  boolean _intersects(AABB other) {
     return (max.x() > other.min.x() && min.x() < other.max.x() &&
       max.y() > other.min.y() && min.y() < other.max.y() &&
       max.z() > other.min.z() && min.z() < other.max.z());
@@ -76,6 +75,25 @@ public class AABB implements Collider {
     return (point.x() >= min.x() && point.x() <= max.x()) &&
       (point.y() >= min.y() && point.y() <= max.y()) &&
       (point.z() >= min.z() && point.z() <= max.z());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    AABB other = (AABB) obj;
+    return min.equals(other.min) && max.equals(other.max);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = min.hashCode();
+    result = 31 * result + max.hashCode();
+    return result;
   }
 
   /**

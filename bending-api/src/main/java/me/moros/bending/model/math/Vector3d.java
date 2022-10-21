@@ -249,22 +249,6 @@ public final class Vector3d {
   }
 
   /**
-   * Check if this vector has NaN components.
-   * @return true if any coordinate of this point is NaN, false otherwise
-   */
-  public boolean isNaN() {
-    return Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z);
-  }
-
-  /**
-   * Check if this vector has infinite components.
-   * @return true if any coordinate of this vector is infinite and none are NaN, false otherwise
-   */
-  public boolean isInfinite() {
-    return !isNaN() && (Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z));
-  }
-
-  /**
    * Compute the dot-product of this instance with the given vector.
    * @param v the other vector
    * @return the dot product
@@ -352,17 +336,17 @@ public final class Vector3d {
       return true;
     }
     if (obj instanceof Vector3d v) {
-      return v.isNaN() ? this.isNaN() : (x == v.x && y == v.y && z == v.z);
+      return x == v.x && y == v.y && z == v.z;
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    if (isNaN()) {
-      return 642;
-    }
-    return 643 * (164 * hash(x) + 3 * hash(y) + hash(z));
+    int result = Double.hashCode(x);
+    result = 31 * result + Double.hashCode(y);
+    result = 31 * result + Double.hashCode(z);
+    return result;
   }
 
   @Override
@@ -452,9 +436,5 @@ public final class Vector3d {
    */
   public static Vector3d center(Block b) {
     return new Vector3d(b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5);
-  }
-
-  private static int hash(double value) {
-    return Double.valueOf(value).hashCode();
   }
 }

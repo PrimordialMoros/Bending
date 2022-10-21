@@ -44,7 +44,7 @@ public class Ray implements Collider {
     invDir = new Vector3d(invX, invY, invZ);
   }
 
-  boolean intersects(Ray other) {
+  boolean _intersects(Ray other) {
     Vector3d cross = direction.cross(other.direction);
     if (cross.lengthSq() < EPSILON) {
       return contains(other.origin) || other.contains(origin);
@@ -76,5 +76,24 @@ public class Ray implements Collider {
     }
     double t = Math.max(0, Math.min(1, point.subtract(origin).dot(direction) / lengthSq));
     return origin.add(direction.multiply(t)).distanceSq(point) <= EPSILON;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Ray other = (Ray) obj;
+    return origin.equals(other.origin) && direction.equals(other.direction);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = origin.hashCode();
+    result = 31 * result + direction.hashCode();
+    return result;
   }
 }

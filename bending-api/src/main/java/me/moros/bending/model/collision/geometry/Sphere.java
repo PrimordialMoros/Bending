@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.collision.geometry;
 
+import java.util.Objects;
+
 import me.moros.bending.model.math.Vector3d;
 
 /**
@@ -37,7 +39,7 @@ public class Sphere implements Collider {
     this.radius = radius;
   }
 
-  boolean intersects(Sphere other) {
+  boolean _intersects(Sphere other) {
     // Spheres will be colliding if their distance apart is less than the sum of the radii.
     double sum = radius + other.radius;
     return other.center.distanceSq(center) <= sum * sum;
@@ -62,5 +64,22 @@ public class Sphere implements Collider {
   public boolean contains(Vector3d point) {
     double distSq = center.distanceSq(point);
     return distSq <= radius * radius;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Sphere other = (Sphere) obj;
+    return radius == other.radius && center.equals(other.center);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(center, radius);
   }
 }

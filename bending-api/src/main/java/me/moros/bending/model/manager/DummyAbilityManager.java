@@ -19,6 +19,8 @@
 
 package me.moros.bending.model.manager;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -78,5 +80,10 @@ final class DummyAbilityManager implements AbilityManager {
   @Override
   public UpdateResult update() {
     return UpdateResult.REMOVE;
+  }
+
+  @Override
+  public Iterator<Ability> iterator() {
+    return Collections.emptyIterator();
   }
 }

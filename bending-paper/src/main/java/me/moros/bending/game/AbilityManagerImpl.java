@@ -21,6 +21,7 @@ package me.moros.bending.game;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -167,5 +168,10 @@ public class AbilityManagerImpl implements AbilityManager {
       logger.error(e.getMessage(), e);
     }
     return UpdateResult.CONTINUE;
+  }
+
+  @Override
+  public Iterator<Ability> iterator() {
+    return Collections.unmodifiableCollection(globalInstances.values()).iterator();
   }
 }

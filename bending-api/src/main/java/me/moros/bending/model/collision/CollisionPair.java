@@ -79,11 +79,16 @@ public final class CollisionPair implements Keyed {
     return (first.equals(other.first) && second.equals(other.second)) || (first.equals(other.second) && second.equals(other.first));
   }
 
+  private int hashcode;
+
   @Override
   public int hashCode() {
-    int maxHash = Math.max(first.hashCode(), second.hashCode());
-    int minHash = Math.min(first.hashCode(), second.hashCode());
-    return minHash * 31 + maxHash;
+    if (hashcode == 0) {
+      int maxHash = Math.max(first.hashCode(), second.hashCode());
+      int minHash = Math.min(first.hashCode(), second.hashCode());
+      hashcode = 31 * minHash + maxHash;
+    }
+    return hashcode;
   }
 
   @Override
@@ -91,7 +96,7 @@ public final class CollisionPair implements Keyed {
     return first.name() + " (Remove: " + removeFirst + ") - " + second.name() + "(Remove: " + removeSecond + ")";
   }
 
-  private static Key createKey(AbilityDescription first, AbilityDescription second) {
+  public static Key createKey(AbilityDescription first, AbilityDescription second) {
     String f = first.key().value();
     String s = second.key().value();
     String value = f.compareTo(s) > 0 ? (f + '-' + s) : (s + '-' + f);
@@ -160,7 +165,7 @@ public final class CollisionPair implements Keyed {
           }
         }
       }
-      return new ArrayList<>(collisionSet);
+      return collisionSet;
     }
 
     private List<AbilityDescription> mapAbilities(Collection<String> abilities) {

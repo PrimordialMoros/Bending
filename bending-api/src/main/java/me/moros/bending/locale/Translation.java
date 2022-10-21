@@ -40,11 +40,13 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
   private final Key key;
   private final Locale locale;
   private final Map<String, MessageFormat> formats;
+  private final int hashcode;
 
   private Translation(Key key, Locale locale, Map<String, MessageFormat> formats) {
     this.key = key;
     this.locale = locale;
     this.formats = Map.copyOf(formats);
+    this.hashcode = Objects.hash(this.key, this.formats.hashCode());
   }
 
   /**
@@ -68,7 +70,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.key, this.formats);
+    return hashcode;
   }
 
   @Override

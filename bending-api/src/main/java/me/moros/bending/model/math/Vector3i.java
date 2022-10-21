@@ -253,17 +253,14 @@ public final class Vector3i {
       return true;
     }
     if (obj instanceof Vector3i v) {
-      return (x == v.x) && (y == v.y) && (z == v.z);
+      return x == v.x && y == v.y && z == v.z;
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    int result = x;
-    result = 31 * result + y;
-    result = 31 * result + z;
-    return result;
+    return x + 31 * (y + 31 * z);
   }
 
   @Override
