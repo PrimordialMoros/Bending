@@ -23,6 +23,7 @@ import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
 import me.moros.bending.model.raytrace.RayTraceContext;
+import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -35,8 +36,10 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.LightningRod;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.util.RayTraceResult;
 
 /**
@@ -217,5 +220,36 @@ public interface NativeAdapter {
    * @param ids an array of packet entities' unique ids
    */
   default void destroy(int[] ids) {
+  }
+
+  /**
+   * Try to power a block if it's a lightning rod.
+   * @param block the block to power
+   */
+  default boolean tryPowerLightningRod(Block block) { // Only native implementation handles continuous lightning strikes
+    if (handleLightningRod(block, true) >= 0) {
+      Tasker.INSTANCE.sync(() -> handleLightningRod(block, false), 8);
+      return true;
+    }
+    return false;
+  }
+
+  private int handleLightningRod(Block block, boolean shouldPower) {
+    if (block.getBlockData() instanceof LightningRod state) {
+      if (state.isPowered() == shouldPower) {
+        return 0;
+      }
+      int oldCurrent = shouldPower ? 0 : 15;
+      int newCurrent = 15 - oldCurrent;
+      BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, newCurrent);
+      event.callEvent();
+      int eventCurrent = event.getNewCurrent();
+      if ((eventCurrent == 15 && shouldPower) || (eventCurrent == 0 && !shouldPower)) {
+        state.setPowered(shouldPower);
+        block.setBlockData(state);
+        return 1;
+      }
+    }
+    return -1;
   }
 }

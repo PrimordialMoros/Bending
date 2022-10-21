@@ -176,7 +176,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     public void render() {
       renderRing();
       ParticleUtil.of(Particle.SMOKE_NORMAL, location).spawn(user.world());
-      ParticleUtil.of(Particle.FIREWORKS_SPARK, location).extra(0.005).spawn(user.world());
+      ParticleUtil.of(Particle.WAX_OFF, location).extra(0.005).spawn(user.world());
     }
 
     @Override
@@ -187,12 +187,11 @@ public class Combustion extends AbilityInstance implements Explosive {
     private void renderRing() {
       if (distanceTravelled >= randomBeamDistance) {
         LOUD_COMBUSTION.play(user.world(), location);
-        randomBeamDistance = distanceTravelled + 7 + 3 * ThreadLocalRandom.current().nextGaussian();
-        double radius = ThreadLocalRandom.current().nextDouble(0.3, 0.6);
+        randomBeamDistance = distanceTravelled + 4 + 2 * ThreadLocalRandom.current().nextGaussian();
+        double radius = ThreadLocalRandom.current().nextDouble(3, 6);
         VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
-          Vector3d velocity = v.multiply(radius);
-          ParticleUtil.of(Particle.FIREWORKS_SPARK, location.add(v.multiply(0.2)))
-            .count(0).offset(velocity).extra(0.09).spawn(user.world());
+          ParticleUtil.of(Particle.WAX_OFF, location.add(v.multiply(0.2)))
+            .count(0).offset(v.multiply(radius)).extra(0.9).spawn(user.world());
         });
       }
     }

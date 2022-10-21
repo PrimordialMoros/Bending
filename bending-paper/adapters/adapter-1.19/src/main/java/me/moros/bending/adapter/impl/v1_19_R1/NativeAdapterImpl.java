@@ -66,6 +66,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ClipContext.Fluid;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -311,6 +313,17 @@ public final class NativeAdapterImpl implements NativeAdapter {
     for (Player player : Bukkit.getOnlinePlayers()) {
       adapt(player).connection.send(packet);
     }
+  }
+
+  @Override
+  public boolean tryPowerLightningRod(Block block) {
+    BlockState data = adapt(block.getBlockData());
+    if (data.is(Blocks.LIGHTNING_ROD)) {
+      BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
+      ((LightningRodBlock) data.getBlock()).onLightningStrike(data, adapt(block.getWorld()), pos);
+      return true;
+    }
+    return false;
   }
 
   private void broadcast(Collection<Packet<?>> packets, World world, Vector3d center) {

@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
@@ -131,7 +132,7 @@ public class Lightning extends AbilityInstance {
         double offset = deltaTime / (3.0 * userConfig.overchargeTime);
         ParticleUtil.rgb(spawnLoc, "01E1FF").offset(offset).spawn(user.world());
         if (deltaTime > userConfig.maxChargeTime) {
-          ParticleUtil.of(Particle.END_ROD, spawnLoc).spawn(user.world());
+          ParticleUtil.of(Particle.ELECTRIC_SPARK, spawnLoc).spawn(user.world());
         }
       }
     } else {
@@ -185,29 +186,29 @@ public class Lightning extends AbilityInstance {
         counter += segment.length;
         Block block = result.block();
         if (block != null) {
-          if (WorldUtil.tryPowerLightningRod(block)) {
+          if (NativeAdapter.instance().tryPowerLightningRod(block)) {
             return false;
           }
           explode(result.position(), block);
           return false;
         }
       }
-      if (!renderSegment(segment) || electrocuteAround(result.entity())) {
+      if (!user.canBuild(segment.end.toBlock(user.world()))) {
+        return false;
+      }
+      renderSegment(segment);
+      if (electrocuteAround(result.entity())) {
         return false;
       }
     }
     return arcIterator.hasNext();
   }
 
-  private boolean renderSegment(LineSegment segment) {
+  private void renderSegment(LineSegment segment) {
     for (Vector3d v : segment) {
-      if (!user.canBuild(v.toBlock(user.world()))) {
-        return false;
-      }
-      ParticleUtil.of(Particle.END_ROD, v).spawn(user.world());
+      ParticleUtil.of(Particle.WAX_OFF, v).spawn(user.world());
     }
     TempLight.builder(15).build(segment.mid.toBlock(user.world()));
-    return true;
   }
 
   private boolean handleRedirection(Iterable<Entity> entitiesToCheck) {
@@ -233,7 +234,10 @@ public class Lightning extends AbilityInstance {
       boolean remove = handleRedirection(entities);
       if (!remove) {
         for (Entity e : entities) {
-          remove |= onEntityHit(e);
+          if (onEntityHit(e)) {
+            remove = true;
+            ParticleUtil.of(Particle.ELECTRIC_SPARK, EntityUtil.entityCenter(e)).count(8).offset(0.3).spawn(user.world());
+          }
         }
       }
       return remove;
@@ -313,7 +317,7 @@ public class Lightning extends AbilityInstance {
 
     private Arc(Vector3d start, Vector3d end, @Nullable Vector3d target) {
       this.start = start;
-      Function<LineSegment, Vector3d> f = target == null ?  ls -> randomOffset(ls, 0.75 * OFFSET) : ls -> target;
+      Function<LineSegment, Vector3d> f = target == null ? ls -> randomOffset(ls, 0.75 * OFFSET) : ls -> target;
       List<LineSegment> startingSegments = new LinkedList<>(displaceMidpoint(new LineSegment(start, end), f, 0));
       segments = generateRecursively(OFFSET, startingSegments, 0.25);
     }
