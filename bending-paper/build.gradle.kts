@@ -8,7 +8,7 @@ plugins {
 repositories {
     maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
-    maven("https://ci.ender.zone/plugin/repository/everything/") // LWC
+    maven("https://repo.codemc.io/repository/maven-public/") // LWC
     maven("https://repo.glaremasters.me/repository/towny/") // Towny
     maven("https://jitpack.io") // GriefPrevention
 }
@@ -53,7 +53,7 @@ dependencies {
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
     compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.10")
-    compileOnly("com.griefcraft.lwc", "LWCX", "2.2.6")
+    compileOnly("com.griefcraft", "lwc", "2.2.9-dev")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
     compileOnly("me.clip", "placeholderapi", "2.11.2")
     compileOnly("net.luckperms", "api", "5.4")
