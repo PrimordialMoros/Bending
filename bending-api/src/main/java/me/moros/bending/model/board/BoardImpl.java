@@ -27,6 +27,7 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -35,7 +36,10 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 final class BoardImpl implements Board {
-  private final Map<AbilityDescription, Team> misc = new ConcurrentHashMap<>(); // Used for combos and misc abilities
+  private static final Component INACTIVE = Component.text("> ", NamedTextColor.DARK_GRAY);
+  private static final Component ACTIVE = Component.text("> ");
+
+  private final Map<AbilityDescription, IndexedTeam> misc = new ConcurrentHashMap<>(); // Used for combos and misc abilities
   private final BendingPlayer player;
 
   private final Scoreboard bendingBoard;
@@ -51,7 +55,7 @@ final class BoardImpl implements Board {
     player.entity().setScoreboard(bendingBoard);
     updateAll();
     for (int slot = 1; slot <= 9; slot++) { // init slot prefixes
-      getOrCreateTeam(slot).prefix(Component.text(slot == selectedSlot ? ">" : "  "));
+      getOrCreateTeam(slot).prefix(slot == selectedSlot ? ACTIVE : INACTIVE);
     }
   }
 
@@ -95,8 +99,8 @@ final class BoardImpl implements Board {
         oldSlot = selectedSlot; // Fixes bug when slot is set using setHeldItemSlot
       }
       selectedSlot = newSlot;
-      getOrCreateTeam(oldSlot).prefix(Component.text("  "));
-      getOrCreateTeam(newSlot).prefix(Component.text(">"));
+      getOrCreateTeam(oldSlot).prefix(INACTIVE);
+      getOrCreateTeam(newSlot).prefix(ACTIVE);
     }
   }
 
@@ -105,10 +109,9 @@ final class BoardImpl implements Board {
     if (show && misc.isEmpty()) {
       bendingSlots.getScore(SEP).setScore(-10);
     }
-    String id = Long.toHexString(System.nanoTime());
-    Team team = misc.computeIfAbsent(desc, d -> createTeam(11, id));
+    Team team = misc.computeIfAbsent(desc, d -> createTeam(11, pickAvailableSlot())).team();
     if (show) {
-      team.prefix(Component.text("  ").append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH)));
+      team.prefix(INACTIVE.append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH)));
     } else {
       team.getEntries().forEach(bendingBoard::resetScores);
       team.unregister();
@@ -119,21 +122,32 @@ final class BoardImpl implements Board {
     }
   }
 
+  private int pickAvailableSlot() {
+    int idx = 11;
+    for (IndexedTeam indexedTeam : misc.values()) {
+      idx = Math.max(indexedTeam.textSlot() + 1, idx);
+    }
+    return idx;
+  }
+
   private boolean validSlot(int slot) {
     return 1 <= slot && slot <= 9;
   }
 
   private Team getOrCreateTeam(int slot) {
     Team team = bendingBoard.getTeam(String.valueOf(slot));
-    return team == null ? createTeam(slot, String.valueOf(slot)) : team;
+    return team == null ? createTeam(slot, slot).team() : team;
   }
 
-  private Team createTeam(int slot, String id) {
-    Team team = bendingBoard.registerNewTeam(id);
-    String hidden = TextUtil.generateInvisibleLegacyString(slot);
+  private IndexedTeam createTeam(int slot, int textSlot) {
+    Team team = bendingBoard.registerNewTeam(String.valueOf(textSlot));
+    String hidden = TextUtil.generateInvisibleLegacyString(textSlot);
     team.addEntry(hidden);
     bendingSlots.getScore(hidden).setScore(-slot);
-    return team;
+    return new IndexedTeam(team, textSlot);
+  }
+
+  private record IndexedTeam(Team team, int textSlot) {
   }
 
   static final class DummyBoard implements Board {
