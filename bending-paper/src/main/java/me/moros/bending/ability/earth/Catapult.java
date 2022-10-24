@@ -49,6 +49,7 @@ import me.moros.bending.util.material.EarthMaterials;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,8 +62,11 @@ public class Catapult extends AbilityInstance {
   private User user;
   private Config userConfig;
 
+  private BlockData data;
+  private Vector3d push;
   private Pillar pillar;
 
+  private boolean launched;
   private long startTime;
 
   public Catapult(AbilityDescription desc) {
@@ -73,8 +77,11 @@ public class Catapult extends AbilityInstance {
   public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
-
-    return launch(method == Activation.SNEAK);
+    if (prepareLaunch(method == Activation.SNEAK)) {
+      user.addCooldown(description(), userConfig.cooldown);
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -84,6 +91,7 @@ public class Catapult extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
+    launch();
     if (System.currentTimeMillis() > startTime + 100) {
       return pillar == null ? UpdateResult.REMOVE : pillar.update();
     }
@@ -106,48 +114,44 @@ public class Catapult extends AbilityInstance {
     return EarthMaterials.isEarthbendable(user, block);
   }
 
-  private boolean launch(boolean sneak) {
-    double angle = Vector3d.PLUS_J.angle(user.direction());
-
+  private boolean prepareLaunch(boolean sneak) {
+    Vector3d direction = user.direction();
+    double angle = Vector3d.PLUS_J.angle(direction);
     int length = 0;
     Block base = getBase();
-    boolean forceVertical = false;
-    boolean horizontal = false;
+    double basePower = sneak ? userConfig.sneakPower : userConfig.clickPower;
     if (base != null) {
       length = getLength(new Vector3d(base.getRelative(BlockFace.UP)), Vector3d.MINUS_J);
       if (angle > ANGLE) {
-        forceVertical = true;
+        direction = Vector3d.PLUS_J;
       }
       pillar = Pillar.builder(user, base, EarthPillar::new)
         .predicate(b -> !b.isLiquid() && EarthMaterials.isEarthbendable(user, b))
         .build(3, 1).orElse(null);
     } else {
       if (angle >= ANGLE && angle <= 2 * ANGLE) {
-        length = getLength(user.location(), user.direction().negate());
-        horizontal = true;
+        length = getLength(user.location(), direction.negate());
+        basePower *= userConfig.horizontalFactor;
       }
     }
+    double factor = length / (double) userConfig.length;
+    double power = basePower * factor;
+    push = direction.multiply(power);
+    return power > 0;
+  }
 
-    if (length == 0) {
-      return false;
+  private void launch() {
+    if (launched) {
+      return;
     }
-
+    launched = true;
     startTime = System.currentTimeMillis();
-    user.addCooldown(description(), userConfig.cooldown);
-
     Vector3d origin = user.location().add(0, 0.5, 0);
     SoundUtil.EARTH.play(user.world(), origin);
-    if (base != null) {
-      ParticleUtil.of(Particle.BLOCK_CRACK, origin).count(8).offset(0.4).data(base.getBlockData()).spawn(user.world());
-    }
-
-    Vector3d direction = forceVertical ? Vector3d.PLUS_J : user.direction();
-    double horizontalFactor = horizontal ? userConfig.horizontalFactor : 1;
-    double factor = length / (double) userConfig.length;
-    double power = horizontalFactor * factor * (sneak ? userConfig.sneakPower : userConfig.clickPower);
-    return CollisionUtil.handle(user, new Sphere(origin, 1.5), entity -> {
+    ParticleUtil.of(Particle.BLOCK_CRACK, origin).count(16).offset(0.4).data(data).spawn(user.world());
+    CollisionUtil.handle(user, new Sphere(origin, 1.5), entity -> {
       BendingEffect.FIRE_TICK.reset(entity);
-      EntityUtil.applyVelocity(this, entity, direction.multiply(power));
+      EntityUtil.applyVelocity(this, entity, push);
       return true;
     }, true, true);
   }
@@ -156,11 +160,11 @@ public class Catapult extends AbilityInstance {
     Set<Block> checked = new HashSet<>();
     for (double i = 0.5; i <= userConfig.length; i += 0.5) {
       Block block = origin.add(direction.multiply(i)).toBlock(user.world());
-      if (!checked.contains(block)) {
-        if (!isValidBlock(block)) {
-          return FastMath.ceil(i) - 1;
-        }
-        checked.add(block);
+      if (checked.add(block) && !isValidBlock(block)) {
+        return FastMath.ceil(i) - 1;
+      }
+      if (data == null) {
+        data = block.getBlockData();
       }
     }
     return userConfig.length;
