@@ -21,11 +21,16 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user's ability cooldown has expired.
  */
-public class CooldownRemoveEvent extends BendingEvent implements AbilityEvent {
+public class CooldownRemoveEvent extends Event implements AbilityEvent {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final AbilityDescription desc;
 
@@ -42,5 +47,14 @@ public class CooldownRemoveEvent extends BendingEvent implements AbilityEvent {
   @Override
   public AbilityDescription ability() {
     return desc;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

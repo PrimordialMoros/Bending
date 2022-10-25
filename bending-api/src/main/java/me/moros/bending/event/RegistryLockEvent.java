@@ -24,11 +24,16 @@ import java.util.List;
 
 import me.moros.bending.model.key.Keyed;
 import me.moros.bending.model.key.RegistryKey;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called during Bending's initialization, before registries are locked.
  */
-public class RegistryLockEvent extends BendingEvent {
+public class RegistryLockEvent extends Event {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final Collection<RegistryKey<? extends Keyed>> keys;
 
   RegistryLockEvent(Collection<RegistryKey<? extends Keyed>> keys) {
@@ -41,5 +46,14 @@ public class RegistryLockEvent extends BendingEvent {
    */
   public Collection<RegistryKey<? extends Keyed>> registryKeys() {
     return keys;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

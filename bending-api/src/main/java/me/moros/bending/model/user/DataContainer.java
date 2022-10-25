@@ -49,12 +49,10 @@ public class DataContainer implements DataHolder {
   }
 
   @Override
-  public <T> boolean offer(RegistryKey<T> key, T value) {
-    if (canEdit(key)) {
-      put(key, value);
-      return true;
-    }
-    return false;
+  public <T> T put(RegistryKey<T> key, T value) {
+    cooldowns.add(key);
+    data.put(key, value);
+    return value;
   }
 
   @Override
@@ -65,12 +63,6 @@ public class DataContainer implements DataHolder {
   @Override
   public <T> @Nullable T get(RegistryKey<T> key) {
     return cast(key.type(), data.get(key));
-  }
-
-  @Override
-  public <T> T getOrDefault(RegistryKey<T> key, T defaultValue) {
-    T oldValue = get(key);
-    return oldValue != null ? oldValue : defaultValue;
   }
 
   @Override
@@ -87,12 +79,6 @@ public class DataContainer implements DataHolder {
     T[] values = oldValue.getDeclaringClass().getEnumConstants();
     int index = (oldValue.ordinal() + 1) % values.length;
     return values[index];
-  }
-
-  private <T> T put(RegistryKey<T> key, T value) {
-    cooldowns.add(key);
-    data.put(key, value);
-    return value;
   }
 
   private <T> @Nullable T cast(Class<T> type, Object value) {

@@ -23,11 +23,16 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a {@link BendingEffect} is applied to a target.
  */
-public class TickEffectEvent extends BendingEvent implements UserEvent, Cancellable {
+public class TickEffectEvent extends Event implements UserEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final Entity target;
   private final BendingEffect type;
@@ -89,5 +94,14 @@ public class TickEffectEvent extends BendingEvent implements UserEvent, Cancella
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

@@ -35,21 +35,17 @@ public enum Activation implements Keyed {
    */
   ATTACK("attack"),
   /**
-   * Activation on attacking an entity.
-   */
-  ATTACK_ENTITY("attack-entity"),
-  /**
    * Activation on interaction.
    */
-  INTERACT("interact", true),
+  INTERACT("interact"),
   /**
    * Activation on interaction with an entity.
    */
-  INTERACT_ENTITY("interact-entity", true),
+  INTERACT_ENTITY("interact-entity"),
   /**
    * Activation on interaction with a block.
    */
-  INTERACT_BLOCK("interact-block", true),
+  INTERACT_BLOCK("interact-block"),
   /**
    * Activation on sneak.
    */
@@ -68,19 +64,9 @@ public enum Activation implements Keyed {
   SEQUENCE("sequence");
 
   private final Key key;
-  private final boolean interact;
 
   Activation(String value) {
-    this(value, false);
-  }
-
-  Activation(String value, boolean interact) {
     this.key = Key.create(NAMESPACE, value);
-    this.interact = interact;
-  }
-
-  public boolean isInteract() {
-    return interact;
   }
 
   @Override

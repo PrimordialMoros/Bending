@@ -17,27 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.event;
+package me.moros.bending.model;
 
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.bending.model.key.RegistryKey;
+import me.moros.bending.model.math.Vector3d;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * Base event for all bending events.
- */
-public abstract class BendingEvent extends Event {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  protected BendingEvent() {
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
-  }
+public record BlockInteraction(Block block, BlockFace face, @Nullable Vector3d point) {
+  public static RegistryKey<BlockInteraction> KEY = RegistryKey.create("last-interacted-block", BlockInteraction.class);
 }

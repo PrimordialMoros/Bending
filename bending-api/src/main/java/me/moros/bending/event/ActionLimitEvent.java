@@ -23,12 +23,17 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.ActionLimiter;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user attempts to limit the actions of a target through bending.
  * @see ActionLimiter
  */
-public class ActionLimitEvent extends BendingEvent implements UserEvent, Cancellable {
+public class ActionLimitEvent extends Event implements UserEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final LivingEntity target;
 
@@ -78,5 +83,14 @@ public class ActionLimitEvent extends BendingEvent implements UserEvent, Cancell
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

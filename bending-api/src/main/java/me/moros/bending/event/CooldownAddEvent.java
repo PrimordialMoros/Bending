@@ -22,11 +22,16 @@ package me.moros.bending.event;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user's ability will go on cooldown.
  */
-public class CooldownAddEvent extends BendingEvent implements AbilityEvent, Cancellable {
+public class CooldownAddEvent extends Event implements AbilityEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final AbilityDescription desc;
   private final long duration;
@@ -64,5 +69,14 @@ public class CooldownAddEvent extends BendingEvent implements AbilityEvent, Canc
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

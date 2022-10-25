@@ -22,11 +22,16 @@ package me.moros.bending.event;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user is attempting to create a {@link Preset}.
  */
-public class PresetCreateEvent extends BendingEvent implements UserEvent, Cancellable {
+public class PresetCreateEvent extends Event implements UserEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final Preset preset;
 
@@ -58,5 +63,14 @@ public class PresetCreateEvent extends BendingEvent implements UserEvent, Cancel
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

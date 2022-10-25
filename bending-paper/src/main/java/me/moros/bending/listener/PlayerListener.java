@@ -34,6 +34,8 @@ import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.Bending;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.event.BendingDamageEvent;
+import me.moros.bending.model.BlockInteraction;
+import me.moros.bending.model.EntityInteraction;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
@@ -52,6 +54,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -64,6 +69,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -80,6 +86,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PlayerListener implements Listener {
   private final Bending plugin;
@@ -251,9 +258,15 @@ public class PlayerListener implements Listener {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
         switch (event.getAction()) {
-          case RIGHT_CLICK_AIR -> game.activationController().onUserInteract(user, Activation.INTERACT);
-          case RIGHT_CLICK_BLOCK ->
-            game.activationController().onUserInteract(user, Activation.INTERACT_BLOCK, event.getClickedBlock());
+          case RIGHT_CLICK_AIR, RIGHT_CLICK_BLOCK -> {
+            Block block = event.getClickedBlock();
+            if (block != null) {
+              Location loc = event.getInteractionPoint();
+              Vector3d point = loc == null ? null : new Vector3d(loc);
+              user.store().put(BlockInteraction.KEY, new BlockInteraction(block, event.getBlockFace(), point));
+            }
+            game.activationController().onUserInteract(user, null, event.getClickedBlock());
+          }
           case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(user);
         }
       }
@@ -269,6 +282,11 @@ public class PlayerListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onPlayerInteractAtEntityLow(PlayerInteractAtEntityEvent event) {
+    onPlayerInteractEntityLow(event);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerInteractEntityLow(PlayerInteractEntityEvent event) {
     if (NativeAdapter.hasNativeSupport() || disabledWorld(event)) {
       return;
@@ -279,13 +297,24 @@ public class PlayerListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
+    onPlayerInteractEntity(event, new Vector3d(event.getClickedPosition()));
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+    onPlayerInteractEntity(event, null);
+  }
+
+  private void onPlayerInteractEntity(PlayerInteractEntityEvent event, @Nullable Vector3d point) {
     if (event.getHand() != EquipmentSlot.HAND || disabledWorld(event)) {
       return;
     }
     User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
     if (user != null) {
-      game.activationController().onUserInteract(user, Activation.INTERACT_ENTITY, event.getRightClicked());
+      Entity target = event.getRightClicked();
+      user.store().put(EntityInteraction.KEY, new EntityInteraction(target, point));
+      game.activationController().onUserInteract(user, target, null);
     }
   }
 

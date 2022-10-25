@@ -116,20 +116,18 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserSwing(User user) {
-    if (cache.ignoreSwing.contains(user.uuid())) {
+    if (!cache.addInteraction(user.uuid())) {
       return;
     }
     if (user.game().abilityManager(user.world()).destroyUserInstances(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
       return;
     }
-    ignoreNextSwing(user.uuid());
 
     WaterWave.freeze(user);
     Iceberg.launch(user);
     WaterGimbal.launch(user);
 
-    boolean hit = user.rayTrace(3).entities(user.world()).hit();
-    sequenceManager.registerStep(user, hit ? Activation.ATTACK_ENTITY : Activation.ATTACK);
+    sequenceManager.registerStep(user, Activation.ATTACK);
     activateAbility(user, Activation.ATTACK);
   }
 
@@ -229,29 +227,17 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public void onUserInteract(User user, Activation method) {
-    onUserInteract(user, method, null, null);
-  }
-
-  @Override
-  public void onUserInteract(User user, Activation method, @Nullable Entity entity) {
-    onUserInteract(user, method, entity, null);
-  }
-
-  @Override
-  public void onUserInteract(User user, Activation method, @Nullable Block block) {
-    onUserInteract(user, method, null, block);
-  }
-
-  @Override
-  public void onUserInteract(User user, Activation method, @Nullable Entity entity, @Nullable Block block) {
-    if (!method.isInteract()) {
+  public void onUserInteract(User user, @Nullable Entity entity, @Nullable Block block) {
+    if (!cache.addInteraction(user.uuid())) {
       return;
     }
-    ignoreNextSwing(user.uuid());
+    Activation method = Activation.INTERACT;
     if (block != null) {
+      method = Activation.INTERACT_BLOCK;
       FerroControl.act(user, block);
       EarthSmash.tryDestroy(user, block);
+    } else if (entity != null) {
+      method = Activation.INTERACT_ENTITY;
     }
     Tornado.switchMode(user);
     AirBlast.switchMode(user);
@@ -265,19 +251,19 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void ignoreNextSwing(UUID uuid) {
-    cache.ignoreSwing.add(uuid);
+    cache.addInteraction(uuid);
   }
 
   // Optimize player move events by caching instances every tick
   private static final class ControllerCache {
     private final Map<UUID, AirSpout> airSpoutCache;
     private final Map<UUID, WaterSpout> waterSpoutCache;
-    private final Set<UUID> ignoreSwing;
+    private final Set<UUID> interactionCache;
 
     private ControllerCache() {
       airSpoutCache = new HashMap<>();
       waterSpoutCache = new HashMap<>();
-      ignoreSwing = new HashSet<>();
+      interactionCache = new HashSet<>();
     }
 
     private @Nullable AirSpout getAirSpout(User user) {
@@ -291,7 +277,11 @@ public final class ActivationControllerImpl implements ActivationController {
     private void clear() {
       airSpoutCache.clear();
       waterSpoutCache.clear();
-      ignoreSwing.clear();
+      interactionCache.clear();
+    }
+
+    private boolean addInteraction(UUID uuid) {
+      return interactionCache.add(uuid);
     }
   }
 

@@ -26,11 +26,16 @@ import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when an ability attempts to alter the velocity of a LivingEntity.
  */
-public class VelocityEvent extends BendingEvent implements AbilityEvent, Cancellable {
+public class VelocityEvent extends Event implements AbilityEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final AbilityDescription desc;
   private final LivingEntity target;
@@ -86,5 +91,14 @@ public class VelocityEvent extends BendingEvent implements AbilityEvent, Cancell
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 }

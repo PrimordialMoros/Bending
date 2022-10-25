@@ -58,13 +58,7 @@ public interface ActivationController {
 
   boolean onFall(User user);
 
-  void onUserInteract(User user, Activation method);
-
-  void onUserInteract(User user, Activation method, @Nullable Entity entity);
-
-  void onUserInteract(User user, Activation method, @Nullable Block block);
-
-  void onUserInteract(User user, Activation method, @Nullable Entity entity, @Nullable Block block);
+  void onUserInteract(User user, @Nullable Entity entity, @Nullable Block block);
 
   void ignoreNextSwing(UUID uuid);
 

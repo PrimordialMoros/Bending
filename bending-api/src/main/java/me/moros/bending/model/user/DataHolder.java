@@ -50,7 +50,22 @@ public interface DataHolder {
    * @param <T> the type of data
    * @return true if storing was successful, false otherwise
    */
-  <T> boolean offer(RegistryKey<T> key, T value);
+  default <T> boolean offer(RegistryKey<T> key, T value) {
+    if (canEdit(key)) {
+      put(key, value);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Store data for a specified key, ignoring cooldowns.
+   * @param key the key used to store and access the data
+   * @param value the data to store
+   * @param <T> the type of data
+   * @return true if storing was successful, false otherwise
+   */
+  <T> T put(RegistryKey<T> key, T value);
 
   /**
    * Attempt to remove the data for the specified key.
@@ -75,7 +90,10 @@ public interface DataHolder {
    * @param <T> the type of data
    * @return the result
    */
-  <T> T getOrDefault(RegistryKey<T> key, T defaultValue);
+  default <T> T getOrDefault(RegistryKey<T> key, T defaultValue) {
+    T oldValue = get(key);
+    return oldValue != null ? oldValue : defaultValue;
+  }
 
   /**
    * A special operation for storing enum data that toggles the state of the enum.

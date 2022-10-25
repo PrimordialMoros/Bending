@@ -21,11 +21,16 @@ package me.moros.bending.event;
 
 import me.moros.bending.model.user.User;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user's elements are being changed.
  */
-public class ElementChangeEvent extends BendingEvent implements UserEvent, Cancellable {
+public class ElementChangeEvent extends Event implements UserEvent, Cancellable {
+  private static final HandlerList HANDLERS = new HandlerList();
+
   private final User user;
   private final ElementAction action;
 
@@ -57,6 +62,15 @@ public class ElementChangeEvent extends BendingEvent implements UserEvent, Cance
   @Override
   public void setCancelled(boolean cancel) {
     this.cancelled = cancel;
+  }
+
+  @Override
+  public @NonNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
   }
 
   /**
