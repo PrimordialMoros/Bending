@@ -189,11 +189,31 @@ public final class EntityUtil {
    * @return if a new potion effect was added, false otherwise
    */
   public static boolean tryAddPotion(Entity entity, PotionEffectType type, int duration, int amplifier) {
-    if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
+    if (amplifier > 0 && duration > 0 && entity.isValid() && entity instanceof LivingEntity livingEntity) {
       int minDuration = type.getEffectCategory() == Category.BENEFICIAL ? 20 : duration;
       PotionEffect effect = livingEntity.getPotionEffect(type);
       if (effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < amplifier) {
         livingEntity.addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Attempt to remove a potion effect.
+   * The specified potion effect will only be removed if the duration and amplifier are less or equal to the parameters.
+   * @param entity the entity to process
+   * @param type the type of potion effect to remove
+   * @param maxDuration the maximum duration of the potion effect in ticks
+   * @param maxAmplifier the maximum potion effect amplifier starting from 0
+   * @return if the potion effect was removed, false otherwise
+   */
+  public static boolean tryRemovePotion(Entity entity, PotionEffectType type, int maxDuration, int maxAmplifier) {
+    if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
+      PotionEffect effect = livingEntity.getPotionEffect(type);
+      if (effect != null && effect.getDuration() <= maxDuration && effect.getAmplifier() <= maxAmplifier) {
+        livingEntity.removePotionEffect(type);
         return true;
       }
     }

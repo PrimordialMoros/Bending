@@ -52,11 +52,16 @@ public class FastSwim extends AbilityInstance {
   @Override
   public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
-      user.entity().removePotionEffect(PotionEffectType.DOLPHINS_GRACE);
+      onDestroy();
       return UpdateResult.CONTINUE;
     }
     EntityUtil.tryAddPotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
     return UpdateResult.CONTINUE;
+  }
+
+  @Override
+  public void onDestroy() {
+    EntityUtil.tryRemovePotion(user.entity(), PotionEffectType.DOLPHINS_GRACE, 100, 0);
   }
 
   @Override

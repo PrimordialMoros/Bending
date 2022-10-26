@@ -25,7 +25,6 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -54,20 +53,19 @@ public class HydroSink extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  public static boolean canHydroSink(User user) {
-    AbilityDescription desc = Registries.ABILITIES.fromString("HydroSink");
-    if (desc == null || !user.canBend(desc)) {
+  private boolean canHydroSink() {
+    if (!user.canBend(description())) {
       return false;
     }
-
-    if (!user.game().abilityManager(user.world()).hasAbility(user, HydroSink.class)) {
-      return false;
-    }
-
     AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
     AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
     return WorldUtil.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtil.blockBounds(b)))
       .stream().anyMatch(WaterMaterials::isWaterBendable);
+  }
+
+  public static boolean canHydroSink(User user) {
+    return user.game().abilityManager(user.world()).firstInstance(user, HydroSink.class)
+      .map(HydroSink::canHydroSink).orElse(false);
   }
 
   @Override

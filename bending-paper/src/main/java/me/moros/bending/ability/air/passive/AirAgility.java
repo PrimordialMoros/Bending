@@ -63,26 +63,18 @@ public class AirAgility extends AbilityInstance {
   @Override
   public UpdateResult update() {
     if (removalPolicy.test(user, description()) || !user.canBend(description())) {
-      user.entity().removePotionEffect(PotionEffectType.JUMP);
-      user.entity().removePotionEffect(PotionEffectType.SPEED);
+      onDestroy();
       return UpdateResult.CONTINUE;
     }
-    handlePotionEffect(PotionEffectType.JUMP, userConfig.jumpAmplifier - 1);
-    handlePotionEffect(PotionEffectType.SPEED, userConfig.speedAmplifier - 1);
+    EntityUtil.tryAddPotion(user.entity(), PotionEffectType.JUMP, 100, userConfig.jumpAmplifier - 1);
+    EntityUtil.tryAddPotion(user.entity(), PotionEffectType.SPEED, 100, userConfig.speedAmplifier - 1);
     return UpdateResult.CONTINUE;
-  }
-
-  private void handlePotionEffect(PotionEffectType type, int amplifier) {
-    if (amplifier < 0) {
-      return;
-    }
-    EntityUtil.tryAddPotion(user.entity(), type, 100, amplifier);
   }
 
   @Override
   public void onDestroy() {
-    user.entity().removePotionEffect(PotionEffectType.JUMP);
-    user.entity().removePotionEffect(PotionEffectType.SPEED);
+    EntityUtil.tryRemovePotion(user.entity(), PotionEffectType.JUMP, 100, userConfig.jumpAmplifier - 1);
+    EntityUtil.tryRemovePotion(user.entity(), PotionEffectType.SPEED, 100, userConfig.speedAmplifier - 1);
   }
 
   @Override
