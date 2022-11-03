@@ -112,7 +112,7 @@ public interface NativeAdapter {
   /**
    * Check if an entity is underwater.
    * @param entity the entity to check
-   * @return if there is water fluid at the level of the entity's eyes.
+   * @return if there is water fluid at the level of the entity's eyes
    */
   default boolean eyeInWater(Entity entity) {
     return MaterialUtil.isWater(eyeBlock(entity));
@@ -121,7 +121,7 @@ public interface NativeAdapter {
   /**
    * Check if an entity is under lava.
    * @param entity the entity to check
-   * @return if there is lava fluid at the level of the entity's eyes.
+   * @return if there is lava fluid at the level of the entity's eyes
    */
   default boolean eyeInLava(Entity entity) {
     return MaterialUtil.isLava(eyeBlock(entity));
@@ -225,6 +225,7 @@ public interface NativeAdapter {
   /**
    * Try to power a block if it's a lightning rod.
    * @param block the block to power
+   * @return true if a lightning rod was powered, false otherwise
    */
   default boolean tryPowerLightningRod(Block block) { // Only native implementation handles continuous lightning strikes
     if (handleLightningRod(block, true) >= 0) {

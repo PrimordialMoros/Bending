@@ -101,7 +101,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return ((CraftPlayer) player).getHandle();
   }
 
-  private net.minecraft.world.entity.Entity entity(Entity entity) {
+  private net.minecraft.world.entity.Entity adapt(Entity entity) {
     return ((CraftEntity) entity).getHandle();
   }
 
@@ -117,12 +117,12 @@ public final class NativeAdapterImpl implements NativeAdapter {
 
   @Override
   public boolean eyeInWater(Entity entity) {
-    return entity(entity).isEyeInFluid(FluidTags.WATER);
+    return adapt(entity).isEyeInFluid(FluidTags.WATER);
   }
 
   @Override
   public boolean eyeInLava(Entity entity) {
-    return entity(entity).isEyeInFluid(FluidTags.LAVA);
+    return adapt(entity).isEyeInFluid(FluidTags.LAVA);
   }
 
   @Override

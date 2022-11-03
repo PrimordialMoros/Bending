@@ -22,6 +22,7 @@ package me.moros.bending.listener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.ability.fire.FireShield;
@@ -136,16 +137,6 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityTarget(EntityTargetEvent event) {
-    if (disabledWorld(event)) {
-      return;
-    }
-    if (ActionLimiter.isLimited(event.getEntity())) {
-      event.setCancelled(true);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onEntityTargetLiving(EntityTargetLivingEntityEvent event) {
     if (disabledWorld(event)) {
       return;
     }
@@ -317,12 +308,12 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onUserDeath(EntityDeathEvent event) {
-    LivingEntity entity = event.getEntity();
-    ActionLimiter.MANAGER.get(entity.getUniqueId()).ifPresent(ActionLimiter::revert);
+    UUID uuid = event.getEntity().getUniqueId();
+    ActionLimiter.MANAGER.get(uuid).ifPresent(ActionLimiter::revert);
     if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
       return;
     }
-    User user = Registries.BENDERS.get(entity.getUniqueId());
+    User user = Registries.BENDERS.get(uuid);
     if (user != null) {
       game.activationController().onUserDeconstruct(user);
     }
