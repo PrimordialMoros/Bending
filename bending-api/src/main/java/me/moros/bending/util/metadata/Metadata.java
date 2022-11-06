@@ -42,9 +42,11 @@ public final class Metadata {
   public static final String NPC = "bending-npc";
 
   public static final String PERSISTENT_ARMOR = "bending-armor";
+  public static final String PERSISTENT_METAL_KEY = "bending-metal-key";
   public static final String PERSISTENT_MATERIAL = "bending-material";
 
   public static final NamespacedKey NSK_ARMOR = new NamespacedKey("bending", PERSISTENT_ARMOR);
+  public static final NamespacedKey NSK_METAL_KEY = new NamespacedKey("bending", PERSISTENT_METAL_KEY);
   public static final NamespacedKey NSK_MATERIAL = new NamespacedKey("bending", PERSISTENT_MATERIAL);
 
   private static final byte VALUE = 0x1;
@@ -61,19 +63,15 @@ public final class Metadata {
     }
   }
 
-  public static boolean hasArmorKey(@Nullable PersistentDataHolder dataHolder) {
-    if (dataHolder == null) {
-      return false;
-    }
-    return dataHolder.getPersistentDataContainer().has(NSK_ARMOR, PersistentDataType.BYTE);
+  public static boolean hasKey(@Nullable PersistentDataHolder dataHolder, NamespacedKey key) {
+    return dataHolder != null && dataHolder.getPersistentDataContainer().has(key);
   }
 
-  public static boolean addArmorKey(PersistentDataHolder dataHolder) {
-    if (!hasArmorKey(dataHolder)) {
-      dataHolder.getPersistentDataContainer().set(NSK_ARMOR, PersistentDataType.BYTE, VALUE);
-      return true;
+  public static boolean addEmptyKey(PersistentDataHolder dataHolder, NamespacedKey key) {
+    if (!hasKey(dataHolder, key)) {
+      dataHolder.getPersistentDataContainer().set(key, PersistentDataType.BYTE, VALUE);
     }
-    return false;
+    return true;
   }
 
   public static void add(Metadatable target, String key) {

@@ -48,6 +48,7 @@ public final class MaterialUtil {
   public static final MaterialSetTag BREAKABLE_PLANTS;
   public static final MaterialSetTag WATER_PLANTS;
   public static final MaterialSetTag TRANSPARENT;
+  public static final MaterialSetTag LOCKABLE_CONTAINERS;
   public static final MaterialSetTag CONTAINERS;
   public static final MaterialSetTag UNBREAKABLES;
   public static final MaterialSetTag METAL_ARMOR;
@@ -116,13 +117,18 @@ public final class MaterialUtil {
       .add(Material.LIGHT, Material.AIR, Material.CAVE_AIR, Material.VOID_AIR, Material.COBWEB, Material.SNOW)
       .endsWith("TORCH").lock();
 
-    CONTAINERS = new MaterialSetTag(key).add(
-      Material.CHEST, Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BARREL,
-      Material.SHULKER_BOX, Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER,
-      Material.DISPENSER, Material.DROPPER, Material.ENCHANTING_TABLE, Material.BREWING_STAND,
-      Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.BEACON,
-      Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE, Material.JUKEBOX
+    LOCKABLE_CONTAINERS = new MaterialSetTag(key).add(
+      Material.CHEST, Material.TRAPPED_CHEST, Material.BARREL, Material.SHULKER_BOX,
+      Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER, Material.BEACON,
+      Material.DISPENSER, Material.DROPPER, Material.HOPPER, Material.BREWING_STAND
     ).lock();
+
+    CONTAINERS = new MaterialSetTag(key)
+      .add(LOCKABLE_CONTAINERS.getValues())
+      .add(
+        Material.ENDER_CHEST, Material.ENCHANTING_TABLE, Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL,
+        Material.GRINDSTONE, Material.CARTOGRAPHY_TABLE, Material.LOOM, Material.SMITHING_TABLE, Material.JUKEBOX
+      ).lock();
 
     UNBREAKABLES = new MaterialSetTag(key).add(
       Material.BARRIER, Material.BEDROCK, Material.OBSIDIAN, Material.CRYING_OBSIDIAN,

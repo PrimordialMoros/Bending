@@ -275,7 +275,7 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDeath(EntityDeathEvent event) {
-    event.getDrops().removeIf(item -> Metadata.hasArmorKey(item.getItemMeta()));
+    event.getDrops().removeIf(item -> Metadata.hasKey(item.getItemMeta(), Metadata.NSK_ARMOR));
     boolean keepInventory = event instanceof PlayerDeathEvent pde && pde.getKeepInventory();
     TempArmor.MANAGER.get(event.getEntity().getUniqueId()).ifPresent(tempArmor -> {
       if (!keepInventory) {

@@ -26,9 +26,16 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Nameable;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.Lockable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -111,12 +118,17 @@ public class BlockListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockBreak(BlockBreakEvent event) {
+    Block block = event.getBlock();
+    if (handleLockedContainer(event.getPlayer(), block)) {
+      event.setCancelled(true);
+      return;
+    }
     if (disabledWorld(event)) {
       return;
     }
-    if (TempBlock.MANAGER.isTemp(event.getBlock())) {
+    if (TempBlock.MANAGER.isTemp(block)) {
       event.setDropItems(false);
-    } else if (WaterMaterials.isPlantBendable(event.getBlock())) {
+    } else if (WaterMaterials.isPlantBendable(block)) {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
         AbilityDescription desc = user.selectedAbility();
@@ -126,7 +138,20 @@ public class BlockListener implements Listener {
         }
       }
     }
-    TempBlock.MANAGER.get(event.getBlock()).ifPresent(TempBlock::removeWithoutReverting);
+    TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
+  }
+
+  private boolean handleLockedContainer(Player player, Block block) {
+    if (block.getState(false) instanceof Lockable lockable && !WorldUtil.canBreak(player, lockable)) {
+      Component name = ((Nameable) lockable).customName();
+      if (name == null) {
+        name = Component.translatable(block.translationKey());
+      }
+      player.sendActionBar(Component.translatable("container.isLocked").args(name));
+      SoundUtil.of(Sound.BLOCK_CHEST_LOCKED).play(block);
+      return true;
+    }
+    return false;
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

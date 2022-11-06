@@ -35,6 +35,7 @@ public final class EarthMaterials {
   public static final MaterialSetTag EARTH_BENDABLE;
   public static final MaterialSetTag SAND_BENDABLE;
   public static final MaterialSetTag METAL_BENDABLE;
+  public static final MaterialSetTag METAL_KEYS;
   public static final MaterialSetTag LAVA_BENDABLE;
   public static final MaterialSetTag MUD_BENDABLE;
   private static final MaterialSetTag ALL;
@@ -69,6 +70,10 @@ public final class EarthMaterials {
       Material.GOLD_BLOCK, Material.RAW_GOLD_BLOCK,
       Material.COPPER_BLOCK, Material.RAW_COPPER_BLOCK,
       Material.QUARTZ_BLOCK
+    ).lock();
+
+    METAL_KEYS = new MaterialSetTag(key).add(
+      Material.IRON_INGOT, Material.GOLD_INGOT, Material.COPPER_INGOT, Material.NETHERITE_INGOT
     ).lock();
 
     LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).lock();

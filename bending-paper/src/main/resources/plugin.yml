@@ -7,6 +7,9 @@ website: https://github.com/PrimordialMoros/Bending
 softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC, LuckPerms]
 api-version: 1.18
 permissions:
+  bending.admin.overridelock:
+    description: Allows removing a locksmithing lock even without a matching key.
+    default: false
   bending.admin:
     description: Grants access to all commands and abilities.
     default: op
@@ -18,6 +21,7 @@ permissions:
       bending.command.reload: true
       bending.command.remove: true
   bending.player:
+    description: Grants access to player commands and abilities.
     default: true
     children:
       bending.command.bind: true
@@ -58,6 +62,7 @@ permissions:
       bending.ability.DensityShift: true
       bending.ability.EarthCling: true
       bending.ability.FerroControl: true
+      bending.ability.Locksmithing: true
       bending.ability.EarthPillars: true
       bending.ability.EarthShards: true
       bending.ability.Bulwark: true

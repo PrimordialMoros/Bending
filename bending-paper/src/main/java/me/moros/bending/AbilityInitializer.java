@@ -54,6 +54,7 @@ import me.moros.bending.ability.earth.Shockwave;
 import me.moros.bending.ability.earth.passive.DensityShift;
 import me.moros.bending.ability.earth.passive.EarthCling;
 import me.moros.bending.ability.earth.passive.FerroControl;
+import me.moros.bending.ability.earth.passive.Locksmithing;
 import me.moros.bending.ability.earth.sequence.EarthPillars;
 import me.moros.bending.ability.earth.sequence.EarthShards;
 import me.moros.bending.ability.fire.Blaze;
@@ -278,6 +279,9 @@ public final class AbilityInitializer {
       .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
+      .element(EARTH).activation(PASSIVE).canBind(false).require("bending.metal").build());
+
+    abilities.add(AbilityDescription.builder("Locksmithing", Locksmithing::new)
       .element(EARTH).activation(PASSIVE).canBind(false).require("bending.metal").build());
 
     abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)

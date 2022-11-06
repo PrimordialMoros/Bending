@@ -36,7 +36,7 @@ final class ColliderUtil {
       } else if (second instanceof OBB obb) {
         return _intersects(obb, sphere1);
       } else if (second instanceof Disk disk) {
-        return disk.sphere._intersects(sphere1) && _intersects(disk.obb, sphere1);
+        return disk.sphere()._intersects(sphere1) && _intersects(disk.obb(), sphere1);
       } else if (second instanceof Ray ray) {
         return _intersects(ray, sphere1);
       }
@@ -48,7 +48,7 @@ final class ColliderUtil {
       } else if (second instanceof Sphere sphere) {
         return _intersects(aabb1, sphere);
       } else if (second instanceof Disk disk) {
-        return _intersects(aabb1, disk.sphere) && disk.obb._intersects(new OBB(aabb1));
+        return _intersects(aabb1, disk.sphere()) && disk.obb()._intersects(new OBB(aabb1));
       } else if (second instanceof Ray ray) {
         return _intersects(ray, aabb1);
       }
@@ -60,21 +60,21 @@ final class ColliderUtil {
       } else if (second instanceof Sphere sphere) {
         return _intersects(obb1, sphere);
       } else if (second instanceof Disk disk) {
-        return _intersects(obb1, disk.sphere) && obb1._intersects(disk.obb);
+        return _intersects(obb1, disk.sphere()) && obb1._intersects(disk.obb());
       } else if (second instanceof Ray ray) {
         return _intersects(obb1, ray);
       }
     } else if (first instanceof Disk disk1) {
       if (second instanceof Disk disk2) {
-        return disk1.sphere._intersects(disk2.sphere) && disk1.obb._intersects(disk2.obb);
+        return disk1.sphere()._intersects(disk2.sphere()) && disk1.obb()._intersects(disk2.obb());
       } else if (second instanceof AABB aabb) {
-        return _intersects(aabb, disk1.sphere) && disk1.obb._intersects(new OBB(aabb));
+        return _intersects(aabb, disk1.sphere()) && disk1.obb()._intersects(new OBB(aabb));
       } else if (second instanceof OBB obb) {
-        return _intersects(obb, disk1.sphere) && obb._intersects(disk1.obb);
+        return _intersects(obb, disk1.sphere()) && obb._intersects(disk1.obb());
       } else if (second instanceof Sphere sphere) {
-        return disk1.sphere._intersects(sphere) && _intersects(disk1.obb, sphere);
+        return disk1.sphere()._intersects(sphere) && _intersects(disk1.obb(), sphere);
       } else if (second instanceof Ray ray) {
-        return _intersects(ray, disk1.sphere) && _intersects(disk1.obb, ray);
+        return _intersects(ray, disk1.sphere()) && _intersects(disk1.obb(), ray);
       }
     } else if (first instanceof Ray ray1) {
       if (second instanceof Ray ray2) {
@@ -86,7 +86,7 @@ final class ColliderUtil {
       } else if (second instanceof Sphere sphere) {
         return _intersects(ray1, sphere);
       } else if (second instanceof Disk disk) {
-        return _intersects(ray1, disk.sphere) && _intersects(disk.obb, ray1);
+        return _intersects(ray1, disk.sphere()) && _intersects(disk.obb(), ray1);
       }
     }
     return false;

@@ -24,15 +24,7 @@ import me.moros.bending.model.math.Vector3d;
 /**
  * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider.
  */
-public class Disk implements Collider {
-  public final Sphere sphere;
-  public final OBB obb;
-
-  public Disk(OBB obb, Sphere sphere) {
-    this.obb = obb;
-    this.sphere = sphere;
-  }
-
+public record Disk(OBB obb, Sphere sphere) implements Collider {
   @Override
   public Vector3d position() {
     return sphere.center;
@@ -52,24 +44,4 @@ public class Disk implements Collider {
   public boolean contains(Vector3d point) {
     return sphere.contains(point) && obb.contains(point);
   }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    Disk other = (Disk) obj;
-    return sphere.equals(other.sphere) && obb.equals(other.obb);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = sphere.hashCode();
-    result = 31 * result + obb.hashCode();
-    return result;
-  }
-
 }

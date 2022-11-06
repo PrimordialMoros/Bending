@@ -149,7 +149,7 @@ public final class TempArmor extends TemporaryBase {
           meta.displayName(Component.text("Bending Armor"));
           meta.lore(List.of(Component.text("Temporary")));
           meta.setUnbreakable(true);
-          Metadata.addArmorKey(meta);
+          Metadata.addEmptyKey(meta, Metadata.NSK_ARMOR);
           item.setItemMeta(meta);
           armorItems[i] = item;
         }
@@ -164,7 +164,7 @@ public final class TempArmor extends TemporaryBase {
     for (int i = 0; i < length; i++) {
       ItemStack item = armorItems[i];
       if (item != null && item.getItemMeta() != null) {
-        if (!Metadata.hasArmorKey(item.getItemMeta())) {
+        if (!Metadata.hasKey(item.getItemMeta(), Metadata.NSK_ARMOR)) {
           copy[i] = item;
         }
       }

@@ -362,7 +362,7 @@ public class PlayerListener implements Listener {
     }
 
     ItemMeta meta = item.getItemMeta();
-    if (Metadata.hasArmorKey(meta)) {
+    if (Metadata.hasKey(meta, Metadata.NSK_ARMOR)) {
       Inventory inventory = event.getClickedInventory();
       if (inventory.getHolder() instanceof Player player) {
         if (!TempArmor.MANAGER.isTemp(player.getUniqueId()) || event.getSlotType() != InventoryType.SlotType.ARMOR) {

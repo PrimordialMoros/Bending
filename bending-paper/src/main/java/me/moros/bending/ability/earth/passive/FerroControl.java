@@ -39,6 +39,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Openable;
 import org.bukkit.entity.Minecart;
+import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -121,9 +122,16 @@ public class FerroControl extends AbilityInstance {
 
   public static void act(User user, Block block) {
     if (block.getType() == Material.IRON_DOOR || block.getType() == Material.IRON_TRAPDOOR) {
+      if (user.sneaking() && user.inventory() instanceof PlayerInventory inv && mayPlaceBlock(inv)) {
+        return;
+      }
       user.game().abilityManager(user.world()).firstInstance(user, FerroControl.class)
         .ifPresent(ability -> ability.act(block));
     }
+  }
+
+  private static boolean mayPlaceBlock(PlayerInventory inv) {
+    return inv.getItemInMainHand().getType().isBlock() || inv.getItemInOffHand().getType().isBlock();
   }
 
   @Override
