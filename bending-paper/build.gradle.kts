@@ -52,7 +52,7 @@ dependencies {
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.10")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.19")
     compileOnly("com.griefcraft", "lwc", "2.2.9-dev")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
     compileOnly("me.clip", "placeholderapi", "2.11.2")
