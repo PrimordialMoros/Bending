@@ -32,7 +32,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
@@ -42,6 +41,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lockable;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -49,6 +49,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Locksmithing extends AbilityInstance {
+  private static final String OVERRIDE = "bending.admin.overridelock";
+
   private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
@@ -96,7 +98,7 @@ public class Locksmithing extends AbilityInstance {
         container.setLock(LegacyComponentSerializer.legacySection().serialize(keyName));
         SoundUtil.of(Sound.BLOCK_CHEST_LOCKED).play(block);
         user.sendActionBar(Component.text("Locked", description().element().color()));
-      } else if (user.sneaking() && WorldUtil.canOpen(user.entity(), container, meta)) {
+      } else if (user.sneaking() && (user.hasPermission(OVERRIDE) || validKey(container, meta))) {
         container.setLock(null);
         SoundUtil.of(Sound.BLOCK_CHEST_LOCKED, 1, 2).play(block);
         user.sendActionBar(Component.text("Unlocked", description().element().color()));
@@ -125,6 +127,21 @@ public class Locksmithing extends AbilityInstance {
           .ifPresent(ability -> ability.act(item, block));
       }
     }
+  }
+
+  public static boolean canBreak(Player player, Lockable container) {
+    if (!container.isLocked() || player.hasPermission(OVERRIDE)) {
+      return true;
+    }
+    PlayerInventory inv = player.getInventory();
+    return validKey(container, inv.getItemInMainHand().getItemMeta()) || validKey(container, inv.getItemInOffHand().getItemMeta());
+  }
+
+  private static boolean validKey(Lockable container, ItemMeta meta) {
+    if (!Metadata.hasKey(meta, Metadata.NSK_METAL_KEY)) {
+      return false;
+    }
+    return container.getLock().equals(LegacyComponentSerializer.legacySection().serializeOrNull(meta.displayName()));
   }
 
   @Override

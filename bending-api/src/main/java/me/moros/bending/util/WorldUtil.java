@@ -34,8 +34,6 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
-import me.moros.bending.util.metadata.Metadata;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -44,14 +42,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Furnace;
-import org.bukkit.block.Lockable;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Snow;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * Utility class with useful {@link World} related methods.
@@ -388,27 +381,5 @@ public final class WorldUtil {
       }
     }
     return Optional.empty();
-  }
-
-  public static boolean canOpen(LivingEntity entity, Lockable container, ItemMeta meta) {
-    if (entity.hasPermission("bending.admin.overridelock")) {
-      return true;
-    }
-    return validKey(container, meta);
-  }
-
-  public static boolean canBreak(Player player, Lockable container) {
-    if (!container.isLocked() || player.hasPermission("bending.admin.overridelock")) {
-      return true;
-    }
-    PlayerInventory inv = player.getInventory();
-    return validKey(container, inv.getItemInMainHand().getItemMeta()) || validKey(container, inv.getItemInOffHand().getItemMeta());
-  }
-
-  private static boolean validKey(Lockable container, ItemMeta meta) {
-    if (!Metadata.hasKey(meta, Metadata.NSK_METAL_KEY)) {
-      return false;
-    }
-    return container.getLock().equals(LegacyComponentSerializer.legacySection().serializeOrNull(meta.displayName()));
   }
 }

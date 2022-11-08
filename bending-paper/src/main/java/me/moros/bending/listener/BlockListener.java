@@ -19,6 +19,7 @@
 
 package me.moros.bending.listener;
 
+import me.moros.bending.ability.earth.passive.Locksmithing;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.manager.Game;
@@ -27,7 +28,6 @@ import me.moros.bending.registry.Registries;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import net.kyori.adventure.text.Component;
@@ -142,7 +142,7 @@ public class BlockListener implements Listener {
   }
 
   private boolean handleLockedContainer(Player player, Block block) {
-    if (block.getState(false) instanceof Lockable lockable && !WorldUtil.canBreak(player, lockable)) {
+    if (block.getState(false) instanceof Lockable lockable && !Locksmithing.canBreak(player, lockable)) {
       Component name = ((Nameable) lockable).customName();
       if (name == null) {
         name = Component.translatable(block.translationKey());
