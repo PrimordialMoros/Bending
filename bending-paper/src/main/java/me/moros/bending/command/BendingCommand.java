@@ -267,8 +267,7 @@ public final class BendingCommand {
 
   private void sendElementNotification(User user, Element element) {
     if (user instanceof BendingPlayer player) {
-      Component title = Component.text().append(Component.text("You can now bend", ColorPalette.TEXT_COLOR))
-        .append(Component.space()).append(element.displayName()).build();
+      Component title = Message.ELEMENT_TOAST_NOTIFICATION.build(element.displayName());
       NativeAdapter.instance().sendNotification(player.entity(), Material.NETHER_STAR, title);
     }
   }
@@ -482,9 +481,8 @@ public final class BendingCommand {
         display = List.of();
       } else {
         JoinConfiguration sep = JoinConfiguration.commas(true);
-        Component hover = Component.text("Click to view info about a specific ability.", ColorPalette.NEUTRAL);
         Component component = Component.join(sep, abilities).colorIfAbsent(ColorPalette.TEXT_COLOR);
-        display = List.of(header, component.hoverEvent(HoverEvent.showText(hover)));
+        display = List.of(header, component.hoverEvent(HoverEvent.showText(Message.ABILITY_HOVER.build())));
       }
     }
 

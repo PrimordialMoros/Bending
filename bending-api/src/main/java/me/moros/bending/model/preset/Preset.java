@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.util.ColorPalette;
@@ -121,7 +122,7 @@ public final class Preset {
   public Component meta() {
     Component details = Component.text().append(Component.join(JoinConfiguration.newlines(), display()))
       .append(Component.newline()).append(Component.newline())
-      .append(Component.text("Click to bind this preset.", ColorPalette.NEUTRAL)).build();
+      .append(Message.HOVER_PRESET.build()).build();
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
       .clickEvent(ClickEvent.runCommand("/bending preset bind " + name()));

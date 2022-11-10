@@ -47,6 +47,7 @@ public interface Message {
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", WARN);
   Args0 PRESET_LIST_HEADER = () -> translatable("bending.command.preset.list.header", HEADER);
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", WARN);
+  Args0 HOVER_PRESET = () -> translatable("bending.command.preset.hover", NEUTRAL);
 
   Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.create-success", SUCCESS)
     .args(text(preset));
@@ -76,6 +77,9 @@ public interface Message {
   Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", FAIL);
 
   Args0 RELOAD = () -> translatable("bending.command.reload", SUCCESS);
+
+  Args1<Component> ELEMENT_TOAST_NOTIFICATION = element -> translatable("bending.command.element.toast-notification", TEXT_COLOR)
+    .args(element);
 
   Args1<Component> ELEMENT_CHOOSE_NO_PERMISSION = element -> translatable("bending.command.element.choose-no-permission", FAIL)
     .args(element);
@@ -109,6 +113,8 @@ public interface Message {
   Args0 ABILITIES = () -> translatable("bending.command.display.abilities", TEXT_COLOR);
   Args0 SEQUENCES = () -> translatable("bending.command.display.sequences", TEXT_COLOR);
   Args0 PASSIVES = () -> translatable("bending.command.display.passives", TEXT_COLOR);
+
+  Args0 ABILITY_HOVER = () -> translatable("bending.command.display.ability-hover", NEUTRAL);
 
   Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> translatable("bending.command.bind.require-element", WARN)
     .args(ability, element);
