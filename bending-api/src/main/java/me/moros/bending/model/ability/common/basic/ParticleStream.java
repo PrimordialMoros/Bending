@@ -75,7 +75,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       render();
       postRender();
       if (steps <= 1 || i % d == 0) {
-        boolean hitEntity = CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false, singleCollision);
+        boolean hitEntity = CollisionUtil.handle(user, collider, this, livingOnly, false, singleCollision);
         if (hitEntity) {
           return UpdateResult.REMOVE;
         }

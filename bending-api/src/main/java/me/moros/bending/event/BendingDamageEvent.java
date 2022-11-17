@@ -35,7 +35,7 @@ public class BendingDamageEvent extends EntityDamageByEntityEvent implements Abi
   private final User user;
   private final AbilityDescription desc;
 
-  BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
+  public BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
     super(user.entity(), target, DamageCause.CUSTOM, new EnumMap<>(Map.of(DamageModifier.BASE, damage)), Map.of(DamageModifier.BASE, o -> -0.0), false);
     this.user = user;
     this.desc = desc;

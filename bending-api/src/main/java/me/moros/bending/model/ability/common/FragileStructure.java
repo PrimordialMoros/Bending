@@ -19,32 +19,40 @@
 
 package me.moros.bending.model.ability.common;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class FragileStructure implements Iterable<Block> {
+public class FragileStructure implements Iterable<Block> {
   private final Collection<Block> fragileBlocks;
   private final Predicate<Block> predicate;
+  private final boolean fallingBlocks;
   private int health;
 
-  private FragileStructure(Collection<Block> fragileBlocks, Predicate<Block> predicate, int health) {
-    this.fragileBlocks = fragileBlocks;
-    this.predicate = predicate;
-    this.health = health;
+  protected <T extends FragileStructure> FragileStructure(Builder<T> builder) {
+    this.fragileBlocks = Set.copyOf(builder.blocks);
+    this.predicate = builder.predicate;
+    this.fallingBlocks = builder.fallingBlocks;
+    this.health = builder.health;
     this.fragileBlocks.forEach(b -> Metadata.add(b, Metadata.DESTRUCTIBLE, this));
   }
 
@@ -59,21 +67,50 @@ public final class FragileStructure implements Iterable<Block> {
    * @param damage the amount of damage to inflict
    * @return the remaining structure health
    */
-  private int damageStructure(int damage) {
+  private int damageStructure(int damage, Ray ray) {
     if (damage > 0 && health > damage) {
       health -= damage;
       return health;
     }
-    destroyStructure(this);
+    destroyStructure(ray);
     return 0;
   }
 
-  public static boolean tryDamageStructure(Iterable<Block> blocks, int damage) {
+  private void destroyStructure(Ray ray) {
+    for (Block block : fragileBlocks) {
+      Metadata.remove(block, Metadata.DESTRUCTIBLE);
+      if (!predicate.test(block)) {
+        continue;
+      }
+      onDestroy(block, ray);
+    }
+  }
+
+  protected void onDestroy(Block block, Ray ray) {
+    BlockData blockData = block.getType().createBlockData();
+    TempBlock.air().build(block);
+    Vector3d center = Vector3d.center(block);
+    ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
+    if (ThreadLocalRandom.current().nextInt(3) == 0) {
+      SoundUtil.of(blockData.getSoundGroup().getBreakSound(), 2, 1).play(block);
+    }
+    if (fallingBlocks) {
+      Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(Vector3d.center(block));
+      Vector3d velocity = VectorUtil.gaussianOffset(dir.normalize().multiply(0.3), 0.05);
+      TempEntity.builder(blockData).velocity(velocity).duration(5000).build(block);
+    }
+  }
+
+  public static boolean tryDamageStructure(Block block, int damage, Ray ray) {
+    return tryDamageStructure(List.of(block), damage, ray);
+  }
+
+  public static boolean tryDamageStructure(Iterable<Block> blocks, int damage, Ray ray) {
     for (Block block : blocks) {
       if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
         FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
         if (structure != null) {
-          structure.damageStructure(damage);
+          structure.damageStructure(damage, ray);
           return true;
         }
       }
@@ -81,53 +118,55 @@ public final class FragileStructure implements Iterable<Block> {
     return false;
   }
 
-  public static void destroyStructure(FragileStructure data) {
-    for (Block block : data.fragileBlocks) {
-      Metadata.remove(block, Metadata.DESTRUCTIBLE);
-      if (!data.predicate.test(block)) {
-        continue;
-      }
-      BlockData blockData = block.getType().createBlockData();
-      TempBlock.air().build(block);
-      Vector3d center = Vector3d.center(block);
-      ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
-      if (ThreadLocalRandom.current().nextInt(3) == 0) {
-        SoundUtil.of(blockData.getSoundGroup().getBreakSound(), 2, 1).play(block);
-      }
-    }
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
   @Override
   public Iterator<Block> iterator() {
     return fragileBlocks.iterator();
   }
 
-  public static final class Builder {
+  public static Builder<FragileStructure> builder() {
+    return builder(FragileStructure::new);
+  }
+
+  public static <T extends FragileStructure> Builder<T> builder(Function<Builder<T>, T> constructor) {
+    return new Builder<>(constructor);
+  }
+
+  public static final class Builder<T extends FragileStructure> {
+    private final Function<Builder<T>, T> constructor;
+    private final Collection<Block> blocks = new ArrayList<>();
     private Predicate<Block> predicate;
+    private boolean fallingBlocks;
     private int health = 10;
 
-    private Builder() {
+    private Builder(Function<Builder<T>, T> constructor) {
+      this.constructor = constructor;
     }
 
-    public Builder health(int health) {
+    public Builder<T> fallingBlocks(boolean fallingBlocks) {
+      this.fallingBlocks = fallingBlocks;
+      return this;
+    }
+
+    public Builder<T> health(int health) {
       this.health = Math.max(1, health);
       return this;
     }
 
-    public Builder predicate(Predicate<Block> predicate) {
+    public Builder<T> predicate(Predicate<Block> predicate) {
       this.predicate = Objects.requireNonNull(predicate);
       return this;
     }
 
-    public @Nullable FragileStructure build(Collection<Block> blocks) {
-      if (blocks.isEmpty()) {
+    public Builder<T> add(Collection<Block> blocks) {
+      this.blocks.addAll(List.copyOf(blocks));
+      return this;
+    }
+
+    public @Nullable FragileStructure build() {
+      if (blocks.isEmpty() || predicate == null) {
         return null;
       }
-      return new FragileStructure(Set.copyOf(blocks), predicate, health);
+      return constructor.apply(this);
     }
   }
 }

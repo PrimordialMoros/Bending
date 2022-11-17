@@ -133,38 +133,7 @@ public class WaterManipulation extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (manip != null) {
-      UpdateResult result = manip.update();
-      if (result == UpdateResult.CONTINUE) {
-        Vector3d center = manip.center();
-        if (ThreadLocalRandom.current().nextInt(5) == 0) {
-          SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
-          effect.play(user.world(), center);
-        }
-
-        if (isIce) {
-          ItemStack data = new ItemStack(Material.ICE);
-          ParticleUtil.of(Particle.ITEM_CRACK, center).count(4).offset(0.4).data(data).spawn(user.world());
-          ParticleUtil.of(Particle.SNOW_SHOVEL, center).count(6).offset(0.4).spawn(user.world());
-        } else {
-          Block trail1 = manip.previousBlock();
-          if (trail1 != null) {
-            if (!trail.isEmpty()) {
-              manip.clean(trail.peekFirst());
-            }
-            if (trail.size() == 2) {
-              manip.clean(trail.removeLast());
-            }
-            trail.addFirst(trail1);
-            renderTrail(trail1, 7);
-            renderTrail(trail.peekLast(), 6);
-          }
-        }
-      }
-      return result;
-    } else {
-      return states.update();
-    }
+    return manip == null ? states.update() : manip.update();
   }
 
   private void renderTrail(@Nullable Block block, int level) {
@@ -257,8 +226,28 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public void postRender() {
+      Vector3d center = center();
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
-        SoundUtil.WATER.play(user.world(), center());
+        SoundEffect effect = isIce ? SoundUtil.ICE : SoundUtil.WATER;
+        effect.play(user.world(), center);
+      }
+      if (isIce) {
+        ItemStack data = new ItemStack(Material.ICE);
+        ParticleUtil.of(Particle.ITEM_CRACK, center).count(4).offset(0.4).data(data).spawn(user.world());
+        ParticleUtil.of(Particle.SNOW_SHOVEL, center).count(6).offset(0.4).spawn(user.world());
+      } else {
+        Block trail1 = previousBlock();
+        if (trail1 != null) {
+          if (!trail.isEmpty()) {
+            clean(trail.peekFirst());
+          }
+          if (trail.size() == 2) {
+            clean(trail.removeLast());
+          }
+          trail.addFirst(trail1);
+          renderTrail(trail1, 7);
+          renderTrail(trail.peekLast(), 6);
+        }
       }
     }
 
@@ -274,7 +263,7 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), 3);
+      FragileStructure.tryDamageStructure(block, 3, new Ray(center(), direction));
       return true;
     }
   }

@@ -35,6 +35,11 @@ import me.moros.bending.model.user.User;
  * Utility class with useful {@link Vector3d} related methods.
  */
 public final class VectorUtil {
+  private static final Vector3d[] AXES = {
+    Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K, Vector3d.MINUS_I, Vector3d.MINUS_J, Vector3d.MINUS_K,
+    Vector3d.PLUS_I.add(Vector3d.PLUS_K).normalize(), Vector3d.PLUS_K.add(Vector3d.MINUS_I).normalize(),
+    Vector3d.MINUS_I.add(Vector3d.MINUS_K).normalize(), Vector3d.MINUS_K.add(Vector3d.PLUS_I).normalize()
+  };
   private static final double ANGLE_STEP = Math.toRadians(10);
   private static final double ANGLE = Math.toRadians(30);
   private static final double FALL_MIN_ANGLE = Math.toRadians(60);
@@ -254,6 +259,25 @@ public final class VectorUtil {
   public static Vector3d gaussianOffset(Vector3d target, double offsetX, double offsetY, double offsetZ) {
     ThreadLocalRandom r = ThreadLocalRandom.current();
     return target.add(new Vector3d(r.nextGaussian() * offsetX, r.nextGaussian() * offsetY, r.nextGaussian() * offsetZ));
+  }
+
+  /**
+   * Get the closest matching unit vector axis.
+   * @param dir the vector to check
+   * @return the closest matching axis
+   */
+  public static Vector3d nearestFace(Vector3d dir) {
+    Vector3d normal = dir.normalize();
+    Vector3d result = AXES[0];
+    double f = Double.MIN_VALUE;
+    for (Vector3d face : AXES) {
+      double g = normal.dot(face);
+      if (g > f) {
+        f = g;
+        result = face;
+      }
+    }
+    return result;
   }
 
   /**

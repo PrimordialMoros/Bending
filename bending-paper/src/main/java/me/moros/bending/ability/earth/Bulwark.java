@@ -75,7 +75,7 @@ public class Bulwark extends AbilityInstance {
         .add(ExpireRemovalPolicy.of(5000 + userConfig.wallDuration))
         .build();
       user.addCooldown(description(), userConfig.wallCooldown);
-      raiseWall.pillars().stream().map(Pillar::origin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
+      raiseWall.pillars().map(Pillar::origin).map(b -> b.getRelative(BlockFace.UP, 2)).forEach(bases::add);
       wall = raiseWall;
       startTime = System.currentTimeMillis();
       return true;

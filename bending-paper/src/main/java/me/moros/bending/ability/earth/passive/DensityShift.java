@@ -91,8 +91,7 @@ public class DensityShift extends AbilityInstance {
       if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) {
         continue;
       }
-      TempBlock.builder(MaterialUtil.softType(b.getBlockData())).bendable(true)
-        .duration(userConfig.duration).build(b).ifPresent(TempBlock::forceWeak);
+      TempBlock.builder(MaterialUtil.softType(b.getBlockData())).bendable(true).weak(true).duration(userConfig.duration).build(b);
     }
   }
 

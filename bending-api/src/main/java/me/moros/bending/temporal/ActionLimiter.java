@@ -50,7 +50,7 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActionLimiter extends TemporaryBase {
-  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>("Action Limiter") {
+  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>("ActionLimiter") {
     public void tick() {
       super.tick();
       BARS.entrySet().removeIf(e -> e.getValue().update() == UpdateResult.REMOVE);

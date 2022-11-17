@@ -48,6 +48,7 @@ import me.moros.bending.registry.Registries;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.metadata.Metadata;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -152,7 +153,8 @@ public class PlayerListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
     Player player = event.getEntity();
-    if (player.getLastDamageCause() instanceof BendingDamageEvent cause) {
+    BendingDamageEvent cause = DamageUtil.cachedOrLastCause(player);
+    if (cause != null) {
       Boolean showMessage = player.getWorld().getGameRuleValue(GameRule.SHOW_DEATH_MESSAGES);
       if (showMessage != null && showMessage) {
         Predicate<Audience> predicate = x -> true;

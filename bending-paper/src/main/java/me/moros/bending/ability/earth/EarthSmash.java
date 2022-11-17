@@ -50,6 +50,7 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.math.Vector3i;
@@ -469,7 +470,7 @@ public class EarthSmash extends AbilityInstance {
       if (origin.distanceSq(boulder.center) > userConfig.shootRange * userConfig.shootRange) {
         return UpdateResult.REMOVE;
       }
-      if (!boulder.blendSmash()) {
+      if (!boulder.blendSmash(direction)) {
         shatter();
         return UpdateResult.CONTINUE;
       }
@@ -652,7 +653,7 @@ public class EarthSmash extends AbilityInstance {
       });
     }
 
-    private boolean blendSmash() {
+    private boolean blendSmash(Vector3d direction) {
       int originalSize = data.size();
       Collection<Block> removed = new ArrayList<>();
       Iterator<Vector3i> iterator = data.keySet().iterator();
@@ -663,7 +664,7 @@ public class EarthSmash extends AbilityInstance {
           iterator.remove();
         }
       }
-      FragileStructure.tryDamageStructure(removed, 4 * removed.size());
+      FragileStructure.tryDamageStructure(removed, 4 * removed.size(), new Ray(center, direction));
       return !data.isEmpty() && originalSize - data.size() <= size;
     }
 

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.air;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,6 +28,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -61,7 +61,7 @@ public class AirBreath extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<AirStream> streams = new ArrayList<>();
+  private final MultiUpdatable<AirStream> streams = MultiUpdatable.empty();
 
   public AirBreath(AbilityDescription desc) {
     super(desc);
@@ -99,8 +99,7 @@ public class AirBreath extends AbilityInstance {
     Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   @Override

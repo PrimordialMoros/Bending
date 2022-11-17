@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,6 +30,7 @@ import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -66,7 +66,7 @@ public class FireBreath extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
-  private final Collection<FireStream> streams = new ArrayList<>();
+  private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
 
   public FireBreath(AbilityDescription desc) {
     super(desc);
@@ -107,8 +107,7 @@ public class FireBreath extends AbilityInstance {
     Vector3d offset = new Vector3d(0, -0.1, 0);
     Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FireStream(ray));
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   @Override
@@ -167,7 +166,7 @@ public class FireBreath extends AbilityInstance {
       }
       Block above = block.getRelative(BlockFace.UP);
       if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {
-        TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).build(above);
+        TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).ability(FireBreath.this).build(above);
       }
       return true;
     }

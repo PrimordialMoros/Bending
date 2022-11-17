@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.air;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +32,7 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -65,7 +65,7 @@ public class AirSwipe extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final Set<Entity> affectedEntities = new HashSet<>();
-  private final List<AirStream> streams = new ArrayList<>();
+  private final MultiUpdatable<AirStream> streams = MultiUpdatable.empty();
 
   private boolean charging;
   private double factor = 1;
@@ -120,11 +120,9 @@ public class AirSwipe extends AbilityInstance {
       } else if (!user.sneaking()) {
         launch();
       }
-    } else {
-      streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
+      return UpdateResult.CONTINUE;
     }
-
-    return (charging || !streams.isEmpty()) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+    return streams.update();
   }
 
   private void launch() {

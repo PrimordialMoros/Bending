@@ -32,6 +32,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -281,15 +282,17 @@ public class MetalCable extends AbilityInstance {
       remove();
       return;
     }
+    Vector3d dir = user.eyeLocation().subtract(location).normalize();
     if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockData data = block.getBlockData();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
-      Vector3d velocity = user.eyeLocation().subtract(location).normalize().multiply(0.2);
-      projectile = TempFallingBlock.builder(data).velocity(velocity).buildAt(block, location);
+      projectile = TempFallingBlock.builder(data).velocity(dir.multiply(0.2)).buildAt(block, location);
       target = new CableTarget(projectile.entity());
     } else {
+      dir = dir.negate();
       target = new CableTarget(block);
     }
+    FragileStructure.tryDamageStructure(block, 2, new Ray(location, dir));
     hasHit = true;
   }
 

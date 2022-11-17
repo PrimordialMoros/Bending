@@ -125,9 +125,10 @@ public class AirBlast extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
       ParticleUtil.air(origin).count(4).offset(0.5).spawn(user.world());
+      return UpdateResult.CONTINUE;
     }
 
-    return (!launched || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+    return stream.update();
   }
 
   private boolean selectOrigin() {

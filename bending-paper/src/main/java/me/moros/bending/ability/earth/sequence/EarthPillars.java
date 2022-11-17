@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth.sequence;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +30,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.Pillar;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -63,7 +63,7 @@ public class EarthPillars extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<Pillar> pillars = new ArrayList<>();
+  private final MultiUpdatable<Pillar> pillars = MultiUpdatable.empty();
   private final Collection<Entity> affectedEntities = new HashSet<>();
   private Predicate<Block> predicate;
 
@@ -115,8 +115,7 @@ public class EarthPillars extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return pillars.update();
   }
 
   private boolean createPillar(Entity entity) {

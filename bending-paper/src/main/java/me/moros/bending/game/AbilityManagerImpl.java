@@ -35,6 +35,8 @@ import com.google.common.collect.MultimapBuilder;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
@@ -45,16 +47,24 @@ public class AbilityManagerImpl implements AbilityManager {
   private final UUID world;
   private final Multimap<UUID, Ability> globalInstances;
   private final Collection<Entry<UUID, Ability>> addQueue;
+  private final MultiUpdatable<Updatable> generics;
 
   AbilityManagerImpl(Logger logger, UUID world) {
     this.logger = logger;
     this.world = world;
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
     addQueue = new ArrayList<>(16);
+    generics = MultiUpdatable.empty();
   }
 
   private boolean isPassive(AbilityDescription desc) {
     return desc.isActivatedBy(Activation.PASSIVE);
+  }
+
+
+  @Override
+  public void addUpdatable(Updatable instance) {
+    generics.add(instance);
   }
 
   @Override
@@ -139,6 +149,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyAllInstances() {
+    generics.clear();
     globalInstances.values().forEach(Ability::onDestroy);
     globalInstances.clear();
   }
@@ -149,6 +160,7 @@ public class AbilityManagerImpl implements AbilityManager {
     addQueue.forEach(entry -> globalInstances.put(entry.getKey(), entry.getValue()));
     addQueue.clear();
     // Update all instances and remove invalid instances
+    generics.update();
     Iterator<Ability> globalIterator = globalInstances.values().iterator();
     Collection<Exception> exceptions = new LinkedList<>();
     while (globalIterator.hasNext()) {

@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.earth;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +31,7 @@ import me.moros.bending.model.ExpiringSet;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.BlockLine;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -74,7 +74,7 @@ public class Shockwave extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<Ripple> streams = new ArrayList<>();
+  private final MultiUpdatable<Ripple> streams = MultiUpdatable.empty();
   private final Set<Entity> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
@@ -110,7 +110,9 @@ public class Shockwave extends AbilityInstance {
       if (user.entity().getFallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
-      release(false);
+      if (!release(false)) {
+        return false;
+      }
     }
 
     startTime = System.currentTimeMillis();
@@ -148,8 +150,7 @@ public class Shockwave extends AbilityInstance {
     if (!colliders.isEmpty()) {
       CollisionUtil.handle(user, new Sphere(origin, range + 2), this::onEntityHit, false);
     }
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   private boolean onEntityHit(Entity entity) {
@@ -195,13 +196,11 @@ public class Shockwave extends AbilityInstance {
     }
 
     // First update in same tick to only apply cooldown if there are valid ripples
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    if (streams.isEmpty()) {
-      removalPolicy = (u, d) -> true; // Remove in next tick
-    } else {
-      removalPolicy = Policies.builder().build();
-      user.addCooldown(description(), userConfig.cooldown);
+    if (streams.update() == UpdateResult.REMOVE) {
+      return false;
     }
+    removalPolicy = Policies.builder().build();
+    user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
 

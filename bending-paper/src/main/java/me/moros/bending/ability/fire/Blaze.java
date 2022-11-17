@@ -19,8 +19,6 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +29,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.BlockLine;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -55,7 +54,7 @@ public class Blaze extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<FireStream> streams = new ArrayList<>();
+  private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
   private final Set<Block> affectedBlocks = new HashSet<>();
 
   public Blaze(AbilityDescription desc) {
@@ -95,8 +94,7 @@ public class Blaze extends AbilityInstance {
     }
 
     // First update in same tick to only activate if there are valid fire streams
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    if (streams.isEmpty()) {
+    if (streams.update() == UpdateResult.REMOVE) {
       return false;
     }
     removalPolicy = Policies.builder().build();
@@ -109,8 +107,7 @@ public class Blaze extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   @Override
@@ -141,7 +138,7 @@ public class Blaze extends AbilityInstance {
       if (!affectedBlocks.add(block)) {
         return;
       }
-      TempBlock.fire().duration(500).build(block);
+      TempBlock.fire().duration(500).ability(Blaze.this).build(block);
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.FIRE.play(block);
       }

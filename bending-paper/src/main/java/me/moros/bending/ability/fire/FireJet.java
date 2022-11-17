@@ -108,7 +108,7 @@ public class FireJet extends AbilityInstance {
   }
 
   private void igniteBlock(Block block) {
-    TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).build(block);
+    TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).ability(this).build(block);
   }
 
   @Override

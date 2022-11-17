@@ -19,17 +19,18 @@
 
 package me.moros.bending.ability.earth;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.Pillar;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -57,7 +58,7 @@ public class RaiseEarth extends AbilityInstance {
   private Block origin;
   private Predicate<Block> predicate;
   private Collection<Block> raisedCache;
-  private final Collection<Pillar> pillars = new ArrayList<>();
+  private final MultiUpdatable<Pillar> pillars = MultiUpdatable.empty();
 
   private long interval = 100;
 
@@ -118,8 +119,7 @@ public class RaiseEarth extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return pillars.update();
   }
 
   private void createPillar(Block block, int height) {
@@ -136,8 +136,7 @@ public class RaiseEarth extends AbilityInstance {
 
   private void loadRaised() {
     raisedCache = user.game().abilityManager(user.world()).instances(RaiseEarth.class)
-      .map(RaiseEarth::pillars).flatMap(Collection::stream)
-      .map(Pillar::pillarBlocks).flatMap(Collection::stream)
+      .flatMap(RaiseEarth::pillars).map(Pillar::pillarBlocks).flatMap(Collection::stream)
       .collect(Collectors.toSet());
   }
 
@@ -170,10 +169,10 @@ public class RaiseEarth extends AbilityInstance {
   }
 
   /**
-   * @return an unmodifiable view of the pillars
+   * @return a stream of the pillars
    */
-  public Collection<Pillar> pillars() {
-    return List.copyOf(pillars);
+  public Stream<Pillar> pillars() {
+    return pillars.stream();
   }
 
   @Override

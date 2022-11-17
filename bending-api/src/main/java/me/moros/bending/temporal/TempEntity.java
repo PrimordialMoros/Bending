@@ -35,11 +35,12 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TempEntity extends TemporaryBase {
-  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>("Packet Entity");
+  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>("Entity");
 
   private final TempEntityData data;
   private boolean reverted = false;
@@ -64,11 +65,22 @@ public class TempEntity extends TemporaryBase {
     return reverted;
   }
 
+  public static @Nullable TempEntity register(Entity entity, long duration) {
+    if (entity instanceof Player) {
+      return null;
+    }
+    return MANAGER.get(entity.getEntityId()).orElseGet(() -> new TempEntity(new TempEntityData(entity), duration));
+  }
+
+  public static TempEntity register(int entityId, long duration) {
+    return MANAGER.get(entityId).orElseGet(() -> new TempEntity(new TempEntityData(entityId), duration));
+  }
+
   public static Builder builder(BlockData data) {
     return new Builder(Objects.requireNonNull(data));
   }
 
-  private static final Vector3d armorStandOffset = new Vector3d(0, 1.1, 0);
+  private static final Vector3d armorStandOffset = new Vector3d(0, 1.8, 0);
   private static final Vector3d fallingBlockOffset = new Vector3d(0.5, 0, 0.5);
 
   public static final class Builder {
@@ -112,13 +124,7 @@ public class TempEntity extends TemporaryBase {
     }
 
     public TempFallingBlock build(Block block) {
-      Objects.requireNonNull(block);
-      World world = block.getWorld();
-      Vector3d center = new Vector3d(block).add(fallingBlockOffset);
-      if (particles) {
-        spawnParticles(world, center);
-      }
-      return new TempFallingBlock(spawnFallingBlock(this, world, center), duration);
+      return buildAt(block, new Vector3d(block).add(fallingBlockOffset));
     }
 
     public TempFallingBlock buildAt(Block block, Vector3d center) {

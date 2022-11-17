@@ -36,21 +36,7 @@ import me.moros.bending.ability.air.Tornado;
 import me.moros.bending.ability.air.passive.AirAgility;
 import me.moros.bending.ability.air.passive.GracefulDescent;
 import me.moros.bending.ability.air.sequence.AirWheel;
-import me.moros.bending.ability.earth.Bulwark;
-import me.moros.bending.ability.earth.Catapult;
-import me.moros.bending.ability.earth.Collapse;
-import me.moros.bending.ability.earth.EarthArmor;
-import me.moros.bending.ability.earth.EarthBlast;
-import me.moros.bending.ability.earth.EarthGlove;
-import me.moros.bending.ability.earth.EarthLine;
-import me.moros.bending.ability.earth.EarthShot;
-import me.moros.bending.ability.earth.EarthSmash;
-import me.moros.bending.ability.earth.EarthSurf;
-import me.moros.bending.ability.earth.EarthTunnel;
-import me.moros.bending.ability.earth.LavaDisk;
-import me.moros.bending.ability.earth.MetalCable;
-import me.moros.bending.ability.earth.RaiseEarth;
-import me.moros.bending.ability.earth.Shockwave;
+import me.moros.bending.ability.earth.*;
 import me.moros.bending.ability.earth.passive.DensityShift;
 import me.moros.bending.ability.earth.passive.EarthCling;
 import me.moros.bending.ability.earth.passive.FerroControl;
@@ -140,6 +126,8 @@ public final class AbilityInitializer {
       .add("FireShield", "Combustion", true, true)
       .add("FrostBreath", blasts, false, true)
       .add("FireBreath", blasts, false, true)
+      .add("Lightning", "EarthSmash", false, true)
+      .add("Lightning", "EarthBlast", true, false)
       .add("FireBreath", "EarthSmash", false, false)
       .add("FrostBreath", "EarthSmash", false, false)
       .add("FrostBreath", "FireBreath", true, true)
@@ -329,6 +317,9 @@ public final class AbilityInitializer {
       .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).require("bending.metal").build());
 
     abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
+      .element(EARTH).activation(SNEAK).require("bending.lava").build());
+
+    abilities.add(AbilityDescription.builder("LavaFlux", LavaFlux::new)
       .element(EARTH).activation(SNEAK).require("bending.lava").build());
 
     Sequence bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)

@@ -21,9 +21,11 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import me.moros.bending.BendingProperties;
+import me.moros.bending.ability.fire.Lightning;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
@@ -36,8 +38,10 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -46,9 +50,11 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -123,11 +129,7 @@ public class EarthBlast extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (blast != null) {
-      return blast.update();
-    } else {
-      return states.update();
-    }
+    return blast == null ? states.update() : blast.update();
   }
 
   private void launch() {
@@ -192,8 +194,16 @@ public class EarthBlast extends AbilityInstance {
     return blast == null ? List.of() : List.of(blast.collider());
   }
 
+  @Override
+  public void onCollision(Collision collision) {
+    if (collision.collidedAbility() instanceof Lightning) {
+      blast.electrify();
+    }
+  }
+
   private class Blast extends BlockShot {
     private final double damage;
+    private double electrified = 1;
 
     public Blast(Block block) {
       super(user, block, MaterialUtil.solidType(block.getBlockData()).getMaterial(), userConfig.range, 20);
@@ -207,16 +217,35 @@ public class EarthBlast extends AbilityInstance {
     }
 
     @Override
+    public void postRender() {
+      electrified = Math.max(1, electrified - 0.05);
+      if (electrified > 1) {
+        Vector3d center = center();
+        if (ThreadLocalRandom.current().nextInt(5) == 0) {
+          SoundUtil.LIGHTNING.play(user.world(), center);
+        }
+        int particles = FastMath.ceil(24 * (electrified - 1));
+        ParticleUtil.of(Particle.ELECTRIC_SPARK, center).offset(0.5).count(particles).spawn(user.world());
+      }
+    }
+
+    @Override
     public boolean onEntityHit(Entity entity) {
-      DamageUtil.damageEntity(entity, user, damage, description());
+      DamageUtil.damageEntity(entity, user, electrified * damage, description());
       EntityUtil.applyVelocity(EarthBlast.this, entity, direction.multiply(0.6));
       return true;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), 4);
+      FragileStructure.tryDamageStructure(block, 4, new Ray(center(), direction));
       return true;
+    }
+
+    private void electrify() {
+      if (electrified <= 1 && EarthMaterials.METAL_BENDABLE.isTagged(material)) {
+        electrified = 2;
+      }
     }
   }
 

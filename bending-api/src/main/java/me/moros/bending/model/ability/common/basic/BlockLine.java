@@ -19,24 +19,33 @@
 
 package me.moros.bending.model.ability.common.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import org.bukkit.block.Block;
+import org.bukkit.util.BlockIterator;
 
 public abstract class BlockLine extends MovementResolver implements Updatable {
   private final User user;
+  private final Iterator<Vector2i> iterator;
+
+  private final double maxRange;
+
   protected final Ray ray;
 
   protected Vector3d location;
   protected Vector3d dir;
 
-  private final double maxRange;
-
   protected long interval = 0;
-
   protected double distanceTravelled = 0;
+  protected boolean diagonalMovement = true;
+
   private long nextUpdate = 0;
 
   protected BlockLine(User user, Ray ray) {
@@ -46,6 +55,10 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     this.maxRange = ray.direction.length();
     dir = ray.direction.withY(0).normalize();
     this.location = ray.origin;
+    Collection<Vector2i> vectors = new ArrayList<>();
+    new BlockIterator(user.world(), location.toBukkitVector(), dir.toBukkitVector(), 0, FastMath.ceil(maxRange))
+      .forEachRemaining(b -> vectors.add(new Vector2i(b.getX(), b.getZ())));
+    iterator = vectors.iterator();
   }
 
   @Override
@@ -57,13 +70,19 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
       }
       nextUpdate = time + interval;
     }
-
-    Vector3d newLocation = resolve(location, dir);
-    if (newLocation == null) {
+    Vector3d temp = location;
+    if (!diagonalMovement) {
+      if (!iterator.hasNext()) {
+        return UpdateResult.REMOVE;
+      }
+      Vector2i v = iterator.next();
+      temp = new Vector3d(v.x() + 0.5, FastMath.floor(location.y() + 0.5), v.z() + 0.5);
+    }
+    Resolved resolved = resolve(temp, dir);
+    if (!resolved.success()) {
       return UpdateResult.REMOVE;
     }
-
-    location = newLocation;
+    location = resolved.point();
     Block block = location.toBlock(user.world());
 
     if (location.distanceSq(ray.origin) > maxRange * maxRange) {
@@ -77,9 +96,14 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     if (++distanceTravelled > 1) {
       render(block);
     }
-
     return UpdateResult.CONTINUE;
   }
 
   public abstract void render(Block block);
+
+  protected record Vector2i(int x, int z) {
+    public static Vector2i at(double x, double z) {
+      return new Vector2i(FastMath.floor(x), FastMath.floor(z));
+    }
+  }
 }

@@ -123,8 +123,9 @@ public class FireBlast extends AbilityInstance implements Explosive {
       } else if (!user.sneaking()) {
         launch();
       }
+      return UpdateResult.CONTINUE;
     }
-    return (charging || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+    return stream.update();
   }
 
   private void launch() {
@@ -267,10 +268,11 @@ public class FireBlast extends AbilityInstance implements Explosive {
           continue;
         }
         if (MaterialUtil.isIgnitable(b)) {
-          TempBlock.fire().duration(BendingProperties.instance().fireRevertTime(1000)).build(b);
+          TempBlock.fire().duration(BendingProperties.instance().fireRevertTime(1000))
+            .ability(FireBlast.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(List.of(block), FastMath.round(4 * factor));
+      FragileStructure.tryDamageStructure(block, FastMath.round(4 * factor), new Ray(location, ray.direction));
       explode();
       return true;
     }

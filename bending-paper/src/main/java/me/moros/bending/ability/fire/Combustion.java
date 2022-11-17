@@ -37,6 +37,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -47,7 +48,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -148,7 +148,8 @@ public class Combustion extends AbilityInstance implements Explosive {
     ParticleUtil.of(Particle.SMOKE_LARGE, center).extra(0.2).count(20).offset(1).spawn(user.world());
     ParticleUtil.of(Particle.FIREWORKS_SPARK, center).extra(0.2).count(20).offset(1).spawn(user.world());
 
-    FragileStructure.tryDamageStructure(WorldUtil.nearbyBlocks(user.world(), center, size, WaterMaterials::isIceBendable), 0);
+    Ray ray = new Ray(center, user.direction());
+    FragileStructure.tryDamageStructure(WorldUtil.nearbyBlocks(user.world(), center, size), 0, ray);
 
     BendingExplosion.builder()
       .size(size)
@@ -189,10 +190,10 @@ public class Combustion extends AbilityInstance implements Explosive {
         LOUD_COMBUSTION.play(user.world(), location);
         randomBeamDistance = distanceTravelled + 4 + 2 * ThreadLocalRandom.current().nextGaussian();
         double radius = ThreadLocalRandom.current().nextDouble(3, 6);
-        VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v -> {
+        VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v ->
           ParticleUtil.of(Particle.WAX_OFF, location.add(v.multiply(0.2)))
-            .count(0).offset(v.multiply(radius)).extra(0.9).spawn(user.world());
-        });
+            .count(0).offset(v.multiply(radius)).extra(0.9).spawn(user.world())
+        );
       }
     }
 

@@ -39,6 +39,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
@@ -76,6 +77,7 @@ public class LavaDisk extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private Vector3d location;
+  private Vector3d direction;
   private Collider collider;
 
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(1000);
@@ -106,6 +108,7 @@ public class LavaDisk extends AbilityInstance {
     }
     double r = 1.3;
     location = Vector3d.center(source);
+    direction = user.direction();
     AABB aabb = new AABB(new Vector3d(-r, -0.3, -r), new Vector3d(r, 0.3, r));
     collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
     for (Block block : WorldUtil.nearbyBlocks(user.world(), aabb.at(location))) {
@@ -151,7 +154,7 @@ public class LavaDisk extends AbilityInstance {
     Vector3d targetLocation = user.eyeLocation().add(user.direction().multiply(launched ? userConfig.range + 5 : 3));
     if (location.distanceSq(targetLocation) > 0.5 * 0.5) {
       double speed = launched ? userConfig.speed : 0.66 * userConfig.speed;
-      Vector3d direction = targetLocation.subtract(location).normalize();
+      direction = targetLocation.subtract(location).normalize();
       location = location.add(direction.multiply(speed));
       collider = collider.at(location);
       if (launched) {
@@ -207,7 +210,7 @@ public class LavaDisk extends AbilityInstance {
     if (currentPower <= 0) {
       return false;
     }
-    FragileStructure.tryDamageStructure(List.of(block), 0);
+    FragileStructure.tryDamageStructure(block, 0, new Ray(location, direction));
     if (!TempBlock.isBendable(block) || !user.canBuild(block)) {
       return false;
     }

@@ -20,7 +20,13 @@
 package me.moros.bending.util;
 
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
+import me.moros.bending.event.AbilityEvent;
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.ability.AbilityDescription;
@@ -32,6 +38,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to handle bending damage and death messages.
@@ -39,6 +46,11 @@ import org.bukkit.potion.PotionEffectType;
 public final class DamageUtil {
   private DamageUtil() {
   }
+
+  private static final Cache<UUID, BendingDamageEvent> CACHE = Caffeine.newBuilder()
+    .expireAfterWrite(100, TimeUnit.MILLISECONDS)
+    .scheduler(Scheduler.systemScheduler())
+    .build();
 
   /**
    * Attempt to damage the specified entity with certain parameters.
@@ -76,6 +88,18 @@ public final class DamageUtil {
       }
     }
     return true;
+  }
+
+  public static void cacheBlockDamage(Entity entity, AbilityEvent event, double damage) {
+    CACHE.put(entity.getUniqueId(), new BendingDamageEvent(event.user(), entity, event.ability(), damage));
+  }
+
+  public static @Nullable BendingDamageEvent cachedOrLastCause(Player player) {
+    BendingDamageEvent cause = CACHE.getIfPresent(player.getUniqueId());
+    if (cause == null && player.getLastDamageCause() instanceof BendingDamageEvent lastCause) {
+      return lastCause;
+    }
+    return cause;
   }
 
   private static double calculateDamageAfterResistance(LivingEntity entity, double damage) {

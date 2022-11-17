@@ -78,7 +78,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     render();
     postRender();
     onBlockHit(base.getRelative(BlockFace.UP));
-    boolean hit = CollisionUtil.handle(user, collider.at(location), this::onEntityHit);
+    boolean hit = CollisionUtil.handle(user, collider.at(location), this);
     return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 

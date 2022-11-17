@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.air;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,6 +28,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -61,7 +61,7 @@ public class AirBurst extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<AirStream> streams = new ArrayList<>();
+  private final MultiUpdatable<AirStream> streams = MultiUpdatable.empty();
 
   private boolean released;
   private long startTime;
@@ -118,8 +118,7 @@ public class AirBurst extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
 
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   @Override

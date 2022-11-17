@@ -28,10 +28,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.event.AbilityEvent;
+import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
+import me.moros.bending.model.user.User;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
@@ -51,33 +55,29 @@ public final class TempBlock extends TemporaryBase {
 
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
-  private final Deque<TempBlockState> snapshots;
+  private final Deque<TempBlockState> snapshots = new ArrayDeque<>();
   private final Block block;
-  private boolean bendable;
+  private Snapshot index;
   private boolean reverted = false;
 
-  private TempBlock(Block block, boolean bendable, int ticks) {
+  private TempBlock(Block block, BlockData data, int ticks, Builder builder) {
     super();
-    snapshots = new ArrayDeque<>();
     this.block = block;
-    this.bendable = bendable;
-    snapshots.offerLast(new TempBlockState(block, bendable, ticks));
+    addState(data, ticks, builder);
+    MANAGER.addEntry(block, this, ticks);
   }
 
-  private void addState(BlockData data, boolean bendable, int ticks) {
+  private void addState(BlockData data, int ticks, Builder builder) {
     cleanStates();
-    if (!snapshots.isEmpty()) {
-      TempBlockState tbs = snapshots.peekLast();
-      if (!tbs.weak) {
-        snapshots.offerLast(new TempBlockState(block, bendable, ticks));
-      } else {
-        tbs.weak = false;
-      }
-      this.bendable = bendable;
-      NativeAdapter.instance().setBlockFast(block, data);
-      refreshGravityCache(block);
-      MANAGER.reschedule(block, ticks);
+    if (index == null || !index.weak) {
+      TempBlockState tbs = new TempBlockState(block, ticks, builder);
+      snapshots.offerLast(tbs);
+      index = tbs;
+    } else {
+      index.weak = builder.weak;
     }
+    NativeAdapter.instance().setBlockFast(block, data);
+    refreshGravityCache(block);
   }
 
   // Cleans up previous states that have already expired
@@ -134,11 +134,8 @@ public final class TempBlock extends TemporaryBase {
     return block;
   }
 
-  public void forceWeak() {
-    TempBlockState tbs = snapshots.peekLast();
-    if (tbs != null) {
-      tbs.weak = true;
-    }
+  public @Nullable AbilityEvent damageSource() {
+    return index.source;
   }
 
   public void removeWithoutReverting() {
@@ -156,7 +153,7 @@ public final class TempBlock extends TemporaryBase {
   }
 
   private void revertToSnapshot(Snapshot snapshot) {
-    bendable = snapshot.bendable;
+    index = snapshot;
     snapshot.revert();
     refreshGravityCache(block);
   }
@@ -183,11 +180,11 @@ public final class TempBlock extends TemporaryBase {
   }
 
   public Snapshot snapshot() {
-    return new Snapshot(block, bendable);
+    return new Snapshot(block, index.bendable, index.weak, index.source);
   }
 
   public static boolean isBendable(Block block) {
-    return MANAGER.get(block).map(tb -> tb.bendable).orElse(true);
+    return MANAGER.get(block).map(tb -> tb.index.bendable).orElse(true);
   }
 
   public static boolean shouldIgnorePhysics(Block block) {
@@ -196,11 +193,8 @@ public final class TempBlock extends TemporaryBase {
 
   public static BlockData getLastValidData(Block block) {
     TempBlock tb = MANAGER.get(block).orElse(null);
-    if (tb != null) {
-      TempBlockState tbs = tb.snapshots.peekLast();
-      if (tbs != null && tbs.weak) {
-        return tbs.state.getBlockData();
-      }
+    if (tb != null && tb.index.weak) {
+      return tb.index.state.getBlockData();
     }
     return block.getBlockData();
   }
@@ -215,21 +209,27 @@ public final class TempBlock extends TemporaryBase {
 
   private static final class TempBlockState extends Snapshot {
     private final int expirationTicks;
-    private boolean weak = false;
 
-    private TempBlockState(Block block, boolean bendable, int ticks) {
-      super(block, bendable);
+    private TempBlockState(Block block, int ticks, Builder builder) {
+      super(block, builder.bendable, builder.weak, builder.source);
       this.expirationTicks = MANAGER.currentTick() + ticks;
     }
   }
 
+  private record DamageSource(User user, AbilityDescription ability) implements AbilityEvent {
+  }
+
   public static class Snapshot {
+    protected final DamageSource source;
     protected final BlockState state;
     protected final boolean bendable;
+    protected boolean weak;
 
-    private Snapshot(Block block, boolean bendable) {
+    private Snapshot(Block block, boolean bendable, boolean weak, @Nullable DamageSource source) {
       this.state = block.getState(false);
       this.bendable = bendable;
+      this.weak = weak;
+      this.source = source;
     }
 
     private void revert() {
@@ -273,8 +273,10 @@ public final class TempBlock extends TemporaryBase {
   public static final class Builder {
     private final BlockData data;
 
+    private DamageSource source;
     private boolean fixWater;
     private boolean bendable = false;
+    private boolean weak = false;
     private long duration = 0;
 
     private Builder(BlockData data) {
@@ -292,8 +294,18 @@ public final class TempBlock extends TemporaryBase {
       return this;
     }
 
+    public Builder weak(boolean weak) {
+      this.weak = weak;
+      return this;
+    }
+
     public Builder duration(long duration) {
       this.duration = duration;
+      return this;
+    }
+
+    public Builder ability(@Nullable Ability ability) {
+      this.source = ability == null ? null : new DamageSource(ability.user(), ability.description());
       return this;
     }
 
@@ -353,22 +365,21 @@ public final class TempBlock extends TemporaryBase {
       }
       int ticks = validateDuration(block);
       TempBlock tb = MANAGER.get(block).orElse(null);
-      if (tb != null && !tb.snapshots.isEmpty()) {
-        if (newData.matches(tb.snapshots.peekFirst().state.getBlockData())) {
+      if (tb != null) {
+        TempBlockState first = tb.snapshots.peekFirst();
+        if (first != null && newData.matches(first.state.getBlockData())) {
           tb.revertFully();
+        }
+        if (tb.reverted || tb.snapshots.isEmpty()) {
           MANAGER.removeEntry(block);
           return Optional.empty();
         }
-        tb.addState(newData, bendable, ticks);
+        tb.addState(newData, ticks, this);
+        MANAGER.reschedule(block, ticks);
         return Optional.of(tb);
       }
-      TempBlock result = new TempBlock(block, bendable, ticks);
-      if (NativeAdapter.instance().setBlockFast(block, newData)) {
-        refreshGravityCache(block);
-        MANAGER.addEntry(block, result, ticks);
-        return Optional.of(result);
-      }
-      return Optional.empty();
+      TempBlock result = new TempBlock(block, newData, ticks, this);
+      return Optional.of(result);
     }
   }
 }

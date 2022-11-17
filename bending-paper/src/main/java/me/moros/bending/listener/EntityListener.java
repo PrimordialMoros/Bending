@@ -24,8 +24,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
+import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.ability.fire.FireShield;
+import me.moros.bending.event.AbilityEvent;
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.event.TickEffectEvent;
 import me.moros.bending.model.Element;
@@ -39,10 +41,12 @@ import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.BendingEffect;
+import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
@@ -147,15 +151,40 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityCombustByBlock(EntityCombustByBlockEvent event) {
-    if (TempBlock.MANAGER.isTemp(event.getCombuster())) {
-      if (disabledWorld(event)) {
-        return;
-      }
+    Block block = event.getCombuster();
+    if (block == null || disabledWorld(event)) {
+      return;
+    }
+    TempBlock tb = TempBlock.MANAGER.get(block).orElse(null);
+    if (tb != null) {
       int ticks = event.getDuration() * 20;
       if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
         event.setDuration(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20.0));
       }
+      AbilityEvent ev = tb.damageSource();
+      if (ev != null) {
+        DamageUtil.cacheBlockDamage(event.getEntity(), ev, 0);
+      }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityDamageByBlock(EntityDamageByBlockEvent event) {
+    Block block = event.getDamager();
+    if (block == null || disabledWorld(event)) {
+      return;
+    }
+    TempBlock.MANAGER.get(block).map(TempBlock::damageSource)
+      .ifPresent(ev -> DamageUtil.cacheBlockDamage(event.getEntity(), ev, event.getDamage()));
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityInsideBlock(EntityInsideBlockEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    TempBlock.MANAGER.get(event.getBlock()).map(TempBlock::damageSource)
+      .ifPresent(ev -> DamageUtil.cacheBlockDamage(event.getEntity(), ev, 0));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

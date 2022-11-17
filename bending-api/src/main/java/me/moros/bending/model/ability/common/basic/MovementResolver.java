@@ -28,19 +28,20 @@ import me.moros.bending.util.material.MaterialUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class MovementResolver {
   private final World world;
+
   protected Predicate<Block> diagonalsPredicate = MaterialUtil::isTransparent;
 
   protected MovementResolver(World world) {
     this.world = world;
   }
 
-  protected @Nullable Vector3d resolve(Vector3d origin, Vector3d direction) {
+  protected Resolved resolve(Vector3d origin, Vector3d direction) {
+    Vector3d temp = origin.add(direction);
     Block original = origin.toBlock(world);
-    Block destination = origin.add(direction).toBlock(world);
+    Block destination = temp.toBlock(world);
     int offset = 0;
     if (!isValidBlock(destination)) {
       if (isValidBlock(destination.getRelative(BlockFace.UP)) && diagonalsPredicate.test(original.getRelative(BlockFace.UP))) {
@@ -48,7 +49,8 @@ public abstract class MovementResolver {
       } else if (isValidBlock(destination.getRelative(BlockFace.DOWN)) && diagonalsPredicate.test(destination)) {
         offset = -1;
       } else {
-        return null;
+        onCollision(temp);
+        return new Resolved(temp, false);
       }
     }
 
@@ -57,13 +59,21 @@ public abstract class MovementResolver {
       Block block = original.getRelative(v.x(), v.y() + offset, v.z());
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
-          return null;
+          Vector3d point = temp.add(v.x(), v.y() + offset, v.z());
+          onCollision(point);
+          return new Resolved(point, false);
         }
       }
     }
 
-    return origin.add(direction).add(0, offset, 0);
+    return new Resolved(temp.add(0, offset, 0), true);
   }
 
   protected abstract boolean isValidBlock(Block block);
+
+  protected void onCollision(Vector3d point) {
+  }
+
+  protected record Resolved(Vector3d point, boolean success) {
+  }
 }

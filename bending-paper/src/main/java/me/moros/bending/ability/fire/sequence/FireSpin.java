@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.fire.sequence;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +30,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
@@ -38,6 +38,8 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
+import me.moros.bending.model.predicate.Policies;
+import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
@@ -57,9 +59,10 @@ public class FireSpin extends AbilityInstance {
 
   private User user;
   private Config userConfig;
+  private RemovalPolicy removalPolicy;
 
   private final Set<Entity> affectedEntities = new HashSet<>();
-  private final Collection<FireStream> streams = new ArrayList<>();
+  private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
 
   public FireSpin(AbilityDescription desc) {
     super(desc);
@@ -74,7 +77,7 @@ public class FireSpin extends AbilityInstance {
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 40).forEach(
       v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
     );
-
+    removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }
@@ -86,8 +89,10 @@ public class FireSpin extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    if (removalPolicy.test(user, description())) {
+      return UpdateResult.REMOVE;
+    }
+    return streams.update();
   }
 
   @Override
@@ -135,7 +140,7 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), 3);
+      FragileStructure.tryDamageStructure(block, 3, new Ray(location, ray.direction));
       return true;
     }
   }

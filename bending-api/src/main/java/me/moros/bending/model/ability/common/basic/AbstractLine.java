@@ -86,32 +86,30 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     collider = new Sphere(location, 1);
-    if (CollisionUtil.handle(user, collider, this::onEntityHit, true)) {
+    if (CollisionUtil.handle(user, collider, this, true)) {
       return UpdateResult.REMOVE;
     }
 
-    Vector3d newLocation = resolve(location, direction);
-    if (newLocation == null) {
-      onCollision();
+    Resolved resolved = resolve(location, direction);
+    if (!resolved.success()) {
       return UpdateResult.REMOVE;
     }
-
     render();
-    location = location.add(newLocation).multiply(0.5);
+    location = location.add(resolved.point()).multiply(0.5);
     render(); // Render again at midpoint for a smoother line
+    location = resolved.point();
     postRender();
-    location = newLocation;
 
     Block block = location.toBlock(user.world());
 
     if (skipVertical) { // Advance location vertically if possible to match target height
       int y1 = FastMath.floor(targetLocation.y());
-      int y2 = FastMath.floor(newLocation.y());
+      int y2 = FastMath.floor(resolved.point().y());
       if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
-        location = newLocation.add(Vector3d.PLUS_J);
+        location = resolved.point().add(Vector3d.PLUS_J);
         block = block.getRelative(BlockFace.UP);
       } else if (y1 < y2 && isValidBlock(block.getRelative(BlockFace.DOWN))) {
-        location = newLocation.add(Vector3d.MINUS_J);
+        location = resolved.point().add(Vector3d.MINUS_J);
         block = block.getRelative(BlockFace.DOWN);
       }
     }
@@ -128,9 +126,6 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   @Override
   public Collider collider() {
     return collider;
-  }
-
-  protected void onCollision() {
   }
 
   protected boolean isValidTarget() {

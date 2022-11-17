@@ -40,6 +40,7 @@ import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.math.Rotation;
 import me.moros.bending.model.math.Vector3d;
@@ -61,7 +62,6 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.material.WaterMaterials;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
@@ -83,6 +83,8 @@ public class Lightning extends AbilityInstance {
   private final Set<Entity> affectedEntities = new HashSet<>();
 
   private ListIterator<LineSegment> arcIterator;
+  private Vector3d direction;
+  private Vector3d location;
 
   private boolean launched = false;
   private boolean exploded = false;
@@ -167,6 +169,8 @@ public class Lightning extends AbilityInstance {
     if (rayTrace.hit()) {
       point = rayTrace.position();
     }
+    location = origin;
+    direction = target.subtract(origin).normalize();
     arcIterator = new Arc(origin, target, point).iterator();
     user.addCooldown(description(), userConfig.cooldown);
     removalPolicy = Policies.builder().build();
@@ -179,6 +183,7 @@ public class Lightning extends AbilityInstance {
       LineSegment segment = arcIterator.next();
       CompositeRayTrace result = (CompositeRayTrace) user.rayTrace(segment.start, segment.direction)
         .ignoreLiquids(true).raySize(0.3).entities(user.world());
+      direction = segment.direction;
       if (!segment.isFork) {
         if (ThreadLocalRandom.current().nextInt(6) == 0) {
           SoundUtil.LIGHTNING.play(user.world(), segment.mid);
@@ -196,6 +201,7 @@ public class Lightning extends AbilityInstance {
       if (!user.canBuild(segment.end.toBlock(user.world()))) {
         return false;
       }
+      location = segment.end;
       renderSegment(segment);
       if (electrocuteAround(result.entity())) {
         return false;
@@ -281,9 +287,7 @@ public class Lightning extends AbilityInstance {
       return;
     }
     exploded = true;
-    if (WaterMaterials.isIceBendable(block)) {
-      FragileStructure.tryDamageStructure(List.of(block), 0);
-    }
+    FragileStructure.tryDamageStructure(block, 0, new Ray(center, direction));
     BendingExplosion.builder()
       .size(userConfig.explosionRadius)
       .damage(userConfig.explosionDamage)
@@ -291,6 +295,11 @@ public class Lightning extends AbilityInstance {
       .breakBlocks(true)
       .sound(6, 1)
       .buildAndExplode(this, center);
+  }
+
+  @Override
+  public Collection<Collider> colliders() {
+    return location == null ? List.of() : List.of(new Sphere(location, 0.3));
   }
 
   @Override

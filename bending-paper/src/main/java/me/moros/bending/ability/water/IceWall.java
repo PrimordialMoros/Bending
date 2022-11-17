@@ -28,10 +28,12 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.FastMath;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
@@ -54,7 +56,7 @@ public class IceWall extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<IceWallColumn> pillars = new ArrayList<>();
+  private final MultiUpdatable<IceWallColumn> pillars = MultiUpdatable.empty();
   private final Collection<Block> wallBlocks = new ArrayList<>();
 
   private Block origin;
@@ -66,7 +68,7 @@ public class IceWall extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     Block targetBlock = user.rayTrace(config.selectRange).blocks(user.world()).block();
-    if (targetBlock != null && FragileStructure.tryDamageStructure(List.of(targetBlock), 0)) {
+    if (targetBlock != null && WaterMaterials.isIceBendable(targetBlock) && FragileStructure.tryDamageStructure(targetBlock, 0, Ray.ZERO)) {
       return false;
     }
     if (user.onCooldown(description())) {
@@ -99,9 +101,7 @@ public class IceWall extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
-    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return pillars.update();
   }
 
   private void createPillar(Block block, int height) {
@@ -149,7 +149,7 @@ public class IceWall extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    FragileStructure.builder().health(userConfig.wallHealth).predicate(WaterMaterials::isIceBendable).build(wallBlocks);
+    FragileStructure.builder().health(userConfig.wallHealth).predicate(WaterMaterials::isIceBendable).add(wallBlocks).build();
   }
 
   @Override

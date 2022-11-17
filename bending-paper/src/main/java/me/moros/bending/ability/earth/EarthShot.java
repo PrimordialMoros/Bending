@@ -36,6 +36,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
@@ -49,6 +50,7 @@ import me.moros.bending.util.BendingExplosion;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayTraceBuilder;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
@@ -354,9 +356,11 @@ public class EarthShot extends AbilityInstance implements Explosive {
         BlockData data = projectile.entity().getBlockData();
         ParticleUtil.of(Particle.BLOCK_CRACK, center).count(6).offset(1).data(data).spawn(user.world());
         ParticleUtil.of(Particle.BLOCK_DUST, center).count(4).offset(1).data(data).spawn(user.world());
+        Block projected = RayTraceBuilder.of(center, lastVelocity).blocks(user.world()).block();
+        if (projected != null) {
+          FragileStructure.tryDamageStructure(projected, mode == Mode.MAGMA ? 6 : 4, new Ray(center, lastVelocity));
+        }
         explode();
-        Block projected = projectile.center().add(lastVelocity.normalize().multiply(0.75)).toBlock(user.world());
-        FragileStructure.tryDamageStructure(List.of(projected), mode == Mode.MAGMA ? 6 : 4);
       }
       projectile.revert();
     }

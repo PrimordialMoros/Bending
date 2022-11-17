@@ -25,12 +25,17 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.user.User;
 
 final class DummyAbilityManager implements AbilityManager {
   static final AbilityManager INSTANCE = new DummyAbilityManager();
 
   private DummyAbilityManager() {
+  }
+
+  @Override
+  public void addUpdatable(Updatable instance) {
   }
 
   @Override

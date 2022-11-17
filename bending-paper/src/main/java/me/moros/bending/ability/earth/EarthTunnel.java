@@ -140,12 +140,12 @@ public class EarthTunnel extends AbilityInstance {
       return;
     }
     Material type = block.getType();
-    if (!MaterialUtil.ORES.containsKey(type)) {
+    Material drop = MaterialUtil.ORES.get(type);
+    if (drop == null) {
       return;
     }
-    Material drop = MaterialUtil.ORES.get(type);
     int amount = getAmount(drop);
-    if (amount == 0) {
+    if (amount <= 0) {
       return;
     }
 

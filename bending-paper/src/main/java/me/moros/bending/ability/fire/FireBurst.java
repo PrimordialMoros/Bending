@@ -19,7 +19,6 @@
 
 package me.moros.bending.ability.fire;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +31,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.ability.common.basic.ParticleStream;
 import me.moros.bending.model.attribute.Attribute;
@@ -66,7 +66,7 @@ public class FireBurst extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<FireStream> streams = new ArrayList<>();
+  private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
   private final Set<Entity> affectedEntities = new HashSet<>();
 
   private boolean released;
@@ -103,7 +103,6 @@ public class FireBurst extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
     if (!released) {
       boolean charged = isCharged();
       if (charged) {
@@ -118,9 +117,7 @@ public class FireBurst extends AbilityInstance {
       }
       return UpdateResult.CONTINUE;
     }
-
-    streams.removeIf(stream -> stream.update() == UpdateResult.REMOVE);
-    return streams.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return streams.update();
   }
 
   @Override
@@ -213,10 +210,11 @@ public class FireBurst extends AbilityInstance {
           continue;
         }
         if (MaterialUtil.isIgnitable(b)) {
-          TempBlock.fire().duration(BendingProperties.instance().fireRevertTime(1000)).build(b);
+          TempBlock.fire().duration(BendingProperties.instance().fireRevertTime(1000))
+            .ability(FireBurst.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(List.of(block), 4);
+      FragileStructure.tryDamageStructure(block, 4, new Ray(location, ray.direction));
       return true;
     }
   }

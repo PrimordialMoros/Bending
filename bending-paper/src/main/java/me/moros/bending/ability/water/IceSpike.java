@@ -20,7 +20,6 @@
 package me.moros.bending.ability.water;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import me.moros.bending.config.Configurable;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
@@ -66,7 +66,7 @@ public class IceSpike extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Collection<IcePillar> pillars = new ArrayList<>();
+  private final MultiUpdatable<IcePillar> pillars = MultiUpdatable.empty();
   private final Collection<Entity> affectedEntities = new HashSet<>();
 
   public IceSpike(AbilityDescription desc) {
@@ -117,9 +117,7 @@ public class IceSpike extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
-    pillars.removeIf(pillar -> pillar.update() == UpdateResult.REMOVE);
-    return pillars.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return pillars.update();
   }
 
   private boolean createPillar(Entity entity) {

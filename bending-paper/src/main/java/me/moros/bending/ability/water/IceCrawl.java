@@ -31,6 +31,7 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.ability.common.SelectedSource;
 import me.moros.bending.model.ability.common.basic.AbstractLine;
 import me.moros.bending.model.ability.state.State;
@@ -38,6 +39,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -198,6 +200,12 @@ public class IceCrawl extends AbilityInstance {
       }
       Block below = block.getRelative(BlockFace.DOWN);
       return WaterMaterials.isWaterOrIceBendable(below) || !below.isPassable();
+    }
+
+    @Override
+    protected void onCollision(Vector3d point) {
+      Block projected = point.toBlock(user.world());
+      FragileStructure.tryDamageStructure(projected, 5, new Ray(location, direction));
     }
   }
 

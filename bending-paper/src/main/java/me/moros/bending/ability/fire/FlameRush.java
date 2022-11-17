@@ -111,7 +111,6 @@ public class FlameRush extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-
     if (charging) {
       if (user.sneaking()) {
         Vector3d spawnLoc = user.mainHandSide();
@@ -122,9 +121,9 @@ public class FlameRush extends AbilityInstance {
       } else {
         launch();
       }
+      return UpdateResult.CONTINUE;
     }
-
-    return (charging || stream.update() == UpdateResult.CONTINUE) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
+    return stream.update();
   }
 
   public boolean isFullyCharged() {
@@ -233,14 +232,14 @@ public class FlameRush extends AbilityInstance {
         affectedEntities.add(entity);
         DamageUtil.damageEntity(entity, user, userConfig.damage * factor, description());
         BendingEffect.FIRE_TICK.apply(user, entity);
-        EntityUtil.applyVelocity(FlameRush.this, entity, streamDirection.normalize().multiply(0.9));
+        EntityUtil.applyVelocity(FlameRush.this, entity, streamDirection.normalize().multiply(0.7 * factor));
       }
       return false;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), FastMath.round(8 * factor));
+      FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), new Ray(location, streamDirection));
       return true;
     }
   }

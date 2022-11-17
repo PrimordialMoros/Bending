@@ -47,7 +47,7 @@ public class TemporalManager<K, V extends TemporaryBase> {
   }
 
   public TemporalManager(String name, Consumer<V> consumer) {
-    this.label = "Temporal " + name + " - tick";
+    this.label = "Temporal " + name;
     this.consumer = Objects.requireNonNull(consumer);
     this.instances = new ConcurrentHashMap<>();
     this.wheel = new TimerWheel();

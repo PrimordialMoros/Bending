@@ -33,6 +33,8 @@ import me.moros.bending.model.user.User;
  * Handles active {@link Ability} instances.
  */
 public interface AbilityManager extends Updatable, Iterable<Ability> {
+  void addUpdatable(Updatable instance);
+
   void addAbility(User user, Ability instance);
 
   void changeOwner(Ability ability, User user);

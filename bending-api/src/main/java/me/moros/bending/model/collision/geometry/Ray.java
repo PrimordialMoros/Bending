@@ -25,6 +25,8 @@ import me.moros.bending.model.math.Vector3d;
  * Ray with origin and direction.
  */
 public class Ray implements Collider {
+  public static final Ray ZERO = new Ray(Vector3d.ZERO, Vector3d.ZERO);
+
   public final Vector3d origin;
   public final Vector3d direction;
   public final Vector3d invDir;

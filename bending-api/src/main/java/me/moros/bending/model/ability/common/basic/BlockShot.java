@@ -134,7 +134,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
-    if (CollisionUtil.handle(user, collider, this::onEntityHit)) {
+    if (CollisionUtil.handle(user, collider, this)) {
       return UpdateResult.REMOVE;
     }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
@@ -146,6 +146,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
         tempBlock = current;
         TempBlock.builder(material.createBlockData()).build(current);
       }
+      postRender();
     } else {
       onBlockHit(current);
       return UpdateResult.REMOVE;
@@ -173,7 +174,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public Vector3d center() {
-    return location.floor().add(0.5, 0.5, 0.5);
+    return location.snapToBlockCenter();
   }
 
   @Override

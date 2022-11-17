@@ -42,6 +42,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
@@ -312,7 +313,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(List.of(block), 3);
+      FragileStructure.tryDamageStructure(block, 3, new Ray(Vector3d.center(block), direction));
     }
   }
 

@@ -142,7 +142,7 @@ public class FireWheel extends AbilityInstance {
     @Override
     public boolean onBlockHit(Block block) {
       if (userConfig.fireTrail && MaterialUtil.isIgnitable(block) && user.canBuild(block)) {
-        TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).build(block);
+        TempBlock.fire().duration(BendingProperties.instance().fireRevertTime()).ability(FireWheel.this).build(block);
       }
       return true;
     }

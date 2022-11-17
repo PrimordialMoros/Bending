@@ -39,6 +39,7 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -219,13 +220,14 @@ public class Torrent extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
+      Ray ray = new Ray(Vector3d.center(block), direction);
       if (clicked) {
         if (freeze()) {
-          FragileStructure.tryDamageStructure(List.of(block), 8);
+          FragileStructure.tryDamageStructure(block, 8, ray);
         }
         return;
       }
-      FragileStructure.tryDamageStructure(List.of(block), 1);
+      FragileStructure.tryDamageStructure(block, 1, ray);
     }
   }
 
