@@ -23,11 +23,11 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.raytrace.EntityRayTrace;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -54,7 +54,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   protected AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
     super(user.world());
     this.user = user;
-    this.location = new Vector3d(source.getLocation().add(0.5, 1.25, 0.5));
+    this.location = Vector3d.from(source.getLocation().add(0.5, 1.25, 0.5));
     this.origin = location;
     this.range = range;
     this.speed = speed;
@@ -69,7 +69,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   public UpdateResult update() {
     if (locked) {
       if (isValidTarget()) {
-        targetLocation = new Vector3d(target.getLocation());
+        targetLocation = Vector3d.from(target.getLocation());
         direction = targetLocation.subtract(location).withY(0).normalize();
       } else {
         locked = false;
@@ -135,6 +135,6 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (target instanceof Player player && !player.isOnline()) {
       return false;
     }
-    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(new Vector3d(target.getLocation())) < 5 * 5;
+    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(Vector3d.from(target.getLocation())) < 5 * 5;
   }
 }

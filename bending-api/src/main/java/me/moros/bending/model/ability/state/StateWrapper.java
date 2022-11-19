@@ -21,6 +21,9 @@ package me.moros.bending.model.ability.state;
 
 import me.moros.bending.model.ability.Updatable;
 
+/**
+ * Wraps an {@link Updatable} into a {@link State}.
+ */
 public class StateWrapper implements State {
   private final Updatable action;
   private StateChain chain;

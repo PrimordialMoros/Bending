@@ -24,17 +24,20 @@ import java.util.Map;
 
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempBlock.Snapshot;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * State implementation for focusing a selected source.
+ */
 public class SelectedSource implements State {
   private static final Map<Block, SelectedSource> INSTANCES = new HashMap<>();
 
@@ -48,8 +51,8 @@ public class SelectedSource implements State {
   private final boolean particles;
   private final double distanceSq;
 
-  private boolean started = false;
-  private boolean forceRemove = false;
+  private boolean started;
+  private boolean forceRemove;
 
   public SelectedSource(User user, Block block, double maxDistance, @Nullable BlockData data) {
     this.user = user;
@@ -70,7 +73,7 @@ public class SelectedSource implements State {
     if (block.equals(this.block)) {
       return false;
     }
-    Vector3d newOrigin = Vector3d.center(block);
+    Vector3d newOrigin = Vector3d.fromCenter(block);
     if (user.eyeLocation().distanceSq(newOrigin) > distanceSq) {
       return false;
     }

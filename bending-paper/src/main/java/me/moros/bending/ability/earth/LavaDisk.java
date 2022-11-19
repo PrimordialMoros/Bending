@@ -41,8 +41,6 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -54,11 +52,13 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -107,9 +107,9 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     double r = 1.3;
-    location = Vector3d.center(source);
+    location = Vector3d.fromCenter(source);
     direction = user.direction();
-    AABB aabb = new AABB(new Vector3d(-r, -0.3, -r), new Vector3d(r, 0.3, r));
+    AABB aabb = new AABB(Vector3d.of(-r, -0.3, -r), Vector3d.of(r, 0.3, r));
     collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
     for (Block block : WorldUtil.nearbyBlocks(user.world(), aabb.at(location))) {
       if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.getRelative(BlockFace.UP))) {
@@ -222,7 +222,7 @@ public class LavaDisk extends AbilityInstance {
     if (tree || EarthMaterials.isEarthOrSand(block)) {
       currentPower -= block.getType().getHardness();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
-      Vector3d center = Vector3d.center(block);
+      Vector3d center = Vector3d.fromCenter(block);
       ParticleUtil.of(Particle.LAVA, center).offset(0.5).extra(0.05).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
         SoundUtil.of(Sound.BLOCK_GRINDSTONE_USE, 0.3F, 0.3F).play(block);
@@ -244,7 +244,7 @@ public class LavaDisk extends AbilityInstance {
       for (int j = 0; j <= 288; j += 72) {
         int rotAngle = rotationAngle + j + offset;
         double length = 0.1 * i;
-        Vector3d temp = new Vector3d(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
+        Vector3d temp = Vector3d.of(length * Math.cos(rotAngle), 0, length * Math.sin(rotAngle));
         Vector3d loc = location.add(VectorUtil.rotateAroundAxisY(temp, cos, sin));
         ParticleUtil.rgb(loc, colors[index], size).spawn(user.world());
         if (length > 0.5) {

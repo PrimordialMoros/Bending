@@ -138,4 +138,24 @@ public final class Preset {
     return counter.entrySet().stream().max(Entry.comparingByValue())
       .map(e -> e.getKey().color()).orElse(ColorPalette.NEUTRAL);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Preset other = (Preset) obj;
+    return id == other.id && name.equals(other.name) && Arrays.equals(abilities, other.abilities);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = id;
+    result = 31 * result + name.hashCode();
+    result = 31 * result + Arrays.hashCode(abilities);
+    return result;
+  }
 }

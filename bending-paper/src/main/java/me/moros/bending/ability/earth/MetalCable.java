@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -39,8 +38,6 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -57,6 +54,8 @@ import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -70,7 +69,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -139,7 +138,7 @@ public class MetalCable extends AbilityInstance {
     if (cable == null || !cable.isValid()) {
       return UpdateResult.REMOVE;
     }
-    location = new Vector3d(cable.getLocation());
+    location = Vector3d.from(cable.getLocation());
     double distance = user.location().distance(location);
     if (hasHit) {
       if (!handleMovement(distance)) {
@@ -197,14 +196,14 @@ public class MetalCable extends AbilityInstance {
         targetLocation = ray.origin.add(ray.direction);
       }
     }
-    Vector3d direction = targetLocation.subtract(new Vector3d(entityToMove.getLocation())).normalize();
+    Vector3d direction = targetLocation.subtract(Vector3d.from(entityToMove.getLocation())).normalize();
     if (distance > 3) {
       EntityUtil.applyVelocity(this, entityToMove, direction.multiply(userConfig.pullSpeed));
     } else {
       if (target.type == CableTarget.Type.ENTITY) {
         EntityUtil.applyVelocity(this, entityToMove, Vector3d.ZERO);
         if (target.entity instanceof FallingBlock fb) {
-          Vector3d tempLocation = new Vector3d(fb.getLocation().add(0, 0.5, 0));
+          Vector3d tempLocation = Vector3d.from(fb.getLocation().add(0, 0.5, 0));
           ParticleUtil.of(Particle.BLOCK_CRACK, tempLocation).count(4)
             .offset(0.25, 0.15, 0.25).data(fb.getBlockData()).spawn(user.world());
           ParticleUtil.of(Particle.BLOCK_DUST, tempLocation).count(6)
@@ -216,7 +215,7 @@ public class MetalCable extends AbilityInstance {
         if (distance <= 3 && distance > 1.5) {
           EntityUtil.applyVelocity(this, entityToMove, direction.multiply(0.4 * userConfig.pullSpeed));
         } else {
-          EntityUtil.applyVelocity(this, entityToMove, new Vector3d(0, 0.5, 0));
+          EntityUtil.applyVelocity(this, entityToMove, Vector3d.of(0, 0.5, 0));
           return false;
         }
       }
@@ -243,7 +242,7 @@ public class MetalCable extends AbilityInstance {
     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
     Metadata.add(arrow, Metadata.METAL_CABLE, this);
     cable = arrow;
-    location = new Vector3d(cable.getLocation());
+    location = Vector3d.from(cable.getLocation());
     SoundUtil.METAL.play(user.world(), origin);
 
     removalPolicy = Policies.builder()
@@ -257,8 +256,8 @@ public class MetalCable extends AbilityInstance {
   private boolean visualizeLine(double distance) {
     Vector3d origin = user.mainHandSide();
     Vector3d dir = location.subtract(origin);
-    Set<Block> ignored = target != null && target.block != null ? Set.of(target.block) : Set.of();
-    if (dir.lengthSq() > 0.1 && user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignored).blocks(user.world()).hit()) {
+    Block ignore = target == null ? null : target.block;
+    if (dir.lengthSq() > 0.1 && user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignore).blocks(user.world()).hit()) {
       return false;
     }
     boolean evenTicks = ticks % 2 == 0;

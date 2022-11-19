@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.Tasker;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -103,9 +103,9 @@ public class Fracture implements Updatable {
     //noinspection ConstantConditions
     int progress = wallData.computeIfPresent(block, (k, v) -> v + 1);
     int particles = FastMath.floor(0.5 * progress);
-    ParticleUtil.of(Particle.LAVA, Vector3d.center(block)).count(particles).offset(0.4).spawn(block.getWorld());
+    ParticleUtil.of(Particle.LAVA, Vector3d.fromCenter(block)).count(particles).offset(0.4).spawn(block.getWorld());
     if (progress <= 9) {
-      NativeAdapter.instance().fakeBreak(block.getWorld(), Vector3d.center(block), (byte) progress);
+      NativeAdapter.instance().fakeBreak(block.getWorld(), Vector3d.fromCenter(block), (byte) progress);
       return false;
     }
     return true;

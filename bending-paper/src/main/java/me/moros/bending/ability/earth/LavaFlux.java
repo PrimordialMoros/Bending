@@ -37,17 +37,17 @@ import me.moros.bending.model.ability.common.basic.BlockLine;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -127,7 +127,7 @@ public class LavaFlux extends AbilityInstance {
     if (!user.isOnGround()) {
       return false;
     }
-    Vector3d center = user.location().snapToBlockCenter();
+    Vector3d center = user.location().blockCenter();
     Vector3d dir = user.direction().withY(0).normalize().multiply(userConfig.range + 2);
 
     line = new Line(new Ray(center, dir), 70);
@@ -209,7 +209,7 @@ public class LavaFlux extends AbilityInstance {
     }
 
     private void expand(Block base, Vector3d side, int left, int right) {
-      Resolved resolved = resolve(Vector3d.center(base), side);
+      Resolved resolved = resolve(Vector3d.fromCenter(base), side);
       Block block = resolved.point().toBlock(user.world());
       if (resolved.success()) {
         render(block, left, right);
@@ -249,7 +249,7 @@ public class LavaFlux extends AbilityInstance {
     }
 
     private boolean checkDistance(Block block) {
-      return Vector3d.center(block).distanceSq(location) < userConfig.wallRadius * userConfig.wallRadius;
+      return Vector3d.fromCenter(block).distanceSq(location) < userConfig.wallRadius * userConfig.wallRadius;
     }
   }
 

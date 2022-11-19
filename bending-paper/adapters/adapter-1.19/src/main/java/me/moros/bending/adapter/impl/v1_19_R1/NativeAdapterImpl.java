@@ -32,10 +32,11 @@ import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
-import me.moros.bending.model.raytrace.RayTraceContext;
+import me.moros.bending.model.raytrace.RayTrace.Context;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -126,7 +127,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public CompositeRayTrace rayTraceBlocks(RayTraceContext context, World world) {
+  public CompositeRayTrace rayTraceBlocks(Context context, World world) {
     Vector3d s = context.start();
     Vector3d e = context.end();
     Vec3 startPos = new Vec3(s.x(), s.y(), s.z());
@@ -137,13 +138,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
 
     BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()), null);
-    Set<BlockPos> ignored = context.ignoreBlocks().stream()
-      .map(b -> new BlockPos(b.getX(), b.getY(), b.getZ())).collect(Collectors.toSet());
-
+    Set<BlockPos> ignored = context.ignore().stream().map(b -> new BlockPos(b.blockX(), b.blockY(), b.blockZ()))
+      .collect(Collectors.toSet());
     BlockHit result = traverseBlocks(world, clipContext, ignored, miss);
     if (!miss.equals(result)) {
-      Vector3i bp = result.blockPosition();
-      return CompositeRayTrace.hit(result.position, world.getBlockAt(bp.x(), bp.y(), bp.z()), dirToFace(result.direction()));
+      return CompositeRayTrace.hit(result.position, result.blockPosition().toBlock(world), dirToFace(result.direction()));
     }
     return CompositeRayTrace.miss(result.position);
   }
@@ -251,7 +250,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     }
 
     private BlockHit(Vec3 pos, BlockPos bp, @Nullable Direction direction) {
-      this(new Vector3d(pos.x, pos.y, pos.z), new Vector3i(bp.getX(), bp.getY(), bp.getZ()), direction);
+      this(Vector3d.of(pos.x, pos.y, pos.z), Vector3i.of(bp.getX(), bp.getY(), bp.getZ()), direction);
     }
   }
 
@@ -266,7 +265,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public int createArmorStand(World world, Vector3d center, Material material, Vector3d velocity, boolean gravity) {
+  public int createArmorStand(World world, Position center, Material material, Vector3d velocity, boolean gravity) {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
     packets.add(createMob(id, armorStandId, center));
@@ -282,7 +281,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public int createFallingBlock(World world, Vector3d center, BlockData data, Vector3d velocity, boolean gravity) {
+  public int createFallingBlock(World world, Position center, BlockData data, Vector3d velocity, boolean gravity) {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
@@ -298,12 +297,12 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public void fakeBlock(World world, Vector3d center, BlockData data) {
+  public void fakeBlock(World world, Position center, BlockData data) {
     broadcast(List.of(fakeBlock(center, data)), world, center, world.getViewDistance() << 4);
   }
 
   @Override
-  public void fakeBreak(World world, Vector3d center, byte progress) {
+  public void fakeBreak(World world, Position center, byte progress) {
     broadcast(List.of(fakeBreak(center, progress)), world, center, world.getViewDistance() << 4);
   }
 
@@ -326,17 +325,17 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return false;
   }
 
-  private void broadcast(Collection<Packet<?>> packets, World world, Vector3d center) {
+  private void broadcast(Collection<Packet<?>> packets, World world, Position center) {
     broadcast(packets, world, center, world.getViewDistance() << 4);
   }
 
-  private void broadcast(Collection<Packet<?>> packets, World world, Vector3d center, int dist) {
+  private void broadcast(Collection<Packet<?>> packets, World world, Position center, int dist) {
     if (packets.isEmpty()) {
       return;
     }
     int distanceSq = dist * dist;
     for (var player : adapt(world).players()) {
-      if (new Vector3d(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
+      if (Vector3d.of(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
         for (var packet : packets) {
           player.connection.send(packet);
         }
@@ -368,7 +367,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(id), Map.of());
   }
 
-  private ClientboundAddEntityPacket createMob(int id, int entityTypeId, Vector3d center) {
+  private ClientboundAddEntityPacket createMob(int id, int entityTypeId, Position center) {
     PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
 
     packetByteBuffer.writeVarInt(id);
@@ -398,7 +397,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return new ClientboundAddEntityPacket(packetByteBuffer);
   }
 
-  private ClientboundAddEntityPacket createFallingBlock(int id, Vector3d center, int blockId) {
+  private ClientboundAddEntityPacket createFallingBlock(int id, Position center, int blockId) {
     double x = center.x();
     double y = center.y();
     double z = center.z();
@@ -409,11 +408,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.x(), vel.y(), vel.z()));
   }
 
-  private ClientboundBlockUpdatePacket fakeBlock(Vector3d b, BlockData data) {
+  private ClientboundBlockUpdatePacket fakeBlock(Position b, BlockData data) {
     return new ClientboundBlockUpdatePacket(new BlockPos(b.x(), b.y(), b.z()), adapt(data));
   }
 
-  private ClientboundBlockDestructionPacket fakeBreak(Vector3d b, byte progress) {
+  private ClientboundBlockDestructionPacket fakeBreak(Position b, byte progress) {
     int id = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
     return new ClientboundBlockDestructionPacket(id, new BlockPos(b.x(), b.y(), b.z()), progress);
   }

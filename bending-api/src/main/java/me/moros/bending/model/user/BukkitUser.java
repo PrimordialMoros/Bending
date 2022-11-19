@@ -22,9 +22,9 @@ package me.moros.bending.model.user;
 import java.util.UUID;
 
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.RayTraceBuilder;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.identity.Identity;
@@ -59,19 +59,19 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
   }
 
   default Vector3d location() {
-    return new Vector3d(entity().getLocation());
+    return Vector3d.from(entity().getLocation());
   }
 
   default Vector3d eyeLocation() {
-    return new Vector3d(entity().getEyeLocation());
+    return Vector3d.from(entity().getEyeLocation());
   }
 
   default Vector3d direction() {
-    return new Vector3d(entity().getLocation().getDirection());
+    return Vector3d.from(entity().getLocation().getDirection());
   }
 
   default Vector3d velocity() {
-    return new Vector3d(entity().getVelocity());
+    return Vector3d.from(entity().getVelocity());
   }
 
   default int yaw() {
@@ -188,7 +188,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    */
   default Vector3d rightSide() {
     double angle = Math.toRadians(yaw());
-    return location().subtract(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
+    return location().subtract(Vector3d.of(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   /**
@@ -197,7 +197,7 @@ public interface BukkitUser extends ForwardingAudience.Single, Identity {
    */
   default Vector3d leftSide() {
     double angle = Math.toRadians(yaw());
-    return location().add(new Vector3d(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
+    return location().add(Vector3d.of(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
   }
 
   @Override

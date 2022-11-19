@@ -29,8 +29,6 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -45,6 +43,8 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -98,7 +98,7 @@ public class EarthArmor extends AbilityInstance {
     }
     data = source.getBlockData();
     TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(source);
-    temp = TempEntity.builder(data).velocity(new Vector3d(0, 0.2, 0))
+    temp = TempEntity.builder(data).velocity(Vector3d.of(0, 0.2, 0))
       .gravity(false).duration(10000).build(source);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(5000)).build();
     return true;

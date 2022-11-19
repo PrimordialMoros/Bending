@@ -39,8 +39,6 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -51,12 +49,14 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -68,7 +68,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Shockwave extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
-  private static final Vector3d OFFSET = new Vector3d(0.4, 0.75, 0.4);
+  private static final Vector3d OFFSET = Vector3d.of(0.4, 0.75, 0.4);
 
   private User user;
   private Config userConfig;
@@ -145,7 +145,7 @@ public class Shockwave extends AbilityInstance {
     }
 
     colliders = recentAffectedBlocks.snapshot().stream()
-      .map(b -> (Collider) AABB.BLOCK_BOUNDS.grow(OFFSET).at(new Vector3d(b.getX(), b.getY() + 0.5, b.getZ())))
+      .map(b -> (Collider) AABB.BLOCK_BOUNDS.grow(OFFSET).at(Vector3d.of(b.getX(), b.getY() + 0.5, b.getZ())))
       .toList();
     if (!colliders.isEmpty()) {
       CollisionUtil.handle(user, new Sphere(origin, range + 2), this::onEntityHit, false);
@@ -155,7 +155,7 @@ public class Shockwave extends AbilityInstance {
 
   private boolean onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
-      Vector3d loc = new Vector3d(entity.getLocation());
+      Vector3d loc = Vector3d.from(entity.getLocation());
       AABB entityCollider = AABBUtil.entityBounds(entity);
       for (Collider aabb : colliders) {
         if (aabb.intersects(entityCollider)) {
@@ -182,7 +182,7 @@ public class Shockwave extends AbilityInstance {
     released = true;
     range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    origin = user.location().snapToBlockCenter();
+    origin = user.location().blockCenter();
     Vector3d dir = user.direction().withY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
@@ -239,12 +239,12 @@ public class Shockwave extends AbilityInstance {
         block.setType(Material.AIR);
       }
       double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
-      Vector3d velocity = new Vector3d(0, deltaY, 0);
+      Vector3d velocity = Vector3d.of(0, deltaY, 0);
       Block below = block.getRelative(BlockFace.DOWN);
       BlockData data = mapData(below.getBlockData());
       TempEntity.builder(data).velocity(velocity).duration(500)
-        .build(TempEntityType.FALLING_BLOCK, user.world(), Vector3d.center(below));
-      ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.center(block).add(0, 0.75, 0))
+        .build(TempEntityType.FALLING_BLOCK, user.world(), Vector3d.fromCenter(below));
+      ParticleUtil.of(Particle.BLOCK_CRACK, Vector3d.fromCenter(block).add(0, 0.75, 0))
         .count(5).offset(0.5, 0.25, 0.5).data(data).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundUtil.EARTH.play(block);

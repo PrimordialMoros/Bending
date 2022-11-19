@@ -40,7 +40,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -50,6 +49,7 @@ import me.moros.bending.temporal.TempBlock.Builder;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.SoundUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -220,7 +220,7 @@ public class Torrent extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
-      Ray ray = new Ray(Vector3d.center(block), direction);
+      Ray ray = new Ray(Vector3d.fromCenter(block), direction);
       if (clicked) {
         if (freeze()) {
           FragileStructure.tryDamageStructure(block, 8, ray);

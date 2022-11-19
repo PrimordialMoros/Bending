@@ -40,7 +40,6 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.manager.Game;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
@@ -50,6 +49,7 @@ import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -216,7 +216,7 @@ public class PlayerListener implements Listener {
     if (user != null) {
       double x = event.getTo().getX() - event.getFrom().getX();
       double z = event.getTo().getZ() - event.getFrom().getZ();
-      game.activationController().onUserMove(user, new Vector3d(x, 0, z));
+      game.activationController().onUserMove(user, Vector3d.of(x, 0, z));
     }
     return false;
   }
@@ -264,7 +264,7 @@ public class PlayerListener implements Listener {
             Block block = event.getClickedBlock();
             if (block != null) {
               Location loc = event.getInteractionPoint();
-              Vector3d point = loc == null ? null : new Vector3d(loc);
+              Vector3d point = loc == null ? null : Vector3d.from(loc);
               user.store().put(BlockInteraction.KEY, new BlockInteraction(block, event.getBlockFace(), point));
             }
             game.activationController().onUserInteract(user, null, event.getClickedBlock());
@@ -300,7 +300,7 @@ public class PlayerListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-    onPlayerInteractEntity(event, new Vector3d(event.getClickedPosition()));
+    onPlayerInteractEntity(event, Vector3d.from(event.getClickedPosition()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

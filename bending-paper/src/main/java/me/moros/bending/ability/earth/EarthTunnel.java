@@ -31,14 +31,14 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -78,7 +78,7 @@ public class EarthTunnel extends AbilityInstance {
       return false;
     }
 
-    center = Vector3d.center(block);
+    center = Vector3d.fromCenter(block);
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
 
     return true;
@@ -115,7 +115,7 @@ public class EarthTunnel extends AbilityInstance {
         if (block == null) {
           return UpdateResult.REMOVE;
         }
-        center = Vector3d.center(block);
+        center = Vector3d.fromCenter(block);
 
         if (++radius > userConfig.radius) {
           radius = 0;

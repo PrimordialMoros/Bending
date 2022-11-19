@@ -37,21 +37,21 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.registry.Registries;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
-  private static final AABB BOUNDS = new AABB(new Vector3d(-0.4, -2, -2), new Vector3d(0.4, 2, 2));
+  private static final AABB BOUNDS = new AABB(Vector3d.of(-0.4, -2, -2), Vector3d.of(0.4, 2, 2));
   private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription scooterDesc;
 

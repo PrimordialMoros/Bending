@@ -129,6 +129,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
   /**
    * Create a translation from a map of localized Strings.
    * @param key a unique key to identify your translation when registering
+   * @param locale the locale for your translation
    * @param translations a map with localized strings
    * @return the constructed translation
    * @throws IllegalArgumentException if translations is empty

@@ -19,22 +19,21 @@
 
 package me.moros.bending.model.ability.common.basic;
 
-import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -68,7 +67,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   protected BlockShot(User user, Block block, Material material, double range, int speed) {
     this.user = user;
     this.material = material;
-    this.location = Vector3d.center(block);
+    this.location = Vector3d.fromCenter(block);
     this.collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
     this.range = range;
     this.speed = Math.min(20, speed);
@@ -85,7 +84,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if ((targetY > currentY && validAbove) || (targetY < currentY && validBelow)) {
       firstDestination = fixedY;
     } else if (location.add(dir).toBlock(user.world()).isPassable()) {
-      firstDestination = location.add(dir).snapToBlockCenter();
+      firstDestination = location.add(dir).blockCenter();
     } else {
       if (validAbove) {
         firstDestination = location.add(0, 2, 0);
@@ -113,13 +112,13 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     previousBlock = location.toBlock(user.world());
     Vector3d dest = settingUp ? firstDestination : target;
     direction = dest.subtract(location.subtract(direction)).normalize();
-    Vector3d originalVector = new Vector3d(location.toArray());
+    Vector3d originalVector = location;
     Block originBlock = originalVector.toBlock(user.world());
     if (location.add(direction).toBlock(user.world()).equals(previousBlock)) {
       direction = direction.multiply(2);
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-      Block diagonal = originBlock.getRelative(v.x(), v.y(), v.z());
+      Block diagonal = originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ());
       if (diagonalsPredicate.test(diagonal)) {
         onBlockHit(diagonal);
         return UpdateResult.REMOVE;
@@ -164,8 +163,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void redirect() {
-    target = user.rayTrace(range).ignore(Set.of(location.toBlock(user.world()))).entities(user.world())
-      .entityEyeLevelOrPosition().snapToBlockCenter();
+    target = user.rayTrace(range).ignore(location).entities(user.world()).entityEyeLevelOrPosition().blockCenter();
     settingUp = false;
   }
 
@@ -174,7 +172,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public Vector3d center() {
-    return location.snapToBlockCenter();
+    return location.blockCenter();
   }
 
   @Override

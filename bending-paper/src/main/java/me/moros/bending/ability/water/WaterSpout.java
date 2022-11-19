@@ -34,8 +34,6 @@ import me.moros.bending.model.ability.common.basic.AbstractSpout;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -45,6 +43,8 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -129,8 +129,8 @@ public class WaterSpout extends AbilityInstance {
   }
 
   private final class Spout extends AbstractSpout {
-    private Vector3i lastPosition;
-    private final Vector3d g = new Vector3d(0, -0.1, 0); // Applied as extra gravity
+    private Position lastPosition;
+    private final Vector3d g = Vector3d.of(0, -0.1, 0); // Applied as extra gravity
 
     private Spout() {
       super(user.game().flightManager().get(user), userConfig.height);
@@ -139,7 +139,7 @@ public class WaterSpout extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3i newPosition = user.location().toVector3i();
+      Position newPosition = user.location().toVector3i();
       if (newPosition.equals(lastPosition)) {
         return;
       }

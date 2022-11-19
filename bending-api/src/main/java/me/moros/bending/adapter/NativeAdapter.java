@@ -19,12 +19,14 @@
 
 package me.moros.bending.adapter;
 
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
-import me.moros.bending.model.raytrace.RayTraceContext;
+import me.moros.bending.model.raytrace.RayTrace.Context;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
@@ -133,7 +135,7 @@ public interface NativeAdapter {
    * @param world the world to perform the raytrace in
    * @return the result of the performed raytrace
    */
-  default CompositeRayTrace rayTraceBlocks(RayTraceContext context, World world) {
+  default CompositeRayTrace rayTraceBlocks(Context context, World world) {
     Location start = context.start().toLocation(world);
     Vector3d dir = context.end().subtract(context.start());
     double range = dir.length();
@@ -145,10 +147,10 @@ public interface NativeAdapter {
     }
     Block block = result.getHitBlock();
     BlockFace face = result.getHitBlockFace();
-    if (block == null || face == null || context.ignoreBlocks().contains(block)) {
+    if (block == null || face == null || context.ignore().contains(Vector3i.from(block))) {
       return missResult;
     }
-    return CompositeRayTrace.hit(new Vector3d(result.getHitPosition()), block, face);
+    return CompositeRayTrace.hit(Vector3d.from(result.getHitPosition()), block, face);
   }
 
   /**
@@ -171,7 +173,7 @@ public interface NativeAdapter {
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  default int createArmorStand(World world, Vector3d center, Material material, Vector3d velocity, boolean gravity) {
+  default int createArmorStand(World world, Position center, Material material, Vector3d velocity, boolean gravity) {
     return 0;
   }
 
@@ -184,7 +186,7 @@ public interface NativeAdapter {
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  default int createFallingBlock(World world, Vector3d center, BlockData data, Vector3d velocity, boolean gravity) {
+  default int createFallingBlock(World world, Position center, BlockData data, Vector3d velocity, boolean gravity) {
     return 0;
   }
 
@@ -194,7 +196,7 @@ public interface NativeAdapter {
    * @param center the fake block's location
    * @param data the fake block's data
    */
-  default void fakeBlock(World world, Vector3d center, BlockData data) {
+  default void fakeBlock(World world, Position center, BlockData data) {
   }
 
   /**
@@ -203,7 +205,7 @@ public interface NativeAdapter {
    * @param center the block location for the animation
    * @param progress the animation <a href="https://wiki.vg/Protocol#Set_Block_Destroy_Stage">stage</a>
    */
-  default void fakeBreak(World world, Vector3d center, byte progress) {
+  default void fakeBreak(World world, Position center, byte progress) {
   }
 
   /**

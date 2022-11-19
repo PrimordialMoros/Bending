@@ -29,12 +29,12 @@ import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -85,7 +85,7 @@ public class DensityShift extends AbilityInstance {
   }
 
   private void softenArea() {
-    Vector3d center = Vector3d.center(user.locBlock().getRelative(BlockFace.DOWN));
+    Vector3d center = Vector3d.fromCenter(user.locBlock().getRelative(BlockFace.DOWN));
     Predicate<Block> predicate = b -> EarthMaterials.isEarthOrSand(b) && b.getRelative(BlockFace.UP).isPassable();
     for (Block b : WorldUtil.nearbyBlocks(user.world(), center, userConfig.radius, predicate)) {
       if (MaterialUtil.isAir(b.getRelative(BlockFace.DOWN)) || !TempBlock.isBendable(b)) {

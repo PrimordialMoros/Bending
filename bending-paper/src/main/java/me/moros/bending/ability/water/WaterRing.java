@@ -44,9 +44,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -62,6 +59,9 @@ import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.FastMath;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -81,7 +81,7 @@ public class WaterRing extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Vector3i lastPosition;
+  private Position lastPosition;
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
@@ -159,15 +159,15 @@ public class WaterRing extends AbilityInstance {
 
   private Block getClosestRingBlock() {
     Vector3d dir = user.direction().withY(0).normalize().multiply(radius);
-    Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
+    Block target = Vector3d.fromCenter(user.headBlock()).add(dir).toBlock(user.world());
     Block result = ring.get(0);
-    Vector3d targetVector = new Vector3d(target);
+    Vector3d targetVector = Vector3d.from(target);
     double minDistance = Double.MAX_VALUE;
     for (Block block : ring) {
       if (target.equals(block)) {
         return target;
       }
-      double d = new Vector3d(block).distanceSq(targetVector);
+      double d = Vector3d.from(block).distanceSq(targetVector);
       if (d < minDistance) {
         minDistance = d;
         result = block;
@@ -178,7 +178,7 @@ public class WaterRing extends AbilityInstance {
 
   private int getDirectionIndex() {
     Vector3d dir = user.direction().withY(0).normalize().multiply(radius);
-    Block target = Vector3d.center(user.headBlock()).add(dir).toBlock(user.world());
+    Block target = Vector3d.fromCenter(user.headBlock()).add(dir).toBlock(user.world());
     return Math.max(0, ring.indexOf(target));
   }
 
@@ -203,7 +203,7 @@ public class WaterRing extends AbilityInstance {
     if (sources <= 0 || !user.canBuild(user.headBlock())) {
       return UpdateResult.REMOVE;
     }
-    Vector3i newPosition = user.location().toVector3i();
+    Position newPosition = user.location().toVector3i();
     if (!newPosition.equals(lastPosition)) {
       ring.clear();
       ring.addAll(WorldUtil.createBlockRing(user.headBlock(), this.radius));
@@ -263,11 +263,11 @@ public class WaterRing extends AbilityInstance {
       if (affectedEntities.contains(entity)) {
         return false;
       }
-      AABB blockBounds = AABB.BLOCK_BOUNDS.at(new Vector3d(block));
+      AABB blockBounds = AABB.BLOCK_BOUNDS.at(Vector3d.from(block));
       AABB entityBounds = AABBUtil.entityBounds(entity);
       if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
         DamageUtil.damageEntity(entity, user, userConfig.damage, description());
-        Vector3d velocity = new Vector3d(entity.getLocation()).subtract(user.eyeLocation()).withY(0).normalize();
+        Vector3d velocity = Vector3d.from(entity.getLocation()).subtract(user.eyeLocation()).withY(0).normalize();
         EntityUtil.applyVelocity(WaterRing.this, entity, velocity.multiply(userConfig.knockback));
         affectedEntities.add(entity);
       }
@@ -332,7 +332,7 @@ public class WaterRing extends AbilityInstance {
     long time = System.currentTimeMillis();
     if (time >= nextShardTime) {
       nextShardTime = time + userConfig.shardCooldown;
-      Vector3d origin = new Vector3d(getClosestRingBlock());
+      Vector3d origin = Vector3d.from(getClosestRingBlock());
       Vector3d lookingDir = user.direction().multiply(userConfig.shardRange + radius);
       shards.add(new IceShard(new Ray(origin, lookingDir)));
     }

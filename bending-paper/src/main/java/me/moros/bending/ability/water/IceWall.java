@@ -34,8 +34,6 @@ import me.moros.bending.model.ability.common.FragileStructure;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -44,6 +42,8 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -133,7 +133,7 @@ public class IceWall extends AbilityInstance {
   private void raiseWall(int height, int width) {
     double w = (width - 1) / 2.0;
     Vector3d side = user.direction().cross(Vector3d.PLUS_J).normalize();
-    Vector3d center = Vector3d.center(origin);
+    Vector3d center = Vector3d.fromCenter(origin);
     int min = -FastMath.ceil(w);
     int max = FastMath.floor(w);
     for (int i = min; i <= max; i++) {

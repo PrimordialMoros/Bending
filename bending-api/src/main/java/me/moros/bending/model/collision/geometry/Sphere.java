@@ -21,7 +21,7 @@ package me.moros.bending.model.collision.geometry;
 
 import java.util.Objects;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 
 /**
  * Simple sphere collider.
@@ -57,7 +57,7 @@ public class Sphere implements Collider {
 
   @Override
   public Vector3d halfExtents() {
-    return new Vector3d(radius, radius, radius);
+    return Vector3d.of(radius, radius, radius);
   }
 
   @Override

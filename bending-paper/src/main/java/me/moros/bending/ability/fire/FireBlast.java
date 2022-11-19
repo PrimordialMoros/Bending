@@ -39,8 +39,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -54,6 +52,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -261,10 +261,10 @@ public class FireBlast extends AbilityInstance implements Explosive {
       WorldUtil.tryLightBlock(block);
       Vector3d standing = user.location().add(0, 0.5, 0);
       for (Block b : WorldUtil.nearbyBlocks(user.world(), location, userConfig.igniteRadius * factor)) {
-        if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
+        if (standing.distanceSq(Vector3d.fromCenter(b)) < 4 || !user.canBuild(b)) {
           continue;
         }
-        if (user.rayTrace(Vector3d.center(b), reverse).range(userConfig.igniteRadius + 2).blocks(user.world()).hit()) {
+        if (user.rayTrace(Vector3d.fromCenter(b), reverse).range(userConfig.igniteRadius + 2).blocks(user.world()).hit()) {
           continue;
         }
         if (MaterialUtil.isIgnitable(b)) {

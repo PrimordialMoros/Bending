@@ -19,7 +19,6 @@
 
 package me.moros.bending.storage;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
@@ -36,11 +35,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
@@ -51,8 +50,8 @@ import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.sql.SqlQueries;
 import me.moros.bending.util.Tasker;
 import me.moros.storage.SqlStreamReader;
+import me.moros.storage.StorageDataSource;
 import me.moros.storage.StorageType;
-import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
@@ -62,48 +61,47 @@ import org.jdbi.v3.core.statement.Batch;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.StatementContext;
-import org.slf4j.Logger;
 
 public final class StorageImpl implements BendingStorage {
-  private final HikariDataSource source;
-  private final StorageType type;
-  private final Logger logger;
-  private final Jdbi DB;
-
   private final BiMap<AbilityDescription, Integer> abilityMap;
 
-  StorageImpl(StorageType type, Logger logger, HikariDataSource source) {
-    this.type = type;
-    this.logger = logger;
-    this.source = source;
-    DB = Jdbi.create(this.source);
-    if (type != StorageType.H2 && type != StorageType.POSTGRESQL) {
+  private final StorageDataSource dataSource;
+  private final Jdbi DB;
+
+  StorageImpl(StorageDataSource dataSource) {
+    this.dataSource = dataSource;
+    this.DB = Jdbi.create(this.dataSource.source());
+    if (!nativeUuid()) {
       DB.registerArgument(new UUIDArgumentFactory());
     }
-    abilityMap = HashBiMap.create(32);
+    this.abilityMap = HashBiMap.create(32);
   }
 
-  @Override
-  public void init(Plugin plugin) {
+  boolean init(Function<String, InputStream> resourceProvider) {
     if (!tableExists("bending_players")) {
-      InputStream stream = Objects.requireNonNull(plugin.getResource(type.schemaPath()), "Null schema.");
-      Collection<String> statements = SqlStreamReader.parseQueries(stream);
+      Collection<String> statements;
+      try (InputStream stream = resourceProvider.apply(dataSource.type().realName() + ".sql")) {
+        statements = SqlStreamReader.parseQueries(stream);
+      } catch (Exception e) {
+        return false;
+      }
       DB.useHandle(handle -> {
         Batch batch = handle.createBatch();
         statements.forEach(batch::add);
         batch.execute();
       });
     }
+    return true;
   }
 
   @Override
   public StorageType type() {
-    return type;
+    return dataSource.type();
   }
 
   @Override
   public void close() {
-    source.close();
+    dataSource.source().close();
   }
 
   @Override
@@ -122,7 +120,7 @@ public final class StorageImpl implements BendingStorage {
   @Override
   public CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid) {
     return Tasker.INSTANCE.async(() -> loadProfile(uuid)).exceptionally(t -> {
-      logger.error(t.getMessage(), t);
+      dataSource.logger().error(t.getMessage(), t);
       return null;
     });
   }
@@ -141,7 +139,7 @@ public final class StorageImpl implements BendingStorage {
   @Override
   public boolean createAbilities(Iterable<AbilityDescription> abilities) {
     DB.useHandle(handle -> {
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type));
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type()));
       for (AbilityDescription desc : abilities) {
         if (desc.canBind()) {
           batch.bind(0, desc.name()).add();
@@ -165,7 +163,7 @@ public final class StorageImpl implements BendingStorage {
   @Override
   public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
     return Tasker.INSTANCE.async(() -> savePreset(playerId, preset)).exceptionally(t -> {
-      logger.error(t.getMessage(), t);
+      dataSource.logger().error(t.getMessage(), t);
       return false;
     });
   }
@@ -320,13 +318,13 @@ public final class StorageImpl implements BendingStorage {
           .map(x -> x.getColumn("TABLE_NAME", String.class)).stream().anyMatch(table::equalsIgnoreCase);
       });
     } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
+      dataSource.logger().warn(e.getMessage(), e);
     }
     return false;
   }
 
   private Void logError(Throwable t) {
-    logger.error(t.getMessage(), t);
+    dataSource.logger().error(t.getMessage(), t);
     return null;
   }
 
@@ -343,6 +341,13 @@ public final class StorageImpl implements BendingStorage {
     return Map.entry(rs.getInt("preset_id"), rs.getString("preset_name"));
   }
 
+  private boolean nativeUuid() {
+    return switch (type()) {
+      case POSTGRESQL, H2, HSQL -> true;
+      default -> false;
+    };
+  }
+
   private static final class UUIDArgumentFactory extends AbstractArgumentFactory<UUID> {
     private UUIDArgumentFactory() {
       super(Types.BINARY);
@@ -353,8 +358,7 @@ public final class StorageImpl implements BendingStorage {
       ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
       buffer.putLong(value.getMostSignificantBits());
       buffer.putLong(value.getLeastSignificantBits());
-      ByteArrayInputStream stream = new ByteArrayInputStream(buffer.array());
-      return (position, statement, ctx) -> statement.setBinaryStream(position, stream);
+      return (position, statement, ctx) -> statement.setBytes(position, buffer.array());
     }
   }
 }

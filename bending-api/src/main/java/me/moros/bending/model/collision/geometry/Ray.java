@@ -19,7 +19,8 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 
 /**
  * Ray with origin and direction.
@@ -43,7 +44,7 @@ public class Ray implements Collider {
     double invX = direction.x() == 0 ? Double.MAX_VALUE : 1 / direction.x();
     double invY = direction.y() == 0 ? Double.MAX_VALUE : 1 / direction.y();
     double invZ = direction.z() == 0 ? Double.MAX_VALUE : 1 / direction.z();
-    invDir = new Vector3d(invX, invY, invZ);
+    invDir = Vector3d.of(invX, invY, invZ);
   }
 
   boolean _intersects(Ray other) {
@@ -76,7 +77,7 @@ public class Ray implements Collider {
     if (lengthSq == 0) {
       return origin.distanceSq(point) <= EPSILON;
     }
-    double t = Math.max(0, Math.min(1, point.subtract(origin).dot(direction) / lengthSq));
+    double t = FastMath.clamp(point.subtract(origin).dot(direction) / lengthSq, 0, 1);
     return origin.add(direction.multiply(t)).distanceSq(point) <= EPSILON;
   }
 

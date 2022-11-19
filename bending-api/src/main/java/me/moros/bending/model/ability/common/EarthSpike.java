@@ -20,13 +20,13 @@
 package me.moros.bending.model.ability.common;
 
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -69,7 +69,7 @@ public class EarthSpike implements Updatable {
     nextUpdateTime = time + DELAY;
     Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
     if (canMove(currentIndex)) {
-      Vector3d center = Vector3d.center(currentIndex);
+      Vector3d center = Vector3d.fromCenter(currentIndex);
       ParticleUtil.of(Particle.BLOCK_DUST, center).count(24).offset(0.2)
         .data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn(currentIndex.getWorld());
       TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(DURATION - currentLength * DELAY).build(currentIndex);

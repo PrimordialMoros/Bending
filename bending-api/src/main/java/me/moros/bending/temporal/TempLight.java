@@ -23,10 +23,11 @@ import java.util.Optional;
 
 import me.moros.bending.BendingProperties;
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -61,7 +62,7 @@ public final class TempLight extends TemporaryBase {
   private TempLight(Block block, int level, int rate, long duration) {
     super();
     this.block = block;
-    this.pos = new Vector3d(block);
+    this.pos = Vector3d.from(block);
     this.level = level;
     this.rate = rate;
     MANAGER.addEntry(block, this, Temporary.toTicks(duration));
@@ -127,7 +128,7 @@ public final class TempLight extends TemporaryBase {
   }
 
   public static Builder builder(int level) {
-    return new Builder(Math.max(1, Math.min(LIGHT_ARRAY.length, level)));
+    return new Builder(FastMath.clamp(level, 1, LIGHT_ARRAY.length));
   }
 
   private enum Type {NORMAL, WATER, INVALID}

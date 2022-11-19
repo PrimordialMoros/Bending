@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 
 /**
  * Axis aligned bounding box.
@@ -27,7 +27,7 @@ import me.moros.bending.model.math.Vector3d;
 public class AABB implements Collider {
   public static final AABB DUMMY_COLLIDER = new DummyCollider();
   public static final AABB BLOCK_BOUNDS = new AABB(Vector3d.ZERO, Vector3d.ONE);
-  public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(new Vector3d(0.4, 0.4, 0.4));
+  public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(Vector3d.of(0.4, 0.4, 0.4));
 
   public final Vector3d min;
   public final Vector3d max;

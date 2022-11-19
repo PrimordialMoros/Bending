@@ -28,14 +28,14 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
+import me.moros.math.VectorUtil;
 import org.bukkit.block.Block;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
@@ -81,7 +81,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
         }
       }
 
-      Vector3d originalVector = new Vector3d(location.toArray());
+      Vector3d originalVector = location;
       location = location.add(vector);
       distanceTravelled += speed;
       if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location.toBlock(user.world()))) {
@@ -102,7 +102,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       toCheck.add(originalVector.add(directionVector.multiply(0.5)).toBlock(user.world()));
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, directionVector)) {
-      toCheck.add(originBlock.getRelative(v.x(), v.y(), v.z()));
+      toCheck.add(originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ()));
     }
     return toCheck.stream().noneMatch(this::testCollision);
   }

@@ -35,7 +35,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -43,10 +42,12 @@ import me.moros.bending.model.user.User;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -150,9 +151,9 @@ public class AirBurst extends AbilityInstance {
     }
     released = true;
     Collection<Ray> rays = switch (mode) {
-      case CONE -> VectorUtil.cone(user, userConfig.coneRange);
-      case FALL -> VectorUtil.fall(user, userConfig.sphereRange);
-      default -> VectorUtil.sphere(user, userConfig.sphereRange);
+      case CONE -> RayUtil.cone(user, userConfig.coneRange);
+      case FALL -> RayUtil.fall(user, userConfig.sphereRange);
+      default -> RayUtil.sphere(user, userConfig.sphereRange);
     };
     rays.forEach(r -> streams.add(new AirStream(r)));
     removalPolicy = Policies.builder().build();
@@ -194,10 +195,10 @@ public class AirBurst extends AbilityInstance {
 
       Vector3d push = ray.direction.normalize();
       // Cap vertical push
-      push = push.withY(Math.max(-0.3, Math.min(0.3, push.y())));
+      push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));
 
       factor *= 1 - (distanceTravelled / (2 * maxRange));
-      Vector3d velocity = new Vector3d(entity.getVelocity());
+      Vector3d velocity = Vector3d.from(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
       double strength = velocity.dot(push.normalize());
       if (strength > factor) {

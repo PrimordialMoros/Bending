@@ -19,8 +19,8 @@
 
 package me.moros.bending.util;
 
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.math.Vector3d;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -145,7 +145,7 @@ public final class ParticleUtil {
    * @return a new builder instance
    */
   public static ParticleUtil bubble(Block center) {
-    return new ParticleUtil(Particle.WATER_BUBBLE, Vector3d.center(center)).count(3).offset(0.25);
+    return new ParticleUtil(Particle.WATER_BUBBLE, Vector3d.fromCenter(center)).count(3).offset(0.25);
   }
 
   /**

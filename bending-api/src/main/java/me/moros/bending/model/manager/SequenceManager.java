@@ -26,5 +26,10 @@ import me.moros.bending.model.user.User;
  * Handles the registration of sequence steps and activates matching sequences.
  */
 public interface SequenceManager {
+  /**
+   * Register a sequence step.
+   * @param user the user to associate the step with
+   * @param action the activation of the user
+   */
   void registerStep(User user, Activation action);
 }

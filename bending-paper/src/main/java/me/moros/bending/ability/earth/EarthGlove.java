@@ -33,7 +33,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
@@ -47,6 +46,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -132,7 +132,7 @@ public class EarthGlove extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
 
-    location = new Vector3d(glove.getLocation());
+    location = Vector3d.from(glove.getLocation());
     if (location.distanceSq(user.eyeLocation()) > userConfig.range * userConfig.range) {
       returning = true;
     }
@@ -159,7 +159,7 @@ public class EarthGlove extends AbilityInstance {
           shatterGlove();
           return UpdateResult.REMOVE;
         }
-        Vector3d dir = returnLocation.subtract(new Vector3d(grabbedTarget.getLocation())).normalize().multiply(GLOVE_GRABBED_SPEED);
+        Vector3d dir = returnLocation.subtract(Vector3d.from(grabbedTarget.getLocation())).normalize().multiply(GLOVE_GRABBED_SPEED);
         EntityUtil.applyVelocity(this, grabbedTarget, dir);
         glove.teleport(grabbedTarget.getEyeLocation().subtract(0, grabbedTarget.getHeight() / 2, 0));
         return UpdateResult.CONTINUE;
@@ -169,7 +169,7 @@ public class EarthGlove extends AbilityInstance {
       }
     } else {
       double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
-      Vector3d gloveVelocity = new Vector3d(glove.getVelocity());
+      Vector3d gloveVelocity = Vector3d.from(glove.getVelocity());
       if (glove.isOnGround() || lastVelocity.angle(gloveVelocity) > Math.PI / 6 || gloveVelocity.lengthSq() < velocityLimit * velocityLimit) {
         shatterGlove();
         return UpdateResult.REMOVE;
@@ -242,7 +242,7 @@ public class EarthGlove extends AbilityInstance {
     double factor = isMetal ? BendingProperties.instance().metalModifier() : 1;
     Vector3d velocity = target.subtract(gloveSpawnLocation).normalize().multiply(GLOVE_SPEED * factor);
     updateGloveVelocity(velocity);
-    location = new Vector3d(glove.getLocation());
+    location = Vector3d.from(glove.getLocation());
     return true;
   }
 
@@ -263,7 +263,7 @@ public class EarthGlove extends AbilityInstance {
 
   private void updateGloveVelocity(Vector3d velocity) {
     EntityUtil.applyVelocity(this, glove, velocity);
-    lastVelocity = new Vector3d(glove.getVelocity());
+    lastVelocity = Vector3d.from(glove.getVelocity());
   }
 
   @Override

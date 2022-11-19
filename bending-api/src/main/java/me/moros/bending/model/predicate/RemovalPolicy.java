@@ -30,12 +30,14 @@ import me.moros.bending.model.user.User;
  */
 @FunctionalInterface
 public interface RemovalPolicy extends BiPredicate<User, AbilityDescription> {
-  default RemovalPolicy and(RemovalPolicy other) {
+  @Override
+  default RemovalPolicy and(BiPredicate<? super User, ? super AbilityDescription> other) {
     Objects.requireNonNull(other);
     return (u, d) -> test(u, d) && other.test(u, d);
   }
 
-  default RemovalPolicy or(RemovalPolicy other) {
+  @Override
+  default RemovalPolicy or(BiPredicate<? super User, ? super AbilityDescription> other) {
     Objects.requireNonNull(other);
     return (u, d) -> test(u, d) || other.test(u, d);
   }

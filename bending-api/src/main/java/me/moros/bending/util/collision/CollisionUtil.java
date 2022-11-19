@@ -22,9 +22,9 @@ package me.moros.bending.util.collision;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.Collider;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempEntity;
+import me.moros.math.Vector3d;
 import org.bukkit.GameMode;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;

@@ -23,12 +23,13 @@ import java.util.function.Predicate;
 
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 
@@ -67,7 +68,7 @@ public abstract class AbstractRide implements Updatable {
       return UpdateResult.REMOVE;
     }
     double delta = getPrediction() - height;
-    double force = Math.max(-0.5, Math.min(0.5, 0.3 * delta));
+    double force = FastMath.clamp(0.3 * delta, -0.5, 0.5);
     Vector3d velocity = user.direction().withY(0).normalize().multiply(speed).withY(force);
     affect(velocity);
     user.entity().setFallDistance(0);

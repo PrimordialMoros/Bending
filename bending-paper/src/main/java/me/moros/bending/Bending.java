@@ -20,7 +20,6 @@
 package me.moros.bending;
 
 import java.util.Locale;
-import java.util.Objects;
 
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.command.CommandManager;
@@ -67,8 +66,7 @@ public class Bending extends JavaPlugin {
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
 
-    storage = StorageFactory.createInstance(logger, dir);
-    Objects.requireNonNull(storage, "Unable to establish database connection!").init(this);
+    storage = StorageFactory.createInstance(this);
     new AbilityInitializer();
 
     if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
@@ -78,6 +76,11 @@ public class Bending extends JavaPlugin {
 
   @Override
   public void onEnable() {
+    if (storage == null) {
+      logger.error("Unable to establish database connection!");
+      getServer().getPluginManager().disablePlugin(this);
+      return;
+    }
     new Metrics(this, 8717);
     loadAdapter();
     Metadata.inject(this);

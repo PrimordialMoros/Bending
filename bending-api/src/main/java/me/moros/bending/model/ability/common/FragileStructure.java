@@ -30,13 +30,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -60,13 +60,6 @@ public class FragileStructure implements Iterable<Block> {
     return health;
   }
 
-  /**
-   * Try to subtract the specified amount of damage from this structure's health.
-   * If health drops at zero or below then the structure will shatter.
-   * <p>Note: Provide a non-positive damage value to instantly destroy the structure.
-   * @param damage the amount of damage to inflict
-   * @return the remaining structure health
-   */
   private int damageStructure(int damage, Ray ray) {
     if (damage > 0 && health > damage) {
       health -= damage;
@@ -89,13 +82,13 @@ public class FragileStructure implements Iterable<Block> {
   protected void onDestroy(Block block, Ray ray) {
     BlockData blockData = block.getType().createBlockData();
     TempBlock.air().build(block);
-    Vector3d center = Vector3d.center(block);
+    Vector3d center = Vector3d.fromCenter(block);
     ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
     if (ThreadLocalRandom.current().nextInt(3) == 0) {
       SoundUtil.of(blockData.getSoundGroup().getBreakSound(), 2, 1).play(block);
     }
     if (fallingBlocks) {
-      Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(Vector3d.center(block));
+      Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(Vector3d.fromCenter(block));
       Vector3d velocity = VectorUtil.gaussianOffset(dir.normalize().multiply(0.3), 0.05);
       TempEntity.builder(blockData).velocity(velocity).duration(5000).build(block);
     }

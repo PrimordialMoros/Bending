@@ -151,6 +151,7 @@ public final class TextUtil {
    * Collects all the provided values formats them as an array.
    * @param values the values to collect
    * @param function the function to transform each value into a string
+   * @param <T> the type of values
    * @return the array-like formatted string with the values
    */
   public static <T> String collect(Iterable<T> values, Function<T, String> function) {

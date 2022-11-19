@@ -31,13 +31,13 @@ import java.util.function.Predicate;
 import me.moros.bending.BendingProperties;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -86,7 +86,7 @@ public class Pillar implements Updatable, Iterable<Block> {
     Block start = origin.getRelative(direction, currentDistance + 1);
     Block finish = start.getRelative(opposite, length - 1);
     BoundingBox box = BoundingBox.of(start, finish).expand(direction, 0.65);
-    AABB collider = new AABB(new Vector3d(box.getMin()), new Vector3d(box.getMax()));
+    AABB collider = new AABB(Vector3d.from(box.getMin()), Vector3d.from(box.getMax()));
     CollisionUtil.handle(user, collider, this::onEntityHit, false, true); // Push entities
 
     long time = System.currentTimeMillis();
@@ -154,7 +154,7 @@ public class Pillar implements Updatable, Iterable<Block> {
 
   public boolean onEntityHit(Entity entity) {
     double factor = 0.75 * (length - 0.4 * currentDistance) / length;
-    entity.setVelocity(normalizeVelocity(new Vector3d(entity.getVelocity()), factor).clampVelocity());
+    entity.setVelocity(normalizeVelocity(Vector3d.from(entity.getVelocity()), factor).clampVelocity());
     return true;
   }
 

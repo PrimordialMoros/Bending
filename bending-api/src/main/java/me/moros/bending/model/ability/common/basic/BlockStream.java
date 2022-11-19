@@ -29,14 +29,14 @@ import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -103,17 +103,17 @@ public abstract class BlockStream implements State {
     }
 
     Block head = stream.getFirst();
-    Vector3d current = Vector3d.center(head);
+    Vector3d current = Vector3d.fromCenter(head);
     if (controllable || direction == null) {
       Vector3d targetLoc = user.rayTrace(range).entities(user.world()).entityEyeLevelOrPosition();
       // Improve targeting when near
-      if (new Vector3d(head).distanceSq(targetLoc.floor()) < 1.1) {
+      if (Vector3d.from(head).distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());
       }
       direction = targetLoc.subtract(current).normalize();
     }
 
-    Vector3d originalVector = new Vector3d(current.toArray());
+    Vector3d originalVector = current;
     Block originBlock = originalVector.toBlock(user.world());
 
     current = current.add(direction);
@@ -126,7 +126,7 @@ public abstract class BlockStream implements State {
     if (current.distanceSq(user.eyeLocation()) <= range * range) {
       boolean canRender = true;
       for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-        Block b = originBlock.getRelative(v.x(), v.y(), v.z());
+        Block b = originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ());
         if (diagonalsPredicate.test(b)) {
           canRender = false;
           onBlockHit(b);
@@ -144,7 +144,7 @@ public abstract class BlockStream implements State {
     colliders.clear();
     boolean hit = false;
     for (Block block : stream) {
-      Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(new Vector3d(block));
+      Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(Vector3d.from(block));
       colliders.add(collider);
       hit |= CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false);
     }

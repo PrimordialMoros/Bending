@@ -34,8 +34,8 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Rotation;
+import me.moros.math.Vector3d;
 
 public class CollisionUtil {
   private static final Vector3d[] AXES = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
@@ -59,9 +59,10 @@ public class CollisionUtil {
       for (int j = 1; j <= size; j++) {
         double[] arr = new double[]{1, 1, 1};
         arr[i] = rand.nextDouble(0.5, j);
-        AABB aabb = new AABB(new Vector3d(arr).negate(), new Vector3d(arr));
+        Vector3d temp = Vector3d.from(arr);
+        AABB aabb = new AABB(temp.negate(), temp);
         double angle = rand.nextDouble(2 * Math.PI);
-        Rotation rotation = new Rotation(AXES[i], angle);
+        Rotation rotation = Rotation.from(AXES[i], angle);
         for (int k = 1; k <= 20; k++) {
           Vector3d center = randomVector(k * 0.5 * j);
           OBB obb = new OBB(aabb.at(center), rotation);
@@ -98,7 +99,7 @@ public class CollisionUtil {
     double offsetX = ThreadLocalRandom.current().nextDouble(-spread, spread);
     double offsetY = ThreadLocalRandom.current().nextDouble(-spread, spread);
     double offsetZ = ThreadLocalRandom.current().nextDouble(-spread, spread);
-    return new Vector3d(offsetX, offsetY, offsetZ);
+    return Vector3d.of(offsetX, offsetY, offsetZ);
   }
 
   public enum CollectionType {

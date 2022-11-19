@@ -23,11 +23,11 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class HydroSink extends AbilityInstance {
@@ -57,8 +57,8 @@ public class HydroSink extends AbilityInstance {
     if (!user.canBend(description())) {
       return false;
     }
-    AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
-    AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
+    AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(Vector3d.of(0, 0.2, 0));
+    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(user.location());
     return WorldUtil.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtil.blockBounds(b)))
       .stream().anyMatch(WaterMaterials::isWaterBendable);
   }

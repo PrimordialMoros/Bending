@@ -34,8 +34,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
@@ -46,6 +44,8 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -99,11 +99,11 @@ public class Catapult extends AbilityInstance {
   }
 
   private @Nullable Block getBase() {
-    AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(new Vector3d(0, 0.2, 0));
-    AABB floorBounds = new AABB(new Vector3d(-1, -0.5, -1), new Vector3d(1, 0, 1)).at(user.location());
+    AABB entityBounds = AABBUtil.entityBounds(user.entity()).grow(Vector3d.of(0, 0.2, 0));
+    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(user.location());
     return WorldUtil.nearbyBlocks(user.world(), floorBounds, b -> entityBounds.intersects(AABBUtil.blockBounds(b))).stream()
       .filter(this::isValidBlock)
-      .min(Comparator.comparingDouble(b -> Vector3d.center(b).distanceSq(user.location())))
+      .min(Comparator.comparingDouble(b -> Vector3d.fromCenter(b).distanceSq(user.location())))
       .orElse(null);
   }
 
@@ -121,7 +121,7 @@ public class Catapult extends AbilityInstance {
     Block base = getBase();
     double basePower = sneak ? userConfig.sneakPower : userConfig.clickPower;
     if (base != null) {
-      length = getLength(new Vector3d(base.getRelative(BlockFace.UP)), Vector3d.MINUS_J);
+      length = getLength(Vector3d.from(base.getRelative(BlockFace.UP)), Vector3d.MINUS_J);
       if (angle > ANGLE) {
         direction = Vector3d.PLUS_J;
       }

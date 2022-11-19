@@ -20,7 +20,7 @@
 package me.moros.bending.util.collision;
 
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
@@ -47,7 +47,7 @@ public final class AABBUtil {
    * @return the provided block's {@link AABB}
    */
   public static AABB blockBounds(Block block) {
-    return dimensions(block, new Vector3d(block));
+    return dimensions(block, Vector3d.from(block));
   }
 
   /**
@@ -65,7 +65,7 @@ public final class AABBUtil {
    * @return the provided entity's {@link AABB}
    */
   public static AABB entityBounds(Entity entity) {
-    return dimensions(entity, new Vector3d(entity.getLocation()));
+    return dimensions(entity, Vector3d.from(entity.getLocation()));
   }
 
   private static AABB dimensions(Block block, Vector3d point) {
@@ -76,15 +76,15 @@ public final class AABBUtil {
     double dx = point.x() - block.getX();
     double dy = point.y() - block.getY();
     double dz = point.z() - block.getZ();
-    Vector3d min = new Vector3d(box.getMinX() + dx, box.getMinY() + dy, box.getMinZ() + dz);
-    Vector3d max = new Vector3d(box.getMaxX() + dx, box.getMaxY() + dy, box.getMaxZ() + dz);
+    Vector3d min = Vector3d.of(box.getMinX() + dx, box.getMinY() + dy, box.getMinZ() + dz);
+    Vector3d max = Vector3d.of(box.getMaxX() + dx, box.getMaxY() + dy, box.getMaxZ() + dz);
     return new AABB(min, max);
   }
 
   private static AABB dimensions(Entity entity, Vector3d point) {
     double halfWidth = 0.5 * entity.getWidth();
-    Vector3d min = new Vector3d(point.x() - halfWidth, point.y(), point.z() - halfWidth);
-    Vector3d max = new Vector3d(point.x() + halfWidth, point.y() + entity.getHeight(), point.z() + halfWidth);
+    Vector3d min = Vector3d.of(point.x() - halfWidth, point.y(), point.z() - halfWidth);
+    Vector3d max = Vector3d.of(point.x() + halfWidth, point.y() + entity.getHeight(), point.z() + halfWidth);
     return new AABB(min, max);
   }
 }

@@ -56,7 +56,6 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.manager.ActivationController;
 import me.moros.bending.model.manager.SequenceManager;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.protection.ProtectionCache;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
@@ -66,6 +65,7 @@ import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.WorldUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -219,7 +219,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   private boolean noSuffocate(LivingEntity e) {
     double f = 0.4 * e.getWidth();
-    AABB box = new AABB(new Vector3d(-f, -0.01, -f), new Vector3d(f, 0.01, f)).at(new Vector3d(e.getEyeLocation()));
+    AABB box = new AABB(Vector3d.of(-f, -0.01, -f), Vector3d.of(f, 0.01, f)).at(Vector3d.from(e.getEyeLocation()));
     return WorldUtil.nearbyBlocks(e.getWorld(), box, this::canSuffocate, 1).isEmpty();
   }
 

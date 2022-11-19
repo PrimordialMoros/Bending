@@ -21,10 +21,10 @@ package me.moros.bending.model.ability.common.basic;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.model.math.Vector3d;
-import me.moros.bending.model.math.Vector3i;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
+import me.moros.math.VectorUtil;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -56,10 +56,10 @@ public abstract class MovementResolver {
 
     int diagonalCollisions = 0;
     for (Vector3i v : VectorUtil.decomposeDiagonals(origin, direction)) {
-      Block block = original.getRelative(v.x(), v.y() + offset, v.z());
+      Block block = original.getRelative(v.blockX(), v.blockY() + offset, v.blockZ());
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
-          Vector3d point = temp.add(v.x(), v.y() + offset, v.z());
+          Vector3d point = temp.add(v).add(0, offset, 0);
           onCollision(point);
           return new Resolved(point, false);
         }

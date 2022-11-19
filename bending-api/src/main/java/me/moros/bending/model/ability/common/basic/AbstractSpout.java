@@ -28,9 +28,9 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.manager.FlightManager.Flight;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -71,7 +71,7 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     }
     flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
-    collider = new AABB(new Vector3d(-0.5, -distance, -0.5), new Vector3d(0.5, 0, 0.5)).at(user.location());
+    collider = new AABB(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(user.location());
     render();
     postRender();
     return UpdateResult.CONTINUE;

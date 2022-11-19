@@ -24,11 +24,14 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.raytrace.BlockRayTrace;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
 import me.moros.bending.model.raytrace.EntityRayTrace;
-import me.moros.bending.model.raytrace.RayTraceContext;
+import me.moros.bending.model.raytrace.RayTrace.Context;
+import me.moros.math.FastMath;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -36,11 +39,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to easily cast ray traces.
  */
 public final class RayTraceBuilder {
+  public static final double MIN_RANGE = 1;
   public static final double MAX_RANGE = 100;
 
   private Vector3d origin;
@@ -52,7 +57,7 @@ public final class RayTraceBuilder {
   private boolean ignoreLiquids = true;
   private boolean ignorePassable = true;
 
-  private Set<Block> ignoreBlocks = Set.of();
+  private Set<Position> ignore = Set.of();
   private Predicate<Entity> entityPredicate = x -> true;
 
   private RayTraceBuilder(Vector3d origin, Vector3d direction) {
@@ -83,12 +88,12 @@ public final class RayTraceBuilder {
 
   /**
    * Override the raytrace range.
-   * <p>Note: Range is clamped at [1, 100].
+   * <p>Note: Range is clamped at [{@value MIN_RANGE}, {@value MAX_RANGE}].
    * @param range the new range
    * @return the modified builder
    */
   public RayTraceBuilder range(double range) {
-    this.range = Math.min(MAX_RANGE, Math.max(1, range));
+    this.range = FastMath.clamp(range, MIN_RANGE, MAX_RANGE);
     return this;
   }
 
@@ -127,13 +132,34 @@ public final class RayTraceBuilder {
   }
 
   /**
-   * Define a set of specific blocks the raytrace should ignore.
+   * Define a block the raytrace should ignore.
+   * @param ignore the block to ignore if not null
+   * @return the modified builder
+   * @see #ignore(Set)
+   */
+  public RayTraceBuilder ignore(@Nullable Block ignore) {
+    this.ignore = ignore == null ? Set.of() : Set.of(Vector3i.from(ignore));
+    return this;
+  }
+
+  /**
+   * Define a position the raytrace should ignore.
+   * @param ignore the position to ignore
+   * @return the modified builder
+   * @see #ignore(Set)
+   */
+  public RayTraceBuilder ignore(Position ignore) {
+    return ignore(Set.of(ignore));
+  }
+
+  /**
+   * Define a set of positions the raytrace should ignore.
    * Default value is an empty set.
-   * @param ignoreBlocks the new set of blocks to ignore
+   * @param ignore the new set of blocks to ignore
    * @return the modified builder
    */
-  public RayTraceBuilder ignore(Set<Block> ignoreBlocks) {
-    this.ignoreBlocks = Set.copyOf(ignoreBlocks);
+  public RayTraceBuilder ignore(Set<Position> ignore) {
+    this.ignore = Set.copyOf(ignore);
     return this;
   }
 
@@ -183,7 +209,7 @@ public final class RayTraceBuilder {
   private CompositeRayTrace result(World world, boolean checkEntities) {
     Objects.requireNonNull(world);
     Vector3d endPoint = origin.add(direction.multiply(range));
-    RayTraceContext context = new RayTraceContext(origin, endPoint, ignoreLiquids, ignorePassable, ignoreBlocks);
+    Context context = new Context(origin, endPoint, ignoreLiquids, ignorePassable, ignore);
     CompositeRayTrace blockResult = NativeAdapter.instance().rayTraceBlocks(context, world);
     double blockHitDistance = blockResult.hit() ? origin.distance(blockResult.position()) : range;
 
@@ -195,7 +221,7 @@ public final class RayTraceBuilder {
       if (eResult != null) {
         Entity entity = eResult.getHitEntity();
         if (entity != null) {
-          entityResult = CompositeRayTrace.hit(new Vector3d(eResult.getHitPosition()), entity);
+          entityResult = CompositeRayTrace.hit(Vector3d.from(eResult.getHitPosition()), entity);
         }
       }
     }

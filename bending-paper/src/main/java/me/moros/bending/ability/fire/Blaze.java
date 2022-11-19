@@ -34,15 +34,15 @@ import me.moros.bending.model.ability.common.basic.BlockLine;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -80,7 +80,7 @@ public class Blaze extends AbilityInstance {
   private boolean release(boolean cone) {
     double range = cone ? userConfig.coneRange : userConfig.ringRange;
 
-    Vector3d origin = user.location().snapToBlockCenter();
+    Vector3d origin = user.location().blockCenter();
     Vector3d dir = user.direction().withY(0).normalize();
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);

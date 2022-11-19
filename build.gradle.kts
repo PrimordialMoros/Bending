@@ -1,12 +1,12 @@
 plugins {
-    id("org.checkerframework").version("0.6.14")
+    id("org.checkerframework").version("0.6.19")
 }
 
 allprojects {
     group = "me.moros"
     version = "2.2.0-SNAPSHOT"
 
-    apply(plugin = "java")
+    apply(plugin = "java-library")
     apply(plugin = "org.checkerframework")
 
     repositories {

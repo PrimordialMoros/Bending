@@ -22,8 +22,8 @@ package me.moros.bending.model.predicate;
 import java.util.function.Supplier;
 
 import me.moros.bending.model.ability.AbilityDescription;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

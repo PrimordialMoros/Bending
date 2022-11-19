@@ -24,31 +24,25 @@ val adapters = configurations.create("adapters") {
 }
 
 dependencies {
-    implementation(project(":bending-api"))
+    api(project(":bending-api"))
     project.project(":bending-paper:adapters").subprojects.forEach {
         adapters(project(it.path, "reobf"))
     }
-    implementation("me.moros", "storage", "2.1.0")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.1") {
-        exclude(module = "checker-qual")
+    implementation("org.postgresql", "postgresql", "42.5.0")
+    implementation("com.h2database", "h2", "2.1.214")
+    implementation("org.hsqldb", "hsqldb", "2.7.1")
+    implementation("org.mariadb.jdbc", "mariadb-java-client", "3.1.0") {
+        isTransitive = false
     }
-    implementation("org.spongepowered", "configurate-hocon", "4.1.2")
     implementation("org.jdbi", "jdbi3-core", "3.34.0") {
         exclude(module = "caffeine")
-        exclude(module = "slf4j-api")
     }
-    implementation("com.zaxxer", "HikariCP", "5.0.1") {
-        exclude(module = "slf4j-api")
-    }
-    implementation("org.postgresql", "postgresql", "42.5.0") {
-        exclude(module = "checker-qual")
-    }
-    implementation("com.h2database", "h2", "2.1.214")
+    implementation("com.zaxxer", "HikariCP", "5.0.1")
+    implementation("org.spongepowered", "configurate-hocon", "4.1.2")
     implementation("org.bstats", "bstats-bukkit", "3.0.0")
     implementation("cloud.commandframework", "cloud-paper", "1.7.1")
-    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1") {
-        exclude(group = "net.kyori")
-    }
+    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1")
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.1")
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
@@ -59,8 +53,15 @@ dependencies {
     compileOnly("net.luckperms", "api", "5.4")
 }
 
-configurations.implementation {
-    exclude(module = "error_prone_annotations")
+configurations {
+    implementation {
+        exclude(module = "error_prone_annotations")
+    }
+    runtimeClasspath  {
+        exclude(module = "checker-qual")
+        exclude(module = "slf4j-api")
+        exclude(group = "net.kyori")
+    }
 }
 
 tasks {
@@ -69,14 +70,7 @@ tasks {
     }
     shadowJar {
         dependsOn(project(":bending-paper:adapters").subprojects.map { it.tasks.named("assemble") })
-        from(Callable {
-            adapters.resolve()
-                    .map { f ->
-                        zipTree(f).matching {
-                            exclude("META-INF/")
-                        }
-                    }
-        })
+        from(adapters.resolve().map { f -> zipTree(f).matching { exclude("META-INF/") } })
         archiveClassifier.set("")
         archiveBaseName.set(rootProject.name)
         destinationDirectory.set(rootProject.buildDir)
@@ -87,10 +81,11 @@ tasks {
             relocate("com.typesafe", "me.moros.bending.internal.typesafe")
             relocate("com.zaxxer.hikari", "me.moros.bending.internal.hikari")
             relocate("io.leangen", "me.moros.bending.internal.leangen")
-            relocate("me.moros.storage", "me.moros.bending.internal.storage")
             relocate("org.bstats", "me.moros.bending.bstats")
             relocate("org.h2", "me.moros.bending.internal.h2")
+            relocate("org.hsqldb", "me.moros.bending.internal.hsqldb")
             relocate("org.jdbi", "me.moros.bending.internal.jdbi")
+            relocate("org.mariadb", "me.moros.bending.internal.mariadb")
             relocate("org.postgresql", "me.moros.bending.internal.postgresql")
             relocate("org.spongepowered.configurate", "me.moros.bending.internal.configurate")
         }

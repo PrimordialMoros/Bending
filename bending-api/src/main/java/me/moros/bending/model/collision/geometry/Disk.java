@@ -19,7 +19,7 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 
 /**
  * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider.

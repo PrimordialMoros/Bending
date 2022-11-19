@@ -21,8 +21,9 @@ package me.moros.bending.model.collision.geometry;
 
 import java.util.Arrays;
 
-import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.FastMath;
+import me.moros.math.Rotation;
+import me.moros.math.Vector3d;
 
 import static java.lang.Math.abs;
 
@@ -56,14 +57,14 @@ public class OBB implements Collider {
     double[][] m = rotation.getMatrix();
     this.axes = new Vector3d[3];
     for (int i = 0; i < 3; i++) {
-      this.axes[i] = new Vector3d(m[i]);
+      this.axes[i] = Vector3d.from(m[i]);
     }
     Vector3d halfExtents = halfExtents();
     this.outer = new AABB(center.subtract(halfExtents), center.add(halfExtents));
   }
 
   public OBB(AABB aabb, Vector3d axis, double angle) {
-    this(aabb, new Rotation(axis, angle));
+    this(aabb, Rotation.from(axis, angle));
   }
 
   boolean _intersects(OBB other) {
@@ -91,7 +92,7 @@ public class OBB implements Collider {
     for (int row = 0; row < 3; row++) {
       out[row] = axes[row].dot(dir);
     }
-    return new Vector3d(out);
+    return Vector3d.from(out);
   }
 
   // check if there's a separating plane in between the selected axes
@@ -114,7 +115,7 @@ public class OBB implements Collider {
     for (int i = 0; i < 3; i++) {
       Vector3d axis = axes[i];
       double r = extentArray[i];
-      double dist = Math.max(-r, Math.min(t.dot(axis), r));
+      double dist = FastMath.clamp(t.dot(axis), -r, r);
       closest = closest.add(axis.multiply(dist));
     }
     return closest;

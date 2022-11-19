@@ -22,8 +22,8 @@ package me.moros.bending.event;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.event.entity.EntityExplodeEvent;
 

@@ -42,7 +42,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -55,10 +54,11 @@ import me.moros.bending.util.ColorPalette;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -269,7 +269,7 @@ public class EarthLine extends AbilityInstance {
       if (EarthMaterials.isEarthbendable(user, blockToCheck)) { // Prefer to use the block under the entity first
         material = blockToCheck.getType() == Material.GRASS_BLOCK ? Material.DIRT : blockToCheck.getType();
       } else {
-        for (Block block : WorldUtil.nearbyBlocks(user.world(), Vector3d.center(blockToCheck), 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
+        for (Block block : WorldUtil.nearbyBlocks(user.world(), Vector3d.fromCenter(blockToCheck), 1, b -> EarthMaterials.isEarthbendable(user, b), 1)) {
           material = block.getType() == Material.GRASS_BLOCK ? Material.DIRT : block.getType();
         }
       }
@@ -281,8 +281,8 @@ public class EarthLine extends AbilityInstance {
       imprisoned = true;
       EntityUtil.applyVelocity(EarthLine.this, entity, Vector3d.MINUS_J);
       BlockData data = material.createBlockData();
-      Vector3d center = new Vector3d(entity.getLocation()).add(Vector3d.MINUS_J);
-      Vector3d offset = new Vector3d(0, -0.6, 0);
+      Vector3d center = Vector3d.from(entity.getLocation()).add(Vector3d.MINUS_J);
+      Vector3d offset = Vector3d.of(0, -0.6, 0);
       Builder builder = TempEntity.builder(data).gravity(false).duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         builder.build(TempEntityType.ARMOR_STAND, user.world(), center.add(v));

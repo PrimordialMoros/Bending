@@ -35,7 +35,6 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -48,6 +47,8 @@ import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -142,8 +143,8 @@ public class AirBlast extends AbilityInstance {
     launched = true;
     Vector3d target = user.rayTrace(userConfig.range).entities(user.world()).entityCenterOrPosition();
     if (user.store().getOrDefault(RegistryKey.create("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
-      Vector3d temp = new Vector3d(origin.toArray());
-      origin = new Vector3d(target.toArray());
+      Vector3d temp = origin;
+      origin = target;
       target = temp;
     }
     Vector3d direction = target.subtract(origin).normalize();
@@ -209,7 +210,7 @@ public class AirBlast extends AbilityInstance {
       Vector3d push = ray.direction.normalize();
       if (!isUser) {
         // Cap vertical push
-        push = push.withY(Math.max(-0.3, Math.min(0.3, push.y())));
+        push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));
       }
 
       factor *= 1 - (distanceTravelled / (2 * maxRange));
@@ -217,7 +218,7 @@ public class AirBlast extends AbilityInstance {
       if (isUser && user.isOnGround()) {
         factor *= 0.5;
       }
-      Vector3d velocity = new Vector3d(entity.getVelocity());
+      Vector3d velocity = Vector3d.from(entity.getVelocity());
       // The strength of the entity's velocity in the direction of the blast.
       double strength = velocity.dot(push.normalize());
       if (strength > factor) {

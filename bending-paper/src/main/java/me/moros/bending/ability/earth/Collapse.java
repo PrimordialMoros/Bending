@@ -33,14 +33,14 @@ import me.moros.bending.model.ability.MultiUpdatable;
 import me.moros.bending.model.ability.common.Pillar;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -80,7 +80,7 @@ public class Collapse extends AbilityInstance {
       int size = offset * 2 + 1;
       // Micro optimization, construct 2d map of pillar locations to avoid instantiating pillars in the same x, z with different y
       boolean[][] checked = new boolean[size][size];
-      for (Block block : WorldUtil.nearbyBlocks(user.world(), Vector3d.center(origin), userConfig.radius, predicate)) {
+      for (Block block : WorldUtil.nearbyBlocks(user.world(), Vector3d.fromCenter(origin), userConfig.radius, predicate)) {
         if (block.getY() < origin.getY()) {
           continue;
         }

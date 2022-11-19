@@ -20,7 +20,7 @@
 package me.moros.bending.model;
 
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.Nullable;

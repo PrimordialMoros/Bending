@@ -19,7 +19,7 @@
 
 package me.moros.bending.util;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Source;

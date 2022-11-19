@@ -22,6 +22,7 @@ package me.moros.bending.model.user;
 import java.util.Objects;
 
 import me.moros.bending.model.ability.Updatable;
+import me.moros.math.FastMath;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.entity.Player;
@@ -54,7 +55,7 @@ public final class BendingBar implements Updatable {
         return UpdateResult.REMOVE;
       }
     }
-    float factor = Math.max(0, Math.min(1, (endTime - time) / (float) duration));
+    float factor = FastMath.clamp((endTime - time) / (float) duration, 0, 1);
     audience.showBossBar(bar.progress(factor));
     return UpdateResult.CONTINUE;
   }

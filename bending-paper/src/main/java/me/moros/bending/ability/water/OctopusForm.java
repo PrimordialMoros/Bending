@@ -36,7 +36,6 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -48,6 +47,7 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -58,7 +58,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 public class OctopusForm extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
   private static final double RADIUS = 3.0;
-  private static final AABB TENTACLE_BOX = new AABB(new Vector3d(-1, 0.0, -1), new Vector3d(1, 2.5, 1));
+  private static final AABB TENTACLE_BOX = new AABB(Vector3d.of(-1, 0.0, -1), Vector3d.of(1, 2.5, 1));
 
   private User user;
   private Config userConfig;
@@ -162,7 +162,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private void renderTentacles(boolean forceUpdate) {
-    Vector3d center = user.location().snapToBlockCenter();
+    Vector3d center = user.location().blockCenter();
     long time = System.currentTimeMillis();
     for (Tentacle tentacle : tentacles) {
       if (forceUpdate || time > tentacle.nextUpdateTime) {
@@ -244,7 +244,7 @@ public class OctopusForm extends AbilityInstance {
       cos = Math.cos(phi);
       sin = Math.sin(phi);
       topFormTime = System.currentTimeMillis() + 150;
-      updateBlocks(user.location().snapToBlockCenter());
+      updateBlocks(user.location().blockCenter());
     }
 
     private void updateBlocks(Vector3d center) {

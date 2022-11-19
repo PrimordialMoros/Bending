@@ -28,12 +28,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -99,7 +100,7 @@ public final class WorldUtil {
     for (double x = pos.x() - r; x <= pos.x() + r; x++) {
       for (double y = pos.y() - r; y <= pos.y() + r; y++) {
         for (double z = pos.z() - r; z <= pos.z() + r; z++) {
-          Vector3d loc = new Vector3d(x, y, z);
+          Vector3d loc = Vector3d.of(x, y, z);
           if (pos.distanceSq(loc) > radius * radius) {
             continue;
           }
@@ -157,7 +158,7 @@ public final class WorldUtil {
     for (double x = box.min.x(); x <= box.max.x(); x++) {
       for (double y = box.min.y(); y <= box.max.y(); y++) {
         for (double z = box.min.z(); z <= box.max.z(); z++) {
-          Vector3d loc = new Vector3d(x, y, z);
+          Vector3d loc = Vector3d.of(x, y, z);
           Block block = loc.toBlock(world);
           if (predicate.test(block)) {
             blocks.add(block);
@@ -219,7 +220,7 @@ public final class WorldUtil {
    */
   public static void playLavaExtinguishEffect(Block block) {
     SoundUtil.LAVA_EXTINGUISH.play(block);
-    Vector3d center = Vector3d.center(block).add(0, 0.2, 0);
+    Vector3d center = Vector3d.fromCenter(block).add(0, 0.2, 0);
     ParticleUtil.of(Particle.CLOUD, center).count(8).offset(0.3).spawn(block.getWorld());
   }
 
@@ -325,7 +326,7 @@ public final class WorldUtil {
    * @return a collection of blocks representing the ring
    */
   public static Collection<Block> createBlockRing(Block center, double radius) {
-    Vector3d centerVector = Vector3d.center(center);
+    Vector3d centerVector = Vector3d.fromCenter(center);
     int steps = FastMath.ceil(10 * radius);
     return VectorUtil.circle(Vector3d.PLUS_I.multiply(radius), Vector3d.PLUS_J, steps)
       .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().toList();

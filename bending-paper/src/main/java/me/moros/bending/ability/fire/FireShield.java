@@ -37,8 +37,6 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -51,6 +49,8 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.math.Rotation;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
@@ -198,10 +198,10 @@ public class FireShield extends AbilityInstance {
     public void update() {
       location = user.eyeLocation().add(user.direction().multiply(userConfig.diskRange));
       double r = userConfig.diskRadius;
-      AABB aabb = new AABB(new Vector3d(-r, -r, -1), new Vector3d(r, r, 1));
+      AABB aabb = new AABB(Vector3d.of(-r, -r, -1), Vector3d.of(r, r, 1));
       Vector3d right = user.rightSide();
-      Rotation rotation = new Rotation(Vector3d.PLUS_J, Math.toRadians(user.yaw()));
-      rotation = rotation.applyTo(new Rotation(right, Math.toRadians(user.pitch())));
+      Rotation rotation = Rotation.from(Vector3d.PLUS_J, Math.toRadians(user.yaw()));
+      rotation = rotation.applyTo(Rotation.from(right, Math.toRadians(user.pitch())));
       disk = new Disk(new OBB(aabb, rotation), new Sphere(userConfig.diskRadius)).at(location);
     }
 
@@ -213,11 +213,11 @@ public class FireShield extends AbilityInstance {
         return;
       }
       nextRenderTime = time + 200;
-      Rotation rotation = new Rotation(user.direction(), Math.toRadians(20));
+      Rotation rotation = Rotation.from(user.direction(), Math.toRadians(20));
       double[] array = Vector3d.PLUS_J.cross(user.direction()).normalize().toArray();
       for (int i = 0; i < 18; i++) {
         for (double j = 0.2; j <= 1; j += 0.2) {
-          Vector3d spawnLoc = location.add(new Vector3d(array).multiply(j * userConfig.diskRadius));
+          Vector3d spawnLoc = location.add(Vector3d.from(array).multiply(j * userConfig.diskRadius));
           ParticleUtil.fire(user, spawnLoc).offset(0.15).extra(0.01).spawn(user.world());
           if (rand.nextInt(12) == 0) {
             SoundUtil.FIRE.play(user.world(), spawnLoc);

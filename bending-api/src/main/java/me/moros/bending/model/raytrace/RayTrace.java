@@ -19,10 +19,16 @@
 
 package me.moros.bending.model.raytrace;
 
-import me.moros.bending.model.math.Vector3d;
+import java.util.Set;
+
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
 
 public interface RayTrace {
   Vector3d position();
 
   boolean hit();
+
+  record Context(Vector3d start, Vector3d end, boolean ignoreLiquids, boolean ignorePassable, Set<Position> ignore) {
+  }
 }

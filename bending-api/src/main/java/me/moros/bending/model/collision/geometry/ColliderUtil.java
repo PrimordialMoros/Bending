@@ -19,7 +19,8 @@
 
 package me.moros.bending.model.collision.geometry;
 
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 
 final class ColliderUtil {
   private ColliderUtil() {
@@ -96,11 +97,11 @@ final class ColliderUtil {
     Vector3d min = aabb.min;
     Vector3d max = aabb.max;
     // Get the point closest to sphere center on the aabb.
-    double x = Math.max(min.x(), Math.min(sphere.center.x(), max.x()));
-    double y = Math.max(min.y(), Math.min(sphere.center.y(), max.y()));
-    double z = Math.max(min.z(), Math.min(sphere.center.z(), max.z()));
+    double x = FastMath.clamp(sphere.center.x(), min.x(), max.x());
+    double y = FastMath.clamp(sphere.center.y(), min.y(), max.y());
+    double z = FastMath.clamp(sphere.center.z(), min.z(), max.z());
     // Check if that point is inside the sphere.
-    return sphere.contains(new Vector3d(x, y, z));
+    return sphere.contains(Vector3d.of(x, y, z));
   }
 
   private static boolean _intersects(OBB obb, Sphere sphere) {
@@ -123,6 +124,6 @@ final class ColliderUtil {
   private static boolean _intersects(Ray ray, AABB aabb) {
     Vector3d t0 = aabb.min.subtract(ray.origin).multiply(ray.invDir);
     Vector3d t1 = aabb.max.subtract(ray.origin).multiply(ray.invDir);
-    return Vector3d.maxComponent(t0.min(t1)) <= Vector3d.minComponent(t0.max(t1));
+    return t0.min(t1).maxComponent() <= t0.max(t1).minComponent();
   }
 }

@@ -30,7 +30,6 @@ import me.moros.bending.model.ability.common.basic.AbstractRide;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -42,10 +41,11 @@ import me.moros.bending.temporal.TempEntity.TempEntityType;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -166,7 +166,7 @@ public class EarthSurf extends AbilityInstance {
       if (ticks % 3 == 0) {
         return;
       }
-      Builder builder = TempEntity.builder(MaterialUtil.softType(data)).velocity(new Vector3d(0, 0.25, 0)).duration(500);
+      Builder builder = TempEntity.builder(MaterialUtil.softType(data)).velocity(Vector3d.of(0, 0.25, 0)).duration(500);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {

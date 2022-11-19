@@ -169,10 +169,11 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public CompletableFuture<PresetCreateResult> addPreset(Preset preset) {
-    if (preset.id() > 0 || presets.contains(preset)) {
+    String n = preset.name();
+    if (preset.id() > 0 || presets.contains(preset) || presets.stream().map(Preset::name).anyMatch(n::equalsIgnoreCase)) {
       return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
     }
-    if (!EventBus.INSTANCE.postPresetCreateEvent(this, preset)) {
+    if (n.isEmpty() || !EventBus.INSTANCE.postPresetCreateEvent(this, preset)) {
       return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
     return game().storage().savePresetAsync(internalId, preset).thenApply(success -> {

@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.raytrace;
 
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.util.EntityUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,7 +35,7 @@ public interface EntityRayTrace extends RayTrace {
 
   default Vector3d entityEyeLevelOrPosition() {
     if (entity() instanceof LivingEntity livingEntity) {
-      return new Vector3d(livingEntity.getEyeLocation());
+      return Vector3d.from(livingEntity.getEyeLocation());
     }
     return position();
   }

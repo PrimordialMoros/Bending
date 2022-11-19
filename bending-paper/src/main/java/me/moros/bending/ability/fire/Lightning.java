@@ -42,8 +42,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Rotation;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -59,9 +57,11 @@ import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.InventoryUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.math.Rotation;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
@@ -367,7 +367,7 @@ public class Lightning extends AbilityInstance {
     }
 
     private Vector3d randomDirection(Vector3d axis, double maxLength) {
-      Rotation rotation = new Rotation(axis, rand.nextDouble(Math.PI / 4));
+      Rotation rotation = Rotation.from(axis, rand.nextDouble(Math.PI / 4));
       Vector3d angledVector = rand.nextBoolean() ? rotation.applyTo(axis) : rotation.applyInverseTo(axis);
       double halfLength = 0.5 * maxLength;
       return angledVector.normalize().multiply(halfLength + rand.nextDouble() * halfLength);

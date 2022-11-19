@@ -27,15 +27,12 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.storage.Storage;
-import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles all Storage tasks and their concurrency.
  */
 public interface BendingStorage extends Storage {
-  void init(Plugin plugin);
-
   /**
    * Creates a new profile for the given uuid or returns an existing one if possible.
    */

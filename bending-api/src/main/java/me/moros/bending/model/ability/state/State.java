@@ -21,8 +21,19 @@ package me.moros.bending.model.ability.state;
 
 import me.moros.bending.model.ability.Updatable;
 
+/**
+ * Represents an {@link Updatable} state that can be started and completed.
+ * @see StateChain
+ */
 public interface State extends Updatable {
+  /**
+   * Start this state.
+   * @param chain the chain to assign this state to
+   */
   void start(StateChain chain);
 
+  /**
+   * Complete this state.
+   */
   void complete();
 }

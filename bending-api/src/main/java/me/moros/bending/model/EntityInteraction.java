@@ -22,7 +22,7 @@ package me.moros.bending.model;
 import java.lang.ref.WeakReference;
 
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
+import me.moros.math.Vector3d;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -37,7 +37,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.user.User;
@@ -51,6 +50,7 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -224,7 +224,7 @@ public class IceSpike extends AbilityInstance {
       }
 
       Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
-      AABB collider = AABB.BLOCK_BOUNDS.at(new Vector3d(currentIndex));
+      AABB collider = AABB.BLOCK_BOUNDS.at(Vector3d.from(currentIndex));
       CollisionUtil.handle(user, collider, this::onEntityHit, true, true);
 
       if (canMove(currentIndex)) {

@@ -43,7 +43,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -54,9 +53,10 @@ import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -233,8 +233,8 @@ public class WaterGimbal extends AbilityInstance {
         if (angle >= 360) {
           angle = 0;
         }
-        Vector3d v1 = new Vector3d(Math.cos(theta), Math.sin(theta), 0).multiply(3.4);
-        Vector3d v2 = new Vector3d(v1.toArray());
+        Vector3d v1 = Vector3d.of(Math.cos(theta), Math.sin(theta), 0).multiply(3.4);
+        Vector3d v2 = v1;
         v1 = VectorUtil.rotateAroundAxisX(v1, 0.7, 0.7);
         v1 = VectorUtil.rotateAroundAxisY(v1, cos, sin);
         v2 = VectorUtil.rotateAroundAxisX(v2, 0.7, -0.7);
@@ -295,7 +295,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     protected void renderHead(Block block) {
-      ParticleUtil.of(Particle.SNOW_SHOVEL, Vector3d.center(block)).count(6).offset(0.25).extra(0.05).spawn(user.world());
+      ParticleUtil.of(Particle.SNOW_SHOVEL, Vector3d.fromCenter(block)).count(6).offset(0.25).extra(0.05).spawn(user.world());
       if (!MaterialUtil.isWater(block)) {
         TempBlock.water().build(block);
       }
@@ -313,7 +313,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, new Ray(Vector3d.center(block), direction));
+      FragileStructure.tryDamageStructure(block, 3, new Ray(Vector3d.fromCenter(block), direction));
     }
   }
 

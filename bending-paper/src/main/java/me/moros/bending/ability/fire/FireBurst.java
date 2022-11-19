@@ -39,7 +39,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
 import me.moros.bending.model.predicate.SwappedSlotsRemovalPolicy;
@@ -50,10 +49,11 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.util.RayUtil;
 import me.moros.bending.util.SoundUtil;
-import me.moros.bending.util.VectorUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -150,9 +150,9 @@ public class FireBurst extends AbilityInstance {
     released = true;
     Collection<Ray> rays;
     if (cone) {
-      rays = VectorUtil.cone(user, userConfig.coneRange);
+      rays = RayUtil.cone(user, userConfig.coneRange);
     } else {
-      rays = VectorUtil.sphere(user, userConfig.sphereRange);
+      rays = RayUtil.sphere(user, userConfig.sphereRange);
     }
     rays.forEach(r -> streams.add(new FireStream(r)));
     removalPolicy = Policies.builder().build();
@@ -203,10 +203,10 @@ public class FireBurst extends AbilityInstance {
       double igniteRadius = 1.5;
       Vector3d standing = user.location().add(0, 0.5, 0);
       for (Block b : WorldUtil.nearbyBlocks(user.world(), location, igniteRadius)) {
-        if (standing.distanceSq(Vector3d.center(b)) < 4 || !user.canBuild(b)) {
+        if (standing.distanceSq(Vector3d.fromCenter(b)) < 4 || !user.canBuild(b)) {
           continue;
         }
-        if (user.rayTrace(Vector3d.center(b), reverse).range(igniteRadius + 2).blocks(user.world()).hit()) {
+        if (user.rayTrace(Vector3d.fromCenter(b), reverse).range(igniteRadius + 2).blocks(user.world()).hit()) {
           continue;
         }
         if (MaterialUtil.isIgnitable(b)) {

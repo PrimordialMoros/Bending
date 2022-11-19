@@ -21,17 +21,20 @@ package me.moros.bending.model.ability.common;
 
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * State implementation for a source block that travels towards the user.
+ */
 public class TravellingSource implements State {
   private final BlockData data;
   private StateChain chain;
@@ -75,8 +78,8 @@ public class TravellingSource implements State {
       return UpdateResult.REMOVE;
     }
     clean();
-    Vector3d target = Vector3d.center(user.locBlock());
-    Vector3d location = Vector3d.center(source);
+    Vector3d target = Vector3d.fromCenter(user.locBlock());
+    Vector3d location = Vector3d.fromCenter(source);
 
     double distSq = target.distanceSq(location);
     if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
@@ -108,7 +111,7 @@ public class TravellingSource implements State {
   }
 
   private @Nullable Block findPath(Block check) {
-    Vector3d dest = Vector3d.center(user.headBlock());
+    Vector3d dest = Vector3d.fromCenter(user.headBlock());
     Block result = null;
     double minDistance = Double.MAX_VALUE;
     for (BlockFace face : WorldUtil.SIDES) {
@@ -116,7 +119,7 @@ public class TravellingSource implements State {
       if (!isValid(block)) {
         continue;
       }
-      double d = Vector3d.center(block).distanceSq(dest);
+      double d = Vector3d.fromCenter(block).distanceSq(dest);
       if (d < minDistance) {
         minDistance = d;
         result = block;

@@ -61,8 +61,10 @@ public enum SqlQueries {
     String column = "ability_name";
     String table = "bending_abilities (" + column + ") ";
     return switch (type) {
-      case MYSQL, MARIADB -> "INSERT INTO " + table + "VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
-      case SQLITE, H2, POSTGRESQL -> "INSERT INTO " + table + "VALUES(?) ON CONFLICT DO NOTHING";
+      case SQLITE -> "INSERT OR IGNORE INTO " + table + "VALUES(?)";
+      case MYSQL, MARIADB, HSQL ->
+        "INSERT INTO " + table + "VALUES(?) ON DUPLICATE KEY UPDATE " + column + "=" + column;
+      case H2, POSTGRESQL -> "INSERT INTO " + table + "VALUES(?) ON CONFLICT DO NOTHING";
     };
   }
 }

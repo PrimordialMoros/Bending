@@ -29,12 +29,12 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
 import me.moros.bending.util.RayTraceBuilder;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.AABBUtil;
 import me.moros.bending.util.collision.CollisionUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
@@ -55,8 +55,8 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     this.location = ray.origin;
     this.radius = radius;
     this.dir = ray.direction.normalize().multiply(speed);
-    box = new AABB(new Vector3d(-radius, -radius, -radius), new Vector3d(radius, radius, radius));
-    AABB bounds = new AABB(new Vector3d(-0.15, -radius, -radius), new Vector3d(0.15, radius, radius));
+    box = new AABB(Vector3d.of(-radius, -radius, -radius), Vector3d.of(radius, radius, radius));
+    AABB bounds = new AABB(Vector3d.of(-0.15, -radius, -radius), Vector3d.of(0.15, radius, radius));
     double angle = Math.toRadians(user.yaw());
     OBB obb = new OBB(bounds, Vector3d.PLUS_J, angle);
     collider = new Disk(obb, new Sphere(radius));
@@ -120,7 +120,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
       }
     }
     // Try to fall if the block below doesn't have a bounding box.
-    Vector3d offset = new Vector3d(0, radius - 0.125, 0);
+    Vector3d offset = Vector3d.of(0, radius - 0.125, 0);
     Vector3d bottom = location.subtract(offset);
     if (bottom.toBlock(user.world()).isPassable()) {
       Vector3d pos = RayTraceBuilder.of(bottom, Vector3d.MINUS_J).range(0.75 * radius).blocks(user.world()).position().add(offset);

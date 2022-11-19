@@ -22,11 +22,11 @@ package me.moros.bending.temporal;
 import java.util.Objects;
 
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.util.ParticleUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -80,8 +80,8 @@ public class TempEntity extends TemporaryBase {
     return new Builder(Objects.requireNonNull(data));
   }
 
-  private static final Vector3d armorStandOffset = new Vector3d(0, 1.8, 0);
-  private static final Vector3d fallingBlockOffset = new Vector3d(0.5, 0, 0.5);
+  private static final Vector3d armorStandOffset = Vector3d.of(0, 1.8, 0);
+  private static final Vector3d fallingBlockOffset = Vector3d.of(0.5, 0, 0.5);
 
   public static final class Builder {
     private final BlockData data;
@@ -124,7 +124,7 @@ public class TempEntity extends TemporaryBase {
     }
 
     public TempFallingBlock build(Block block) {
-      return buildAt(block, new Vector3d(block).add(fallingBlockOffset));
+      return buildAt(block, Vector3d.from(block).add(fallingBlockOffset));
     }
 
     public TempFallingBlock buildAt(Block block, Vector3d center) {
@@ -147,7 +147,7 @@ public class TempEntity extends TemporaryBase {
     }
 
     private void spawnParticles(World world, Vector3d spawnLoc) {
-      Vector3d offset = new Vector3d(0.25, 0.125, 0.25);
+      Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
       ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(offset).data(data).spawn(world);
       ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(offset).data(data).spawn(world);
     }
@@ -235,7 +235,7 @@ public class TempEntity extends TemporaryBase {
     }
 
     public Vector3d center() {
-      return new Vector3d(fallingBlock.getLocation()).add(fallingBlockOffset);
+      return Vector3d.from(fallingBlock.getLocation()).add(fallingBlockOffset);
     }
 
     public boolean isValid() {

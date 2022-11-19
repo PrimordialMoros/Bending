@@ -94,6 +94,7 @@ public enum Tasker {
   /**
    * Create an asynchronous task using Bending's executor.
    * @param supplier the task to execute
+   * @param <T> the type of result the future will hold
    * @return a future with the result
    */
   public <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {

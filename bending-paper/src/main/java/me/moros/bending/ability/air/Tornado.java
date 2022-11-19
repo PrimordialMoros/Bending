@@ -31,7 +31,6 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.key.RegistryKey;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -43,6 +42,8 @@ import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -108,7 +109,7 @@ public class Tornado extends AbilityInstance {
     double height = 2 + factor * (userConfig.height - 2);
     double radius = 2 + factor * (userConfig.radius - 2);
     double rBox = 0.6 * radius;
-    AABB box = new AABB(new Vector3d(-rBox, 0, -rBox), new Vector3d(rBox, height, rBox)).at(base);
+    AABB box = new AABB(Vector3d.of(-rBox, 0, -rBox), Vector3d.of(rBox, height, rBox)).at(base);
     CollisionUtil.handle(user, box, entity -> {
       double dy = entity.getLocation().getY() - base.y();
       double r = 0.5 + (radius - 0.5) * dy;
@@ -146,7 +147,7 @@ public class Tornado extends AbilityInstance {
   }
 
   private void render(Vector3d base, double factor, double height, double radius) {
-    double amount = Math.min(30, Math.max(4, factor * 30));
+    double amount = FastMath.clamp(factor * 30, 4, 30);
     yOffset += 0.1;
     if (yOffset >= 1) {
       yOffset = 0;

@@ -21,7 +21,6 @@ package me.moros.bending.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.BendingProperties;
@@ -37,7 +36,6 @@ import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -56,6 +54,7 @@ import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Vector3d;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -67,7 +66,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthShot extends AbilityInstance implements Explosive {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(new Vector3d(0.25, 0.25, 0.25));
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
 
   private enum Mode {ROCK, METAL, MAGMA}
 
@@ -160,7 +159,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       SoundUtil.EARTH.play(source);
     }
 
-    projectile = TempEntity.builder(solidData).velocity(new Vector3d(0, 0.65, 0))
+    projectile = TempEntity.builder(solidData).velocity(Vector3d.of(0, 0.65, 0))
       .gravity(false).duration(6000).build(source);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(source);
@@ -185,7 +184,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
         return UpdateResult.REMOVE;
       }
 
-      Vector3d velocity = new Vector3d(projectile.entity().getVelocity());
+      Vector3d velocity = Vector3d.from(projectile.entity().getVelocity());
       double minLength = userConfig.speed * 0.85;
       if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < minLength * minLength) {
         return UpdateResult.REMOVE;
@@ -195,14 +194,14 @@ public class EarthShot extends AbilityInstance implements Explosive {
         velocity = velocity.add(dir.withY(0));
       }
       EntityUtil.applyVelocity(this, projectile.entity(), velocity.normalize().multiply(userConfig.speed));
-      lastVelocity = new Vector3d(projectile.entity().getVelocity());
+      lastVelocity = Vector3d.from(projectile.entity().getVelocity());
       location = projectile.center();
       Collider c = BOX.at(location);
       boolean magma = mode == Mode.MAGMA;
       if (CollisionUtil.handle(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
-      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.entity().getLocation()))
+      ParticleUtil.of(Particle.BLOCK_DUST, Vector3d.from(projectile.entity().getLocation()))
         .count(3).offset(0.25).data(projectile.entity().getBlockData()).spawn(user.world());
     } else {
       if (!ready) {
@@ -221,7 +220,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       return false;
     }
     DamageUtil.damageEntity(entity, user, damage, description());
-    Vector3d velocity = new Vector3d(projectile.entity().getVelocity()).normalize().multiply(0.4);
+    Vector3d velocity = Vector3d.from(projectile.entity().getVelocity()).normalize().multiply(0.4);
     EntityUtil.applyVelocity(this, entity, velocity);
     return true;
   }
@@ -231,12 +230,12 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (block.getY() >= targetY) {
       TempBlock.builder(projectile.entity().getBlockData()).build(block);
       projectile.revert();
-      location = new Vector3d(block);
+      location = Vector3d.from(block);
       readySource = block;
       ready = true;
     } else {
       location = projectile.center();
-      ParticleUtil.of(Particle.BLOCK_DUST, new Vector3d(projectile.entity().getLocation()))
+      ParticleUtil.of(Particle.BLOCK_DUST, Vector3d.from(projectile.entity().getLocation()))
         .count(3).offset(0.25).data(projectile.entity().getBlockData()).spawn(user.world());
     }
   }
@@ -253,7 +252,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
           SoundUtil.LAVA.play(readySource);
         }
       }
-      Vector3d spawnLoc = Vector3d.center(readySource);
+      Vector3d spawnLoc = Vector3d.fromCenter(readySource);
       ParticleUtil.of(Particle.LAVA, spawnLoc).count(2).offset(0.5).spawn(user.world());
       ParticleUtil.of(Particle.SMOKE_NORMAL, spawnLoc).count(2).offset(0.5).spawn(user.world());
       ParticleUtil.rgb(spawnLoc, "FFA400").count(2).offset(0.5).spawn(user.world());
@@ -302,14 +301,14 @@ public class EarthShot extends AbilityInstance implements Explosive {
       projectile.entity().setGravity(true);
       EntityUtil.applyVelocity(this, projectile.entity(), dir.add(0, 0.2, 0));
     } else {
-      origin = Vector3d.center(readySource);
+      origin = Vector3d.fromCenter(readySource);
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed);
       projectile = TempFallingBlock.builder(readySource.getBlockData())
         .velocity(dir.add(0, 0.2, 0)).build(readySource);
       TempBlock.air().build(readySource);
     }
     location = projectile.center();
-    lastVelocity = new Vector3d(projectile.entity().getVelocity());
+    lastVelocity = Vector3d.from(projectile.entity().getVelocity());
 
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
@@ -326,8 +325,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   private Vector3d getTarget(@Nullable Block source) {
-    return user.rayTrace(userConfig.range).ignore(source == null ? Set.of() : Set.of(source))
-      .entities(user.world()).entityCenterOrPosition();
+    return user.rayTrace(userConfig.range).ignore(source).entities(user.world()).entityCenterOrPosition();
   }
 
   @Override

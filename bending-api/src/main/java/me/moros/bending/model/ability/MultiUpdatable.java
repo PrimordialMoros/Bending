@@ -29,6 +29,9 @@ import java.util.stream.Stream;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateWrapper;
 
+/**
+ * Wraps a collection of {@link Updatable}.
+ */
 public class MultiUpdatable<T extends Updatable> implements Updatable, Iterable<T> {
   protected final Collection<T> actions;
 

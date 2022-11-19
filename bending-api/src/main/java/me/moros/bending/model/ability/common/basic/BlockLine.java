@@ -25,9 +25,9 @@ import java.util.Iterator;
 
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
-import me.moros.bending.model.math.FastMath;
-import me.moros.bending.model.math.Vector3d;
 import me.moros.bending.model.user.User;
+import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
 
@@ -76,7 +76,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
         return UpdateResult.REMOVE;
       }
       Vector2i v = iterator.next();
-      temp = new Vector3d(v.x() + 0.5, FastMath.floor(location.y() + 0.5), v.z() + 0.5);
+      temp = Vector3d.of(v.x() + 0.5, FastMath.floor(location.y() + 0.5), v.z() + 0.5);
     }
     Resolved resolved = resolve(temp, dir);
     if (!resolved.success()) {
