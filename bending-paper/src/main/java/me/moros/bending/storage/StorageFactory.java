@@ -64,7 +64,6 @@ public final class StorageFactory {
           p.put("DB_CLOSE_ON_EXIT", false);
         });
       }
-      ;
       Path parent = Path.of(plugin.getDataFolder().toString(), "data", config.engine.realName());
       try {
         Files.createDirectories(parent);

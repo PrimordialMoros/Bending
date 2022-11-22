@@ -21,6 +21,7 @@ package me.moros.bending.storage;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -80,7 +81,8 @@ public final class StorageImpl implements BendingStorage {
   boolean init(Function<String, InputStream> resourceProvider) {
     if (!tableExists("bending_players")) {
       Collection<String> statements;
-      try (InputStream stream = resourceProvider.apply(dataSource.type().realName() + ".sql")) {
+      String path = Path.of("schema", dataSource.type().realName() + ".sql").toString();
+      try (InputStream stream = resourceProvider.apply(path)) {
         statements = SqlStreamReader.parseQueries(stream);
       } catch (Exception e) {
         return false;
