@@ -34,7 +34,7 @@ dependencies {
     implementation("org.mariadb.jdbc", "mariadb-java-client", "3.1.0") {
         isTransitive = false
     }
-    implementation("org.jdbi", "jdbi3-core", "3.34.0") {
+    implementation("org.jdbi", "jdbi3-core", "3.35.0") {
         exclude(module = "caffeine")
     }
     implementation("com.zaxxer", "HikariCP", "5.0.1")
