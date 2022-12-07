@@ -28,7 +28,7 @@ dependencies {
     project.project(":bending-paper:adapters").subprojects.forEach {
         adapters(project(it.path, "reobf"))
     }
-    implementation("org.postgresql", "postgresql", "42.5.0")
+    implementation("org.postgresql", "postgresql", "42.5.1")
     implementation("com.h2database", "h2", "2.1.214")
     implementation("org.hsqldb", "hsqldb", "2.7.1")
     implementation("org.mariadb.jdbc", "mariadb-java-client", "3.1.0") {
@@ -42,11 +42,11 @@ dependencies {
     implementation("org.bstats", "bstats-bukkit", "3.0.0")
     implementation("cloud.commandframework", "cloud-paper", "1.7.1")
     implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.1")
+    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.2")
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
     compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.3.19")
+    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.4.4")
     compileOnly("com.griefcraft", "lwc", "2.2.9-dev")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
     compileOnly("me.clip", "placeholderapi", "2.11.2")
