@@ -78,7 +78,7 @@ final class BoardImpl implements Board {
       AbilityDescription desc = player.boundAbility(slot);
       Component suffix;
       if (desc == null) {
-        suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(String.valueOf(slot));
+        suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(slot);
       } else {
         suffix = desc.displayName();
         if (player.onCooldown(desc)) {

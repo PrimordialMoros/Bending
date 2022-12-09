@@ -187,14 +187,16 @@ public final class BendingCommand {
         .argument(EnumArgument.of(Attribute.class, "attribute"))
         .argument(EnumArgument.of(ModifierOperation.class, "operation"))
         .argument(DoubleArgument.of("amount"))
+        .argument(userArg.build())
         .handler(c -> {
           AttributeModifier modifier = new AttributeModifier(c.get("policy"), c.get("attribute"), c.get("operation"), c.get("amount"));
-          onModifierAdd(c.get(ContextKeys.BENDING_PLAYER), modifier);
+          onModifierAdd(c.getSender(), modifier, c.get("target"));
         })
       ).command(modifierBase.literal("clear", "c")
         .meta(CommandMeta.DESCRIPTION, "Clear all existing modifiers for a user")
         .senderType(Player.class)
-        .handler(c -> onModifierClear(c.get(ContextKeys.BENDING_PLAYER)))
+        .argument(userArg.build())
+        .handler(c -> onModifierClear(c.getSender(), c.get("target")))
       );
   }
 
@@ -286,10 +288,6 @@ public final class BendingCommand {
   }
 
   public void onElementAdd(User user, Element element) {
-    if (!user.hasPermission(CommandPermissions.ADD + "." + element)) {
-      Message.ELEMENT_ADD_NO_PERMISSION.send(user, element.displayName());
-      return;
-    }
     if (user.addElement(element)) {
       Message.ELEMENT_ADD_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);
@@ -378,9 +376,10 @@ public final class BendingCommand {
       hover = Message.NO_ELEMENTS.build();
     } else {
       JoinConfiguration sep = JoinConfiguration.commas(true);
-      hover = Component.join(sep, user.elements().stream().map(Element::displayName).toList());
+      hover = Component.join(sep, elements.stream().map(Element::displayName).toList())
+        .colorIfAbsent(ColorPalette.TEXT_COLOR);
     }
-    Message.BOUND_SLOTS.send(sender, user.entity().getName(), hover.colorIfAbsent(ColorPalette.TEXT_COLOR));
+    Message.BOUND_SLOTS.send(sender, user.entity().name().hoverEvent(HoverEvent.showText(hover)));
     user.createPresetFromSlots("").display().forEach(sender::sendMessage);
   }
 
@@ -406,7 +405,7 @@ public final class BendingCommand {
       Message.EMPTY_PRESET.send(player);
       return;
     }
-    player.addPreset(preset).thenAccept(result -> result.message().send(player, input));
+    player.addPreset(preset).thenAccept(result -> result.send(player, input));
   }
 
   private void onPresetRemove(BendingPlayer player, Preset preset) {
@@ -425,16 +424,16 @@ public final class BendingCommand {
     }
   }
 
-  private void onModifierAdd(User user, AttributeModifier modifier) {
+  private void onModifierAdd(CommandSender sender, AttributeModifier modifier, User user) {
     user.addAttribute(modifier);
     recalculate(user);
-    Message.MODIFIER_ADD.send(user, user.entity().getName());
+    Message.MODIFIER_ADD.send(sender, user.entity().name());
   }
 
-  private void onModifierClear(User user) {
+  private void onModifierClear(CommandSender sender, User user) {
     user.clearAttributes();
     recalculate(user);
-    Message.MODIFIER_CLEAR.send(user, user.entity().getName());
+    Message.MODIFIER_CLEAR.send(sender, user.entity().name());
   }
 
   private void recalculate(User user) {

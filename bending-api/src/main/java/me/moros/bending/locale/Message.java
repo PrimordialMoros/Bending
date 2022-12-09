@@ -68,10 +68,10 @@ public interface Message {
   Args1<String> PRESET_BIND_FAIL = preset -> translatable("bending.command.preset.bind-fail", WARN)
     .args(text(preset));
 
-  Args1<String> MODIFIER_ADD = name -> translatable("bending.command.modifier.add", SUCCESS)
-    .args(text(name));
-  Args1<String> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", SUCCESS)
-    .args(text(name));
+  Args1<Component> MODIFIER_ADD = name -> translatable("bending.command.modifier.add", SUCCESS)
+    .args(name);
+  Args1<Component> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", SUCCESS)
+    .args(name);
 
   Args0 TOGGLE_ON = () -> translatable("bending.command.toggle.on", SUCCESS);
   Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", FAIL);
@@ -88,8 +88,6 @@ public interface Message {
   Args1<Component> ELEMENT_CHOOSE_FAIL = element -> translatable("bending.command.element.choose-fail", WARN)
     .args(element);
 
-  Args1<Component> ELEMENT_ADD_NO_PERMISSION = element -> translatable("bending.command.element.add-no-permission", FAIL)
-    .args(element);
   Args1<Component> ELEMENT_ADD_SUCCESS = element -> translatable("bending.command.element.add-success", SUCCESS)
     .args(element);
   Args1<Component> ELEMENT_ADD_FAIL = element -> translatable("bending.command.element.add-fail", WARN)
@@ -128,8 +126,8 @@ public interface Message {
   Args1<Component> ABILITY_BIND_NO_PERMISSION = ability -> translatable("bending.command.bind.no-permission", FAIL)
     .args(ability);
 
-  Args2<String, Component> BOUND_SLOTS = (name, elements) -> translatable("bending.command.binds.header", HEADER)
-    .args(text(name).hoverEvent(HoverEvent.showText(elements)));
+  Args1<Component> BOUND_SLOTS = name -> translatable("bending.command.binds.header", HEADER)
+    .args(name);
 
   Args0 NO_ELEMENTS = () -> translatable("bending.command.binds.no-elements", NEUTRAL);
 
@@ -153,7 +151,7 @@ public interface Message {
 
   Args0 BENDING_BOARD_TITLE = () -> translatable("bending.board.title", Style.style(TEXT_COLOR, TextDecoration.BOLD));
 
-  Args1<String> BENDING_BOARD_EMPTY_SLOT = slot -> translatable("bending.board.empty-slot", METAL)
+  Args1<Integer> BENDING_BOARD_EMPTY_SLOT = slot -> translatable("bending.board.empty-slot", METAL)
     .args(text(slot));
 
   Args0 GUI_NO_PERMISSION = () -> translatable("bending.gui.no-permission", FAIL);

@@ -61,10 +61,13 @@ public class AbilityManagerImpl implements AbilityManager {
     return desc.isActivatedBy(Activation.PASSIVE);
   }
 
-
   @Override
   public void addUpdatable(Updatable instance) {
-    generics.add(instance);
+    if (instance instanceof Ability ability) {
+      addAbility(ability.user(), ability);
+    } else {
+      generics.add(instance);
+    }
   }
 
   @Override

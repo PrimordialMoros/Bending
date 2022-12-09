@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = "me.moros"
-    version = "2.2.0"
+    version = "2.3.0-SNAPSHOT"
 
     apply(plugin = "java-library")
     apply(plugin = "org.checkerframework")

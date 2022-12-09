@@ -6,7 +6,7 @@ pluginManagement {
 }
 rootProject.name = "bending"
 
-listOf("1.18.2", "1.19").forEach {
+listOf("1.18.2", "1.19", "1.19.3").forEach {
     include("bending-paper:adapters:adapter-$it")
 }
 include("bending-api")

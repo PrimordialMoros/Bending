@@ -21,8 +21,9 @@ package me.moros.bending.model.preset;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args1;
+import net.kyori.adventure.text.Component;
 
-public enum PresetCreateResult {
+public enum PresetCreateResult implements Args1<String> {
   SUCCESS(Message.PRESET_SUCCESS),
   EXISTS(Message.PRESET_EXISTS),
   CANCELLED(Message.PRESET_CANCELLED),
@@ -34,7 +35,8 @@ public enum PresetCreateResult {
     this.message = message;
   }
 
-  public Args1<String> message() {
-    return message;
+  @Override
+  public Component build(String arg0) {
+    return message.build(arg0);
   }
 }
