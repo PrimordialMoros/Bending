@@ -1,10 +1,3 @@
-import io.papermc.paperweight.userdev.attribute.Obfuscation
-
-plugins {
-    id("com.github.johnrengelman.shadow").version("7.1.2")
-    id("io.papermc.paperweight.userdev").version("1.3.11").apply(false)
-}
-
 repositories {
     maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
@@ -13,20 +6,10 @@ repositories {
     maven("https://jitpack.io") // GriefPrevention
 }
 
-val adapters = configurations.create("adapters") {
-    description = "Adapters to include in the JAR"
-    isCanBeConsumed = false
-    isCanBeResolved = true
-    shouldResolveConsistentlyWith(configurations["runtimeClasspath"])
-    attributes {
-        attribute(Obfuscation.OBFUSCATION_ATTRIBUTE, objects.named(Obfuscation.OBFUSCATED))
-    }
-}
-
 dependencies {
     api(project(":bending-api"))
     project.project(":bending-paper:adapters").subprojects.forEach {
-        adapters(project(it.path, "reobf"))
+        implementation(project(it.path, "reobf"))
     }
     implementation("org.postgresql", "postgresql", "42.5.1")
     implementation("com.h2database", "h2", "2.1.214")
@@ -65,12 +48,7 @@ configurations {
 }
 
 tasks {
-    assemble {
-        dependsOn(shadowJar)
-    }
     shadowJar {
-        dependsOn(project(":bending-paper:adapters").subprojects.map { it.tasks.named("assemble") })
-        from(adapters.resolve().map { f -> zipTree(f).matching { exclude("META-INF/") } })
         archiveClassifier.set("")
         archiveBaseName.set(rootProject.name)
         destinationDirectory.set(rootProject.buildDir)

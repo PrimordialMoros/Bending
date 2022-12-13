@@ -6,8 +6,8 @@ pluginManagement {
 }
 rootProject.name = "bending"
 
-listOf("1.18.2", "1.19", "1.19.3").forEach {
-    include("bending-paper:adapters:adapter-$it")
-}
 include("bending-api")
+file("bending-paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
+    include("bending-paper:adapters:${it.name}")
+}
 include("bending-paper")
