@@ -9,7 +9,7 @@ Bending
 <h4 align="center">Experience the universe of <i>Avatar: The Last Airbender</i> in your minecraft server.</h4>
 
 <p align="center">
-<a href="https://github.com/PrimordialMoros/Bending/actions"><img src="https://img.shields.io/github/workflow/status/PrimordialMoros/Bending/Build?style=flat-square" alt="Gradle CI"/></a>
+<a href="https://github.com/PrimordialMoros/Bending/actions"><img src="https://img.shields.io/github/actions/workflow/status/PrimordialMoros/Bending/gradle.yml?branch=master&style=flat-square" alt="Gradle CI"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimordialMoros/Bending?color=009185&style=flat-square" alt="License"/></a>
 <a href="https://github.com/PrimordialMoros/Bending/releases"><img src="https://img.shields.io/github/v/release/PrimordialMoros/Bending?color=009185&style=flat-square" alt="Github release"/></a>
 <a href="https://discord.gg/sjwncgE"><img src="https://img.shields.io/badge/chat-discord-5865F2?style=flat-square" alt="Discord"/></a>
