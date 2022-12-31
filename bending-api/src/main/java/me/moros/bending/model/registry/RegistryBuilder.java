@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,7 +22,6 @@ package me.moros.bending.model.registry;
 import java.util.Objects;
 import java.util.function.Function;
 
-import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.registry.SimpleRegistry.SimpleMutableRegistry;
 
 /**
@@ -30,52 +29,38 @@ import me.moros.bending.model.registry.SimpleRegistry.SimpleMutableRegistry;
  * @param <K> the key type
  * @param <V> the value type
  */
-public class RegistryBuilder<K, V> {
-  protected final String namespace;
+public final class RegistryBuilder<K, V> {
+  private final String namespace;
+  private final Function<V, K> inverseMapper;
+  private Function<String, K> keyMapper;
 
-  private RegistryBuilder(String namespace) {
+  private RegistryBuilder(String namespace, Function<V, K> inverseMapper) {
     this.namespace = namespace;
+    this.inverseMapper = inverseMapper;
   }
 
-  private RegistryBuilder(RegistryBuilder<K, V> builder) {
-    this(builder.namespace);
+  public RegistryBuilder<K, V> keyMapper(Function<String, K> keyMapper) {
+    this.keyMapper = Objects.requireNonNull(keyMapper);
+    return this;
   }
 
-  public <K1> RegistryBuilder1<K1, V> inverseMapper(Function<V, K1> inverseMapper) {
-    RegistryBuilder1<K1, V> newBuilder = new RegistryBuilder1<>(namespace);
-    newBuilder.inverseMapper = Objects.requireNonNull(inverseMapper);
-    return newBuilder;
+  public Registry<K, V> build() {
+    return new SimpleRegistry<>(namespace, inverseMapper, keyMapper);
   }
 
-  public static final class RegistryBuilder1<K, V> extends RegistryBuilder<K, V> {
-    Function<V, K> inverseMapper;
-    Function<String, K> keyMapper;
-
-    private RegistryBuilder1(String namespace) {
-      super(namespace);
-    }
-
-    private RegistryBuilder1(RegistryBuilder1<K, V> builder) {
-      super(builder);
-      this.inverseMapper = builder.inverseMapper;
-      this.keyMapper = builder.keyMapper;
-    }
-
-    public RegistryBuilder1<K, V> keyMapper(Function<String, K> keyMapper) {
-      this.keyMapper = Objects.requireNonNull(keyMapper);
-      return this;
-    }
-
-    public Registry<K, V> build() {
-      return new SimpleRegistry<>(namespace, inverseMapper, keyMapper);
-    }
-
-    public MutableRegistry<K, V> buildMutable() {
-      return new SimpleMutableRegistry<>(namespace, inverseMapper, keyMapper);
-    }
+  public MutableRegistry<K, V> buildMutable() {
+    return new SimpleMutableRegistry<>(namespace, inverseMapper, keyMapper);
   }
 
-  public static <V> RegistryBuilder<?, V> builder(RegistryKey<V> type) {
-    return new RegistryBuilder<>(type.namespace());
+  public static class IntermediaryRegistryBuilder<V> {
+    private final String namespace;
+
+    IntermediaryRegistryBuilder(String namespace) {
+      this.namespace = namespace;
+    }
+
+    public <K1> RegistryBuilder<K1, V> inverseMapper(Function<V, K1> inverseMapper) {
+      return new RegistryBuilder<>(namespace, Objects.requireNonNull(inverseMapper));
+    }
   }
 }

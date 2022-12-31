@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import me.moros.bending.model.GridIterator;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.util.BlockIterator;
 
 public abstract class BlockLine extends MovementResolver implements Updatable {
   private final User user;
@@ -56,8 +56,8 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     dir = ray.direction.withY(0).normalize();
     this.location = ray.origin;
     Collection<Vector2i> vectors = new ArrayList<>();
-    new BlockIterator(user.world(), location.toBukkitVector(), dir.toBukkitVector(), 0, FastMath.ceil(maxRange))
-      .forEachRemaining(b -> vectors.add(new Vector2i(b.getX(), b.getZ())));
+    GridIterator.create(location, dir, FastMath.ceil(maxRange))
+      .forEachRemaining(b -> vectors.add(new Vector2i(b.blockX(), b.blockZ())));
     iterator = vectors.iterator();
   }
 
@@ -83,7 +83,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
       return UpdateResult.REMOVE;
     }
     location = resolved.point();
-    Block block = location.toBlock(user.world());
+    Block block = user.world().blockAt(location);
 
     if (location.distanceSq(ray.origin) > maxRange * maxRange) {
       return UpdateResult.REMOVE;

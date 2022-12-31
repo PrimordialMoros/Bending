@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,35 +19,34 @@
 
 package me.moros.bending.event;
 
-import java.util.EnumMap;
-import java.util.Map;
-
+import me.moros.bending.event.base.AbilityEvent;
+import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.bukkit.entity.Entity;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import me.moros.bending.platform.entity.LivingEntity;
 
 /**
  * Called when a bending ability damages an entity.
  */
-@SuppressWarnings("deprecation")
-public class BendingDamageEvent extends EntityDamageByEntityEvent implements AbilityEvent {
-  private final User user;
-  private final AbilityDescription desc;
+public class BendingDamageEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
+  private final LivingEntity target;
+  private double damage;
 
-  public BendingDamageEvent(User user, Entity target, AbilityDescription desc, double damage) {
-    super(user.entity(), target, DamageCause.CUSTOM, new EnumMap<>(Map.of(DamageModifier.BASE, damage)), Map.of(DamageModifier.BASE, o -> -0.0), false);
-    this.user = user;
-    this.desc = desc;
+  protected BendingDamageEvent(User user, AbilityDescription desc, LivingEntity target, double damage) {
+    super(user, desc);
+    this.target = target;
+    this.damage = damage;
   }
 
-  @Override
-  public User user() {
-    return user;
+  public LivingEntity target() {
+    return target;
   }
 
-  @Override
-  public AbilityDescription ability() {
-    return desc;
+  public double damage() {
+    return damage;
+  }
+
+  public void damage(double damage) {
+    this.damage = damage;
   }
 }

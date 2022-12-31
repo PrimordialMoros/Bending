@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.manager;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import me.moros.bending.model.ability.Updatable;
-import org.bukkit.World;
 
 /**
  * Responsible for updating per-world managers.
@@ -33,7 +33,7 @@ public interface WorldManager extends Updatable {
    * @param world the world to check
    * @return the ability manager instance for that world
    */
-  AbilityManager instance(World world);
+  AbilityManager instance(UUID world);
 
   /**
    * Clear all per-world managers this instance is responsible for.
@@ -42,14 +42,20 @@ public interface WorldManager extends Updatable {
 
   /**
    * Check if bending is enabled for the specified world.
-   * @param world the world to check
+   * @param world the world uuid to check
    * @return true if bending is enabled for the given world, false otherwise
    */
-  boolean isEnabled(World world);
+  boolean isEnabled(UUID world);
 
   /**
    * Perform an action for every ability manager handled by this instance.
    * @param consumer the action to perform
    */
   void forEach(Consumer<AbilityManager> consumer);
+
+  void onWorldLoad(String worldName, UUID world);
+
+  void onWorldUnload(UUID world);
+
+  void onUserChangeWorld(UUID uuid, UUID oldWorld, UUID newWorld);
 }

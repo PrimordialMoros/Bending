@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -33,21 +33,23 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.Bending;
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.model.BlockInteraction;
+import me.moros.bending.model.DamageSource;
 import me.moros.bending.model.EntityInteraction;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.manager.Game;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.platform.DamageUtil;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.entity.BukkitPlayer;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempEntity;
-import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
@@ -57,7 +59,6 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -102,7 +103,7 @@ public class PlayerListener implements Listener {
   }
 
   private boolean disabledWorld(PlayerEvent event) {
-    return !game.worldManager().isEnabled(event.getPlayer().getWorld());
+    return !game.worldManager().isEnabled(event.getPlayer().getWorld().getUID());
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -130,10 +131,10 @@ public class PlayerListener implements Listener {
     String name = player.getName();
     PlayerProfile profile = profileCache.synchronous().get(uuid);
     if (profile != null) {
-      User user = BendingPlayer.createUser(game, player, profile).orElse(null);
+      User user = BendingPlayer.createUser(game, new BukkitPlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
-        game.abilityManager(user.world()).createPassives(user);
+        game.abilityManager(user.worldUid()).createPassives(user);
       }
     } else {
       plugin.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
@@ -153,7 +154,7 @@ public class PlayerListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
     Player player = event.getEntity();
-    BendingDamageEvent cause = DamageUtil.cachedOrLastCause(player);
+    DamageSource cause = DamageUtil.cachedDamageSource(player.getUniqueId());
     if (cause != null) {
       Boolean showMessage = player.getWorld().getGameRuleValue(GameRule.SHOW_DEATH_MESSAGES);
       if (showMessage != null && showMessage) {
@@ -164,11 +165,11 @@ public class PlayerListener implements Listener {
           predicate = u -> canSend(status, team, u);
         }
         AbilityDescription ability = cause.ability();
-        TranslatableComponent msg = plugin.translationManager().translate(ability.key() + ".death");
+        TranslatableComponent msg = plugin.translationManager().translate(ability.translationKey() + ".death");
         if (msg == null) {
           msg = Component.translatable("bending.ability.generic.death");
         }
-        Component message = msg.args(player.name(), cause.user().entity().name(), ability.displayName());
+        Component message = msg.args(player.name(), cause.name(), ability.displayName());
         // Client isn't aware of custom death message translations, so we have to manually broadcast
         plugin.getServer().filterAudience(predicate).sendMessage(message);
         event.deathMessage(Component.empty());
@@ -190,7 +191,7 @@ public class PlayerListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onUserMove(EntityMoveEvent event) {
-    if (!game.worldManager().isEnabled(event.getEntity().getWorld())) {
+    if (!game.worldManager().isEnabled(event.getEntity().getWorld().getUID())) {
       return;
     }
     if (cancelMovement(event)) {
@@ -209,7 +210,7 @@ public class PlayerListener implements Listener {
   }
 
   private boolean cancelMovement(EntityMoveEvent event) {
-    if (event.hasChangedBlock() && ActionLimiter.isLimited(event.getEntity(), ActionType.MOVE)) {
+    if (event.hasChangedBlock() && ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.MOVE)) {
       return true;
     }
     User user = Registries.BENDERS.get(event.getEntity().getUniqueId());
@@ -226,7 +227,7 @@ public class PlayerListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getPlayer(), ActionType.MOVE)) {
+    if (ActionLimiter.isLimited(event.getPlayer().getUniqueId(), ActionType.MOVE)) {
       event.setCancelled(true);
     }
   }
@@ -246,7 +247,7 @@ public class PlayerListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getPlayer(), ActionType.INTERACT)) {
+    if (ActionLimiter.isLimited(event.getPlayer().getUniqueId(), ActionType.INTERACT)) {
       event.setCancelled(true);
     }
   }
@@ -261,13 +262,14 @@ public class PlayerListener implements Listener {
       if (user != null) {
         switch (event.getAction()) {
           case RIGHT_CLICK_AIR, RIGHT_CLICK_BLOCK -> {
-            Block block = event.getClickedBlock();
+            Block b = event.getClickedBlock();
+            var block = b == null ? null : PlatformAdapter.fromBukkitBlock(b);
             if (block != null) {
               Location loc = event.getInteractionPoint();
               Vector3d point = loc == null ? null : Vector3d.from(loc);
-              user.store().put(BlockInteraction.KEY, new BlockInteraction(block, event.getBlockFace(), point));
+              user.store().put(BlockInteraction.KEY, new BlockInteraction(block, point));
             }
-            game.activationController().onUserInteract(user, null, event.getClickedBlock());
+            game.activationController().onUserInteract(user, null, block);
           }
           case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(user);
         }
@@ -314,7 +316,7 @@ public class PlayerListener implements Listener {
     }
     User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
     if (user != null) {
-      Entity target = event.getRightClicked();
+      var target = PlatformAdapter.fromBukkitEntity(event.getRightClicked());
       user.store().put(EntityInteraction.KEY, new EntityInteraction(target, point));
       game.activationController().onUserInteract(user, target, null);
     }
@@ -340,7 +342,7 @@ public class PlayerListener implements Listener {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
         user.board().updateAll();
-        game.abilityManager(user.world()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+        game.abilityManager(user.worldUid()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
     }
   }
@@ -362,9 +364,8 @@ public class PlayerListener implements Listener {
     if (item == null || !(event.getClickedInventory() instanceof PlayerInventory)) {
       return;
     }
-
     ItemMeta meta = item.getItemMeta();
-    if (Metadata.hasKey(meta, Metadata.NSK_ARMOR)) {
+    if (meta.getPersistentDataContainer().has(PlatformAdapter.nsk(Metadata.ARMOR_KEY))) {
       Inventory inventory = event.getClickedInventory();
       if (inventory.getHolder() instanceof Player player) {
         if (!TempArmor.MANAGER.isTemp(player.getUniqueId()) || event.getSlotType() != InventoryType.SlotType.ARMOR) {

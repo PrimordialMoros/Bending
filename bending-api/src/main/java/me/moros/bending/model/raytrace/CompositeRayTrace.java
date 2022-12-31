@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,27 +21,25 @@ package me.moros.bending.model.raytrace;
 
 import java.util.Objects;
 
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 
 public interface CompositeRayTrace extends EntityRayTrace, BlockRayTrace {
   static CompositeRayTrace miss(Vector3d position) {
     Objects.requireNonNull(position);
-    return new CompositeRayTraceImpl(position, null, null, null);
+    return new CompositeRayTraceImpl(position, null, null);
   }
 
-  static CompositeRayTrace hit(Vector3d position, Block block, BlockFace face) {
+  static CompositeRayTrace hit(Vector3d position, Block block) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(block);
-    Objects.requireNonNull(face);
-    return new CompositeRayTraceImpl(position, block, face, null);
+    return new CompositeRayTraceImpl(position, block, null);
   }
 
   static CompositeRayTrace hit(Vector3d position, Entity entity) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(entity);
-    return new CompositeRayTraceImpl(position, null, null, entity);
+    return new CompositeRayTraceImpl(position, null, entity);
   }
 }

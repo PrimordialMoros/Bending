@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -30,22 +30,22 @@ import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.particle.ParticleBuilder;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 
 public abstract class BlockStream implements State {
   private StateChain chain;
   private final User user;
   private final Collection<Collider> colliders = new ArrayList<>();
-  private final Material material;
+  private final BlockType type;
 
   protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
   protected Deque<Block> stream;
@@ -63,9 +63,9 @@ public abstract class BlockStream implements State {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  protected BlockStream(User user, Material material, double range, int speed) {
+  protected BlockStream(User user, BlockType type, double range, int speed) {
     this.user = user;
-    this.material = material;
+    this.type = type;
     this.range = range;
     this.speed = Math.min(20, speed);
     buffer = speed;
@@ -103,21 +103,21 @@ public abstract class BlockStream implements State {
     }
 
     Block head = stream.getFirst();
-    Vector3d current = Vector3d.fromCenter(head);
+    Vector3d current = head.center();
     if (controllable || direction == null) {
-      Vector3d targetLoc = user.rayTrace(range).entities(user.world()).entityEyeLevelOrPosition();
+      Vector3d targetLoc = user.rayTrace(range).cast(user.world()).entityEyeLevelOrPosition();
       // Improve targeting when near
-      if (Vector3d.from(head).distanceSq(targetLoc.floor()) < 1.1) {
+      if (head.distanceSq(targetLoc.floor()) < 1.1) {
         targetLoc = targetLoc.add(user.direction());
       }
       direction = targetLoc.subtract(current).normalize();
     }
 
     Vector3d originalVector = current;
-    Block originBlock = originalVector.toBlock(user.world());
+    Block originBlock = user.world().blockAt(originalVector);
 
     current = current.add(direction);
-    head = current.toBlock(user.world());
+    head = user.world().blockAt(current);
     if (!user.canBuild(head)) {
       return UpdateResult.REMOVE;
     }
@@ -126,7 +126,7 @@ public abstract class BlockStream implements State {
     if (current.distanceSq(user.eyeLocation()) <= range * range) {
       boolean canRender = true;
       for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-        Block b = originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ());
+        Block b = originBlock.offset(v);
         if (diagonalsPredicate.test(b)) {
           canRender = false;
           onBlockHit(b);
@@ -144,7 +144,7 @@ public abstract class BlockStream implements State {
     colliders.clear();
     boolean hit = false;
     for (Block block : stream) {
-      Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(Vector3d.from(block));
+      Collider collider = AABB.EXPANDED_BLOCK_BOUNDS.at(block);
       colliders.add(collider);
       hit |= CollisionUtil.handle(user, collider, this::onEntityHit, livingOnly, false);
     }
@@ -165,18 +165,18 @@ public abstract class BlockStream implements State {
   }
 
   protected void renderHead(Block block) {
-    if (material == Material.WATER && MaterialUtil.isWater(block)) {
-      ParticleUtil.bubble(block).spawn(user.world());
+    if (type == BlockType.WATER && MaterialUtil.isWater(block)) {
+      ParticleBuilder.bubble(block).spawn(user.world());
     } else {
-      TempBlock.builder(material.createBlockData()).build(block);
+      TempBlock.builder(type).build(block);
     }
   }
 
   public boolean isValid(Block block) {
-    if (material == Material.WATER) {
+    if (type == BlockType.WATER) {
       return MaterialUtil.isWater(block);
     }
-    return material == block.getType();
+    return type == block.type();
   }
 
   public void cleanAll() {

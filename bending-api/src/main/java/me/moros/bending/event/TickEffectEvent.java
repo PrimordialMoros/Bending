@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,37 +19,26 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.AbstractCancellableUserEvent;
+import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.util.BendingEffect;
-import org.bukkit.entity.Entity;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a {@link BendingEffect} is applied to a target.
  */
-public class TickEffectEvent extends Event implements UserEvent, Cancellable {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
+public class TickEffectEvent extends AbstractCancellableUserEvent implements UserEvent {
   private final Entity target;
   private final BendingEffect type;
 
-  private boolean cancelled = false;
   private int duration;
 
-  TickEffectEvent(User user, Entity target, int duration, BendingEffect type) {
-    this.user = user;
+  protected TickEffectEvent(User user, Entity target, int duration, BendingEffect type) {
+    super(user);
     this.target = target;
     this.duration = duration;
     this.type = type;
-  }
-
-  @Override
-  public User user() {
-    return user;
   }
 
   /**
@@ -84,24 +73,5 @@ public class TickEffectEvent extends Event implements UserEvent, Cancellable {
    */
   public BendingEffect type() {
     return type;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

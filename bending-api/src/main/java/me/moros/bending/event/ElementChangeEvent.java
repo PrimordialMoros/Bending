@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,31 +19,19 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.AbstractCancellableUserEvent;
+import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.User;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user's elements are being changed.
  */
-public class ElementChangeEvent extends Event implements UserEvent, Cancellable {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
+public class ElementChangeEvent extends AbstractCancellableUserEvent implements UserEvent {
   private final ElementAction action;
 
-  private boolean cancelled = false;
-
-  ElementChangeEvent(User user, ElementAction action) {
-    this.user = user;
+  protected ElementChangeEvent(User user, ElementAction action) {
+    super(user);
     this.action = action;
-  }
-
-  @Override
-  public User user() {
-    return user;
   }
 
   /**
@@ -52,25 +40,6 @@ public class ElementChangeEvent extends Event implements UserEvent, Cancellable 
    */
   public ElementAction type() {
     return action;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 
   /**

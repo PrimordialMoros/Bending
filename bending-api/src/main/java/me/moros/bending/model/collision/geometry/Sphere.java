@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,6 +21,7 @@ package me.moros.bending.model.collision.geometry;
 
 import java.util.Objects;
 
+import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
 /**
@@ -51,8 +52,8 @@ public class Sphere implements Collider {
   }
 
   @Override
-  public Sphere at(Vector3d point) {
-    return new Sphere(point, radius);
+  public Sphere at(Position point) {
+    return new Sphere(point.toVector3d(), radius);
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,42 +21,24 @@ package me.moros.bending.event;
 
 import java.util.Objects;
 
+import me.moros.bending.event.base.AbilityEvent;
+import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.math.Vector3d;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when an ability attempts to alter the velocity of a LivingEntity.
  */
-public class VelocityEvent extends Event implements AbilityEvent, Cancellable {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
-  private final AbilityDescription desc;
+public class VelocityEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
   private final LivingEntity target;
   private Vector3d velocity;
-  private boolean cancelled = false;
 
-  VelocityEvent(User user, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
-    this.user = user;
-    this.desc = desc;
+  protected VelocityEvent(User user, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
+    super(user, desc);
     this.target = target;
     this.velocity = velocity;
-  }
-
-  @Override
-  public User user() {
-    return user;
-  }
-
-  @Override
-  public AbilityDescription ability() {
-    return desc;
   }
 
   /**
@@ -81,24 +63,5 @@ public class VelocityEvent extends Event implements AbilityEvent, Cancellable {
    */
   public void velocity(Vector3d velocity) {
     this.velocity = Objects.requireNonNull(velocity);
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

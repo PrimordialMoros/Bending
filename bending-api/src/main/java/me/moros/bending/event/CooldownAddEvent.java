@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,38 +19,20 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.AbilityEvent;
+import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user's ability will go on cooldown.
  */
-public class CooldownAddEvent extends Event implements AbilityEvent, Cancellable {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
-  private final AbilityDescription desc;
+public class CooldownAddEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
   private final long duration;
-  private boolean cancelled = false;
 
-  CooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    this.user = user;
-    this.desc = desc;
+  protected CooldownAddEvent(User user, AbilityDescription desc, long duration) {
+    super(user, desc);
     this.duration = duration;
-  }
-
-  @Override
-  public User user() {
-    return user;
-  }
-
-  @Override
-  public AbilityDescription ability() {
-    return desc;
   }
 
   /**
@@ -59,24 +41,5 @@ public class CooldownAddEvent extends Event implements AbilityEvent, Cancellable
    */
   public long duration() {
     return duration;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

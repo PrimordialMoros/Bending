@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -28,8 +28,9 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.key.Keyed;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a translation of one or more key-value pairs.
@@ -74,7 +75,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
   }
 
   @Override
-  public Key key() {
+  public @NonNull Key key() {
     return key;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -27,8 +27,8 @@ import java.util.function.Function;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityDescription.Sequence;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.registry.Registries;
 import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -64,7 +64,7 @@ public final class PlaceholderProvider {
   }
 
   private Component displayName(BendingPlayer player) {
-    Component name = player.entity().displayName();
+    Component name = player.name();
     return withElementColor(player, e -> name.colorIfAbsent(e.color()), name, name);
   }
 
@@ -89,12 +89,12 @@ public final class PlaceholderProvider {
     if (desc == null) {
       return null;
     }
-    Component description = Component.translatable(desc.key() + ".description");
+    Component description = Component.translatable(desc.translationKey() + ".description");
     Component instructions;
     if (desc instanceof Sequence sequence) {
       instructions = sequence.instructions();
     } else {
-      instructions = Component.translatable(desc.key() + ".instructions");
+      instructions = Component.translatable(desc.translationKey() + ".instructions");
     }
     return Component.join(JoinConfiguration.newlines(), description, instructions);
   }

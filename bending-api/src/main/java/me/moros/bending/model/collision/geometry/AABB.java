@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,13 +19,14 @@
 
 package me.moros.bending.model.collision.geometry;
 
+import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
 /**
  * Axis aligned bounding box.
  */
 public class AABB implements Collider {
-  public static final AABB DUMMY_COLLIDER = new DummyCollider();
+  private static final AABB DUMMY_COLLIDER = new DummyCollider();
   public static final AABB BLOCK_BOUNDS = new AABB(Vector3d.ZERO, Vector3d.ONE);
   public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(Vector3d.of(0.4, 0.4, 0.4));
 
@@ -60,9 +61,10 @@ public class AABB implements Collider {
   }
 
   @Override
-  public AABB at(Vector3d point) {
+  public AABB at(Position point) {
     Vector3d halfExtents = halfExtents();
-    return new AABB(point.add(halfExtents.negate()), point.add(halfExtents));
+    Vector3d pos = point.toVector3d();
+    return new AABB(pos.subtract(halfExtents), pos.add(halfExtents));
   }
 
   @Override
@@ -125,7 +127,7 @@ public class AABB implements Collider {
     }
 
     @Override
-    public AABB at(Vector3d point) {
+    public AABB at(Position point) {
       return this;
     }
 

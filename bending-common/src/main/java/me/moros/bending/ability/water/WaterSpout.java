@@ -1,0 +1,188 @@
+/*
+ * Copyright 2020-2023 Moros
+ *
+ * This file is part of Bending.
+ *
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.ability.water;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
+import me.moros.bending.config.ConfigManager;
+import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.ability.common.basic.AbstractSpout;
+import me.moros.bending.model.attribute.Attribute;
+import me.moros.bending.model.attribute.Modifiable;
+import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.model.predicate.Policies;
+import me.moros.bending.model.predicate.RemovalPolicy;
+import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.property.EntityProperty;
+import me.moros.bending.platform.property.StateProperty;
+import me.moros.bending.platform.sound.SoundEffect;
+import me.moros.bending.temporal.TempBlock;
+import me.moros.bending.temporal.TempBlock.Builder;
+import me.moros.bending.util.material.MaterialUtil;
+import me.moros.bending.util.material.WaterMaterials;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
+import net.kyori.adventure.util.TriState;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+
+public class WaterSpout extends AbilityInstance {
+  private static final Config config = ConfigManager.load(Config::new);
+
+  private User user;
+  private Config userConfig;
+  private RemovalPolicy removalPolicy;
+
+  private final Collection<Block> column = new ArrayList<>();
+  private final Predicate<Block> predicate = WaterMaterials::isWaterNotPlant;
+  private Spout spout;
+
+  public WaterSpout(AbilityDescription desc) {
+    super(desc);
+  }
+
+  @Override
+  public boolean activate(User user, Activation method) {
+    if (user.game().abilityManager(user.worldUid()).destroyUserInstance(user, WaterSpout.class)) {
+      return false;
+    }
+
+    this.user = user;
+    loadConfig();
+
+    double h = userConfig.height + 2;
+    Block block = AbstractSpout.blockCast(user.eyeBlock(), h);
+    if (block == null || !predicate.test(block)) {
+      return false;
+    }
+
+    removalPolicy = Policies.builder().build();
+
+    spout = new Spout();
+    return true;
+  }
+
+  @Override
+  public void loadConfig() {
+    userConfig = user.game().configProcessor().calculate(this, config);
+  }
+
+  @Override
+  public UpdateResult update() {
+    if (removalPolicy.test(user, description())) {
+      return UpdateResult.REMOVE;
+    }
+
+    return spout.update();
+  }
+
+  @Override
+  public void onDestroy() {
+    column.forEach(spout::clean);
+    spout.onDestroy();
+    user.addCooldown(description(), userConfig.cooldown);
+  }
+
+  @Override
+  public @MonotonicNonNull User user() {
+    return user;
+  }
+
+  @Override
+  public Collection<Collider> colliders() {
+    return List.of(spout.collider());
+  }
+
+  public void handleMovement(Vector3d velocity) {
+    AbstractSpout.limitVelocity(user.entity(), velocity, userConfig.maxSpeed);
+  }
+
+  private final class Spout extends AbstractSpout {
+    private Position lastPosition;
+    private final Vector3d g = Vector3d.of(0, -0.1, 0); // Applied as extra gravity
+
+    private Spout() {
+      super(user, userConfig.height);
+      validBlock = predicate;
+    }
+
+    @Override
+    public void render() {
+      Position newPosition = user.location().toVector3i();
+      if (newPosition.equals(lastPosition)) {
+        return;
+      }
+      lastPosition = newPosition;
+      column.forEach(this::clean);
+      column.clear();
+      ignore.clear();
+      Block block = user.eyeBlock();
+      TempBlock.water().build(block).ifPresent(tb -> column.add(block));
+      BlockState state = BlockType.BUBBLE_COLUMN.defaultState().withProperty(StateProperty.DRAG, false);
+      Builder bubbles = TempBlock.builder(state);
+      for (int i = 1; i < distance - 1; i++) {
+        bubbles.build(block.offset(Direction.DOWN, i)).ifPresent(tb -> column.add(tb.block()));
+      }
+      ignore.addAll(column);
+    }
+
+    @Override
+    public void postRender() {
+      if (user.checkProperty(EntityProperty.FLYING) != TriState.TRUE) {
+        user.applyVelocity(WaterSpout.this, user.velocity().add(g));
+      }
+      if (ThreadLocalRandom.current().nextInt(8) == 0) {
+        SoundEffect.WATER.play(user.world(), user.location());
+      }
+    }
+
+    private void clean(Block block) {
+      if (MaterialUtil.isWater(block)) {
+        TempBlock.air().build(block);
+      }
+    }
+  }
+
+  @ConfigSerializable
+  private static class Config extends Configurable {
+    @Modifiable(Attribute.COOLDOWN)
+    private long cooldown = 0;
+    @Modifiable(Attribute.HEIGHT)
+    private double height = 14;
+    @Modifiable(Attribute.SPEED)
+    private double maxSpeed = 0.2;
+
+    @Override
+    public Iterable<String> path() {
+      return List.of("abilities", "water", "waterspout");
+    }
+  }
+}

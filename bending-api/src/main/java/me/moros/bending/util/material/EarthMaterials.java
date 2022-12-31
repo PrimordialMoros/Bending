@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,75 +19,74 @@
 
 package me.moros.bending.util.material;
 
-import com.destroystokyo.paper.MaterialSetTag;
-import com.destroystokyo.paper.MaterialTags;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.metadata.Metadata;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
-import org.bukkit.block.Block;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockTag;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.item.ItemTag;
 
 /**
  * Group and categorize all earth bendable materials.
  */
 public final class EarthMaterials {
-  public static final MaterialSetTag EARTH_BENDABLE;
-  public static final MaterialSetTag SAND_BENDABLE;
-  public static final MaterialSetTag METAL_BENDABLE;
-  public static final MaterialSetTag METAL_KEYS;
-  public static final MaterialSetTag LAVA_BENDABLE;
-  public static final MaterialSetTag MUD_BENDABLE;
-  private static final MaterialSetTag ALL;
+  public static final BlockTag EARTH_BENDABLE;
+  public static final BlockTag SAND_BENDABLE;
+  public static final BlockTag METAL_BENDABLE;
+  public static final ItemTag METAL_KEYS;
+  public static final BlockTag LAVA_BENDABLE;
+  public static final BlockTag MUD_BENDABLE;
+  private static final BlockTag ALL;
 
   static {
-    NamespacedKey key = Metadata.NSK_MATERIAL;
-    EARTH_BENDABLE = new MaterialSetTag(key)
-      .add(Tag.DIRT.getValues())
-      .add(Tag.STONE_BRICKS.getValues())
-      .add(MaterialTags.TERRACOTTA.getValues())
-      .add(MaterialTags.CONCRETES.getValues())
-      .add(MaterialTags.CONCRETE_POWDER.getValues())
-      .add(Material.DIRT_PATH,
-        Material.GRANITE, Material.POLISHED_GRANITE, Material.DIORITE, Material.POLISHED_DIORITE,
-        Material.ANDESITE, Material.POLISHED_ANDESITE, Material.GRAVEL, Material.CLAY,
-        Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE, Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE,
-        Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE,
-        Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
-        Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE,
-        Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.NETHERRACK, Material.STONE_BRICK_STAIRS,
-        Material.STONE, Material.COBBLESTONE, Material.COBBLESTONE_STAIRS, Material.AMETHYST_BLOCK,
-        Material.DEEPSLATE, Material.CALCITE, Material.TUFF, Material.SMOOTH_BASALT
-      ).lock();
+    EARTH_BENDABLE = BlockTag.builder("earth-sources")
+      .add(BlockTag.DIRT)
+      .add(BlockTag.STONE_BRICKS)
+      .add(BlockTag.TERRACOTTA)
+      .contains("concrete")
+      .add(BlockType.DIRT_PATH,
+        BlockType.GRANITE, BlockType.POLISHED_GRANITE, BlockType.DIORITE, BlockType.POLISHED_DIORITE,
+        BlockType.ANDESITE, BlockType.POLISHED_ANDESITE, BlockType.GRAVEL, BlockType.CLAY,
+        BlockType.COAL_ORE, BlockType.DEEPSLATE_COAL_ORE, BlockType.IRON_ORE, BlockType.DEEPSLATE_IRON_ORE,
+        BlockType.GOLD_ORE, BlockType.DEEPSLATE_GOLD_ORE, BlockType.REDSTONE_ORE, BlockType.DEEPSLATE_REDSTONE_ORE,
+        BlockType.LAPIS_ORE, BlockType.DEEPSLATE_LAPIS_ORE, BlockType.DIAMOND_ORE, BlockType.DEEPSLATE_DIAMOND_ORE,
+        BlockType.COPPER_ORE, BlockType.DEEPSLATE_COPPER_ORE, BlockType.EMERALD_ORE, BlockType.DEEPSLATE_EMERALD_ORE,
+        BlockType.NETHER_QUARTZ_ORE, BlockType.NETHER_GOLD_ORE, BlockType.NETHERRACK, BlockType.STONE_BRICK_STAIRS,
+        BlockType.STONE, BlockType.COBBLESTONE, BlockType.COBBLESTONE_STAIRS, BlockType.AMETHYST_BLOCK,
+        BlockType.DEEPSLATE, BlockType.CALCITE, BlockType.TUFF, BlockType.SMOOTH_BASALT
+      ).build();
 
-    SAND_BENDABLE = new MaterialSetTag(key)
-      .add(Material.SAND, Material.RED_SAND)
-      .add(MaterialTags.SANDSTONES.getValues())
-      .add(MaterialTags.RED_SANDSTONES.getValues()).lock();
+    SAND_BENDABLE = BlockTag.builder("sand-sources")
+      .add(BlockTag.SAND)
+      .endsWith("sandstone")
+      .build();
 
-    METAL_BENDABLE = new MaterialSetTag(key).add(
-      Material.IRON_BLOCK, Material.RAW_IRON_BLOCK,
-      Material.GOLD_BLOCK, Material.RAW_GOLD_BLOCK,
-      Material.COPPER_BLOCK, Material.RAW_COPPER_BLOCK,
-      Material.QUARTZ_BLOCK
-    ).lock();
+    METAL_BENDABLE = BlockTag.builder("metal-sources")
+      .add(BlockType.IRON_BLOCK, BlockType.RAW_IRON_BLOCK,
+        BlockType.GOLD_BLOCK, BlockType.RAW_GOLD_BLOCK,
+        BlockType.COPPER_BLOCK, BlockType.RAW_COPPER_BLOCK,
+        BlockType.QUARTZ_BLOCK
+      ).build();
 
-    METAL_KEYS = new MaterialSetTag(key).add(
-      Material.IRON_INGOT, Material.GOLD_INGOT, Material.COPPER_INGOT, Material.NETHERITE_INGOT
-    ).lock();
+    METAL_KEYS = ItemTag.builder("metal-keys")
+      .add(Item.IRON_INGOT, Item.GOLD_INGOT, Item.COPPER_INGOT, Item.NETHERITE_INGOT
+      ).build();
 
-    LAVA_BENDABLE = new MaterialSetTag(key).add(Material.LAVA, Material.MAGMA_BLOCK).lock();
+    LAVA_BENDABLE = BlockTag.builder("lava-sources")
+      .add(BlockType.LAVA, BlockType.MAGMA_BLOCK).build();
 
-    MUD_BENDABLE = new MaterialSetTag(key).add(Material.SOUL_SAND, Material.SOUL_SOIL, Material.BROWN_TERRACOTTA)
-      .endsWith("MUD").lock();
+    MUD_BENDABLE = BlockTag.builder("mud-sources")
+      .add(BlockType.SOUL_SAND, BlockType.SOUL_SOIL, BlockType.BROWN_TERRACOTTA)
+      .endsWith("MUD")
+      .build();
 
-    ALL = new MaterialSetTag(key)
-      .add(EARTH_BENDABLE.getValues())
-      .add(SAND_BENDABLE.getValues())
-      .add(METAL_BENDABLE.getValues())
-      .add(LAVA_BENDABLE.getValues())
-      .add(MUD_BENDABLE.getValues())
-      .lock();
+    ALL = BlockTag.builder("all-earth-sources")
+      .add(EARTH_BENDABLE)
+      .add(SAND_BENDABLE)
+      .add(METAL_BENDABLE)
+      .add(LAVA_BENDABLE)
+      .add(MUD_BENDABLE)
+      .build();
   }
 
   private EarthMaterials() {

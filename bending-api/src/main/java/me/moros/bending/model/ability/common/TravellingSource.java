@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,21 +22,21 @@ package me.moros.bending.model.ability.common;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * State implementation for a source block that travels towards the user.
  */
 public class TravellingSource implements State {
-  private final BlockData data;
+  private final BlockState state;
   private StateChain chain;
   private final User user;
   private Block source;
@@ -45,9 +45,9 @@ public class TravellingSource implements State {
 
   private final double minDistanceSq, maxDistanceSq;
 
-  public TravellingSource(User user, BlockData data, double minDistance, double maxDistance) {
+  public TravellingSource(User user, BlockState state, double minDistance, double maxDistance) {
     this.user = user;
-    this.data = data;
+    this.state = state;
     this.minDistanceSq = minDistance * minDistance;
     this.maxDistanceSq = maxDistance * maxDistance;
   }
@@ -78,8 +78,8 @@ public class TravellingSource implements State {
       return UpdateResult.REMOVE;
     }
     clean();
-    Vector3d target = Vector3d.fromCenter(user.locBlock());
-    Vector3d location = Vector3d.fromCenter(source);
+    Vector3d target = user.location().center();
+    Vector3d location = source.center();
 
     double distSq = target.distanceSq(location);
     if (maxDistanceSq > minDistanceSq && distSq > maxDistanceSq) {
@@ -90,13 +90,15 @@ public class TravellingSource implements State {
       return UpdateResult.CONTINUE;
     }
 
-    if (isValid(source.getRelative(BlockFace.UP)) && source.getY() < user.headBlock().getY()) {
-      source = source.getRelative(BlockFace.UP);
-    } else if (isValid(source.getRelative(BlockFace.DOWN)) && source.getY() > user.headBlock().getY()) {
-      source = source.getRelative(BlockFace.DOWN);
+    int y = user.eyeLocation().blockY();
+
+    if (isValid(source.offset(Direction.UP)) && source.y() < y) {
+      source = source.offset(Direction.UP);
+    } else if (isValid(source.offset(Direction.DOWN)) && source.y() > y) {
+      source = source.offset(Direction.DOWN);
     } else {
       Vector3d direction = target.subtract(location).normalize();
-      Block nextBlock = location.add(direction).toBlock(user.world());
+      Block nextBlock = user.world().blockAt(location.add(direction));
       if (source.equals(nextBlock)) {
         source = findPath(nextBlock);
       } else {
@@ -106,20 +108,20 @@ public class TravellingSource implements State {
     if (source == null || !isValid(source) || !user.canBuild(source)) {
       return UpdateResult.REMOVE;
     }
-    TempBlock.builder(data).duration(200).build(source);
+    TempBlock.builder(state).duration(200).build(source);
     return UpdateResult.CONTINUE;
   }
 
   private @Nullable Block findPath(Block check) {
-    Vector3d dest = Vector3d.fromCenter(user.headBlock());
+    Vector3d dest = user.eyeLocation().center();
     Block result = null;
     double minDistance = Double.MAX_VALUE;
-    for (BlockFace face : WorldUtil.SIDES) {
-      Block block = check.getRelative(face);
+    for (Direction face : WorldUtil.SIDES) {
+      Block block = check.offset(face);
       if (!isValid(block)) {
         continue;
       }
-      double d = Vector3d.fromCenter(block).distanceSq(dest);
+      double d = block.center().distanceSq(dest);
       if (d < minDistance) {
         minDistance = d;
         result = block;
@@ -132,14 +134,14 @@ public class TravellingSource implements State {
     if (!TempBlock.isBendable(block)) {
       return false;
     }
-    if (data.getMaterial() == Material.WATER) {
+    if (state.type() == BlockType.WATER) {
       return MaterialUtil.isTransparentOrWater(block);
     }
     return MaterialUtil.isTransparent(block);
   }
 
   private void clean() {
-    if (source.getType() == data.getMaterial()) {
+    if (state.type() == source.type()) {
       TempBlock.air().build(source);
     }
   }

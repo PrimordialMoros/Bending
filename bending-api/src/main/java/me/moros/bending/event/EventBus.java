@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,20 +20,22 @@
 package me.moros.bending.event;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
+import me.moros.bending.event.base.BendingEvent;
 import me.moros.bending.model.ability.AbilityDescription;
-import me.moros.bending.model.key.Keyed;
-import me.moros.bending.model.key.RegistryKey;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.util.BendingEffect;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
+import net.kyori.adventure.key.Key;
+import net.kyori.event.PostResult;
 
 /**
  * The event bus is responsible for posting bending events.
@@ -41,12 +43,46 @@ import org.bukkit.entity.LivingEntity;
 public enum EventBus {
   INSTANCE;
 
+  private final net.kyori.event.EventBus<BendingEvent> eventBus;
+  private boolean closed = false;
+
+  EventBus() {
+    this.eventBus = net.kyori.event.EventBus.create(BendingEvent.class);
+  }
+
+  /**
+   * Close this event bus and stop sendi
+   */
+  public void shutdown() {
+    this.eventBus.unsubscribeIf(x -> true);
+    this.closed = true;
+  }
+
+  /**
+   * Registers the given subscriber to receive events.
+   * @param event the event type
+   * @param subscriber the subscriber
+   * @param <T> the event type
+   */
+  public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber) {
+    if (!closed) {
+      eventBus.subscribe(event, subscriber::accept);
+    }
+  }
+
+  private <T extends BendingEvent> PostResult post(T event) {
+    if (closed) {
+      throw new IllegalStateException("Eventbus has been terminated, cannot post new events!");
+    }
+    return eventBus.post(event);
+  }
+
   /**
    * Posts a new {@link RegistryLockEvent}.
    * @param keys the RegistryKeys of all Registries that are going to be locked
    */
-  public void postRegistryLockEvent(Collection<RegistryKey<? extends Keyed>> keys) {
-    new RegistryLockEvent(keys).callEvent();
+  public void postRegistryLockEvent(Collection<Key> keys) {
+    post(new RegistryLockEvent(keys));
   }
 
   /**
@@ -54,7 +90,7 @@ public enum EventBus {
    * @param player the player that was registered
    */
   public void postPlayerRegisterEvent(BendingPlayer player) {
-    new PlayerRegisterEvent(player).callEvent();
+    post(new PlayerRegisterEvent(player));
   }
 
   /**
@@ -65,7 +101,7 @@ public enum EventBus {
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postCooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    return new CooldownAddEvent(user, desc, duration).callEvent();
+    return post(new CooldownAddEvent(user, desc, duration)).wasSuccessful();
   }
 
   /**
@@ -74,7 +110,7 @@ public enum EventBus {
    * @param desc the ability whose cooldown has expired
    */
   public void postCooldownRemoveEvent(User user, AbilityDescription desc) {
-    new CooldownRemoveEvent(user, desc).callEvent();
+    post(new CooldownRemoveEvent(user, desc));
   }
 
   /**
@@ -83,7 +119,7 @@ public enum EventBus {
    * @param desc the ability that is being activated
    */
   public void postAbilityActivationEvent(User user, AbilityDescription desc) {
-    new AbilityActivationEvent(user, desc).callEvent();
+    post(new AbilityActivationEvent(user, desc));
   }
 
   /**
@@ -93,7 +129,7 @@ public enum EventBus {
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postElementChangeEvent(User user, ElementAction type) {
-    return new ElementChangeEvent(user, type).callEvent();
+    return post(new ElementChangeEvent(user, type)).wasSuccessful();
   }
 
   /**
@@ -103,7 +139,7 @@ public enum EventBus {
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postBindChangeEvent(User user, BindType type) {
-    return new BindChangeEvent(user, type).callEvent();
+    return post(new BindChangeEvent(user, type)).wasSuccessful();
   }
 
   /**
@@ -113,7 +149,7 @@ public enum EventBus {
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postPresetCreateEvent(User user, Preset preset) {
-    return !preset.isEmpty() && new PresetCreateEvent(user, preset).callEvent();
+    return !preset.isEmpty() && post(new PresetCreateEvent(user, preset)).wasSuccessful();
   }
 
   /**
@@ -126,21 +162,21 @@ public enum EventBus {
    */
   public TickEffectEvent postTickEffectEvent(User source, Entity target, int duration, BendingEffect type) {
     TickEffectEvent event = new TickEffectEvent(source, target, duration, type);
-    event.callEvent();
+    post(event);
     return event;
   }
 
   /**
    * Posts a new {@link BendingDamageEvent}.
    * @param source the user applying the damage
-   * @param target the entity to be damaged
    * @param desc the ability that causes the damage
+   * @param target the entity to be damaged
    * @param damage the amount of damage
    * @return the event after it was posted
    */
-  public BendingDamageEvent postAbilityDamageEvent(User source, Entity target, AbilityDescription desc, double damage) {
-    BendingDamageEvent event = new BendingDamageEvent(source, target, desc, damage);
-    event.callEvent();
+  public BendingDamageEvent postAbilityDamageEvent(User source, AbilityDescription desc, LivingEntity target, double damage) {
+    BendingDamageEvent event = new BendingDamageEvent(source, desc, target, damage);
+    post(event);
     return event;
   }
 
@@ -149,12 +185,11 @@ public enum EventBus {
    * @param source the user causing the explosion
    * @param center the epicenter of the explosion
    * @param blocks the blocks that are being exploded
-   * @param power the power of the explosion
    * @return the event after it was posted
    */
-  public BendingExplosionEvent postExplosionEvent(User source, Vector3d center, Collection<Block> blocks, double power) {
-    BendingExplosionEvent event = new BendingExplosionEvent(source, center, blocks, (float) power);
-    event.callEvent();
+  public BendingExplosionEvent postExplosionEvent(User source, Vector3d center, Collection<Block> blocks) {
+    BendingExplosionEvent event = new BendingExplosionEvent(source, center, blocks);
+    post(event);
     return event;
   }
 
@@ -167,7 +202,7 @@ public enum EventBus {
    */
   public ActionLimitEvent postActionLimitEvent(User source, LivingEntity target, long duration) {
     ActionLimitEvent event = new ActionLimitEvent(source, target, duration);
-    event.callEvent();
+    post(event);
     return event;
   }
 
@@ -181,7 +216,7 @@ public enum EventBus {
    */
   public VelocityEvent postVelocityEvent(User source, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
     VelocityEvent event = new VelocityEvent(source, target, desc, velocity);
-    event.callEvent();
+    post(event);
     return event;
   }
 }

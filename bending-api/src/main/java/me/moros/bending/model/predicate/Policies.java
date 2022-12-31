@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -24,7 +24,8 @@ import java.util.Set;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.EntityUtil;
+import me.moros.bending.platform.property.EntityProperty;
+import net.kyori.adventure.util.TriState;
 
 /**
  * Built-in policies to check whether an ability needs to be removed.
@@ -49,23 +50,23 @@ public enum Policies implements RemovalPolicy {
   /**
    * Checks if the user is flying.
    */
-  FLYING((u, d) -> u.flying()),
+  FLYING((u, d) -> u.checkProperty(EntityProperty.FLYING) == TriState.TRUE),
   /**
    * Checks if the user is submerged underwater.
    */
-  UNDER_WATER((u, d) -> EntityUtil.underWater(u.entity())),
+  UNDER_WATER((u, d) -> u.inWater(true)),
   /**
    * Checks if the user is in water.
    */
-  PARTIALLY_UNDER_WATER((u, d) -> u.entity().isInWaterOrBubbleColumn()),
+  PARTIALLY_UNDER_WATER((u, d) -> u.inWater(false)),
   /**
    * Checks if the user is submerged under lava.
    */
-  UNDER_LAVA((u, d) -> EntityUtil.underLava(u.entity())),
+  UNDER_LAVA((u, d) -> u.inLava(true)),
   /**
    * Checks if the user is in lava.
    */
-  PARTIALLY_UNDER_LAVA((u, d) -> u.entity().isInLava());
+  PARTIALLY_UNDER_LAVA((u, d) -> u.inLava(false));
 
   private final RemovalPolicy policy;
 

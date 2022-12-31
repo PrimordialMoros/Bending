@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -41,7 +41,7 @@ public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
   /**
    * Checks if user is not a spectator.
    */
-  GAMEMODE((u, d) -> !u.spectator()),
+  GAMEMODE((u, d) -> !u.isSpectator()),
   /**
    * Checks if user has all required permissions to use the ability.
    */
@@ -53,7 +53,7 @@ public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
   /**
    * Checks if the user is in a bending enabled world.
    */
-  WORLD((u, d) -> u.game().worldManager().isEnabled(u.world()));
+  WORLD((u, d) -> u.game().worldManager().isEnabled(u.worldUid()));
 
   private final BiPredicate<User, AbilityDescription> predicate;
 

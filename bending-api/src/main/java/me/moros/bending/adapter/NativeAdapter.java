@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,30 +19,22 @@
 
 package me.moros.bending.adapter;
 
-import me.moros.bending.model.raytrace.CompositeRayTrace;
-import me.moros.bending.model.raytrace.RayTrace.Context;
-import me.moros.bending.util.Tasker;
+import me.moros.bending.model.raytrace.BlockRayTrace;
+import me.moros.bending.model.raytrace.Context;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.player.Player;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.world.World;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import me.moros.math.Vector3i;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.util.Ticks;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.LightningRod;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.util.RayTraceResult;
 
 /**
  * Interface for all NMS and Packet shenanigans that Bending takes advantage of.
@@ -96,19 +88,20 @@ public interface NativeAdapter {
   /**
    * Attempt to use NMS to set BlockData for a specific block.
    * @param block the block to set
-   * @param data the new block data
+   * @param state the new block data
    * @return true if block was changed, false otherwise
    */
-  default boolean setBlockFast(Block block, BlockData data) {
-    block.setBlockData(data, false);
+  default boolean setBlockFast(Block block, BlockState state) {
+    block.world().setBlockState(block, state);
     return true;
   }
 
   private Block eyeBlock(Entity entity) {
-    int x = entity.getLocation().getBlockX();
-    int y = FastMath.floor(entity.getLocation().getY() + (entity.getHeight() * 0.85) - 0.11);
-    int z = entity.getLocation().getBlockZ();
-    return entity.getWorld().getBlockAt(x, y, z);
+    Vector3d loc = entity.location();
+    int x = loc.blockX();
+    int y = FastMath.floor(loc.y() + (entity.height() * 0.85) - 0.11);
+    int z = loc.blockZ();
+    return entity.world().blockAt(x, y, z);
   }
 
   /**
@@ -135,31 +128,17 @@ public interface NativeAdapter {
    * @param world the world to perform the raytrace in
    * @return the result of the performed raytrace
    */
-  default CompositeRayTrace rayTraceBlocks(Context context, World world) {
-    Location start = context.start().toLocation(world);
-    Vector3d dir = context.end().subtract(context.start());
-    double range = dir.length();
-    FluidCollisionMode mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
-    RayTraceResult result = world.rayTraceBlocks(start, dir.toBukkitVector(), range, mode, context.ignorePassable());
-    CompositeRayTrace missResult = CompositeRayTrace.miss(context.end());
-    if (result == null) {
-      return missResult;
-    }
-    Block block = result.getHitBlock();
-    BlockFace face = result.getHitBlockFace();
-    if (block == null || face == null || context.ignore().contains(Vector3i.from(block))) {
-      return missResult;
-    }
-    return CompositeRayTrace.hit(Vector3d.from(result.getHitPosition()), block, face);
+  default BlockRayTrace rayTraceBlocks(Context context, World world) {
+    return world.rayTraceBlocks(context);
   }
 
   /**
    * Send a notification.
    * @param player the notification's receiver
-   * @param material the material to use in the icon for the notification
+   * @param item the material to use in the icon for the notification
    * @param title the content of the notification
    */
-  default void sendNotification(Player player, Material material, Component title) {
+  default void sendNotification(Player player, Item item, Component title) {
     Times times = Times.times(Ticks.duration(10), Ticks.duration(70), Ticks.duration(10));
     player.showTitle(Title.title(title, Component.empty(), times));
   }
@@ -168,12 +147,12 @@ public interface NativeAdapter {
    * Create a packet armor stand entity.
    * @param world the world for the packet entity to appear in
    * @param center the spawn location
-   * @param material the material to use for the armor stand's head equipment
+   * @param item the material to use for the armor stand's head equipment
    * @param velocity the initial velocity for the entity
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  default int createArmorStand(World world, Position center, Material material, Vector3d velocity, boolean gravity) {
+  default int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
     return 0;
   }
 
@@ -181,31 +160,29 @@ public interface NativeAdapter {
    * Create a packet falling block entity.
    * @param world the world for the packet entity to appear in
    * @param center the spawn location
-   * @param data the data to use for the falling block
+   * @param state the data to use for the falling block
    * @param velocity the initial velocity for the entity
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  default int createFallingBlock(World world, Position center, BlockData data, Vector3d velocity, boolean gravity) {
+  default int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity) {
     return 0;
   }
 
   /**
    * Send a block update packet to every connection within view distance.
-   * @param world the world for the fake block to appear in
-   * @param center the fake block's location
-   * @param data the fake block's data
+   * @param block the world-position tuple for the fake block to appear in
+   * @param state the fake block's data
    */
-  default void fakeBlock(World world, Position center, BlockData data) {
+  default void fakeBlock(Block block, BlockState state) {
   }
 
   /**
    * Send a block break animation to every connection within view distance.
-   * @param world the world for the animation to appear in
-   * @param center the block location for the animation
+   * @param block the world-position tuple for the animation to appear in
    * @param progress the animation <a href="https://wiki.vg/Protocol#Set_Block_Destroy_Stage">stage</a>
    */
-  default void fakeBreak(World world, Position center, byte progress) {
+  default void fakeBreak(Block block, byte progress) {
   }
 
   /**
@@ -230,29 +207,6 @@ public interface NativeAdapter {
    * @return true if a lightning rod was powered, false otherwise
    */
   default boolean tryPowerLightningRod(Block block) { // Only native implementation handles continuous lightning strikes
-    if (handleLightningRod(block, true) >= 0) {
-      Tasker.INSTANCE.sync(() -> handleLightningRod(block, false), 8);
-      return true;
-    }
     return false;
-  }
-
-  private int handleLightningRod(Block block, boolean shouldPower) {
-    if (block.getBlockData() instanceof LightningRod state) {
-      if (state.isPowered() == shouldPower) {
-        return 0;
-      }
-      int oldCurrent = shouldPower ? 0 : 15;
-      int newCurrent = 15 - oldCurrent;
-      BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, newCurrent);
-      event.callEvent();
-      int eventCurrent = event.getNewCurrent();
-      if ((eventCurrent == 15 && shouldPower) || (eventCurrent == 0 && !shouldPower)) {
-        state.setPowered(shouldPower);
-        block.setBlockData(state);
-        return 1;
-      }
-    }
-    return -1;
   }
 }

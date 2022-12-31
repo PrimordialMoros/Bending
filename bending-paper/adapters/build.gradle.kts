@@ -1,5 +1,5 @@
 plugins {
-    id("io.papermc.paperweight.userdev").version("1.4.0").apply(false)
+    alias(libs.plugins.userdev).apply(false)
 }
 
 subprojects {

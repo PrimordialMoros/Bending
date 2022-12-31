@@ -5,7 +5,7 @@ author: Moros
 description: Bending plugin for PaperMC.
 website: https://github.com/PrimordialMoros/Bending
 softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC, LuckPerms]
-api-version: 1.18
+api-version: 1.19
 permissions:
   bending.admin.overridelock:
     description: Allows removing a locksmithing lock even without a matching key.

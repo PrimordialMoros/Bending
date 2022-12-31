@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -28,7 +28,7 @@ import me.moros.bending.model.preset.PresetCreateResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Represents a user that has a set of {@link Preset}.
+ * Represents a user that has a set of {@link Preset Presets}.
  */
 public interface PresetUser {
   /**
@@ -38,9 +38,9 @@ public interface PresetUser {
   Set<Preset> presets();
 
   /**
-   * Check if the user has the specified preset.
-   * @param name the preset name to check
-   * @return true the user has the specified preset, false otherwise
+   * Get this user's preset by its name.
+   * @param name the preset name to find
+   * @return the specified preset if found, null otherwise
    */
   @Nullable Preset presetByName(String name);
 

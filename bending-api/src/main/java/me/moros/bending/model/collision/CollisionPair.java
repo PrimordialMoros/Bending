@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -27,9 +27,10 @@ import java.util.Objects;
 import java.util.Set;
 
 import me.moros.bending.model.ability.AbilityDescription;
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.key.Keyed;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.model.registry.Registries;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a possible collision between 2 abilities.
@@ -100,7 +101,7 @@ public final class CollisionPair implements Keyed {
     String f = first.key().value();
     String s = second.key().value();
     String value = f.compareTo(s) > 0 ? (f + '-' + s) : (s + '-' + f);
-    return Key.create(NAMESPACE, value);
+    return Key.key(NAMESPACE, value);
   }
 
   public static Builder builder() {
@@ -108,7 +109,7 @@ public final class CollisionPair implements Keyed {
   }
 
   @Override
-  public Key key() {
+  public @NonNull Key key() {
     return key;
   }
 

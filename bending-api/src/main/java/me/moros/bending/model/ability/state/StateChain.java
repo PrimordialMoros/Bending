@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Queue;
 
 import me.moros.bending.model.ability.Updatable;
-import org.bukkit.block.Block;
+import me.moros.bending.platform.block.Block;
 
 /**
  * Represents a chain of states that are evaluated sequentially.

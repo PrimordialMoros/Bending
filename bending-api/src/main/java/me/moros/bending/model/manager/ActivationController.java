@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,11 +25,11 @@ import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.damage.DamageCause;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

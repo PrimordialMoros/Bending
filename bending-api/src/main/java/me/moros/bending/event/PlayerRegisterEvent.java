@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,34 +19,21 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.BendingPlayer;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a player has successfully been registered.
  */
-public class PlayerRegisterEvent extends Event implements UserEvent {
-  private static final HandlerList HANDLERS = new HandlerList();
-
+public class PlayerRegisterEvent implements UserEvent {
   private final BendingPlayer user;
 
-  PlayerRegisterEvent(BendingPlayer user) {
+  protected PlayerRegisterEvent(BendingPlayer user) {
     this.user = user;
   }
 
   @Override
   public BendingPlayer user() {
     return user;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

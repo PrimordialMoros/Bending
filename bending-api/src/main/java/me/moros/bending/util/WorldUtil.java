@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,177 +19,36 @@
 
 package me.moros.bending.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
-import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.particle.Particle;
+import me.moros.bending.platform.property.StateProperty;
+import me.moros.bending.platform.sound.SoundEffect;
+import me.moros.bending.platform.world.World;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.World.Environment;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Furnace;
-import org.bukkit.block.data.Lightable;
-import org.bukkit.block.data.type.Snow;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Utility class with useful {@link World} related methods.
  * <p>Note: This is not thread-safe.
  */
 public final class WorldUtil {
-  public static final Set<BlockFace> FACES = Set.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
-  public static final Set<BlockFace> SIDES = Set.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
+  public static final Set<Direction> FACES = Set.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN);
+  public static final Set<Direction> SIDES = Set.of(Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH);
 
   private WorldUtil() {
-  }
-
-  /**
-   * Collects all blocks in a sphere.
-   * @param world the world to check
-   * @param pos the center point
-   * @param radius the radius of the sphere
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, AABB)
-   */
-  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius) {
-    return nearbyBlocks(world, pos, radius, block -> true, 0);
-  }
-
-  /**
-   * Collects all blocks in a sphere that satisfy the given predicate.
-   * @param world the world to check
-   * @param pos the center point
-   * @param radius the radius of the sphere
-   * @param predicate the predicate that needs to be satisfied for every block
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, AABB, Predicate)
-   */
-  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate) {
-    return nearbyBlocks(world, pos, radius, predicate, 0);
-  }
-
-  /**
-   * Collects all blocks in a sphere that satisfy the given predicate.
-   * <p>Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
-   * @param world the world to check
-   * @param pos the center point
-   * @param radius the radius of the sphere
-   * @param predicate the predicate that needs to be satisfied for every block
-   * @param limit the amount of blocks to collect
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, AABB, Predicate, int)
-   */
-  public static List<Block> nearbyBlocks(World world, Vector3d pos, double radius, Predicate<Block> predicate, int limit) {
-    int r = FastMath.ceil(radius) + 1;
-    List<Block> blocks = new ArrayList<>();
-    for (double x = pos.x() - r; x <= pos.x() + r; x++) {
-      for (double y = pos.y() - r; y <= pos.y() + r; y++) {
-        for (double z = pos.z() - r; z <= pos.z() + r; z++) {
-          Vector3d loc = Vector3d.of(x, y, z);
-          if (pos.distanceSq(loc) > radius * radius) {
-            continue;
-          }
-          Block block = loc.toBlock(world);
-          if (predicate.test(block)) {
-            blocks.add(block);
-            if (limit > 0 && blocks.size() >= limit) {
-              return blocks;
-            }
-          }
-        }
-      }
-    }
-    return blocks;
-  }
-
-  /**
-   * Collects all blocks inside a bounding box.
-   * @param world the world to check
-   * @param box the bounding box to check
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, Vector3d, double)
-   */
-  public static List<Block> nearbyBlocks(World world, AABB box) {
-    return nearbyBlocks(world, box, block -> true, 0);
-  }
-
-  /**
-   * Collects all blocks inside a bounding box that satisfy the given predicate.
-   * @param world the world to check
-   * @param box the bounding box to check
-   * @param predicate the predicate that needs to be satisfied for every block
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, Vector3d, double, Predicate)
-   */
-  public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate) {
-    return nearbyBlocks(world, box, predicate, 0);
-  }
-
-  /**
-   * Collects all blocks inside a bounding box that satisfy the given predicate.
-   * <p>Note: Limit is only respected if positive. Otherwise, all blocks that satisfy the given predicate are collected.
-   * @param world the world to check
-   * @param box the bounding box to check
-   * @param predicate the predicate that needs to be satisfied for every block
-   * @param limit the amount of blocks to collect
-   * @return all collected blocks
-   * @see #nearbyBlocks(World, Vector3d, double, Predicate, int)
-   */
-  public static List<Block> nearbyBlocks(World world, AABB box, Predicate<Block> predicate, int limit) {
-    if (box.equals(AABB.dummy())) {
-      return List.of();
-    }
-    List<Block> blocks = new ArrayList<>();
-    for (double x = box.min.x(); x <= box.max.x(); x++) {
-      for (double y = box.min.y(); y <= box.max.y(); y++) {
-        for (double z = box.min.z(); z <= box.max.z(); z++) {
-          Vector3d loc = Vector3d.of(x, y, z);
-          Block block = loc.toBlock(world);
-          if (predicate.test(block)) {
-            blocks.add(block);
-            if (limit > 0 && blocks.size() >= limit) {
-              return blocks;
-            }
-          }
-        }
-      }
-    }
-    return blocks;
-  }
-
-  /**
-   * Check if it is daytime in the specified world. Only applicable in the Overworld.
-   * @param world the world to check
-   * @return true if it is daytime
-   * @see #isNight(World)
-   */
-  public static boolean isDay(World world) {
-    return world.getEnvironment() == Environment.NORMAL && world.isDayTime();
-  }
-
-  /**
-   * Check if it is nighttime in the specified world. Only applicable in the Overworld.
-   * @param world the world to check
-   * @return true if it is nighttime
-   * @see #isDay(World)
-   */
-  public static boolean isNight(World world) {
-    return world.getEnvironment() == Environment.NORMAL && !world.isDayTime();
   }
 
   /**
@@ -197,20 +56,16 @@ public final class WorldUtil {
    * @param block the block to light
    */
   public static void tryLightBlock(Block block) {
-    BlockState state = block.getState(false);
     boolean light = false;
-    if (state instanceof Furnace furnace) {
+    // TODO Handle furnace
+    /*if (state2 instanceof Furnace furnace) {
       if (furnace.getBurnTime() < 800) {
         furnace.setBurnTime((short) 800);
         light = true;
       }
-    }
+    }*/
     if (light || MaterialUtil.isCampfire(block)) {
-      Lightable data = (Lightable) block.getBlockData();
-      if (!data.isLit()) {
-        data.setLit(true);
-        block.setBlockData(data);
-      }
+      block.setState(block.state().withProperty(StateProperty.LIT, true));
     }
   }
 
@@ -219,9 +74,9 @@ public final class WorldUtil {
    * @param block the block to play the effect at
    */
   public static void playLavaExtinguishEffect(Block block) {
-    SoundUtil.LAVA_EXTINGUISH.play(block);
-    Vector3d center = Vector3d.fromCenter(block).add(0, 0.2, 0);
-    ParticleUtil.of(Particle.CLOUD, center).count(8).offset(0.3).spawn(block.getWorld());
+    SoundEffect.LAVA_EXTINGUISH.play(block);
+    Vector3d center = block.center().add(0, 0.2, 0);
+    Particle.CLOUD.builder(center).count(8).offset(0.3).spawn(block.world());
   }
 
   /**
@@ -235,7 +90,7 @@ public final class WorldUtil {
       return false;
     }
     if (MaterialUtil.isLava(block)) {
-      block.setType(MaterialUtil.isSourceBlock(block) ? Material.OBSIDIAN : Material.COBBLESTONE);
+      block.setType(MaterialUtil.isSourceBlock(block) ? BlockType.OBSIDIAN : BlockType.COBBLESTONE);
       if (ThreadLocalRandom.current().nextBoolean()) {
         playLavaExtinguishEffect(block);
       }
@@ -255,17 +110,13 @@ public final class WorldUtil {
       return false;
     }
     if (MaterialUtil.isFire(block)) {
-      block.setType(Material.AIR);
+      block.setType(BlockType.AIR);
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
-        SoundUtil.FIRE_EXTINGUISH.play(block);
+        SoundEffect.FIRE_EXTINGUISH.play(block);
       }
       return true;
     } else if (MaterialUtil.isCampfire(block)) {
-      Lightable data = (Lightable) block.getBlockData();
-      if (data.isLit()) {
-        data.setLit(false);
-        block.setBlockData(data);
-      }
+      block.setState(block.state().withProperty(StateProperty.LIT, false));
     }
     return false;
   }
@@ -281,18 +132,19 @@ public final class WorldUtil {
       return false;
     }
     if (WaterMaterials.isSnowBendable(block)) {
-      Snow snow;
-      if (block.getBlockData() instanceof Snow) {
-        snow = (Snow) block.getBlockData();
+      BlockState snow;
+      int level;
+      if (block.type() == BlockType.SNOW_BLOCK) {
+        snow = BlockType.SNOW.defaultState();
+        level = StateProperty.LAYERS.max();
       } else {
-        snow = (Snow) Material.SNOW.createBlockData();
-        snow.setLayers(snow.getMaximumLayers());
+        snow = block.state();
+        level = Objects.requireNonNull(snow.property(StateProperty.LAYERS));
       }
-      if (snow.getLayers() == snow.getMinimumLayers()) {
-        block.setType(Material.AIR);
+      if (level == StateProperty.LAYERS.min()) {
+        block.setType(BlockType.AIR);
       } else {
-        snow.setLayers(snow.getLayers() - 1);
-        block.setBlockData(snow);
+        block.setState(snow.withProperty(StateProperty.LAYERS, level - 1));
       }
       return true;
     } else if (WaterMaterials.isIceBendable(block)) {
@@ -309,8 +161,8 @@ public final class WorldUtil {
    */
   public static boolean isInfiniteWater(Block block) {
     int sources = 0;
-    for (BlockFace face : SIDES) {
-      Block adjacent = block.getRelative(face);
+    for (Direction face : SIDES) {
+      Block adjacent = block.offset(face);
       if (MaterialUtil.isWater(adjacent) && MaterialUtil.isSourceBlock(adjacent) && !TempBlock.MANAGER.isTemp(adjacent)) {
         sources++;
       }
@@ -326,10 +178,10 @@ public final class WorldUtil {
    * @return a collection of blocks representing the ring
    */
   public static Collection<Block> createBlockRing(Block center, double radius) {
-    Vector3d centerVector = Vector3d.fromCenter(center);
+    Vector3d centerVector = center.center();
     int steps = FastMath.ceil(10 * radius);
     return VectorUtil.circle(Vector3d.PLUS_I.multiply(radius), Vector3d.PLUS_J, steps)
-      .stream().map(v -> centerVector.add(v).toBlock(center.getWorld())).distinct().toList();
+      .stream().map(v -> center.world().blockAt(centerVector.add(v))).distinct().toList();
   }
 
   /**
@@ -342,45 +194,9 @@ public final class WorldUtil {
       if (TempBlock.MANAGER.isTemp(block)) {
         return false;
       }
-      block.breakNaturally(new ItemStack(Material.AIR));
+      block.world().breakNaturally(block);
       return true;
     }
     return false;
-  }
-
-  /**
-   * Search for the top block that satisfies the given predicate.
-   * @param block the block to search from
-   * @param height the max height to check relative to the block
-   * @param predicate the predicate to satisfy for every block
-   * @return the result if found
-   * @see #findBottomBlock(Block, int, Predicate)
-   */
-  public static Optional<Block> findTopBlock(Block block, int height, Predicate<Block> predicate) {
-    for (int i = 1; i <= height; i++) {
-      Block check = block.getRelative(BlockFace.UP, i);
-      if (!predicate.test(check)) {
-        return Optional.of(check.getRelative(BlockFace.DOWN));
-      }
-    }
-    return Optional.empty();
-  }
-
-  /**
-   * Search for the bottom block that satisfies the given predicate.
-   * @param block the block to search from
-   * @param height the max height to check relative to the block
-   * @param predicate the predicate to satisfy for every block
-   * @return the result if found
-   * @see #findTopBlock(Block, int, Predicate)
-   */
-  public static Optional<Block> findBottomBlock(Block block, int height, Predicate<Block> predicate) {
-    for (int i = 1; i <= height; i++) {
-      Block check = block.getRelative(BlockFace.DOWN, i);
-      if (!predicate.test(check)) {
-        return Optional.of(check.getRelative(BlockFace.UP));
-      }
-    }
-    return Optional.empty();
   }
 }

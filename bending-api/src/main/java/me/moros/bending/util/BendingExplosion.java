@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -32,15 +32,15 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.particle.Particle;
+import me.moros.bending.platform.sound.SoundEffect;
+import me.moros.bending.platform.world.World;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.SoundUtil.SoundEffect;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -85,13 +85,13 @@ public final class BendingExplosion {
 
   private void playParticles(World world, Vector3d center) {
     if (size <= 1.5) {
-      ParticleUtil.of(Particle.EXPLOSION_NORMAL, center).count(FastMath.ceil(10 * size)).offset(0.75).spawn(world);
+      Particle.POOF.builder(center).count(FastMath.ceil(10 * size)).offset(0.75).spawn(world);
     } else if (size <= 3) {
-      ParticleUtil.of(Particle.EXPLOSION_LARGE, center).count(FastMath.ceil(3 * size)).offset(0.5).spawn(world);
+      Particle.EXPLOSION.builder(center).count(FastMath.ceil(3 * size)).offset(0.5).spawn(world);
     } else if (size <= 5) {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).spawn(world);
+      Particle.EXPLOSION_EMITTER.builder(center).spawn(world);
     } else {
-      ParticleUtil.of(Particle.EXPLOSION_HUGE, center).count(FastMath.ceil(size / 5)).spawn(world);
+      Particle.EXPLOSION_EMITTER.builder(center).count(FastMath.ceil(size / 5)).spawn(world);
     }
   }
 
@@ -106,10 +106,10 @@ public final class BendingExplosion {
     User user = source.user();
     World world = user.world();
     AbilityDescription desc = source.description();
-    Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.isLiquid();
-    Collection<Block> blocks = breakBlocks ? WorldUtil.nearbyBlocks(world, center, size, predicate) : new ArrayList<>();
+    Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.type().isLiquid();
+    Collection<Block> blocks = breakBlocks ? world.nearbyBlocks(center, size, predicate) : new ArrayList<>();
 
-    if (EventBus.INSTANCE.postExplosionEvent(user, center, blocks, size).isCancelled()) {
+    if (EventBus.INSTANCE.postExplosionEvent(user, center, blocks).cancelled()) {
       return false;
     }
 
@@ -120,7 +120,7 @@ public final class BendingExplosion {
       sound.play(world, center);
     }
 
-    if (breakBlocks && !center.toBlock(world).isLiquid()) {
+    if (breakBlocks && !world.blockAt(center).type().isLiquid()) {
       Collection<Block> filteredBlocks = blocks.stream().filter(predicate).filter(user::canBuild).toList();
       ThreadLocalRandom rand = ThreadLocalRandom.current();
       for (Block block : filteredBlocks) {
@@ -136,11 +136,11 @@ public final class BendingExplosion {
     }
 
     return CollisionUtil.handle(user, new Sphere(center, size), entity -> {
-      Vector3d entityCenter = EntityUtil.entityCenter(entity);
+      Vector3d entityCenter = entity.center();
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : (1 - (distance - halfSize) / size);
       if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
-        DamageUtil.damageEntity(entity, user, damage * distanceFactor, desc);
+        entity.damage(damage * distanceFactor, user, desc);
         BendingEffect.FIRE_TICK.apply(user, entity, fireTicks);
       } else {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
@@ -150,7 +150,7 @@ public final class BendingExplosion {
         knockback *= selfKnockbackFactor;
       }
       Vector3d dir = entityCenter.subtract(center).normalize().multiply(knockback);
-      EntityUtil.applyVelocity(source, entity, dir);
+      entity.applyVelocity(source, dir);
       return true;
     }, livingOnly, true);
   }
@@ -288,7 +288,7 @@ public final class BendingExplosion {
      * @return the modified builder
      */
     public Builder sound(float volume, float pitch) {
-      this.sound = SoundUtil.EXPLOSION.with(volume, pitch);
+      this.sound = SoundEffect.EXPLOSION.with(volume, pitch);
       return this;
     }
 

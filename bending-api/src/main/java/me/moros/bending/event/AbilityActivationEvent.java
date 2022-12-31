@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,42 +19,15 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.AbstractAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user has successfully activated an ability.
  */
-public class AbilityActivationEvent extends Event implements AbilityEvent {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
-  private final AbilityDescription desc;
-
-  AbilityActivationEvent(User user, AbilityDescription desc) {
-    this.user = user;
-    this.desc = desc;
-  }
-
-  @Override
-  public User user() {
-    return user;
-  }
-
-  @Override
-  public AbilityDescription ability() {
-    return desc;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
+public class AbilityActivationEvent extends AbstractAbilityEvent {
+  protected AbilityActivationEvent(User user, AbilityDescription desc) {
+    super(user, desc);
   }
 }

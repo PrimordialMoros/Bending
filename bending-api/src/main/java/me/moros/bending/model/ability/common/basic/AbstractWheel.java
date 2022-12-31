@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -29,14 +29,12 @@ import me.moros.bending.model.collision.geometry.Disk;
 import me.moros.bending.model.collision.geometry.OBB;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.raytrace.Context;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.RayTraceBuilder;
-import me.moros.bending.util.WorldUtil;
-import me.moros.bending.util.collision.AABBUtil;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 
 public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private final User user;
@@ -65,20 +63,20 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   @Override
   public UpdateResult update() {
     location = location.add(dir);
-    if (!user.canBuild(location.toBlock(user.world()))) {
+    if (!user.canBuild(location)) {
       return UpdateResult.REMOVE;
     }
     if (!resolveMovement()) {
       return UpdateResult.REMOVE;
     }
-    Block base = location.subtract(0, radius + 0.25, 0).toBlock(user.world());
-    if (base.isLiquid()) {
+    Block base = user.world().blockAt(location.subtract(0, radius + 0.25, 0));
+    if (base.type().isLiquid()) {
       return UpdateResult.REMOVE;
     }
     render();
     postRender();
-    onBlockHit(base.getRelative(BlockFace.UP));
-    boolean hit = CollisionUtil.handle(user, collider.at(location), this);
+    onBlockHit(base.offset(Direction.UP));
+    boolean hit = CollisionUtil.handle(user, collider(), this);
     return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
@@ -99,13 +97,13 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   // Try to resolve wheel location by checking collider-block intersections.
   public boolean resolveMovement() {
     double r = radius + 0.05;
-    Collection<Block> nearbyBlocks = WorldUtil.nearbyBlocks(user.world(), box.at(location));
+    Collection<Block> nearbyBlocks = user.world().nearbyBlocks(box.at(location));
     Collider checkCollider = collider();
     // Calculate top and bottom positions and add a small buffer
     double topY = location.y() + r;
     double bottomY = location.y() - r;
     for (Block block : nearbyBlocks) {
-      AABB blockBounds = AABBUtil.blockBounds(block);
+      AABB blockBounds = block.bounds();
       if (blockBounds.intersects(checkCollider)) {
         if (blockBounds.min.y() > topY) { // Collision on the top part
           return false;
@@ -122,10 +120,10 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     // Try to fall if the block below doesn't have a bounding box.
     Vector3d offset = Vector3d.of(0, radius - 0.125, 0);
     Vector3d bottom = location.subtract(offset);
-    if (bottom.toBlock(user.world()).isPassable()) {
-      Vector3d pos = RayTraceBuilder.of(bottom, Vector3d.MINUS_J).range(0.75 * radius).blocks(user.world()).position().add(offset);
+    if (!user.world().blockAt(bottom).type().isCollidable()) {
+      Vector3d pos = Context.builder(bottom, Vector3d.MINUS_J).range(0.75 * radius).blocks(user.world()).position().add(offset);
       Disk tempCollider = collider.at(pos);
-      if (nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(tempCollider::intersects)) {
+      if (nearbyBlocks.stream().map(Block::bounds).noneMatch(tempCollider::intersects)) {
         location = pos;
         return true;
       }
@@ -136,7 +134,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private boolean checkCollisions(Collection<Block> nearbyBlocks) {
     // Check if there's any final collisions after all movements.
     Collider checkCollider = collider();
-    return nearbyBlocks.stream().map(AABBUtil::blockBounds).noneMatch(checkCollider::intersects);
+    return nearbyBlocks.stream().map(Block::bounds).noneMatch(checkCollider::intersects);
   }
 }
 

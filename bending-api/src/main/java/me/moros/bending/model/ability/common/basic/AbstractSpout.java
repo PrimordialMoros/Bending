@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -27,19 +27,17 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
-import me.moros.bending.model.manager.FlightManager.Flight;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.util.material.MaterialUtil;
+import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class AbstractSpout implements Updatable, SimpleAbility {
-  private final User user;
+public abstract class AbstractSpout extends AbstractFlight implements Updatable, SimpleAbility {
   protected final Set<Block> ignore = new HashSet<>();
-  protected final Flight flight;
 
   protected Predicate<Block> validBlock = x -> true;
   protected AABB collider;
@@ -48,30 +46,28 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   protected double distance;
 
-  protected AbstractSpout(Flight flight, double height) {
-    this.flight = flight;
-    this.user = flight.user();
+  protected AbstractSpout(User user, double height) {
+    super(user);
     this.height = height;
-    this.flight.flying(true);
   }
 
   @Override
   public UpdateResult update() {
-    user.entity().setFallDistance(0);
-    user.sprinting(false);
+    resetSprintAndFall();
     double maxHeight = height + 2; // Buffer for safety
-    Block block = blockCast(user.locBlock(), maxHeight, ignore::contains);
+    Block block = blockCast(user.block(), maxHeight, ignore::contains);
     if (block == null || !validBlock.test(block)) {
       return UpdateResult.REMOVE;
     }
     // Remove if player gets too far away from ground.
-    distance = user.location().y() - block.getY();
+    distance = user.location().y() - block.y();
     if (distance > maxHeight) {
       return UpdateResult.REMOVE;
     }
     flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
-    collider = new AABB(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(user.location());
+    Position pos = user.location().floor();
+    collider = new AABB(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(pos);
     render();
     postRender();
     return UpdateResult.CONTINUE;
@@ -92,13 +88,13 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
     return collider;
   }
 
-  public Flight flight() {
-    return flight;
+  public void onDestroy() {
+    cleanup();
   }
 
   public static void limitVelocity(Entity entity, Vector3d velocity, double speed) {
     if (velocity.lengthSq() > speed * speed) {
-      entity.setVelocity(velocity.normalize().multiply(speed).clampVelocity());
+      entity.velocity(velocity.normalize().multiply(speed));
     }
   }
 
@@ -108,9 +104,9 @@ public abstract class AbstractSpout implements Updatable, SimpleAbility {
 
   public static @Nullable Block blockCast(Block origin, double distance, Predicate<Block> ignore) {
     for (int i = 0; i < distance; i++) {
-      Block check = origin.getRelative(BlockFace.DOWN, i);
-      boolean isLiquid = check.isLiquid() || MaterialUtil.isWaterPlant(check);
-      if ((check.isPassable() && !isLiquid) || ignore.test(check)) {
+      Block check = origin.offset(Direction.DOWN, i);
+      boolean isLiquid = check.type().isLiquid() || MaterialUtil.isWaterPlant(check);
+      if ((!check.type().isCollidable() && !isLiquid) || ignore.test(check)) {
         continue;
       }
       return check;

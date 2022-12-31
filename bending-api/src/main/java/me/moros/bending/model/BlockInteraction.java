@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,12 +19,11 @@
 
 package me.moros.bending.model;
 
-import me.moros.bending.model.key.RegistryKey;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.util.KeyUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record BlockInteraction(Block block, BlockFace face, @Nullable Vector3d point) {
-  public static RegistryKey<BlockInteraction> KEY = RegistryKey.create("last-interacted-block", BlockInteraction.class);
+public record BlockInteraction(Block block, @Nullable Vector3d point) {
+  public static BendingKey<BlockInteraction> KEY = KeyUtil.bending("last-interacted-block", BlockInteraction.class);
 }

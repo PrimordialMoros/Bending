@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,22 +21,24 @@ package me.moros.bending.model.user;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.model.GridIterator;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.protection.ProtectionCache;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.DelegateEntity;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.math.FastMath;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.block.Block;
-import org.bukkit.util.BlockIterator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents a user that can bend.
  */
-public sealed interface User extends BukkitUser, ElementUser, AttributeUser permits BendingUser {
+public sealed interface User extends DelegateEntity, ElementUser, AttributeUser permits BendingUser {
   String NAMESPACE = "bending.user";
 
   /**
@@ -49,7 +51,15 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
    * Get the data store for this user.
    * @return the data store object
    */
-  DataHolder store();
+  DataContainer store();
+
+  /**
+   * Check if this user is in spectator mode.
+   * @return whether this user is a player in spectator mode
+   */
+  default boolean isSpectator() {
+    return false;
+  }
 
   /**
    * Check if the user has the specified ability on cooldown.
@@ -184,6 +194,25 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
   TriState setPermission(String permission, TriState state);
 
   /**
+   * Checks if the user can build at its current location.
+   * @return the result
+   * @see ProtectionCache#canBuild(User, Block)
+   */
+  default boolean canBuild() {
+    return canBuild(world().blockAt(location()));
+  }
+
+  /**
+   * Checks if the user can build at a location.
+   * @param position the position to check in the user's current world
+   * @return the result
+   * @see ProtectionCache#canBuild(User, Block)
+   */
+  default boolean canBuild(Vector3d position) {
+    return canBuild(world().blockAt(position));
+  }
+
+  /**
    * Checks if the user can build at a block location.
    * @param block the block to check
    * @return the result
@@ -200,16 +229,16 @@ public sealed interface User extends BukkitUser, ElementUser, AttributeUser perm
    * @return the source block if one was found, null otherwise
    */
   default @Nullable Block find(double range, Predicate<Block> predicate) {
-    BlockIterator it = new BlockIterator(entity(), Math.min(100, FastMath.ceil(range)));
+    GridIterator it = GridIterator.create(eyeLocation(), direction(), FastMath.clamp(1, 100, FastMath.ceil(range)));
     while (it.hasNext()) {
-      Block block = it.next();
-      if (block.getType().isAir()) {
+      Block block = world().blockAt(it.next());
+      if (block.type().isAir()) {
         continue;
       }
       if (predicate.test(block) && TempBlock.isBendable(block) && canBuild(block)) {
         return block;
       }
-      if (!block.isPassable()) {
+      if (block.type().isCollidable()) {
         break;
       }
     }

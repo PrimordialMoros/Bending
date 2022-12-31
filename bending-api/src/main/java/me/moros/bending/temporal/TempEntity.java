@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -24,31 +24,25 @@ import java.util.Objects;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
-import me.moros.bending.util.ParticleUtil;
+import me.moros.bending.platform.Platform;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.world.World;
 import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import me.moros.tasker.TimerWheel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TempEntity extends TemporaryBase {
-  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>("Entity");
+public class TempEntity extends Temporary {
+  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
 
   private final TempEntityData data;
   private boolean reverted = false;
 
-  private TempEntity(TempEntityData data, long duration) {
-    super();
+  private TempEntity(TempEntityData data, int ticks) {
     this.data = data;
-    MANAGER.addEntry(data.id, this, Temporary.toTicks(duration));
+    MANAGER.addEntry(data.id, this, ticks);
   }
 
   @Override
@@ -65,142 +59,79 @@ public class TempEntity extends TemporaryBase {
     return reverted;
   }
 
-  public static @Nullable TempEntity register(Entity entity, long duration) {
-    if (entity instanceof Player) {
-      return null;
-    }
-    return MANAGER.get(entity.getEntityId()).orElseGet(() -> new TempEntity(new TempEntityData(entity), duration));
+  public static FallingBlockBuilder fallingBlock(BlockState data) {
+    return new FallingBlockBuilder(Objects.requireNonNull(data));
   }
 
-  public static TempEntity register(int entityId, long duration) {
-    return MANAGER.get(entityId).orElseGet(() -> new TempEntity(new TempEntityData(entityId), duration));
-  }
-
-  public static Builder builder(BlockData data) {
-    return new Builder(Objects.requireNonNull(data));
+  public static ArmorStandBuilder armorStand(Item data) {
+    return new ArmorStandBuilder(Objects.requireNonNull(data));
   }
 
   private static final Vector3d armorStandOffset = Vector3d.of(0, 1.8, 0);
   private static final Vector3d fallingBlockOffset = Vector3d.of(0.5, 0, 0.5);
 
-  public static final class Builder {
-    private final BlockData data;
-
-    private Vector3d velocity = Vector3d.ZERO;
-    private boolean packetIfSupported = NativeAdapter.hasNativeSupport();
-    private boolean particles = false;
-    private boolean gravity = true;
-    private long duration = 30_000;
-
-    private Builder(BlockData data) {
-      this.data = data;
+  public static final class FallingBlockBuilder extends TempEntityBuilder<BlockState, TempEntity, FallingBlockBuilder> {
+    private FallingBlockBuilder(BlockState data) {
+      super(data);
     }
 
-    public Builder velocity(Vector3d velocity) {
-      this.velocity = Objects.requireNonNull(velocity);
-      return this;
+    public TempFallingBlock buildReal(Block block) {
+      return buildReal(block.world(), block.toVector3d().add(fallingBlockOffset));
     }
 
-    public Builder packetIfSupported(boolean packet) {
-      if (NativeAdapter.hasNativeSupport()) {
-        this.packetIfSupported = packet;
-      }
-      return this;
+    public TempFallingBlock buildReal(World world, Vector3d center) {
+      return (TempFallingBlock) packetIfSupported(false).build(world, center);
     }
 
-    public Builder particles(boolean particles) {
-      this.particles = particles;
-      return this;
+    public TempEntity build(Block block) {
+      return build(block.world(), block.toVector3d().add(fallingBlockOffset));
     }
 
-    public Builder gravity(boolean gravity) {
-      this.gravity = gravity;
-      return this;
-    }
-
-    public Builder duration(long duration) {
-      this.duration = duration;
-      return this;
-    }
-
-    public TempFallingBlock build(Block block) {
-      return buildAt(block, Vector3d.from(block).add(fallingBlockOffset));
-    }
-
-    public TempFallingBlock buildAt(Block block, Vector3d center) {
-      Objects.requireNonNull(block);
-      World world = block.getWorld();
+    @Override
+    public TempEntity build(World world, Vector3d center) {
+      Objects.requireNonNull(center);
       if (particles) {
-        spawnParticles(world, center);
+        Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
+        data.asParticle(center).count(6).offset(offset).spawn(world);
       }
-      return new TempFallingBlock(spawnFallingBlock(this, world, center), duration);
+      return packetIfSupported ? spawn(world, center) : spawnReal(world, center);
     }
 
-    public TempEntity build(TempEntityType type, World world, Vector3d center) {
+    public TempEntity spawn(World world, Vector3d center) {
+      int id = NativeAdapter.instance().createFallingBlock(world, center, data, velocity, gravity);
+      return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration, 600));
+    }
+
+    public TempFallingBlock spawnReal(World world, Vector3d center) {
+      Entity entity = Platform.instance().factory().createFallingBlock(world, center, data, gravity);
+      entity.velocity(velocity);
+      return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration, 600));
+    }
+  }
+
+  public static final class ArmorStandBuilder extends TempEntityBuilder<Item, TempEntity, ArmorStandBuilder> {
+    private ArmorStandBuilder(Item data) {
+      super(data);
+    }
+
+    public TempEntity build(World world, Vector3d center) {
       Objects.requireNonNull(world);
       Objects.requireNonNull(center);
       if (particles) {
-        spawnParticles(world, type == TempEntityType.ARMOR_STAND ? center.add(armorStandOffset) : center);
+        Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
+        data.asParticle(center.add(armorStandOffset)).count(6).offset(offset).spawn(world);
       }
-      TempEntityData entityData = type.factory.create(this, world, center);
-      return new TempEntity(entityData, duration);
+      return new TempEntity(armorStand(world, center), MANAGER.fromMillis(duration, 600));
     }
 
-    private void spawnParticles(World world, Vector3d spawnLoc) {
-      Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
-      ParticleUtil.of(Particle.BLOCK_CRACK, spawnLoc).count(4).offset(offset).data(data).spawn(world);
-      ParticleUtil.of(Particle.BLOCK_DUST, spawnLoc).count(6).offset(offset).data(data).spawn(world);
+    private TempEntityData armorStand(World world, Vector3d center) {
+      if (packetIfSupported) {
+        return new TempEntityData(NativeAdapter.instance().createArmorStand(world, center, data, velocity, gravity));
+      }
+      Entity entity = Platform.instance().factory().createArmorStand(world, center, data, gravity);
+      entity.velocity(velocity);
+      return new TempEntityData(entity);
     }
-  }
-
-  public enum TempEntityType {
-    ARMOR_STAND(TempEntity::armorStand),
-    FALLING_BLOCK(TempEntity::fallingBlock);
-
-    private final EntityFactory factory;
-
-    TempEntityType(EntityFactory factory) {
-      this.factory = factory;
-    }
-  }
-
-  private interface EntityFactory {
-    TempEntityData create(Builder builder, World world, Vector3d center);
-  }
-
-  private static TempEntityData armorStand(Builder builder, World world, Vector3d center) {
-    Material mat = builder.data.getMaterial();
-    Vector3d vel = builder.velocity;
-    boolean gravity = builder.gravity;
-    if (builder.packetIfSupported) {
-      return new TempEntityData(NativeAdapter.instance().createArmorStand(world, center, mat, vel, gravity));
-    }
-    Entity entity = world.spawn(center.toLocation(world), ArmorStand.class, as -> {
-      as.setInvulnerable(true);
-      as.setVisible(false);
-      as.setGravity(gravity);
-      as.getEquipment().setHelmet(new ItemStack(mat));
-    });
-    entity.setVelocity(vel.clampVelocity());
-    return new TempEntityData(entity);
-  }
-
-  private static TempEntityData fallingBlock(Builder builder, World world, Vector3d center) {
-    BlockData data = builder.data;
-    Vector3d vel = builder.velocity;
-    boolean gravity = builder.gravity;
-    if (builder.packetIfSupported) {
-      return new TempEntityData(NativeAdapter.instance().createFallingBlock(world, center, data, vel, gravity));
-    }
-    return new TempEntityData(spawnFallingBlock(builder, world, center));
-  }
-
-  private static FallingBlock spawnFallingBlock(Builder builder, World world, Vector3d center) {
-    FallingBlock entity = world.spawnFallingBlock(center.toLocation(world), builder.data);
-    entity.setVelocity(builder.velocity.clampVelocity());
-    entity.setGravity(builder.gravity);
-    entity.setDropItem(false);
-    return entity;
   }
 
   private record TempEntityData(int id, @Nullable Entity entity) {
@@ -209,7 +140,7 @@ public class TempEntity extends TemporaryBase {
     }
 
     private TempEntityData(Entity entity) {
-      this(entity.getEntityId(), entity);
+      this(entity.id(), entity);
     }
 
     private int destroy() {
@@ -223,23 +154,29 @@ public class TempEntity extends TemporaryBase {
   }
 
   public static final class TempFallingBlock extends TempEntity {
-    private final FallingBlock fallingBlock;
+    private final Entity fallingBlock;
+    private final BlockState state;
 
-    private TempFallingBlock(FallingBlock fallingBlock, long duration) {
-      super(new TempEntityData(fallingBlock), duration);
+    private TempFallingBlock(Entity fallingBlock, BlockState state, int ticks) {
+      super(new TempEntityData(fallingBlock), ticks);
       this.fallingBlock = fallingBlock;
+      this.state = state;
     }
 
-    public FallingBlock entity() {
+    public Entity entity() {
       return fallingBlock;
     }
 
+    public BlockState state() {
+      return state;
+    }
+
     public Vector3d center() {
-      return Vector3d.from(fallingBlock.getLocation()).add(fallingBlockOffset);
+      return fallingBlock.location().add(0, 0.5, 0);
     }
 
     public boolean isValid() {
-      return !isReverted() && fallingBlock.isValid();
+      return !isReverted() && fallingBlock.valid();
     }
   }
 }

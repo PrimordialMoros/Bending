@@ -26,9 +26,10 @@ Please fork this repository and contribute back using [pull requests](https://gi
 
 ## Project Layout
 
-The project is currently split into 2 main modules:
+The project is split into the following modules:
 - `bending-api` - Developer api module
-- `bending-paper` - Has several adapter modules which to support different nms versions
+- `bending-common` - Common implementations
+- `bending-paper` - Paper implementation, also has adapter submodules to support different nms versions
 
 `me.moros.bending` is the top level package.
 
@@ -39,16 +40,14 @@ The project is currently split into 2 main modules:
 - `event` - Contains bending related events
 - `locale` - Contains locale interfaces
 - `model` - Contains models for bending systems and components
-- `registry` - Contains built-in registries
+- `platform` - Contains the common platform api
 - `temporal` - Contains temporal systems
 - `util` - Contains utility classes
 
-### bending-paper packages
+### bending-common packages
 
 - `ability` - Contains ability implementations
 - `command` - Contains plugin commands
 - `game` - Contains base systems for the main logic of the game
 - `hook` - Contains hooks that provide data to third-party plugins
-- `listener` - Contains plugin listeners
-- `protection` - Contains world/region protection systems
 - `storage` - Contains persistent storage (databases) implementations

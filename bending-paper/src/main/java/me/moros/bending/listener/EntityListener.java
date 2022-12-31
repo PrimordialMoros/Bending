@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -27,20 +27,23 @@ import java.util.UUID;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.ability.fire.FireShield;
-import me.moros.bending.event.AbilityEvent;
-import me.moros.bending.event.BendingDamageEvent;
+import me.moros.bending.event.EventBus;
 import me.moros.bending.event.TickEffectEvent;
+import me.moros.bending.model.DamageSource;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.manager.Game;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.platform.DamageUtil;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.potion.PotionEffect;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.util.BendingEffect;
-import me.moros.bending.util.DamageUtil;
 import me.moros.bending.util.EntityUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
@@ -57,17 +60,17 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
 
 public class EntityListener implements Listener {
   private final Game game;
 
   public EntityListener(Game game) {
     this.game = game;
+    EventBus.INSTANCE.subscribe(TickEffectEvent.class, this::onEntityFreeze);
   }
 
   private boolean disabledWorld(EntityEvent event) {
-    return !game.worldManager().isEnabled(event.getEntity().getWorld());
+    return !game.worldManager().isEnabled(event.getEntity().getWorld().getUID());
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -75,13 +78,14 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(Metadata.METAL_CABLE)) {
-      MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE).get(0).value();
+    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(Metadata.METAL_CABLE.value())) {
+      MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE.value()).get(0).value();
       if (cable != null) {
-        if (event.getHitBlock() != null) {
-          cable.hitBlock(event.getHitBlock());
-        } else if (event.getHitEntity() instanceof LivingEntity) {
-          cable.hitEntity(event.getHitEntity());
+        var block = event.getHitBlock();
+        if (block != null) {
+          cable.hitBlock(PlatformAdapter.fromBukkitBlock(block));
+        } else if (event.getHitEntity() instanceof LivingEntity living) {
+          cable.hitEntity(PlatformAdapter.fromBukkitEntity(living));
         } else {
           event.getEntity().remove();
         }
@@ -94,7 +98,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity())) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId())) {
       event.setCancelled(true);
     }
   }
@@ -104,7 +108,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity(), ActionType.INTERACT)) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.INTERACT)) {
       event.setCancelled(true);
     }
   }
@@ -114,7 +118,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity(), ActionType.SHOOT)) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.SHOOT)) {
       event.setCancelled(true);
     }
   }
@@ -124,7 +128,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity(), ActionType.SHOOT)) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.SHOOT)) {
       event.setCancelled(true);
     }
   }
@@ -134,7 +138,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity())) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId())) {
       event.setCancelled(true);
     }
   }
@@ -144,7 +148,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (ActionLimiter.isLimited(event.getEntity())) {
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId())) {
       event.setCancelled(true);
     }
   }
@@ -155,15 +159,15 @@ public class EntityListener implements Listener {
     if (block == null || disabledWorld(event)) {
       return;
     }
-    TempBlock tb = TempBlock.MANAGER.get(block).orElse(null);
+    TempBlock tb = TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(block)).orElse(null);
     if (tb != null) {
       int ticks = event.getDuration() * 20;
       if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
         event.setDuration(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20.0));
       }
-      AbilityEvent ev = tb.damageSource();
-      if (ev != null) {
-        DamageUtil.cacheBlockDamage(event.getEntity(), ev, 0);
+      DamageSource source = tb.damageSource();
+      if (source != null) {
+        DamageUtil.cacheDamageSource(event.getEntity().getUniqueId(), source);
       }
     }
   }
@@ -174,8 +178,8 @@ public class EntityListener implements Listener {
     if (block == null || disabledWorld(event)) {
       return;
     }
-    TempBlock.MANAGER.get(block).map(TempBlock::damageSource)
-      .ifPresent(ev -> DamageUtil.cacheBlockDamage(event.getEntity(), ev, event.getDamage()));
+    TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(block)).map(TempBlock::damageSource)
+      .ifPresent(source -> DamageUtil.cacheDamageSource(event.getEntity().getUniqueId(), source));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -183,8 +187,8 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    TempBlock.MANAGER.get(event.getBlock()).map(TempBlock::damageSource)
-      .ifPresent(ev -> DamageUtil.cacheBlockDamage(event.getEntity(), ev, 0));
+    TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(event.getBlock())).map(TempBlock::damageSource)
+      .ifPresent(source -> DamageUtil.cacheDamageSource(event.getEntity().getUniqueId(), source));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -192,9 +196,9 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE)) {
+    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE.value())) {
       event.setCancelled(true);
-    } else if (ActionLimiter.isLimited(event.getDamager(), ActionType.DAMAGE)) {
+    } else if (ActionLimiter.isLimited(event.getDamager().getUniqueId(), ActionType.DAMAGE)) {
       event.setCancelled(true);
     }
   }
@@ -204,7 +208,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY)) {
+    if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY.value()) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY.value())) {
       event.setCancelled(true);
     }
   }
@@ -214,7 +218,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+    if (event.getItem().hasMetadata(Metadata.NO_PICKUP.value())) {
       event.setCancelled(true);
     }
   }
@@ -230,7 +234,7 @@ public class EntityListener implements Listener {
         temp.revert();
       });
     } else {
-      if (ActionLimiter.isLimited(event.getEntity(), ActionType.INTERACT_BLOCK)) {
+      if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.INTERACT_BLOCK)) {
         event.setCancelled(true);
       }
     }
@@ -241,9 +245,11 @@ public class EntityListener implements Listener {
     if (event.getDamage() <= 0 || disabledWorld(event)) {
       return;
     }
-    if (event.getEntity() instanceof LivingEntity entity) {
+    if (event.getEntity() instanceof LivingEntity bukkitEntity) {
       double oldDamage = event.getDamage();
-      double newDamage = game.activationController().onEntityDamage(entity, event.getCause(), oldDamage);
+      var entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
+      var cause = PlatformAdapter.fromBukkitCause(event.getCause());
+      double newDamage = game.activationController().onEntityDamage(entity, cause, oldDamage);
       if (newDamage <= 0) {
         event.setCancelled(true);
       } else if (oldDamage != newDamage) {
@@ -275,7 +281,7 @@ public class EntityListener implements Listener {
         User user = Registries.BENDERS.get(entity.getUniqueId());
         if (user != null) {
           double oldDmg = event.getDamage();
-          double newDmg = FireShield.shieldFromExplosion(user, event.getDamager(), oldDmg);
+          double newDmg = FireShield.shieldFromExplosion(user, PlatformAdapter.fromBukkitEntity(event.getDamager()), oldDmg);
           if (newDmg <= 0) {
             event.setCancelled(true);
           } else if (oldDmg != newDmg) {
@@ -292,7 +298,7 @@ public class EntityListener implements Listener {
       return;
     }
     if (!event.isGliding() && event.getEntity() instanceof LivingEntity entity) {
-      if (ActionLimiter.isLimited(event.getEntity(), ActionType.MOVE)) {
+      if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.MOVE)) {
         return;
       }
       User user = Registries.BENDERS.get(entity.getUniqueId());
@@ -304,11 +310,12 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityDeath(EntityDeathEvent event) {
-    event.getDrops().removeIf(item -> Metadata.hasKey(item.getItemMeta(), Metadata.NSK_ARMOR));
+    var nsk = PlatformAdapter.nsk(Metadata.ARMOR_KEY);
+    event.getDrops().removeIf(item -> item.getItemMeta().getPersistentDataContainer().has(nsk));
     boolean keepInventory = event instanceof PlayerDeathEvent pde && pde.getKeepInventory();
     TempArmor.MANAGER.get(event.getEntity().getUniqueId()).ifPresent(tempArmor -> {
       if (!keepInventory) {
-        event.getDrops().addAll(tempArmor.snapshot());
+        event.getDrops().addAll(tempArmor.snapshot().map(PlatformAdapter::toBukkitItem).toList());
       }
       tempArmor.revert();
     });
@@ -319,13 +326,15 @@ public class EntityListener implements Listener {
     if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
       return;
     }
-    EntityDamageEvent lastDamageCause = event.getEntity().getLastDamageCause();
-    if (lastDamageCause instanceof BendingDamageEvent cause && cause.ability().element() == Element.FIRE) {
+    DamageSource cause = DamageUtil.cachedDamageSource(event.getEntity().getUniqueId());
+    if (cause != null && cause.ability().element() == Element.FIRE) {
       Collection<ItemStack> newDrops = new ArrayList<>();
       Iterator<ItemStack> it = event.getDrops().iterator();
       while (it.hasNext()) {
         ItemStack item = it.next();
-        Material flamed = MaterialUtil.COOKABLE.get(item.getType());
+        var type = PlatformAdapter.ITEM_MATERIAL_INDEX.keyOr(item.getType(), Item.AIR);
+        var mapped = MaterialUtil.COOKABLE.get(type);
+        Material flamed = mapped == null ? null : PlatformAdapter.ITEM_MATERIAL_INDEX.value(mapped);
         if (flamed != null) {
           newDrops.add(new ItemStack(flamed, item.getAmount()));
           it.remove();
@@ -350,26 +359,25 @@ public class EntityListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onHopperItemPickup(InventoryPickupItemEvent event) {
-    if (!game.worldManager().isEnabled(event.getItem().getWorld())) {
+    if (!game.worldManager().isEnabled(event.getItem().getWorld().getUID())) {
       return;
     }
-    if (event.getItem().hasMetadata(Metadata.NO_PICKUP)) {
+    if (event.getItem().hasMetadata(Metadata.NO_PICKUP.value())) {
       event.setCancelled(true);
       event.getItem().remove();
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onEntityFreeze(TickEffectEvent event) {
-    if (!game.worldManager().isEnabled(event.target().getWorld())) {
+  private void onEntityFreeze(TickEffectEvent event) {
+    if (!game.worldManager().isEnabled(event.target().worldUid())) {
       return;
     }
-    if (event.type() == BendingEffect.FROST_TICK && event.target() instanceof LivingEntity entity) {
+    if (event.type() == BendingEffect.FROST_TICK && event.target() instanceof me.moros.bending.platform.entity.LivingEntity entity) {
       int duration = event.duration();
       if (duration > 30) {
         int potionDuration = FastMath.round(0.5 * duration);
         int power = FastMath.floor(duration / 30.0);
-        EntityUtil.tryAddPotion(entity, PotionEffectType.SLOW, potionDuration, power);
+        EntityUtil.tryAddPotion(entity, PotionEffect.SLOWNESS, potionDuration, power);
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -82,7 +82,7 @@ public final class RayUtil {
    */
   // Negative angle for fall burst
   public static Collection<Ray> createBurst(User user, double range, double angleStep, double angle) {
-    Vector3d center = EntityUtil.entityCenter(user.entity());
+    Vector3d center = user.center();
     Vector3d userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();
     double epsilon = 0.001; // Needed for accuracy

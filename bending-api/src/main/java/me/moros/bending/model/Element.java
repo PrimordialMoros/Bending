@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,17 +23,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.key.Keyed;
 import me.moros.bending.util.ColorPalette;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.translation.Translatable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An immutable and thread-safe object that represents a bending element.
  */
-public enum Element implements Keyed {
+public enum Element implements Keyed, Translatable {
   AIR("Air", ColorPalette.AIR),
   WATER("Water", ColorPalette.WATER),
   EARTH("Earth", ColorPalette.EARTH),
@@ -46,7 +48,7 @@ public enum Element implements Keyed {
   Element(String elementName, TextColor color) {
     this.elementName = elementName;
     this.color = color;
-    this.key = Key.create(NAMESPACE, elementName.toLowerCase(Locale.ROOT));
+    this.key = Key.key(NAMESPACE, elementName.toLowerCase(Locale.ROOT));
   }
 
   @Override
@@ -54,8 +56,14 @@ public enum Element implements Keyed {
     return elementName;
   }
 
-  public Key key() {
+  @Override
+  public @NonNull Key key() {
     return key;
+  }
+
+  @Override
+  public @NonNull String translationKey() {
+    return NAMESPACE + "." + key().value();
   }
 
   /**
@@ -63,7 +71,7 @@ public enum Element implements Keyed {
    * @return the display name
    */
   public Component displayName() {
-    return Component.translatable(key().toString(), color);
+    return Component.translatable(translationKey(), color);
   }
 
   /**
@@ -71,7 +79,7 @@ public enum Element implements Keyed {
    * @return the description
    */
   public Component description() {
-    return Component.translatable(key() + ".description", color);
+    return Component.translatable(translationKey() + ".description", color);
   }
 
   /**

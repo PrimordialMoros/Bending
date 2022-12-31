@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -30,9 +30,10 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.moros.bending.model.protection.AbstractProtection;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.BukkitPlayer;
+import me.moros.bending.platform.entity.LivingEntity;
 import org.bukkit.plugin.Plugin;
 
 public final class WorldGuardProtection extends AbstractProtection {
@@ -40,7 +41,7 @@ public final class WorldGuardProtection extends AbstractProtection {
   private final StateFlag bendingFlag;
 
   public WorldGuardProtection(Plugin plugin) {
-    super(plugin);
+    super(plugin.getName());
     worldGuard = WorldGuard.getInstance();
     bendingFlag = (StateFlag) worldGuard.getFlagRegistry().get("bending");
   }
@@ -48,11 +49,12 @@ public final class WorldGuardProtection extends AbstractProtection {
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
     RegionQuery query = worldGuard.getPlatform().getRegionContainer().createQuery();
-    Location location = BukkitAdapter.adapt(block.getLocation());
+    var w = PlatformAdapter.toBukkitWorld(block.world());
+    Location location = BukkitAdapter.adapt(new org.bukkit.Location(w, block.blockX(), block.blockY(), block.blockZ()));
     StateFlag flagToCheck = bendingFlag == null ? Flags.BUILD : bendingFlag;
-    if (entity instanceof Player player) {
-      LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-      World world = BukkitAdapter.adapt(block.getWorld());
+    if (entity instanceof BukkitPlayer player) {
+      LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player.handle());
+      World world = BukkitAdapter.adapt(w);
       if (worldGuard.getPlatform().getSessionManager().hasBypass(localPlayer, world)) {
         return true;
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,54 +19,49 @@
 
 package me.moros.bending.util.material;
 
-import com.destroystokyo.paper.MaterialSetTag;
-import com.destroystokyo.paper.MaterialTags;
-import me.moros.bending.util.metadata.Metadata;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
-import org.bukkit.block.Block;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockTag;
+import me.moros.bending.platform.block.BlockType;
 
 /**
  * Group and categorize all water bendable materials.
  */
 public final class WaterMaterials {
-  public static final MaterialSetTag PLANT_BENDABLE;
-  public static final MaterialSetTag ICE_BENDABLE;
-  public static final MaterialSetTag SNOW_BENDABLE;
-  public static final MaterialSetTag FULL_SOURCES;
-  private static final MaterialSetTag ALL;
+  public static final BlockTag PLANT_BENDABLE;
+  public static final BlockTag ICE_BENDABLE;
+  public static final BlockTag SNOW_BENDABLE;
+  public static final BlockTag FULL_SOURCES;
+  private static final BlockTag ALL;
 
   static {
-    NamespacedKey key = Metadata.NSK_MATERIAL;
-    PLANT_BENDABLE = new MaterialSetTag(key)
-      .add(Material.CACTUS, Material.MELON, Material.VINE)
-      .add(Tag.FLOWERS.getValues())
-      .add(Tag.SAPLINGS.getValues())
-      .add(Tag.CROPS.getValues())
-      .add(Tag.LEAVES.getValues())
-      .add(MaterialTags.MUSHROOMS.getValues())
-      .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
-      .add(MaterialTags.PUMPKINS.getValues())
-      .lock();
+    PLANT_BENDABLE = BlockTag.builder("plant-sources")
+      .add(BlockType.CACTUS, BlockType.MELON, BlockType.VINE)
+      .add(BlockTag.FLOWERS)
+      .add(BlockTag.SAPLINGS)
+      .add(BlockTag.CROPS)
+      .add(BlockTag.LEAVES)
+      .add(BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM)
+      .add(BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
+      .add(BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN)
+      .build();
 
-    ICE_BENDABLE = new MaterialSetTag(key).add(Tag.ICE.getValues()).lock();
+    ICE_BENDABLE = BlockTag.builder("ice-sources").add(BlockTag.ICE).build();
 
-    SNOW_BENDABLE = new MaterialSetTag(key).add(Material.SNOW, Material.SNOW_BLOCK).lock();
+    SNOW_BENDABLE = BlockTag.builder("snow-sources").add(BlockType.SNOW, BlockType.SNOW_BLOCK).build();
 
-    FULL_SOURCES = new MaterialSetTag(key)
-      .add(Material.WATER, Material.CACTUS, Material.MELON, Material.SNOW_BLOCK)
-      .add(ICE_BENDABLE.getValues())
-      .add(Tag.LEAVES.getValues())
-      .add(MaterialTags.MUSHROOM_BLOCKS.getValues())
-      .add(MaterialTags.PUMPKINS.getValues())
-      .lock();
+    FULL_SOURCES = BlockTag.builder("full-water-sources")
+      .add(BlockType.WATER, BlockType.CACTUS, BlockType.MELON, BlockType.SNOW_BLOCK)
+      .add(ICE_BENDABLE)
+      .add(BlockTag.LEAVES)
+      .add(BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
+      .add(BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN)
+      .build();
 
-    ALL = new MaterialSetTag(key)
-      .add(PLANT_BENDABLE.getValues())
-      .add(ICE_BENDABLE.getValues())
-      .add(SNOW_BENDABLE.getValues())
-      .add(Material.WATER).lock();
+    ALL = BlockTag.builder("all-water-sources")
+      .add(PLANT_BENDABLE)
+      .add(ICE_BENDABLE)
+      .add(SNOW_BENDABLE)
+      .add(BlockType.WATER).build();
   }
 
   private WaterMaterials() {

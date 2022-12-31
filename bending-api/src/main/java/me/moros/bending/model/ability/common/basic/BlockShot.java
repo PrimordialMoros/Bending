@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,8 +25,11 @@ import me.moros.bending.model.ability.SimpleAbility;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.particle.ParticleBuilder;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
@@ -34,16 +37,13 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class BlockShot implements Updatable, SimpleAbility {
   private User user;
 
   private Vector3d location;
-  private Block previousBlock;
+  private Vector3i previousBlock;
   private Block tempBlock;
   private AABB collider;
   private final Vector3d firstDestination;
@@ -51,7 +51,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
   protected Vector3d target;
   protected Vector3d direction;
-  protected Material material;
+  protected BlockType type;
 
   private boolean settingUp;
   private int buffer;
@@ -64,10 +64,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
    * The maximum speed is 20 and represents movement of 1 block per tick.
    * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
    */
-  protected BlockShot(User user, Block block, Material material, double range, int speed) {
+  protected BlockShot(User user, Block block, BlockType type, double range, int speed) {
     this.user = user;
-    this.material = material;
-    this.location = Vector3d.fromCenter(block);
+    this.type = type;
+    this.location = block.center();
     this.collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
     this.range = range;
     this.speed = Math.min(20, speed);
@@ -76,15 +76,15 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     redirect();
     settingUp = true;
     int targetY = FastMath.floor(target.y());
-    int currentY = block.getY();
+    int currentY = block.blockY();
     Vector3d dir = target.subtract(location).normalize().withY(0);
-    boolean validAbove = block.getRelative(BlockFace.UP).isPassable();
-    boolean validBelow = block.getRelative(BlockFace.DOWN).isPassable();
+    boolean validAbove = !block.offset(Direction.UP).type().isCollidable();
+    boolean validBelow = !block.offset(Direction.DOWN).type().isCollidable();
     Vector3d fixedY = location.withY(targetY + 0.5);
     if ((targetY > currentY && validAbove) || (targetY < currentY && validBelow)) {
       firstDestination = fixedY;
-    } else if (location.add(dir).toBlock(user.world()).isPassable()) {
-      firstDestination = location.add(dir).blockCenter();
+    } else if (!user.world().blockAt(location.add(dir)).type().isCollidable()) {
+      firstDestination = location.add(dir).center();
     } else {
       if (validAbove) {
         firstDestination = location.add(0, 2, 0);
@@ -109,16 +109,16 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     if (Math.abs(location.y() - firstDestination.y()) < 0.5) {
       settingUp = false;
     }
-    previousBlock = location.toBlock(user.world());
+    previousBlock = location.toVector3i();
     Vector3d dest = settingUp ? firstDestination : target;
     direction = dest.subtract(location.subtract(direction)).normalize();
     Vector3d originalVector = location;
-    Block originBlock = originalVector.toBlock(user.world());
-    if (location.add(direction).toBlock(user.world()).equals(previousBlock)) {
+    Block originBlock = user.world().blockAt(originalVector);
+    if (location.add(direction).toVector3i().equals(previousBlock)) {
       direction = direction.multiply(2);
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, direction)) {
-      Block diagonal = originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ());
+      Block diagonal = originBlock.offset(v);
       if (diagonalsPredicate.test(diagonal)) {
         onBlockHit(diagonal);
         return UpdateResult.REMOVE;
@@ -128,7 +128,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
       return UpdateResult.REMOVE;
     }
     location = location.add(direction);
-    Block current = location.toBlock(user.world());
+    Block current = user.world().blockAt(location);
     if (!user.canBuild(current)) {
       return UpdateResult.REMOVE;
     }
@@ -138,12 +138,12 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
       WorldUtil.tryBreakPlant(current);
-      if (material == Material.WATER && MaterialUtil.isWater(current)) {
-        ParticleUtil.bubble(current).spawn(user.world());
+      if (type == BlockType.WATER && MaterialUtil.isWater(current)) {
+        ParticleBuilder.bubble(current).spawn(user.world());
         tempBlock = null;
       } else {
         tempBlock = current;
-        TempBlock.builder(material.createBlockData()).build(current);
+        TempBlock.builder(type).build(current);
       }
       postRender();
     } else {
@@ -153,7 +153,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
 
     if (location.distanceSq(target) < 0.8) {
       // Project the target block
-      Block projected = location.add(direction).toBlock(user.world());
+      Block projected = user.world().blockAt(location.add(direction));
       if (!MaterialUtil.isTransparent(projected)) {
         onBlockHit(projected);
       }
@@ -163,16 +163,16 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public void redirect() {
-    target = user.rayTrace(range).ignore(location).entities(user.world()).entityEyeLevelOrPosition().blockCenter();
+    target = user.rayTrace(range).ignore(location).cast(user.world()).entityEyeLevelOrPosition().center();
     settingUp = false;
   }
 
   public @Nullable Block previousBlock() {
-    return previousBlock;
+    return previousBlock == null ? null : user.world().blockAt(previousBlock);
   }
 
   public Vector3d center() {
-    return location.blockCenter();
+    return location.center();
   }
 
   @Override
@@ -185,10 +185,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public boolean isValid(Block block) {
-    if (material == Material.WATER) {
+    if (type == BlockType.WATER) {
       return MaterialUtil.isWater(block);
     }
-    return material == block.getType();
+    return type == block.type();
   }
 
   public void clean() {

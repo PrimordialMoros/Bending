@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,6 +22,7 @@ package me.moros.bending.model.collision.geometry;
 import java.util.Arrays;
 
 import me.moros.math.FastMath;
+import me.moros.math.Position;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 
@@ -127,8 +128,8 @@ public class OBB implements Collider {
   }
 
   @Override
-  public OBB at(Vector3d point) {
-    return new OBB(this, point);
+  public OBB at(Position point) {
+    return new OBB(this, point.toVector3d());
   }
 
   @Override

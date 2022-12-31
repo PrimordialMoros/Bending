@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -24,26 +24,29 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.moros.bending.model.protection.AbstractProtection;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.BukkitPlayer;
+import me.moros.bending.platform.entity.LivingEntity;
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public final class TownyProtection extends AbstractProtection {
   private final TownyAPI api;
 
   public TownyProtection(Plugin plugin) {
-    super(plugin);
+    super(plugin.getName());
     api = TownyAPI.getInstance();
   }
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
-    if (entity instanceof Player player) {
-      return PlayerCacheUtil.getCachePermission(player, block.getLocation(), Material.DIRT, TownyPermission.ActionType.BUILD);
+    var loc = new Location(PlatformAdapter.toBukkitWorld(block.world()), block.blockX(), block.blockY(), block.blockZ());
+    if (entity instanceof BukkitPlayer player) {
+      return PlayerCacheUtil.getCachePermission(player.handle(), loc, Material.DIRT, TownyPermission.ActionType.BUILD);
     }
-    TownBlock townBlock = api.getTownBlock(block.getLocation());
+    TownBlock townBlock = api.getTownBlock(loc);
     return townBlock == null || !townBlock.hasTown();
   }
 }

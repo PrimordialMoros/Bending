@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,8 +19,10 @@
 
 package me.moros.bending.model.protection;
 
-import me.moros.bending.model.key.Key;
-import org.bukkit.plugin.Plugin;
+import java.util.Locale;
+
+import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Base class for {@link Protection}.
@@ -28,12 +30,12 @@ import org.bukkit.plugin.Plugin;
 public abstract class AbstractProtection implements Protection {
   private final Key key;
 
-  protected AbstractProtection(Plugin plugin) {
-    key = Key.create(NAMESPACE, plugin.getName());
+  protected AbstractProtection(String protectionName) {
+    key = Key.key(NAMESPACE, protectionName.toLowerCase(Locale.ROOT));
   }
 
   @Override
-  public Key key() {
+  public @NonNull Key key() {
     return key;
   }
 }

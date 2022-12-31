@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,51 +25,33 @@ import me.moros.bending.BendingProperties;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.property.StateProperty;
 import me.moros.math.FastMath;
-import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Levelled;
-import org.bukkit.block.data.Waterlogged;
+import me.moros.tasker.TimerWheel;
 
-public final class TempLight extends TemporaryBase {
-  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>("Light");
-
-  private static final int MAX_LEVEL;
-  private static final BlockData[] LIGHT_ARRAY;
-
-  static {
-    Levelled data = (Levelled) Material.LIGHT.createBlockData();
-    MAX_LEVEL = data.getMaximumLevel();
-    LIGHT_ARRAY = new BlockData[MAX_LEVEL - 1];
-    Levelled clone;
-    for (int i = 0; i < MAX_LEVEL - 1; i++) {
-      clone = (Levelled) data.clone();
-      clone.setLevel(i + 1);
-      LIGHT_ARRAY[i] = clone;
-    }
-  }
+public final class TempLight extends Temporary {
+  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
 
   private final Block block;
-  private final Vector3d pos;
   private int level;
+  private int repeat;
   private final int rate;
   private boolean lock = false;
   private boolean reverted = false;
 
-  private TempLight(Block block, int level, int rate, long duration) {
-    super();
+  private TempLight(Block block, int level, int rate, int ticks) {
     this.block = block;
-    this.pos = Vector3d.from(block);
     this.level = level;
     this.rate = rate;
-    MANAGER.addEntry(block, this, Temporary.toTicks(duration));
+    MANAGER.addEntry(block, this, ticks);
   }
 
   @Override
   public boolean revert() {
+    repeat = 0;
     if (reverted || lock) {
       return false;
     }
@@ -77,22 +59,25 @@ public final class TempLight extends TemporaryBase {
     Type type = isValid(block, level);
     if (level <= 0 || type == Type.INVALID) {
       reverted = true;
-      NativeAdapter.instance().fakeBlock(block.getWorld(), pos, block.getBlockData());
+      NativeAdapter.instance().fakeBlock(block, block.state());
       MANAGER.removeEntry(block);
       return true;
     }
     render(type == Type.WATER);
-    MANAGER.reschedule(block, 2);
+    repeat = 2;
     return false;
   }
 
+  public int repeat() {
+    return repeat;
+  }
+
   private void render(boolean waterlogged) {
-    BlockData data = LIGHT_ARRAY[level - 1];
+    BlockState state = BlockType.LIGHT.defaultState().withProperty(StateProperty.LEVEL, level);
     if (waterlogged) {
-      data = data.clone();
-      ((Waterlogged) data).setWaterlogged(true);
+      state = state.withProperty(StateProperty.WATERLOGGED, true);
     }
-    NativeAdapter.instance().fakeBlock(block.getWorld(), pos, data);
+    NativeAdapter.instance().fakeBlock(block, state);
   }
 
   public TempLight lock() {
@@ -115,20 +100,23 @@ public final class TempLight extends TemporaryBase {
   }
 
   private static Type isValid(Block block, int level) {
-    if (block.getLightLevel() < level) {
-      BlockData data = block.getBlockData();
-      Material mat = data.getMaterial();
+    if (block.world().lightLevel(block) < level) {
+      BlockState state = block.state();
+      BlockType mat = state.type();
       if (mat.isAir()) {
         return Type.NORMAL;
-      } else if (mat == Material.WATER && ((Levelled) data).getLevel() == 0) {
-        return Type.WATER;
+      } else if (mat == BlockType.WATER) {
+        var property = state.property(StateProperty.LEVEL);
+        if (property != null && property == 0) {
+          return Type.WATER;
+        }
       }
     }
     return Type.INVALID;
   }
 
   public static Builder builder(int level) {
-    return new Builder(FastMath.clamp(level, 1, LIGHT_ARRAY.length));
+    return new Builder(FastMath.clamp(level, 1, StateProperty.LEVEL.max()));
   }
 
   private enum Type {NORMAL, WATER, INVALID}
@@ -149,7 +137,7 @@ public final class TempLight extends TemporaryBase {
     }
 
     public Builder duration(long duration) {
-      this.duration = duration;
+      this.duration = (duration <= 0 || duration > 30_000) ? 30_000 : duration;
       return this;
     }
 
@@ -169,7 +157,7 @@ public final class TempLight extends TemporaryBase {
         }
         return Optional.of(light);
       }
-      light = new TempLight(block, level, rate, duration);
+      light = new TempLight(block, level, rate, MANAGER.fromMillis(duration, 600));
       light.render(type == Type.WATER);
       return Optional.of(light);
     }

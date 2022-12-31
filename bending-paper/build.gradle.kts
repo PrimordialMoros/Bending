@@ -1,4 +1,9 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
 repositories {
+    maven("https://repo.papermc.io/repository/maven-public/") // Paper
     maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
     maven("https://repo.codemc.io/repository/maven-public/") // LWC
@@ -7,33 +12,32 @@ repositories {
 }
 
 dependencies {
-    api(project(":bending-api"))
+    implementation(project(":bending-common"))
     project.project(":bending-paper:adapters").subprojects.forEach {
         implementation(project(it.path, "reobf"))
     }
-    implementation("org.postgresql", "postgresql", "42.5.1")
-    implementation("com.h2database", "h2", "2.1.214")
-    implementation("org.hsqldb", "hsqldb", "2.7.1")
-    implementation("org.mariadb.jdbc", "mariadb-java-client", "3.1.0") {
+    implementation(libs.math.bukkit)
+    implementation(libs.tasker.bukkit)
+    implementation(libs.mariadb) {
         isTransitive = false
     }
-    implementation("org.jdbi", "jdbi3-core", "3.35.0") {
-        exclude(module = "caffeine")
+    implementation(libs.postgresql)
+    implementation(libs.h2)
+    implementation(libs.hsql)
+    implementation(libs.configurate.hocon)
+    implementation(libs.bstats.bukkit)
+    implementation(libs.cloud.paper)
+    implementation(libs.cloud.minecraft) {
+        isTransitive = false
     }
-    implementation("com.zaxxer", "HikariCP", "5.0.1")
-    implementation("org.spongepowered", "configurate-hocon", "4.1.2")
-    implementation("org.bstats", "bstats-bukkit", "3.0.0")
-    implementation("cloud.commandframework", "cloud-paper", "1.7.1")
-    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1")
-    implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.2")
-    implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
-    compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
-    compileOnly("com.github.TechFortress", "GriefPrevention", "16.18")
-    compileOnly("com.palmergames.bukkit.towny", "towny", "0.98.4.4")
-    compileOnly("com.griefcraft", "lwc", "2.2.9-dev")
-    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.7")
-    compileOnly("me.clip", "placeholderapi", "2.11.2")
-    compileOnly("net.luckperms", "api", "5.4")
+    implementation(libs.inventory.framework)
+    compileOnly(libs.paper)
+    compileOnly(libs.grief.prevention)
+    compileOnly(libs.towny)
+    compileOnly(libs.lwc)
+    compileOnly(libs.worldguard.bukkit)
+    compileOnly(libs.papi)
+    compileOnly(libs.luckperms.api)
 }
 
 configurations {
@@ -43,29 +47,35 @@ configurations {
     runtimeClasspath  {
         exclude(module = "checker-qual")
         exclude(module = "slf4j-api")
-        exclude(group = "net.kyori")
     }
 }
 
 tasks {
+    assemble {
+        dependsOn(shadowJar)
+    }
     shadowJar {
         archiveClassifier.set("")
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(project.name)
         destinationDirectory.set(rootProject.buildDir)
+        fun reloc(pkg: String, name: String) = relocate(pkg, "me.moros.bending.$name")
+        fun relocInternal(pkg: String, name: String) = reloc(pkg, "internal.$name")
         dependencies {
-            relocate("cloud.commandframework", "me.moros.bending.internal.cf")
-            relocate("com.github.benmanes.caffeine", "me.moros.bending.internal.caffeine")
-            relocate("com.github.stefvanschie.inventoryframework", "me.moros.bending.internal.inventoryframework")
-            relocate("com.typesafe", "me.moros.bending.internal.typesafe")
-            relocate("com.zaxxer.hikari", "me.moros.bending.internal.hikari")
-            relocate("io.leangen", "me.moros.bending.internal.leangen")
-            relocate("org.bstats", "me.moros.bending.bstats")
-            relocate("org.h2", "me.moros.bending.internal.h2")
-            relocate("org.hsqldb", "me.moros.bending.internal.hsqldb")
-            relocate("org.jdbi", "me.moros.bending.internal.jdbi")
-            relocate("org.mariadb", "me.moros.bending.internal.mariadb")
-            relocate("org.postgresql", "me.moros.bending.internal.postgresql")
-            relocate("org.spongepowered.configurate", "me.moros.bending.internal.configurate")
+            reloc("me.moros.storage", "storage")
+            reloc("net.kyori.event", "event.bus")
+            reloc("org.bstats", "bstats")
+            relocInternal("cloud.commandframework", "cloudframework")
+            relocInternal("com.github.benmanes.caffeine", "caffeine")
+            relocInternal("com.github.stefvanschie.inventoryframework", "inventoryframework")
+            relocInternal("com.typesafe", "typesafe")
+            relocInternal("com.zaxxer.hikari", "hikari")
+            relocInternal("io.leangen", "leangen")
+            relocInternal("org.h2", "h2")
+            relocInternal("org.hsqldb", "hsqldb")
+            relocInternal("org.jdbi", "jdbi")
+            relocInternal("org.mariadb", "mariadb")
+            relocInternal("org.postgresql", "postgresql")
+            relocInternal("org.spongepowered.configurate", "configurate")
         }
     }
     named<Copy>("processResources") {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,14 +19,18 @@
 
 package me.moros.bending.model.board;
 
+import me.moros.bending.model.BendingKey;
 import me.moros.bending.model.ability.AbilityDescription;
-import me.moros.bending.model.board.BoardImpl.DummyBoard;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.platform.Platform;
+import me.moros.bending.util.KeyUtil;
 
 /**
  * Represents a bending board that utilizes a scoreboard to render bound abilities and cooldowns.
  */
 public interface Board {
+  BendingKey<Board> HIDDEN = KeyUtil.bending("hidden-board", Board.class);
+
   String SEP = " -------------- ";
 
   /**
@@ -65,7 +69,10 @@ public interface Board {
    * @return a new board instance.
    */
   static Board create(BendingPlayer player) {
-    return player.hasPermission("bending.board") ? new BoardImpl(player) : dummy();
+    if (player.hasPermission("bending.board")) {
+      return Platform.instance().factory().buildBoard(player).orElseGet(Board::dummy);
+    }
+    return dummy();
   }
 
   /**

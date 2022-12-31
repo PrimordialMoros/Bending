@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,49 +19,15 @@
 
 package me.moros.bending.model.raytrace;
 
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class CompositeRayTraceImpl implements CompositeRayTrace {
-  private final Vector3d position;
-  private final Block block;
-  private final BlockFace face;
-  private final Entity entity;
-  private final boolean hit;
-
-  CompositeRayTraceImpl(Vector3d position, @Nullable Block block, @Nullable BlockFace face, @Nullable Entity entity) {
-    this.position = position;
-    this.block = block;
-    this.face = face;
-    this.entity = entity;
-    this.hit = block != null || entity != null;
-  }
-
-  @Override
-  public Vector3d position() {
-    return position;
-  }
-
-  @Override
-  public @Nullable Block block() {
-    return block;
-  }
-
-  @Override
-  public @Nullable BlockFace face() {
-    return face;
-  }
-
-  @Override
-  public @Nullable Entity entity() {
-    return entity;
-  }
-
+record CompositeRayTraceImpl(Vector3d position, @Nullable Block block,
+                             @Nullable Entity entity) implements CompositeRayTrace {
   @Override
   public boolean hit() {
-    return hit;
+    return block != null || entity != null;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,8 +20,8 @@
 package me.moros.bending.model.ability;
 
 import me.moros.bending.model.collision.geometry.Collider;
+import me.moros.bending.platform.block.Block;
 import me.moros.bending.util.collision.CollisionUtil.CollisionCallback;
-import org.bukkit.block.Block;
 
 /**
  * Represents a simple ability.

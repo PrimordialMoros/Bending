@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -31,14 +31,13 @@ import me.moros.bending.model.board.Board;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.preset.PresetCreateResult;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.model.user.profile.PlayerProfile;
-import me.moros.bending.registry.Registries;
-import me.moros.bending.util.metadata.Metadata;
+import me.moros.bending.platform.entity.player.GameMode;
+import me.moros.bending.platform.entity.player.Player;
+import me.moros.bending.platform.property.BooleanProperty;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.GameMode;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -65,8 +64,23 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
+  public TriState checkProperty(BooleanProperty property) {
+    return entity().checkProperty(property);
+  }
+
+  @Override
+  public void setProperty(BooleanProperty property, boolean value) {
+    entity().setProperty(property, value);
+  }
+
+  @Override
+  public boolean isSpectator() {
+    return entity().gamemode() == GameMode.SPECTATOR;
+  }
+
+  @Override
   public int currentSlot() {
-    return entity().getInventory().getHeldItemSlot() + 1;
+    return entity().inventory().selectedSlot() + 1;
   }
 
   @Override
@@ -89,65 +103,8 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public boolean valid() {
-    return entity().isOnline();
-  }
-
-  @Override
-  public boolean spectator() {
-    return entity().getGameMode() == GameMode.SPECTATOR;
-  }
-
-  @Override
-  public boolean sneaking() {
-    return entity().isSneaking();
-  }
-
-  @Override
-  public void sneaking(boolean sneaking) {
-    entity().setSneaking(sneaking);
-  }
-
-  @Override
-  public boolean sprinting() {
-    return entity().isSprinting();
-  }
-
-  @Override
-  public void sprinting(boolean sprinting) {
-    if (sprinting() != sprinting) {
-      entity().setSprinting(sprinting);
-    }
-  }
-
-  @Override
-  public boolean allowFlight() {
-    return entity().getAllowFlight();
-  }
-
-  @Override
-  public boolean flying() {
-    return entity().isFlying();
-  }
-
-  @Override
-  public void allowFlight(boolean allow) {
-    entity().setAllowFlight(allow);
-  }
-
-  @Override
-  public void flying(boolean flying) {
-    entity().setFlying(flying);
-  }
-
-  @Override
-  public PlayerInventory inventory() {
-    return entity().getInventory();
-  }
-
-  @Override
   public Board board() {
-    if (!game().worldManager().isEnabled(world()) || entity().hasMetadata(Metadata.HIDDEN_BOARD)) {
+    if (!game().worldManager().isEnabled(worldUid()) || store().containsKey(Board.HIDDEN)) {
       board.disableScoreboard();
       board = Board.dummy();
     } else if (!board.isEnabled()) {
@@ -197,13 +154,13 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   public PlayerProfile toProfile() {
     BenderData data = new BenderData(createPresetFromSlots("").abilities(), elements(), presets);
-    boolean board = !entity().hasMetadata(Metadata.HIDDEN_BOARD);
+    boolean board = !store().containsKey(Board.HIDDEN);
     return new PlayerProfile(internalId, board, data);
   }
 
   public static Optional<User> createUser(Game game, Player player, PlayerProfile profile) {
     Objects.requireNonNull(game);
-    if (Registries.BENDERS.containsKey(player.getUniqueId())) {
+    if (Registries.BENDERS.containsKey(player.uuid())) {
       return Optional.empty();
     }
     return Optional.of(new BendingPlayer(game, player, profile));

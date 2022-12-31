@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,12 +19,9 @@
 
 package me.moros.bending.model.raytrace;
 
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import me.moros.bending.platform.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface BlockRayTrace extends RayTrace {
   @Nullable Block block();
-
-  @Nullable BlockFace face();
 }

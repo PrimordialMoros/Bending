@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -37,20 +37,20 @@ import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Updatable.UpdateResult;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.BendingBar;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.entity.player.Player;
+import me.moros.tasker.TimerWheel;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class ActionLimiter extends TemporaryBase {
-  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>("ActionLimiter") {
+public final class ActionLimiter extends Temporary {
+  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>(TimerWheel.simple(600)) {
+    @Override
     public void tick() {
       super.tick();
       BARS.entrySet().removeIf(e -> e.getValue().update() == UpdateResult.REMOVE);
@@ -66,21 +66,20 @@ public final class ActionLimiter extends TemporaryBase {
 
   private boolean reverted = false;
 
-  private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, long duration) {
-    super();
-    this.uuid = entity.getUniqueId();
+  private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, int ticks) {
+    this.uuid = entity.uuid();
     this.entity = entity;
     this.limitedActions = Collections.unmodifiableSet(EnumSet.copyOf(limitedActions));
-    hadAI = entity.hasAI();
+    hadAI = entity.ai();
     if (entity instanceof Player player) {
-      if (duration > 100) {
+      if (ticks > 2) {
         BossBar bar = BossBar.bossBar(Component.text("Restricted"), 1, Color.YELLOW, Overlay.PROGRESS);
-        BARS.putIfAbsent(uuid, BendingBar.of(bar, player, duration));
+        BARS.putIfAbsent(uuid, BendingBar.of(bar, player, ticks));
       }
     } else {
-      entity.setAI(false);
+      entity.ai(false);
     }
-    MANAGER.addEntry(uuid, this, Temporary.toTicks(duration));
+    MANAGER.addEntry(uuid, this, ticks);
   }
 
   @Override
@@ -94,16 +93,16 @@ public final class ActionLimiter extends TemporaryBase {
     if (bar != null) {
       bar.onRemove();
     }
-    entity.setAI(hadAI);
+    entity.ai(hadAI);
     return true;
   }
 
-  public static boolean isLimited(Entity entity) {
-    return isLimited(entity, null);
+  public static boolean isLimited(UUID uuid) {
+    return isLimited(uuid, null);
   }
 
-  public static boolean isLimited(Entity entity, @Nullable ActionType method) {
-    ActionLimiter limiter = MANAGER.get(entity.getUniqueId()).orElse(null);
+  public static boolean isLimited(UUID uuid, @Nullable ActionType method) {
+    ActionLimiter limiter = MANAGER.get(uuid).orElse(null);
     if (limiter == null) {
       return false;
     }
@@ -143,14 +142,14 @@ public final class ActionLimiter extends TemporaryBase {
     public Optional<ActionLimiter> build(User source, LivingEntity target) {
       Objects.requireNonNull(source);
       Objects.requireNonNull(target);
-      if (isLimited(target)) {
+      if (isLimited(target.uuid())) {
         return Optional.empty();
       }
       ActionLimitEvent event = EventBus.INSTANCE.postActionLimitEvent(source, target, duration);
-      if (event.isCancelled() || event.duration() <= 0) {
+      if (event.cancelled() || event.duration() <= 0) {
         return Optional.empty();
       }
-      return Optional.of(new ActionLimiter(target, limitedActions, event.duration()));
+      return Optional.of(new ActionLimiter(target, limitedActions, MANAGER.fromMillis(event.duration(), 600)));
     }
   }
 }

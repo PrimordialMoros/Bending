@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -30,16 +30,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
-import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.bukkit.Particle;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FragileStructure implements Iterable<Block> {
@@ -53,7 +50,7 @@ public class FragileStructure implements Iterable<Block> {
     this.predicate = builder.predicate;
     this.fallingBlocks = builder.fallingBlocks;
     this.health = builder.health;
-    this.fragileBlocks.forEach(b -> Metadata.add(b, Metadata.DESTRUCTIBLE, this));
+    this.fragileBlocks.forEach(b -> b.addMetadata(Metadata.DESTRUCTIBLE, this));
   }
 
   public int health() {
@@ -71,7 +68,7 @@ public class FragileStructure implements Iterable<Block> {
 
   private void destroyStructure(Ray ray) {
     for (Block block : fragileBlocks) {
-      Metadata.remove(block, Metadata.DESTRUCTIBLE);
+      block.removeMetadata(Metadata.DESTRUCTIBLE);
       if (!predicate.test(block)) {
         continue;
       }
@@ -80,17 +77,16 @@ public class FragileStructure implements Iterable<Block> {
   }
 
   protected void onDestroy(Block block, Ray ray) {
-    BlockData blockData = block.getType().createBlockData();
+    BlockType type = block.type();
     TempBlock.air().build(block);
-    Vector3d center = Vector3d.fromCenter(block);
-    ParticleUtil.of(Particle.BLOCK_CRACK, center).count(2).offset(0.3).data(blockData).spawn(block.getWorld());
+    type.asParticle(block.center()).count(2).offset(0.3).spawn(block.world());
     if (ThreadLocalRandom.current().nextInt(3) == 0) {
-      SoundUtil.of(blockData.getSoundGroup().getBreakSound(), 2, 1).play(block);
+      type.soundGroup().breakSound().asEffect(2, 1).play(block);
     }
     if (fallingBlocks) {
-      Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(Vector3d.fromCenter(block));
+      Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(block.center());
       Vector3d velocity = VectorUtil.gaussianOffset(dir.normalize().multiply(0.3), 0.05);
-      TempEntity.builder(blockData).velocity(velocity).duration(5000).build(block);
+      TempEntity.fallingBlock(type.defaultState()).velocity(velocity).duration(5000).build(block);
     }
   }
 
@@ -100,12 +96,10 @@ public class FragileStructure implements Iterable<Block> {
 
   public static boolean tryDamageStructure(Iterable<Block> blocks, int damage, Ray ray) {
     for (Block block : blocks) {
-      if (block.hasMetadata(Metadata.DESTRUCTIBLE)) {
-        FragileStructure structure = (FragileStructure) block.getMetadata(Metadata.DESTRUCTIBLE).get(0).value();
-        if (structure != null) {
-          structure.damageStructure(damage, ray);
-          return true;
-        }
+      FragileStructure structure = block.metadata(Metadata.DESTRUCTIBLE, FragileStructure.class).findAny().orElse(null);
+      if (structure != null) {
+        structure.damageStructure(damage, ray);
+        return true;
       }
     }
     return false;

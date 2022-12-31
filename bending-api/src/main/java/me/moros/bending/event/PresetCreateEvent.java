@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,32 +19,20 @@
 
 package me.moros.bending.event;
 
+import me.moros.bending.event.base.AbstractCancellableUserEvent;
+import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user is attempting to create a {@link Preset}.
  */
-public class PresetCreateEvent extends Event implements UserEvent, Cancellable {
-  private static final HandlerList HANDLERS = new HandlerList();
-
-  private final User user;
+public class PresetCreateEvent extends AbstractCancellableUserEvent implements UserEvent {
   private final Preset preset;
 
-  private boolean cancelled = false;
-
-  PresetCreateEvent(User user, Preset preset) {
-    this.user = user;
+  protected PresetCreateEvent(User user, Preset preset) {
+    super(user);
     this.preset = preset;
-  }
-
-  @Override
-  public User user() {
-    return user;
   }
 
   /**
@@ -53,24 +41,5 @@ public class PresetCreateEvent extends Event implements UserEvent, Cancellable {
    */
   public Preset preset() {
     return preset;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

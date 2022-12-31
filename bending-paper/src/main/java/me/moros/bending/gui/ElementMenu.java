@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,6 +22,7 @@ package me.moros.bending.gui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import cloud.commandframework.permission.CommandPermission;
@@ -32,13 +33,14 @@ import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import me.moros.bending.command.BendingCommand;
 import me.moros.bending.command.CommandPermissions;
 import me.moros.bending.locale.Message;
 import me.moros.bending.locale.Message.Args0;
 import me.moros.bending.model.Element;
+import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.entity.BukkitPlayer;
 import me.moros.bending.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -79,41 +81,48 @@ public final class ElementMenu {
     BASE_GUI.addPane(elementsPane);
   }
 
-  private final BendingCommand handler;
 
-  public ElementMenu(BendingCommand handler, BendingPlayer player) {
-    this.handler = handler;
+  public static boolean createMenu(ElementHandler handler, BendingPlayer player) {
     if (!player.hasPermission(CommandPermissions.HELP.toString())) {
       Message.GUI_NO_PERMISSION.send(player);
-      return;
+      return false;
     }
+    new ElementMenu(handler, player);
+    return true;
+  }
+
+  private final ElementHandler handler;
+
+  private ElementMenu(ElementHandler handler, BendingPlayer bendingPlayer) {
+    this.handler = handler;
     ChestGui gui = BASE_GUI.copy();
     OutlinePane pane = gui.getPanes().stream().filter(p -> p.getUUID().equals(innerPaneUUID) && p instanceof OutlinePane)
       .map(OutlinePane.class::cast).findAny().orElseThrow(() -> new RuntimeException("Gui cloning went wrong!"));
 
+    Player player = ((BukkitPlayer) bendingPlayer.entity()).handle();
+
     for (Element element : Element.VALUES) {
-      ItemStack itemStack = generateItem(player, element);
-      DataWrapper data = new DataWrapper(player, element, itemStack, gui);
+      ItemStack itemStack = generateItem(player.locale(), element, bendingPlayer.hasElement(element));
+      DataWrapper data = new DataWrapper(player, bendingPlayer, element, itemStack, gui);
       pane.addItem(new GuiItem(itemStack, event -> handleClick(event, data)));
     }
 
     StaticPane helpPane = new StaticPane(0, 0, 9, 1);
     helpPane.addItem(new GuiItem(generateHelpItem(player)), 4, 0);
     gui.addPane(helpPane);
-    gui.show(player.entity());
+    gui.show(player);
   }
 
   private void handleClick(InventoryClickEvent event, DataWrapper meta) {
-    Player player = meta.player.entity();
     Element element = meta.element;
     ActionType type = mapType(event.getClick());
-    if (type != null && type.executeCommand(handler, meta.player, element)) {
+    if (type != null && type.executeCommand(handler, meta.bendingPlayer, element)) {
       if (type.keepOpen()) {
-        handleItemStackGlow(meta.player(), element, meta.itemStack);
+        handleItemStackGlow(meta.itemStack, meta.bendingPlayer.hasElement(element));
         meta.gui.update();
       } else {
-        player.closeInventory();
-        player.updateInventory();
+        meta.player.closeInventory();
+        meta.player.updateInventory();
       }
     }
   }
@@ -135,29 +144,29 @@ public final class ElementMenu {
     return null;
   }
 
-  private static void handleItemStackGlow(BendingPlayer player, Element element, ItemStack itemStack) {
-    if (player.hasElement(element)) {
+  private static void handleItemStackGlow(ItemStack itemStack, boolean glow) {
+    if (glow) {
       itemStack.addUnsafeEnchantment(Enchantment.LUCK, 1);
     } else {
       itemStack.removeEnchantment(Enchantment.LUCK);
     }
   }
 
-  private static ItemStack generateItem(BendingPlayer player, Element element) {
+  private static ItemStack generateItem(Locale locale, Element element, boolean hasElement) {
     ItemStack itemStack = new ItemStack(mapElement(element));
     itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-    handleItemStackGlow(player, element, itemStack);
+    handleItemStackGlow(itemStack, hasElement);
     ItemMeta itemMeta = itemStack.getItemMeta();
-    Component itemName = GlobalTranslator.render(element.displayName(), player.entity().locale())
+    Component itemName = GlobalTranslator.render(element.displayName(), locale)
       .decoration(TextDecoration.ITALIC, false);
     itemMeta.displayName(itemName);
-    itemMeta.lore(generateLore(player.entity(), element));
+    itemMeta.lore(generateLore(locale, element));
     itemStack.setItemMeta(itemMeta);
     return itemStack;
   }
 
-  private static List<Component> generateLore(Player player, Element element) {
-    Component base = GlobalTranslator.render(element.description(), player.locale());
+  private static List<Component> generateLore(Locale locale, Element element) {
+    Component base = GlobalTranslator.render(element.description(), locale);
     String raw = PlainTextComponentSerializer.plainText().serialize(base);
     List<Component> lore = new ArrayList<>();
     for (String s : TextUtil.wrap(raw, 36)) {
@@ -166,11 +175,11 @@ public final class ElementMenu {
     return lore;
   }
 
-  private static ItemStack generateHelpItem(BendingPlayer player) {
+  private static ItemStack generateHelpItem(Player player) {
     ItemStack itemStack = new ItemStack(Material.BOOK);
     ItemMeta itemMeta = itemStack.getItemMeta();
     // ItemStacks get translated early, so we render in default locale for now
-    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.entity().locale())
+    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.locale())
       .decoration(TextDecoration.ITALIC, false);
     itemMeta.displayName(itemName);
     itemMeta.lore(ActionType.VALUES.stream().map(type -> type.toEntry(player)).toList());
@@ -187,14 +196,15 @@ public final class ElementMenu {
     };
   }
 
-  private record DataWrapper(BendingPlayer player, Element element, ItemStack itemStack, Gui gui) {
+  private record DataWrapper(Player player, BendingPlayer bendingPlayer, Element element, ItemStack itemStack,
+                             Gui gui) {
   }
 
   private enum ActionType {
-    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, CommandPermissions.CHOOSE, BendingCommand::onElementChoose, false),
-    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.HELP, BendingCommand::onElementDisplay, false),
-    ADD(Message.ELEMENTS_GUI_ADD, CommandPermissions.ADD, BendingCommand::onElementAdd, true),
-    REMOVE(Message.ELEMENTS_GUI_REMOVE, CommandPermissions.REMOVE, BendingCommand::onElementRemove, true);
+    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, CommandPermissions.CHOOSE, ElementHandler::onElementChoose, false),
+    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.HELP, ElementHandler::onElementDisplay, false),
+    ADD(Message.ELEMENTS_GUI_ADD, CommandPermissions.ADD, ElementHandler::onElementAdd, true),
+    REMOVE(Message.ELEMENTS_GUI_REMOVE, CommandPermissions.REMOVE, ElementHandler::onElementRemove, true);
 
     private final Args0 message;
     private final String permission;
@@ -212,17 +222,17 @@ public final class ElementMenu {
       return keepOpen;
     }
 
-    private boolean executeCommand(BendingCommand command, User user, Element element) {
+    private boolean executeCommand(ElementHandler handler, User user, Element element) {
       if (!user.hasPermission(permission)) {
         Message.GUI_NO_PERMISSION.send(user);
         return false;
       }
-      menuAction.accept(command, user, element);
+      menuAction.accept(handler, user, element);
       return true;
     }
 
-    private Component toEntry(BendingPlayer player) {
-      return GlobalTranslator.render(message.build(), player.entity().locale())
+    private Component toEntry(Player player) {
+      return GlobalTranslator.render(message.build(), player.locale())
         .decoration(TextDecoration.ITALIC, false)
         .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission));
     }
@@ -231,6 +241,6 @@ public final class ElementMenu {
   }
 
   private interface MenuAction {
-    void accept(BendingCommand command, User user, Element element);
+    void accept(ElementHandler handler, User user, Element element);
   }
 }

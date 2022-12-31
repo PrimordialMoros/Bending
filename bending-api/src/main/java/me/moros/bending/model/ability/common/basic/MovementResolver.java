@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,13 +21,13 @@ package me.moros.bending.model.ability.common.basic;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.world.World;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 
 public abstract class MovementResolver {
   private final World world;
@@ -40,13 +40,13 @@ public abstract class MovementResolver {
 
   protected Resolved resolve(Vector3d origin, Vector3d direction) {
     Vector3d temp = origin.add(direction);
-    Block original = origin.toBlock(world);
-    Block destination = temp.toBlock(world);
+    Block original = world.blockAt(origin);
+    Block destination = world.blockAt(temp);
     int offset = 0;
     if (!isValidBlock(destination)) {
-      if (isValidBlock(destination.getRelative(BlockFace.UP)) && diagonalsPredicate.test(original.getRelative(BlockFace.UP))) {
+      if (isValidBlock(destination.offset(Direction.UP)) && diagonalsPredicate.test(original.offset(Direction.UP))) {
         offset = 1;
-      } else if (isValidBlock(destination.getRelative(BlockFace.DOWN)) && diagonalsPredicate.test(destination)) {
+      } else if (isValidBlock(destination.offset(Direction.DOWN)) && diagonalsPredicate.test(destination)) {
         offset = -1;
       } else {
         onCollision(temp);
@@ -56,7 +56,7 @@ public abstract class MovementResolver {
 
     int diagonalCollisions = 0;
     for (Vector3i v : VectorUtil.decomposeDiagonals(origin, direction)) {
-      Block block = original.getRelative(v.blockX(), v.blockY() + offset, v.blockZ());
+      Block block = original.offset(v.blockX(), v.blockY() + offset, v.blockZ());
       if (!isValidBlock(block)) {
         if (++diagonalCollisions > 1) {
           Vector3d point = temp.add(v).add(0, offset, 0);

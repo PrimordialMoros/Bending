@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,13 +25,12 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.raytrace.EntityRayTrace;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 
 public abstract class AbstractLine extends MovementResolver implements Updatable, SimpleAbility {
   private final User user;
@@ -54,11 +53,11 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   protected AbstractLine(User user, Block source, double range, double speed, boolean followTarget) {
     super(user.world());
     this.user = user;
-    this.location = Vector3d.from(source.getLocation().add(0.5, 1.25, 0.5));
+    this.location = source.toVector3d().add(0.5, 1.25, 0.5);
     this.origin = location;
     this.range = range;
     this.speed = speed;
-    EntityRayTrace result = user.rayTrace(range).entities(user.world());
+    EntityRayTrace result = user.rayTrace(range).cast(user.world());
     target = result.entity();
     targetLocation = result.entityCenterOrPosition();
     locked = followTarget && target != null;
@@ -69,7 +68,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   public UpdateResult update() {
     if (locked) {
       if (isValidTarget()) {
-        targetLocation = Vector3d.from(target.getLocation());
+        targetLocation = target.location();
         direction = targetLocation.subtract(location).withY(0).normalize();
       } else {
         locked = false;
@@ -77,11 +76,11 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     }
 
     if (controllable) {
-      targetLocation = user.rayTrace(range).entities(user.world()).entityCenterOrPosition();
+      targetLocation = user.rayTrace(range).cast(user.world()).entityCenterOrPosition();
       direction = targetLocation.subtract(origin).withY(0).normalize();
     }
 
-    if (onBlockHit(location.toBlock(user.world()).getRelative(BlockFace.DOWN))) {
+    if (onBlockHit(user.world().blockAt(location).offset(Direction.DOWN))) {
       return UpdateResult.REMOVE;
     }
 
@@ -100,17 +99,17 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     location = resolved.point();
     postRender();
 
-    Block block = location.toBlock(user.world());
+    Block block = user.world().blockAt(location);
 
     if (skipVertical) { // Advance location vertically if possible to match target height
       int y1 = FastMath.floor(targetLocation.y());
       int y2 = FastMath.floor(resolved.point().y());
-      if (y1 > y2 && isValidBlock(block.getRelative(BlockFace.UP))) {
+      if (y1 > y2 && isValidBlock(block.offset(Direction.UP))) {
         location = resolved.point().add(Vector3d.PLUS_J);
-        block = block.getRelative(BlockFace.UP);
-      } else if (y1 < y2 && isValidBlock(block.getRelative(BlockFace.DOWN))) {
+        block = block.offset(Direction.UP);
+      } else if (y1 < y2 && isValidBlock(block.offset(Direction.DOWN))) {
         location = resolved.point().add(Vector3d.MINUS_J);
-        block = block.getRelative(BlockFace.DOWN);
+        block = block.offset(Direction.DOWN);
       }
     }
 
@@ -129,12 +128,9 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
   }
 
   protected boolean isValidTarget() {
-    if (target == null || !target.isValid()) {
+    if (target == null || !target.valid()) {
       return false;
     }
-    if (target instanceof Player player && !player.isOnline()) {
-      return false;
-    }
-    return target.getWorld().equals(user.world()) && targetLocation.distanceSq(Vector3d.from(target.getLocation())) < 5 * 5;
+    return target.world().equals(user.world()) && targetLocation.distanceSq(target.location()) < 5 * 5;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,10 +19,9 @@
 
 package me.moros.bending.model.raytrace;
 
-import me.moros.bending.util.EntityUtil;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.math.Vector3d;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EntityRayTrace extends RayTrace {
@@ -30,12 +29,12 @@ public interface EntityRayTrace extends RayTrace {
 
   default Vector3d entityCenterOrPosition() {
     Entity entity = entity();
-    return entity == null ? position() : EntityUtil.entityCenter(entity);
+    return entity == null ? position() : entity.center();
   }
 
   default Vector3d entityEyeLevelOrPosition() {
     if (entity() instanceof LivingEntity livingEntity) {
-      return Vector3d.from(livingEntity.getEyeLocation());
+      return livingEntity.eyeLocation();
     }
     return position();
   }

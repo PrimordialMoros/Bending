@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,13 +21,13 @@ package me.moros.bending.model;
 
 import java.lang.ref.WeakReference;
 
-import me.moros.bending.model.key.RegistryKey;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.util.KeyUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record EntityInteraction(WeakReference<Entity> entity, @Nullable Vector3d point) {
-  public static RegistryKey<EntityInteraction> KEY = RegistryKey.create("last-interacted-enttity", EntityInteraction.class);
+  public static BendingKey<EntityInteraction> KEY = KeyUtil.bending("last-interacted-enttity", EntityInteraction.class);
 
   public EntityInteraction(Entity entity, @Nullable Vector3d point) {
     this(new WeakReference<>(entity), point);

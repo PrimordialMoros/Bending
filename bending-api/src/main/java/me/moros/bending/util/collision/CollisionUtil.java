@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,16 +21,16 @@ package me.moros.bending.util.collision;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.EntityType;
+import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.entity.player.GameMode;
+import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.temporal.TempEntity;
 import me.moros.math.Vector3d;
-import org.bukkit.GameMode;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 
 /**
  * Utility class to handle detect and handle ability collisions with entities.
@@ -95,15 +95,12 @@ public final class CollisionUtil {
    * @return true if at least one entity was processed, false otherwise
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
-    Vector3d extent = collider.halfExtents();
-    Vector3d pos = collider.position();
+    Vector3d extents = collider.halfExtents();
     boolean hit = false;
     Predicate<Entity> filter = entityPredicate(user.entity(), livingOnly, selfCollision);
-    for (Entity entity : user.world().getNearbyEntities(pos.toLocation(user.world()), extent.x(), extent.y(), extent.z(), filter)) {
-      if (collider.intersects(AABBUtil.entityBounds(entity))) {
-        if (!user.canBuild(entity.getLocation().getBlock())) {
-          continue;
-        }
+    AABB box = new AABB(collider.position().subtract(extents), collider.position().add(extents));
+    for (Entity entity : user.world().nearbyEntities(box, filter)) {
+      if (collider.intersects(entity.bounds()) && user.canBuild(entity.block())) {
         boolean result = callback.onEntityHit(entity);
         if (earlyEscape && result) {
           return true;
@@ -123,11 +120,11 @@ public final class CollisionUtil {
 
   private static boolean isValidEntity(Entity entity) {
     if (entity instanceof Player player) {
-      return player.getGameMode() != GameMode.SPECTATOR;
-    } else if (entity instanceof FallingBlock) {
-      return !TempEntity.MANAGER.isTemp(entity.getEntityId());
-    } else if (entity instanceof ArmorStand armorStand) {
-      return armorStand.isVisible();
+      return player.gamemode() != GameMode.SPECTATOR;
+    } else if (entity.type() == EntityType.FALLING_BLOCK) {
+      return !TempEntity.MANAGER.isTemp(entity.id());
+    } else if (entity.type() == EntityType.ARMOR_STAND) {
+      return entity.visible();
     }
     return true;
   }

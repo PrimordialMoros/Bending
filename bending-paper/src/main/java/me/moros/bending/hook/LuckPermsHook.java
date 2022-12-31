@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -28,8 +28,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.Element;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;

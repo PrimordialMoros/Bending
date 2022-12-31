@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -28,46 +28,43 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.event.AbilityEvent;
+import me.moros.bending.model.DamageSource;
 import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
-import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.Platform;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.property.StateProperty;
+import me.moros.bending.platform.world.World.Dimension;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.material.WaterMaterials;
 import me.moros.math.FastMath;
-import org.bukkit.Material;
-import org.bukkit.World.Environment;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.TileState;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Levelled;
-import org.bukkit.block.data.Waterlogged;
+import me.moros.tasker.TimerWheel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TempBlock extends TemporaryBase {
-  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>("Block", TempBlock::revertFully);
+public final class TempBlock extends Temporary {
+  private static final TimerWheel wheel = TimerWheel.hierarchical();
+  public static final TemporalManager<Block, TempBlock> MANAGER = new TemporalManager<>(wheel);
 
   private static final Set<Block> GRAVITY_CACHE = ConcurrentHashMap.newKeySet();
 
   private final Deque<TempBlockState> snapshots = new ArrayDeque<>();
   private final Block block;
   private Snapshot index;
+  private int repeat;
   private boolean reverted = false;
 
-  private TempBlock(Block block, BlockData data, int ticks, Builder builder) {
-    super();
+  private TempBlock(Block block, BlockState state, int ticks, Builder builder) {
     this.block = block;
-    addState(data, ticks, builder);
+    addState(state, ticks, builder);
     MANAGER.addEntry(block, this, ticks);
   }
 
-  private void addState(BlockData data, int ticks, Builder builder) {
+  private void addState(BlockState state, int ticks, Builder builder) {
     cleanStates();
     if (index == null || !index.weak) {
       TempBlockState tbs = new TempBlockState(block, ticks, builder);
@@ -76,7 +73,7 @@ public final class TempBlock extends TemporaryBase {
     } else {
       index.weak = builder.weak;
     }
-    NativeAdapter.instance().setBlockFast(block, data);
+    NativeAdapter.instance().setBlockFast(block, state);
     refreshGravityCache(block);
   }
 
@@ -86,7 +83,7 @@ public final class TempBlock extends TemporaryBase {
       Iterator<TempBlockState> it = snapshots.iterator();
       it.next(); // ignore original snapshot
       while (it.hasNext()) {
-        if (MANAGER.currentTick() > it.next().expirationTicks) {
+        if (Platform.instance().currentTick() > it.next().expirationTicks) {
           it.remove();
         }
       }
@@ -98,7 +95,7 @@ public final class TempBlock extends TemporaryBase {
     Iterator<TempBlockState> it = snapshots.descendingIterator();
     while (it.hasNext()) {
       TempBlockState next = it.next();
-      if (MANAGER.currentTick() >= next.expirationTicks) {
+      if (Platform.instance().currentTick() >= next.expirationTicks) {
         it.remove();
         toRevert = next;
       } else {
@@ -110,6 +107,11 @@ public final class TempBlock extends TemporaryBase {
 
   @Override
   public boolean revert() {
+    repeat = 0;
+    if (MANAGER.clearing()) {
+      revertFully();
+      return true;
+    }
     if (reverted || snapshots.isEmpty()) {
       return false;
     }
@@ -119,22 +121,24 @@ public final class TempBlock extends TemporaryBase {
       revertFully();
       return true;
     }
+    int t = toRevert.expirationTicks;
     revertToSnapshot(toRevert);
     TempBlockState nextState = snapshots.peekLast();
     if (nextState != null) {
-      int deltaTicks = nextState.expirationTicks - MANAGER.currentTick();
-      if (deltaTicks > 0) {
-        MANAGER.reschedule(block, deltaTicks);
-      }
+      repeat = nextState.expirationTicks - t;
     }
     return false;
+  }
+
+  public int repeat() {
+    return repeat;
   }
 
   public Block block() {
     return block;
   }
 
-  public @Nullable AbilityEvent damageSource() {
+  public @Nullable DamageSource damageSource() {
     return index.source;
   }
 
@@ -191,16 +195,16 @@ public final class TempBlock extends TemporaryBase {
     return GRAVITY_CACHE.contains(block);
   }
 
-  public static BlockData getLastValidData(Block block) {
+  public static BlockType getLastValidType(Block block) {
     TempBlock tb = MANAGER.get(block).orElse(null);
     if (tb != null && tb.index.weak) {
-      return tb.index.state.getBlockData();
+      return tb.index.state.type();
     }
-    return block.getBlockData();
+    return block.type();
   }
 
   private static void refreshGravityCache(Block block) {
-    if (block.getType().hasGravity()) {
+    if (block.type().hasGravity()) {
       GRAVITY_CACHE.add(block);
     } else {
       GRAVITY_CACHE.remove(block);
@@ -212,66 +216,68 @@ public final class TempBlock extends TemporaryBase {
 
     private TempBlockState(Block block, int ticks, Builder builder) {
       super(block, builder.bendable, builder.weak, builder.source);
-      this.expirationTicks = MANAGER.currentTick() + ticks;
+      this.expirationTicks = Platform.instance().currentTick() + ticks;
     }
-  }
-
-  private record DamageSource(User user, AbilityDescription ability) implements AbilityEvent {
   }
 
   public static class Snapshot {
     protected final DamageSource source;
+    protected final Block block;
     protected final BlockState state;
     protected final boolean bendable;
     protected boolean weak;
 
     private Snapshot(Block block, boolean bendable, boolean weak, @Nullable DamageSource source) {
-      this.state = block.getState(false);
+      this.block = block;
+      this.state = block.state();
       this.bendable = bendable;
       this.weak = weak;
       this.source = source;
     }
 
     private void revert() {
-      Block block = state.getBlock();
-      state.getWorld().getChunkAtAsync(block).thenRun(() -> NativeAdapter.instance().setBlockFast(block, state.getBlockData()));
+      block.world().loadChunkAsync(block).thenRun(() -> NativeAdapter.instance().setBlockFast(block, state));
     }
   }
 
-  public static Builder builder(BlockData data) {
-    return new Builder(Objects.requireNonNull(data));
+  public static Builder builder(BlockType type) {
+    return builder(type.defaultState());
+  }
+
+  public static Builder builder(BlockState state) {
+    return new Builder(Objects.requireNonNull(state));
   }
 
   /**
    * @return a {@link Builder} with bendable fire
    */
   public static Builder fire() {
-    return builder(Material.FIRE.createBlockData()).bendable(true);
+    return builder(BlockType.FIRE).bendable(true);
   }
 
   /**
    * @return a {@link Builder} with water
    */
   public static Builder water() {
-    return builder(Material.WATER.createBlockData());
+    return builder(BlockType.WATER);
   }
 
   /**
    * @return a {@link Builder} with bendable ice
    */
   public static Builder ice() {
-    return builder(Material.ICE.createBlockData()).bendable(true);
+    return builder(BlockType.ICE).bendable(true);
   }
 
   /**
    * @return a {@link Builder} with bendable air
    */
   public static Builder air() {
-    return builder(Material.AIR.createBlockData()).bendable(true);
+    return builder(BlockType.AIR).bendable(true);
   }
 
   public static final class Builder {
-    private final BlockData data;
+    private final BlockState state;
 
     private DamageSource source;
     private boolean fixWater;
@@ -279,9 +285,9 @@ public final class TempBlock extends TemporaryBase {
     private boolean weak = false;
     private long duration = 0;
 
-    private Builder(BlockData data) {
-      this.data = data;
-      fixWater = data.getMaterial().isAir();
+    private Builder(BlockState state) {
+      this.state = state;
+      fixWater = state.type().isAir();
     }
 
     public Builder fixWater(boolean fixWater) {
@@ -305,23 +311,24 @@ public final class TempBlock extends TemporaryBase {
     }
 
     public Builder ability(@Nullable Ability ability) {
-      this.source = ability == null ? null : new DamageSource(ability.user(), ability.description());
+      this.source = ability == null ? null : new DamageSource(ability.user().name(), ability.description());
       return this;
     }
 
     private int validateDuration(Block block) {
-      long time = duration <= 0 ? DEFAULT_REVERT : duration;
-      if (WaterMaterials.ICE_BENDABLE.isTagged(data) && block.getWorld().getEnvironment() == Environment.NETHER) {
+      long time = duration;
+      if (WaterMaterials.ICE_BENDABLE.isTagged(state) && block.world().dimension() == Dimension.NETHER) {
         time = FastMath.floor(0.5 * time);
       }
-      return Temporary.toTicks(time);
+      return MANAGER.fromMillis(time, DEFAULT_REVERT);
     }
 
     // Handle falling water
-    private BlockData calculateWaterData(Block above) {
+    private BlockState calculateWaterData(Block above) {
       int level;
-      if (above.getBlockData() instanceof Levelled levelled) {
-        level = levelled.getLevel();
+      var property = above.state().property(StateProperty.LEVEL);
+      if (property != null) {
+        level = property;
         if (level <= 7) {
           level += 8;
         }
@@ -331,35 +338,35 @@ public final class TempBlock extends TemporaryBase {
       return MaterialUtil.waterData(level);
     }
 
-    private BlockData correctData(Block block) {
-      BlockData newData = data;
+    private BlockState correctData(Block block) {
+      BlockState newData = state;
       if (fixWater) {
-        Material mat = WorldUtil.isInfiniteWater(block) ? Material.WATER : Material.AIR;
-        Block above = block.getRelative(BlockFace.UP);
-        if (mat == Material.AIR && MaterialUtil.isWater(above)) {
+        BlockType mat = WorldUtil.isInfiniteWater(block) ? BlockType.WATER : BlockType.AIR;
+        Block above = block.offset(Direction.UP);
+        if (mat == BlockType.AIR && MaterialUtil.isWater(above)) {
           newData = calculateWaterData(above);
         } else {
-          newData = mat.createBlockData();
+          newData = mat.defaultState();
         }
       }
-      if (block.getBlockData() instanceof Waterlogged waterData) {
-        if (waterData.isWaterlogged() && newData.getMaterial().isAir()) {
-          waterData.setWaterlogged(false);
-          return waterData;
-        } else if (!waterData.isWaterlogged() && newData.getMaterial() == Material.WATER) {
-          waterData.setWaterlogged(true);
-          return waterData;
+      BlockState old = block.state();
+      var waterlogged = old.property(StateProperty.WATERLOGGED);
+      if (waterlogged != null) {
+        if (waterlogged && newData.type().isAir()) {
+          return old.withProperty(StateProperty.WATERLOGGED, false);
+        } else if (!waterlogged && newData.type() == BlockType.WATER) {
+          return old.withProperty(StateProperty.WATERLOGGED, true);
         }
       }
       return newData;
     }
 
     public Optional<TempBlock> build(Block block) {
-      if (block.getState(false) instanceof TileState) {
+      if (block.world().isTileEntity(block)) {
         return Optional.empty();
       }
-      BlockData current = block.getBlockData();
-      BlockData newData = correctData(block);
+      BlockState current = block.state();
+      BlockState newData = correctData(block);
       if (current.matches(newData)) {
         return Optional.empty();
       }
@@ -367,7 +374,7 @@ public final class TempBlock extends TemporaryBase {
       TempBlock tb = MANAGER.get(block).orElse(null);
       if (tb != null) {
         TempBlockState first = tb.snapshots.peekFirst();
-        if (first != null && newData.matches(first.state.getBlockData())) {
+        if (first != null && newData.matches(first.state)) {
           tb.revertFully();
         }
         if (tb.reverted || tb.snapshots.isEmpty()) {
@@ -375,7 +382,7 @@ public final class TempBlock extends TemporaryBase {
           return Optional.empty();
         }
         tb.addState(newData, ticks, this);
-        MANAGER.reschedule(block, ticks);
+        wheel.schedule(tb, ticks);
         return Optional.of(tb);
       }
       TempBlock result = new TempBlock(block, newData, ticks, this);

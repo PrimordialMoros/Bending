@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,24 +19,16 @@
 
 package me.moros.bending.util;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
-import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.event.EventBus;
-import me.moros.bending.event.VelocityEvent;
-import me.moros.bending.model.ability.Ability;
-import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.util.collision.AABBUtil;
-import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionEffectType.Category;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.potion.Potion;
+import me.moros.bending.platform.potion.PotionEffect;
 
 /**
  * Utility class with useful {@link Entity} related methods.
@@ -47,26 +39,6 @@ public final class EntityUtil {
   }
 
   /**
-   * Set an entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
-   * @param ability the ability the causes this velocity change
-   * @param entity the target entity
-   * @param velocity the new velocity
-   * @return whether the new velocity was successfully applied
-   */
-  public static boolean applyVelocity(Ability ability, Entity entity, Vector3d velocity) {
-    if (entity instanceof LivingEntity livingEntity) {
-      VelocityEvent event = EventBus.INSTANCE.postVelocityEvent(ability.user(), livingEntity, ability.description(), velocity);
-      if (!event.isCancelled()) {
-        entity.setVelocity(event.velocity().clampVelocity());
-        return true;
-      }
-      return false;
-    }
-    entity.setVelocity(velocity.clampVelocity());
-    return true;
-  }
-
-  /**
    * Check if a user is against a wall made of blocks matching the given predicate.
    * <p>Note: Passable blocks and barriers are ignored.
    * @param entity the entity to check
@@ -74,10 +46,10 @@ public final class EntityUtil {
    * @return whether the user is against a wall
    */
   public static boolean isAgainstWall(Entity entity, Predicate<Block> predicate) {
-    Block origin = entity.getLocation().getBlock();
-    for (BlockFace face : WorldUtil.SIDES) {
-      Block relative = origin.getRelative(face);
-      if (relative.isPassable() || relative.getType() == Material.BARRIER) {
+    Block origin = entity.block();
+    for (Direction face : WorldUtil.SIDES) {
+      Block relative = origin.offset(face);
+      if (!relative.type().isCollidable() || relative.type() == BlockType.BARRIER) {
         continue;
       }
       if (predicate.test(relative)) {
@@ -87,96 +59,26 @@ public final class EntityUtil {
     return false;
   }
 
-  /**
-   * Accurately checks if an entity is standing on ground using {@link AABB}.
-   * @param entity the entity to check
-   * @return true if entity standing on ground, false otherwise
-   */
-  public static boolean isOnGround(Entity entity) {
-    if (!(entity instanceof Player)) {
-      return entity.isOnGround();
-    }
-    AABB entityBounds = AABBUtil.entityBounds(entity).grow(Vector3d.of(0, 0.05, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.1, -1), Vector3d.of(1, 0.1, 1)).at(Vector3d.from(entity.getLocation()));
-    for (Block block : WorldUtil.nearbyBlocks(entity.getWorld(), floorBounds, b -> !b.isPassable())) {
-      if (entityBounds.intersects(AABBUtil.blockBounds(block))) {
-        return true;
-      }
-    }
-    return false;
-  }
+  private static final Set<PotionEffect> BENEFICIAL = Set.of(
+    PotionEffect.SPEED, PotionEffect.HASTE, PotionEffect.STRENGTH, PotionEffect.INSTANT_HEALTH, PotionEffect.JUMP_BOOST,
+    PotionEffect.REGENERATION, PotionEffect.RESISTANCE, PotionEffect.FIRE_RESISTANCE, PotionEffect.WATER_BREATHING,
+    PotionEffect.INVISIBILITY, PotionEffect.NIGHT_VISION, PotionEffect.HEALTH_BOOST, PotionEffect.ABSORPTION,
+    PotionEffect.SATURATION, PotionEffect.LUCK, PotionEffect.SLOW_FALLING, PotionEffect.CONDUIT_POWER, PotionEffect.DOLPHINS_GRACE
+  );
 
-  /**
-   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
-   * By default, it ignores all passable materials except liquids.
-   * @param entity the entity to check
-   * @return the distance in blocks between the entity and ground or the max world height.
-   * @see #distanceAboveGround(Entity, double)
-   */
-  public static double distanceAboveGround(Entity entity) {
-    int minHeight = entity.getWorld().getMinHeight();
-    int realMax = entity.getWorld().getMaxHeight() - minHeight;
-    return distanceAboveGround(entity, realMax);
-  }
-
-  /**
-   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
-   * By default, it ignores all passable materials except liquids.
-   * @param entity the entity to check
-   * @param maxHeight the maximum height to check
-   * @return the distance in blocks between the entity and ground or the max height.
-   */
-  public static double distanceAboveGround(Entity entity, double maxHeight) {
-    int minHeight = entity.getWorld().getMinHeight();
-    AABB entityBounds = AABBUtil.entityBounds(entity).grow(Vector3d.of(0, maxHeight, 0));
-    Block origin = entity.getLocation().getBlock();
-    for (int i = 0; i < maxHeight; i++) {
-      Block check = origin.getRelative(BlockFace.DOWN, i);
-      if (check.getY() <= minHeight) {
-        break;
-      }
-      AABB checkBounds = check.isLiquid() ? AABB.BLOCK_BOUNDS.at(Vector3d.from(check)) : AABBUtil.blockBounds(check);
-      if (checkBounds.intersects(entityBounds)) {
-        return Math.max(0, entity.getBoundingBox().getMinY() - checkBounds.max.y());
-      }
-    }
-    return maxHeight;
-  }
-
-  /**
-   * Calculates a vector at the center of the given entity using its height.
-   * @param entity the entity to get the vector for
-   * @return the resulting vector
-   */
-  public static Vector3d entityCenter(Entity entity) {
-    return Vector3d.from(entity.getLocation()).add(0, entity.getHeight() / 2, 0);
-  }
-
-  /**
-   * Check if entity is submerged underwater.
-   * @param entity the entity to check
-   * @return the result
-   */
-  public static boolean underWater(Entity entity) {
-    return entity.isInWaterOrBubbleColumn() && NativeAdapter.instance().eyeInWater(entity);
-  }
-
-  /**
-   * Check if entity is submerged under lava.
-   * @param entity the entity to check
-   * @return the result
-   */
-  public static boolean underLava(Entity entity) {
-    return entity.isInLava() && NativeAdapter.instance().eyeInLava(entity);
-  }
+  private static final Set<PotionEffect> HARMFUL = Set.of(
+    PotionEffect.UNLUCK, PotionEffect.SLOWNESS, PotionEffect.LEVITATION, PotionEffect.HUNGER, PotionEffect.WEAKNESS,
+    PotionEffect.POISON, PotionEffect.WITHER, PotionEffect.BLINDNESS, PotionEffect.NAUSEA, PotionEffect.INSTANT_DAMAGE,
+    PotionEffect.MINING_FATIGUE
+  );
 
   /**
    * Removes any negative potion effects the entity may have.
    * @param entity the entity to process
    */
   public static void removeNegativeEffects(LivingEntity entity) {
-    entity.getActivePotionEffects().stream().map(PotionEffect::getType)
-      .filter(t -> t.getEffectCategory() == Category.HARMFUL).forEach(entity::removePotionEffect);
+    entity.activePotions().stream().map(Potion::effect)
+      .filter(HARMFUL::contains).forEach(entity::removePotion);
   }
 
   /**
@@ -188,12 +90,12 @@ public final class EntityUtil {
    * @param amplifier the potion effect amplifier starting from 0
    * @return if a new potion effect was added, false otherwise
    */
-  public static boolean tryAddPotion(Entity entity, PotionEffectType type, int duration, int amplifier) {
-    if (amplifier > 0 && duration > 0 && entity.isValid() && entity instanceof LivingEntity livingEntity) {
-      int minDuration = type.getEffectCategory() == Category.BENEFICIAL ? 20 : duration;
-      PotionEffect effect = livingEntity.getPotionEffect(type);
-      if (effect == null || effect.getDuration() < minDuration || effect.getAmplifier() < amplifier) {
-        livingEntity.addPotionEffect(new PotionEffect(type, duration, amplifier, true, false));
+  public static boolean tryAddPotion(Entity entity, PotionEffect type, int duration, int amplifier) {
+    if (amplifier > 0 && duration > 0 && entity.valid() && entity instanceof LivingEntity livingEntity) {
+      int minDuration = BENEFICIAL.contains(type) ? 20 : duration;
+      Potion potion = livingEntity.potion(type);
+      if (potion == null || potion.duration() < minDuration || potion.amplifier() < amplifier) {
+        livingEntity.addPotion(type.builder().duration(duration).amplifier(amplifier).build());
         return true;
       }
     }
@@ -209,11 +111,11 @@ public final class EntityUtil {
    * @param maxAmplifier the maximum potion effect amplifier starting from 0
    * @return if the potion effect was removed, false otherwise
    */
-  public static boolean tryRemovePotion(Entity entity, PotionEffectType type, int maxDuration, int maxAmplifier) {
-    if (entity.isValid() && entity instanceof LivingEntity livingEntity) {
-      PotionEffect effect = livingEntity.getPotionEffect(type);
-      if (effect != null && effect.getDuration() <= maxDuration && effect.getAmplifier() <= maxAmplifier) {
-        livingEntity.removePotionEffect(type);
+  public static boolean tryRemovePotion(Entity entity, PotionEffect type, int maxDuration, int maxAmplifier) {
+    if (entity.valid() && entity instanceof LivingEntity livingEntity) {
+      Potion potion = livingEntity.potion(type);
+      if (potion != null && potion.duration() <= maxDuration && potion.amplifier() <= maxAmplifier) {
+        livingEntity.removePotion(type);
         return true;
       }
     }

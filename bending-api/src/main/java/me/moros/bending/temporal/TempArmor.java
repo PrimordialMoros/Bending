@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,9 +19,6 @@
 
 package me.moros.bending.temporal;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,38 +26,38 @@ import java.util.UUID;
 
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Platform;
+import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.item.ArmorContents;
+import me.moros.bending.platform.item.Inventory;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.tasker.TimerWheel;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TempArmor extends TemporaryBase {
-  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>("Armor");
+public final class TempArmor extends Temporary {
+  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
 
   private final LivingEntity entity;
-  private final ItemStack[] snapshot;
+  private final ArmorContents<ItemSnapshot> snapshot;
   private boolean reverted = false;
 
-  private TempArmor(LivingEntity entity, ItemStack[] armor, long duration) {
-    super();
-    EntityEquipment equipment = Objects.requireNonNull(entity.getEquipment());
+  private TempArmor(LivingEntity entity, ArmorContents<ItemSnapshot> armor, int ticks) {
+    Inventory equipment = Objects.requireNonNull(entity.inventory());
     this.entity = entity;
-    this.snapshot = copyFilteredArmor(equipment.getArmorContents());
-    equipment.setArmorContents(armor);
-    MANAGER.addEntry(entity.getUniqueId(), this, Temporary.toTicks(duration));
+    this.snapshot = equipment.armor().map(TempArmor::filter);
+    equipment.equipArmor(armor);
+    MANAGER.addEntry(entity.uuid(), this, ticks);
   }
 
   /**
    * @return an unmodifiable view of the snapshot
    */
-  public Collection<@Nullable ItemStack> snapshot() {
-    return Collections.unmodifiableCollection(Arrays.asList(snapshot));
+  public ArmorContents<ItemSnapshot> snapshot() {
+    return snapshot;
   }
 
   @Override
@@ -69,8 +66,8 @@ public final class TempArmor extends TemporaryBase {
       return false;
     }
     reverted = true;
-    Objects.requireNonNull(entity.getEquipment()).setArmorContents(snapshot);
-    MANAGER.removeEntry(entity.getUniqueId());
+    Objects.requireNonNull(entity.inventory()).equipArmor(snapshot);
+    MANAGER.removeEntry(entity.uuid());
     return true;
   }
 
@@ -80,53 +77,53 @@ public final class TempArmor extends TemporaryBase {
 
   public static Builder leather() {
     return builder()
-      .head(Material.LEATHER_HELMET)
-      .chest(Material.LEATHER_CHESTPLATE)
-      .legs(Material.LEATHER_LEGGINGS)
-      .boots(Material.LEATHER_BOOTS);
+      .head(Item.LEATHER_HELMET)
+      .chest(Item.LEATHER_CHESTPLATE)
+      .legs(Item.LEATHER_LEGGINGS)
+      .boots(Item.LEATHER_BOOTS);
   }
 
   public static Builder iron() {
     return builder()
-      .head(Material.IRON_HELMET)
-      .chest(Material.IRON_CHESTPLATE)
-      .legs(Material.IRON_LEGGINGS)
-      .boots(Material.IRON_BOOTS);
+      .head(Item.IRON_HELMET)
+      .chest(Item.IRON_CHESTPLATE)
+      .legs(Item.IRON_LEGGINGS)
+      .boots(Item.IRON_BOOTS);
   }
 
   public static Builder gold() {
     return builder()
-      .head(Material.GOLDEN_HELMET)
-      .chest(Material.GOLDEN_CHESTPLATE)
-      .legs(Material.GOLDEN_LEGGINGS)
-      .boots(Material.GOLDEN_BOOTS);
+      .head(Item.GOLDEN_HELMET)
+      .chest(Item.GOLDEN_CHESTPLATE)
+      .legs(Item.GOLDEN_LEGGINGS)
+      .boots(Item.GOLDEN_BOOTS);
   }
 
   public static final class Builder {
-    private final Material[] armor;
+    private final Item[] armor;
     private long duration = 30000;
 
     private Builder() {
-      this.armor = new Material[4];
+      this.armor = new Item[4];
     }
 
-    public Builder head(@Nullable Material material) {
-      armor[3] = material;
+    public Builder head(@Nullable Item material) {
+      armor[0] = material;
       return this;
     }
 
-    public Builder chest(@Nullable Material material) {
-      armor[2] = material;
-      return this;
-    }
-
-    public Builder legs(@Nullable Material material) {
+    public Builder chest(@Nullable Item material) {
       armor[1] = material;
       return this;
     }
 
-    public Builder boots(@Nullable Material material) {
-      armor[0] = material;
+    public Builder legs(@Nullable Item material) {
+      armor[2] = material;
+      return this;
+    }
+
+    public Builder boots(@Nullable Item material) {
+      armor[3] = material;
       return this;
     }
 
@@ -137,38 +134,27 @@ public final class TempArmor extends TemporaryBase {
 
     public Optional<TempArmor> build(User user) {
       Objects.requireNonNull(user);
-      if (MANAGER.isTemp(user.uuid()) || user.entity().getEquipment() == null) {
+      if (MANAGER.isTemp(user.uuid()) || user.inventory() == null) {
         return Optional.empty();
       }
-      ItemStack[] armorItems = new ItemStack[4];
+      ItemSnapshot[] armorItems = new ItemSnapshot[4];
       for (int i = 0; i < 4; i++) {
-        Material mat = armor[i];
+        Item mat = armor[i];
         if (mat != null) {
-          ItemStack item = new ItemStack(mat);
-          ItemMeta meta = item.getItemMeta();
-          meta.displayName(Component.text("Bending Armor"));
-          meta.lore(List.of(Component.text("Temporary")));
-          meta.setUnbreakable(true);
-          Metadata.addEmptyKey(meta, Metadata.NSK_ARMOR);
-          item.setItemMeta(meta);
-          armorItems[i] = item;
+          ItemSnapshot builtItem = Platform.instance().factory().itemBuilder(mat)
+            .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
+            .unbreakable(true).meta(Metadata.ARMOR_KEY).build();
+          armorItems[i] = builtItem;
+        } else {
+          ItemSnapshot.AIR.get();
         }
       }
-      return Optional.of(new TempArmor(user.entity(), armorItems, duration));
+      var newArmor = ArmorContents.of(armorItems[0], armorItems[1], armorItems[2], armorItems[3]);
+      return Optional.of(new TempArmor(user.entity(), newArmor, MANAGER.fromMillis(duration, 600)));
     }
   }
 
-  private static ItemStack[] copyFilteredArmor(ItemStack[] armorItems) {
-    int length = armorItems.length;
-    ItemStack[] copy = new ItemStack[length];
-    for (int i = 0; i < length; i++) {
-      ItemStack item = armorItems[i];
-      if (item != null && item.getItemMeta() != null) {
-        if (!Metadata.hasKey(item.getItemMeta(), Metadata.NSK_ARMOR)) {
-          copy[i] = item;
-        }
-      }
-    }
-    return copy;
+  private static ItemSnapshot filter(ItemSnapshot item) {
+    return !item.hasPersistentMetadata(Metadata.ARMOR_KEY) ? item : ItemSnapshot.AIR.get();
   }
 }

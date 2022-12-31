@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,22 +23,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 
 import me.moros.bending.model.Element;
-import me.moros.bending.model.key.Key;
-import me.moros.bending.model.key.Keyed;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.translation.Translatable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * AbilityDescription is immutable and thread-safe.
  * Assume that all collections returning AbilityDescription are also immutable
  */
-public class AbilityDescription implements Keyed {
+public class AbilityDescription implements Keyed, Translatable {
   public static final String NAMESPACE = "bending.ability";
 
   private final Key key;
@@ -66,7 +69,7 @@ public class AbilityDescription implements Keyed {
     bypassCooldown = builder.bypassCooldown;
     displayName = Component.text(name, element.color());
     hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
-    key = Key.create(NAMESPACE, name);
+    key = Key.key(NAMESPACE, name.toLowerCase(Locale.ROOT));
   }
 
   public String name() {
@@ -121,8 +124,8 @@ public class AbilityDescription implements Keyed {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    AbilityDescription desc = (AbilityDescription) obj;
-    return name().equals(desc.name()) && element() == desc.element();
+    AbilityDescription other = (AbilityDescription) obj;
+    return name().equals(other.name()) && element() == other.element();
   }
 
   @Override
@@ -135,8 +138,13 @@ public class AbilityDescription implements Keyed {
   }
 
   @Override
-  public Key key() {
+  public @NonNull Key key() {
     return key;
+  }
+
+  @Override
+  public @NonNull String translationKey() {
+    return NAMESPACE + "." + key().value();
   }
 
   /**
@@ -180,7 +188,7 @@ public class AbilityDescription implements Keyed {
         }
         AbilityDescription desc = sequenceStep.ability();
         Activation action = sequenceStep.activation();
-        String key = action.key().toString();
+        String key = action.translationKey();
         if (action == Activation.SNEAK && i + 1 < steps.size()) {
           // Check if the next instruction is to release sneak.
           SequenceStep next = steps.get(i + 1);

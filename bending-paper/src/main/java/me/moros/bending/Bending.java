@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,10 +19,16 @@
 
 package me.moros.bending;
 
+import java.io.InputStream;
 import java.util.Locale;
+import java.util.function.Function;
 
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.paper.PaperCommandManager;
+import io.leangen.geantyref.TypeToken;
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.command.CommandManager;
+import me.moros.bending.command.BendingCommandManager;
+import me.moros.bending.command.parser.UserParser;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.GameImpl;
 import me.moros.bending.hook.LuckPermsHook;
@@ -30,22 +36,34 @@ import me.moros.bending.hook.placeholder.BendingExpansion;
 import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.PlayerListener;
+import me.moros.bending.listener.WorldListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.storage.BendingStorage;
+import me.moros.bending.model.user.User;
+import me.moros.bending.platform.BukkitPlatform;
+import me.moros.bending.platform.Platform;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.protection.WorldGuardFlag;
-import me.moros.bending.registry.Registries;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.TextUtil;
-import me.moros.bending.util.metadata.Metadata;
+import me.moros.tasker.bukkit.BukkitExecutor;
+import me.moros.tasker.executor.CompositeExecutor;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-public class Bending extends JavaPlugin {
+public class Bending extends JavaPlugin implements BendingPlugin {
+  private static Bending plugin;
   private Logger logger;
   private String author;
   private String version;
@@ -66,7 +84,7 @@ public class Bending extends JavaPlugin {
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
 
-    storage = StorageFactory.createInstance(this);
+    storage = StorageFactory.createInstance(this, dir);
     new AbilityInitializer();
 
     if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
@@ -76,16 +94,16 @@ public class Bending extends JavaPlugin {
 
   @Override
   public void onEnable() {
+    plugin = this;
     if (storage == null) {
       logger.error("Unable to establish database connection!");
       getServer().getPluginManager().disablePlugin(this);
       return;
     }
     new Metrics(this, 8717);
+    Tasker.inject(CompositeExecutor.of(new BukkitExecutor(this)));
+    Platform.inject(new BukkitPlatform(this));
     loadAdapter();
-    Metadata.inject(this);
-    Tasker.INSTANCE.inject(this);
-
     new ProtectionInitializer(getServer().getPluginManager(), configManager);
     BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
     game = new GameImpl(this, configManager, storage);
@@ -95,9 +113,13 @@ public class Bending extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new BlockListener(game), this);
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
     getServer().getPluginManager().registerEvents(new PlayerListener(this, game), this);
+    getServer().getPluginManager().registerEvents(new WorldListener(this, game), this);
 
     try {
-      new CommandManager(this, game);
+      PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(this, CommandExecutionCoordinator.simpleCoordinator());
+      manager.registerAsynchronousCompletions();
+      manager.parserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser<>());
+      new BendingCommandManager<>(this, game, Player.class, manager);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       getServer().getPluginManager().disablePlugin(this);
@@ -130,7 +152,8 @@ public class Bending extends JavaPlugin {
     try {
       Class<?> cls = Class.forName(className);
       if (!cls.isSynthetic() && NativeAdapter.class.isAssignableFrom(cls)) {
-        return (NativeAdapter) cls.getDeclaredConstructor().newInstance();
+        Function<BlockState, BlockData> dataMapper = PlatformAdapter::toBukkitData;
+        return (NativeAdapter) cls.getDeclaredConstructor(Function.class).newInstance(dataMapper);
       }
     } catch (Exception ignore) {
     }
@@ -175,19 +198,32 @@ public class Bending extends JavaPlugin {
     }
   }
 
+  @Override
   public String author() {
     return author;
   }
 
+  @Override
   public String version() {
     return version;
   }
 
+  @Override
   public Logger logger() {
     return logger;
   }
 
+  @Override
   public TranslationManager translationManager() {
     return translationManager;
+  }
+
+  @Override
+  public @Nullable InputStream resource(String fileName) {
+    return getResource(fileName);
+  }
+
+  public static @MonotonicNonNull Bending plugin() {
+    return plugin;
   }
 }

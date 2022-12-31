@@ -1,0 +1,82 @@
+/*
+ * Copyright 2020-2023 Moros
+ *
+ * This file is part of Bending.
+ *
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.ability.earth.passive;
+
+import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.ability.AbilityInstance;
+import me.moros.bending.model.ability.Activation;
+import me.moros.bending.model.predicate.Policies;
+import me.moros.bending.model.predicate.RemovalPolicy;
+import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.particle.Particle;
+import me.moros.bending.platform.potion.PotionEffect;
+import me.moros.bending.util.EntityUtil;
+import me.moros.bending.util.material.EarthMaterials;
+import me.moros.math.Vector3d;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
+public class EarthCling extends AbilityInstance {
+  private User user;
+  private RemovalPolicy removalPolicy;
+
+  public EarthCling(AbilityDescription desc) {
+    super(desc);
+  }
+
+  @Override
+  public boolean activate(User user, Activation method) {
+    this.user = user;
+    loadConfig();
+    removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();
+    return true;
+  }
+
+  @Override
+  public void loadConfig() {
+  }
+
+  @Override
+  public UpdateResult update() {
+    if (removalPolicy.test(user, description()) || !user.selectedAbilityName().equals("EarthGlove") || user.isOnGround()) {
+      return UpdateResult.CONTINUE;
+    }
+    if (EntityUtil.isAgainstWall(user.entity(), b -> EarthMaterials.isEarthbendable(user, b) && !b.type().isLiquid())) {
+      EntityUtil.tryAddPotion(user.entity(), PotionEffect.SLOW_FALLING, 10, 0);
+      //noinspection ConstantConditions
+      if (!user.onCooldown(user.selectedAbility())) {
+        user.applyVelocity(this, Vector3d.ZERO);
+        user.fallDistance(0);
+      } else {
+        if (user.velocity().y() < 0) {
+          Particle.CRIT.builder(user.eyeLocation()).count(2).offset(0.05, 0.4, 0.05).spawn(user.world());
+          BlockType.STONE.asParticle(user.eyeLocation()).count(3).offset(0.1, 0.4, 0.1).spawn(user.world());
+        }
+      }
+    }
+    return UpdateResult.CONTINUE;
+  }
+
+  @Override
+  public @MonotonicNonNull User user() {
+    return user;
+  }
+}
+

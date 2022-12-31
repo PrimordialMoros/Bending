@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,6 +19,7 @@
 
 package me.moros.bending.model.collision.geometry;
 
+import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
 /**
@@ -47,7 +48,7 @@ public interface Collider {
    * @param point the new center position
    * @return the new collider
    */
-  Collider at(Vector3d point);
+  Collider at(Position point);
 
   /**
    * Calculate the half extents for this collider.

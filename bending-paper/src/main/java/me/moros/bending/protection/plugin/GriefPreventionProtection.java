@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,26 +20,29 @@
 package me.moros.bending.protection.plugin;
 
 import me.moros.bending.model.protection.AbstractProtection;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.BukkitPlayer;
+import me.moros.bending.platform.entity.LivingEntity;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 
 public final class GriefPreventionProtection extends AbstractProtection {
   private final GriefPrevention griefPrevention;
 
   public GriefPreventionProtection(Plugin plugin) {
-    super(plugin);
+    super(plugin.getName());
     griefPrevention = (GriefPrevention) plugin;
   }
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
-    if (entity instanceof Player player) {
-      String reason = griefPrevention.allowBuild(player, block.getLocation());
-      Claim claim = griefPrevention.dataStore.getClaimAt(block.getLocation(), true, null);
+    if (entity instanceof BukkitPlayer player) {
+      var loc = new Location(PlatformAdapter.toBukkitWorld(block.world()), block.blockX(), block.blockY(), block.blockZ());
+      String reason = griefPrevention.allowBuild(player.handle(), loc);
+      Claim claim = griefPrevention.dataStore.getClaimAt(loc, true, null);
       return reason == null || claim == null || claim.siegeData != null;
     }
     return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -24,11 +24,11 @@ import java.util.function.Function;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.protection.Protection;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.protection.plugin.LWCProtection;
 import me.moros.bending.protection.plugin.TownyProtection;
 import me.moros.bending.protection.plugin.WorldGuardProtection;
-import me.moros.bending.registry.Registries;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.spongepowered.configurate.CommentedConfigurationNode;

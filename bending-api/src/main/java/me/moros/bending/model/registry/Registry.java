@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,7 +22,10 @@ package me.moros.bending.model.registry;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import me.moros.bending.model.key.Namespaced;
+import me.moros.bending.model.registry.RegistryBuilder.IntermediaryRegistryBuilder;
+import me.moros.bending.util.KeyUtil;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -30,7 +33,28 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <K> the type of keys for this registry
  * @param <V> the type of values for this registry
  */
-public interface Registry<K, V> extends Namespaced, Iterable<V> {
+public interface Registry<K, V> extends Container<V> {
+  /**
+   * Check if the registry contains a value for the specified key.
+   * @param key the key to check
+   * @return true if the key has an associated value, false otherwise
+   */
+  boolean containsKey(K key);
+
+  /**
+   * Get the value for the specified key.
+   * @param key the key to check
+   * @return the value associated with the given key or null if not found
+   */
+  @Nullable V get(K key);
+
+  /**
+   * Get the value for the specified key.
+   * @param input the key to check
+   * @return the value associated with the given key or null if not found
+   */
+  @Nullable V fromString(String input);
+
   /**
    * Registers a value if it doesn't exist.
    * @param value the value to register
@@ -57,40 +81,6 @@ public interface Registry<K, V> extends Namespaced, Iterable<V> {
   }
 
   /**
-   * Check if the registry contains a value for the specified key.
-   * @param key the key to check
-   * @return true if the key has an associated value, false otherwise
-   */
-  boolean containsKey(K key);
-
-  /**
-   * Check if the registry contains the specified value.
-   * @param value the value to check
-   * @return true if that value is registered, false otherwise
-   */
-  boolean containsValue(V value);
-
-  /**
-   * Get the value for the specified key.
-   * @param key the key to check
-   * @return the value associated with the given key or null if not found
-   */
-  @Nullable V get(K key);
-
-  /**
-   * Get the value for the specified key.
-   * @param key the key to check
-   * @return the value associated with the given key or null if not found
-   */
-  @Nullable V fromString(String key);
-
-  /**
-   * Check the size of this registry.
-   * @return the amount of values this registry holds
-   */
-  int size();
-
-  /**
    * Lock this registry to prevent further modifications.
    */
   void lock();
@@ -100,12 +90,6 @@ public interface Registry<K, V> extends Namespaced, Iterable<V> {
    * @return true if locked, false otherwise
    */
   boolean isLocked();
-
-  /**
-   * Stream all the values contained in this registry.
-   * @return a stream of this registry's values
-   */
-  Stream<V> stream();
 
   /**
    * Stream all the keys in this registry.
@@ -118,4 +102,20 @@ public interface Registry<K, V> extends Namespaced, Iterable<V> {
    * @return an immutable collection of this registry's keys
    */
   Set<K> keys();
+
+  static <V> IntermediaryRegistryBuilder<V> builder(String namespace) {
+    return new IntermediaryRegistryBuilder<>(namespace);
+  }
+
+  static <V extends Keyed> RegistryBuilder<Key, V> simpleBuilder(String namespace) {
+    return Registry.<V>builder(namespace).inverseMapper(Keyed::key).keyMapper(KeyUtil.stringToKey(namespace));
+  }
+
+  static <V extends Keyed> RegistryBuilder<Key, V> vanillaBuilder(String namespace) {
+    return Registry.<V>builder(namespace).inverseMapper(Keyed::key).keyMapper(KeyUtil.VANILLA_KEY_MAPPER);
+  }
+
+  static <V extends Keyed> Registry<Key, V> vanilla(String namespace) {
+    return Registry.<V>vanillaBuilder(namespace).build();
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,9 +19,10 @@
 
 package me.moros.bending.model.manager;
 
+import java.util.UUID;
+
 import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.model.storage.BendingStorage;
-import org.bukkit.World;
 
 /**
  * Holds all the needed bending sub-systems.
@@ -35,7 +36,7 @@ public interface Game {
 
   FlightManager flightManager();
 
-  AbilityManager abilityManager(World world);
+  AbilityManager abilityManager(UUID world);
 
   WorldManager worldManager();
 

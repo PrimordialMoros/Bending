@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,10 +19,10 @@
 
 package me.moros.bending.model.protection;
 
-import me.moros.bending.model.key.Keyed;
-import me.moros.bending.registry.Registries;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
+import me.moros.bending.model.registry.Registries;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.LivingEntity;
+import net.kyori.adventure.key.Keyed;
 
 /**
  * Interface that models a region/block protection plugin.

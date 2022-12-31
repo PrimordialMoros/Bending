@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,6 +21,7 @@ package me.moros.bending.model.user;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,39 +41,37 @@ import me.moros.bending.model.board.Board;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.predicate.BendingConditions;
 import me.moros.bending.model.preset.Preset;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.profile.BenderData;
-import me.moros.bending.registry.Registries;
+import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.entity.player.Player;
+import me.moros.bending.platform.property.BooleanProperty;
 import me.moros.bending.temporal.Cooldown;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Base {@link User} implementation for all living entities.
  */
 public sealed class BendingUser implements User permits BendingPlayer {
-  private final Game game;
   private final LivingEntity entity;
-  private final DataHolder container;
+  private final Game game;
+  private final DataContainer container;
   private final Set<Element> elements;
+  private final Map<BooleanProperty, Boolean> properties;
   private final Map<String, TriState> virtualPermissions;
   private final Collection<AttributeModifier> attributes;
   private final AbilityDescription[] slots;
   private final BiPredicate<User, AbilityDescription> condition;
 
-  private boolean sneaking = false;
-  private boolean sprinting = false;
-  private boolean allowFlight = false;
-  private boolean flying = false;
-
   private boolean canBend = true;
   private int index = 1;
 
   protected BendingUser(Game game, LivingEntity entity, BenderData data) {
-    this.game = game;
     this.entity = entity;
-    container = new DataContainer();
+    this.game = game;
+    container = new DataContainerImpl();
+    properties = new IdentityHashMap<>();
     virtualPermissions = new ConcurrentHashMap<>();
     attributes = ConcurrentHashMap.newKeySet();
     slots = new AbilityDescription[9];
@@ -87,8 +86,13 @@ public sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
-  public Game game() {
-    return game;
+  public TriState checkProperty(BooleanProperty property) {
+    return TriState.byBoolean(properties.computeIfAbsent(property, p -> false));
+  }
+
+  @Override
+  public void setProperty(BooleanProperty property, boolean value) {
+    properties.put(property, value);
   }
 
   @Override
@@ -97,47 +101,12 @@ public sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
-  public boolean sneaking() {
-    return sneaking;
+  public Game game() {
+    return game;
   }
 
   @Override
-  public void sneaking(boolean sneaking) {
-    this.sneaking = sneaking;
-  }
-
-  @Override
-  public boolean sprinting() {
-    return sprinting;
-  }
-
-  @Override
-  public void sprinting(boolean sprinting) {
-    this.sprinting = sprinting;
-  }
-
-  @Override
-  public boolean allowFlight() {
-    return allowFlight;
-  }
-
-  @Override
-  public void allowFlight(boolean allow) {
-    this.allowFlight = allow;
-  }
-
-  @Override
-  public boolean flying() {
-    return flying;
-  }
-
-  @Override
-  public void flying(boolean flying) {
-    this.flying = flying;
-  }
-
-  @Override
-  public DataHolder store() {
+  public DataContainer store() {
     return container;
   }
 
@@ -187,12 +156,12 @@ public sealed class BendingUser implements User permits BendingPlayer {
   }
 
   private void validateAbilities() {
-    game.abilityManager(world()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
+    game.abilityManager(worldUid()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
     validatePassives();
   }
 
   private void validatePassives() {
-    game.abilityManager(world()).createPassives(this);
+    game.abilityManager(worldUid()).createPassives(this);
   }
 
   @Override
@@ -285,7 +254,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   public boolean toggleBending() {
     canBend ^= true;
     if (!canBend) {
-      game.abilityManager(world()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+      game.abilityManager(worldUid()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
     }
     return canBend;
   }
@@ -348,20 +317,23 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
     if (obj instanceof BendingUser other) {
       return entity().equals(other.entity());
     }
-    return entity().equals(obj);
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return entity.hashCode();
+    return entity().hashCode();
   }
 
   public static Optional<User> createUser(Game game, LivingEntity entity, BenderData data) {
     Objects.requireNonNull(game);
-    if (Registries.BENDERS.containsKey(entity.getUniqueId()) || entity instanceof Player) {
+    if (Registries.BENDERS.containsKey(entity.uuid()) || entity instanceof Player) {
       return Optional.empty();
     }
     return Optional.of(new BendingUser(game, entity, data));

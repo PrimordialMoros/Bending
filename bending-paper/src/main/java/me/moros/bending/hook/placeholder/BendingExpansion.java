@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,9 +21,9 @@ package me.moros.bending.hook.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;

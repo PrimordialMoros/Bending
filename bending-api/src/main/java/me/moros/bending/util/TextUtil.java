@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -29,9 +29,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import me.moros.bending.model.key.Key;
 import me.moros.bending.model.registry.Registry;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -40,15 +39,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class TextUtil {
   private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
   private static final Pattern SPACE = Pattern.compile(" ");
-  private static final String[] CHAT_CODES;
-
-  static {
-    var arr = ChatColor.values();
-    CHAT_CODES = new String[arr.length];
-    for (ChatColor color : arr) {
-      CHAT_CODES[color.ordinal()] = color.toString();
-    }
-  }
 
   private TextUtil() {
   }
@@ -65,16 +55,6 @@ public final class TextUtil {
     }
     String output = NON_ALPHANUMERIC.matcher(input).replaceAll("").toLowerCase(Locale.ROOT);
     return output.length() > 16 ? output.substring(0, 16) : output;
-  }
-
-  /**
-   * Do not use legacy strings, this is only for scoreboards.
-   * @param slot the slot number
-   * @return a deterministic unique legacy code for the given slot
-   */
-  public static String generateInvisibleLegacyString(int slot) {
-    String hidden = CHAT_CODES[slot % CHAT_CODES.length];
-    return slot <= CHAT_CODES.length ? hidden : hidden + generateInvisibleLegacyString(slot - CHAT_CODES.length);
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,19 +22,14 @@ package me.moros.bending.model.ability.common.basic;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.ability.Updatable;
-import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.EntityUtil;
-import me.moros.bending.util.WorldUtil;
-import me.moros.bending.util.collision.AABBUtil;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 
-public abstract class AbstractRide implements Updatable {
-  private final User user;
+public abstract class AbstractRide extends AbstractFlight implements Updatable {
   private final HeightSmoother smoother;
 
   private final double speed;
@@ -44,7 +39,7 @@ public abstract class AbstractRide implements Updatable {
   protected Predicate<Block> predicate = x -> true;
 
   protected AbstractRide(User user, double speed, double targetHeight) {
-    this.user = user;
+    super(user);
     this.speed = speed;
     this.targetHeight = targetHeight;
     smoother = new HeightSmoother();
@@ -52,28 +47,29 @@ public abstract class AbstractRide implements Updatable {
 
   @Override
   public UpdateResult update() {
+    resetSprintAndFall();
     stuckCount = user.velocity().lengthSq() < 0.1 ? stuckCount + 1 : 0;
     if (stuckCount > 10 || isColliding()) {
       return UpdateResult.REMOVE;
     }
-    double height = EntityUtil.distanceAboveGround(user.entity(), 3.5);
+    double height = user.distanceAboveGround(targetHeight + 2);
+    flight.flying(height < targetHeight + 1);
     double smoothedHeight = smoother.add(height);
-    if (user.locBlock().isLiquid()) {
-      height = 0.5;
-    } else if (smoothedHeight > targetHeight) {
+    if (smoothedHeight > targetHeight) {
       return UpdateResult.REMOVE;
     }
-    Block check = user.location().subtract(0, height + 0.05, 0).toBlock(user.world());
+    if (user.block().type().isLiquid()) {
+      height = 0.5;
+    }
+    Block check = user.world().blockAt(user.location().subtract(0, height + 0.05, 0));
     if (!predicate.test(check)) {
       return UpdateResult.REMOVE;
     }
     double delta = getPrediction() - height;
-    double force = FastMath.clamp(0.3 * delta, -0.5, 0.5);
+    double force = FastMath.clamp(0.3 * delta, -1, 0.5);
     Vector3d velocity = user.direction().withY(0).normalize().multiply(speed).withY(force);
     affect(velocity);
-    user.entity().setFallDistance(0);
-
-    render(check.getBlockData());
+    render(check.state());
     postRender();
     return UpdateResult.CONTINUE;
   }
@@ -82,21 +78,24 @@ public abstract class AbstractRide implements Updatable {
     double playerSpeed = user.velocity().withY(0).length();
     Vector3d direction = user.direction().withY(0).normalize(Vector3d.ZERO).multiply(Math.max(speed, playerSpeed));
     Vector3d front = user.eyeLocation().subtract(0, 0.5, 0).add(direction);
-    Block block = front.toBlock(user.world());
-    return !MaterialUtil.isTransparentOrWater(block) || !block.isPassable();
+    Block block = user.world().blockAt(front);
+    return !MaterialUtil.isTransparentOrWater(block) || block.type().isCollidable();
   }
 
   private double getPrediction() {
     double playerSpeed = user.velocity().withY(0).length();
     Vector3d offset = user.direction().withY(0).normalize().multiply(Math.max(speed, playerSpeed) * 3);
-    AABB userBounds = AABBUtil.entityBounds(user.entity()).at(offset);
-    if (!WorldUtil.nearbyBlocks(user.world(), userBounds, block -> true, 1).isEmpty()) {
-      return targetHeight - 1;
+    if (user.world().nearbyBlocks(user.dimensions(user.location().add(offset)), block -> true, 1).isEmpty()) {
+      return Math.max(1.25, targetHeight - 2);
     }
-    return Math.max(1.25, targetHeight - 2);
+    return targetHeight - 1;
   }
 
-  protected abstract void render(BlockData data);
+  public void onDestroy() {
+    cleanup();
+  }
+
+  protected abstract void render(BlockState data);
 
   protected abstract void postRender();
 

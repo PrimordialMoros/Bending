@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -33,14 +33,12 @@ import java.util.stream.Collectors;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.particle.Particle;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.bending.util.Tasker;
 import me.moros.math.FastMath;
-import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.block.Block;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -53,7 +51,7 @@ public class Fracture implements Updatable {
   private long nextUpdateTime;
 
   protected <T extends Fracture> Fracture(Builder<T> builder) {
-    this.wall = builder.blocks.stream().sorted(Comparator.comparingInt(Block::getY)).collect(Collectors.toList());
+    this.wall = builder.blocks.stream().sorted(Comparator.comparingInt(Block::blockY)).collect(Collectors.toList());
     this.weakened = new HashSet<>();
     this.wallData = this.wall.stream().collect(Collectors.toMap(Function.identity(), k -> -1));
     this.fragileBuilder = builder.fragileBuilder;
@@ -73,15 +71,15 @@ public class Fracture implements Updatable {
     if (iterator.hasNext()) {
       Block block = iterator.next();
       int offset = 1;
-      int maxY = block.getY();
+      int maxY = block.blockY();
       while (block != null) {
         int y = ThreadLocalRandom.current().nextBoolean() ? maxY : maxY + offset;
-        if (block.getY() <= y && tryBreakBlock(block)) {
+        if (block.blockY() <= y && tryBreakBlock(block)) {
           iterator.remove();
-          TempBlock.builder(Material.MAGMA_BLOCK.createBlockData()).build(block);
+          TempBlock.builder(BlockType.MAGMA_BLOCK).build(block);
           weakened.add(block);
           wallData.remove(block);
-        } else if (block.getY() > maxY + offset) {
+        } else if (block.blockY() > maxY + offset) {
           break;
         }
         block = iterator.hasNext() ? iterator.next() : null;
@@ -91,7 +89,7 @@ public class Fracture implements Updatable {
       if (fragileBuilder != null) {
         FragileStructure structure = fragileBuilder.add(weakened).build();
         if (structure != null) {
-          Tasker.INSTANCE.sync(() -> FragileStructure.tryDamageStructure(weakened, 0, Ray.ZERO), 200);
+          Tasker.sync().submit(() -> FragileStructure.tryDamageStructure(weakened, 0, Ray.ZERO), 200);
         }
       }
       return UpdateResult.REMOVE;
@@ -103,9 +101,9 @@ public class Fracture implements Updatable {
     //noinspection ConstantConditions
     int progress = wallData.computeIfPresent(block, (k, v) -> v + 1);
     int particles = FastMath.floor(0.5 * progress);
-    ParticleUtil.of(Particle.LAVA, Vector3d.fromCenter(block)).count(particles).offset(0.4).spawn(block.getWorld());
+    Particle.LAVA.builder(block.center()).count(particles).offset(0.4).spawn(block.world());
     if (progress <= 9) {
-      NativeAdapter.instance().fakeBreak(block.getWorld(), Vector3d.fromCenter(block), (byte) progress);
+      NativeAdapter.instance().fakeBreak(block, (byte) progress);
       return false;
     }
     return true;

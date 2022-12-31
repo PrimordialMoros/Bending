@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -32,25 +32,23 @@ import me.moros.bending.BendingProperties;
 import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.sound.SoundEffect;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Entity;
-import org.bukkit.util.BoundingBox;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.index.qual.Positive;
 
 public class Pillar implements Updatable, Iterable<Block> {
   private final User user;
   private final Block origin;
-  private final BlockFace direction;
-  private final BlockFace opposite;
+  private final Direction direction;
   private final Collection<Block> pillarBlocks;
   private final Predicate<Block> predicate;
 
@@ -66,7 +64,6 @@ public class Pillar implements Updatable, Iterable<Block> {
     this.user = builder.user;
     this.origin = builder.origin;
     this.direction = builder.direction;
-    this.opposite = direction.getOppositeFace();
     this.length = builder.length;
     this.distance = builder.distance;
     this.interval = builder.interval;
@@ -82,11 +79,8 @@ public class Pillar implements Updatable, Iterable<Block> {
     if (currentDistance >= distance) {
       return UpdateResult.REMOVE;
     }
-
-    Block start = origin.getRelative(direction, currentDistance + 1);
-    Block finish = start.getRelative(opposite, length - 1);
-    BoundingBox box = BoundingBox.of(start, finish).expand(direction, 0.65);
-    AABB collider = new AABB(Vector3d.from(box.getMin()), Vector3d.from(box.getMax()));
+    Vector3d pos = origin.offset(direction.opposite(), length - currentDistance).center();
+    AABB collider = createPillarBox(pos, length + 0.35);
     CollisionUtil.handle(user, collider, this::onEntityHit, false, true); // Push entities
 
     long time = System.currentTimeMillis();
@@ -95,7 +89,7 @@ public class Pillar implements Updatable, Iterable<Block> {
     }
 
     nextUpdateTime = time + interval;
-    Block currentIndex = origin.getRelative(direction, ++currentDistance);
+    Block currentIndex = origin.offset(direction, ++currentDistance);
     return move(currentIndex) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
@@ -108,30 +102,47 @@ public class Pillar implements Updatable, Iterable<Block> {
     }
     WorldUtil.tryBreakPlant(newBlock);
 
-    SelectedSource.tryRevertSource(newBlock.getRelative(opposite));
+    SelectedSource.tryRevertSource(newBlock.offset(direction.opposite()));
 
     for (int i = 0; i < length; i++) {
-      Block forwardBlock = newBlock.getRelative(opposite, i);
-      Block backwardBlock = forwardBlock.getRelative(opposite);
+      Block forwardBlock = newBlock.offset(direction, -i);
+      Block backwardBlock = forwardBlock.offset(direction.opposite());
       if (!predicate.test(backwardBlock)) {
         TempBlock.air().duration(duration).build(forwardBlock);
         playSound(forwardBlock);
         return false;
       }
-      BlockData data = TempBlock.getLastValidData(backwardBlock);
-      TempBlock.builder(MaterialUtil.solidType(data)).bendable(true).duration(duration).build(forwardBlock);
+      BlockType type = MaterialUtil.solidType(TempBlock.getLastValidType(backwardBlock));
+      TempBlock.builder(type).bendable(true).duration(duration).build(forwardBlock);
     }
     pillarBlocks.add(newBlock);
-    TempBlock.air().duration(duration).build(newBlock.getRelative(opposite, length));
+    TempBlock.air().duration(duration).build(newBlock.offset(direction, -length));
     playSound(newBlock);
     return true;
   }
 
-  protected Vector3d normalizeVelocity(Vector3d velocity, double factor) {
+  private Vector3d withComponentInDirection(Vector3d vector, Direction dir, double factor) {
+    return switch (dir) {
+      case EAST, WEST -> vector.withX(direction.blockX() * factor);
+      case NORTH, SOUTH -> vector.withZ(direction.blockZ() * factor);
+      default -> vector.withY(direction.blockY() * factor);
+    };
+  }
+
+  public AABB createPillarBox(Vector3d pos, double len) {
+    Vector3d xMin = Vector3d.of(-0.5, -0.5, -0.5);
+    Vector3d xMax = Vector3d.of(len + 0.5, 0.5, 0.5);
+    Vector3d yMin = Vector3d.of(-0.5, -0.5, -0.5);
+    Vector3d yMax = Vector3d.of(0.5, len + 0.5, 0.5);
+    Vector3d zMin = Vector3d.of(-0.5, -0.5, -0.5);
+    Vector3d zMax = Vector3d.of(0.5, 0.5, len + 0.5);
     return switch (direction) {
-      case NORTH, SOUTH -> velocity.withX(direction.getModX() * factor);
-      case EAST, WEST -> velocity.withZ(direction.getModZ() * factor);
-      default -> velocity.withY(direction.getModY() * factor);
+      case EAST -> new AABB(pos.add(xMin), pos.add(xMax));
+      case WEST -> new AABB(pos.add(xMax.negate()), pos.add(xMin.negate()));
+      case UP -> new AABB(pos.add(yMin), pos.add(yMax));
+      case DOWN -> new AABB(pos.add(yMax.negate()), pos.add(yMin.negate()));
+      case NORTH -> new AABB(pos.add(zMin), pos.add(zMax));
+      case SOUTH -> new AABB(pos.add(zMax.negate()), pos.add(zMin.negate()));
     };
   }
 
@@ -149,12 +160,13 @@ public class Pillar implements Updatable, Iterable<Block> {
   }
 
   public void playSound(Block block) {
-    SoundUtil.EARTH.play(block);
+    SoundEffect.EARTH.play(block);
   }
 
   public boolean onEntityHit(Entity entity) {
     double factor = 0.75 * (length - 0.4 * currentDistance) / length;
-    entity.setVelocity(normalizeVelocity(Vector3d.from(entity.getVelocity()), factor).clampVelocity());
+    Vector3d vel = withComponentInDirection(entity.velocity(), direction, factor);
+    entity.velocity(vel);
     return true;
   }
 
@@ -170,7 +182,7 @@ public class Pillar implements Updatable, Iterable<Block> {
     private final User user;
     private final Block origin;
     private final Function<Builder<T>, T> constructor;
-    private BlockFace direction = BlockFace.UP;
+    private Direction direction = Direction.UP;
     private int length;
     private int distance;
     private long interval = 125;
@@ -183,7 +195,7 @@ public class Pillar implements Updatable, Iterable<Block> {
       this.constructor = constructor;
     }
 
-    public Builder<T> direction(BlockFace direction) {
+    public Builder<T> direction(Direction direction) {
       if (!WorldUtil.FACES.contains(direction)) {
         throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
       }
@@ -229,7 +241,7 @@ public class Pillar implements Updatable, Iterable<Block> {
      */
     private int validateLength(int max) {
       for (int i = 0; i < max; i++) {
-        Block backwardBlock = origin.getRelative(direction.getOppositeFace(), i);
+        Block backwardBlock = origin.offset(direction.opposite(), i);
         if (!TempBlock.isBendable(backwardBlock) || !user.canBuild(backwardBlock) || !predicate.test(backwardBlock)) {
           return i;
         }
@@ -239,7 +251,7 @@ public class Pillar implements Updatable, Iterable<Block> {
 
     private int validateDistance(int max) {
       for (int i = 0; i < max; i++) {
-        Block forwardBlock = origin.getRelative(direction, i + 1);
+        Block forwardBlock = origin.offset(direction, i + 1);
         if (!user.canBuild(forwardBlock)) {
           return i;
         }

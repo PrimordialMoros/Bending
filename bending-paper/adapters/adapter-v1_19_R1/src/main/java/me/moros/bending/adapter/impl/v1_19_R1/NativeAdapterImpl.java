@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,27 +23,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.model.raytrace.BlockRayTrace;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
-import me.moros.bending.model.raytrace.RayTrace.Context;
+import me.moros.bending.model.raytrace.Context;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.player.Player;
+import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import me.moros.math.Vector3i;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -59,6 +64,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -75,45 +81,47 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+@SuppressWarnings("resource")
 public final class NativeAdapterImpl implements NativeAdapter {
-  private ServerLevel adapt(World world) {
-    return ((CraftWorld) world).getHandle();
+  private final Function<me.moros.bending.platform.block.BlockState, BlockData> mapper;
+  private final PlayerList playerList;
+
+  public NativeAdapterImpl(Function<me.moros.bending.platform.block.BlockState, BlockData> mapper) {
+    this.mapper = mapper;
+    playerList = ((CraftServer) Bukkit.getServer()).getHandle();
   }
 
-  private BlockState adapt(BlockData data) {
-    return ((CraftBlockData) data).getState();
+  private ServerLevel adapt(World world) {
+    var bukkitWorld = Objects.requireNonNull(Bukkit.getWorld(world.name()));
+    return ((CraftWorld) bukkitWorld).getHandle();
+  }
+
+  private BlockState adapt(me.moros.bending.platform.block.BlockState state) {
+    return ((CraftBlockData) mapper.apply(state)).getState();
   }
 
   private ServerPlayer adapt(Player player) {
-    return ((CraftPlayer) player).getHandle();
+    return Objects.requireNonNull(playerList.getPlayer(player.uuid()));
   }
 
   private net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return ((CraftEntity) entity).getHandle();
+    return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
   }
 
-  private ItemStack adapt(Material material) {
-    return CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(material));
+  private ItemStack adapt(Item item) {
+    return Registry.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
   }
 
   @Override
-  public boolean setBlockFast(Block block, BlockData data) {
-    BlockPos position = new BlockPos(block.getX(), block.getY(), block.getZ());
-    return adapt(block.getWorld()).setBlock(position, adapt(data), 2);
+  public boolean setBlockFast(Block block, me.moros.bending.platform.block.BlockState state) {
+    BlockPos position = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
+    return adapt(block.world()).setBlock(position, adapt(state), 2);
   }
 
   @Override
@@ -127,9 +135,9 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public CompositeRayTrace rayTraceBlocks(Context context, World world) {
-    Vector3d s = context.start();
-    Vector3d e = context.end();
+  public BlockRayTrace rayTraceBlocks(Context context, World world) {
+    Vector3d s = context.origin();
+    Vector3d e = context.endPoint();
     Vec3 startPos = new Vec3(s.x(), s.y(), s.z());
     Vec3 endPos = new Vec3(e.x(), e.y(), e.z());
 
@@ -137,31 +145,10 @@ public final class NativeAdapterImpl implements NativeAdapter {
     Fluid ccf = context.ignoreLiquids() ? Fluid.NONE : Fluid.ANY;
     ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
 
-    BlockHit miss = new BlockHit(clipContext.getTo(), new BlockPos(clipContext.getTo()), null);
-    Set<BlockPos> ignored = context.ignore().stream().map(b -> new BlockPos(b.blockX(), b.blockY(), b.blockZ()))
-      .collect(Collectors.toSet());
-    BlockHit result = traverseBlocks(world, clipContext, ignored, miss);
-    if (!miss.equals(result)) {
-      return CompositeRayTrace.hit(result.position, result.blockPosition().toBlock(world), dirToFace(result.direction()));
-    }
-    return CompositeRayTrace.miss(result.position);
+    return traverseBlocks(world, clipContext, context, CompositeRayTrace.miss(e));
   }
 
-  private BlockFace dirToFace(@Nullable Direction direction) {
-    if (direction == null) {
-      return BlockFace.SELF;
-    }
-    return switch (direction) {
-      case DOWN -> BlockFace.DOWN;
-      case UP -> BlockFace.UP;
-      case NORTH -> BlockFace.NORTH;
-      case SOUTH -> BlockFace.SOUTH;
-      case WEST -> BlockFace.WEST;
-      case EAST -> BlockFace.EAST;
-    };
-  }
-
-  private BlockHit traverseBlocks(World world, ClipContext context, Set<BlockPos> ignored, BlockHit miss) {
+  private BlockRayTrace traverseBlocks(World world, ClipContext context, Context originalContext, BlockRayTrace miss) {
     Vec3 start = context.getFrom();
     Vec3 end = context.getTo();
     Level level = adapt(world);
@@ -178,7 +165,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
       int j = Mth.floor(d4);
       int k = Mth.floor(d5);
       BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, j, k);
-      BlockHit t0 = checkBlockCollision(level, context, ignored, mutableBlockPos, miss);
+      BlockRayTrace t0 = checkBlockCollision(level, context, originalContext, mutableBlockPos, miss, r -> hitFactory(world, r));
       if (t0 != null) {
         return t0;
       } else {
@@ -194,7 +181,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
         double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
         double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
         double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
-        BlockHit result;
+        BlockRayTrace result;
         do {
           if (d12 > 1.0D && d13 > 1.0D && d14 > 1.0D) {
             return miss;
@@ -214,15 +201,15 @@ public final class NativeAdapterImpl implements NativeAdapter {
             k += j1;
             d14 += d11;
           }
-          result = checkBlockCollision(level, context, ignored, mutableBlockPos.set(i, j, k), miss);
+          result = checkBlockCollision(level, context, originalContext, mutableBlockPos.set(i, j, k), miss, r -> hitFactory(world, r));
         } while (result == null);
         return result;
       }
     }
   }
 
-  private static @Nullable BlockHit checkBlockCollision(Level world, ClipContext context, Set<BlockPos> ignored, BlockPos pos, BlockHit miss) {
-    if (ignored.contains(pos)) {
+  private @Nullable BlockRayTrace checkBlockCollision(Level world, ClipContext context, Context originalContext, BlockPos pos, BlockRayTrace miss, Function<BlockHitResult, BlockRayTrace> hitFactory) {
+    if (originalContext.ignore(pos.getX(), pos.getY(), pos.getZ())) {
       return null;
     }
     BlockState iblockdata = world.getBlockStateIfLoaded(pos);
@@ -239,33 +226,29 @@ public final class NativeAdapterImpl implements NativeAdapter {
     BlockHitResult res1 = voxelshape1.clip(vec3d, vec3d1, pos);
     double d0 = res0 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res0.getLocation());
     double d1 = res1 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res1.getLocation());
-    BlockHit b0 = res0 == null ? null : new BlockHit(res0);
-    BlockHit b1 = res1 == null ? null : new BlockHit(res1);
-    return d0 <= d1 ? b0 : b1;
+    return d0 <= d1 ? hitFactory.apply(res0) : hitFactory.apply(res1);
   }
 
-  private record BlockHit(Vector3d position, Vector3i blockPosition, @Nullable Direction direction) {
-    private BlockHit(BlockHitResult hitResult) {
-      this(hitResult.getLocation(), hitResult.getBlockPos(), hitResult.getDirection());
+  private @Nullable BlockRayTrace hitFactory(World w, @Nullable BlockHitResult result) {
+    if (result == null) {
+      return null;
     }
-
-    private BlockHit(Vec3 pos, BlockPos bp, @Nullable Direction direction) {
-      this(Vector3d.of(pos.x, pos.y, pos.z), Vector3i.of(bp.getX(), bp.getY(), bp.getZ()), direction);
-    }
+    var l = result.getLocation();
+    var p = result.getBlockPos();
+    return CompositeRayTrace.hit(Vector3d.of(l.x(), l.y(), l.z()), new Block(w, p.getX(), p.getY(), p.getZ()));
   }
 
   private final int armorStandId = Registry.ENTITY_TYPE.getId(EntityType.ARMOR_STAND);
 
   @Override
-  public void sendNotification(Player player, Material material, Component title) {
-    Collection<Packet<?>> packets = List.of(createNotification(material, title), clearNotification());
-    for (var packet : packets) {
-      adapt(player).connection.send(packet);
-    }
+  public void sendNotification(Player player, Item item, Component title) {
+    var conn = adapt(player).connection;
+    conn.send(createNotification(item, title));
+    conn.send(clearNotification());
   }
 
   @Override
-  public int createArmorStand(World world, Position center, Material material, Vector3d velocity, boolean gravity) {
+  public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
     packets.add(createMob(id, armorStandId, center));
@@ -275,13 +258,13 @@ public final class NativeAdapterImpl implements NativeAdapter {
     if (velocity.lengthSq() > 0) {
       packets.add(addVelocity(id, velocity));
     }
-    packets.add(setupEquipment(id, material));
+    packets.add(setupEquipment(id, item));
     broadcast(packets, world, center);
     return id;
   }
 
   @Override
-  public int createFallingBlock(World world, Position center, BlockData data, Vector3d velocity, boolean gravity) {
+  public int createFallingBlock(World world, Position center, me.moros.bending.platform.block.BlockState data, Vector3d velocity, boolean gravity) {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
@@ -297,36 +280,35 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public void fakeBlock(World world, Position center, BlockData data) {
-    broadcast(List.of(fakeBlock(center, data)), world, center, world.getViewDistance() << 4);
+  public void fakeBlock(Block block, me.moros.bending.platform.block.BlockState data) {
+    broadcast(List.of(fakeBlockPacket(block, adapt(data))), block.world(), block, block.world().viewDistance() << 4);
   }
 
   @Override
-  public void fakeBreak(World world, Position center, byte progress) {
-    broadcast(List.of(fakeBreak(center, progress)), world, center, world.getViewDistance() << 4);
+  public void fakeBreak(Block block, byte progress) {
+    broadcast(List.of(fakeBreakPacket(block, progress)), block.world(), block, block.world().viewDistance() << 4);
   }
 
   @Override
   public void destroy(int[] ids) {
     var packet = new ClientboundRemoveEntitiesPacket(ids);
-    for (Player player : Bukkit.getOnlinePlayers()) {
-      adapt(player).connection.send(packet);
-    }
+    playerList.getPlayers().forEach(p -> p.connection.send(packet));
   }
 
   @Override
   public boolean tryPowerLightningRod(Block block) {
-    BlockState data = adapt(block.getBlockData());
+    ServerLevel level = adapt(block.world());
+    BlockState data = level.getBlockState(new BlockPos(block.blockX(), block.blockY(), block.blockZ()));
     if (data.is(Blocks.LIGHTNING_ROD)) {
-      BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
-      ((LightningRodBlock) data.getBlock()).onLightningStrike(data, adapt(block.getWorld()), pos);
+      BlockPos pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
+      ((LightningRodBlock) data.getBlock()).onLightningStrike(data, adapt(block.world()), pos);
       return true;
     }
     return false;
   }
 
   private void broadcast(Collection<Packet<?>> packets, World world, Position center) {
-    broadcast(packets, world, center, world.getViewDistance() << 4);
+    broadcast(packets, world, center, world.viewDistance() << 4);
   }
 
   private void broadcast(Collection<Packet<?>> packets, World world, Position center, int dist) {
@@ -343,11 +325,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     }
   }
 
-  private ClientboundUpdateAdvancementsPacket createNotification(Material material, Component title) {
+  private ClientboundUpdateAdvancementsPacket createNotification(Item item, Component title) {
     String identifier = "bending:notification";
     ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";
-    net.minecraft.world.item.ItemStack icon = adapt(material);
+    ItemStack icon = adapt(item);
     net.minecraft.network.chat.Component nmsTitle = PaperAdventure.asVanilla(title);
     net.minecraft.network.chat.Component nmsDesc = PaperAdventure.asVanilla(Component.empty());
     FrameType type = FrameType.TASK;
@@ -408,11 +390,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return new ClientboundSetEntityMotionPacket(id, new Vec3(vel.x(), vel.y(), vel.z()));
   }
 
-  private ClientboundBlockUpdatePacket fakeBlock(Position b, BlockData data) {
-    return new ClientboundBlockUpdatePacket(new BlockPos(b.x(), b.y(), b.z()), adapt(data));
+  private ClientboundBlockUpdatePacket fakeBlockPacket(Position b, BlockState state) {
+    return new ClientboundBlockUpdatePacket(new BlockPos(b.x(), b.y(), b.z()), state);
   }
 
-  private ClientboundBlockDestructionPacket fakeBreak(Position b, byte progress) {
+  private ClientboundBlockDestructionPacket fakeBreakPacket(Position b, byte progress) {
     int id = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
     return new ClientboundBlockDestructionPacket(id, new BlockPos(b.x(), b.y(), b.z()), progress);
   }
@@ -446,8 +428,8 @@ public final class NativeAdapterImpl implements NativeAdapter {
     }
   }
 
-  private ClientboundSetEquipmentPacket setupEquipment(int id, Material material) {
-    return new ClientboundSetEquipmentPacket(id, List.of(new Pair<>(EquipmentSlot.HEAD, adapt(material))));
+  private ClientboundSetEquipmentPacket setupEquipment(int id, Item item) {
+    return new ClientboundSetEquipmentPacket(id, List.of(new Pair<>(EquipmentSlot.HEAD, adapt(item))));
   }
 
   private static final class PacketByteBuffer extends FriendlyByteBuf {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,18 +20,15 @@
 package me.moros.bending.model.ability.common;
 
 import me.moros.bending.model.ability.Updatable;
+import me.moros.bending.platform.Direction;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.sound.SoundEffect;
 import me.moros.bending.temporal.TempBlock;
-import me.moros.bending.util.ParticleUtil;
-import me.moros.bending.util.SoundUtil;
 import me.moros.bending.util.WorldUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 
 public class EarthSpike implements Updatable {
   private static final long DELAY = 80;
@@ -63,17 +60,15 @@ public class EarthSpike implements Updatable {
       if (!EarthMaterials.isEarthOrSand(origin)) {
         return UpdateResult.REMOVE;
       }
-      BlockData data = MaterialUtil.solidType(origin.getBlockData(), Material.DRIPSTONE_BLOCK.createBlockData());
-      TempBlock.builder(data).duration(DURATION).build(origin);
+      TempBlock.builder(MaterialUtil.solidType(origin.type(), BlockType.DRIPSTONE_BLOCK)).duration(DURATION).build(origin);
     }
     nextUpdateTime = time + DELAY;
-    Block currentIndex = origin.getRelative(BlockFace.UP, ++currentLength);
+    Block currentIndex = origin.offset(Direction.UP, ++currentLength);
     if (canMove(currentIndex)) {
-      Vector3d center = Vector3d.fromCenter(currentIndex);
-      ParticleUtil.of(Particle.BLOCK_DUST, center).count(24).offset(0.2)
-        .data(Material.DRIPSTONE_BLOCK.createBlockData()).spawn(currentIndex.getWorld());
-      TempBlock.builder(Material.POINTED_DRIPSTONE.createBlockData()).duration(DURATION - currentLength * DELAY).build(currentIndex);
-      SoundUtil.EARTH.play(currentIndex);
+      Vector3d center = currentIndex.center();
+      BlockType.DRIPSTONE_BLOCK.asParticle(center).count(24).offset(0.2).spawn(currentIndex.world());
+      TempBlock.builder(BlockType.POINTED_DRIPSTONE).duration(DURATION - currentLength * DELAY).build(currentIndex);
+      SoundEffect.EARTH.play(currentIndex);
     } else {
       return UpdateResult.REMOVE;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -29,20 +29,20 @@ import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
 import me.moros.bending.model.user.User;
-import me.moros.bending.util.collision.AABBUtil;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.bukkit.block.Block;
 
 public abstract class ParticleStream implements Updatable, SimpleAbility {
   private final User user;
   protected final Ray ray;
 
-  protected Predicate<Block> canCollide = b -> false;
+  protected Predicate<BlockType> canCollide = b -> false;
   protected Sphere collider;
   protected Vector3d location;
   protected final Vector3d dir;
@@ -84,7 +84,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       Vector3d originalVector = location;
       location = location.add(vector);
       distanceTravelled += speed;
-      if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location.toBlock(user.world()))) {
+      if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location)) {
         return UpdateResult.REMOVE;
       }
       if (!validDiagonals(originalVector, vector)) {
@@ -96,23 +96,23 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   }
 
   private boolean validDiagonals(Vector3d originalVector, Vector3d directionVector) {
-    Block originBlock = originalVector.toBlock(user.world());
+    Block originBlock = user.world().blockAt(originalVector);
     Set<Block> toCheck = new HashSet<>();
     if (speed > 1) {
-      toCheck.add(originalVector.add(directionVector.multiply(0.5)).toBlock(user.world()));
+      toCheck.add(user.world().blockAt(originalVector.add(directionVector.multiply(0.5))));
     }
     for (Vector3i v : VectorUtil.decomposeDiagonals(originalVector, directionVector)) {
-      toCheck.add(originBlock.getRelative(v.blockX(), v.blockY(), v.blockZ()));
+      toCheck.add(originBlock.offset(v));
     }
     return toCheck.stream().noneMatch(this::testCollision);
   }
 
   private boolean testCollision(Block block) {
-    if (canCollide.test(block) && onBlockHit(block)) {
+    if (canCollide.test(block.type()) && onBlockHit(block)) {
       return true;
     }
     if (!MaterialUtil.isTransparent(block)) {
-      if (AABBUtil.blockBounds(block).intersects(collider)) {
+      if (block.bounds().intersects(collider)) {
         return onBlockHit(block);
       }
     }

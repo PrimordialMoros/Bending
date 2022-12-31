@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,21 +22,16 @@ package me.moros.bending.event;
 import java.util.Collection;
 import java.util.List;
 
-import me.moros.bending.model.key.Keyed;
-import me.moros.bending.model.key.RegistryKey;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.moros.bending.event.base.BendingEvent;
+import net.kyori.adventure.key.Key;
 
 /**
  * Called during Bending's initialization, before registries are locked.
  */
-public class RegistryLockEvent extends Event {
-  private static final HandlerList HANDLERS = new HandlerList();
+public class RegistryLockEvent implements BendingEvent {
+  private final Collection<Key> keys;
 
-  private final Collection<RegistryKey<? extends Keyed>> keys;
-
-  RegistryLockEvent(Collection<RegistryKey<? extends Keyed>> keys) {
+  protected RegistryLockEvent(Collection<Key> keys) {
     this.keys = List.copyOf(keys);
   }
 
@@ -44,16 +39,7 @@ public class RegistryLockEvent extends Event {
    * Provides the keys of the registries that are going to be locked.
    * @return the collection of RegistryKeys
    */
-  public Collection<RegistryKey<? extends Keyed>> registryKeys() {
+  public Collection<Key> registryKeys() {
     return keys;
-  }
-
-  @Override
-  public @NonNull HandlerList getHandlers() {
-    return HANDLERS;
-  }
-
-  public static HandlerList getHandlerList() {
-    return HANDLERS;
   }
 }

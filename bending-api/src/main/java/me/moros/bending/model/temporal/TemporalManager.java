@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,14 +19,15 @@
 
 package me.moros.bending.model.temporal;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.bukkit.Bukkit;
+import me.moros.tasker.TimerWheel;
+import me.moros.tasker.executor.TickAdapter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -34,36 +35,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <K> the key type
  * @param <V> the value type
  */
-public class TemporalManager<K, V extends TemporaryBase> {
-  private final Consumer<V> consumer;
-  private final Map<K, V> instances;
+public class TemporalManager<K, V extends Temporary> implements TickAdapter {
   private final TimerWheel wheel;
-  private final String label;
+  private final Map<K, V> instances;
+  private final boolean revertOnClear;
+  private final AtomicBoolean clearing = new AtomicBoolean();
 
-  private int currentTick;
-
-  public TemporalManager(String name) {
-    this(name, Temporary::revert);
+  public TemporalManager(TimerWheel wheel) {
+    this(wheel, true);
   }
 
-  public TemporalManager(String name, Consumer<V> consumer) {
-    this.label = "Temporal " + name;
-    this.consumer = Objects.requireNonNull(consumer);
+  public TemporalManager(TimerWheel wheel, boolean revertOnClear) {
+    this.wheel = Objects.requireNonNull(wheel);
     this.instances = new ConcurrentHashMap<>();
-    this.wheel = new TimerWheel();
-  }
-
-  public String label() {
-    return label;
+    this.revertOnClear = revertOnClear;
   }
 
   public void tick() {
-    currentTick = Bukkit.getCurrentTick();
-    wheel.advance(currentTick);
-  }
-
-  public int currentTick() {
-    return currentTick;
+    wheel.advance();
   }
 
   public boolean isTemp(@Nullable K key) {
@@ -74,20 +63,12 @@ public class TemporalManager<K, V extends TemporaryBase> {
     return Optional.ofNullable(instances.get(key));
   }
 
-  public void addEntry(K key, V value, int tickDuration) {
+  public void addEntry(K key, V value, int ticks) {
     if (isTemp(key)) {
       return;
     }
     instances.put(key, value);
-    reschedule(key, tickDuration);
-  }
-
-  public void reschedule(K key, int tickDuration) {
-    V value = instances.get(key);
-    if (value != null) {
-      value.expirationTick(currentTick + tickDuration);
-      wheel.reschedule(value, currentTick);
-    }
+    wheel.schedule(value, ticks);
   }
 
   /**
@@ -97,18 +78,25 @@ public class TemporalManager<K, V extends TemporaryBase> {
   public boolean removeEntry(K key) {
     V result = instances.remove(key);
     if (result != null) {
-      wheel.deschedule(result);
+      result.cancel();
       return true;
     }
     return false;
   }
 
-  public void removeAll() {
-    List.copyOf(instances.values()).forEach(consumer);
-    clear();
+  public boolean clearing() {
+    return clearing.get();
   }
 
-  protected void clear() {
+  public void removeAll() {
+    clearing.set(true);
+    wheel.shutdown(revertOnClear);
     instances.clear();
+    clearing.set(false);
+  }
+
+  public int fromMillis(long duration, int max) {
+    int time = toTicks(duration, TimeUnit.MILLISECONDS);
+    return time <= 0 ? max : Math.min(time, max);
   }
 }

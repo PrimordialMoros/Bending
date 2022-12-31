@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,73 +19,88 @@
 
 package me.moros.bending.model.user;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import me.moros.bending.model.ExpiringSet;
-import me.moros.bending.model.key.RegistryKey;
+import me.moros.bending.model.BendingKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Base implementation for {@link DataHolder}.
+ * Represents an object that holds a map collection of data.
  */
-public class DataContainer implements DataHolder {
-  private final Map<RegistryKey<?>, Object> data;
-  private final ExpiringSet<RegistryKey<?>> cooldowns;
+public interface DataContainer {
+  /**
+   * Check if this object contains data for the specified key.
+   * @param key the key associated with data
+   * @param <T> the type of data
+   * @return true if this object contains a mapping for the specified key
+   */
+  <T> boolean containsKey(BendingKey<T> key);
 
-  DataContainer() {
-    data = new ConcurrentHashMap<>();
-    cooldowns = new ExpiringSet<>(500);
-  }
+  /**
+   * Check if the data associated with the specified key can be edited.
+   * When inserting/updating data, a cooldown can be used to prevent it from being changed too quickly.
+   * @param key the key associated with data
+   * @param <T> the type of data
+   * @return true if this object has a mapping for the specified key and its data can be edited, false otherwise
+   */
+  <T> boolean canEdit(BendingKey<T> key);
 
-  @Override
-  public <T> boolean containsKey(RegistryKey<T> key) {
-    return data.containsKey(key);
-  }
-
-  @Override
-  public <T> boolean canEdit(RegistryKey<T> key) {
-    return !cooldowns.contains(key);
-  }
-
-  @Override
-  public <T> T put(RegistryKey<T> key, T value) {
-    cooldowns.add(key);
-    data.put(key, value);
-    return value;
-  }
-
-  @Override
-  public <T> @Nullable T remove(RegistryKey<T> key) {
-    return cast(key.type(), data.remove(key));
-  }
-
-  @Override
-  public <T> @Nullable T get(RegistryKey<T> key) {
-    return cast(key.type(), data.get(key));
-  }
-
-  @Override
-  public <T extends Enum<T>> T toggle(RegistryKey<T> key, T defaultValue) {
-    T oldValue = cast(key.type(), data.computeIfAbsent(key, k -> defaultValue));
-    if (oldValue != null && !canEdit(key)) {
-      return oldValue;
+  /**
+   * Attempt to store data for a specified key.
+   * @param key the key used to store and access the data
+   * @param value the data to store
+   * @param <T> the type of data
+   * @return true if storing was successful, false otherwise
+   */
+  default <T> boolean offer(BendingKey<T> key, T value) {
+    if (canEdit(key)) {
+      put(key, value);
+      return true;
     }
-    T newValue = toggle(oldValue == null ? defaultValue : oldValue);
-    return put(key, newValue);
+    return false;
   }
 
-  private <T extends Enum<T>> T toggle(T oldValue) {
-    T[] values = oldValue.getDeclaringClass().getEnumConstants();
-    int index = (oldValue.ordinal() + 1) % values.length;
-    return values[index];
+  /**
+   * Store data for a specified key, ignoring cooldowns.
+   * @param key the key used to store and access the data
+   * @param value the data to store
+   * @param <T> the type of data
+   */
+  <T> void put(BendingKey<T> key, T value);
+
+  /**
+   * Attempt to remove the data for the specified key.
+   * @param key the key associated with data
+   * @param <T> the type of data
+   * @return the data that was removed or null if no data was associated with the given key
+   */
+  <T> @Nullable T remove(BendingKey<T> key);
+
+  /**
+   * Attempt to retrieve the data for the specified key.
+   * @param key the key associated with data
+   * @param <T> the type of data
+   * @return the data that was retrieved or null if no data was associated with the given key
+   */
+  <T> @Nullable T get(BendingKey<T> key);
+
+  /**
+   * Attempt to retrieve the data for the specified key.
+   * @param key the key associated with data
+   * @param defaultValue the default value to return if no data was found
+   * @param <T> the type of data
+   * @return the result
+   */
+  default <T> T getOrDefault(BendingKey<T> key, T defaultValue) {
+    T oldValue = get(key);
+    return oldValue != null ? oldValue : defaultValue;
   }
 
-  private <T> @Nullable T cast(Class<T> type, Object value) {
-    try {
-      return type.cast(value);
-    } catch (ClassCastException e) {
-      return null;
-    }
-  }
+  /**
+   * A special operation for storing enum data that toggles the state of the enum.
+   * Toggling the enum will choose the next possible value if possible or cycle to the beginning.
+   * @param key the key associated with data
+   * @param defaultValue the default value to store if no data exists
+   * @param <T> the type of enum data
+   * @return the resulting enum data after toggling
+   */
+  <T extends Enum<T>> T toggle(BendingKey<T> key, T defaultValue);
 }

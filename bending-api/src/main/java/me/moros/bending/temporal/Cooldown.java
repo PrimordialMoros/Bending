@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -21,17 +21,16 @@ package me.moros.bending.temporal;
 
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.model.temporal.TemporaryBase;
 import me.moros.bending.model.user.User;
+import me.moros.tasker.TimerWheel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class Cooldown extends TemporaryBase {
-  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>("Cooldown", Function.identity()::apply);
+public final class Cooldown extends Temporary {
+  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(TimerWheel.simple(600), false);
 
   private final UUID uuid;
   private final AbilityDescription desc;
@@ -40,16 +39,15 @@ public final class Cooldown extends TemporaryBase {
   private final int hashCode;
 
   private Cooldown(UUID uuid, AbilityDescription desc, @Nullable Runnable runnable) {
-    super();
     this.uuid = uuid;
     this.desc = desc;
     this.runnable = runnable;
     this.hashCode = Objects.hash(this.uuid, this.desc);
   }
 
-  private Cooldown(UUID uuid, AbilityDescription desc, Runnable runnable, long duration) {
+  private Cooldown(UUID uuid, AbilityDescription desc, Runnable runnable, int ticks) {
     this(uuid, desc, runnable);
-    MANAGER.addEntry(this, this, Temporary.toTicks(duration));
+    MANAGER.addEntry(this, this, ticks);
   }
 
   @Override
@@ -67,7 +65,13 @@ public final class Cooldown extends TemporaryBase {
 
   @Override
   public boolean equals(Object obj) {
-    return obj instanceof Cooldown other && uuid.equals(other.uuid) && desc.equals(other.desc);
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof Cooldown other) {
+      return uuid.equals(other.uuid) && desc.equals(other.desc);
+    }
+    return false;
   }
 
   @Override
@@ -80,6 +84,6 @@ public final class Cooldown extends TemporaryBase {
   }
 
   public static Cooldown of(User user, AbilityDescription desc, Runnable runnable, long duration) {
-    return new Cooldown(user.uuid(), desc, runnable, duration);
+    return new Cooldown(user.uuid(), desc, runnable, MANAGER.fromMillis(duration, 600));
   }
 }

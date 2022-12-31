@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,24 +23,26 @@ import com.griefcraft.lwc.LWC;
 import com.griefcraft.lwc.LWCPlugin;
 import com.griefcraft.model.Protection;
 import me.moros.bending.model.protection.AbstractProtection;
-import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.entity.BukkitPlayer;
+import me.moros.bending.platform.entity.LivingEntity;
 import org.bukkit.plugin.Plugin;
 
 public final class LWCProtection extends AbstractProtection {
   private final LWC lwc;
 
   public LWCProtection(Plugin plugin) {
-    super(plugin);
+    super(plugin.getName());
     lwc = ((LWCPlugin) plugin).getLWC();
   }
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
-    if (entity instanceof Player player) {
-      Protection protection = lwc.getProtectionCache().getProtection(block);
-      return protection == null || lwc.canAccessProtection(player, protection);
+    if (entity instanceof BukkitPlayer player) {
+      var b = PlatformAdapter.toBukkitWorld(block.world()).getBlockAt(block.blockX(), block.blockY(), block.blockZ());
+      Protection protection = lwc.getProtectionCache().getProtection(b);
+      return protection == null || lwc.canAccessProtection(player.handle(), protection);
     }
     return true;
   }

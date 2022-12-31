@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,27 +19,33 @@
 
 package me.moros.bending.event;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
+import me.moros.bending.event.base.AbstractCancellableUserEvent;
+import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.User;
-import me.moros.math.Vector3d;
-import org.bukkit.block.Block;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import me.moros.bending.platform.block.Block;
+import me.moros.math.Position;
 
 /**
  * Called when a bending ability causes an explosion.
  */
-public class BendingExplosionEvent extends EntityExplodeEvent implements UserEvent {
-  private final User user;
+public class BendingExplosionEvent extends AbstractCancellableUserEvent implements UserEvent {
+  private final Position center;
+  private final Collection<Block> affectedBlocks;
 
-  BendingExplosionEvent(User user, Vector3d location, Collection<Block> blocks, float yield) {
-    super(user.entity(), location.toLocation(user.world()), new ArrayList<>(blocks), yield);
-    this.user = user;
+  protected BendingExplosionEvent(User user, Position center, Collection<Block> affectedBlocks) {
+    super(user);
+    this.center = center;
+    this.affectedBlocks = Set.copyOf(affectedBlocks);
   }
 
-  @Override
-  public User user() {
-    return user;
+  public Position center() {
+    return center;
+  }
+
+  public Collection<Block> affectedBlocks() {
+    return affectedBlocks;
   }
 }

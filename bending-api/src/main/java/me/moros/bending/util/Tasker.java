@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,84 +20,33 @@
 package me.moros.bending.util;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.tasker.executor.AsyncExecutor;
+import me.moros.tasker.executor.CompositeExecutor;
+import me.moros.tasker.executor.SyncExecutor;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Utility class to easily schedule sync, async tasks.
  */
-public enum Tasker {
-  INSTANCE;
+public final class Tasker {
+  private static SyncExecutor SYNC;
+  private static AsyncExecutor ASYNC;
 
-  private final ExecutorService executor;
-  private Plugin plugin;
-
-  Tasker() {
-    executor = Executors.newCachedThreadPool();
-  }
-
-  public void inject(Plugin plugin) {
-    this.plugin = Objects.requireNonNull(plugin);
-  }
-
-  public void shutdown() {
-    executor.shutdown();
-    try {
-      if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-        executor.shutdownNow();
-      }
-    } catch (InterruptedException e) {
-      executor.shutdownNow();
+  public static void inject(CompositeExecutor compositeExecutor) {
+    Objects.requireNonNull(compositeExecutor);
+    if (SYNC != null || ASYNC != null) {
+      throw new RuntimeException("Executor has already been injected!");
     }
+    SYNC = compositeExecutor.sync();
+    ASYNC = compositeExecutor.async();
   }
 
-  private boolean canExecute() {
-    return plugin != null && plugin.isEnabled();
+  public static @MonotonicNonNull SyncExecutor sync() {
+    return SYNC;
   }
 
-  /**
-   * Create a synchronous task and execute it after a delay.
-   * @param runnable the task to execute
-   * @param delay the delay in ticks
-   * @return the created task if scheduled, null otherwise
-   */
-  public @Nullable BukkitTask sync(Runnable runnable, long delay) {
-    return canExecute() ? plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delay) : null;
-  }
-
-  /**
-   * Create a repeating synchronous tasks and execute it.
-   * @param runnable the task to execute
-   * @param interval the interval in ticks
-   * @return the created task if scheduled, null otherwise
-   */
-  public @Nullable BukkitTask repeat(Runnable runnable, long interval) {
-    return canExecute() ? plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, 1, interval) : null;
-  }
-
-  /**
-   * Create an asynchronous task using Bending's executor.
-   * @param runnable the task to execute
-   * @return a future
-   */
-  public CompletableFuture<Void> async(Runnable runnable) {
-    return CompletableFuture.runAsync(runnable, executor);
-  }
-
-  /**
-   * Create an asynchronous task using Bending's executor.
-   * @param supplier the task to execute
-   * @param <T> the type of result the future will hold
-   * @return a future with the result
-   */
-  public <T> CompletableFuture<@Nullable T> async(Supplier<@Nullable T> supplier) {
-    return CompletableFuture.supplyAsync(supplier, executor);
+  public static @MonotonicNonNull AsyncExecutor async() {
+    return ASYNC;
   }
 }

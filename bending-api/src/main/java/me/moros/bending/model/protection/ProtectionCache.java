@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -26,9 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
-import me.moros.bending.registry.Registries;
-import org.bukkit.block.Block;
+import me.moros.bending.platform.block.Block;
 
 /**
  * A multi-layered cache used to check if a User can build in a specific block location.
@@ -72,7 +72,7 @@ public enum ProtectionCache {
    * @return true if all enabled protections allow it, false otherwise
    */
   private boolean canBuildPostCache(User user, Block block) {
-    return Registries.PROTECTIONS.stream().allMatch(m -> m.canBuild(user.entity(), block));
+    return Registries.PROTECTIONS.stream().allMatch(m -> m.canBuild(user, block));
   }
 
   /**

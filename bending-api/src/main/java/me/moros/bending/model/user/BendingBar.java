@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,10 +22,10 @@ package me.moros.bending.model.user;
 import java.util.Objects;
 
 import me.moros.bending.model.ability.Updatable;
+import me.moros.bending.platform.entity.player.Player;
 import me.moros.math.FastMath;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
-import org.bukkit.entity.Player;
 
 /**
  * Represents a {@link BossBar} for bending purposes.
@@ -34,11 +34,10 @@ public final class BendingBar implements Updatable {
   private final BossBar bar;
   private final Audience audience;
 
-  private final long duration;
+  private final int duration;
+  private int ticks;
 
-  private long endTime;
-
-  private BendingBar(BossBar bar, Audience audience, long duration) {
+  private BendingBar(BossBar bar, Audience audience, int duration) {
     this.bar = bar;
     this.audience = audience;
     this.duration = duration;
@@ -46,16 +45,12 @@ public final class BendingBar implements Updatable {
 
   @Override
   public UpdateResult update() {
-    long time = System.currentTimeMillis();
-    if (endTime == 0) {
-      endTime = time + duration;
-    } else {
-      if (time > endTime) {
-        onRemove();
-        return UpdateResult.REMOVE;
-      }
+    if (ticks >= duration) {
+      onRemove();
+      return UpdateResult.REMOVE;
     }
-    float factor = FastMath.clamp((endTime - time) / (float) duration, 0, 1);
+    float factor = FastMath.clamp((duration - ticks) / (float) duration, 0, 1);
+    ++ticks;
     audience.showBossBar(bar.progress(factor));
     return UpdateResult.CONTINUE;
   }
@@ -64,9 +59,9 @@ public final class BendingBar implements Updatable {
     audience.hideBossBar(bar);
   }
 
-  public static BendingBar of(BossBar bar, Player target, long duration) {
+  public static BendingBar of(BossBar bar, Player target, int ticks) {
     Objects.requireNonNull(bar);
     Objects.requireNonNull(target);
-    return new BendingBar(bar, target, duration);
+    return new BendingBar(bar, target, ticks);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.event.TickEffectEvent;
 import me.moros.bending.model.user.User;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
+import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -37,12 +37,12 @@ public enum BendingEffect {
    * FreezeTick effect that freezes the target as if they were in powdered snow.
    * This effect is applied cumulatively.
    */
-  FROST_TICK(135, true, Entity::getMaxFreezeTicks, Entity::getFreezeTicks, Entity::setFreezeTicks),
+  FROST_TICK(135, true, Entity::maxFreezeTicks, Entity::freezeTicks, Entity::freezeTicks),
   /**
    * FireTick effect that burns the target as if they were standing in fire.
    * Applying this effect overrides previous instances of it.
    */
-  FIRE_TICK(15, false, e -> 100, Entity::getFireTicks, Entity::setFireTicks);
+  FIRE_TICK(15, false, e -> 100, Entity::fireTicks, Entity::fireTicks);
 
   public static final int MAX_BLOCK_FIRE_TICKS = 100;
 
@@ -82,7 +82,7 @@ public enum BendingEffect {
       return;
     }
     TickEffectEvent event = EventBus.INSTANCE.postTickEffectEvent(source, entity, ticks, this);
-    if (event.isCancelled()) {
+    if (event.cancelled()) {
       return;
     }
     int current = Math.max(0, currentTicks.get(entity));
@@ -120,7 +120,7 @@ public enum BendingEffect {
 
   public static void cleanup() {
     for (BendingEffect tick : values()) {
-      tick.instances.keySet().removeIf(e -> !e.isValid() || tick.currentTicks.get(e) <= 0);
+      tick.instances.keySet().removeIf(e -> !e.valid() || tick.currentTicks.get(e) <= 0);
     }
   }
 

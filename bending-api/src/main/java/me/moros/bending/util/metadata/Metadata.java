@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -19,70 +19,24 @@
 
 package me.moros.bending.util.metadata;
 
-import java.util.Objects;
-
-import org.bukkit.NamespacedKey;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.Metadatable;
-import org.bukkit.persistence.PersistentDataHolder;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.util.KeyUtil;
+import net.kyori.adventure.key.Key;
 
 /**
  * Utility class to provide metadata keys
- * @see FixedMetadataValue
  */
 public final class Metadata {
-  public static final String NO_PICKUP = "bending-no-pickup";
-  public static final String GLOVE_KEY = "bending-earth-glove";
-  public static final String METAL_CABLE = "bending-metal-cable";
-  public static final String DESTRUCTIBLE = "bending-destructible";
-  public static final String HIDDEN_BOARD = "bending-hidden-board";
-  public static final String NPC = "bending-npc";
+  public static final Key NO_PICKUP = KeyUtil.simple("bending-no-pickup");
+  public static final Key GLOVE_KEY = KeyUtil.simple("bending-earth-glove");
+  public static final Key METAL_CABLE = KeyUtil.simple("bending-metal-cable");
+  public static final Key DESTRUCTIBLE = KeyUtil.simple("bending-destructible");
+  public static final Key NPC = KeyUtil.simple("bending-npc");
 
-  public static final String PERSISTENT_ARMOR = "bending-armor";
-  public static final String PERSISTENT_METAL_KEY = "bending-metal-key";
-  public static final String PERSISTENT_MATERIAL = "bending-material";
+  public static final Key ARMOR_KEY = KeyUtil.simple("bending-armor");
+  public static final Key METAL_KEY = KeyUtil.simple("bending-metal-key");
 
-  public static final NamespacedKey NSK_ARMOR = new NamespacedKey("bending", PERSISTENT_ARMOR);
-  public static final NamespacedKey NSK_METAL_KEY = new NamespacedKey("bending", PERSISTENT_METAL_KEY);
-  public static final NamespacedKey NSK_MATERIAL = new NamespacedKey("bending", PERSISTENT_MATERIAL);
-
-  private static final byte VALUE = 0x1;
-
-  private static Plugin plugin;
+  public static final byte EMPTY = 0x1;
 
   private Metadata() {
-  }
-
-  public static void inject(Plugin plugin) {
-    Objects.requireNonNull(plugin);
-    if (Metadata.plugin == null) {
-      Metadata.plugin = plugin;
-    }
-  }
-
-  public static boolean hasKey(@Nullable PersistentDataHolder dataHolder, NamespacedKey key) {
-    return dataHolder != null && dataHolder.getPersistentDataContainer().has(key);
-  }
-
-  public static boolean addEmptyKey(PersistentDataHolder dataHolder, NamespacedKey key) {
-    if (!hasKey(dataHolder, key)) {
-      dataHolder.getPersistentDataContainer().set(key, PersistentDataType.BYTE, VALUE);
-    }
-    return true;
-  }
-
-  public static void add(Metadatable target, String key) {
-    add(target, key, null);
-  }
-
-  public static void add(Metadatable target, String key, @Nullable Object object) {
-    target.setMetadata(key, new FixedMetadataValue(plugin, object));
-  }
-
-  public static void remove(Metadatable target, String key) {
-    target.removeMetadata(key, plugin);
   }
 }

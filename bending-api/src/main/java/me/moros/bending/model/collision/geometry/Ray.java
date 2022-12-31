@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -20,6 +20,7 @@
 package me.moros.bending.model.collision.geometry;
 
 import me.moros.math.FastMath;
+import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
 /**
@@ -62,8 +63,8 @@ public class Ray implements Collider {
   }
 
   @Override
-  public Collider at(Vector3d point) {
-    return new Ray(point, direction, invDir);
+  public Collider at(Position point) {
+    return new Ray(point.toVector3d(), direction, invDir);
   }
 
   @Override

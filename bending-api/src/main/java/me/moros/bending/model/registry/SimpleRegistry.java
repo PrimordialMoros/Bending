@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -22,6 +22,7 @@ package me.moros.bending.model.registry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -37,8 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <V> the value type
  */
 public class SimpleRegistry<K, V> implements Registry<K, V> {
-  private final String namespace;
-
+  private final Key key;
   protected final Map<K, V> registryMap;
   protected final Function<V, K> inverseMapper;
   protected final Function<String, K> keyMapper;
@@ -47,7 +49,7 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
 
   protected SimpleRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper) {
     registryMap = new ConcurrentHashMap<>();
-    this.namespace = namespace;
+    this.key = Key.key(namespace, "registry");
     this.inverseMapper = inverseMapper;
     this.keyMapper = keyMapper;
   }
@@ -57,8 +59,8 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
   }
 
   @Override
-  public String namespace() {
-    return namespace;
+  public @NonNull Key key() {
+    return key;
   }
 
   @Override
@@ -80,7 +82,7 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
 
   protected void checkLock() {
     if (isLocked()) {
-      throw new RegistryModificationException("Registry is locked!");
+      throw new RegistryModificationException("Registry " + key.asString() + " is locked!");
     }
   }
 
@@ -103,7 +105,7 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
   @Override
   public @Nullable V fromString(String input) {
     Objects.requireNonNull(input);
-    K key = keyMapper.apply(input);
+    K key = keyMapper.apply(input.toLowerCase(Locale.ROOT));
     return key == null ? null : get(key);
   }
 

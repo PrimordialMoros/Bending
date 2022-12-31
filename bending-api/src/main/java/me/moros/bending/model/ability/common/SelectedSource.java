@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -25,14 +25,13 @@ import java.util.Map;
 import me.moros.bending.model.ability.state.State;
 import me.moros.bending.model.ability.state.StateChain;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.block.BlockType;
+import me.moros.bending.platform.particle.Particle;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempBlock.Snapshot;
-import me.moros.bending.util.ParticleUtil;
 import me.moros.math.Vector3d;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -45,7 +44,7 @@ public class SelectedSource implements State {
   private final User user;
   private Vector3d origin;
   private Block block;
-  private Material material;
+  private BlockType type;
   private Snapshot snapshot;
 
   private final boolean particles;
@@ -54,11 +53,11 @@ public class SelectedSource implements State {
   private boolean started;
   private boolean forceRemove;
 
-  public SelectedSource(User user, Block block, double maxDistance, @Nullable BlockData data) {
+  public SelectedSource(User user, Block block, double maxDistance, @Nullable BlockState state) {
     this.user = user;
     this.distanceSq = 0.25 + maxDistance * maxDistance;
-    particles = data == null;
-    reselect(block, data);
+    particles = state == null;
+    reselect(block, state);
   }
 
   public SelectedSource(User user, Block block, double maxDistance) {
@@ -69,21 +68,21 @@ public class SelectedSource implements State {
     return reselect(block, null);
   }
 
-  public boolean reselect(Block block, @Nullable BlockData data) {
+  public boolean reselect(Block block, @Nullable BlockState state) {
     if (block.equals(this.block)) {
       return false;
     }
-    Vector3d newOrigin = Vector3d.fromCenter(block);
+    Vector3d newOrigin = block.center();
     if (user.eyeLocation().distanceSq(newOrigin) > distanceSq) {
       return false;
     }
     onDestroy();
     this.block = block;
     this.origin = newOrigin;
-    this.material = data == null ? block.getType() : data.getMaterial();
-    if (data != null) {
+    this.type = state == null ? block.type() : state.type();
+    if (state != null) {
       snapshot = TempBlock.MANAGER.get(block).map(TempBlock::snapshot).orElse(null);
-      TempBlock.builder(data).build(block);
+      TempBlock.builder(state).build(block);
       INSTANCES.put(block, this);
     }
     return true;
@@ -103,7 +102,7 @@ public class SelectedSource implements State {
     if (!started) {
       return;
     }
-    if (block.getType() != material) {
+    if (block.type() != type) {
       forceRemove = true;
     }
     onDestroy();
@@ -124,7 +123,7 @@ public class SelectedSource implements State {
       return UpdateResult.REMOVE;
     }
     if (particles) {
-      ParticleUtil.of(Particle.SMOKE_NORMAL, origin.add(0, 0.5, 0)).spawn(user.world());
+      Particle.SMOKE.builder(origin.add(0, 0.5, 0)).spawn(user.world());
     }
     return UpdateResult.CONTINUE;
   }
@@ -134,7 +133,7 @@ public class SelectedSource implements State {
   }
 
   public void onDestroy() {
-    if (!particles && block != null && block.getType() == material) {
+    if (!particles && block != null && block.type() == type) {
       TempBlock.revertToSnapshot(block, snapshot);
     }
     INSTANCES.remove(block);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -23,7 +23,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 
-import org.bukkit.block.Block;
+import me.moros.bending.platform.block.Block;
 
 public abstract class PhaseTransformer {
   private final Deque<Block> queue;
