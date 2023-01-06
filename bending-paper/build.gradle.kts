@@ -41,7 +41,7 @@ dependencies {
     implementation("org.spongepowered", "configurate-hocon", "4.1.2")
     implementation("org.bstats", "bstats-bukkit", "3.0.0")
     implementation("cloud.commandframework", "cloud-paper", "1.7.1")
-    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.7.1")
+    implementation("cloud.commandframework", "cloud-minecraft-extras", "1.8.0")
     implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.2")
     implementation("com.github.stefvanschie.inventoryframework", "IF", "0.10.7")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
