@@ -264,7 +264,7 @@ public final class StorageImpl implements BendingStorage {
   private Set<Element> getElements(int playerId) {
     return DB.withHandle(handle ->
       handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT.query()).bind(0, playerId)
-        .mapTo(String.class).stream().map(Element::fromName).filter(Objects::nonNull).collect(Collectors.toSet())
+        .mapTo(String.class).stream().map(Element::fromName).filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet())
     );
   }
 

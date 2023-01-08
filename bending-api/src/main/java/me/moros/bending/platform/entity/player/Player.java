@@ -19,9 +19,12 @@
 
 package me.moros.bending.platform.entity.player;
 
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.platform.item.Inventory;
+import me.moros.bending.platform.item.Item;
+import net.kyori.adventure.text.Component;
 
 public interface Player extends LivingEntity {
   @Override
@@ -30,4 +33,8 @@ public interface Player extends LivingEntity {
   GameMode gamemode();
 
   boolean canSee(Entity other);
+
+  default void sendNotification(Item item, Component title) {
+    NativeAdapter.instance().sendNotification(this, item, title);
+  }
 }

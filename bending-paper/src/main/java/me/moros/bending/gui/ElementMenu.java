@@ -83,10 +83,6 @@ public final class ElementMenu {
 
 
   public static boolean createMenu(ElementHandler handler, BendingPlayer player) {
-    if (!player.hasPermission(CommandPermissions.HELP.toString())) {
-      Message.GUI_NO_PERMISSION.send(player);
-      return false;
-    }
     new ElementMenu(handler, player);
     return true;
   }

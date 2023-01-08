@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.DamageSource;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.temporal.TemporalManager;
@@ -73,7 +72,7 @@ public final class TempBlock extends Temporary {
     } else {
       index.weak = builder.weak;
     }
-    NativeAdapter.instance().setBlockFast(block, state);
+    block.setState(state);
     refreshGravityCache(block);
   }
 
@@ -236,7 +235,7 @@ public final class TempBlock extends Temporary {
     }
 
     private void revert() {
-      block.world().loadChunkAsync(block).thenRun(() -> NativeAdapter.instance().setBlockFast(block, state));
+      block.world().loadChunkAsync(block).thenRun(() -> block.setState(state));
     }
   }
 

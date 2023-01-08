@@ -76,7 +76,7 @@ public final class BlockInitializer extends Initializer {
     Map<Key, Set<BlockType>> map = new HashMap<>();
     for (var tag : Bukkit.getTags(Tag.REGISTRY_BLOCKS, Material.class)) {
       Set<BlockType> data = tag.getValues().stream().map(PlatformAdapter.BLOCK_MATERIAL_INDEX::key)
-        .filter(Objects::nonNull).collect(Collectors.toSet());
+        .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
       map.put(PlatformAdapter.fromNsk(tag.getKey()), data);
     }
     return map;

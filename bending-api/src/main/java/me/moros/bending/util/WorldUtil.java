@@ -52,19 +52,11 @@ public final class WorldUtil {
   }
 
   /**
-   * Try to light a block if it's a furnace, smoker, blast furnace or campfire.
+   * Try to light a block if it's a campfire.
    * @param block the block to light
    */
   public static void tryLightBlock(Block block) {
-    boolean light = false;
-    // TODO Handle furnace
-    /*if (state2 instanceof Furnace furnace) {
-      if (furnace.getBurnTime() < 800) {
-        furnace.setBurnTime((short) 800);
-        light = true;
-      }
-    }*/
-    if (light || MaterialUtil.isCampfire(block)) {
+    if (MaterialUtil.isCampfire(block)) {
       block.setState(block.state().withProperty(StateProperty.LIT, true));
     }
   }

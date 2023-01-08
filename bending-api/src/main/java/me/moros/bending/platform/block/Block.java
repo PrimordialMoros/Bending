@@ -21,6 +21,7 @@ package me.moros.bending.platform.block;
 
 import java.util.stream.Stream;
 
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.platform.entity.Metadatable;
 import me.moros.bending.platform.world.World;
@@ -51,7 +52,7 @@ public record Block(World world, int blockX, int blockY, int blockZ) implements 
   }
 
   public boolean setType(BlockType type) {
-    return world().setBlockState(this, type.defaultState());
+    return setState(type.defaultState());
   }
 
   public BlockState state() {
@@ -59,7 +60,7 @@ public record Block(World world, int blockX, int blockY, int blockZ) implements 
   }
 
   public boolean setState(BlockState state) {
-    return world().setBlockState(this, state);
+    return NativeAdapter.instance().setBlockFast(this, state);
   }
 
   public AABB bounds() {

@@ -33,7 +33,6 @@ import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.minecraft.extras.MinecraftHelp.HelpColors;
 import me.moros.bending.BendingPlugin;
-import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ElementHandler;
@@ -266,6 +265,10 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
 
   private void onElementChooseOptional(BendingPlayer player, @Nullable Element element) {
     if (element == null) {
+      if (!player.hasPermission(CommandPermissions.HELP.toString())) {
+        Message.GUI_NO_PERMISSION.send(player);
+        return;
+      }
       Platform.instance().factory().buildMenu(this, player);
     } else {
       onElementChoose(player, element);
@@ -274,8 +277,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
 
   private void sendElementNotification(User user, Element element) {
     if (user.entity() instanceof Player player) {
-      Component title = Message.ELEMENT_TOAST_NOTIFICATION.build(element.displayName());
-      NativeAdapter.instance().sendNotification(player, Item.NETHER_STAR, title);
+      player.sendNotification(Item.NETHER_STAR, Message.ELEMENT_TOAST_NOTIFICATION.build(element.displayName()));
     }
   }
 

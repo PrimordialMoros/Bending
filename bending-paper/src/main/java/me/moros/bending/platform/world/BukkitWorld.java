@@ -123,7 +123,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public boolean setBlockState(int x, int y, int z, BlockState state) {
-    return false;
+    handle().setBlockData(x, y, z, PlatformAdapter.toBukkitData(state));
+    return true;
   }
 
   @Override

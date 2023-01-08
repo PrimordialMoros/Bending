@@ -19,12 +19,12 @@
 
 package me.moros.bending.model.raytrace;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.platform.entity.player.GameMode;
@@ -177,7 +177,7 @@ public final class ContextBuilder {
    * @return the result
    */
   public BlockRayTrace blocks(World world) {
-    return NativeAdapter.instance().rayTraceBlocks(build(), world);
+    return world.rayTraceBlocks(build());
   }
 
   /**
@@ -195,8 +195,12 @@ public final class ContextBuilder {
    */
   public Context build() {
     Vector3d endPoint = origin.add(direction.multiply(range));
-    Set<Vector3i> ignoredBlocks = ignore.stream().map(p -> Vector3i.of(p.blockX(), p.blockY(), p.blockZ())).collect(Collectors.toSet());
-    return new ContextImpl(origin, endPoint, range, raySize, ignoreLiquids, ignorePassable, ignoredBlocks, entityPredicate);
+    return new ContextImpl(origin, endPoint, range, raySize, ignoreLiquids, ignorePassable, deepCopy(ignore), entityPredicate);
+  }
+
+  private static Set<Vector3i> deepCopy(Collection<Position> col) {
+    // Make new vector3i instances to ensure equality/hashcode checks are consistent
+    return col.stream().map(p -> Vector3i.of(p.blockX(), p.blockY(), p.blockZ())).collect(Collectors.toUnmodifiableSet());
   }
 
   private static boolean userPredicate(Entity check, Entity entity) {

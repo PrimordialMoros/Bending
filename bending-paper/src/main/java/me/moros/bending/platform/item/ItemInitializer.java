@@ -61,7 +61,7 @@ public final class ItemInitializer extends Initializer {
     Map<Key, Set<Item>> map = new HashMap<>();
     for (var tag : Bukkit.getTags(Tag.REGISTRY_ITEMS, Material.class)) {
       Set<Item> data = tag.getValues().stream().map(PlatformAdapter.ITEM_MATERIAL_INDEX::key)
-        .filter(Objects::nonNull).collect(Collectors.toSet());
+        .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
       map.put(PlatformAdapter.fromNsk(tag.getKey()), data);
     }
     return map;
