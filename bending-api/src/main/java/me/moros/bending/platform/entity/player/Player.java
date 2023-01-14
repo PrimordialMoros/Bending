@@ -27,6 +27,8 @@ import me.moros.bending.platform.item.Item;
 import net.kyori.adventure.text.Component;
 
 public interface Player extends LivingEntity {
+  boolean hasPermission(String permission);
+
   @Override
   Inventory inventory();
 

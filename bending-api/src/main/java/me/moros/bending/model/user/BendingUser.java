@@ -21,12 +21,12 @@ package me.moros.bending.model.user;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
@@ -38,6 +38,7 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.AttributeModifier;
 import me.moros.bending.model.board.Board;
+import me.moros.bending.model.data.DataContainer;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.predicate.BendingConditions;
 import me.moros.bending.model.preset.Preset;
@@ -45,7 +46,6 @@ import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.profile.BenderData;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.platform.entity.player.Player;
-import me.moros.bending.platform.property.BooleanProperty;
 import me.moros.bending.temporal.Cooldown;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,7 +58,6 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private final Game game;
   private final DataContainer container;
   private final Set<Element> elements;
-  private final Map<BooleanProperty, Boolean> properties;
   private final Map<String, TriState> virtualPermissions;
   private final Collection<AttributeModifier> attributes;
   private final AbilityDescription[] slots;
@@ -70,8 +69,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   protected BendingUser(Game game, LivingEntity entity, BenderData data) {
     this.entity = entity;
     this.game = game;
-    container = new DataContainerImpl();
-    properties = new IdentityHashMap<>();
+    container = DataContainer.blocking(500, TimeUnit.MILLISECONDS);
     virtualPermissions = new ConcurrentHashMap<>();
     attributes = ConcurrentHashMap.newKeySet();
     slots = new AbilityDescription[9];
@@ -83,16 +81,6 @@ public sealed class BendingUser implements User permits BendingPlayer {
     elements.addAll(data.elements());
     condition = BendingConditions.all();
     validateSlots();
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    return TriState.byBoolean(properties.computeIfAbsent(property, p -> false));
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    properties.put(property, value);
   }
 
   @Override

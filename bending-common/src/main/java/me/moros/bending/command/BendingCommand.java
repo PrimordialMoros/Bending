@@ -235,12 +235,11 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
 
   private void onReload(T sender) {
     game.reload();
-    plugin.translationManager().reload();
     Message.RELOAD.send(sender);
   }
 
   private void onBoard(BendingPlayer player) {
-    boolean hidden = player.store().containsKey(Board.HIDDEN);
+    boolean hidden = player.store().has(Board.HIDDEN);
     if (!player.board().isEnabled() && !hidden) {
       Message.BOARD_DISABLED.send(player);
       return;
@@ -249,7 +248,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
       player.store().remove(Board.HIDDEN);
       Message.BOARD_TOGGLED_ON.send(player);
     } else {
-      player.store().put(Board.HIDDEN, Board.dummy());
+      player.store().add(Board.HIDDEN, Board.dummy());
       Message.BOARD_TOGGLED_OFF.send(player);
     }
     player.board();

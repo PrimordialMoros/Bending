@@ -28,6 +28,7 @@ import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
+import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.world.World;
 import me.moros.math.Position;
 
@@ -37,6 +38,8 @@ public interface PlatformFactory {
   boolean buildMenu(ElementHandler handler, BendingPlayer player);
 
   ItemBuilder itemBuilder(Item item);
+
+  ItemBuilder itemBuilder(ItemSnapshot snapshot);
 
   Entity createFallingBlock(World world, Position center, BlockState state, boolean gravity);
 

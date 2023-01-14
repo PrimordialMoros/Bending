@@ -19,8 +19,8 @@
 
 package me.moros.bending.model.board;
 
-import me.moros.bending.model.BendingKey;
 import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.platform.Platform;
 import me.moros.bending.util.KeyUtil;
@@ -29,7 +29,7 @@ import me.moros.bending.util.KeyUtil;
  * Represents a bending board that utilizes a scoreboard to render bound abilities and cooldowns.
  */
 public interface Board {
-  BendingKey<Board> HIDDEN = KeyUtil.bending("hidden-board", Board.class);
+  DataKey<Board> HIDDEN = KeyUtil.data("hidden-board", Board.class);
 
   String SEP = " -------------- ";
 

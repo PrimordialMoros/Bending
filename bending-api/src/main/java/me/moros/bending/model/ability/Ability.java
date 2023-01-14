@@ -26,6 +26,7 @@ import me.moros.bending.model.collision.Collision;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.user.User;
+import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
@@ -85,5 +86,9 @@ public interface Ability extends Updatable {
    * @see AbilityManager#destroyInstance(Ability)
    */
   default void onDestroy() {
+  }
+
+  interface SpoutAbility extends Ability {
+    void handleMovement(Vector3d velocity);
   }
 }

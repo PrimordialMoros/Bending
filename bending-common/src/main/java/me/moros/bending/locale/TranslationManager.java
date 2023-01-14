@@ -57,9 +57,9 @@ public final class TranslationManager implements Iterable<Locale> {
   private final Path translationsDirectory;
   private TranslationRegistry registry;
 
-  public TranslationManager(Logger logger, String directory) {
+  public TranslationManager(Logger logger, Path directory) {
     this.logger = logger;
-    translationsDirectory = Path.of(directory, "translations");
+    translationsDirectory = directory.resolve("translations");
     reload();
   }
 

@@ -4,7 +4,11 @@ tasker = "1.0.0-SNAPSHOT"
 adventure = "4.11.0"
 configurate = "4.1.2"
 cloud = "1.8.0"
+cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.0"
+paper = "1.19.2-R0.1-SNAPSHOT"
+sponge = "10.0.0-SNAPSHOT"
+minecraft = "1.19.2"
 
 [libraries]
 storage = { module = "me.moros:storage", version = "3.0.0" }
@@ -45,6 +49,7 @@ bstats-sponge = { module = "org.bstats:bstats-sponge", version.ref = "bstats" }
 cloud-core = { module = "cloud.commandframework:cloud-core", version.ref = "cloud" }
 cloud-minecraft = { module = "cloud.commandframework:cloud-minecraft-extras", version.ref = "cloud" }
 cloud-paper = { module = "cloud.commandframework:cloud-paper", version.ref = "cloud" }
+cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "cloud-snapshot" }
 
 # Databases
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.29" }
@@ -55,13 +60,16 @@ h2 = { module = "com.h2database:h2", version = "2.1.214" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.1" }
 
 # Bukkit
-paper = { module = "io.papermc.paper:paper-api", version = "1.19.2-R0.1-SNAPSHOT" }
+paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.8" }
 grief-prevention = { module = "com.github.TechFOrtress:GriefPrevention", version = "16.18" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.98.4.21" }
 lwc = { module = "com.griefcraft:lwc", version = "2.2.9-dev" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.7" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.2" }
+
+# Sponge
+sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -71,3 +79,5 @@ jmh = { id = "me.champeau.jmh", version = "0.6.8" }
 checker = { id = "org.checkerframework", version = "0.6.21" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.4.1" }
+sponge = { id = "org.spongepowered.gradle.plugin", version = "2.1.1" }
+vanilla = { id = "org.spongepowered.gradle.vanilla", version = "0.2.1-SNAPSHOT" }

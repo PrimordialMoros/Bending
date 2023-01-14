@@ -22,8 +22,10 @@ package me.moros.bending.platform;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import me.moros.bending.Bending;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.block.BlockTag;
@@ -56,6 +58,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class PlatformAdapter {
@@ -66,11 +69,12 @@ public final class PlatformAdapter {
   public static final Index<org.bukkit.potion.PotionEffectType, PotionEffect> POTION_EFFECT_INDEX;
   public static final Index<Item, Material> ITEM_MATERIAL_INDEX;
   public static final Index<BlockType, Material> BLOCK_MATERIAL_INDEX;
+  public static final Map<Class<?>, PersistentDataType<?, ?>> PERSISTENT_DATA_TYPE_MAP;
 
   static {
-    var l0 = List.of(BlockType.AIR, BlockTag.DIRT, EntityType.PLAYER, Item.AIR, ItemTag.DIRT,
+    var dummy = List.of(BlockType.AIR, BlockTag.DIRT, EntityType.PLAYER, Item.AIR, ItemTag.DIRT,
       Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
-    Bending.plugin().logger().debug("Init: " + l0.size()); // Required for proper class loading and initialization
+    Bending.plugin().logger().debug("Init: " + dummy.size()); // Required for proper class loading and initialization
 
     ENTITY_TYPE_INDEX = Index.create(t -> Registry.ENTITY_TYPE.get(nsk(t.key())), EntityType.registry().stream().toList());
     POTION_EFFECT_INDEX = Index.create(t -> Registry.POTION_EFFECT_TYPE.get(nsk(t.key())), PotionEffect.registry().stream().toList());
@@ -90,6 +94,18 @@ public final class PlatformAdapter {
     }
     ITEM_MATERIAL_INDEX = Index.create(Material.class, itemMap::get, itemMap.keySet().toArray(Material[]::new));
     BLOCK_MATERIAL_INDEX = Index.create(Material.class, blockTypeMap::get, blockTypeMap.keySet().toArray(Material[]::new));
+    PERSISTENT_DATA_TYPE_MAP = Map.ofEntries(
+      entry(PersistentDataType.SHORT), entry(PersistentDataType.FLOAT), entry(PersistentDataType.DOUBLE),
+      entry(BooleanPDT.INSTANCE), entry(PersistentDataType.STRING),
+      entry(PersistentDataType.BYTE), entry(PersistentDataType.BYTE_ARRAY),
+      entry(PersistentDataType.INTEGER), entry(PersistentDataType.INTEGER_ARRAY),
+      entry(PersistentDataType.LONG), entry(PersistentDataType.LONG_ARRAY),
+      entry(PersistentDataType.TAG_CONTAINER), entry(PersistentDataType.TAG_CONTAINER_ARRAY)
+    );
+  }
+
+  private static Entry<Class<?>, PersistentDataType<?, ?>> entry(PersistentDataType<?, ?> type) {
+    return Map.entry(type.getComplexType(), type);
   }
 
   private static <T extends Keyed> void tryAdd(Material m, me.moros.bending.model.registry.Registry<Key, T> registry, Map<Material, T> map) {
@@ -127,10 +143,14 @@ public final class PlatformAdapter {
     return new NamespacedKey(key.namespace(), key.value());
   }
 
-  // NamespacedKey impl uses dumb equals/hashcode, we need to duplicate keys
-  @SuppressWarnings("PatternValidation")
+  // To ensure consistent equals/hashcode we need to duplicate keys
   public static Key fromNsk(NamespacedKey key) {
     return Key.key(key.namespace(), key.value());
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> @Nullable PersistentDataType<?, T> dataType(DataKey<T> key) {
+    return (PersistentDataType<?, T>) PERSISTENT_DATA_TYPE_MAP.get(key.type());
   }
 
   public static World fromBukkitWorld(org.bukkit.World world) {

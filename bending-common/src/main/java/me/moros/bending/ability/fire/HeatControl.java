@@ -168,9 +168,8 @@ public class HeatControl extends AbilityInstance {
       Item cooked = MaterialUtil.COOKABLE.get(uncooked);
       if (cooked != null && inv.remove(uncooked)) {
         ItemSnapshot item = Platform.instance().factory().itemBuilder(cooked).build();
-        int remaining = inv.add(item);
-        if (remaining > 0) {
-          user.world().dropItem(user.location(), item.withAmount(remaining));
+        if (inv.add(item) > 0) {
+          user.world().dropItem(user.location(), item);
         }
         return true;
       }
@@ -216,7 +215,7 @@ public class HeatControl extends AbilityInstance {
 
   public static void toggleLight(User user) {
     if (user.selectedAbilityName().equals("HeatControl")) {
-      var key = KeyUtil.bending("heatcontrol-light", Light.class);
+      var key = KeyUtil.data("heatcontrol-light", Light.class);
       if (user.store().canEdit(key)) {
         Light light = user.store().toggle(key, Light.ON);
         user.sendActionBar(Component.text("Light: " + light.name(), ColorPalette.TEXT_COLOR));

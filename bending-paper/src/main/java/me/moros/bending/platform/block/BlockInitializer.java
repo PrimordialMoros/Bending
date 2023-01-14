@@ -19,6 +19,7 @@
 
 package me.moros.bending.platform.block;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import me.moros.bending.model.registry.Container;
-import me.moros.bending.platform.Initializer;
+import me.moros.bending.platform.AbstractInitializer;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.sound.SoundGroup;
@@ -39,13 +40,13 @@ import org.bukkit.Tag;
 import org.bukkit.block.data.BlockData;
 import org.slf4j.Logger;
 
-public final class BlockInitializer extends Initializer {
-  public BlockInitializer(String path, Logger logger) {
+public final class BlockInitializer extends AbstractInitializer {
+  public BlockInitializer(Path path, Logger logger) {
     super(path, logger);
   }
 
   @Override
-  protected void init() {
+  public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
     for (BlockTag tag : BlockTag.registry()) {
@@ -64,10 +65,10 @@ public final class BlockInitializer extends Initializer {
         var data = mat.createBlockData();
         BlockTypeImpl.STATE_REGISTRY.register(PlatformAdapter.fromBukkitData(data));
         BlockTypeImpl.PROPERTY_REGISTRY.register(mapProperties(type, data));
-      }
-      var item = mat == null ? null : PlatformAdapter.ITEM_MATERIAL_INDEX.key(mat);
-      if (item != null) {
-        BlockTypeImpl.ITEM_REGISTRY.register(item);
+        var item = PlatformAdapter.ITEM_MATERIAL_INDEX.key(mat);
+        if (item != null) {
+          BlockTypeImpl.ITEM_REGISTRY.register(item);
+        }
       }
     }
   }

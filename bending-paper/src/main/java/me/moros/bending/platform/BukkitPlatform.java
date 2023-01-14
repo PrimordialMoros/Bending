@@ -19,6 +19,7 @@
 
 package me.moros.bending.platform;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import me.moros.bending.Bending;
@@ -33,6 +34,7 @@ import me.moros.bending.platform.item.BukkitItemBuilder;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
+import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.bukkit.BukkitMathAdapter;
@@ -44,7 +46,7 @@ import org.bukkit.inventory.ItemStack;
 public class BukkitPlatform implements Platform, PlatformFactory {
   public BukkitPlatform(Bending plugin) {
     BukkitMathAdapter.register();
-    String dir = plugin.getDataFolder().toString();
+    Path dir = plugin.getDataFolder().toPath();
     new BlockInitializer(dir, plugin.logger());
     new ItemInitializer(dir, plugin.logger());
   }
@@ -76,7 +78,16 @@ public class BukkitPlatform implements Platform, PlatformFactory {
 
   @Override
   public ItemBuilder itemBuilder(Item item) {
-    return new BukkitItemBuilder(item);
+    var material = PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(item);
+    if (!material.isItem()) {
+      throw new IllegalStateException(material.name() + " is not an item!");
+    }
+    return new BukkitItemBuilder(new ItemStack(material));
+  }
+
+  @Override
+  public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
+    return new BukkitItemBuilder(PlatformAdapter.toBukkitItem(snapshot));
   }
 
   @Override

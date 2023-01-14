@@ -21,10 +21,10 @@ package me.moros.bending.game;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import me.moros.bending.BendingPlugin;
-import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.manager.AbilityManager;
@@ -45,10 +45,10 @@ import me.moros.bending.temporal.TempEntity;
 import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.Tasker;
-import org.slf4j.Logger;
+import me.moros.bending.util.TextUtil;
 
 public final class GameImpl implements Game {
-  private final Logger logger;
+  private final BendingPlugin plugin;
   private final ConfigProcessor configProcessor;
   private final BendingStorage storage;
 
@@ -59,13 +59,13 @@ public final class GameImpl implements Game {
 
   private final Collection<TemporalManager<?, ?>> temporal;
 
-  public GameImpl(BendingPlugin plugin, ConfigManager configManager, BendingStorage storage) {
-    this.logger = plugin.logger();
-    this.configProcessor = configManager.processor();
+  public GameImpl(BendingPlugin plugin, BendingStorage storage) {
+    this.plugin = plugin;
+    this.configProcessor = plugin.configManager().processor();
     this.storage = storage;
 
     flightManager = new FlightManagerImpl();
-    worldManager = new WorldManagerImpl(plugin, configManager);
+    worldManager = new WorldManagerImpl(plugin);
 
     activationController = new ActivationControllerImpl();
     temporal = initTemporary();
@@ -75,6 +75,18 @@ public final class GameImpl implements Game {
 
     Tasker.sync().repeat(this::update, 1);
     Tasker.sync().repeat(BendingEffect::cleanup, 5);
+
+    printInfo();
+  }
+
+  private void printInfo() {
+    int abilityAmount = Registries.ABILITIES.size();
+    int sequenceAmount = Registries.SEQUENCES.size();
+    int collisionAmount = Registries.COLLISIONS.size();
+    plugin.logger().info(String.format("Found %d registered abilities (%d Sequences)!", abilityAmount, sequenceAmount));
+    plugin.logger().info(String.format("Found %d registered collisions!", collisionAmount));
+    plugin.logger().info("Registered protection plugins: " + TextUtil.collect(Registries.PROTECTIONS));
+    plugin.logger().info("Registered translations: " + TextUtil.collect(plugin.translationManager(), Locale::getLanguage));
   }
 
   private void lockRegistries() {
@@ -90,13 +102,14 @@ public final class GameImpl implements Game {
       worldManager.update();
       flightManager.update();
     } catch (Throwable t) { // The show must go on
-      logger.error(t.getMessage(), t);
+      plugin.logger().error(t.getMessage(), t);
     }
   }
 
   @Override
   public void reload() {
     cleanup(false);
+    plugin.translationManager().reload();
     Registries.BENDERS.forEach(u -> worldManager.instance(u.worldUid()).createPassives(u));
   }
 
@@ -106,11 +119,12 @@ public final class GameImpl implements Game {
     flightManager.removeAll();
     temporal.forEach(TemporalManager::removeAll);
     if (shutdown) {
+      EventBus.INSTANCE.shutdown();
+      plugin.configManager().close();
       storage.saveProfilesAsync(Registries.BENDERS.players().map(BendingPlayer::toProfile).toList());
       Tasker.sync().shutdown();
       Tasker.async().shutdown();
       storage.close();
-      EventBus.INSTANCE.shutdown();
     }
   }
 

@@ -19,6 +19,7 @@
 
 package me.moros.bending.platform.item;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import me.moros.bending.model.registry.Container;
-import me.moros.bending.platform.Initializer;
+import me.moros.bending.platform.AbstractInitializer;
 import me.moros.bending.platform.PlatformAdapter;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
@@ -36,13 +37,13 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.slf4j.Logger;
 
-public final class ItemInitializer extends Initializer {
-  public ItemInitializer(String path, Logger logger) {
+public final class ItemInitializer extends AbstractInitializer {
+  public ItemInitializer(Path path, Logger logger) {
     super(path, logger);
   }
 
   @Override
-  protected void init() {
+  public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
     for (ItemTag tag : ItemTag.registry()) {

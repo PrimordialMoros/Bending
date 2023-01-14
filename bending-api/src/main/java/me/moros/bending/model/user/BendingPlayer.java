@@ -104,7 +104,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public Board board() {
-    if (!game().worldManager().isEnabled(worldUid()) || store().containsKey(Board.HIDDEN)) {
+    if (!game().worldManager().isEnabled(worldUid()) || store().has(Board.HIDDEN)) {
       board.disableScoreboard();
       board = Board.dummy();
     } else if (!board.isEnabled()) {
@@ -154,7 +154,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   public PlayerProfile toProfile() {
     BenderData data = new BenderData(createPresetFromSlots("").abilities(), elements(), presets);
-    boolean board = !store().containsKey(Board.HIDDEN);
+    boolean board = !store().has(Board.HIDDEN);
     return new PlayerProfile(internalId, board, data);
   }
 

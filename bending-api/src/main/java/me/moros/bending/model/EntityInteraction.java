@@ -21,13 +21,14 @@ package me.moros.bending.model;
 
 import java.lang.ref.WeakReference;
 
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.util.KeyUtil;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record EntityInteraction(WeakReference<Entity> entity, @Nullable Vector3d point) {
-  public static BendingKey<EntityInteraction> KEY = KeyUtil.bending("last-interacted-enttity", EntityInteraction.class);
+  public static DataKey<EntityInteraction> KEY = KeyUtil.data("last-interacted-enttity", EntityInteraction.class);
 
   public EntityInteraction(Entity entity, @Nullable Vector3d point) {
     this(new WeakReference<>(entity), point);

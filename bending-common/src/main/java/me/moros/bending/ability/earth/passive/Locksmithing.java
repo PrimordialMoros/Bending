@@ -31,6 +31,7 @@ import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.user.User;
+import me.moros.bending.platform.Platform;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.Lockable;
 import me.moros.bending.platform.entity.player.Player;
@@ -104,14 +105,18 @@ public class Locksmithing extends AbilityInstance {
 
   private Component getOrCreateKey(Inventory inv, ItemSnapshot item) {
     Component keyName = item.customDisplayName().orElse(null);
-    if (keyName == null || !item.hasPersistentMetadata(Metadata.METAL_KEY)) {
-      item.addPersistentMetadata(Metadata.METAL_KEY);
-      List<NamedTextColor> colors = List.copyOf(NamedTextColor.NAMES.values());
-      NamedTextColor randomColor = colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
-      keyName = Component.text(UUID.randomUUID().toString(), randomColor);
-      inv.renameMainHandItem(keyName);
+    if (keyName == null || item.get(Metadata.METAL_KEY).isEmpty()) {
+      keyName = generateName();
+      var key = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY).name(keyName).build(item.amount());
+      inv.setItemInMainHand(key);
     }
     return keyName;
+  }
+
+  private Component generateName() {
+    List<NamedTextColor> colors = List.copyOf(NamedTextColor.NAMES.values());
+    NamedTextColor randomColor = colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
+    return Component.text(UUID.randomUUID().toString(), randomColor);
   }
 
   public static void act(User user, Block block) {
@@ -135,7 +140,7 @@ public class Locksmithing extends AbilityInstance {
   }
 
   private static boolean validKey(ItemSnapshot item, String lock) {
-    if (!item.hasPersistentMetadata(Metadata.METAL_KEY)) {
+    if (item.get(Metadata.METAL_KEY).isEmpty()) {
       return false;
     }
     return item.customName().map(lock::equals).orElse(false);

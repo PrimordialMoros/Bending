@@ -21,6 +21,7 @@ package me.moros.bending;
 
 import java.io.InputStream;
 
+import me.moros.bending.config.ConfigManager;
 import me.moros.bending.locale.TranslationManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ public interface BendingPlugin {
   String version();
 
   Logger logger();
+
+  ConfigManager configManager();
 
   TranslationManager translationManager();
 

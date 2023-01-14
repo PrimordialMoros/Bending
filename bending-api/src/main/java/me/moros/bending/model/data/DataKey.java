@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model;
+package me.moros.bending.model.data;
 
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -26,11 +26,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * Key implementation that also holds the type of data that can be associated with it.
  * @param <T> the type of data
  */
-public final class BendingKey<T> implements Key {
+public final class DataKey<T> implements Key {
   private final Key key;
   private final Class<T> type;
 
-  private BendingKey(Key key, Class<T> type) {
+  private DataKey(Key key, Class<T> type) {
     this.key = key;
     this.type = type;
   }
@@ -63,7 +63,7 @@ public final class BendingKey<T> implements Key {
     if (this == obj) {
       return true;
     }
-    if (obj instanceof BendingKey<?> other) {
+    if (obj instanceof DataKey<?> other) {
       return key.equals(other.key) && type == other.type;
     }
     return false;
@@ -87,10 +87,10 @@ public final class BendingKey<T> implements Key {
    * @return the constructed bending key
    */
   @SuppressWarnings("unchecked")
-  public static <T> BendingKey<T> wrap(Key key, Class<T> clazz) {
-    if (key instanceof BendingKey<?> k && k.type() == clazz) {
-      return (BendingKey<T>) k;
+  public static <T> DataKey<T> wrap(Key key, Class<T> clazz) {
+    if (key instanceof DataKey<?> k && k.type() == clazz) {
+      return (DataKey<T>) k;
     }
-    return new BendingKey<>(key, clazz);
+    return new DataKey<>(key, clazz);
   }
 }

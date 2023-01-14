@@ -310,7 +310,7 @@ public final class TempBlock extends Temporary {
     }
 
     public Builder ability(@Nullable Ability ability) {
-      this.source = ability == null ? null : new DamageSource(ability.user().name(), ability.description());
+      this.source = ability == null ? null : DamageSource.of(ability.user().name(), ability.description());
       return this;
     }
 

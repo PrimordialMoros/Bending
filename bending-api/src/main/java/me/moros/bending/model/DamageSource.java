@@ -19,8 +19,19 @@
 
 package me.moros.bending.model;
 
+import java.util.Objects;
+
 import me.moros.bending.model.ability.AbilityDescription;
 import net.kyori.adventure.text.Component;
 
-public record DamageSource(Component name, AbilityDescription ability) {
+public interface DamageSource {
+  Component name();
+
+  AbilityDescription ability();
+
+  static DamageSource of(Component name, AbilityDescription ability) {
+    Objects.requireNonNull(name);
+    Objects.requireNonNull(ability);
+    return new DamageSourceImpl(name, ability);
+  }
 }

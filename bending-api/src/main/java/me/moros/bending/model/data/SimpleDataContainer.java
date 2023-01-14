@@ -17,55 +17,48 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model.user;
+package me.moros.bending.model.data;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
-import me.moros.bending.model.BendingKey;
-import me.moros.bending.model.ExpiringSet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-record DataContainerImpl(Map<BendingKey<?>, Object> data,
-                         ExpiringSet<BendingKey<?>> cooldowns) implements DataContainer {
-  DataContainerImpl() {
-    this(new ConcurrentHashMap<>(), new ExpiringSet<>(500));
+class SimpleDataContainer implements DataContainer {
+  private Map<DataKey<?>, Object> data;
+
+  SimpleDataContainer(Map<DataKey<?>, Object> data) {
+    this.data = data;
   }
 
   @Override
-  public <T> boolean containsKey(BendingKey<T> key) {
-    return data.containsKey(key);
+  public <T> Optional<T> get(DataKey<T> key) {
+    return Optional.ofNullable(cast(key.type(), data.get(key)));
   }
 
   @Override
-  public <T> boolean canEdit(BendingKey<T> key) {
-    return !cooldowns.contains(key);
-  }
-
-  @Override
-  public <T> void put(BendingKey<T> key, T value) {
-    cooldowns.add(key);
+  public <T> void add(DataKey<T> key, T value) {
     data.put(key, value);
   }
 
   @Override
-  public <T> @Nullable T remove(BendingKey<T> key) {
-    return cast(key.type(), data.remove(key));
+  public <T> void remove(DataKey<T> key) {
+    data.remove(key);
   }
 
   @Override
-  public <T> @Nullable T get(BendingKey<T> key) {
-    return cast(key.type(), data.get(key));
+  public <T> boolean canEdit(DataKey<T> key) {
+    return true;
   }
 
   @Override
-  public <T extends Enum<T>> T toggle(BendingKey<T> key, T defaultValue) {
+  public <T extends Enum<T>> T toggle(DataKey<T> key, T defaultValue) {
     T oldValue = cast(key.type(), data.computeIfAbsent(key, k -> defaultValue));
     if (oldValue != null && !canEdit(key)) {
       return oldValue;
     }
     T newValue = toggle(oldValue == null ? defaultValue : oldValue);
-    put(key, newValue);
+    add(key, newValue);
     return newValue;
   }
 
@@ -76,10 +69,9 @@ record DataContainerImpl(Map<BendingKey<?>, Object> data,
   }
 
   private <T> @Nullable T cast(Class<T> type, Object value) {
-    try {
+    if (type.isInstance(value)) {
       return type.cast(value);
-    } catch (ClassCastException e) {
-      return null;
     }
+    return null;
   }
 }

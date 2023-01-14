@@ -79,6 +79,7 @@ import me.moros.bending.model.ability.AbilityDescription.Sequence;
 import me.moros.bending.model.ability.SequenceStep;
 import me.moros.bending.model.collision.CollisionPair;
 import me.moros.bending.model.registry.Registries;
+import me.moros.bending.platform.Initializer;
 
 import static me.moros.bending.model.Element.*;
 import static me.moros.bending.model.ability.Activation.*;
@@ -86,7 +87,7 @@ import static me.moros.bending.model.ability.Activation.*;
 /**
  * Used to initialize all default ability descriptions, sequences and collisions.
  */
-public final class AbilityInitializer {
+public final class AbilityInitializer implements Initializer {
   public static final List<String> spouts = List.of("AirSpout", "WaterSpout");
   public static final List<String> blasts = List.of("EarthBlast", "FireBlast", "WaterManipulation");
   public static final List<String> layer0 = List.of("EarthGlove", "MetalCable");
@@ -97,6 +98,11 @@ public final class AbilityInitializer {
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
 
   AbilityInitializer() {
+    init();
+  }
+
+  @Override
+  public void init() {
     initAir();
     initWater();
     initEarth();

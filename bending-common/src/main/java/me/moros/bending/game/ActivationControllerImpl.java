@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import me.moros.bending.ability.air.AirBlast;
 import me.moros.bending.ability.air.AirScooter;
-import me.moros.bending.ability.air.AirSpout;
 import me.moros.bending.ability.air.Tornado;
 import me.moros.bending.ability.air.passive.GracefulDescent;
 import me.moros.bending.ability.air.sequence.AirWheel;
@@ -43,7 +42,6 @@ import me.moros.bending.ability.earth.sequence.EarthPillars;
 import me.moros.bending.ability.fire.FireJet;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.water.HealingWaters;
-import me.moros.bending.ability.water.WaterSpout;
 import me.moros.bending.ability.water.WaterWave;
 import me.moros.bending.ability.water.passive.HydroSink;
 import me.moros.bending.ability.water.sequence.Iceberg;
@@ -51,6 +49,7 @@ import me.moros.bending.ability.water.sequence.WaterGimbal;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.Ability;
+import me.moros.bending.model.ability.Ability.SpoutAbility;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.collision.geometry.AABB;
@@ -76,7 +75,7 @@ public final class ActivationControllerImpl implements ActivationController {
   private final SequenceManager sequenceManager;
 
   ActivationControllerImpl() {
-    this.cache = new ControllerCache();
+    this.cache = new ControllerCache(new HashMap<>(), new HashSet<>());
     this.sequenceManager = new SequenceManagerImpl(this);
   }
 
@@ -145,14 +144,8 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserMove(User user, Vector3d velocity) {
-    if (user.hasElement(Element.AIR)) {
-      AirSpout spout = cache.getAirSpout(user);
-      if (spout != null) {
-        spout.handleMovement(velocity);
-      }
-    }
-    if (user.hasElement(Element.WATER)) {
-      WaterSpout spout = cache.getWaterSpout(user);
+    if (user.hasElement(Element.AIR) || user.hasElement(Element.WATER)) {
+      SpoutAbility spout = cache.getSpout(user);
       if (spout != null) {
         spout.handleMovement(velocity);
       }
@@ -256,39 +249,24 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   // Optimize player move events by caching instances every tick
-  private static final class ControllerCache {
-    private final Map<UUID, AirSpout> airSpoutCache;
-    private final Map<UUID, WaterSpout> waterSpoutCache;
-    private final Set<UUID> interactionCache;
-
-    private ControllerCache() {
-      airSpoutCache = new HashMap<>();
-      waterSpoutCache = new HashMap<>();
-      interactionCache = new HashSet<>();
-    }
-
-    private @Nullable AirSpout getAirSpout(User user) {
-      return airSpoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.worldUid()).firstInstance(user, AirSpout.class).orElse(null));
-    }
-
-    private @Nullable WaterSpout getWaterSpout(User user) {
-      return waterSpoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.worldUid()).firstInstance(user, WaterSpout.class).orElse(null));
+  private record ControllerCache(Map<UUID, SpoutAbility> spoutCache, Set<UUID> interactionCache) {
+    private @Nullable SpoutAbility getSpout(User user) {
+      return spoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.worldUid()).firstInstance(user, SpoutAbility.class).orElse(null));
     }
 
     private void clear() {
-      airSpoutCache.clear();
-      waterSpoutCache.clear();
+      spoutCache.clear();
       interactionCache.clear();
     }
 
     private boolean addInteraction(UUID uuid) {
       return interactionCache.add(uuid);
     }
-  }
+  }// TODO revisit multi spouts users
 
   @Override
   public boolean hasSpout(UUID uuid) {
-    return cache.airSpoutCache.containsKey(uuid) || cache.waterSpoutCache.containsKey(uuid);
+    return cache.spoutCache.containsKey(uuid);
   }
 
   @Override

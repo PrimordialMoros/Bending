@@ -22,7 +22,6 @@ package me.moros.bending.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import me.moros.bending.BendingProperties;
@@ -38,6 +37,7 @@ import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Ray;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
 import me.moros.bending.model.predicate.RemovalPolicy;
@@ -55,18 +55,19 @@ import me.moros.bending.platform.sound.SoundEffect;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.util.InventoryUtil;
+import me.moros.bending.util.KeyUtil;
 import me.moros.bending.util.collision.CollisionUtil;
 import me.moros.bending.util.material.EarthMaterials;
 import me.moros.bending.util.material.MaterialUtil;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
+  public static final DataKey<MetalCable> CABLE_KEY = KeyUtil.data("metal-cable", MetalCable.class);
 
+  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
   private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
@@ -91,9 +92,8 @@ public class MetalCable extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.SNEAK) {
-      Predicate<Entity> predicate = e -> e.type() == EntityType.ARROW && e.hasMetadata(Metadata.METAL_CABLE);
-      for (Entity entity : user.world().nearbyEntities(user.eyeLocation(), 3, predicate)) {
-        MetalCable ability = entity.metadata(Metadata.METAL_CABLE, MetalCable.class).findAny().orElse(null);
+      for (Entity entity : user.world().nearbyEntities(user.eyeLocation(), 3, e -> e.type() == EntityType.ARROW)) {
+        MetalCable ability = entity.get(CABLE_KEY).orElse(null);
         if (ability != null && !entity.equals(ability.user().entity())) {
           ability.remove();
         }
@@ -226,7 +226,7 @@ public class MetalCable extends AbilityInstance {
     Vector3d origin = user.mainHandSide();
     Vector3d dir = targetLocation.subtract(origin).normalize();
     Entity arrow = user.shootArrow(origin, dir, 1.8);
-    arrow.addMetadata(Metadata.METAL_CABLE, this);
+    arrow.add(CABLE_KEY, this);
     cable = arrow;
     location = cable.location();
     SoundEffect.METAL.play(user.world(), origin);

@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import me.moros.bending.model.GridIterator;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.board.Board;
+import me.moros.bending.model.data.DataContainer;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.protection.ProtectionCache;

@@ -155,6 +155,6 @@ public final class TempArmor extends Temporary {
   }
 
   private static ItemSnapshot filter(ItemSnapshot item) {
-    return !item.hasPersistentMetadata(Metadata.ARMOR_KEY) ? item : ItemSnapshot.AIR.get();
+    return item.get(Metadata.ARMOR_KEY).isEmpty() ? item : ItemSnapshot.AIR.get();
   }
 }

@@ -20,17 +20,16 @@
 package me.moros.bending.platform;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.platform.entity.BukkitPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Criteria;
@@ -54,7 +53,7 @@ final class BoardImpl implements Board {
 
   BoardImpl(BendingPlayer player) {
     this.player = player;
-    this.bukkitPlayer = Objects.requireNonNull(Bukkit.getPlayer(player.uuid()));
+    this.bukkitPlayer = ((BukkitPlayer) player.entity()).handle();
     selectedSlot = player.currentSlot();
     bendingBoard = bukkitPlayer.getServer().getScoreboardManager().getNewScoreboard();
     bendingSlots = bendingBoard.registerNewObjective("BendingBoard", Criteria.DUMMY, Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);

@@ -22,12 +22,12 @@ package me.moros.bending.platform.item;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.platform.Platform;
-import me.moros.bending.platform.entity.Metadatable;
 import net.kyori.adventure.text.Component;
 
-public interface ItemSnapshot extends Metadatable.Persistent {
+public interface ItemSnapshot extends DataHolder {
   Supplier<ItemSnapshot> AIR = Suppliers.lazy(() -> Platform.instance().factory().itemBuilder(Item.AIR).build());
 
   Item type();
@@ -37,6 +37,4 @@ public interface ItemSnapshot extends Metadatable.Persistent {
   Optional<String> customName();
 
   Optional<Component> customDisplayName();
-
-  ItemSnapshot withAmount(int amount);
 }

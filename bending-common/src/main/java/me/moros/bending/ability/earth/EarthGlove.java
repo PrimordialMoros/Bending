@@ -32,6 +32,7 @@ import me.moros.bending.model.attribute.Attribute;
 import me.moros.bending.model.attribute.Modifiable;
 import me.moros.bending.model.collision.geometry.Collider;
 import me.moros.bending.model.collision.geometry.Sphere;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.model.predicate.ExpireRemovalPolicy;
 import me.moros.bending.model.predicate.OutOfRangeRemovalPolicy;
 import me.moros.bending.model.predicate.Policies;
@@ -58,6 +59,8 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 // TODO possible changes: add per glove cooldown
 public class EarthGlove extends AbilityInstance {
+  public static final DataKey<EarthGlove> GLOVE_KEY = KeyUtil.data("earth-glove", EarthGlove.class);
+
   enum Side {RIGHT, LEFT}
 
   private static final Config config = ConfigManager.load(Config::new);
@@ -217,7 +220,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private boolean launchEarthGlove() {
-    var key = KeyUtil.bending("glove-side", Side.class);
+    var key = KeyUtil.data("glove-side", Side.class);
     Side side = user.store().toggle(key, Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
     Vector3d target = user.rayTrace(userConfig.range).cast(user.world()).entityCenterOrPosition();
@@ -243,11 +246,12 @@ public class EarthGlove extends AbilityInstance {
     Entity entity = user.world().dropItem(spawnLocation, item, isMetal);
     entity.invulnerable(true);
     entity.gravity(false);
-    entity.addMetadata(Metadata.GLOVE_KEY, this);
+    entity.add(GLOVE_KEY, this);
     if (isMetal && inv != null && inv.remove(Item.IRON_INGOT)) {
       return entity;
     }
-    entity.addMetadata(Metadata.NO_PICKUP);
+    // TODO better pickup rule;
+    entity.add(Metadata.NO_PICKUP, true);
     return entity;
   }
 
@@ -285,7 +289,7 @@ public class EarthGlove extends AbilityInstance {
   private static void tryDestroy(User user) {
     CollisionUtil.handle(user, new Sphere(user.eyeLocation(), 8), entity -> {
       if (entity.type() == EntityType.ITEM && user.entity().hasLineOfSight(entity)) {
-        EarthGlove ability = entity.metadata(Metadata.GLOVE_KEY, EarthGlove.class).findAny().orElse(null);
+        EarthGlove ability = entity.get(GLOVE_KEY).orElse(null);
         if (ability != null && !user.equals(ability.user())) {
           ability.shatterGlove();
         }

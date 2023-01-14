@@ -20,35 +20,35 @@
 package me.moros.bending.platform.entity;
 
 import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
-import me.moros.bending.Bending;
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.model.functional.Suppliers;
+import me.moros.bending.platform.BukkitDataHolder;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.world.BukkitWorld;
 import me.moros.bending.platform.world.World;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Projectile;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BukkitEntity implements Entity {
+public class BukkitEntity extends BukkitDataHolder implements Entity {
   private final org.bukkit.entity.Entity handle;
 
+  private BukkitEntity(Supplier<org.bukkit.entity.Entity> handle) {
+    super(handle, handle);
+    this.handle = handle.get();
+  }
+
   public BukkitEntity(org.bukkit.entity.Entity handle) {
-    this.handle = handle;
+    this(Suppliers.cached(handle));
   }
 
   public org.bukkit.entity.Entity handle() {
@@ -217,48 +217,6 @@ public class BukkitEntity implements Entity {
   @Override
   public boolean teleport(Position position) {
     return handle().teleport(position.to(Location.class, handle().getWorld()));
-  }
-
-  @Override
-  public boolean hasMetadata(Key key) {
-    return handle().hasMetadata(key.value());
-  }
-
-  @Override
-  public <T> Stream<T> metadata(Key key, Class<T> type) {
-    return handle().getMetadata(key.value()).stream().map(MetadataValue::value)
-      .filter(type::isInstance).map(type::cast);
-  }
-
-  @Override
-  public void addMetadata(Key key, @Nullable Object object) {
-    handle().setMetadata(key.value(), new FixedMetadataValue(Bending.plugin(), object));
-  }
-
-  @Override
-  public void removeMetadata(Key key) {
-    handle().removeMetadata(key.value(), Bending.plugin());
-  }
-
-  @Override
-  public boolean hasPersistentMetadata(Key key) {
-    return handle().getPersistentDataContainer().has(PlatformAdapter.nsk(key));
-  }
-
-  @Override
-  public boolean addPersistentMetadata(Key key) {
-    var store = handle().getPersistentDataContainer();
-    var nsk = PlatformAdapter.nsk(key);
-    if (store.has(nsk)) {
-      return false;
-    }
-    store.set(nsk, PersistentDataType.BYTE, Metadata.EMPTY);
-    return true;
-  }
-
-  @Override
-  public void removePersistentMetadata(Key key) {
-    handle().getPersistentDataContainer().remove(PlatformAdapter.nsk(key));
   }
 
   @Override

@@ -36,6 +36,7 @@ import me.moros.bending.BendingPlugin;
 import me.moros.bending.command.parser.AbilityDescriptionParser;
 import me.moros.bending.command.parser.ModifyPolicyParser;
 import me.moros.bending.command.parser.PresetParser;
+import me.moros.bending.command.parser.UserParser;
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
@@ -44,6 +45,7 @@ import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
+import me.moros.bending.model.user.User;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -93,6 +95,7 @@ public final class BendingCommandManager<T extends Audience> {
     manager.parserRegistry().registerParserSupplier(TypeToken.get(AbilityDescription.class), options -> new AbilityDescriptionParser<>());
     manager.parserRegistry().registerParserSupplier(TypeToken.get(ModifyPolicy.class), options -> new ModifyPolicyParser<>());
     manager.parserRegistry().registerParserSupplier(TypeToken.get(Preset.class), options -> new PresetParser<>());
+    manager.parserRegistry().registerParserSupplier(TypeToken.get(User.class), options -> new UserParser<>());
   }
 
   public static <T extends Audience> List<String> combinedSuggestions(T sender) {

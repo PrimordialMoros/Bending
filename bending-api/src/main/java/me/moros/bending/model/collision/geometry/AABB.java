@@ -106,6 +106,24 @@ public class AABB implements Collider {
     return DUMMY_COLLIDER;
   }
 
+  public static AABB fromRay(Ray ray, double raySize) {
+    return fromRay(ray.origin, ray.direction, raySize);
+  }
+
+  public static AABB fromRay(Vector3d start, Vector3d dir, double raySize) {
+    if (dir.lengthSq() == 0) {
+      return dummy();
+    }
+    double offset = Math.max(0, raySize);
+    double newMinX = start.x() - (dir.x() < 0 ? -dir.x() : 0) - offset;
+    double newMinY = start.y() - (dir.y() < 0 ? -dir.y() : 0) - offset;
+    double newMinZ = start.z() - (dir.z() < 0 ? -dir.z() : 0) - offset;
+    double newMaxX = start.x() + (dir.x() > 0 ? dir.x() : 0) + offset;
+    double newMaxY = start.y() + (dir.y() > 0 ? dir.y() : 0) + offset;
+    double newMaxZ = start.z() + (dir.z() > 0 ? dir.z() : 0) + offset;
+    return new AABB(Vector3d.of(newMinX, newMinY, newMinZ), Vector3d.of(newMaxX, newMaxY, newMaxZ));
+  }
+
   private static final class DummyCollider extends AABB {
     private DummyCollider() {
       super(Vector3d.ZERO, Vector3d.ZERO);

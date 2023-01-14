@@ -125,7 +125,7 @@ public class AbilityDescription implements Keyed, Translatable {
       return false;
     }
     AbilityDescription other = (AbilityDescription) obj;
-    return name().equals(other.name()) && element() == other.element();
+    return name.equals(other.name) && element == other.element;
   }
 
   @Override

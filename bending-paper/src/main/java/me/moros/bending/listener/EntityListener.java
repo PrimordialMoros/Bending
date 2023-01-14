@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
+import me.moros.bending.ability.earth.EarthGlove;
 import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.event.EventBus;
@@ -78,8 +79,8 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(Metadata.METAL_CABLE.value())) {
-      MetalCable cable = (MetalCable) event.getEntity().getMetadata(Metadata.METAL_CABLE.value()).get(0).value();
+    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(MetalCable.CABLE_KEY.value())) {
+      MetalCable cable = (MetalCable) event.getEntity().getMetadata(MetalCable.CABLE_KEY.value()).get(0).value();
       if (cable != null) {
         var block = event.getHitBlock();
         if (block != null) {
@@ -196,7 +197,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(Metadata.METAL_CABLE.value())) {
+    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(MetalCable.CABLE_KEY.value())) {
       event.setCancelled(true);
     } else if (ActionLimiter.isLimited(event.getDamager().getUniqueId(), ActionType.DAMAGE)) {
       event.setCancelled(true);
@@ -208,7 +209,7 @@ public class EntityListener implements Listener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity().hasMetadata(Metadata.GLOVE_KEY.value()) || event.getTarget().hasMetadata(Metadata.GLOVE_KEY.value())) {
+    if (event.getEntity().hasMetadata(EarthGlove.GLOVE_KEY.value()) || event.getTarget().hasMetadata(EarthGlove.GLOVE_KEY.value())) {
       event.setCancelled(true);
     }
   }

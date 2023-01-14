@@ -28,4 +28,10 @@ public interface BlockSetter {
   }
 
   boolean setBlockState(int x, int y, int z, BlockState state);
+
+  default boolean breakNaturally(Position position) {
+    return breakNaturally(position.blockX(), position.blockY(), position.blockZ());
+  }
+
+  boolean breakNaturally(int x, int y, int z);
 }

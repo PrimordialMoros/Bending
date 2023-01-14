@@ -43,9 +43,9 @@ public final class ConfigManager {
   private final ConfigurationReference<CommentedConfigurationNode> reference;
   private final ConfigProcessor processor;
 
-  public ConfigManager(Logger logger, String directory) {
+  public ConfigManager(Logger logger, Path directory) {
     this.logger = logger;
-    Path path = Path.of(directory, "bending.conf");
+    Path path = directory.resolve("bending.conf");
     try {
       Files.createDirectories(path.getParent());
       listener = WatchServiceListener.create();

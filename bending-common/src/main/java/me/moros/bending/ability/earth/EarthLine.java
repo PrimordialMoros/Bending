@@ -141,7 +141,7 @@ public class EarthLine extends AbilityInstance {
       state.complete();
       Block source = states.chainStore().stream().findAny().orElse(null);
       if (source != null) {
-        Mode mode = user.store().getOrDefault(KeyUtil.bending("earthline-mode", Mode.class), Mode.NORMAL);
+        Mode mode = user.store().get(KeyUtil.data("earthline-mode", Mode.class)).orElse(Mode.NORMAL);
         earthLine = new Line(source, mode);
         removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
         user.addCooldown(description(), userConfig.cooldown);
@@ -151,7 +151,7 @@ public class EarthLine extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("EarthLine")) {
-      var key = KeyUtil.bending("earthline-mode", Mode.class);
+      var key = KeyUtil.data("earthline-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.NORMAL);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));

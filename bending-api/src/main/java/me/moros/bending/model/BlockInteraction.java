@@ -19,11 +19,12 @@
 
 package me.moros.bending.model;
 
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.util.KeyUtil;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record BlockInteraction(Block block, @Nullable Vector3d point) {
-  public static BendingKey<BlockInteraction> KEY = KeyUtil.bending("last-interacted-block", BlockInteraction.class);
+  public static DataKey<BlockInteraction> KEY = KeyUtil.data("last-interacted-block", BlockInteraction.class);
 }

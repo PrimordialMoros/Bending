@@ -24,14 +24,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import me.moros.bending.Bending;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.model.raytrace.BlockRayTrace;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
 import me.moros.bending.model.raytrace.Context;
+import me.moros.bending.platform.BukkitDataHolder;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
@@ -45,13 +45,10 @@ import me.moros.bending.platform.particle.ParticleMapper;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -59,10 +56,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record BukkitWorld(org.bukkit.World handle) implements World {
-  private org.bukkit.block.Block bukkitBlock(Position position) {
-    return handle().getBlockAt(position.blockX(), position.blockY(), position.blockZ());
-  }
-
   @Override
   public BlockType getBlockType(int x, int y, int z) {
     return PlatformAdapter.BLOCK_MATERIAL_INDEX.keyOr(handle().getType(x, y, z), BlockType.AIR);
@@ -86,24 +79,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public boolean hasMetadata(Position position, Key key) {
-    return bukkitBlock(position).hasMetadata(key.value());
-  }
-
-  @Override
-  public <T> Stream<T> metadata(Position position, Key key, Class<T> type) {
-    return bukkitBlock(position).getMetadata(key.value()).stream().map(MetadataValue::value)
-      .filter(type::isInstance).map(type::cast);
-  }
-
-  @Override
-  public void addMetadata(Position position, Key key, @Nullable Object object) {
-    bukkitBlock(position).setMetadata(key.value(), new FixedMetadataValue(Bending.plugin(), object));
-  }
-
-  @Override
-  public void removeMetadata(Position position, Key key) {
-    bukkitBlock(position).removeMetadata(key.value(), Bending.plugin());
+  public DataHolder blockMetadata(int x, int y, int z) {
+    return BukkitDataHolder.nonPersistent(handle().getBlockAt(x, y, z));
   }
 
   @Override
@@ -132,7 +109,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     BoundingBox bb = BoundingBox.of(pos.to(Vector.class), radius, radius, radius);
     List<Entity> entities = new ArrayList<>();
     Location loc = new Location(handle(), 0, 0, 0); // Reuse
-    for (org.bukkit.entity.Entity bukkitEntity : handle().getNearbyEntities(bb)) {
+    for (var bukkitEntity : handle().getNearbyEntities(bb)) {
       Entity entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
       if (distSq(pos, bukkitEntity.getLocation(loc)) < radius * radius && predicate.test(entity)) {
         entities.add(entity);
@@ -155,7 +132,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
     BoundingBox bb = BoundingBox.of(box.min.to(Vector.class), box.max.to(Vector.class));
     List<Entity> entities = new ArrayList<>();
-    for (org.bukkit.entity.Entity bukkitEntity : handle().getNearbyEntities(bb)) {
+    for (var bukkitEntity : handle().getNearbyEntities(bb)) {
       Entity entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
       if (predicate.test(entity)) {
         entities.add(entity);
@@ -208,12 +185,9 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public CompositeRayTrace rayTrace(Context context) {
-    var loc = context.origin().to(Location.class, handle());
-    var start = loc.toVector();
-    var dir = context.dir().to(Vector.class);
     var blockResult = NativeAdapter.instance().rayTraceBlocks(context, this);
     double blockHitDistance = blockResult.hit() ? blockResult.position().distance(context.origin()) : context.range();
-    var entityResult = rayTraceEntities(start, dir, blockHitDistance, context);
+    var entityResult = rayTraceEntities(context, blockHitDistance);
     var block = blockResult.block();
     if (block == null) {
       return entityResult;
@@ -227,12 +201,15 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     return CompositeRayTrace.hit(blockResult.position(), block);
   }
 
-  private CompositeRayTrace rayTraceEntities(Vector start, Vector dir, double range, Context context) {
-    BoundingBox bb = BoundingBox.of(start, start).expandDirectional(dir).expand(context.raySize());
+  private CompositeRayTrace rayTraceEntities(Context context, double range) {
+    var start = context.origin().to(Vector.class);
+    var dir = context.dir().to(Vector.class);
+    AABB box = AABB.fromRay(context.origin(), context.dir(), context.raySize());
+    BoundingBox bb = new BoundingBox(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
     Entity nearestHitEntity = null;
     RayTraceResult nearestHitResult = null;
     double nearestDistanceSq = Double.MAX_VALUE;
-    for (org.bukkit.entity.Entity bukkitEntity : handle().getNearbyEntities(bb)) {
+    for (var bukkitEntity : handle().getNearbyEntities(bb)) {
       Entity entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
       if (context.entityPredicate().test(entity)) {
         BoundingBox boundingBox = bukkitEntity.getBoundingBox().expand(context.raySize());
@@ -264,8 +241,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public boolean breakNaturally(Position position) {
-    return bukkitBlock(position).breakNaturally();
+  public boolean breakNaturally(int x, int y, int z) {
+    return handle.getBlockAt(x, y, z).breakNaturally();
   }
 
   @Override
@@ -277,8 +254,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public int lightLevel(Position position) {
-    return bukkitBlock(position).getLightLevel();
+  public int lightLevel(int x, int y, int z) {
+    return handle().getBlockAt(x, y, z).getLightLevel();
   }
 
   @Override

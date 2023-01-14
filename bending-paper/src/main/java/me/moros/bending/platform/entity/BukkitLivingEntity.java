@@ -20,9 +20,13 @@
 package me.moros.bending.platform.entity;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.DamageUtil;
 import me.moros.bending.platform.PlatformAdapter;
@@ -43,9 +47,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   private AttributeInstance maxHealth;
+  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public BukkitLivingEntity(org.bukkit.entity.LivingEntity handle) {
     super(handle);
+    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   @Override
@@ -81,11 +87,6 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   @Override
   public boolean damage(double damage, User source, AbilityDescription desc) {
     return DamageUtil.damageEntity(handle(), source, damage, desc);
-  }
-
-  @Override
-  public boolean hasPermission(String permission) {
-    return handle().hasPermission(permission);
   }
 
   @Override
@@ -172,12 +173,11 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
     return PlatformAdapter.fromBukkitEntity(arrow);
   }
 
-
   @Override
   public TriState checkProperty(BooleanProperty property) {
     var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
     if (bukkitProperty == null) {
-      return TriState.NOT_SET;
+      return TriState.byBoolean(properties.get().get(property));
     }
     return bukkitProperty.get(handle());
   }
@@ -187,6 +187,8 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
     var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
     if (bukkitProperty != null) {
       bukkitProperty.set(handle(), value);
+    } else {
+      properties.get().put(property, value);
     }
   }
 }

@@ -48,6 +48,13 @@ public class BukkitPlayerInventory extends BukkitInventory {
   }
 
   @Override
+  public int add(ItemSnapshot item) {
+    var bukkitItem = PlatformAdapter.toBukkitItem(item);
+    var result = handle.addItem(bukkitItem);
+    return result.size();
+  }
+
+  @Override
   public boolean remove(Item type, int amount) {
     var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.value(type);
     return mat != null && removeItemAmount(new ItemStack(mat, amount));
@@ -97,12 +104,5 @@ public class BukkitPlayerInventory extends BukkitInventory {
       item.setAmount(0);
       handle.setItem(slot, item);
     }
-  }
-
-  @Override
-  public int add(ItemSnapshot item) {
-    var bukkitItem = PlatformAdapter.toBukkitItem(item);
-    var result = handle.addItem(bukkitItem);
-    return result.size();
   }
 }

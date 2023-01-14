@@ -19,10 +19,8 @@
 
 package me.moros.bending.listener;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.manager.Game;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
+import org.bukkit.Server;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,19 +28,17 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-public class WorldListener implements Listener {
-  private final Game game;
-
-  public WorldListener(Bending plugin, Game game) {
-    this.game = game;
-    for (World world : plugin.getServer().getWorlds()) {
+public record WorldListener(Game game) implements Listener {
+  public WorldListener(Game game, Server server) {
+    this(game);
+    for (var world : server.getWorlds()) {
       game.worldManager().onWorldLoad(world.getName(), world.getUID());
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onWorldLoad(WorldLoadEvent event) {
-    World world = event.getWorld();
+    var world = event.getWorld();
     game.worldManager().onWorldLoad(world.getName(), world.getUID());
   }
 
@@ -53,7 +49,7 @@ public class WorldListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-    Player p = event.getPlayer();
+    var p = event.getPlayer();
     game.worldManager().onUserChangeWorld(p.getUniqueId(), event.getFrom().getUID(), p.getWorld().getUID());
   }
 }

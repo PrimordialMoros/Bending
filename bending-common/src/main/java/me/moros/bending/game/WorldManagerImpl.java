@@ -45,13 +45,13 @@ public final class WorldManagerImpl implements WorldManager {
   private final Set<String> disabledRaw;
   private final Set<UUID> disabled;
 
-  WorldManagerImpl(BendingPlugin plugin, ConfigManager configManager) {
+  WorldManagerImpl(BendingPlugin plugin) {
     this.logger = plugin.logger();
     worlds = new ConcurrentHashMap<>();
     disabledRaw = ConcurrentHashMap.newKeySet();
     disabled = ConcurrentHashMap.newKeySet();
     Config config = ConfigManager.load(Config::new);
-    var ref = configManager.reference(Config.class, config);
+    var ref = plugin.configManager().reference(Config.class, config);
     if (ref != null) {
       ref.subscribe(this::onConfigUpdate);
     }

@@ -140,7 +140,7 @@ public class AirBlast extends AbilityInstance {
   private void launch() {
     launched = true;
     Vector3d target = user.rayTrace(userConfig.range).cast(user.world()).entityCenterOrPosition();
-    if (user.store().getOrDefault(KeyUtil.bending("airblast-mode", Mode.class), Mode.PUSH) == Mode.PULL) {
+    if (user.store().get(KeyUtil.data("airblast-mode", Mode.class)).orElse(Mode.PUSH) == Mode.PULL) {
       Vector3d temp = origin;
       origin = target;
       target = temp;
@@ -163,7 +163,7 @@ public class AirBlast extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("AirBlast")) {
-      var key = KeyUtil.bending("airblast-mode", Mode.class);
+      var key = KeyUtil.data("airblast-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));

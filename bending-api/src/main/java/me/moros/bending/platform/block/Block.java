@@ -19,18 +19,17 @@
 
 package me.moros.bending.platform.block;
 
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.collision.geometry.AABB;
-import me.moros.bending.platform.entity.Metadatable;
+import me.moros.bending.model.data.DataHolder;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.adapter.Adapters;
-import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record Block(World world, int blockX, int blockY, int blockZ) implements Position, Metadatable {
+public record Block(World world, int blockX, int blockY, int blockZ) implements Position, DataHolder {
   public Block(World world, Position position) {
     this(world, position.blockX(), position.blockY(), position.blockZ());
   }
@@ -88,22 +87,17 @@ public record Block(World world, int blockX, int blockY, int blockZ) implements 
   }
 
   @Override
-  public boolean hasMetadata(Key key) {
-    return world().hasMetadata(this, key);
+  public <T> Optional<T> get(DataKey<T> key) {
+    return world().blockMetadata(this).get(key);
   }
 
   @Override
-  public <T> Stream<T> metadata(Key key, Class<T> type) {
-    return world().metadata(this, key, type);
+  public <T> void add(DataKey<T> key, T value) {
+    world().blockMetadata(this).add(key, value);
   }
 
   @Override
-  public void addMetadata(Key key, @Nullable Object object) {
-    world().addMetadata(this, key, object);
-  }
-
-  @Override
-  public void removeMetadata(Key key) {
-    world().removeMetadata(this, key);
+  public <T> void remove(DataKey<T> key) {
+    world().blockMetadata(this).remove(key);
   }
 }

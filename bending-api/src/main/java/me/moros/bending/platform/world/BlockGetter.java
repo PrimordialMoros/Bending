@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.block.BlockType;
@@ -33,7 +33,6 @@ import me.moros.bending.platform.block.Lockable;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface BlockGetter {
@@ -188,17 +187,11 @@ public interface BlockGetter {
    */
   Optional<Block> findBottom(Position origin, int height, Predicate<Block> predicate);
 
-  boolean hasMetadata(Position position, Key key);
-
-  <T> Stream<T> metadata(Position position, Key key, Class<T> type);
-
-  default void addMetadata(Position position, Key key) {
-    addMetadata(position, key, null);
+  default DataHolder blockMetadata(Position position) {
+    return blockMetadata(position.blockX(), position.blockY(), position.blockZ());
   }
 
-  void addMetadata(Position position, Key key, @Nullable Object object);
-
-  void removeMetadata(Position position, Key key);
+  DataHolder blockMetadata(int x, int y, int z);
 
   boolean isTileEntity(Position position);
 

@@ -33,7 +33,7 @@ public class BukkitBlockState implements BlockState {
     this.type = type;
   }
 
-  public BukkitBlockState(org.bukkit.block.data.BlockData handle) {
+  public BukkitBlockState(BlockData handle) {
     this(handle.clone(), PlatformAdapter.BLOCK_MATERIAL_INDEX.keyOrThrow(handle.getMaterial()));
   }
 

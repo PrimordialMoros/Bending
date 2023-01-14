@@ -20,22 +20,24 @@
 package me.moros.bending.platform.entity;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.model.raytrace.ContextBuilder;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.item.Inventory;
 import me.moros.bending.platform.potion.Potion;
 import me.moros.bending.platform.potion.PotionEffect;
+import me.moros.bending.platform.property.BooleanProperty;
 import me.moros.bending.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -67,11 +69,6 @@ public interface DelegateEntity extends LivingEntity {
   @Override
   default World world() {
     return entity().world();
-  }
-
-  @Override
-  default boolean hasPermission(String permission) {
-    return entity().hasPermission(permission);
   }
 
   @Override
@@ -280,38 +277,18 @@ public interface DelegateEntity extends LivingEntity {
   }
 
   @Override
-  default boolean hasPersistentMetadata(Key key) {
-    return entity().hasPersistentMetadata(key);
+  default <T> Optional<T> get(DataKey<T> key) {
+    return entity().get(key);
   }
 
   @Override
-  default boolean addPersistentMetadata(Key key) {
-    return entity().addPersistentMetadata(key);
+  default <T> void add(DataKey<T> key, T value) {
+    entity().add(key, value);
   }
 
   @Override
-  default void removePersistentMetadata(Key key) {
-    entity().removePersistentMetadata(key);
-  }
-
-  @Override
-  default boolean hasMetadata(Key key) {
-    return entity().hasMetadata(key);
-  }
-
-  @Override
-  default <T> Stream<T> metadata(Key key, Class<T> type) {
-    return entity().metadata(key, type);
-  }
-
-  @Override
-  default void addMetadata(Key key, @Nullable Object object) {
-    entity().addMetadata(key, object);
-  }
-
-  @Override
-  default void removeMetadata(Key key) {
-    entity().removeMetadata(key);
+  default <T> void remove(DataKey<T> key) {
+    entity().remove(key);
   }
 
   @Override
@@ -397,6 +374,16 @@ public interface DelegateEntity extends LivingEntity {
   @Override
   default Entity shootArrow(Position origin, Vector3d direction, double power) {
     return entity().shootArrow(origin, direction, power);
+  }
+
+  @Override
+  default TriState checkProperty(BooleanProperty property) {
+    return entity().checkProperty(property);
+  }
+
+  @Override
+  default void setProperty(BooleanProperty property, boolean value) {
+    entity().setProperty(property, value);
   }
 
   @Override

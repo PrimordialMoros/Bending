@@ -37,6 +37,11 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   }
 
   @Override
+  public boolean hasPermission(String permission) {
+    return handle().hasPermission(permission);
+  }
+
+  @Override
   public Inventory inventory() {
     return new BukkitPlayerInventory(handle());
   }

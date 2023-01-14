@@ -92,9 +92,9 @@ public abstract class AbstractSpout extends AbstractFlight implements Updatable,
     cleanup();
   }
 
-  public static void limitVelocity(Entity entity, Vector3d velocity, double speed) {
+  public void limitVelocity(Vector3d velocity, double speed) {
     if (velocity.lengthSq() > speed * speed) {
-      entity.velocity(velocity.normalize().multiply(speed));
+      user.velocity(velocity.normalize().multiply(speed));
     }
   }
 

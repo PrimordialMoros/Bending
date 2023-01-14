@@ -24,6 +24,7 @@ import java.util.UUID;
 import me.moros.bending.event.VelocityEvent;
 import me.moros.bending.model.ability.Ability;
 import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.platform.Direction;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.world.World;
@@ -33,7 +34,7 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 
-public interface Entity extends Identity, ForwardingAudience.Single, Damageable, Metadatable, Metadatable.Persistent {
+public interface Entity extends Identity, ForwardingAudience.Single, Damageable, DataHolder {
   int id();
 
   Component name();

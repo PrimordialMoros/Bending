@@ -105,15 +105,17 @@ public interface World extends Identity, ForwardingAudience, BlockGetter, BlockS
    */
   boolean isNight();
 
-  boolean breakNaturally(Position position);
-
   default Entity dropItem(Position position, ItemSnapshot item) {
     return dropItem(position, item, true);
   }
 
   Entity dropItem(Position position, ItemSnapshot item, boolean canPickup);
 
-  int lightLevel(Position position);
+  default int lightLevel(Position position) {
+    return lightLevel(position.blockX(), position.blockY(), position.blockZ());
+  }
+
+  int lightLevel(int x, int y, int z);
 
   Dimension dimension();
 

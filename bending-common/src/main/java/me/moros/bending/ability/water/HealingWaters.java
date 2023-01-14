@@ -100,7 +100,7 @@ public class HealingWaters extends AbilityInstance {
 
   private boolean tryHeal() {
     LivingEntity target;
-    Mode mode = user.store().getOrDefault(KeyUtil.bending("healingwaters-mode", Mode.class), Mode.SELF);
+    Mode mode = user.store().get(KeyUtil.data("healingwaters-mode", Mode.class)).orElse(Mode.SELF);
     if (mode == Mode.OTHERS) {
       Entity entity = user.rayTrace(userConfig.range + 1).cast(user.world()).entity();
       if (entity instanceof LivingEntity && user.entity().hasLineOfSight(entity)) {
@@ -127,7 +127,7 @@ public class HealingWaters extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("HealingWaters")) {
-      var key = KeyUtil.bending("healingwaters-mode", Mode.class);
+      var key = KeyUtil.data("healingwaters-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.SELF);
         user.sendActionBar(Component.text("Healing: " + mode.name(), ColorPalette.TEXT_COLOR));

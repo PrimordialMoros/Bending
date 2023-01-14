@@ -128,7 +128,6 @@ public class PlayerListener implements Listener {
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
-    String name = player.getName();
     PlayerProfile profile = profileCache.synchronous().get(uuid);
     if (profile != null) {
       User user = BendingPlayer.createUser(game, new BukkitPlayer(player), profile).orElse(null);
@@ -137,7 +136,7 @@ public class PlayerListener implements Listener {
         game.abilityManager(user.worldUid()).createPassives(user);
       }
     } else {
-      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + name + ")");
+      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.getName() + ")");
     }
   }
 
@@ -267,7 +266,7 @@ public class PlayerListener implements Listener {
             if (block != null) {
               Location loc = event.getInteractionPoint();
               Vector3d point = loc == null ? null : Vector3d.from(loc);
-              user.store().put(BlockInteraction.KEY, new BlockInteraction(block, point));
+              user.store().add(BlockInteraction.KEY, new BlockInteraction(block, point));
             }
             game.activationController().onUserInteract(user, null, block);
           }
@@ -317,7 +316,7 @@ public class PlayerListener implements Listener {
     User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
     if (user != null) {
       var target = PlatformAdapter.fromBukkitEntity(event.getRightClicked());
-      user.store().put(EntityInteraction.KEY, new EntityInteraction(target, point));
+      user.store().add(EntityInteraction.KEY, new EntityInteraction(target, point));
       game.activationController().onUserInteract(user, target, null);
     }
   }

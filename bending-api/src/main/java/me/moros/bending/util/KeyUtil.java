@@ -21,7 +21,7 @@ package me.moros.bending.util;
 
 import java.util.function.Function;
 
-import me.moros.bending.model.BendingKey;
+import me.moros.bending.model.data.DataKey;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,8 +47,8 @@ public final class KeyUtil {
     return Key.key(BENDING_NAMESPACE, value);
   }
 
-  public static <V> BendingKey<V> bending(String value, Class<V> type) {
-    return BendingKey.wrap(Key.key(BENDING_NAMESPACE, value), type);
+  public static <V> DataKey<V> data(String value, Class<V> type) {
+    return DataKey.wrap(Key.key(BENDING_NAMESPACE, value), type);
   }
 
   private static @Nullable Key fromString(String string, String defNamespace) {

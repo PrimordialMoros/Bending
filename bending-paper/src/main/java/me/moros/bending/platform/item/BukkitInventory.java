@@ -20,7 +20,6 @@
 package me.moros.bending.platform.item;
 
 import me.moros.bending.platform.PlatformAdapter;
-import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,8 +40,8 @@ public class BukkitInventory implements Inventory {
   }
 
   @Override
-  public void renameMainHandItem(Component name) {
-    handle().getItemInMainHand().editMeta(m -> m.displayName(name));
+  public void setItemInMainHand(ItemSnapshot item) {
+    handle().setItemInMainHand(PlatformAdapter.toBukkitItem(item), true);
   }
 
   @Override
@@ -66,13 +65,13 @@ public class BukkitInventory implements Inventory {
   }
 
   @Override
-  public boolean remove(Item type, int amount) {
-    return false;
+  public int add(ItemSnapshot item) {
+    return item.amount();
   }
 
   @Override
-  public int add(ItemSnapshot item) {
-    return item.amount();
+  public boolean remove(Item type, int amount) {
+    return false;
   }
 
   @Override

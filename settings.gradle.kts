@@ -2,6 +2,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://repo.spongepowered.org/repository/maven-public/")
     }
 }
 rootProject.name = "bending"
@@ -12,4 +13,6 @@ file("bending-paper/adapters").listFiles { _, name -> name.startsWith("adapter-"
     include("bending-paper:adapters:${it.name}")
 }
 include("bending-paper")
+include("bending-fabric")
+//include("bending-sponge")
 //include("code-generator")

@@ -29,12 +29,12 @@ import me.moros.bending.util.Tasker;
 import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 
-public abstract class Initializer {
+public abstract class AbstractInitializer implements Initializer {
   private final Path path;
   private final Logger logger;
 
-  protected Initializer(String path, Logger logger) {
-    this.path = Path.of(path);
+  protected AbstractInitializer(Path path, Logger logger) {
+    this.path = path;
     this.logger = logger;
     init();
   }
@@ -52,6 +52,5 @@ public abstract class Initializer {
       });
     }
   }
-
-  protected abstract void init();
 }
+

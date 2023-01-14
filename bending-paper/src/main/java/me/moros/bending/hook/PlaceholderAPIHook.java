@@ -17,13 +17,13 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.hook.placeholder;
+package me.moros.bending.hook;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.Bending;
 import me.moros.bending.model.registry.Registries;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
+import me.moros.bending.placeholder.PlaceholderProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -31,14 +31,14 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BendingExpansion extends PlaceholderExpansion {
+public class PlaceholderAPIHook extends PlaceholderExpansion {
   private final Bending plugin;
   private final PlaceholderProvider provider;
   private final LegacyComponentSerializer serializer;
 
-  public BendingExpansion(Bending plugin) {
+  public PlaceholderAPIHook(Bending plugin) {
     this.plugin = plugin;
-    this.provider = new PlaceholderProvider();
+    this.provider = PlaceholderProvider.defaultBuilder().build();
     this.serializer = LegacyComponentSerializer.legacyAmpersand().toBuilder().hexColors().build();
   }
 
@@ -65,9 +65,9 @@ public class BendingExpansion extends PlaceholderExpansion {
   @Override
   public @Nullable String onPlaceholderRequest(@Nullable Player player, String params) {
     User user = player == null ? null : Registries.BENDERS.get(player.getUniqueId());
-    if (user instanceof BendingPlayer bendingPlayer) {
-      Component result = provider.onPlaceholderRequest(bendingPlayer, params);
-      if (result != null) {
+    if (user != null) {
+      Component result = provider.onPlaceholderRequest(user, params);
+      if (!Component.empty().equals(result)) {
         return serializer.serialize(GlobalTranslator.render(result, player.locale()));
       }
     }

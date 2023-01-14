@@ -19,24 +19,26 @@
 
 package me.moros.bending.util.metadata;
 
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.util.KeyUtil;
-import net.kyori.adventure.key.Key;
 
 /**
  * Utility class to provide metadata keys
  */
 public final class Metadata {
-  public static final Key NO_PICKUP = KeyUtil.simple("bending-no-pickup");
-  public static final Key GLOVE_KEY = KeyUtil.simple("bending-earth-glove");
-  public static final Key METAL_CABLE = KeyUtil.simple("bending-metal-cable");
-  public static final Key DESTRUCTIBLE = KeyUtil.simple("bending-destructible");
-  public static final Key NPC = KeyUtil.simple("bending-npc");
+  public static final DataKey<Boolean> NO_PICKUP = KeyUtil.data("bending-no-pickup", Boolean.class);
+  public static final DataKey<Boolean> NPC = KeyUtil.data("bending-npc", Boolean.class);
 
-  public static final Key ARMOR_KEY = KeyUtil.simple("bending-armor");
-  public static final Key METAL_KEY = KeyUtil.simple("bending-metal-key");
+  public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("bending-armor", Boolean.class);
+  public static final DataKey<String> METAL_KEY = KeyUtil.data("bending-metal-key", String.class);
 
   public static final byte EMPTY = 0x1;
 
   private Metadata() {
+  }
+
+  // Maybe use registry
+  public static boolean isPersistent(DataKey<?> key) {
+    return key == ARMOR_KEY || key == METAL_KEY;
   }
 }

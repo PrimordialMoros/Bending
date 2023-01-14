@@ -22,9 +22,9 @@ package me.moros.bending;
 import java.util.Map;
 import java.util.function.Function;
 
-import me.moros.bending.config.ConfigManager;
 import me.moros.bending.model.protection.Protection;
 import me.moros.bending.model.registry.Registries;
+import me.moros.bending.platform.Initializer;
 import me.moros.bending.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.protection.plugin.LWCProtection;
 import me.moros.bending.protection.plugin.TownyProtection;
@@ -33,16 +33,18 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
-/**
- * Used to initialize all default protections.
- */
-public final class ProtectionInitializer {
+public final class ProtectionInitializer implements Initializer {
   private final PluginManager manager;
   private final CommentedConfigurationNode config;
 
-  ProtectionInitializer(PluginManager manager, ConfigManager configManager) {
-    this.manager = manager;
-    config = configManager.config();
+  ProtectionInitializer(Bending plugin) {
+    this.manager = plugin.getServer().getPluginManager();
+    this.config = plugin.configManager().config();
+    init();
+  }
+
+  @Override
+  public void init() {
     Map<String, Function<Plugin, Protection>> map = Map.of(
       "WorldGuard", WorldGuardProtection::new,
       "GriefPrevention", GriefPreventionProtection::new,

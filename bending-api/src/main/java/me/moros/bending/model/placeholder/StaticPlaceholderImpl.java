@@ -17,31 +17,16 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.platform.entity;
+package me.moros.bending.model.placeholder;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.model.user.User;
+import net.kyori.adventure.text.Component;
 
-public interface Metadatable {
-  boolean hasMetadata(Key key);
-
-  <T> Stream<T> metadata(Key key, Class<T> type);
-
-  default void addMetadata(Key key) {
-    addMetadata(key, null);
-  }
-
-  void addMetadata(Key key, @Nullable Object object);
-
-  void removeMetadata(Key key);
-
-  interface Persistent {
-    boolean hasPersistentMetadata(Key key);
-
-    boolean addPersistentMetadata(Key key);
-
-    void removePersistentMetadata(Key key);
+record StaticPlaceholderImpl(Function<User, Component> function) implements StaticPlaceholder {
+  @Override
+  public Component handle(User user) {
+    return function.apply(user);
   }
 }

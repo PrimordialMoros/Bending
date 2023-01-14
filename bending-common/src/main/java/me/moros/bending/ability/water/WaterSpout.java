@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.config.Configurable;
+import me.moros.bending.model.ability.Ability.SpoutAbility;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.AbilityInstance;
 import me.moros.bending.model.ability.Activation;
@@ -54,7 +55,7 @@ import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
-public class WaterSpout extends AbilityInstance {
+public class WaterSpout extends AbilityInstance implements SpoutAbility {
   private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
@@ -121,8 +122,11 @@ public class WaterSpout extends AbilityInstance {
     return List.of(spout.collider());
   }
 
+  @Override
   public void handleMovement(Vector3d velocity) {
-    AbstractSpout.limitVelocity(user.entity(), velocity, userConfig.maxSpeed);
+    if (spout != null) {
+      spout.limitVelocity(velocity, userConfig.maxSpeed);
+    }
   }
 
   private final class Spout extends AbstractSpout {

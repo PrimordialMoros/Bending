@@ -30,16 +30,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import me.moros.bending.model.collision.geometry.Ray;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
-import me.moros.bending.util.metadata.Metadata;
+import me.moros.bending.util.KeyUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FragileStructure implements Iterable<Block> {
+  public static final DataKey<FragileStructure> DESTRUCTIBLE = KeyUtil.data("bending-destructible", FragileStructure.class);
+
   private final Collection<Block> fragileBlocks;
   private final Predicate<Block> predicate;
   private final boolean fallingBlocks;
@@ -50,7 +53,7 @@ public class FragileStructure implements Iterable<Block> {
     this.predicate = builder.predicate;
     this.fallingBlocks = builder.fallingBlocks;
     this.health = builder.health;
-    this.fragileBlocks.forEach(b -> b.addMetadata(Metadata.DESTRUCTIBLE, this));
+    this.fragileBlocks.forEach(b -> b.add(DESTRUCTIBLE, this));
   }
 
   public int health() {
@@ -68,7 +71,7 @@ public class FragileStructure implements Iterable<Block> {
 
   private void destroyStructure(Ray ray) {
     for (Block block : fragileBlocks) {
-      block.removeMetadata(Metadata.DESTRUCTIBLE);
+      block.remove(DESTRUCTIBLE);
       if (!predicate.test(block)) {
         continue;
       }
@@ -96,7 +99,7 @@ public class FragileStructure implements Iterable<Block> {
 
   public static boolean tryDamageStructure(Iterable<Block> blocks, int damage, Ray ray) {
     for (Block block : blocks) {
-      FragileStructure structure = block.metadata(Metadata.DESTRUCTIBLE, FragileStructure.class).findAny().orElse(null);
+      FragileStructure structure = block.get(DESTRUCTIBLE).orElse(null);
       if (structure != null) {
         structure.damageStructure(damage, ray);
         return true;

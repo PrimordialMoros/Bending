@@ -81,7 +81,7 @@ public final class DamageUtil {
     if (dmg > 0) {
       dmg = calculateDamageAfterAbsorption(targetEntity, dmg);
       if (dmg > 0) {
-        cacheDamageSource(targetEntity.getUniqueId(), new DamageSource(event.user().name(), event.ability()));
+        cacheDamageSource(targetEntity.getUniqueId(), DamageSource.of(event.user().name(), event.ability()));
         targetEntity.setLastDamage(dmg);
         double previousHealth = targetEntity.getHealth();
         double newHealth = Math.max(0, previousHealth - dmg);

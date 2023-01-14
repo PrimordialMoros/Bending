@@ -79,7 +79,7 @@ public class Tornado extends AbilityInstance {
       .add(Policies.UNDER_WATER)
       .add(Policies.UNDER_LAVA)
       .build();
-    mode = user.store().getOrDefault(KeyUtil.bending("tornado-mode", Mode.class), Mode.PUSH);
+    mode = user.store().get(KeyUtil.data("tornado-mode", Mode.class)).orElse(Mode.PUSH);
     startTime = System.currentTimeMillis();
     return true;
   }
@@ -182,7 +182,7 @@ public class Tornado extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("Tornado")) {
-      var key = KeyUtil.bending("tornado-mode", Mode.class);
+      var key = KeyUtil.data("tornado-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));

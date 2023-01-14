@@ -39,8 +39,6 @@ import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LivingEntity extends Entity {
-  boolean hasPermission(String permission);
-
   boolean ai();
 
   void ai(boolean value);

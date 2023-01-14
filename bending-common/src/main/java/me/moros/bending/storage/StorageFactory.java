@@ -42,7 +42,7 @@ public final class StorageFactory {
   private StorageFactory() {
   }
 
-  public static @Nullable BendingStorage createInstance(BendingPlugin plugin, String directory) {
+  public static @Nullable BendingStorage createInstance(BendingPlugin plugin, Path directory) {
     Config config = ConfigManager.load(Config::new);
     Builder builder = StorageDataSource.builder(config.engine).database(config.database)
       .host(config.host).port(config.port).username(config.username).password(config.password);
@@ -64,7 +64,7 @@ public final class StorageFactory {
           p.put("DB_CLOSE_ON_EXIT", false);
         });
       }
-      Path parent = Path.of(directory, "data", config.engine.realName());
+      Path parent = directory.resolve("data").resolve(config.engine.realName());
       try {
         Files.createDirectories(parent);
       } catch (IOException e) {

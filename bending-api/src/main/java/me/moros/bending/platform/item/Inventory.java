@@ -19,16 +19,14 @@
 
 package me.moros.bending.platform.item;
 
-import net.kyori.adventure.text.Component;
-
 public interface Inventory {
   int selectedSlot();
-
-  void renameMainHandItem(Component name);
 
   boolean canPlaceBlock();
 
   ItemSnapshot itemInMainHand();
+
+  void setItemInMainHand(ItemSnapshot item);
 
   ItemSnapshot itemInOffHand();
 
@@ -38,13 +36,13 @@ public interface Inventory {
 
   boolean has(Item type, int amount);
 
+  int add(ItemSnapshot item);
+
   default boolean remove(Item type) {
     return remove(type, 1);
   }
 
   boolean remove(Item type, int amount);
-
-  int add(ItemSnapshot item);
 
   ArmorContents<ItemSnapshot> armor();
 
