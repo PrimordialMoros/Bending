@@ -120,7 +120,6 @@ public class FabricBending implements BendingPlugin {
       }
       Platform.inject(new FabricPlatform(dir, this, server));
       game = new GameImpl(this, storage);
-      configManager.save();
       listeners = List.of(
         //new BlockListener(game),
         //new EntityListener(game),

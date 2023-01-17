@@ -116,7 +116,6 @@ public class Bending extends JavaPlugin implements BendingPlugin {
       getServer().getPluginManager().disablePlugin(this);
       return;
     }
-    configManager.save();
     getServer().getServicesManager().register(Game.class, game, this, ServicePriority.Normal);
     GameProvider.register(game);
     registerHooks();

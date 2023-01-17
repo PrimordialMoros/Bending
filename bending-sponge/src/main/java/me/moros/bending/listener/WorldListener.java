@@ -26,7 +26,13 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
 
-public record WorldListener(Game game) {
+public class WorldListener {
+  private final Game game;
+
+  public WorldListener(Game game) {
+    this.game = game;
+  }
+
   @Listener(order = Order.LAST)
   public void onWorldUnload(UnloadWorldEvent event) {
     var key = PlatformAdapter.fromRsk(event.world().key());

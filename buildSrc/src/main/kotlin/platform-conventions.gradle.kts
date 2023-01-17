@@ -31,7 +31,6 @@ tasks {
             reloc("cloud.commandframework", "cloudframework")
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
-            reloc("io.leangen", "leangen")
             reloc("org.jdbi", "jdbi")
             reloc("com.mysql", "mysql")
             reloc("org.mariadb", "mariadb")

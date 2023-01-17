@@ -84,6 +84,7 @@ public final class StorageImpl implements BendingStorage {
       try (InputStream stream = resourceProvider.apply(path)) {
         statements = SqlStreamReader.parseQueries(stream);
       } catch (Exception e) {
+        dataSource.logger().error(e.getMessage(), e);
         return false;
       }
       DB.useHandle(handle -> {

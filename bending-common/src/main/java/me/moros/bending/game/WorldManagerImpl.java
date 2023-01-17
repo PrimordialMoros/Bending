@@ -20,6 +20,7 @@
 package me.moros.bending.game;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -58,7 +59,7 @@ public final class WorldManagerImpl implements WorldManager {
   private void onConfigUpdate(Config config) {
     disabled.clear();
     for (String raw : config.disabledWorlds) {
-      Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(raw);
+      Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(raw.toLowerCase(Locale.ROOT));
       if (key != null) {
         disabled.add(key);
       }

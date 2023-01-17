@@ -51,13 +51,15 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerWorld;
 
-public record PlayerListener(Game game, BendingPlugin plugin, AsyncLoadingCache<UUID, PlayerProfile> profileCache) {
-  public PlayerListener(Game game, BendingPlugin plugin) {
-    this(game, plugin, createCache(game));
-  }
+public class PlayerListener {
+  private final Game game;
+  private final BendingPlugin plugin;
+  private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
 
-  private static AsyncLoadingCache<UUID, PlayerProfile> createCache(Game game) {
-    return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
+  public PlayerListener(Game game, BendingPlugin plugin) {
+    this.game = game;
+    this.plugin = plugin;
+    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(game.storage()::createProfile);
   }
 

@@ -35,11 +35,12 @@ import me.moros.bending.platform.sound.SoundGroup;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet.Named;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.SoundType;
 import org.slf4j.Logger;
 
 public final class BlockInitializer extends AbstractInitializer {
@@ -51,7 +52,7 @@ public final class BlockInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (BlockTag tag : BlockTag.registry()) {
+    for (var tag : BlockTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {
@@ -61,7 +62,7 @@ public final class BlockInitializer extends AbstractInitializer {
       }
     }
     checkMissing("blocktags.log", "Missing block tags: %d", missing);
-    for (BlockType type : BlockType.registry()) {
+    for (var type : BlockType.registry()) {
       var mat = PlatformAdapter.BLOCK_MATERIAL_INDEX.key(type);
       if (mat != null) {
         var data = mat.defaultBlockState();
@@ -75,7 +76,7 @@ public final class BlockInitializer extends AbstractInitializer {
   }
 
   private Map<Key, Set<BlockType>> collect() {
-    return Registry.BLOCK.getTags()
+    return BuiltInRegistries.BLOCK.getTags()
       .collect(Collectors.toMap(p -> p.getFirst().location(), p -> toSet(p.getSecond())));
   }
 
@@ -94,16 +95,15 @@ public final class BlockInitializer extends AbstractInitializer {
       .hasGravity(data.getBlock() instanceof FallingBlock)
       .isCollidable(mat.blocksMotion())
       .hardness(data.getBlock().defaultDestroyTime())
-      .soundGroup(mapSoundGroup(data)).build();
+      .soundGroup(mapSoundGroup(data.getSoundType())).build();
   }
 
-  private SoundGroup mapSoundGroup(net.minecraft.world.level.block.state.BlockState data) {
-    var st = data.getSoundType();
-    return new SoundGroup(mapSound(st.getBreakSound()),
-      mapSound(st.getStepSound()),
-      mapSound(st.getPlaceSound()),
-      mapSound(st.getHitSound()),
-      mapSound(st.getFallSound())
+  private SoundGroup mapSoundGroup(SoundType type) {
+    return new SoundGroup(mapSound(type.getBreakSound()),
+      mapSound(type.getStepSound()),
+      mapSound(type.getPlaceSound()),
+      mapSound(type.getHitSound()),
+      mapSound(type.getFallSound())
     );
   }
 

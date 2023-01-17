@@ -32,6 +32,7 @@ import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.item.SpongeItemBuilder;
+import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.sponge.SpongeMathAdapter;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -39,6 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 public class SpongePlatform implements Platform, PlatformFactory {
   public SpongePlatform(Path path, SpongeBending plugin) {
     SpongeMathAdapter.register();
+    new SoundInitializer().init();
     new BlockInitializer(path, plugin.logger());
     new ItemInitializer(path, plugin.logger());
   }

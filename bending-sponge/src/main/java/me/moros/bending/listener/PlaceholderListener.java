@@ -38,9 +38,11 @@ import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Identifiable;
 
-public record PlaceholderListener(PlaceholderProvider provider) {
+public class PlaceholderListener {
+  private final PlaceholderProvider provider;
+
   public PlaceholderListener() {
-    this(PlaceholderProvider.defaultBuilder().build());
+    this.provider = PlaceholderProvider.defaultBuilder().build();
   }
 
   @Listener

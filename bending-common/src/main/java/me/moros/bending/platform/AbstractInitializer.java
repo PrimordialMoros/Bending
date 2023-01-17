@@ -30,8 +30,8 @@ import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 
 public abstract class AbstractInitializer implements Initializer {
-  private final Path path;
-  private final Logger logger;
+  protected final Path path;
+  protected final Logger logger;
 
   protected AbstractInitializer(Path path, Logger logger) {
     this.path = path;

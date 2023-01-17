@@ -71,6 +71,7 @@ public final class GameImpl implements Game {
     temporal = initTemporary();
 
     lockRegistries();
+    plugin.configManager().save();
     storage.createAbilities(Registries.ABILITIES);
 
     Tasker.sync().repeat(this::update, 1);

@@ -23,7 +23,7 @@ dependencies {
     bendingImplementation(libs.cloud.paper)
     bendingImplementation(libs.configurate.hocon)
     bendingImplementation(libs.inventory.framework)
-    bendingImplementation(libs.bundles.drivers.bukkit) { isTransitive = false }
+    bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
     compileOnly(libs.paper)
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
@@ -37,6 +37,7 @@ tasks {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
+            reloc("io.leangen", "leangen")
         }
     }
     named<Copy>("processResources") {

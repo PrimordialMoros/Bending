@@ -46,6 +46,7 @@ import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.util.Index;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,10 +71,10 @@ public final class PlatformAdapter {
       Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
     dummy.forEach(Keyed::key); // Required for proper class loading and initialization
 
-    ENTITY_TYPE_INDEX = Index.create(t -> fromVanillaRegistry(Registry.ENTITY_TYPE, t), EntityType.registry().stream().toList());
-    POTION_EFFECT_INDEX = Index.create(t -> fromVanillaRegistry(Registry.MOB_EFFECT, t), PotionEffect.registry().stream().toList());
-    ITEM_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(Registry.ITEM, t), Item.registry().stream().toList());
-    BLOCK_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(Registry.BLOCK, t), BlockType.registry().stream().toList());
+    ENTITY_TYPE_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.ENTITY_TYPE, t), EntityType.registry().stream().toList());
+    POTION_EFFECT_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.MOB_EFFECT, t), PotionEffect.registry().stream().toList());
+    ITEM_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.ITEM, t), Item.registry().stream().toList());
+    BLOCK_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.BLOCK, t), BlockType.registry().stream().toList());
   }
 
   private static <T> T fromVanillaRegistry(Registry<T> registry, Keyed key) {

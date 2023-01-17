@@ -34,9 +34,7 @@ import me.moros.bending.platform.PlatformAdapter;
 import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.tag.Tag;
 
 public final class ItemInitializer extends AbstractInitializer {
   public ItemInitializer(Path path, Logger logger) {
@@ -47,7 +45,7 @@ public final class ItemInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (ItemTag tag : ItemTag.registry()) {
+    for (var tag : ItemTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {
@@ -62,8 +60,8 @@ public final class ItemInitializer extends AbstractInitializer {
   private Map<Key, Set<Item>> collect() {
     Map<Key, Set<Item>> map = new HashMap<>();
     var spongeRegistry = Sponge.game().registry(RegistryTypes.ITEM_TYPE);
-    var it = spongeRegistry.tags().iterator();
-    for (Tag<ItemType> tag = it.next(); it.hasNext(); ) {
+    var list = spongeRegistry.tags().toList();
+    for (var tag : list) {
       Set<Item> data = spongeRegistry.taggedValues(tag).stream().map(PlatformAdapter.ITEM_MATERIAL_INDEX::value)
         .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
       map.put(PlatformAdapter.fromRsk(tag.key()), data);

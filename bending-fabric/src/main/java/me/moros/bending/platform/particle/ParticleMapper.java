@@ -19,12 +19,10 @@
 
 package me.moros.bending.platform.particle;
 
-import com.mojang.math.Vector3f;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.particle.ParticleDustData.Transitive;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -33,14 +31,16 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joml.Vector3f;
 
 public final class ParticleMapper {
   @SuppressWarnings("unchecked")
   public static @Nullable ParticleOptions mapParticleOptions(ParticleContext<?> context) {
     var p = context.particle();
-    var fabricParticle = Registry.PARTICLE_TYPE.get(PlatformAdapter.rsl(p.key()));
+    var fabricParticle = BuiltInRegistries.PARTICLE_TYPE.get(PlatformAdapter.rsl(p.key()));
     if (fabricParticle != null) {
       var data = context.data();
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {

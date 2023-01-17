@@ -33,6 +33,7 @@ import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
+import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.bukkit.BukkitMathAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +42,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   public BukkitPlatform(Bending plugin) {
     BukkitMathAdapter.register();
     Path dir = plugin.getDataFolder().toPath();
+    new SoundInitializer().init();
     new BlockInitializer(dir, plugin.logger());
     new ItemInitializer(dir, plugin.logger());
   }

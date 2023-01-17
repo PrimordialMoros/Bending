@@ -37,6 +37,9 @@ loom {
 }
 
 tasks {
+    shadowJar {
+        reloc("io.leangen", "leangen")
+    }
     named<Copy>("processResources") {
         filesMatching("fabric.mod.json") {
             expand("pluginVersion" to project.version)

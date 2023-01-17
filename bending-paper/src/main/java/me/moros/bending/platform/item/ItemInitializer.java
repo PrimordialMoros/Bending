@@ -46,7 +46,7 @@ public final class ItemInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (ItemTag tag : ItemTag.registry()) {
+    for (var tag : ItemTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {

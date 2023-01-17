@@ -20,7 +20,6 @@
 package me.moros.bending;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Path;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -88,12 +87,16 @@ public class SpongeBending implements BendingPlugin {
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
 
-    Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
     storage = StorageFactory.createInstance(this, dir);
     if (storage != null) {
       loaded = true;
       new AbilityInitializer();
       BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
+      SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
+        container, CommandExecutionCoordinator.simpleCoordinator(),
+        CommandSender::cause, CommandSender::from
+      );
+      new BendingCommandManager<>(this, game, PlayerCommandSender.class, manager);
     } else {
       loaded = false;
       logger.error("Unable to establish database connection!");
@@ -101,32 +104,27 @@ public class SpongeBending implements BendingPlugin {
   }
 
   @Listener
-  public void onGameLoad(LoadedGameEvent event) { // Plugins, Game-scoped registries are ready
-    if (loaded) {
-      SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
-        container, CommandExecutionCoordinator.simpleCoordinator(),
-        CommandSender::cause, CommandSender::from
-      );
-      new BendingCommandManager<>(this, game, PlayerCommandSender.class, manager);
-      event.game().eventManager().registerListeners(container, new PlaceholderListener());
-      if (event.game().pluginManager().plugin("LuckPerms").isPresent()) {
-        LuckPermsHook.register(event.game().serviceProvider());
-      }
-    }
-  }
-
-  @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     if (loaded) {
+      Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
       Platform.inject(new SpongePlatform(dir, this));
       game = new GameImpl(this, storage);
-      configManager.save();
       var eventManager = event.game().eventManager();
       //eventManager.registerListeners(container, new BlockListener(game));
       //eventManager.registerListeners(container, new EntityListener(game));
       eventManager.registerListeners(container, new PlayerListener(game, this));
       eventManager.registerListeners(container, new WorldListener(game));
+      eventManager.registerListeners(container, new PlaceholderListener());
       GameProvider.register(game);
+    }
+  }
+
+  @Listener
+  public void onGameLoad(LoadedGameEvent event) { // Plugins, Game-scoped registries are ready
+    if (loaded) {
+      if (event.game().pluginManager().plugin("LuckPerms").isPresent()) {
+        LuckPermsHook.register(event.game().serviceProvider());
+      }
     }
   }
 
@@ -186,6 +184,7 @@ public class SpongeBending implements BendingPlugin {
 
   @Override
   public @Nullable InputStream resource(String fileName) {
-    return container.openResource(URI.create(fileName)).orElse(null);
+    return getClass().getResourceAsStream("/" + fileName);
+    //return container.openResource(URI.create("/" + fileName)).orElse(null);
   }
 }

@@ -49,7 +49,7 @@ public final class BlockInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (BlockTag tag : BlockTag.registry()) {
+    for (var tag : BlockTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {
@@ -93,16 +93,15 @@ public final class BlockInitializer extends AbstractInitializer {
       .hasGravity(mat.hasGravity())
       .isCollidable(mat.isCollidable())
       .hardness(mat.getHardness())
-      .soundGroup(mapSoundGroup(data)).build();
+      .soundGroup(mapSoundGroup(data.getSoundGroup())).build();
   }
 
-  private SoundGroup mapSoundGroup(BlockData data) {
-    var bs = data.getSoundGroup();
-    return new SoundGroup(mapSound(bs.getBreakSound()),
-      mapSound(bs.getStepSound()),
-      mapSound(bs.getPlaceSound()),
-      mapSound(bs.getHitSound()),
-      mapSound(bs.getFallSound())
+  private SoundGroup mapSoundGroup(org.bukkit.SoundGroup group) {
+    return new SoundGroup(mapSound(group.getBreakSound()),
+      mapSound(group.getStepSound()),
+      mapSound(group.getPlaceSound()),
+      mapSound(group.getHitSound()),
+      mapSound(group.getFallSound())
     );
   }
 

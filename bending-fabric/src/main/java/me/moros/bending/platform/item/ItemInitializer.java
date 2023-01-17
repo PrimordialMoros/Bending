@@ -33,7 +33,7 @@ import me.moros.bending.platform.PlatformAdapter;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet.Named;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.slf4j.Logger;
 
 public final class ItemInitializer extends AbstractInitializer {
@@ -45,7 +45,7 @@ public final class ItemInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (ItemTag tag : ItemTag.registry()) {
+    for (var tag : ItemTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {
@@ -58,7 +58,7 @@ public final class ItemInitializer extends AbstractInitializer {
   }
 
   private Map<Key, Set<Item>> collect() {
-    return Registry.ITEM.getTags()
+    return BuiltInRegistries.ITEM.getTags()
       .collect(Collectors.toMap(p -> p.getFirst().location(), p -> toSet(p.getSecond())));
   }
 

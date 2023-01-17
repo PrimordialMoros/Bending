@@ -33,6 +33,7 @@ import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
+import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.fabric.FabricMathAdapter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
@@ -42,6 +43,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   public FabricPlatform(Path path, FabricBending plugin, MinecraftServer server) {
     FabricMathAdapter.register();
+    new SoundInitializer().init();
     new BlockInitializer(path, plugin.logger());
     new ItemInitializer(path, plugin.logger());
     this.tickSupplier = server::getTickCount;

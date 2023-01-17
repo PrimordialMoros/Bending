@@ -34,14 +34,17 @@ import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.sound.SoundGroup;
 import net.kyori.adventure.key.Key;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.block.SoundType;
 import org.slf4j.Logger;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.registry.RegistryTypes;
 
 public final class BlockInitializer extends AbstractInitializer {
+
   public BlockInitializer(Path path, Logger logger) {
     super(path, logger);
   }
@@ -50,7 +53,7 @@ public final class BlockInitializer extends AbstractInitializer {
   public void init() {
     var map = collect();
     Collection<Key> missing = new ArrayList<>();
-    for (BlockTag tag : BlockTag.registry()) {
+    for (var tag : BlockTag.registry()) {
       Key key = tag.key();
       var data = map.get(key);
       if (data != null && !data.isEmpty()) {
@@ -60,7 +63,7 @@ public final class BlockInitializer extends AbstractInitializer {
       }
     }
     checkMissing("blocktags.log", "Missing block tags: %d", missing);
-    for (BlockType type : BlockType.registry()) {
+    for (var type : BlockType.registry()) {
       var mat = PlatformAdapter.BLOCK_MATERIAL_INDEX.key(type);
       if (mat != null) {
         var data = mat.defaultState();
@@ -74,8 +77,8 @@ public final class BlockInitializer extends AbstractInitializer {
   private Map<Key, Set<BlockType>> collect() {
     Map<Key, Set<BlockType>> map = new HashMap<>();
     var spongeRegistry = Sponge.game().registry(RegistryTypes.BLOCK_TYPE);
-    var it = spongeRegistry.tags().iterator();
-    for (var tag = it.next(); it.hasNext(); ) {
+    var list = spongeRegistry.tags().toList();
+    for (var tag : list) {
       Set<BlockType> data = spongeRegistry.taggedValues(tag).stream().map(PlatformAdapter.BLOCK_MATERIAL_INDEX::value)
         .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
       map.put(PlatformAdapter.fromRsk(tag.key()), data);
@@ -94,20 +97,20 @@ public final class BlockInitializer extends AbstractInitializer {
       .hasGravity(data.getOrElse(Keys.IS_GRAVITY_AFFECTED, false))
       .isCollidable(mat.blocksMotion())
       .hardness(nms.getBlock().defaultDestroyTime())
-      .soundGroup(mapSoundGroup(data)).build();
+      .soundGroup(mapSoundGroup(nms.getSoundType())).build();
   }
 
-  private SoundGroup mapSoundGroup(BlockState data) {
-    var bs = data.type().soundGroup();
-    return new SoundGroup(mapSound(bs.breakSound()),
-      mapSound(bs.stepSound()),
-      mapSound(bs.placeSound()),
-      mapSound(bs.hitSound()),
-      mapSound(bs.fallSound())
+  private SoundGroup mapSoundGroup(SoundType group) {
+    return new SoundGroup(mapSound(group.getBreakSound()),
+      mapSound(group.getStepSound()),
+      mapSound(group.getPlaceSound()),
+      mapSound(group.getHitSound()),
+      mapSound(group.getFallSound())
     );
   }
 
-  private Sound mapSound(SoundType sound) {
-    return Objects.requireNonNull(Sound.registry().get(PlatformAdapter.fromRsk(sound.key())));
+  private Sound mapSound(SoundEvent sound) {
+    Object key = sound.getLocation();
+    return Objects.requireNonNull(Sound.registry().get(PlatformAdapter.fromRsk((ResourceKey) key)));
   }
 }
