@@ -118,7 +118,7 @@ public class Tornado extends AbilityInstance {
         return false;
       }
       Vector3d velocity;
-      if (entity.equals(user.entity())) {
+      if (entity.uuid().equals(user.uuid())) {
         double velY;
         if (dy >= height * .95) {
           velY = 0;
@@ -186,7 +186,7 @@ public class Tornado extends AbilityInstance {
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
-        user.game().abilityManager(user.worldUid()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
+        user.game().abilityManager(user.worldKey()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
       }
     }
   }

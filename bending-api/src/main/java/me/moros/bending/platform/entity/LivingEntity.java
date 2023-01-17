@@ -165,8 +165,6 @@ public interface LivingEntity extends Entity {
     return false;
   }
 
-  boolean hasLineOfSight(Entity other);
-
   int airCapacity();
 
   int remainingAir();

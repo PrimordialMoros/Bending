@@ -79,7 +79,7 @@ public class DensityShift extends AbilityInstance {
   }
 
   public static boolean isSoftened(User user) {
-    return user.game().abilityManager(user.worldUid()).firstInstance(user, DensityShift.class)
+    return user.game().abilityManager(user.worldKey()).firstInstance(user, DensityShift.class)
       .map(DensityShift::isSoftened).orElse(false);
   }
 

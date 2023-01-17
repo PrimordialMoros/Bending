@@ -53,7 +53,7 @@ public enum BendingConditions implements BiPredicate<User, AbilityDescription> {
   /**
    * Checks if the user is in a bending enabled world.
    */
-  WORLD((u, d) -> u.game().worldManager().isEnabled(u.worldUid()));
+  WORLD((u, d) -> u.game().worldManager().isEnabled(u.worldKey()));
 
   private final BiPredicate<User, AbilityDescription> predicate;
 

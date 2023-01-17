@@ -67,7 +67,7 @@ public class FireJet extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).destroyUserInstance(user, FireJet.class)) {
+    if (user.game().abilityManager(user.worldKey()).destroyUserInstance(user, FireJet.class)) {
       return false;
     }
 

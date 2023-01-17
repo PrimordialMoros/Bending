@@ -6,8 +6,8 @@ plugins {
 
 dependencies {
     api(libs.math.core)
-    compileOnlyApi(libs.adventure.api)
     compileOnlyApi(libs.slf4j.api)
+    compileOnlyApi(libs.adventure.api)
     compileOnlyApi(libs.tasker.core)
     compileOnly(libs.storage)
     compileOnly(libs.caffeine)

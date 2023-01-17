@@ -28,19 +28,13 @@ import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.platform.block.BlockInitializer;
-import me.moros.bending.platform.block.BlockState;
-import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.item.BukkitItemBuilder;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.world.World;
-import me.moros.math.Position;
 import me.moros.math.bukkit.BukkitMathAdapter;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 
 public class BukkitPlatform implements Platform, PlatformFactory {
@@ -88,28 +82,5 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   @Override
   public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
     return new BukkitItemBuilder(PlatformAdapter.toBukkitItem(snapshot));
-  }
-
-  @Override
-  public Entity createFallingBlock(World world, Position center, BlockState state, boolean gravity) {
-    var w = PlatformAdapter.toBukkitWorld(world);
-    var data = PlatformAdapter.toBukkitData(state);
-    var bukkitEntity = w.spawnFallingBlock(center.to(Location.class, w), data);
-    bukkitEntity.setGravity(gravity);
-    bukkitEntity.setDropItem(false);
-    return PlatformAdapter.fromBukkitEntity(bukkitEntity);
-  }
-
-  @Override
-  public Entity createArmorStand(World world, Position center, Item type, boolean gravity) {
-    var w = PlatformAdapter.toBukkitWorld(world);
-    var item = new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(type));
-    var bukkitEntity = w.spawn(center.to(Location.class, w), ArmorStand.class, as -> {
-      as.setInvulnerable(true);
-      as.setVisible(false);
-      as.setGravity(gravity);
-      as.getEquipment().setHelmet(item);
-    });
-    return PlatformAdapter.fromBukkitEntity(bukkitEntity);
   }
 }

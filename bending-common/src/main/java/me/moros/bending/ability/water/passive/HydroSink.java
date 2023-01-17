@@ -62,7 +62,7 @@ public class HydroSink extends AbilityInstance {
   }
 
   public static boolean canHydroSink(User user) {
-    return user.game().abilityManager(user.worldUid()).firstInstance(user, HydroSink.class)
+    return user.game().abilityManager(user.worldKey()).firstInstance(user, HydroSink.class)
       .map(HydroSink::canHydroSink).orElse(false);
   }
 

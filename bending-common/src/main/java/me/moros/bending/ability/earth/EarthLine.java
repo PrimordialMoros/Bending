@@ -83,7 +83,7 @@ public class EarthLine extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, EarthLine.class).ifPresent(EarthLine::launch);
       return false;
     }
     if (user.onCooldown(description())) {
@@ -98,7 +98,7 @@ public class EarthLine extends AbilityInstance {
       return false;
     }
     BlockState fakeData = MaterialUtil.focusedType(source.type()).defaultState();
-    Optional<EarthLine> line = user.game().abilityManager(user.worldUid()).firstInstance(user, EarthLine.class);
+    Optional<EarthLine> line = user.game().abilityManager(user.worldKey()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
       State state = line.get().states.current();
       if (state instanceof SelectedSource selectedSource) {
@@ -251,7 +251,7 @@ public class EarthLine extends AbilityInstance {
         .add(new EarthSpike(user.world().blockAt(loc), 1, false))
         .add(new EarthSpike(user.world().blockAt(loc.add(direction)), 2, true))
         .build();
-      user.game().abilityManager(user.worldUid()).addUpdatable(spikes);
+      user.game().abilityManager(user.worldKey()).addUpdatable(spikes);
     }
 
     private void imprisonTarget(LivingEntity entity) {

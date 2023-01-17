@@ -12,7 +12,7 @@ include("bending-common")
 file("bending-paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
     include("bending-paper:adapters:${it.name}")
 }
-include("bending-paper")
 include("bending-fabric")
-//include("bending-sponge")
+include("bending-paper")
+include("bending-sponge")
 //include("code-generator")

@@ -63,10 +63,10 @@ public class PhaseChange extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
       return false;
     } else if (method == Activation.SNEAK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
       return false;
     }
     this.user = user;

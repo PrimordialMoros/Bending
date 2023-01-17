@@ -143,7 +143,7 @@ public final class TempArmor extends Temporary {
         if (mat != null) {
           ItemSnapshot builtItem = Platform.instance().factory().itemBuilder(mat)
             .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
-            .unbreakable(true).meta(Metadata.ARMOR_KEY).build();
+            .unbreakable(true).meta(Metadata.ARMOR_KEY, true).build();
           armorItems[i] = builtItem;
         } else {
           ItemSnapshot.AIR.get();

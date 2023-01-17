@@ -78,7 +78,7 @@ public class Iceberg extends AbilityInstance {
     this.user = user;
     loadConfig();
 
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, IceCrawl.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, IceCrawl.class)) {
       return false;
     }
 
@@ -150,7 +150,7 @@ public class Iceberg extends AbilityInstance {
 
   public static void launch(User user) {
     if (user.selectedAbilityName().equals("IceSpike")) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
     }
   }
 

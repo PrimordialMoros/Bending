@@ -81,14 +81,14 @@ public class WaterGimbal extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, WaterGimbal.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
     this.user = user;
     loadConfig();
 
-    WaterRing ring = user.game().abilityManager(user.worldUid()).firstInstance(user, WaterRing.class).orElse(null);
+    WaterRing ring = user.game().abilityManager(user.worldKey()).firstInstance(user, WaterRing.class).orElse(null);
     List<Block> sources = new ArrayList<>();
     if (ring != null && ring.isReady()) {
       sources.addAll(ring.complete());
@@ -121,7 +121,7 @@ public class WaterGimbal extends AbilityInstance {
       .add(SwappedSlotsRemovalPolicy.of(torrentDesc))
       .build();
 
-    user.game().abilityManager(user.worldUid()).destroyUserInstances(user, List.of(Torrent.class, WaterRing.class));
+    user.game().abilityManager(user.worldKey()).destroyUserInstances(user, List.of(Torrent.class, WaterRing.class));
     return true;
   }
 
@@ -140,7 +140,7 @@ public class WaterGimbal extends AbilityInstance {
 
   public static void launch(User user) {
     if (user.selectedAbilityName().equals("Torrent")) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
     }
   }
 

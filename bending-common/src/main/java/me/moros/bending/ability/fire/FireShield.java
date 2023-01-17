@@ -73,7 +73,7 @@ public class FireShield extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, FireShield.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, FireShield.class)) {
       return false;
     }
 
@@ -289,7 +289,7 @@ public class FireShield extends AbilityInstance {
   }
 
   public static double shieldFromExplosion(User user, Entity source, double damage) {
-    FireShield shield = user.game().abilityManager(user.worldUid()).userInstances(user, FireShield.class)
+    FireShield shield = user.game().abilityManager(user.worldKey()).userInstances(user, FireShield.class)
       .filter(FireShield::isSphere).findAny().orElse(null);
     if (shield == null) {
       return damage;

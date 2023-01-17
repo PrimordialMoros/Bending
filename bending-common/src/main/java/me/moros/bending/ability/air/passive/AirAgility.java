@@ -66,15 +66,15 @@ public class AirAgility extends AbilityInstance {
       onDestroy();
       return UpdateResult.CONTINUE;
     }
-    EntityUtil.tryAddPotion(user.entity(), PotionEffect.JUMP_BOOST, 100, userConfig.jumpAmplifier - 1);
-    EntityUtil.tryAddPotion(user.entity(), PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
+    EntityUtil.tryAddPotion(user, PotionEffect.JUMP_BOOST, 100, userConfig.jumpAmplifier - 1);
+    EntityUtil.tryAddPotion(user, PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
     return UpdateResult.CONTINUE;
   }
 
   @Override
   public void onDestroy() {
-    EntityUtil.tryRemovePotion(user.entity(), PotionEffect.JUMP_BOOST, 100, userConfig.jumpAmplifier - 1);
-    EntityUtil.tryRemovePotion(user.entity(), PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
+    EntityUtil.tryRemovePotion(user, PotionEffect.JUMP_BOOST, 100, userConfig.jumpAmplifier - 1);
+    EntityUtil.tryRemovePotion(user, PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
   }
 
   @Override

@@ -443,7 +443,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
   }
 
   private void recalculate(User user) {
-    game.abilityManager(user.worldUid()).userInstances(user).forEach(Ability::loadConfig);
+    game.abilityManager(user.worldKey()).userInstances(user).forEach(Ability::loadConfig);
   }
 
   private AbilityDisplay collectAbilities(Audience user, Element element) {

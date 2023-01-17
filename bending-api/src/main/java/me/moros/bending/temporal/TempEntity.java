@@ -24,7 +24,6 @@ import java.util.Objects;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
-import me.moros.bending.platform.Platform;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.entity.Entity;
@@ -103,7 +102,7 @@ public class TempEntity extends Temporary {
     }
 
     public TempFallingBlock spawnReal(World world, Vector3d center) {
-      Entity entity = Platform.instance().factory().createFallingBlock(world, center, data, gravity);
+      Entity entity = world.createFallingBlock(center, data, gravity);
       entity.velocity(velocity);
       return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration, 600));
     }
@@ -128,7 +127,7 @@ public class TempEntity extends Temporary {
       if (packetIfSupported) {
         return new TempEntityData(NativeAdapter.instance().createArmorStand(world, center, data, velocity, gravity));
       }
-      Entity entity = Platform.instance().factory().createArmorStand(world, center, data, gravity);
+      Entity entity = world.createArmorStand(center, data, gravity);
       entity.velocity(velocity);
       return new TempEntityData(entity);
     }

@@ -19,20 +19,19 @@
 
 package me.moros.bending.platform.item;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.PlatformAdapter;
-import me.moros.bending.util.metadata.Metadata;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.persistence.PersistentDataContainer;
 
 public class BukkitItemBuilder implements ItemBuilder {
   private final ItemStack stack;
-  private final Set<Key> meta = new HashSet<>();
+  private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private Component name;
   private List<Component> lore;
   private boolean unbreakable;
@@ -54,8 +53,8 @@ public class BukkitItemBuilder implements ItemBuilder {
   }
 
   @Override
-  public ItemBuilder meta(Key key) {
-    this.meta.add(key);
+  public <T> ItemBuilder meta(DataKey<T> key, T value) {
+    this.meta.put(key, value);
     return this;
   }
 
@@ -76,10 +75,18 @@ public class BukkitItemBuilder implements ItemBuilder {
       m.lore(lore);
       m.setUnbreakable(unbreakable);
       var data = m.getPersistentDataContainer();
-      for (Key key : meta) {
-        data.set(PlatformAdapter.nsk(key), PersistentDataType.BYTE, Metadata.EMPTY);
+      for (var entry : meta.entrySet()) {
+        addMeta(data, entry.getKey(), entry.getValue()); // Get around type erasure
       }
     });
     return new BukkitItem(stack);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> void addMeta(PersistentDataContainer store, DataKey<T> key, Object value) {
+    var type = PlatformAdapter.dataType(key);
+    if (type != null) {
+      store.set(PlatformAdapter.nsk(key), type, (T) value);
+    }
   }
 }

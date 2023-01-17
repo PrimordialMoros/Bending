@@ -59,7 +59,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class EntityListener implements Listener {
@@ -71,7 +70,7 @@ public class EntityListener implements Listener {
   }
 
   private boolean disabledWorld(EntityEvent event) {
-    return !game.worldManager().isEnabled(event.getEntity().getWorld().getUID());
+    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getEntity().getWorld().getKey()));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -215,16 +214,6 @@ public class EntityListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onItemPickup(EntityPickupItemEvent event) {
-    if (disabledWorld(event)) {
-      return;
-    }
-    if (event.getItem().hasMetadata(Metadata.NO_PICKUP.value())) {
-      event.setCancelled(true);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onEntityChangeBlock(EntityChangeBlockEvent event) {
     if (disabledWorld(event)) {
       return;
@@ -358,19 +347,8 @@ public class EntityListener implements Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onHopperItemPickup(InventoryPickupItemEvent event) {
-    if (!game.worldManager().isEnabled(event.getItem().getWorld().getUID())) {
-      return;
-    }
-    if (event.getItem().hasMetadata(Metadata.NO_PICKUP.value())) {
-      event.setCancelled(true);
-      event.getItem().remove();
-    }
-  }
-
   private void onEntityFreeze(TickEffectEvent event) {
-    if (!game.worldManager().isEnabled(event.target().worldUid())) {
+    if (!game.worldManager().isEnabled(event.target().worldKey())) {
       return;
     }
     if (event.type() == BendingEffect.FROST_TICK && event.target() instanceof me.moros.bending.platform.entity.LivingEntity entity) {

@@ -112,7 +112,7 @@ public class LavaFlux extends AbilityInstance {
       FragileStructure.builder().fallingBlocks(true).health(1).predicate(b -> b.type() == BlockType.MAGMA_BLOCK)
     ).interval(70).add(blocks).build();
     if (fracture != null) {
-      user.game().abilityManager(user.worldUid()).addUpdatable(fracture);
+      user.game().abilityManager(user.worldKey()).addUpdatable(fracture);
     }
   }
 

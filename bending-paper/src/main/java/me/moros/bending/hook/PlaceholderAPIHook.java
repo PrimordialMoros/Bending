@@ -67,7 +67,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
     User user = player == null ? null : Registries.BENDERS.get(player.getUniqueId());
     if (user != null) {
       Component result = provider.onPlaceholderRequest(user, params);
-      if (!Component.empty().equals(result)) {
+      if (result != Component.empty()) {
         return serializer.serialize(GlobalTranslator.render(result, player.locale()));
       }
     }

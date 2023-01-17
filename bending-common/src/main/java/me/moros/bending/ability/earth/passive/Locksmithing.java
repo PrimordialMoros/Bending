@@ -107,7 +107,7 @@ public class Locksmithing extends AbilityInstance {
     Component keyName = item.customDisplayName().orElse(null);
     if (keyName == null || item.get(Metadata.METAL_KEY).isEmpty()) {
       keyName = generateName();
-      var key = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY).name(keyName).build(item.amount());
+      var key = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, true).name(keyName).build(item.amount());
       inv.setItemInMainHand(key);
     }
     return keyName;
@@ -124,7 +124,7 @@ public class Locksmithing extends AbilityInstance {
     if (inv != null) {
       ItemSnapshot item = inv.itemInMainHand();
       if (EarthMaterials.METAL_KEYS.isTagged(item) && MaterialUtil.LOCKABLE_CONTAINERS.isTagged(block)) {
-        user.game().abilityManager(user.worldUid()).firstInstance(user, Locksmithing.class)
+        user.game().abilityManager(user.worldKey()).firstInstance(user, Locksmithing.class)
           .ifPresent(ability -> ability.act(inv, item, block));
       }
     }

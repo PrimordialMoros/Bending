@@ -20,7 +20,6 @@
 package me.moros.bending.game;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -34,21 +33,20 @@ import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.manager.WorldManager;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.util.KeyUtil;
+import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public final class WorldManagerImpl implements WorldManager {
   private final Logger logger;
-  private final Map<UUID, ManagerPair> worlds;
-  private final Set<String> disabledRaw;
-  private final Set<UUID> disabled;
+  private final Map<Key, ManagerPair> worlds;
+  private final Set<Key> disabled;
 
   WorldManagerImpl(BendingPlugin plugin) {
     this.logger = plugin.logger();
     worlds = new ConcurrentHashMap<>();
-    disabledRaw = ConcurrentHashMap.newKeySet();
     disabled = ConcurrentHashMap.newKeySet();
     Config config = ConfigManager.load(Config::new);
     var ref = plugin.configManager().reference(Config.class, config);
@@ -58,17 +56,27 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   private void onConfigUpdate(Config config) {
-    disabledRaw.clear();
-    disabledRaw.addAll(config.disabledWorlds);
+    disabled.clear();
+    for (String raw : config.disabledWorlds) {
+      Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(raw);
+      if (key != null) {
+        disabled.add(key);
+      }
+    }
   }
 
   @Override
-  public AbilityManager instance(UUID world) {
+  public AbilityManager instance(Key world) {
     return isEnabled(world) ? computePair(world).abilities : AbilityManager.dummy();
   }
 
-  private ManagerPair computePair(UUID world) {
-    return worlds.computeIfAbsent(world, w -> new ManagerPair(logger, world));
+  private ManagerPair computePair(Key world) {
+    return worlds.computeIfAbsent(world, this::createPair);
+  }
+
+  private ManagerPair createPair(Key world) {
+    AbilityManager abilities = new AbilityManagerImpl(logger, world);
+    return new ManagerPair(abilities);
   }
 
   @Override
@@ -83,7 +91,7 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @Override
-  public boolean isEnabled(UUID world) {
+  public boolean isEnabled(Key world) {
     return !disabled.contains(world);
   }
 
@@ -95,18 +103,7 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @Override
-  public void onWorldLoad(String worldName, UUID world) {
-    if (containsLowerCase(worldName) || containsLowerCase(world.toString())) {
-      disabled.add(world);
-    }
-  }
-
-  private boolean containsLowerCase(String value) {
-    return disabledRaw.contains(value.toLowerCase(Locale.ROOT));
-  }
-
-  @Override
-  public void onWorldUnload(UUID world) {
+  public void onWorldUnload(Key world) {
     ManagerPair pair = worlds.remove(world);
     if (pair != null) {
       pair.abilities.destroyAllInstances();
@@ -114,7 +111,7 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @Override
-  public void onUserChangeWorld(UUID uuid, UUID oldWorld, UUID newWorld) {
+  public void onUserChangeWorld(UUID uuid, Key oldWorld, Key newWorld) {
     if (isEnabled(newWorld)) {
       User user = Registries.BENDERS.get(uuid);
       if (user != null) {
@@ -125,13 +122,9 @@ public final class WorldManagerImpl implements WorldManager {
     }
   }
 
-  private static final class ManagerPair {
-    private final AbilityManager abilities;
-    private final CollisionManager collisions;
-
-    private ManagerPair(Logger logger, UUID world) {
-      abilities = new AbilityManagerImpl(logger, world);
-      collisions = new CollisionManager(abilities);
+  private record ManagerPair(AbilityManager abilities, CollisionManager collisions) {
+    private ManagerPair(AbilityManager abilities) {
+      this(abilities, new CollisionManager(abilities));
     }
 
     private void update() {
@@ -142,19 +135,8 @@ public final class WorldManagerImpl implements WorldManager {
 
   @ConfigSerializable
   private static class Config extends Configurable {
-    @Comment("You can specify worlds either by name or UUID")
+    @Comment("You can specify worlds by their name")
     private List<String> disabledWorlds = List.of("DisabledBendingWorld");
-
-    private boolean contains(@Nullable String nameOrUuid) {
-      if (nameOrUuid != null) {
-        for (String value : disabledWorlds) {
-          if (nameOrUuid.equalsIgnoreCase(value)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
 
     @Override
     public List<String> path() {

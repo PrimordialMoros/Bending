@@ -21,7 +21,6 @@ package me.moros.bending.platform.world;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -39,16 +38,20 @@ import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.block.Lockable;
 import me.moros.bending.platform.block.LockableImpl;
 import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.particle.ParticleContext;
 import me.moros.bending.platform.particle.ParticleMapper;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -102,30 +105,6 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   public boolean setBlockState(int x, int y, int z, BlockState state) {
     handle().setBlockData(x, y, z, PlatformAdapter.toBukkitData(state));
     return true;
-  }
-
-  @Override
-  public List<Entity> nearbyEntities(Vector3d pos, double radius, Predicate<Entity> predicate, int limit) {
-    BoundingBox bb = BoundingBox.of(pos.to(Vector.class), radius, radius, radius);
-    List<Entity> entities = new ArrayList<>();
-    Location loc = new Location(handle(), 0, 0, 0); // Reuse
-    for (var bukkitEntity : handle().getNearbyEntities(bb)) {
-      Entity entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
-      if (distSq(pos, bukkitEntity.getLocation(loc)) < radius * radius && predicate.test(entity)) {
-        entities.add(entity);
-        if (limit > 0 && entities.size() >= limit) {
-          return entities;
-        }
-      }
-    }
-    return entities;
-  }
-
-  private static double distSq(Position v, Location location) {
-    double dx = v.x() - location.getX();
-    double dy = v.y() - location.getY();
-    double dz = v.z() - location.getZ();
-    return dx * dx + dy * dy + dz * dz;
   }
 
   @Override
@@ -254,6 +233,27 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
+  public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
+    var data = PlatformAdapter.toBukkitData(state);
+    var bukkitEntity = handle().spawnFallingBlock(center.to(Location.class, handle()), data);
+    bukkitEntity.setGravity(gravity);
+    bukkitEntity.setDropItem(false);
+    return PlatformAdapter.fromBukkitEntity(bukkitEntity);
+  }
+
+  @Override
+  public Entity createArmorStand(Position center, Item type, boolean gravity) {
+    var item = new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(type));
+    var bukkitEntity = handle().spawn(center.to(Location.class, handle()), ArmorStand.class, as -> {
+      as.setInvulnerable(true);
+      as.setVisible(false);
+      as.setGravity(gravity);
+      as.getEquipment().setHelmet(item);
+    });
+    return PlatformAdapter.fromBukkitEntity(bukkitEntity);
+  }
+
+  @Override
   public int lightLevel(int x, int y, int z) {
     return handle().getBlockAt(x, y, z).getLightLevel();
   }
@@ -284,7 +284,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public @NonNull UUID uuid() {
-    return handle().getUID();
+  public @NonNull Key key() {
+    return PlatformAdapter.fromNsk(handle().getKey());
   }
 }

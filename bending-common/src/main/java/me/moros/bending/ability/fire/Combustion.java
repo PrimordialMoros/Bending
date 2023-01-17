@@ -71,7 +71,7 @@ public class Combustion extends AbilityInstance implements Explosive {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).userInstances(user, Combustion.class).forEach(Combustion::explode);
+      user.game().abilityManager(user.worldKey()).userInstances(user, Combustion.class).forEach(Combustion::explode);
       return false;
     }
     if (user.onCooldown(description())) {

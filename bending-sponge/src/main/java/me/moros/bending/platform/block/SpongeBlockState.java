@@ -23,26 +23,9 @@ import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.property.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SpongeBlockState implements BlockState {
-  private final org.spongepowered.api.block.BlockState handle;
-  private final BlockType type;
-
-  private SpongeBlockState(org.spongepowered.api.block.BlockState newData, BlockType type) {
-    this.handle = newData;
-    this.type = type;
-  }
-
+public record SpongeBlockState(org.spongepowered.api.block.BlockState handle, BlockType type) implements BlockState {
   public SpongeBlockState(org.spongepowered.api.block.BlockState handle) {
     this(handle, PlatformAdapter.BLOCK_MATERIAL_INDEX.valueOrThrow(handle.type()));
-  }
-
-  public org.spongepowered.api.block.BlockState handle() {
-    return handle;
-  }
-
-  @Override
-  public BlockType type() {
-    return type;
   }
 
   @Override

@@ -36,6 +36,7 @@ import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.platform.AbilityDamageSource;
+import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.entity.SpongePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -61,7 +62,7 @@ public record PlayerListener(Game game, BendingPlugin plugin, AsyncLoadingCache<
   }
 
   private boolean disabledWorld(Entity entity) {
-    return !(entity.world() instanceof ServerWorld serverWorld && game.worldManager().isEnabled(serverWorld.uniqueId()));
+    return !(entity.world() instanceof ServerWorld serverWorld && game.worldManager().isEnabled(PlatformAdapter.fromRsk(serverWorld.key())));
   }
 
   @Listener(order = Order.EARLY)
@@ -92,7 +93,7 @@ public record PlayerListener(Game game, BendingPlugin plugin, AsyncLoadingCache<
       User user = BendingPlayer.createUser(game, new SpongePlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
-        game.abilityManager(user.worldUid()).createPassives(user);
+        game.abilityManager(user.worldKey()).createPassives(user);
       }
     } else {
       plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.name() + ")");

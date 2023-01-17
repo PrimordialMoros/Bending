@@ -97,7 +97,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).userInstances(user, EarthShot.class)
+      user.game().abilityManager(user.worldKey()).userInstances(user, EarthShot.class)
         .filter(e -> !e.launched).forEach(EarthShot::launch);
       return false;
     }
@@ -105,7 +105,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     this.user = user;
     loadConfig();
 
-    long count = user.game().abilityManager(user.worldUid()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
+    long count = user.game().abilityManager(user.worldKey()).userInstances(user, EarthShot.class).filter(e -> !e.launched).count();
     if (count >= userConfig.maxAmount) {
       return false;
     }

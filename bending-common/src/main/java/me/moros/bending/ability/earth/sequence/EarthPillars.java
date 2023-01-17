@@ -150,7 +150,7 @@ public class EarthPillars extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (entity.equals(user.entity())) {
+      if (entity.uuid().equals(user.uuid())) {
         return false;
       }
       if (!affectedEntities.contains(entity)) {

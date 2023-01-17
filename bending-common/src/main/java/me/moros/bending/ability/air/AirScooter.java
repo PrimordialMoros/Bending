@@ -65,10 +65,10 @@ public class AirScooter extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, AirScooter.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, AirScooter.class)) {
       return false;
     }
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, AirWheel.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, AirWheel.class)) {
       return false;
     }
     this.user = user;

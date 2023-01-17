@@ -104,7 +104,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public Board board() {
-    if (!game().worldManager().isEnabled(worldUid()) || store().has(Board.HIDDEN)) {
+    if (!game().worldManager().isEnabled(worldKey()) || store().has(Board.HIDDEN)) {
       board.disableScoreboard();
       board = Board.dummy();
     } else if (!board.isEnabled()) {

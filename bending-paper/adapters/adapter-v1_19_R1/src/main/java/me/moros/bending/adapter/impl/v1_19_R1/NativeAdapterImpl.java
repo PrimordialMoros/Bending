@@ -87,7 +87,6 @@ import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@SuppressWarnings("resource")
 public final class NativeAdapterImpl implements NativeAdapter {
   private final Function<me.moros.bending.platform.block.BlockState, BlockData> mapper;
   private final PlayerList playerList;

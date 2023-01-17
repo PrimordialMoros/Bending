@@ -67,7 +67,7 @@ public class EarthTunnel extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, EarthTunnel.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, EarthTunnel.class)) {
       return false;
     }
 

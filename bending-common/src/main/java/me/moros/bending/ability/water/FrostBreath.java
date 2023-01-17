@@ -75,7 +75,7 @@ public class FrostBreath extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, FrostBreath.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, FrostBreath.class)) {
       return false;
     }
 

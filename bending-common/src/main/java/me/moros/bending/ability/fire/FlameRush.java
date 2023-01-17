@@ -79,7 +79,7 @@ public class FlameRush extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, FlameRush.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, FlameRush.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {

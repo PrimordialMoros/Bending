@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @SuppressWarnings("PatternValidation")
 public final class KeyUtil {
   public static final String BENDING_NAMESPACE = "bending";
-  public static final Function<String, Key> VANILLA_KEY_MAPPER = stringToKey(Key.MINECRAFT_NAMESPACE);
+  public static final Function<String, @Nullable Key> VANILLA_KEY_MAPPER = stringToKey(Key.MINECRAFT_NAMESPACE);
   private static final char DEFAULT_SEPARATOR = ':';
 
   private KeyUtil() {

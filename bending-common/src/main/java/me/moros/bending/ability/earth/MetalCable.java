@@ -94,13 +94,13 @@ public class MetalCable extends AbilityInstance {
     if (method == Activation.SNEAK) {
       for (Entity entity : user.world().nearbyEntities(user.eyeLocation(), 3, e -> e.type() == EntityType.ARROW)) {
         MetalCable ability = entity.get(CABLE_KEY).orElse(null);
-        if (ability != null && !entity.equals(ability.user().entity())) {
+        if (ability != null && !entity.uuid().equals(ability.user().uuid())) {
           ability.remove();
         }
       }
       return false;
     } else if (method == Activation.ATTACK) {
-      Optional<MetalCable> cable = user.game().abilityManager(user.worldUid()).firstInstance(user, MetalCable.class);
+      Optional<MetalCable> cable = user.game().abilityManager(user.worldKey()).firstInstance(user, MetalCable.class);
       if (cable.isPresent()) {
         cable.get().tryLaunchTarget();
         return false;
@@ -176,7 +176,7 @@ public class MetalCable extends AbilityInstance {
     if (target == null || !target.isValid(user)) {
       return false;
     }
-    Entity entityToMove = user.entity();
+    Entity entityToMove = user;
     Vector3d targetLocation = location;
     if (target.type == CableTarget.Type.ENTITY) {
       if (target.entity != null) {
@@ -295,7 +295,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   private boolean hasRequiredInv() {
-    if (InventoryUtil.hasMetalArmor(user.entity())) {
+    if (InventoryUtil.hasMetalArmor(user)) {
       return true;
     }
     Inventory inv = user.inventory();

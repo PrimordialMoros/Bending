@@ -105,7 +105,7 @@ public class Bending extends JavaPlugin implements BendingPlugin {
     getServer().getPluginManager().registerEvents(new BlockListener(game), this);
     getServer().getPluginManager().registerEvents(new EntityListener(game), this);
     getServer().getPluginManager().registerEvents(new PlayerListener(this, game), this);
-    getServer().getPluginManager().registerEvents(new WorldListener(game, getServer()), this);
+    getServer().getPluginManager().registerEvents(new WorldListener(game), this);
 
     try {
       PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(this, CommandExecutionCoordinator.simpleCoordinator());
@@ -177,7 +177,7 @@ public class Bending extends JavaPlugin implements BendingPlugin {
       new PlaceholderAPIHook(this).register();
     }
     if (getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
-      new LuckPermsHook(getServer().getServicesManager());
+      LuckPermsHook.register(getServer().getServicesManager());
     }
   }
 

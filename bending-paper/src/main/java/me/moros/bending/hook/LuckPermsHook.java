@@ -19,101 +19,31 @@
 
 package me.moros.bending.hook;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import me.moros.bending.model.Element;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.context.ContextCalculator;
-import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextManager;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class LuckPermsHook {
-  public LuckPermsHook(ServicesManager manager) {
+public final class LuckPermsHook extends AbstractLuckPermsHook<Player> {
+  private LuckPermsHook(ContextManager manager) {
+    super(manager);
+  }
+
+  @Override
+  protected @Nullable User adapt(Player user) {
+    return Registries.BENDERS.get(user.getUniqueId());
+  }
+
+  public static boolean register(ServicesManager manager) {
     RegisteredServiceProvider<LuckPerms> provider = manager.getRegistration(LuckPerms.class);
     if (provider != null) {
-      setupContexts(provider.getProvider().getContextManager());
+      new LuckPermsHook(provider.getProvider().getContextManager());
+      return true;
     }
-  }
-
-  private void setupContexts(ContextManager manager) {
-    manager.registerCalculator(new Builder("element")
-      .suggestions(Element.NAMES)
-      .build(u -> u.elements().stream().map(Element::toString).toList())
-    );
-    manager.registerCalculator(new Builder("avatar")
-      .suggestions(List.of("true", "false"))
-      .buildWithPredicate(u -> u.elements().size() >= 4)
-    );
-  }
-
-  private static final class Builder {
-    private final String key;
-    private Collection<String> suggestions;
-
-    private Builder(String key) {
-      this.key = key.toLowerCase(Locale.ROOT);
-    }
-
-    private Builder suggestions(Collection<String> suggestions) {
-      this.suggestions = Objects.requireNonNull(suggestions);
-      return this;
-    }
-
-    private ContextCalculator<Player> build(Function<User, Iterable<String>> mapper) {
-      return new ContextCalculator<>() {
-        @Override
-        public void calculate(Player target, ContextConsumer consumer) {
-          UUID uuid = target.getUniqueId();
-          if (Registries.BENDERS.containsKey(uuid)) {
-            consumer.accept(createContextSet(mapper.apply(Registries.BENDERS.get(uuid))));
-          }
-        }
-
-        @Override
-        public ContextSet estimatePotentialContexts() {
-          return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
-        }
-      };
-    }
-
-    private ContextCalculator<Player> buildWithPredicate(Predicate<User> predicate) {
-      return new ContextCalculator<>() {
-        @Override
-        public void calculate(Player target, ContextConsumer consumer) {
-          UUID uuid = target.getUniqueId();
-          if (Registries.BENDERS.containsKey(uuid)) {
-            consumer.accept(createContextSet(predicate.test(Registries.BENDERS.get(uuid))));
-          }
-        }
-
-        @Override
-        public ContextSet estimatePotentialContexts() {
-          return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
-        }
-      };
-    }
-
-    private ContextSet createContextSet(Iterable<String> values) {
-      ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
-      values.forEach(value -> builder.add("bending:" + key, value.toLowerCase(Locale.ROOT)));
-      return builder.build();
-    }
-
-    private ContextSet createContextSet(boolean value) {
-      return ImmutableContextSet.of("bending:" + key, String.valueOf(value));
-    }
+    return false;
   }
 }

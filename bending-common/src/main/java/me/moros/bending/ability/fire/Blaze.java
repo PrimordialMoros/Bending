@@ -63,7 +63,7 @@ public class Blaze extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, Blaze.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, Blaze.class)) {
       return false;
     }
 

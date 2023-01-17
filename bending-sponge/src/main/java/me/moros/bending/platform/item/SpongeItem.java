@@ -28,29 +28,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-public class SpongeItem implements ItemSnapshot {
-  private final Item type;
-  private final int amount;
-  private final ItemStack handle;
-
+public record SpongeItem(Item type, int amount, ItemStack handle) implements ItemSnapshot {
   public SpongeItem(ItemStack handle) {
-    this.type = PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(handle.type());
-    this.amount = handle.quantity();
-    this.handle = handle;
-  }
-
-  public ItemStack handle() {
-    return handle;
-  }
-
-  @Override
-  public Item type() {
-    return type;
-  }
-
-  @Override
-  public int amount() {
-    return amount;
+    this(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(handle.type()), handle.quantity(), handle);
   }
 
   @Override

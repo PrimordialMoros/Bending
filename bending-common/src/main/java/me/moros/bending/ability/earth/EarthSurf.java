@@ -67,14 +67,14 @@ public class EarthSurf extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, EarthSurf.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, EarthSurf.class)) {
       return false;
     }
     this.user = user;
     loadConfig();
     charging = true;
     if (method == Activation.FALL) {
-      if (user.entity().fallDistance() < userConfig.fallThreshold || user.sneaking()) {
+      if (user.fallDistance() < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       return launch();

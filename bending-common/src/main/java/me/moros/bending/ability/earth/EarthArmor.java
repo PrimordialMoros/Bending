@@ -73,7 +73,7 @@ public class EarthArmor extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, EarthArmor.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, EarthArmor.class)) {
       return false;
     }
 
@@ -129,7 +129,7 @@ public class EarthArmor extends AbilityInstance {
     };
     armorBuilder.duration(userConfig.duration).build(user);
     int duration = FastMath.round(userConfig.duration / 50.0);
-    EntityUtil.tryAddPotion(user.entity(), PotionEffect.RESISTANCE, duration, resistance - 1);
+    EntityUtil.tryAddPotion(user, PotionEffect.RESISTANCE, duration, resistance - 1);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     user.addCooldown(description(), userConfig.cooldown);
     formed = true;
@@ -169,7 +169,7 @@ public class EarthArmor extends AbilityInstance {
     } else {
       center = user.eyeLocation();
     }
-    user.entity().removePotion(PotionEffect.RESISTANCE);
+    user.removePotion(PotionEffect.RESISTANCE);
     data.type().soundGroup().breakSound().asEffect(2, 1).play(user.world(), center);
     data.asParticle(center).count(8).offset(0.5).spawn(user.world());
   }
@@ -180,7 +180,7 @@ public class EarthArmor extends AbilityInstance {
   }
 
   public static boolean hasArmor(User user) {
-    return user.game().abilityManager(user.worldUid()).firstInstance(user, EarthArmor.class)
+    return user.game().abilityManager(user.worldKey()).firstInstance(user, EarthArmor.class)
       .map(e -> e.formed).orElse(false);
   }
 

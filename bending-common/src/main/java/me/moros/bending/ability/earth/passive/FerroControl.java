@@ -128,7 +128,7 @@ public class FerroControl extends AbilityInstance {
       if (user.sneaking() && mayPlaceBlock(user)) {
         return;
       }
-      user.game().abilityManager(user.worldUid()).firstInstance(user, FerroControl.class)
+      user.game().abilityManager(user.worldKey()).firstInstance(user, FerroControl.class)
         .ifPresent(ability -> ability.act(block));
     }
   }

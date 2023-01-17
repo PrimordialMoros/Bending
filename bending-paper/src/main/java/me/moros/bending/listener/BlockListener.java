@@ -61,7 +61,7 @@ public class BlockListener implements Listener {
   }
 
   private boolean disabledWorld(BlockEvent event) {
-    return !game.worldManager().isEnabled(event.getBlock().getWorld().getUID());
+    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getBlock().getWorld().getKey()));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

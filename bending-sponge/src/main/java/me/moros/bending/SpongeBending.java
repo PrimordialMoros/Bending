@@ -30,8 +30,6 @@ import me.moros.bending.command.BendingCommandManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.GameImpl;
 import me.moros.bending.hook.LuckPermsHook;
-import me.moros.bending.listener.BlockListener;
-import me.moros.bending.listener.EntityListener;
 import me.moros.bending.listener.PlaceholderListener;
 import me.moros.bending.listener.PlayerListener;
 import me.moros.bending.listener.WorldListener;
@@ -43,7 +41,6 @@ import me.moros.bending.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.platform.Platform;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.SpongePlatform;
-import me.moros.bending.platform.world.SpongeWorldManager;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.metadata.Metadata;
@@ -52,6 +49,7 @@ import me.moros.tasker.sponge.SpongeExecutor;
 import org.bstats.sponge.Metrics;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
@@ -85,7 +83,7 @@ public class SpongeBending implements BendingPlugin {
     this.dir = dir;
     this.container = container;
     metricsFactory.make(8717);
-    this.logger = container.logger(); // TODO SLF4J not currently available in sponge
+    this.logger = LoggerFactory.getLogger("bending");
 
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
@@ -112,7 +110,7 @@ public class SpongeBending implements BendingPlugin {
       new BendingCommandManager<>(this, game, PlayerCommandSender.class, manager);
       event.game().eventManager().registerListeners(container, new PlaceholderListener());
       if (event.game().pluginManager().plugin("LuckPerms").isPresent()) {
-        new LuckPermsHook(event.game().serviceProvider());
+        LuckPermsHook.register(event.game().serviceProvider());
       }
     }
   }
@@ -124,10 +122,10 @@ public class SpongeBending implements BendingPlugin {
       game = new GameImpl(this, storage);
       configManager.save();
       var eventManager = event.game().eventManager();
-      eventManager.registerListeners(container, new BlockListener(game));
-      eventManager.registerListeners(container, new EntityListener(game));
+      //eventManager.registerListeners(container, new BlockListener(game));
+      //eventManager.registerListeners(container, new EntityListener(game));
       eventManager.registerListeners(container, new PlayerListener(game, this));
-      eventManager.registerListeners(container, new WorldListener(game, event.game().server()));
+      eventManager.registerListeners(container, new WorldListener(game));
       GameProvider.register(game);
     }
   }
@@ -142,7 +140,6 @@ public class SpongeBending implements BendingPlugin {
   @Listener
   public void onDisable(StoppingEngineEvent<Server> event) {
     if (game != null) {
-      SpongeWorldManager.INSTANCE.cleanup();
       game.cleanup(true);
       GameProvider.unregister();
       game = null;

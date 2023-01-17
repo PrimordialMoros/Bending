@@ -20,39 +20,23 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.model.manager.Game;
-import me.moros.bending.platform.world.SpongeWorldManager;
-import org.spongepowered.api.Server;
+import me.moros.bending.platform.PlatformAdapter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
 
 public record WorldListener(Game game) {
-  public WorldListener(Game game, Server server) {
-    this(game);
-    for (var world : server.worldManager().worlds()) {
-      game.worldManager().onWorldLoad(world.properties().name(), world.uniqueId());
-    }
-  }
-
-  @Listener(order = Order.LAST)
-  public void onWorldLoad(LoadWorldEvent event) {
-    var world = event.world();
-    game.worldManager().onWorldLoad(world.properties().name(), world.uniqueId());
-  }
-
   @Listener(order = Order.LAST)
   public void onWorldUnload(UnloadWorldEvent event) {
-    var uuid = event.world().uniqueId();
-    game.worldManager().onWorldUnload(uuid);
-    SpongeWorldManager.INSTANCE.cleanup(uuid);
+    var key = PlatformAdapter.fromRsk(event.world().key());
+    game.worldManager().onWorldUnload(key);
   }
 
   @Listener(order = Order.LAST)
   public void onPlayerChangeWorld(ChangeEntityWorldEvent event) {
-    var from = event.originalWorld().uniqueId();
-    var to = event.destinationWorld().uniqueId();
+    var from = PlatformAdapter.fromRsk(event.originalWorld().key());
+    var to = PlatformAdapter.fromRsk(event.destinationWorld().key());
     game.worldManager().onUserChangeWorld(event.entity().uniqueId(), from, to);
   }
 }

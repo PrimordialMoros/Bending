@@ -111,7 +111,7 @@ public class EarthShards extends AbilityInstance {
 
   @Override
   public void onCollision(Collision collision) {
-    user.game().abilityManager(user.worldUid()).destroyInstance(this);
+    user.game().abilityManager(user.worldKey()).destroyInstance(this);
   }
 
   @Override

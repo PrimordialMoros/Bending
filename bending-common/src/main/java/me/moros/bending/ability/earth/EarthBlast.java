@@ -77,7 +77,7 @@ public class EarthBlast extends AbilityInstance {
     if (method == Activation.SNEAK && tryDestroy(user)) {
       return false;
     } else if (method == Activation.ATTACK) {
-      Collection<EarthBlast> eblasts = user.game().abilityManager(user.worldUid()).userInstances(user, EarthBlast.class)
+      Collection<EarthBlast> eblasts = user.game().abilityManager(user.worldKey()).userInstances(user, EarthBlast.class)
         .toList();
       for (EarthBlast eblast : eblasts) {
         if (eblast.blast == null) {
@@ -99,7 +99,7 @@ public class EarthBlast extends AbilityInstance {
     }
     BlockState fakeData = MaterialUtil.focusedType(source.type()).defaultState();
 
-    Collection<EarthBlast> eblasts = user.game().abilityManager(user.worldUid()).userInstances(user, EarthBlast.class)
+    Collection<EarthBlast> eblasts = user.game().abilityManager(user.worldKey()).userInstances(user, EarthBlast.class)
       .filter(eb -> eb.blast == null).toList();
     for (EarthBlast eblast : eblasts) {
       State state = eblast.states.current();
@@ -151,7 +151,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   private static boolean tryDestroy(User user) {
-    Collection<EarthBlast> blasts = user.game().abilityManager(user.worldUid()).instances(EarthBlast.class)
+    Collection<EarthBlast> blasts = user.game().abilityManager(user.worldKey()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
     Ray ray = user.ray(config.shatterRange + 2);
     double distSq = config.shatterRange * config.shatterRange;
@@ -162,7 +162,7 @@ public class EarthBlast extends AbilityInstance {
         double range = Math.min(1, direction.length());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (user.world().blockAt(center).equals(rayTraced)) {
-          user.game().abilityManager(user.worldUid()).destroyInstance(eb);
+          user.game().abilityManager(user.worldKey()).destroyInstance(eb);
           return true;
         }
       }

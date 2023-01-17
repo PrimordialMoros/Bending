@@ -51,7 +51,6 @@ import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.sound.SoundEffect;
 import me.moros.bending.util.KeyUtil;
 import me.moros.bending.util.collision.CollisionUtil;
-import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -92,7 +91,7 @@ public class EarthGlove extends AbilityInstance {
       return false;
     }
 
-    if (user.onCooldown(description()) || user.game().abilityManager(user.worldUid()).userInstances(user, EarthGlove.class).count() >= 2) {
+    if (user.onCooldown(description()) || user.game().abilityManager(user.worldKey()).userInstances(user, EarthGlove.class).count() >= 2) {
       return false;
     }
 
@@ -247,11 +246,9 @@ public class EarthGlove extends AbilityInstance {
     entity.invulnerable(true);
     entity.gravity(false);
     entity.add(GLOVE_KEY, this);
-    if (isMetal && inv != null && inv.remove(Item.IRON_INGOT)) {
-      return entity;
+    if (isMetal && inv != null) {
+      inv.remove(Item.IRON_INGOT);
     }
-    // TODO better pickup rule;
-    entity.add(Metadata.NO_PICKUP, true);
     return entity;
   }
 
@@ -287,8 +284,10 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private static void tryDestroy(User user) {
+    Vector3d eyeLoc = user.eyeLocation();
+    Vector3d dir = user.direction();
     CollisionUtil.handle(user, new Sphere(user.eyeLocation(), 8), entity -> {
-      if (entity.type() == EntityType.ITEM && user.entity().hasLineOfSight(entity)) {
+      if (entity.type() == EntityType.ITEM && entity.location().subtract(eyeLoc).angle(dir) < Math.PI / 3) {
         EarthGlove ability = entity.get(GLOVE_KEY).orElse(null);
         if (ability != null && !user.equals(ability.user())) {
           ability.shatterGlove();

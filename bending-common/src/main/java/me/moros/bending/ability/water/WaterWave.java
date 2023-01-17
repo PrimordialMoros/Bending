@@ -68,7 +68,7 @@ public class WaterWave extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, WaterWave.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterWave.class)) {
       return false;
     }
 
@@ -147,7 +147,7 @@ public class WaterWave extends AbilityInstance {
 
   public static void freeze(User user) {
     if (user.selectedAbilityName().equals("PhaseChange")) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
     }
   }
 

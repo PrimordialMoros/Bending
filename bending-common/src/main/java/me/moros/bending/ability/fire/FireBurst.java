@@ -78,7 +78,7 @@ public class FireBurst extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, FireBurst.class)
+      user.game().abilityManager(user.worldKey()).firstInstance(user, FireBurst.class)
         .ifPresent(b -> b.release(true));
       return false;
     }

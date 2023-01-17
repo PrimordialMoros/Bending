@@ -78,7 +78,7 @@ public class IceCrawl extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, IceCrawl.class).ifPresent(IceCrawl::launch);
       return false;
     }
 
@@ -90,7 +90,7 @@ public class IceCrawl extends AbilityInstance {
       return false;
     }
 
-    Optional<IceCrawl> line = user.game().abilityManager(user.worldUid()).firstInstance(user, IceCrawl.class);
+    Optional<IceCrawl> line = user.game().abilityManager(user.worldKey()).firstInstance(user, IceCrawl.class);
     if (method == Activation.SNEAK && line.isPresent()) {
       State state = line.get().states.current();
       if (state instanceof SelectedSource selectedSource) {

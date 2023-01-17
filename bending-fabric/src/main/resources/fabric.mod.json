@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "bending",
+  "version": "${pluginVersion}",
+  "name": "Bending",
+  "description": "Bending plugin for Fabric.",
+  "contact": {
+    "homepage": "https://github.com/PrimordialMoros/Bending/",
+    "sources": "https://github.com/PrimordialMoros/Bending/",
+    "issues": "https://github.com/PrimordialMoros/Bending/issues/"
+  },
+  "authors": [
+    "Moros"
+  ],
+  "license": [
+    "AGPLv3"
+  ],
+  "provides": "bending",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "me.moros.bending.BendingBootstrap"
+    ]
+  },
+  "mixins": [
+    "bending-fabric.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "fabricloader": ">=0.14.12",
+    "minecraft": "1.19.2",
+    "cloud": "*",
+    "adventure-platform-fabric": "*",
+    "java": ">=17"
+  }
+}

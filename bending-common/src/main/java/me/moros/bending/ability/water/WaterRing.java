@@ -100,14 +100,14 @@ public class WaterRing extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, WaterGimbal.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
-    Optional<WaterRing> ring = user.game().abilityManager(user.worldUid()).firstInstance(user, WaterRing.class);
+    Optional<WaterRing> ring = user.game().abilityManager(user.worldKey()).firstInstance(user, WaterRing.class);
     if (ring.isPresent()) {
       if (method == Activation.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
         if (user.sneaking()) {
-          user.game().abilityManager(user.worldUid()).destroyInstance(ring.get());
+          user.game().abilityManager(user.worldKey()).destroyInstance(ring.get());
         } else {
           ring.get().launchShard();
         }
@@ -311,7 +311,7 @@ public class WaterRing extends AbilityInstance {
     if (ringDesc == null) {
       ringDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("WaterRing"));
     }
-    WaterRing oldRing = user.game().abilityManager(user.worldUid()).firstInstance(user, WaterRing.class)
+    WaterRing oldRing = user.game().abilityManager(user.worldKey()).firstInstance(user, WaterRing.class)
       .orElse(null);
     if (oldRing == null) {
       Ability newRing = user.game().activationController().activateAbility(user, Activation.ATTACK, ringDesc);

@@ -58,11 +58,6 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   }
 
   @Override
-  protected net.minecraft.world.entity.LivingEntity nmsEntity() {
-    return (net.minecraft.world.entity.LivingEntity) super.nmsEntity();
-  }
-
-  @Override
   public double health() {
     return handle().health().get();
   }
@@ -164,11 +159,6 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   @Override
   public Collection<Potion> activePotions() {
     return handle().potionEffects().get().stream().map(PlatformAdapter::fromSpongePotion).filter(Objects::nonNull).toList();
-  }
-
-  @Override
-  public boolean hasLineOfSight(Entity other) {
-    return other instanceof SpongeEntity ent && nmsEntity().hasLineOfSight(ent.nmsEntity());
   }
 
   @Override

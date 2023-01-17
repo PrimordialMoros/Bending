@@ -22,7 +22,6 @@ package me.moros.bending.game;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 import me.moros.bending.BendingPlugin;
 import me.moros.bending.config.ConfigProcessor;
@@ -46,6 +45,7 @@ import me.moros.bending.temporal.TempLight;
 import me.moros.bending.util.BendingEffect;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.TextUtil;
+import net.kyori.adventure.key.Key;
 
 public final class GameImpl implements Game {
   private final BendingPlugin plugin;
@@ -110,7 +110,7 @@ public final class GameImpl implements Game {
   public void reload() {
     cleanup(false);
     plugin.translationManager().reload();
-    Registries.BENDERS.forEach(u -> worldManager.instance(u.worldUid()).createPassives(u));
+    Registries.BENDERS.forEach(u -> worldManager.instance(u.worldKey()).createPassives(u));
   }
 
   @Override
@@ -144,7 +144,7 @@ public final class GameImpl implements Game {
   }
 
   @Override
-  public AbilityManager abilityManager(UUID world) {
+  public AbilityManager abilityManager(Key world) {
     return worldManager.instance(world);
   }
 

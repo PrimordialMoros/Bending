@@ -61,7 +61,7 @@ public class WaterBubble extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, WaterBubble.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterBubble.class)) {
       return false;
     }
     this.user = user;

@@ -73,7 +73,7 @@ public class AirBurst extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, AirBurst.class).ifPresent(b -> b.release(Mode.CONE));
+      user.game().abilityManager(user.worldKey()).firstInstance(user, AirBurst.class).ifPresent(b -> b.release(Mode.CONE));
       return false;
     }
 

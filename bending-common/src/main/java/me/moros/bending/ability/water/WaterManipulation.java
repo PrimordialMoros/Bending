@@ -80,7 +80,7 @@ public class WaterManipulation extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      Collection<WaterManipulation> manips = user.game().abilityManager(user.worldUid()).userInstances(user, WaterManipulation.class)
+      Collection<WaterManipulation> manips = user.game().abilityManager(user.worldKey()).userInstances(user, WaterManipulation.class)
         .toList();
       redirectAny(user);
       for (WaterManipulation manip : manips) {
@@ -101,7 +101,7 @@ public class WaterManipulation extends AbilityInstance {
       return false;
     }
 
-    Collection<WaterManipulation> manips = user.game().abilityManager(user.worldUid()).userInstances(user, WaterManipulation.class)
+    Collection<WaterManipulation> manips = user.game().abilityManager(user.worldKey()).userInstances(user, WaterManipulation.class)
       .filter(m -> m.manip == null).toList();
     for (WaterManipulation manip : manips) {
       State state = manip.states.current();
@@ -165,7 +165,7 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   private static void redirectAny(User user) {
-    Collection<WaterManipulation> manips = user.game().abilityManager(user.worldUid()).instances(WaterManipulation.class)
+    Collection<WaterManipulation> manips = user.game().abilityManager(user.worldKey()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).toList();
     Ray ray = user.ray(config.maxRedirectRange + 2);
     double minSq = config.noRedirectRange * config.noRedirectRange;
@@ -182,7 +182,7 @@ public class WaterManipulation extends AbilityInstance {
         double range = Math.min(1, direction.length());
         Block rayTraced = user.rayTrace(range).direction(direction).ignoreLiquids(false).blocks(user.world()).block();
         if (user.world().blockAt(center).equals(rayTraced)) {
-          user.game().abilityManager(user.worldUid()).changeOwner(manip, user);
+          user.game().abilityManager(user.worldKey()).changeOwner(manip, user);
           manip.manip.redirect();
         }
       }

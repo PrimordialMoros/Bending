@@ -68,7 +68,7 @@ public class AirBreath extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, AirBreath.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, AirBreath.class)) {
       return false;
     }
 

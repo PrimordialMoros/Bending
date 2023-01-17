@@ -73,7 +73,7 @@ public class AirBlade extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, AirBlade.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, AirBlade.class)) {
       return false;
     }
 
@@ -94,7 +94,7 @@ public class AirBlade extends AbilityInstance {
 
     startTime = System.currentTimeMillis();
 
-    AirWheel wheel = user.game().abilityManager(user.worldUid()).firstInstance(user, AirWheel.class).orElse(null);
+    AirWheel wheel = user.game().abilityManager(user.worldKey()).firstInstance(user, AirWheel.class).orElse(null);
     if (wheel != null) {
       origin = wheel.center();
       factor = userConfig.chargeFactor;
@@ -103,7 +103,7 @@ public class AirBlade extends AbilityInstance {
       removalPolicy = Policies.builder()
         .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
       user.addCooldown(description(), userConfig.cooldown);
-      user.game().abilityManager(user.worldUid()).destroyInstance(wheel);
+      user.game().abilityManager(user.worldKey()).destroyInstance(wheel);
     }
     return true;
   }

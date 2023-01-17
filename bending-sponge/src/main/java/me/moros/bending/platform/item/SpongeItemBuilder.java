@@ -21,9 +21,8 @@ package me.moros.bending.platform.item;
 
 import java.util.List;
 
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.PlatformAdapter;
-import me.moros.bending.util.metadata.Metadata;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -48,8 +47,8 @@ public class SpongeItemBuilder implements ItemBuilder {
   }
 
   @Override
-  public ItemBuilder meta(Key key) {
-    stack.offer(PlatformAdapter.dataKey(key), Metadata.EMPTY);
+  public <T> ItemBuilder meta(DataKey<T> key, T value) {
+    stack.offer(PlatformAdapter.dataKey(key), value);
     return this;
   }
 

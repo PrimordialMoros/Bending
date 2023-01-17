@@ -91,7 +91,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     removalPolicy = Policies.builder().add(Policies.UNDER_WATER).add(Policies.UNDER_LAVA).build();
 
-    for (FireBlast blast : user.game().abilityManager(user.worldUid()).userInstances(user, FireBlast.class).toList()) {
+    for (FireBlast blast : user.game().abilityManager(user.worldKey()).userInstances(user, FireBlast.class).toList()) {
       if (blast.charging) {
         blast.launch();
         return false;

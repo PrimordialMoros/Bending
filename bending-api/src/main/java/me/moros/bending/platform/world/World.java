@@ -28,14 +28,16 @@ import me.moros.bending.model.raytrace.CompositeRayTrace;
 import me.moros.bending.model.raytrace.Context;
 import me.moros.bending.platform.Direction;
 import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.particle.ParticleContext;
 import me.moros.math.Position;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.key.Keyed;
 
-public interface World extends Identity, ForwardingAudience, BlockGetter, BlockSetter, EntityGetter {
+public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSetter, EntityGetter {
   @Override
   default Block blockAt(int x, int y, int z) {
     return new Block(this, x, y, z);
@@ -110,6 +112,10 @@ public interface World extends Identity, ForwardingAudience, BlockGetter, BlockS
   }
 
   Entity dropItem(Position position, ItemSnapshot item, boolean canPickup);
+
+  Entity createFallingBlock(Position center, BlockState state, boolean gravity);
+
+  Entity createArmorStand(Position center, Item type, boolean gravity);
 
   default int lightLevel(Position position) {
     return lightLevel(position.blockX(), position.blockY(), position.blockZ());

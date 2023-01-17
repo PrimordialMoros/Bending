@@ -87,11 +87,11 @@ public class AirBlast extends AbilityInstance {
       .add(Policies.UNDER_LAVA)
       .build();
 
-    for (AirBlast blast : user.game().abilityManager(user.worldUid()).userInstances(user, AirBlast.class).toList()) {
+    for (AirBlast blast : user.game().abilityManager(user.worldKey()).userInstances(user, AirBlast.class).toList()) {
       if (!blast.launched) {
         if (method == Activation.SNEAK_RELEASE) {
           if (!blast.selectOrigin()) {
-            user.game().abilityManager(user.worldUid()).destroyInstance(blast);
+            user.game().abilityManager(user.worldKey()).destroyInstance(blast);
           }
         } else {
           blast.launch();
@@ -191,14 +191,14 @@ public class AirBlast extends AbilityInstance {
       // Handle user separately from the general entity collision.
       if (selectedOrigin) {
         if (user.bounds().intersects(new Sphere(location, 2))) {
-          onEntityHit(user.entity());
+          onEntityHit(user);
         }
       }
     }
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      boolean isUser = entity.equals(user.entity());
+      boolean isUser = entity.uuid().equals(user.uuid());
       double factor = isUser ? userConfig.powerSelf : userConfig.powerOther;
       BendingEffect.FIRE_TICK.reset(entity);
       if (factor == 0) {

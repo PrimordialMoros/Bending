@@ -144,12 +144,12 @@ public sealed class BendingUser implements User permits BendingPlayer {
   }
 
   private void validateAbilities() {
-    game.abilityManager(worldUid()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
+    game.abilityManager(worldKey()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
     validatePassives();
   }
 
   private void validatePassives() {
-    game.abilityManager(worldUid()).createPassives(this);
+    game.abilityManager(worldKey()).createPassives(this);
   }
 
   @Override
@@ -242,7 +242,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   public boolean toggleBending() {
     canBend ^= true;
     if (!canBend) {
-      game.abilityManager(worldUid()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+      game.abilityManager(worldKey()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
     }
     return canBend;
   }

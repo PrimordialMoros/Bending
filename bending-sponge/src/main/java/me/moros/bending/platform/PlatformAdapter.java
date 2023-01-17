@@ -172,7 +172,7 @@ public final class PlatformAdapter {
       return DamageCause.FIRE;
     } else if (type == DamageTypes.FALL.get()) {
       return DamageCause.FALL;
-    } else if (type == DamageTypes.CONTACT.get()) { // TODO Incorrect mapping
+    } else if (type == DamageTypes.CONTACT.get()) { // TODO mapping too generic, will include other dmg types too
       return DamageCause.KINETIC;
     } else if (type == DamageTypes.SUFFOCATE.get()) {
       return DamageCause.SUFFOCATION;

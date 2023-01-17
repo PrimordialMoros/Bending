@@ -71,11 +71,11 @@ public class Torrent extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, WaterGimbal.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterGimbal.class)) {
       return false;
     }
 
-    Optional<Torrent> torrent = user.game().abilityManager(user.worldUid()).firstInstance(user, Torrent.class);
+    Optional<Torrent> torrent = user.game().abilityManager(user.worldKey()).firstInstance(user, Torrent.class);
     if (torrent.isPresent()) {
       torrent.get().launch();
       return false;

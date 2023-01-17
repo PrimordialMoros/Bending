@@ -100,7 +100,7 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    Optional<EarthSmash> grabbed = user.game().abilityManager(user.worldUid()).userInstances(user, EarthSmash.class)
+    Optional<EarthSmash> grabbed = user.game().abilityManager(user.worldKey()).userInstances(user, EarthSmash.class)
       .filter(s -> s.state instanceof GrabState).findAny();
 
     if (method == Activation.SNEAK) {
@@ -189,7 +189,7 @@ public class EarthSmash extends AbilityInstance {
     if (earthSmash == null) {
       return false;
     }
-    user.game().abilityManager(user.worldUid()).changeOwner(earthSmash, user);
+    user.game().abilityManager(user.worldKey()).changeOwner(earthSmash, user);
     earthSmash.grabBoulder();
     return true;
   }
@@ -208,7 +208,7 @@ public class EarthSmash extends AbilityInstance {
       return null;
     }
     AABB blockBounds = AABB.BLOCK_BOUNDS.at(block);
-    return user.game().abilityManager(user.worldUid()).instances(EarthSmash.class)
+    return user.game().abilityManager(user.worldKey()).instances(EarthSmash.class)
       .filter(filter)
       .filter(s -> s.boulder != null && s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
       .findAny().orElse(null);

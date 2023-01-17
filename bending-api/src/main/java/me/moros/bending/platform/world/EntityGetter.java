@@ -60,7 +60,11 @@ public interface EntityGetter {
    * @return all collected entities
    * @see #nearbyEntities(AABB, Predicate, int)
    */
-  List<Entity> nearbyEntities(Vector3d pos, double radius, Predicate<Entity> predicate, int limit);
+  default List<Entity> nearbyEntities(Vector3d pos, double radius, Predicate<Entity> predicate, int limit) {
+    AABB aabb = new AABB(pos.subtract(radius, radius, radius), pos.add(radius, radius, radius));
+    Predicate<Entity> distPredicate = e -> pos.distanceSq(e.location()) < radius * radius;
+    return nearbyEntities(aabb, distPredicate.and(predicate), limit);
+  }
 
   /**
    * Collects all entities inside a bounding box.

@@ -87,12 +87,12 @@ public class Shockwave extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, Shockwave.class)
+      user.game().abilityManager(user.worldKey()).firstInstance(user, Shockwave.class)
         .ifPresent(s -> s.release(true));
       return false;
     }
 
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, Shockwave.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, Shockwave.class)) {
       return false;
     }
 

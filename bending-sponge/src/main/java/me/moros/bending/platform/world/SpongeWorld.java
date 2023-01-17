@@ -21,7 +21,6 @@ package me.moros.bending.platform.world;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -31,6 +30,7 @@ import me.moros.bending.model.raytrace.BlockRayTrace;
 import me.moros.bending.model.raytrace.CompositeRayTrace;
 import me.moros.bending.model.raytrace.Context;
 import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.SpongeDataHolder;
 import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.block.Lockable;
@@ -42,6 +42,7 @@ import me.moros.bending.platform.particle.ParticleMapper;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +50,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 
@@ -84,7 +87,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public DataHolder blockMetadata(int x, int y, int z) {
-    return SpongeWorldManager.INSTANCE.metadata(uuid(), x, y, z);
+    return new SpongeDataHolder(handle().location(x, y, z));
   }
 
   @Override
@@ -102,22 +105,6 @@ public record SpongeWorld(ServerWorld handle) implements World {
   public boolean setBlockState(int x, int y, int z, BlockState state) {
     handle().setBlock(x, y, z, PlatformAdapter.toSpongeData(state));
     return true;
-  }
-
-  @Override
-  public List<Entity> nearbyEntities(Vector3d pos, double radius, Predicate<Entity> predicate, int limit) {
-    List<Entity> entities = new ArrayList<>();
-    var center = pos.to(org.spongepowered.math.vector.Vector3d.class);
-    for (var spongeEntity : handle().nearbyEntities(center, radius)) {
-      Entity entity = PlatformAdapter.fromSpongeEntity(spongeEntity);
-      if (predicate.test(entity)) {
-        entities.add(entity);
-        if (limit > 0 && entities.size() >= limit) {
-          return entities;
-        }
-      }
-    }
-    return entities;
   }
 
   @Override
@@ -234,6 +221,28 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
+  public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
+    var spongeEntity = handle().createEntity(EntityTypes.FALLING_BLOCK, center.to(org.spongepowered.math.vector.Vector3d.class));
+    spongeEntity.blockState().set(PlatformAdapter.toSpongeData(state));
+    spongeEntity.gravityAffected().set(gravity);
+    spongeEntity.dropAsItem().set(false);
+    handle().spawnEntity(spongeEntity);
+    return PlatformAdapter.fromSpongeEntity(spongeEntity);
+  }
+
+  @Override
+  public Entity createArmorStand(Position center, me.moros.bending.platform.item.Item type, boolean gravity) {
+    var item = ItemStack.of(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(type));
+    var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, center.to(org.spongepowered.math.vector.Vector3d.class));
+    spongeEntity.invulnerable().set(true);
+    spongeEntity.invisible().set(true);
+    spongeEntity.gravityAffected().set(gravity);
+    spongeEntity.equip(EquipmentTypes.HEAD, item);
+    handle().spawnEntity(spongeEntity);
+    return PlatformAdapter.fromSpongeEntity(spongeEntity);
+  }
+
+  @Override
   public int lightLevel(int x, int y, int z) {
     return handle().light(x, y, z);
   }
@@ -269,7 +278,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public @NonNull UUID uuid() {
-    return handle().uniqueId();
+  public @NonNull Key key() {
+    return PlatformAdapter.fromRsk(handle().key());
   }
 }

@@ -40,16 +40,17 @@ import me.moros.bending.model.ability.Updatable;
 import me.moros.bending.model.manager.AbilityManager;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
+import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 
 public class AbilityManagerImpl implements AbilityManager {
   private final Logger logger;
-  private final UUID world;
+  private final Key world;
   private final Multimap<UUID, Ability> globalInstances;
   private final Collection<Entry<UUID, Ability>> addQueue;
   private final MultiUpdatable<Updatable> generics;
 
-  AbilityManagerImpl(Logger logger, UUID world) {
+  AbilityManagerImpl(Logger logger, Key world) {
     this.logger = logger;
     this.world = world;
     globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
@@ -72,14 +73,14 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void addAbility(User user, Ability instance) {
-    if (world.equals(user.worldUid())) {
+    if (world.equals(user.worldKey())) {
       addQueue.add(Map.entry(user.uuid(), instance));
     }
   }
 
   @Override
   public void changeOwner(Ability ability, User user) {
-    if (ability.user().equals(user) || !ability.user().worldUid().equals(user.worldUid()) || !world.equals(user.worldUid())) {
+    if (ability.user().equals(user) || !ability.user().worldKey().equals(user.worldKey()) || !world.equals(user.worldKey())) {
       return;
     }
     if (globalInstances.remove(ability.user().uuid(), ability)) {
@@ -91,7 +92,7 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void createPassives(User user) {
-    if (!world.equals(user.worldUid())) {
+    if (!world.equals(user.worldKey())) {
       return;
     }
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(this::isPassive).toList();

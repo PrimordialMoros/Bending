@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable {
   @Override
@@ -34,12 +33,12 @@ public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable
 
   @Override
   public void lock(Component lock) {
-    lock(LegacyComponentSerializer.legacySection().serializeOrNull(lock));
+    lock(LegacyComponentSerializer.legacySection().serializeOr(lock, ""));
   }
 
   @Override
-  public void lock(@Nullable String lock) {
-    if (lock == null || lock.isEmpty()) {
+  public void lock(String lock) {
+    if (lock.isEmpty()) {
       unlock();
     } else {
       handle.setLock(lock);

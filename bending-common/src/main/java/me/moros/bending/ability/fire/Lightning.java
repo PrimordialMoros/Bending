@@ -97,7 +97,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).userInstances(user, Lightning.class).anyMatch(l -> !l.launched)) {
+    if (user.game().abilityManager(user.worldKey()).userInstances(user, Lightning.class).anyMatch(l -> !l.launched)) {
       return false;
     }
     this.user = user;
@@ -221,7 +221,7 @@ public class Lightning extends AbilityInstance {
     for (Entity e : entitiesToCheck) {
       User bendingUser = Registries.BENDERS.get(e.uuid());
       if (bendingUser != null) {
-        Lightning other = user.game().abilityManager(user.worldUid()).userInstances(bendingUser, Lightning.class)
+        Lightning other = user.game().abilityManager(user.worldKey()).userInstances(bendingUser, Lightning.class)
           .filter(l -> !l.launched).findFirst().orElse(null);
         if (other != null) {
           other.startTime = 0;

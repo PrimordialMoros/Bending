@@ -103,7 +103,7 @@ public class PlayerListener implements Listener {
   }
 
   private boolean disabledWorld(PlayerEvent event) {
-    return !game.worldManager().isEnabled(event.getPlayer().getWorld().getUID());
+    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getPlayer().getWorld().getKey()));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -133,7 +133,7 @@ public class PlayerListener implements Listener {
       User user = BendingPlayer.createUser(game, new BukkitPlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
-        game.abilityManager(user.worldUid()).createPassives(user);
+        game.abilityManager(user.worldKey()).createPassives(user);
       }
     } else {
       plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.getName() + ")");
@@ -190,7 +190,7 @@ public class PlayerListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onUserMove(EntityMoveEvent event) {
-    if (!game.worldManager().isEnabled(event.getEntity().getWorld().getUID())) {
+    if (!game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getEntity().getWorld().getKey()))) {
       return;
     }
     if (cancelMovement(event)) {
@@ -341,7 +341,7 @@ public class PlayerListener implements Listener {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
         user.board().updateAll();
-        game.abilityManager(user.worldUid()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+        game.abilityManager(user.worldKey()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
     }
   }

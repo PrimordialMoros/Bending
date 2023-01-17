@@ -74,7 +74,7 @@ public class FireBreath extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, FireBreath.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, FireBreath.class)) {
       return false;
     }
     if (Policies.UNDER_WATER.test(user, description()) || Policies.UNDER_LAVA.test(user, description())) {

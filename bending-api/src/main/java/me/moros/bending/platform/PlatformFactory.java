@@ -24,13 +24,9 @@ import java.util.Optional;
 import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.platform.block.BlockState;
-import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.world.World;
-import me.moros.math.Position;
 
 public interface PlatformFactory {
   Optional<Board> buildBoard(BendingPlayer player);
@@ -40,8 +36,4 @@ public interface PlatformFactory {
   ItemBuilder itemBuilder(Item item);
 
   ItemBuilder itemBuilder(ItemSnapshot snapshot);
-
-  Entity createFallingBlock(World world, Position center, BlockState state, boolean gravity);
-
-  Entity createArmorStand(World world, Position center, Item type, boolean gravity);
 }

@@ -1,19 +1,46 @@
+import org.spongepowered.gradle.vanilla.repository.MinecraftPlatform
 import org.spongepowered.gradle.plugin.config.PluginLoaders
 import org.spongepowered.plugin.metadata.model.PluginDependency
 
 plugins {
-    alias(libs.plugins.shadow)
+    id("platform-conventions")
     alias(libs.plugins.sponge)
     alias(libs.plugins.vanilla)
 }
 
 repositories {
     maven("https://repo.spongepowered.org/repository/maven-public/")
-    maven("https://repo.jpenilla.xyz/snapshots/") //cloud-sponge not available in main repo yet
+    maven("https://repo.jpenilla.xyz/snapshots/") { //cloud-sponge not available in main repo yet
+        mavenContent {
+            includeGroup("cloud.commandframework")
+            snapshotsOnly()
+        }
+    }
 }
 
 minecraft {
     version(libs.versions.minecraft.get())
+    platform(MinecraftPlatform.SERVER)
+}
+
+dependencies {
+    bendingImplementation(project(":bending-common"))
+    bendingImplementation(libs.math.sponge)
+    bendingImplementation(libs.tasker.sponge)
+    bendingImplementation(libs.bstats.sponge)
+    bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
+    bendingImplementation(libs.cloud.sponge)
+    bendingImplementation(libs.bundles.drivers.extended) { isTransitive = false }
+    bendingImplementation(libs.slf4j.api)
+    bendingImplementation(libs.slf4j.simple)
+}
+
+tasks {
+    shadowJar {
+        dependencies {
+            reloc("org.slf4j", "slf4j")
+        }
+    }
 }
 
 sponge {
@@ -33,83 +60,15 @@ sponge {
             issues("https://github.com/PrimordialMoros/Bending/issues")
         }
         contributor("Moros") {
-            description("Lead dev")
+            description("Lead Developer")
         }
         dependency("spongeapi") {
             loadOrder(PluginDependency.LoadOrder.AFTER)
             optional(false)
         }
-        dependency("luckperms") {
-            loadOrder(PluginDependency.LoadOrder.AFTER)
-            optional(true)
-        }
     }
 }
 
-
-dependencies {
-    implementation(project(":bending-common"))
-    implementation(libs.math.sponge)
-    implementation(libs.tasker.sponge)
-    implementation(libs.mariadb) {
-        isTransitive = false
-    }
-    implementation(libs.postgresql)
-    implementation(libs.h2)
-    implementation(libs.hsql)
-    implementation(libs.bstats.sponge)
-    implementation(libs.cloud.sponge)
-    implementation(libs.cloud.minecraft) {
-        isTransitive = false
-    }
-    compileOnly(libs.sponge.api)
-    compileOnly(libs.luckperms.api)
-}
-
-configurations {
-    implementation {
-        exclude(module = "error_prone_annotations")
-    }
-    runtimeClasspath  {
-        exclude(module = "checker-qual")
-        exclude(module = "slf4j-api")
-    }
-}
-
-tasks {
-    assemble {
-        dependsOn(shadowJar)
-    }
-    shadowJar {
-        archiveClassifier.set("")
-        archiveBaseName.set(project.name)
-        destinationDirectory.set(rootProject.buildDir)
-        fun reloc(pkg: String, name: String) = relocate(pkg, "me.moros.bending.$name")
-        fun relocInternal(pkg: String, name: String) = reloc(pkg, "internal.$name")
-        dependencies {
-            reloc("me.moros.storage", "storage")
-            reloc("net.kyori.event", "event.bus")
-            reloc("org.bstats", "bstats")
-            relocInternal("cloud.commandframework", "cloudframework")
-            relocInternal("com.github.benmanes.caffeine", "caffeine")
-            relocInternal("com.github.stefvanschie.inventoryframework", "inventoryframework")
-            relocInternal("com.typesafe", "typesafe")
-            relocInternal("com.zaxxer.hikari", "hikari")
-            relocInternal("io.leangen", "leangen")
-            relocInternal("org.h2", "h2")
-            relocInternal("org.hsqldb", "hsqldb")
-            relocInternal("org.jdbi", "jdbi")
-            relocInternal("org.mariadb", "mariadb")
-            relocInternal("org.postgresql", "postgresql")
-            relocInternal("org.spongepowered.configurate", "configurate")
-        }
-    }
-    named<Copy>("processResources") {
-        filesMatching("plugin.yml") {
-            expand("pluginVersion" to project.version)
-        }
-        from("$rootDir/LICENSE") {
-            rename { "${rootProject.name.toUpperCase()}_${it}" }
-        }
-    }
+bendingPlatform {
+    productionJar.set(tasks.shadowJar.flatMap { it.archiveFile })
 }

@@ -20,36 +20,24 @@
 package me.moros.bending.listener;
 
 import me.moros.bending.model.manager.Game;
-import org.bukkit.Server;
+import me.moros.bending.platform.PlatformAdapter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
 public record WorldListener(Game game) implements Listener {
-  public WorldListener(Game game, Server server) {
-    this(game);
-    for (var world : server.getWorlds()) {
-      game.worldManager().onWorldLoad(world.getName(), world.getUID());
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onWorldLoad(WorldLoadEvent event) {
-    var world = event.getWorld();
-    game.worldManager().onWorldLoad(world.getName(), world.getUID());
-  }
-
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onWorldUnload(WorldUnloadEvent event) {
-    game.worldManager().onWorldUnload(event.getWorld().getUID());
+    game.worldManager().onWorldUnload(PlatformAdapter.fromNsk(event.getWorld().getKey()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
     var p = event.getPlayer();
-    game.worldManager().onUserChangeWorld(p.getUniqueId(), event.getFrom().getUID(), p.getWorld().getUID());
+    var from = PlatformAdapter.fromNsk(event.getFrom().getKey());
+    var to = PlatformAdapter.fromNsk(p.getWorld().getKey());
+    game.worldManager().onUserChangeWorld(p.getUniqueId(), from, to);
   }
 }

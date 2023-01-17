@@ -78,10 +78,10 @@ public class HeatControl extends AbilityInstance {
   @Override
   public boolean activate(User user, Activation method) {
     if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::act);
       return false;
     } else if (method == Activation.SNEAK) {
-      user.game().abilityManager(user.worldUid()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::solidify);
+      user.game().abilityManager(user.worldKey()).firstInstance(user, HeatControl.class).ifPresent(HeatControl::solidify);
       return false;
     }
     this.user = user;
@@ -219,7 +219,7 @@ public class HeatControl extends AbilityInstance {
       if (user.store().canEdit(key)) {
         Light light = user.store().toggle(key, Light.ON);
         user.sendActionBar(Component.text("Light: " + light.name(), ColorPalette.TEXT_COLOR));
-        user.game().abilityManager(user.worldUid()).firstInstance(user, HeatControl.class).ifPresent(h -> h.canLight = light == Light.ON);
+        user.game().abilityManager(user.worldKey()).firstInstance(user, HeatControl.class).ifPresent(h -> h.canLight = light == Light.ON);
       }
     }
   }

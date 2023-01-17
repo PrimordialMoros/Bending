@@ -245,7 +245,7 @@ public class IceSpike extends AbilityInstance {
     }
 
     private boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity) && !entity.equals(user.entity())) {
+      if (!affectedEntities.contains(entity) && !entity.uuid().equals(user.uuid())) {
         affectedEntities.add(entity);
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
         entity.damage(userConfig.damage, user, description());

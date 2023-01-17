@@ -92,7 +92,7 @@ public final class ActivationControllerImpl implements ActivationController {
     }
     Ability ability = desc.createAbility();
     if (ability.activate(user, method)) {
-      user.game().abilityManager(user.worldUid()).addAbility(user, ability);
+      user.game().abilityManager(user.worldKey()).addAbility(user, ability);
       EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
       return ability;
     }
@@ -103,7 +103,7 @@ public final class ActivationControllerImpl implements ActivationController {
   public void onUserDeconstruct(User user) {
     ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
-    user.game().abilityManager(user.worldUid()).destroyUserInstances(user);
+    user.game().abilityManager(user.worldKey()).destroyUserInstances(user);
     if (user instanceof BendingPlayer bendingPlayer) {
       user.game().storage().saveProfileAsync(bendingPlayer.toProfile());
       bendingPlayer.board().disableScoreboard();
@@ -118,7 +118,7 @@ public final class ActivationControllerImpl implements ActivationController {
     if (!cache.addInteraction(user.uuid())) {
       return;
     }
-    if (user.game().abilityManager(user.worldUid()).destroyUserInstances(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
+    if (user.game().abilityManager(user.worldKey()).destroyUserInstances(user, List.of(AirScooter.class, AirWheel.class, EarthSurf.class))) {
       return;
     }
 
@@ -132,7 +132,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public boolean onUserGlide(User user) {
-    return user.game().abilityManager(user.worldUid()).hasAbility(user, FireJet.class);
+    return user.game().abilityManager(user.worldKey()).hasAbility(user, FireJet.class);
   }
 
   @Override
@@ -154,7 +154,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserDamage(User user) {
-    user.game().abilityManager(user.worldUid()).destroyUserInstances(user, List.of(AirScooter.class, EarthSurf.class));
+    user.game().abilityManager(user.worldKey()).destroyUserInstances(user, List.of(AirScooter.class, EarthSurf.class));
   }
 
   @Override
@@ -184,7 +184,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public boolean onBurn(User user) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, FireJet.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, FireJet.class)) {
       return false;
     }
     if (EarthArmor.hasArmor(user)) {
@@ -251,7 +251,7 @@ public final class ActivationControllerImpl implements ActivationController {
   // Optimize player move events by caching instances every tick
   private record ControllerCache(Map<UUID, SpoutAbility> spoutCache, Set<UUID> interactionCache) {
     private @Nullable SpoutAbility getSpout(User user) {
-      return spoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.worldUid()).firstInstance(user, SpoutAbility.class).orElse(null));
+      return spoutCache.computeIfAbsent(user.uuid(), u -> user.game().abilityManager(user.worldKey()).firstInstance(user, SpoutAbility.class).orElse(null));
     }
 
     private void clear() {

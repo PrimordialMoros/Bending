@@ -134,7 +134,7 @@ public class RaiseEarth extends AbilityInstance {
   }
 
   private void loadRaised() {
-    raisedCache = user.game().abilityManager(user.worldUid()).instances(RaiseEarth.class)
+    raisedCache = user.game().abilityManager(user.worldKey()).instances(RaiseEarth.class)
       .flatMap(RaiseEarth::pillars).map(Pillar::pillarBlocks).flatMap(Collection::stream)
       .collect(Collectors.toUnmodifiableSet());
   }

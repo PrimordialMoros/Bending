@@ -26,13 +26,10 @@ import me.moros.bending.util.KeyUtil;
  * Utility class to provide metadata keys
  */
 public final class Metadata {
-  public static final DataKey<Boolean> NO_PICKUP = KeyUtil.data("bending-no-pickup", Boolean.class);
   public static final DataKey<Boolean> NPC = KeyUtil.data("bending-npc", Boolean.class);
 
   public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("bending-armor", Boolean.class);
-  public static final DataKey<String> METAL_KEY = KeyUtil.data("bending-metal-key", String.class);
-
-  public static final byte EMPTY = 0x1;
+  public static final DataKey<Boolean> METAL_KEY = KeyUtil.data("bending-metal-key", Boolean.class);
 
   private Metadata() {
   }

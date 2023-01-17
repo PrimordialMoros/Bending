@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import me.moros.bending.model.ability.Updatable;
+import net.kyori.adventure.key.Key;
 
 /**
  * Responsible for updating per-world managers.
@@ -33,7 +34,7 @@ public interface WorldManager extends Updatable {
    * @param world the world to check
    * @return the ability manager instance for that world
    */
-  AbilityManager instance(UUID world);
+  AbilityManager instance(Key world);
 
   /**
    * Clear all per-world managers this instance is responsible for.
@@ -45,7 +46,7 @@ public interface WorldManager extends Updatable {
    * @param world the world uuid to check
    * @return true if bending is enabled for the given world, false otherwise
    */
-  boolean isEnabled(UUID world);
+  boolean isEnabled(Key world);
 
   /**
    * Perform an action for every ability manager handled by this instance.
@@ -53,9 +54,7 @@ public interface WorldManager extends Updatable {
    */
   void forEach(Consumer<AbilityManager> consumer);
 
-  void onWorldLoad(String worldName, UUID world);
+  void onWorldUnload(Key world);
 
-  void onWorldUnload(UUID world);
-
-  void onUserChangeWorld(UUID uuid, UUID oldWorld, UUID newWorld);
+  void onUserChangeWorld(UUID uuid, Key oldWorld, Key newWorld);
 }

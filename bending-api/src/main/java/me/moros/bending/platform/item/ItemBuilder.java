@@ -21,7 +21,7 @@ package me.moros.bending.platform.item;
 
 import java.util.List;
 
-import net.kyori.adventure.key.Key;
+import me.moros.bending.model.data.DataKey;
 import net.kyori.adventure.text.Component;
 
 public interface ItemBuilder {
@@ -29,7 +29,7 @@ public interface ItemBuilder {
 
   ItemBuilder lore(List<Component> lore);
 
-  ItemBuilder meta(Key key);
+  <T> ItemBuilder meta(DataKey<T> key, T value);
 
   ItemBuilder unbreakable(boolean unbreakable);
 

@@ -142,11 +142,6 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   }
 
   @Override
-  public boolean hasLineOfSight(Entity other) {
-    return other instanceof BukkitEntity ent && handle().hasLineOfSight(ent.handle());
-  }
-
-  @Override
   public int airCapacity() {
     return handle().getMaximumAir();
   }

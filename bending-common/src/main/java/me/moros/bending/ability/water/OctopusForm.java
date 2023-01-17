@@ -80,7 +80,7 @@ public class OctopusForm extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    OctopusForm octopusForm = user.game().abilityManager(user.worldUid()).firstInstance(user, OctopusForm.class).orElse(null);
+    OctopusForm octopusForm = user.game().abilityManager(user.worldKey()).firstInstance(user, OctopusForm.class).orElse(null);
     if (octopusForm != null) {
       octopusForm.punch();
       return false;

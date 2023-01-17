@@ -164,7 +164,7 @@ final class BoardImpl implements Board {
     var arr = NamedTextColor.NAMES.values().toArray(NamedTextColor[]::new);
     CHAT_CODES = new Component[arr.length];
     for (int i = 0; i < arr.length; i++) {
-      CHAT_CODES[i] = Component.text(" ", arr[i]); // TODO space might be render weirdly but is needed
+      CHAT_CODES[i] = Component.text(" ", arr[i]); // TODO space might render weirdly but is needed
     }
   }
 

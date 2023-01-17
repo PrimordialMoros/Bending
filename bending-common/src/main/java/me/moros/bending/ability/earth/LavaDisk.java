@@ -92,7 +92,7 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, LavaDisk.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, LavaDisk.class)) {
       return false;
     }
 

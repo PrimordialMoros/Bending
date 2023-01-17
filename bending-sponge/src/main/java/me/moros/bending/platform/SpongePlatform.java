@@ -27,20 +27,14 @@ import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.platform.block.BlockInitializer;
-import me.moros.bending.platform.block.BlockState;
-import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
 import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.item.SpongeItemBuilder;
-import me.moros.bending.platform.world.World;
-import me.moros.math.Position;
 import me.moros.math.sponge.SpongeMathAdapter;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 
 public class SpongePlatform implements Platform, PlatformFactory {
   public SpongePlatform(Path path, SpongeBending plugin) {
@@ -83,29 +77,5 @@ public class SpongePlatform implements Platform, PlatformFactory {
   @Override
   public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
     return new SpongeItemBuilder(PlatformAdapter.toSpongeItem(snapshot));
-  }
-
-  @Override
-  public Entity createFallingBlock(World world, Position center, BlockState state, boolean gravity) {
-    var w = PlatformAdapter.toSpongeWorld(world);
-    var spongeEntity = w.createEntity(EntityTypes.FALLING_BLOCK, center.to(org.spongepowered.math.vector.Vector3d.class));
-    spongeEntity.blockState().set(PlatformAdapter.toSpongeData(state));
-    spongeEntity.gravityAffected().set(gravity);
-    spongeEntity.dropAsItem().set(false);
-    w.spawnEntity(spongeEntity);
-    return PlatformAdapter.fromSpongeEntity(spongeEntity);
-  }
-
-  @Override
-  public Entity createArmorStand(World world, Position center, Item type, boolean gravity) {
-    var w = PlatformAdapter.toSpongeWorld(world);
-    var item = ItemStack.of(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(type));
-    var spongeEntity = w.createEntity(EntityTypes.ARMOR_STAND, center.to(org.spongepowered.math.vector.Vector3d.class));
-    spongeEntity.invulnerable().set(true);
-    spongeEntity.invisible().set(true);
-    spongeEntity.gravityAffected().set(gravity);
-    spongeEntity.equip(EquipmentTypes.HEAD, item);
-    w.spawnEntity(spongeEntity);
-    return PlatformAdapter.fromSpongeEntity(spongeEntity);
   }
 }

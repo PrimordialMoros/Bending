@@ -63,7 +63,7 @@ public class HealingWaters extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldUid()).hasAbility(user, HealingWaters.class)) {
+    if (user.game().abilityManager(user.worldKey()).hasAbility(user, HealingWaters.class)) {
       return false;
     }
     this.user = user;
@@ -103,13 +103,13 @@ public class HealingWaters extends AbilityInstance {
     Mode mode = user.store().get(KeyUtil.data("healingwaters-mode", Mode.class)).orElse(Mode.SELF);
     if (mode == Mode.OTHERS) {
       Entity entity = user.rayTrace(userConfig.range + 1).cast(user.world()).entity();
-      if (entity instanceof LivingEntity && user.entity().hasLineOfSight(entity)) {
-        target = (LivingEntity) entity;
+      if (entity instanceof LivingEntity living) {
+        target = living;
       } else {
         return false;
       }
     } else {
-      target = user.entity();
+      target = user;
     }
     if (!target.inWater(false) && !InventoryUtil.hasFullBottle(user)) {
       return false;

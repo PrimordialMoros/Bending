@@ -49,7 +49,7 @@ public class GracefulDescent extends AbilityInstance {
   }
 
   public static boolean isGraceful(User user) {
-    return user.game().abilityManager(user.worldUid()).firstInstance(user, GracefulDescent.class)
+    return user.game().abilityManager(user.worldKey()).firstInstance(user, GracefulDescent.class)
       .map(a -> user.canBend(a.description())).orElse(false);
   }
 

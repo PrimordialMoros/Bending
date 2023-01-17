@@ -84,7 +84,7 @@ public class AirSwipe extends AbilityInstance {
       return false;
     }
 
-    for (AirSwipe swipe : user.game().abilityManager(user.worldUid()).userInstances(user, AirSwipe.class).toList()) {
+    for (AirSwipe swipe : user.game().abilityManager(user.worldKey()).userInstances(user, AirSwipe.class).toList()) {
       if (swipe.charging) {
         swipe.launch();
         return false;

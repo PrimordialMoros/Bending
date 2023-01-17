@@ -19,10 +19,9 @@
 
 package me.moros.bending.model.manager;
 
-import java.util.UUID;
-
 import me.moros.bending.config.ConfigProcessor;
 import me.moros.bending.model.storage.BendingStorage;
+import net.kyori.adventure.key.Key;
 
 /**
  * Holds all the needed bending sub-systems.
@@ -36,7 +35,7 @@ public interface Game {
 
   FlightManager flightManager();
 
-  AbilityManager abilityManager(UUID world);
+  AbilityManager abilityManager(Key world);
 
   WorldManager worldManager();
 

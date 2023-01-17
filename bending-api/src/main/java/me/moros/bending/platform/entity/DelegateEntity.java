@@ -352,11 +352,6 @@ public interface DelegateEntity extends LivingEntity {
   }
 
   @Override
-  default boolean hasLineOfSight(Entity other) {
-    return entity().hasLineOfSight(other);
-  }
-
-  @Override
   default int airCapacity() {
     return entity().airCapacity();
   }
