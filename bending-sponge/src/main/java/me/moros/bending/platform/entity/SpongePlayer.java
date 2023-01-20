@@ -19,8 +19,7 @@
 
 package me.moros.bending.platform.entity;
 
-import java.util.Objects;
-
+import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.entity.player.GameMode;
 import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.platform.item.Inventory;
@@ -74,8 +73,7 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
 
   @Override
   public GameMode gamemode() {
-    var name = handle().gameMode().get().key(RegistryTypes.GAME_MODE).value();
-    return Objects.requireNonNull(GameMode.registry().fromString(name));
+    return GameMode.registry().getOrThrow(PlatformAdapter.fromRsk(handle().gameMode().get().key(RegistryTypes.GAME_MODE)));
   }
 
   @Override

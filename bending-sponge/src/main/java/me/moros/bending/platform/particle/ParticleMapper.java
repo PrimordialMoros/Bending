@@ -26,7 +26,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.math.vector.Vector3d;
@@ -42,7 +41,7 @@ public final class ParticleMapper {
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
         builder.option(ParticleOptions.BLOCK_STATE, PlatformAdapter.toSpongeData(state));
       } else if (p == Particle.ITEM && data instanceof Item item) {
-        var snapshot = ItemStack.of(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(item)).createSnapshot();
+        var snapshot = PlatformAdapter.toSpongeItem(item).createSnapshot();
         builder.option(ParticleOptions.ITEM_STACK_SNAPSHOT, snapshot);
       } else if (p == Particle.DUST && data instanceof ParticleDustData dust) {
         builder.option(ParticleOptions.COLOR, Color.ofRgb(dust.red(), dust.green(), dust.blue()));

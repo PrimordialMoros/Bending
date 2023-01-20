@@ -29,6 +29,7 @@ import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemTag;
 import me.moros.bending.platform.property.StateProperty;
+import me.moros.bending.util.KeyUtil;
 import me.moros.math.FastMath;
 
 import static java.util.Map.entry;
@@ -43,13 +44,13 @@ public final class MaterialUtil {
 
   public static final Map<Item, Item> COOKABLE;
   public static final Map<BlockType, Item> ORES;
-  public static final BlockTag BREAKABLE_PLANTS;
-  public static final BlockTag WATER_PLANTS;
-  public static final BlockTag TRANSPARENT;
-  public static final BlockTag LOCKABLE_CONTAINERS;
-  public static final BlockTag CONTAINERS;
-  public static final BlockTag UNBREAKABLES;
-  public static final ItemTag METAL_ARMOR;
+  public static final BlockTag WATER_PLANTS = BlockTag.reference(KeyUtil.simple("water-plants"));
+  public static final BlockTag BREAKABLE_PLANTS = BlockTag.reference(KeyUtil.simple("breakable-plants"));
+  public static final BlockTag TRANSPARENT = BlockTag.reference(KeyUtil.simple("transparent"));
+  public static final BlockTag LOCKABLE_CONTAINERS = BlockTag.reference(KeyUtil.simple("lockable-containers"));
+  public static final BlockTag CONTAINERS = BlockTag.reference(KeyUtil.simple("containers"));
+  public static final BlockTag UNBREAKABLES = BlockTag.reference(KeyUtil.simple("unbreakables"));
+  public static final ItemTag METAL_ARMOR = ItemTag.reference(KeyUtil.simple("metal-armor"));
 
   private static final BlockTag STAINED_TERRACOTTA;
   private static final BlockTag SANDSTONES;
@@ -71,78 +72,16 @@ public final class MaterialUtil {
     );
 
     ORES = Map.ofEntries(
-      entry(BlockType.COPPER_ORE, Item.COAL),
-      entry(BlockType.DEEPSLATE_COPPER_ORE, Item.COAL),
-      entry(BlockType.COAL_ORE, Item.COAL),
-      entry(BlockType.DEEPSLATE_COAL_ORE, Item.COAL),
-      entry(BlockType.LAPIS_ORE, Item.LAPIS_LAZULI),
-      entry(BlockType.DEEPSLATE_LAPIS_ORE, Item.LAPIS_LAZULI),
-      entry(BlockType.REDSTONE_ORE, Item.REDSTONE),
-      entry(BlockType.DEEPSLATE_REDSTONE_ORE, Item.REDSTONE),
-      entry(BlockType.DIAMOND_ORE, Item.DIAMOND),
-      entry(BlockType.DEEPSLATE_DIAMOND_ORE, Item.DIAMOND),
-      entry(BlockType.EMERALD_ORE, Item.EMERALD),
-      entry(BlockType.DEEPSLATE_EMERALD_ORE, Item.EMERALD),
-      entry(BlockType.NETHER_QUARTZ_ORE, Item.QUARTZ),
-      entry(BlockType.IRON_ORE, Item.IRON_INGOT),
-      entry(BlockType.DEEPSLATE_IRON_ORE, Item.IRON_INGOT),
-      entry(BlockType.GOLD_ORE, Item.GOLD_INGOT),
-      entry(BlockType.DEEPSLATE_GOLD_ORE, Item.GOLD_INGOT),
-      entry(BlockType.NETHER_GOLD_ORE, Item.GOLD_NUGGET)
+      entry(BlockType.COPPER_ORE, Item.COAL), entry(BlockType.DEEPSLATE_COPPER_ORE, Item.COAL),
+      entry(BlockType.COAL_ORE, Item.COAL), entry(BlockType.DEEPSLATE_COAL_ORE, Item.COAL),
+      entry(BlockType.LAPIS_ORE, Item.LAPIS_LAZULI), entry(BlockType.DEEPSLATE_LAPIS_ORE, Item.LAPIS_LAZULI),
+      entry(BlockType.REDSTONE_ORE, Item.REDSTONE), entry(BlockType.DEEPSLATE_REDSTONE_ORE, Item.REDSTONE),
+      entry(BlockType.DIAMOND_ORE, Item.DIAMOND), entry(BlockType.DEEPSLATE_DIAMOND_ORE, Item.DIAMOND),
+      entry(BlockType.EMERALD_ORE, Item.EMERALD), entry(BlockType.DEEPSLATE_EMERALD_ORE, Item.EMERALD),
+      entry(BlockType.IRON_ORE, Item.IRON_INGOT), entry(BlockType.DEEPSLATE_IRON_ORE, Item.IRON_INGOT),
+      entry(BlockType.GOLD_ORE, Item.GOLD_INGOT), entry(BlockType.DEEPSLATE_GOLD_ORE, Item.GOLD_INGOT),
+      entry(BlockType.NETHER_QUARTZ_ORE, Item.QUARTZ), entry(BlockType.NETHER_GOLD_ORE, Item.GOLD_NUGGET)
     );
-
-    WATER_PLANTS = BlockTag.builder("water-plants")
-      .add(BlockType.SEAGRASS, BlockType.TALL_SEAGRASS, BlockType.KELP, BlockType.KELP_PLANT).build();
-
-    BREAKABLE_PLANTS = BlockTag.builder("breakable-plants")
-      .add(WATER_PLANTS)
-      .add(BlockTag.SAPLINGS)
-      .add(BlockTag.FLOWERS)
-      .add(BlockTag.SMALL_FLOWERS)
-      .add(BlockTag.TALL_FLOWERS)
-      .add(BlockTag.CROPS)
-      .add(BlockTag.CAVE_VINES)
-      .add(BlockTag.CORALS)
-      .add(BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM)
-      .add(BlockTag.CORALS)
-      .add(BlockTag.CORAL_BLOCKS)
-      .add(BlockType.GRASS, BlockType.TALL_GRASS, BlockType.LARGE_FERN, BlockType.GLOW_LICHEN,
-        BlockType.WEEPING_VINES, BlockType.WEEPING_VINES_PLANT, BlockType.TWISTING_VINES, BlockType.TWISTING_VINES_PLANT,
-        BlockType.VINE, BlockType.FERN, BlockType.SUGAR_CANE, BlockType.DEAD_BUSH).build();
-
-    TRANSPARENT = BlockTag.builder("transparent")
-      .add(BREAKABLE_PLANTS)
-      .add(BlockTag.SIGNS)
-      .add(BlockTag.FIRE)
-      .add(BlockTag.WOOL_CARPETS)
-      .add(BlockTag.BUTTONS)
-      .add(BlockType.LIGHT, BlockType.AIR, BlockType.CAVE_AIR, BlockType.VOID_AIR, BlockType.COBWEB, BlockType.SNOW)
-      .endsWith("TORCH").build();
-
-    LOCKABLE_CONTAINERS = BlockTag.builder("lockable-containers").add(
-      BlockType.CHEST, BlockType.TRAPPED_CHEST, BlockType.BARREL, BlockType.SHULKER_BOX,
-      BlockType.FURNACE, BlockType.BLAST_FURNACE, BlockType.SMOKER, BlockType.BEACON,
-      BlockType.DISPENSER, BlockType.DROPPER, BlockType.HOPPER, BlockType.BREWING_STAND
-    ).build();
-
-    CONTAINERS = BlockTag.builder("containers")
-      .add(LOCKABLE_CONTAINERS)
-      .add(
-        BlockType.ENDER_CHEST, BlockType.ENCHANTING_TABLE, BlockType.ANVIL, BlockType.CHIPPED_ANVIL, BlockType.DAMAGED_ANVIL,
-        BlockType.GRINDSTONE, BlockType.CARTOGRAPHY_TABLE, BlockType.LOOM, BlockType.SMITHING_TABLE, BlockType.JUKEBOX
-      ).build();
-
-    UNBREAKABLES = BlockTag.builder("unbreakables").add(
-      BlockType.BARRIER, BlockType.BEDROCK, BlockType.OBSIDIAN, BlockType.CRYING_OBSIDIAN,
-      BlockType.NETHER_PORTAL, BlockType.END_PORTAL, BlockType.END_PORTAL_FRAME, BlockType.END_GATEWAY
-    ).build();
-
-    METAL_ARMOR = ItemTag.builder("metal-armor").add(
-      Item.IRON_HELMET, Item.IRON_CHESTPLATE, Item.IRON_LEGGINGS, Item.IRON_BOOTS,
-      Item.GOLDEN_HELMET, Item.GOLDEN_CHESTPLATE, Item.GOLDEN_LEGGINGS, Item.GOLDEN_BOOTS,
-      Item.CHAINMAIL_HELMET, Item.CHAINMAIL_CHESTPLATE, Item.CHAINMAIL_LEGGINGS, Item.CHAINMAIL_BOOTS,
-      Item.NETHERITE_HELMET, Item.NETHERITE_CHESTPLATE, Item.NETHERITE_LEGGINGS, Item.NETHERITE_BOOTS
-    ).build();
 
     STAINED_TERRACOTTA = BlockTag.builder("stained_terracotta")
       .endsWith("TERRACOTTA")
@@ -157,6 +96,57 @@ public final class MaterialUtil {
     RED_SANDSTONES = BlockTag.builder("red_sandstone").endsWith("RED_SANDSTONE").build();
   }
 
+  public static void init() {
+    BlockTag.builder(WATER_PLANTS.key())
+      .add(BlockType.SEAGRASS, BlockType.TALL_SEAGRASS, BlockType.KELP, BlockType.KELP_PLANT)
+      .buildAndRegister();
+    BlockTag.builder(BREAKABLE_PLANTS.key())
+      .add(WATER_PLANTS)
+      .add(BlockTag.SAPLINGS)
+      .add(BlockTag.FLOWERS)
+      .add(BlockTag.SMALL_FLOWERS)
+      .add(BlockTag.TALL_FLOWERS)
+      .add(BlockTag.CROPS)
+      .add(BlockTag.CAVE_VINES)
+      .add(BlockTag.CORALS)
+      .add(BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM)
+      .add(BlockTag.CORALS)
+      .add(BlockTag.CORAL_BLOCKS)
+      .add(BlockType.GRASS, BlockType.TALL_GRASS, BlockType.LARGE_FERN, BlockType.GLOW_LICHEN,
+        BlockType.WEEPING_VINES, BlockType.WEEPING_VINES_PLANT, BlockType.TWISTING_VINES, BlockType.TWISTING_VINES_PLANT,
+        BlockType.VINE, BlockType.FERN, BlockType.SUGAR_CANE, BlockType.DEAD_BUSH).buildAndRegister();
+    BlockTag.builder(TRANSPARENT.key())
+      .add(BREAKABLE_PLANTS)
+      .add(BlockTag.SIGNS)
+      .add(BlockTag.FIRE)
+      .add(BlockTag.WOOL_CARPETS)
+      .add(BlockTag.BUTTONS)
+      .add(BlockType.LIGHT, BlockType.AIR, BlockType.CAVE_AIR, BlockType.VOID_AIR, BlockType.COBWEB, BlockType.SNOW)
+      .endsWith("TORCH").buildAndRegister();
+    BlockTag.builder(LOCKABLE_CONTAINERS.key())
+      .add(BlockType.CHEST, BlockType.TRAPPED_CHEST, BlockType.BARREL, BlockType.SHULKER_BOX,
+        BlockType.FURNACE, BlockType.BLAST_FURNACE, BlockType.SMOKER, BlockType.BEACON,
+        BlockType.DISPENSER, BlockType.DROPPER, BlockType.HOPPER, BlockType.BREWING_STAND
+      ).buildAndRegister();
+    BlockTag.builder(CONTAINERS.key())
+      .add(LOCKABLE_CONTAINERS)
+      .add(
+        BlockType.ENDER_CHEST, BlockType.ENCHANTING_TABLE, BlockType.ANVIL, BlockType.CHIPPED_ANVIL, BlockType.DAMAGED_ANVIL,
+        BlockType.GRINDSTONE, BlockType.CARTOGRAPHY_TABLE, BlockType.LOOM, BlockType.SMITHING_TABLE, BlockType.JUKEBOX
+      ).buildAndRegister();
+    BlockTag.builder(UNBREAKABLES.key())
+      .add(BlockType.BARRIER, BlockType.BEDROCK, BlockType.OBSIDIAN, BlockType.CRYING_OBSIDIAN,
+        BlockType.NETHER_PORTAL, BlockType.END_PORTAL, BlockType.END_PORTAL_FRAME, BlockType.END_GATEWAY
+      ).buildAndRegister();
+
+    ItemTag.builder(METAL_ARMOR.key())
+      .add(Item.IRON_HELMET, Item.IRON_CHESTPLATE, Item.IRON_LEGGINGS, Item.IRON_BOOTS,
+        Item.GOLDEN_HELMET, Item.GOLDEN_CHESTPLATE, Item.GOLDEN_LEGGINGS, Item.GOLDEN_BOOTS,
+        Item.CHAINMAIL_HELMET, Item.CHAINMAIL_CHESTPLATE, Item.CHAINMAIL_LEGGINGS, Item.CHAINMAIL_BOOTS,
+        Item.NETHERITE_HELMET, Item.NETHERITE_CHESTPLATE, Item.NETHERITE_LEGGINGS, Item.NETHERITE_BOOTS
+      ).buildAndRegister();
+  }
+
   public static boolean isAir(Block block) {
     return block.type().isAir();
   }
@@ -169,12 +159,8 @@ public final class MaterialUtil {
     return TRANSPARENT.isTagged(block) || isWater(block);
   }
 
-  public static boolean isContainer(Block block) {
-    return CONTAINERS.isTagged(block);
-  }
-
   public static boolean isUnbreakable(Block block) {
-    return UNBREAKABLES.isTagged(block) || isContainer(block) || block.world().isTileEntity(block);
+    return UNBREAKABLES.isTagged(block) || CONTAINERS.isTagged(block) || block.world().isTileEntity(block);
   }
 
   public static boolean isIgnitable(Block block) {

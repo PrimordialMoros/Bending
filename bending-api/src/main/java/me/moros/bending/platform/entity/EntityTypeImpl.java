@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.entity;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record EntityTypeImpl(Key key) implements EntityType {
-  static final Registry<Key, EntityType> REGISTRY = Registry.vanilla("entities");
+  static final DefaultedRegistry<Key, EntityType> REGISTRY = Registry.vanillaDefaulted("entities", EntityTypeImpl::new);
 
   static EntityType get(String key) {
-    EntityType instance = new EntityTypeImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

@@ -67,7 +67,6 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 public class SpongeBending implements BendingPlugin {
   private final PluginContainer container;
   private final Logger logger;
-  private final Path dir;
 
   private final ConfigManager configManager;
   private final TranslationManager translationManager;
@@ -79,7 +78,6 @@ public class SpongeBending implements BendingPlugin {
 
   @Inject
   public SpongeBending(@ConfigDir(sharedRoot = false) Path dir, PluginContainer container, Metrics.Factory metricsFactory) {
-    this.dir = dir;
     this.container = container;
     metricsFactory.make(8717);
     this.logger = LoggerFactory.getLogger("bending");
@@ -107,7 +105,7 @@ public class SpongeBending implements BendingPlugin {
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     if (loaded) {
       Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
-      Platform.inject(new SpongePlatform(dir, this));
+      Platform.inject(new SpongePlatform());
       game = new GameImpl(this, storage);
       var eventManager = event.game().eventManager();
       //eventManager.registerListeners(container, new BlockListener(game));
@@ -184,7 +182,7 @@ public class SpongeBending implements BendingPlugin {
 
   @Override
   public @Nullable InputStream resource(String fileName) {
-    return getClass().getResourceAsStream("/" + fileName);
+    return getClass().getClassLoader().getResourceAsStream(fileName);
     //return container.openResource(URI.create("/" + fileName)).orElse(null);
   }
 }

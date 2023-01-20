@@ -19,68 +19,31 @@
 
 package me.moros.bending.platform.block;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import me.moros.bending.model.registry.Container;
-import me.moros.bending.platform.AbstractInitializer;
+import me.moros.bending.platform.Initializer;
 import me.moros.bending.platform.PlatformAdapter;
+import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.sound.SoundGroup;
-import net.kyori.adventure.key.Key;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.Registry;
 import org.bukkit.block.data.BlockData;
-import org.slf4j.Logger;
 
-public final class BlockInitializer extends AbstractInitializer {
-  public BlockInitializer(Path path, Logger logger) {
-    super(path, logger);
-  }
-
+public final class BlockInitializer implements Initializer {
   @Override
   public void init() {
-    var map = collect();
-    Collection<Key> missing = new ArrayList<>();
-    for (var tag : BlockTag.registry()) {
-      Key key = tag.key();
-      var data = map.get(key);
-      if (data != null && !data.isEmpty()) {
-        TagImpl.DATA_REGISTRY.register(Container.create(key, data));
-      } else {
-        missing.add(key);
-      }
-    }
-    checkMissing("blocktags.log", "Missing block tags: %d", missing);
-    for (BlockType type : BlockType.registry()) {
-      var mat = PlatformAdapter.BLOCK_MATERIAL_INDEX.value(type);
-      if (mat != null) {
+    for (Material mat : Registry.MATERIAL) {
+      if (mat.isBlock()) {
+        var key = PlatformAdapter.fromNsk(mat.getKey());
+        var type = BlockTypeImpl.getOrCreate(key);
         var data = mat.createBlockData();
         BlockTypeImpl.STATE_REGISTRY.register(PlatformAdapter.fromBukkitData(data));
         BlockTypeImpl.PROPERTY_REGISTRY.register(mapProperties(type, data));
-        var item = PlatformAdapter.ITEM_MATERIAL_INDEX.key(mat);
+        var item = Item.registry().get(key);
         if (item != null) {
           BlockTypeImpl.ITEM_REGISTRY.register(item);
         }
       }
     }
-  }
-
-  private Map<Key, Set<BlockType>> collect() {
-    Map<Key, Set<BlockType>> map = new HashMap<>();
-    for (var tag : Bukkit.getTags(Tag.REGISTRY_BLOCKS, Material.class)) {
-      Set<BlockType> data = tag.getValues().stream().map(PlatformAdapter.BLOCK_MATERIAL_INDEX::key)
-        .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
-      map.put(PlatformAdapter.fromNsk(tag.getKey()), data);
-    }
-    return map;
   }
 
   private BlockProperties mapProperties(BlockType type, BlockData data) {
@@ -106,6 +69,7 @@ public final class BlockInitializer extends AbstractInitializer {
   }
 
   private Sound mapSound(org.bukkit.Sound sound) {
-    return Objects.requireNonNull(Sound.registry().get(PlatformAdapter.fromNsk(sound.getKey())));
+    //noinspection DataFlowIssue
+    return Sound.registry().get(PlatformAdapter.fromNsk(sound.getKey())); // Defaulted registry
   }
 }

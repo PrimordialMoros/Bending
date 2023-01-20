@@ -51,6 +51,7 @@ import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.sound.SoundEffect;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempEntity;
@@ -192,7 +193,7 @@ public class EarthLine extends AbilityInstance {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       BlockType type = user.world().blockAt(location).offset(Direction.DOWN).type();
-      TempEntity.armorStand(type.asItem()).gravity(false).particles(true).duration(700)
+      TempEntity.armorStand(type.asItem().orElse(Item.GRASS_BLOCK)).gravity(false).particles(true).duration(700)
         .build(user.world(), location.subtract(x, 2, z));
     }
 
@@ -276,7 +277,7 @@ public class EarthLine extends AbilityInstance {
       entity.applyVelocity(EarthLine.this, Vector3d.MINUS_J);
       Vector3d center = entity.location().add(Vector3d.MINUS_J);
       Vector3d offset = Vector3d.of(0, -0.6, 0);
-      var builder = TempEntity.armorStand(material.asItem())
+      var builder = TempEntity.armorStand(material.asItem().orElse(Item.GRASS_BLOCK))
         .gravity(false).duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         builder.build(user.world(), center.add(v));

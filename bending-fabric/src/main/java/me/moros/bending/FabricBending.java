@@ -64,7 +64,6 @@ public class FabricBending implements BendingPlugin {
 
   private final ModContainer container;
   private final Logger logger;
-  private final Path dir;
 
   private final ConfigManager configManager;
   private final TranslationManager translationManager;
@@ -76,7 +75,6 @@ public class FabricBending implements BendingPlugin {
   private final boolean loaded;
 
   public FabricBending(Path dir, ModContainer container) {
-    this.dir = dir;
     this.container = container;
     this.logger = LoggerFactory.getLogger(container.getMetadata().getName());
 
@@ -118,7 +116,7 @@ public class FabricBending implements BendingPlugin {
       if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
         LuckPermsHook.register();
       }
-      Platform.inject(new FabricPlatform(dir, this, server));
+      Platform.inject(new FabricPlatform(server));
       game = new GameImpl(this, storage);
       listeners = List.of(
         //new BlockListener(game),

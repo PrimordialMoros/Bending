@@ -34,7 +34,7 @@ public class FabricItem implements ItemSnapshot {
   private final ItemStack handle;
 
   public FabricItem(ItemStack handle) {
-    this.type = PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(handle.getItem());
+    this.type = PlatformAdapter.fromFabricItem(handle.getItem());
     this.amount = handle.getCount();
     this.handle = handle.copy();
   }

@@ -25,7 +25,6 @@ import java.util.UUID;
 import me.moros.bending.fabric.mixin.EntityAccess;
 import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.FabricMetadata;
-import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.world.FabricWorld;
 import me.moros.bending.platform.world.World;
 import me.moros.math.FastMath;
@@ -33,6 +32,7 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -66,7 +66,7 @@ public class FabricEntity implements Entity {
 
   @Override
   public EntityType type() {
-    return PlatformAdapter.ENTITY_TYPE_INDEX.valueOrThrow(handle().getType());
+    return EntityType.registry().getOrThrow(BuiltInRegistries.ENTITY_TYPE.getKey(handle().getType()));
   }
 
   @Override

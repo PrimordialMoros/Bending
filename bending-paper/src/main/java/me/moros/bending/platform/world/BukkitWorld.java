@@ -51,7 +51,6 @@ import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -61,7 +60,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record BukkitWorld(org.bukkit.World handle) implements World {
   @Override
   public BlockType getBlockType(int x, int y, int z) {
-    return PlatformAdapter.BLOCK_MATERIAL_INDEX.keyOr(handle().getType(x, y, z), BlockType.AIR);
+    var key = PlatformAdapter.fromNsk(handle().getType(x, y, z).getKey());
+    return BlockType.registry().getIfExists(key).orElse(BlockType.VOID_AIR);
   }
 
   @Override
@@ -243,7 +243,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public Entity createArmorStand(Position center, Item type, boolean gravity) {
-    var item = new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(type));
+    var item = PlatformAdapter.toBukkitItem(type);
     var bukkitEntity = handle().spawn(center.to(Location.class, handle()), ArmorStand.class, as -> {
       as.setInvulnerable(true);
       as.setVisible(false);

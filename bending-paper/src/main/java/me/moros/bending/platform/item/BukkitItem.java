@@ -43,7 +43,7 @@ public class BukkitItem extends BukkitDataHolder implements ItemSnapshot {
   }
 
   public BukkitItem(ItemStack handle) {
-    this(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(handle.getType()), handle.getAmount(), Suppliers.lazy(handle::getItemMeta));
+    this(Item.registry().getOrThrow(PlatformAdapter.nsk(handle.getType().getKey())), handle.getAmount(), Suppliers.lazy(handle::getItemMeta));
   }
 
   public ItemMeta handle() {

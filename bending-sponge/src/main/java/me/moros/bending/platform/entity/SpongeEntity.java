@@ -34,6 +34,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.tags.FluidTags;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.registry.RegistryTypes;
 
 public class SpongeEntity implements Entity {
   private final org.spongepowered.api.entity.Entity handle;
@@ -67,7 +68,7 @@ public class SpongeEntity implements Entity {
 
   @Override
   public EntityType type() {
-    return PlatformAdapter.ENTITY_TYPE_INDEX.valueOrThrow(handle().type());
+    return EntityType.registry().getOrThrow(PlatformAdapter.fromRsk(handle().type().key(RegistryTypes.ENTITY_TYPE)));
   }
 
   @Override

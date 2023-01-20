@@ -50,7 +50,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -240,7 +239,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public Entity createArmorStand(Position center, Item type, boolean gravity) {
-    var item = new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(type));
+    var item = PlatformAdapter.toFabricItem(type);
     var fabricEntity = new ArmorStand(handle(), center.x(), center.y(), center.z());
     fabricEntity.setInvulnerable(true);
     fabricEntity.setInvisible(true);

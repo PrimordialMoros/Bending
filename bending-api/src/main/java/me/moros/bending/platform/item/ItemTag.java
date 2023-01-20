@@ -19,17 +19,13 @@
 
 package me.moros.bending.platform.item;
 
-import me.moros.bending.model.registry.Registry;
-import me.moros.bending.platform.Tag;
-import me.moros.bending.platform.TagBuilder;
+import me.moros.bending.model.registry.Tag;
+import me.moros.bending.model.registry.TagBuilder;
+import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 
 public sealed interface ItemTag extends Keyed, Tags, Tag<Item> permits TagImpl {
-  static Registry<Key, ItemTag> registry() {
-    return TagImpl.REGISTRY;
-  }
-
   default boolean isTagged(Key key) {
     Item type = Item.registry().get(key);
     return type != null && isTagged(type);
@@ -40,6 +36,14 @@ public sealed interface ItemTag extends Keyed, Tags, Tag<Item> permits TagImpl {
   }
 
   static TagBuilder<Item, ItemTag> builder(String namespace) {
-    return new TagBuilder<>(namespace, Item.registry(), TagImpl::new);
+    return builder(KeyUtil.simple(namespace));
+  }
+
+  static TagBuilder<Item, ItemTag> builder(Key key) {
+    return new TagBuilder<>(key, Item.registry(), TagImpl::fromContainer);
+  }
+
+  static ItemTag reference(Key key) {
+    return TagImpl.reference(key);
   }
 }

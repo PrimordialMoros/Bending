@@ -19,83 +19,68 @@
 
 package me.moros.bending.platform;
 
-import java.util.List;
+import java.util.Objects;
 
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
-import me.moros.bending.platform.block.BlockTag;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.block.FabricBlockState;
 import me.moros.bending.platform.damage.DamageCause;
-import me.moros.bending.platform.entity.EntityType;
 import me.moros.bending.platform.entity.FabricEntity;
 import me.moros.bending.platform.entity.FabricLivingEntity;
 import me.moros.bending.platform.entity.FabricPlayer;
 import me.moros.bending.platform.item.FabricItem;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.item.ItemTag;
-import me.moros.bending.platform.particle.Particle;
 import me.moros.bending.platform.potion.Potion;
 import me.moros.bending.platform.potion.PotionEffect;
-import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.world.FabricWorld;
 import me.moros.bending.platform.world.World;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
-import net.kyori.adventure.util.Index;
 import net.minecraft.core.BlockSource;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class PlatformAdapter {
   private PlatformAdapter() {
   }
 
-  public static final Index<net.minecraft.world.entity.EntityType<?>, EntityType> ENTITY_TYPE_INDEX;
-  public static final Index<net.minecraft.world.effect.MobEffect, PotionEffect> POTION_EFFECT_INDEX;
-  public static final Index<net.minecraft.world.item.Item, Item> ITEM_MATERIAL_INDEX;
-  public static final Index<net.minecraft.world.level.block.Block, BlockType> BLOCK_MATERIAL_INDEX;
-
-  static {
-    var dummy = List.of(BlockType.AIR, BlockTag.DIRT, EntityType.PLAYER, Item.AIR, ItemTag.DIRT,
-      Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
-    dummy.forEach(Keyed::key); // Required for proper class loading and initialization
-
-    ENTITY_TYPE_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.ENTITY_TYPE, t), EntityType.registry().stream().toList());
-    POTION_EFFECT_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.MOB_EFFECT, t), PotionEffect.registry().stream().toList());
-    ITEM_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.ITEM, t), Item.registry().stream().toList());
-    BLOCK_MATERIAL_INDEX = Index.create(t -> fromVanillaRegistry(BuiltInRegistries.BLOCK, t), BlockType.registry().stream().toList());
+  public static MobEffect toFabricPotion(PotionEffect effect) {
+    return Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.get(rsl(effect.key())));
   }
 
-  private static <T> T fromVanillaRegistry(Registry<T> registry, Keyed key) {
-    return registry.get(rsl(key.key()));
+  public static MobEffectInstance toFabricPotion(Potion p) {
+    return new MobEffectInstance(toFabricPotion(p.effect()), p.duration(), p.amplifier(), p.ambient(), p.particles(), p.icon());
   }
 
-  public static @Nullable MobEffectInstance toFabricPotion(Potion p) {
-    var vanillaType = POTION_EFFECT_INDEX.key(p.effect());
-    if (vanillaType == null) {
-      return null;
-    }
-    return new MobEffectInstance(vanillaType, p.duration(), p.amplifier(), p.ambient(), p.particles(), p.icon());
-  }
-
-  public static @Nullable Potion fromFabricPotion(@Nullable MobEffectInstance p) {
-    if (p == null) {
-      return null;
-    }
-    var effect = POTION_EFFECT_INDEX.value(p.getEffect());
-    return effect == null ? null : Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
+  public static Potion fromFabricPotion(MobEffectInstance p) {
+    var effect = PotionEffect.registry().getOrThrow(BuiltInRegistries.MOB_EFFECT.getKey(p.getEffect()));
+    return Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
       .ambient(p.isAmbient()).particles(p.isVisible()).icon(p.showIcon()).build();
+  }
+
+  public static Item fromFabricItem(net.minecraft.world.item.Item material) {
+    return Item.registry().getOrThrow(BuiltInRegistries.ITEM.getKey(material));
+  }
+
+  public static BlockType fromFabricBlock(net.minecraft.world.level.block.Block material) {
+    return BlockType.registry().getOrThrow(BuiltInRegistries.BLOCK.getKey(material));
+  }
+
+  public static net.minecraft.world.item.Item toFabricItemType(Item item) {
+    return BuiltInRegistries.ITEM.get(rsl(item.key()));
+  }
+
+  public static ItemStack toFabricItem(Item item) {
+    return new ItemStack(toFabricItemType(item));
   }
 
   public static ItemStack toFabricItem(ItemSnapshot item) {

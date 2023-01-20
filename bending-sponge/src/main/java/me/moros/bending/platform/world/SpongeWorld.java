@@ -50,7 +50,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -232,7 +231,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public Entity createArmorStand(Position center, me.moros.bending.platform.item.Item type, boolean gravity) {
-    var item = ItemStack.of(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(type));
+    var item = PlatformAdapter.toSpongeItem(type);
     var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, center.to(org.spongepowered.math.vector.Vector3d.class));
     spongeEntity.invulnerable().set(true);
     spongeEntity.invisible().set(true);

@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record SpongeBlockState(org.spongepowered.api.block.BlockState handle, BlockType type) implements BlockState {
   public SpongeBlockState(org.spongepowered.api.block.BlockState handle) {
-    this(handle, PlatformAdapter.BLOCK_MATERIAL_INDEX.valueOrThrow(handle.type()));
+    this(handle, PlatformAdapter.fromSpongeBlock(handle.type()));
   }
 
   @Override

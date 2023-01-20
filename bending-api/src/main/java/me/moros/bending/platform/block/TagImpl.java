@@ -20,51 +20,52 @@
 package me.moros.bending.platform.block;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.model.registry.Container;
-import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
-record TagImpl(Key key, Supplier<Container<BlockType>> container) implements BlockTag {
-  TagImpl(Container<BlockType> container) {
-    this(container.key(), Suppliers.cached(container));
-  }
-
-  static final Registry<Key, BlockTag> REGISTRY = Registry.vanilla("tags");
-  static final Registry<Key, Container<BlockType>> DATA_REGISTRY = Registry.vanilla("tags");
+record TagImpl(Key key, Supplier<Container<BlockType>> supplier) implements BlockTag {
+  private static final Container<BlockType> EMPTY = Container.create(KeyUtil.simple("empty"), Set.of());
 
   static BlockTag get(String key) {
-    var k = KeyUtil.vanilla(key);
-    BlockTag instance = new TagImpl(k, Suppliers.lazy(() -> DATA_REGISTRY.get(k)));
-    REGISTRY.register(instance);
-    return instance;
+    return reference(KeyUtil.vanilla(key));
   }
 
-  Container<BlockType> fromVanilla() {
-    return container.get();
+  static BlockTag reference(Key key) {
+    return new TagImpl(key, Suppliers.lazy(() -> BlockType.registry().getTag(key)));
+  }
+
+  static BlockTag fromContainer(Container<BlockType> container) {
+    return new TagImpl(container.key(), Suppliers.cached(container));
+  }
+
+  Container<BlockType> container() {
+    var container = supplier().get();
+    return container == null ? EMPTY : container;
   }
 
   @Override
   public boolean containsValue(BlockType type) {
-    return fromVanilla().containsValue(type);
+    return container().containsValue(type);
   }
 
   @Override
   public int size() {
-    return fromVanilla().size();
+    return container().size();
   }
 
   @Override
   public Stream<BlockType> stream() {
-    return fromVanilla().stream();
+    return container().stream();
   }
 
   @Override
   public Iterator<BlockType> iterator() {
-    return fromVanilla().iterator();
+    return container().iterator();
   }
 }

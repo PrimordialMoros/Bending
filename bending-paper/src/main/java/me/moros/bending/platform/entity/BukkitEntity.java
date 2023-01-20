@@ -72,7 +72,7 @@ public class BukkitEntity extends BukkitDataHolder implements Entity {
 
   @Override
   public EntityType type() {
-    return PlatformAdapter.ENTITY_TYPE_INDEX.valueOrThrow(handle().getType());
+    return EntityType.registry().getOrThrow(PlatformAdapter.fromNsk(handle().getType().getKey()));
   }
 
   @Override

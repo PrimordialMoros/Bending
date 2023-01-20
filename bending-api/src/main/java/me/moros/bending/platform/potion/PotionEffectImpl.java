@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.potion;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record PotionEffectImpl(Key key) implements PotionEffect {
-  static final Registry<Key, PotionEffect> REGISTRY = Registry.vanilla("potion");
+  static final DefaultedRegistry<Key, PotionEffect> REGISTRY = Registry.vanillaDefaulted("potion", PotionEffectImpl::new);
 
   static PotionEffect get(String key) {
-    PotionEffect instance = new PotionEffectImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

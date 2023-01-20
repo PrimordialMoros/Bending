@@ -19,32 +19,23 @@
 
 package me.moros.bending.platform;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
-import me.moros.bending.Bending;
 import me.moros.bending.gui.ElementMenu;
 import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.platform.block.BlockInitializer;
 import me.moros.bending.platform.item.BukkitItemBuilder;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
-import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.bukkit.BukkitMathAdapter;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
 
 public class BukkitPlatform implements Platform, PlatformFactory {
-  public BukkitPlatform(Bending plugin) {
+  public BukkitPlatform() {
     BukkitMathAdapter.register();
-    Path dir = plugin.getDataFolder().toPath();
-    new SoundInitializer().init();
-    new BlockInitializer(dir, plugin.logger());
-    new ItemInitializer(dir, plugin.logger());
+    new BukkitRegistryInitializer().init();
   }
 
   @Override
@@ -74,11 +65,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
 
   @Override
   public ItemBuilder itemBuilder(Item item) {
-    var material = PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(item);
-    if (!material.isItem()) {
-      throw new IllegalStateException(material.name() + " is not an item!");
-    }
-    return new BukkitItemBuilder(new ItemStack(material));
+    return new BukkitItemBuilder(PlatformAdapter.toBukkitItem(item));
   }
 
   @Override

@@ -22,7 +22,6 @@ package me.moros.bending.platform.entity;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import me.moros.bending.event.BendingDamageEvent;
@@ -121,33 +120,28 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
 
   @Override
   public boolean addPotion(Potion potion) {
-    var vanillaPotion = PlatformAdapter.toFabricPotion(potion);
-    return vanillaPotion != null && handle().addEffect(vanillaPotion);
+    return handle().addEffect(PlatformAdapter.toFabricPotion(potion));
   }
 
   @Override
   public boolean hasPotion(PotionEffect effect) {
-    var vanillaEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    return vanillaEffect != null && handle().hasEffect(vanillaEffect);
+    return handle().hasEffect(PlatformAdapter.toFabricPotion(effect));
   }
 
   @Override
   public @Nullable Potion potion(PotionEffect effect) {
-    var vanillaEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    return vanillaEffect == null ? null : PlatformAdapter.fromFabricPotion(handle().getEffect(vanillaEffect));
+    var potion = handle().getEffect(PlatformAdapter.toFabricPotion(effect));
+    return potion == null ? null : PlatformAdapter.fromFabricPotion(potion);
   }
 
   @Override
   public void removePotion(PotionEffect effect) {
-    var vanillaEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    if (vanillaEffect != null) {
-      handle().removeEffect(vanillaEffect);
-    }
+    handle().removeEffect(PlatformAdapter.toFabricPotion(effect));
   }
 
   @Override
   public Collection<Potion> activePotions() {
-    return handle().getActiveEffects().stream().map(PlatformAdapter::fromFabricPotion).filter(Objects::nonNull).toList();
+    return handle().getActiveEffects().stream().map(PlatformAdapter::fromFabricPotion).toList();
   }
 
   @Override

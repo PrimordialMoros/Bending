@@ -19,7 +19,10 @@
 
 package me.moros.bending.model.registry;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.registry.RegistryBuilder.IntermediaryRegistryBuilder;
@@ -33,7 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <K> the type of keys for this registry
  * @param <V> the type of values for this registry
  */
-public interface Registry<K, V> extends Container<V> {
+public interface Registry<K, V> extends Container<V>, TagHolder<V> {
   /**
    * Check if the registry contains a value for the specified key.
    * @param key the key to check
@@ -47,6 +50,25 @@ public interface Registry<K, V> extends Container<V> {
    * @return the value associated with the given key or null if not found
    */
   @Nullable V get(K key);
+
+  /**
+   * Get the value for the specified key.
+   * @param key the key to check
+   * @return the value associated with the given key
+   * @throws NullPointerException if registry mapping is not found
+   */
+  default V getOrThrow(K key) {
+    return Objects.requireNonNull(get(key), "No mapping found for " + key);
+  }
+
+  /**
+   * Get the value for the specified key.
+   * @param key the key to check
+   * @return the value associated with the given key or def if not found
+   */
+  default Optional<V> getIfExists(K key) {
+    return Optional.ofNullable(get(key));
+  }
 
   /**
    * Get the value for the specified key.
@@ -117,5 +139,9 @@ public interface Registry<K, V> extends Container<V> {
 
   static <V extends Keyed> Registry<Key, V> vanilla(String namespace) {
     return Registry.<V>vanillaBuilder(namespace).build();
+  }
+
+  static <V extends Keyed> DefaultedRegistry<Key, V> vanillaDefaulted(String namespace, Function<Key, V> factory) {
+    return Registry.<V>vanillaBuilder(namespace).buildDefaulted(factory);
   }
 }

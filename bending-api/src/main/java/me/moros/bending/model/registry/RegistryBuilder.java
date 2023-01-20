@@ -52,6 +52,11 @@ public final class RegistryBuilder<K, V> {
     return new SimpleMutableRegistry<>(namespace, inverseMapper, keyMapper);
   }
 
+  public DefaultedRegistry<K, V> buildDefaulted(Function<K, V> factory) {
+    Objects.requireNonNull(factory);
+    return new DefaultedRegistry<>(namespace, inverseMapper, keyMapper, factory);
+  }
+
   public static class IntermediaryRegistryBuilder<V> {
     private final String namespace;
 

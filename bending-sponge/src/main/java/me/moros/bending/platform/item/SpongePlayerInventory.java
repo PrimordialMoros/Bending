@@ -40,8 +40,7 @@ public class SpongePlayerInventory extends SpongeInventory {
 
   @Override
   public boolean has(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.key(type);
-    return mat != null && handle.contains(ItemStack.of(mat, amount));
+    return handle.contains(ItemStack.of(PlatformAdapter.toSpongeItemType(type), amount));
   }
 
   @Override
@@ -53,11 +52,7 @@ public class SpongePlayerInventory extends SpongeInventory {
 
   @Override
   public boolean remove(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.key(type);
-    if (mat != null) {
-      var queried = handle.query(QueryTypes.ITEM_TYPE.get().of(mat));
-      return !queried.poll(amount).revertOnFailure();
-    }
-    return false;
+    var queried = handle.query(QueryTypes.ITEM_TYPE.get().of(PlatformAdapter.toSpongeItemType(type)));
+    return !queried.poll(amount).revertOnFailure();
   }
 }

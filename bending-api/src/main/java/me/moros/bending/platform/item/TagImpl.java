@@ -20,51 +20,52 @@
 package me.moros.bending.platform.item;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.model.registry.Container;
-import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
-record TagImpl(Key key, Supplier<Container<Item>> container) implements ItemTag {
-  TagImpl(Container<Item> container) {
-    this(container.key(), Suppliers.cached(container));
-  }
-
-  static final Registry<Key, ItemTag> REGISTRY = Registry.vanilla("tags");
-  static final Registry<Key, Container<Item>> DATA_REGISTRY = Registry.vanilla("tags");
+record TagImpl(Key key, Supplier<Container<Item>> supplier) implements ItemTag {
+  private static final Container<Item> EMPTY = Container.create(KeyUtil.simple("empty"), Set.of());
 
   static ItemTag get(String key) {
-    var k = KeyUtil.vanilla(key);
-    ItemTag instance = new TagImpl(k, Suppliers.lazy(() -> DATA_REGISTRY.get(k)));
-    REGISTRY.register(instance);
-    return instance;
+    return reference(KeyUtil.vanilla(key));
   }
 
-  Container<Item> fromVanilla() {
-    return container.get();
+  static ItemTag reference(Key key) {
+    return new TagImpl(key, Suppliers.lazy(() -> Item.registry().getTag(key)));
+  }
+
+  static ItemTag fromContainer(Container<Item> container) {
+    return new TagImpl(container.key(), Suppliers.cached(container));
+  }
+
+  Container<Item> container() {
+    var container = supplier().get();
+    return container == null ? EMPTY : container;
   }
 
   @Override
   public boolean containsValue(Item type) {
-    return fromVanilla().containsValue(type);
+    return container().containsValue(type);
   }
 
   @Override
   public int size() {
-    return fromVanilla().size();
+    return container().size();
   }
 
   @Override
   public Stream<Item> stream() {
-    return fromVanilla().stream();
+    return container().stream();
   }
 
   @Override
   public Iterator<Item> iterator() {
-    return fromVanilla().iterator();
+    return container().iterator();
   }
 }

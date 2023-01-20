@@ -19,6 +19,7 @@
 
 package me.moros.bending.platform.block;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import me.moros.bending.model.functional.Suppliers;
@@ -37,13 +38,19 @@ record BlockTypeImpl(Key key, Supplier<BlockProperties> properties, Supplier<Blo
   static final Registry<Key, Item> ITEM_REGISTRY = Registry.vanilla("block.item");
 
   static BlockType get(String key) {
-    var k = KeyUtil.vanilla(key);
-    BlockType instance = new BlockTypeImpl(k,
-      Suppliers.lazy(() -> PROPERTY_REGISTRY.get(k)),
-      Suppliers.lazy(() -> STATE_REGISTRY.get(k)),
-      Suppliers.lazy(() -> ITEM_REGISTRY.get(k))
-    );
-    REGISTRY.register(instance);
+    return getOrCreate(KeyUtil.vanilla(key));
+  }
+
+  static BlockType getOrCreate(Key key) {
+    var instance = REGISTRY.get(key);
+    if (instance == null) {
+      instance = new BlockTypeImpl(key,
+        Suppliers.lazy(() -> PROPERTY_REGISTRY.get(key)),
+        Suppliers.lazy(() -> STATE_REGISTRY.get(key)),
+        Suppliers.lazy(() -> ITEM_REGISTRY.get(key))
+      );
+      REGISTRY.register(instance);
+    }
     return instance;
   }
 
@@ -102,7 +109,7 @@ record BlockTypeImpl(Key key, Supplier<BlockProperties> properties, Supplier<Blo
   }
 
   @Override
-  public Item asItem() {
-    return item.get();
+  public Optional<Item> asItem() {
+    return Optional.ofNullable(item.get());
   }
 }

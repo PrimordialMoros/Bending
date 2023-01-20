@@ -19,17 +19,13 @@
 
 package me.moros.bending.platform.block;
 
-import me.moros.bending.model.registry.Registry;
-import me.moros.bending.platform.Tag;
-import me.moros.bending.platform.TagBuilder;
+import me.moros.bending.model.registry.Tag;
+import me.moros.bending.model.registry.TagBuilder;
+import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 
 public sealed interface BlockTag extends Keyed, Tags, Tag<BlockType> permits TagImpl {
-  static Registry<Key, BlockTag> registry() {
-    return TagImpl.REGISTRY;
-  }
-
   default boolean isTagged(Key key) {
     BlockType type = BlockType.registry().get(key);
     return type != null && isTagged(type);
@@ -44,6 +40,14 @@ public sealed interface BlockTag extends Keyed, Tags, Tag<BlockType> permits Tag
   }
 
   static TagBuilder<BlockType, BlockTag> builder(String namespace) {
-    return new TagBuilder<>(namespace, BlockType.registry(), TagImpl::new);
+    return builder(KeyUtil.simple(namespace));
+  }
+
+  static TagBuilder<BlockType, BlockTag> builder(Key key) {
+    return new TagBuilder<>(key, BlockType.registry(), TagImpl::fromContainer);
+  }
+
+  static BlockTag reference(Key key) {
+    return TagImpl.reference(key);
   }
 }

@@ -43,8 +43,8 @@ public class BukkitPlayerInventory extends BukkitInventory {
 
   @Override
   public boolean has(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.value(type);
-    return mat != null && handle.contains(mat, amount);
+    var mat = PlatformAdapter.toBukkitItemMaterial(type);
+    return handle.contains(mat, amount);
   }
 
   @Override
@@ -56,12 +56,10 @@ public class BukkitPlayerInventory extends BukkitInventory {
 
   @Override
   public boolean remove(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.value(type);
-    return mat != null && removeItemAmount(new ItemStack(mat, amount));
+    return removeItemAmount(PlatformAdapter.toBukkitItem(type), amount);
   }
 
-  private boolean removeItemAmount(ItemStack toRemove) { // TODO redo logic, should only affect if enough items can be removed
-    int amount = toRemove.getAmount();
+  private boolean removeItemAmount(ItemStack toRemove, int amount) { // TODO redo logic, should only affect if enough items can be removed
     List<Integer> clearSlots = new ArrayList<>();
     ItemStack[] items = handle.getContents();
 

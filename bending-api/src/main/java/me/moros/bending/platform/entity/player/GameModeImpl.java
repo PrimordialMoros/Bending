@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.entity.player;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record GameModeImpl(Key key) implements GameMode {
-  static final Registry<Key, GameMode> REGISTRY = Registry.vanilla("gamemode");
+  static final DefaultedRegistry<Key, GameMode> REGISTRY = Registry.vanillaDefaulted("gamemode", GameModeImpl::new);
 
-  static GameMode of(String key) {
-    GameMode instance = new GameModeImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+  static GameMode get(String key) {
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

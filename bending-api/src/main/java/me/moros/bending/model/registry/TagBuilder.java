@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.platform;
+package me.moros.bending.model.registry;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,19 +25,18 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import me.moros.bending.model.registry.Container;
-import me.moros.bending.util.KeyUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TagBuilder<V extends Keyed, R extends Tag<?>> {
+public final class TagBuilder<V extends Keyed, R extends Tag<V>> {
   private final Function<Container<V>, R> function;
-  private final String name;
-  private final Iterable<V> registry;
+  private final Key key;
+  private final Registry<?, V> registry;
   private final Set<V> container;
 
-  public TagBuilder(String name, Iterable<V> registry, Function<Container<V>, R> function) {
-    this.name = name;
+  public TagBuilder(Key key, Registry<?, V> registry, Function<Container<V>, R> function) {
+    this.key = key;
     this.registry = registry;
     this.function = function;
     container = new HashSet<>();
@@ -130,11 +129,17 @@ public final class TagBuilder<V extends Keyed, R extends Tag<?>> {
   }
 
   public Container<V> buildContainer() {
-    return Container.create(KeyUtil.simple(name), container);
+    return Container.create(key, container);
   }
 
   public R build() {
     return function.apply(buildContainer());
+  }
+
+  public R buildAndRegister() {
+    var tag = build();
+    registry.registerTag(tag);
+    return tag;
   }
 
   private static String name(Keyed key) {

@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.sound;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record SoundImpl(Key key) implements Sound {
-  static final Registry<Key, Sound> REGISTRY = Registry.vanilla("sound");
+  static final DefaultedRegistry<Key, Sound> REGISTRY = Registry.vanillaDefaulted("sound", SoundImpl::new);
 
   static Sound get(String key) {
-    Sound instance = new SoundImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

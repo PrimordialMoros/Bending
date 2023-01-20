@@ -19,6 +19,8 @@
 
 package me.moros.bending.platform.block;
 
+import java.util.Optional;
+
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.particle.ParticleBuilder;
@@ -40,7 +42,7 @@ public sealed interface BlockType extends Keyed, BlockProperties, BlockTypes per
 
   BlockState defaultState();
 
-  Item asItem();
+  Optional<Item> asItem();
 
   default ParticleBuilder<BlockState> asParticle(Position center) {
     return defaultState().asParticle(center);

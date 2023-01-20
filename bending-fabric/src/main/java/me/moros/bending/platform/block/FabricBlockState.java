@@ -26,7 +26,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record FabricBlockState(net.minecraft.world.level.block.state.BlockState handle,
                                BlockType type) implements BlockState {
   public FabricBlockState(net.minecraft.world.level.block.state.BlockState handle) {
-    this(handle, PlatformAdapter.BLOCK_MATERIAL_INDEX.valueOrThrow(handle.getBlock()));
+    this(handle, PlatformAdapter.fromFabricBlock(handle.getBlock()));
   }
 
   @Override

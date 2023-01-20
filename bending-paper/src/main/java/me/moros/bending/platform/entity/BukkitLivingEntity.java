@@ -112,33 +112,28 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
 
   @Override
   public boolean addPotion(Potion potion) {
-    var bukkitPotion = PlatformAdapter.toBukkitPotion(potion);
-    return bukkitPotion != null && handle().addPotionEffect(bukkitPotion);
+    return handle().addPotionEffect(PlatformAdapter.toBukkitPotion(potion));
   }
 
   @Override
   public boolean hasPotion(PotionEffect effect) {
-    var bukkitEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    return bukkitEffect != null && handle().hasPotionEffect(bukkitEffect);
+    return handle().hasPotionEffect(PlatformAdapter.toBukkitPotion(effect));
   }
 
   @Override
   public @Nullable Potion potion(PotionEffect effect) {
-    var bukkitEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    return bukkitEffect == null ? null : PlatformAdapter.fromBukkitPotion(handle().getPotionEffect(bukkitEffect));
+    var potion = handle().getPotionEffect(PlatformAdapter.toBukkitPotion(effect));
+    return potion == null ? null : PlatformAdapter.fromBukkitPotion(potion);
   }
 
   @Override
   public void removePotion(PotionEffect effect) {
-    var bukkitEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    if (bukkitEffect != null) {
-      handle().removePotionEffect(bukkitEffect);
-    }
+    handle().removePotionEffect(PlatformAdapter.toBukkitPotion(effect));
   }
 
   @Override
   public Collection<Potion> activePotions() {
-    return handle().getActivePotionEffects().stream().map(PlatformAdapter::fromBukkitPotion).filter(Objects::nonNull).toList();
+    return handle().getActivePotionEffects().stream().map(PlatformAdapter::fromBukkitPotion).toList();
   }
 
   @Override

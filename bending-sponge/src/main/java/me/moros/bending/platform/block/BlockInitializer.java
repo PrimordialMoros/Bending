@@ -19,71 +19,30 @@
 
 package me.moros.bending.platform.block;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import me.moros.bending.model.registry.Container;
-import me.moros.bending.platform.AbstractInitializer;
+import me.moros.bending.platform.Initializer;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.sound.SoundGroup;
-import net.kyori.adventure.key.Key;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.SoundType;
-import org.slf4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.registry.RegistryTypes;
 
-public final class BlockInitializer extends AbstractInitializer {
-
-  public BlockInitializer(Path path, Logger logger) {
-    super(path, logger);
-  }
-
+public final class BlockInitializer implements Initializer {
   @Override
   public void init() {
-    var map = collect();
-    Collection<Key> missing = new ArrayList<>();
-    for (var tag : BlockTag.registry()) {
-      Key key = tag.key();
-      var data = map.get(key);
-      if (data != null && !data.isEmpty()) {
-        TagImpl.DATA_REGISTRY.register(Container.create(key, data));
-      } else {
-        missing.add(key);
-      }
+    var blockTypes = Sponge.game().registry(RegistryTypes.BLOCK_TYPE).stream().toList();
+    for (var mat : blockTypes) {
+      var key = PlatformAdapter.fromRsk(mat.key(RegistryTypes.BLOCK_TYPE));
+      var type = BlockTypeImpl.getOrCreate(key);
+      var data = mat.defaultState();
+      BlockTypeImpl.STATE_REGISTRY.register(PlatformAdapter.fromSpongeData(data));
+      BlockTypeImpl.PROPERTY_REGISTRY.register(mapProperties(type, data));
+      mat.item().map(PlatformAdapter::fromSpongeItem).ifPresent(BlockTypeImpl.ITEM_REGISTRY::register);
     }
-    checkMissing("blocktags.log", "Missing block tags: %d", missing);
-    for (var type : BlockType.registry()) {
-      var mat = PlatformAdapter.BLOCK_MATERIAL_INDEX.key(type);
-      if (mat != null) {
-        var data = mat.defaultState();
-        BlockTypeImpl.STATE_REGISTRY.register(PlatformAdapter.fromSpongeData(data));
-        BlockTypeImpl.PROPERTY_REGISTRY.register(mapProperties(type, data));
-        mat.item().map(PlatformAdapter.ITEM_MATERIAL_INDEX::value).ifPresent(BlockTypeImpl.ITEM_REGISTRY::register);
-      }
-    }
-  }
-
-  private Map<Key, Set<BlockType>> collect() {
-    Map<Key, Set<BlockType>> map = new HashMap<>();
-    var spongeRegistry = Sponge.game().registry(RegistryTypes.BLOCK_TYPE);
-    var list = spongeRegistry.tags().toList();
-    for (var tag : list) {
-      Set<BlockType> data = spongeRegistry.taggedValues(tag).stream().map(PlatformAdapter.BLOCK_MATERIAL_INDEX::value)
-        .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
-      map.put(PlatformAdapter.fromRsk(tag.key()), data);
-    }
-    return map;
   }
 
   private BlockProperties mapProperties(BlockType type, BlockState data) {
@@ -111,6 +70,7 @@ public final class BlockInitializer extends AbstractInitializer {
 
   private Sound mapSound(SoundEvent sound) {
     Object key = sound.getLocation();
-    return Objects.requireNonNull(Sound.registry().get(PlatformAdapter.fromRsk((ResourceKey) key)));
+    //noinspection DataFlowIssue
+    return Sound.registry().get(PlatformAdapter.fromRsk((ResourceKey) key)); // Defaulted registry
   }
 }

@@ -42,6 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class SimpleRegistry<K, V> implements Registry<K, V> {
   private final Key key;
   protected final Map<K, V> registryMap;
+  protected final Map<Key, Tag<V>> tags;
   protected final Function<V, K> inverseMapper;
   protected final Function<String, K> keyMapper;
 
@@ -49,6 +50,7 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
 
   protected SimpleRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper) {
     registryMap = new ConcurrentHashMap<>();
+    tags = new ConcurrentHashMap<>();
     this.key = Key.key(namespace, "registry");
     this.inverseMapper = inverseMapper;
     this.keyMapper = keyMapper;
@@ -132,6 +134,32 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
   @Override
   public Iterator<V> iterator() {
     return Collections.unmodifiableCollection(values()).iterator();
+  }
+
+  @Override
+  public @Nullable Tag<V> getTag(Key key) {
+    return tags.get(key);
+  }
+
+  @Override
+  public Tag<V> getTagOrCreate(Key key, Function<Key, Tag<V>> factory) {
+    var result = tags.get(key);
+    if (result == null) {
+      checkLock();
+      result = tags.computeIfAbsent(key, factory);
+    }
+    return result;
+  }
+
+  @Override
+  public boolean registerTag(Tag<V> tag) {
+    checkLock();
+    return tags.putIfAbsent(tag.key(), tag) == null;
+  }
+
+  @Override
+  public Stream<Tag<V>> tags() {
+    return tags.values().stream();
   }
 
   /**

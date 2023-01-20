@@ -19,30 +19,22 @@
 
 package me.moros.bending.platform;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
-import me.moros.bending.SpongeBending;
 import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.platform.block.BlockInitializer;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
-import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.platform.item.SpongeItemBuilder;
-import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.sponge.SpongeMathAdapter;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.item.inventory.ItemStack;
 
 public class SpongePlatform implements Platform, PlatformFactory {
-  public SpongePlatform(Path path, SpongeBending plugin) {
+  public SpongePlatform() {
     SpongeMathAdapter.register();
-    new SoundInitializer().init();
-    new BlockInitializer(path, plugin.logger());
-    new ItemInitializer(path, plugin.logger());
+    new SpongeRegistryInitializer().init();
   }
 
   @Override
@@ -73,7 +65,7 @@ public class SpongePlatform implements Platform, PlatformFactory {
 
   @Override
   public ItemBuilder itemBuilder(Item item) {
-    return new SpongeItemBuilder(ItemStack.of(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(item)));
+    return new SpongeItemBuilder(PlatformAdapter.toSpongeItem(item));
   }
 
   @Override

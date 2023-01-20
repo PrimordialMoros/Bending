@@ -41,8 +41,7 @@ public class FabricPlayerInventory extends FabricInventory {
 
   @Override
   public boolean has(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.key(type);
-    return mat != null && handle.contains(new ItemStack(mat, amount));
+    return handle.contains(new ItemStack(PlatformAdapter.toFabricItemType(type), amount));
   }
 
   @Override
@@ -53,21 +52,18 @@ public class FabricPlayerInventory extends FabricInventory {
 
   @Override
   public boolean remove(Item type, int amount) {
-    var mat = PlatformAdapter.ITEM_MATERIAL_INDEX.key(type);
-    if (mat != null) {
-      int remaining = amount;
-      if (remaining > 0) {
-        remaining = removeFrom(handle.items, mat, remaining);
-      }
-      if (remaining > 0) {
-        remaining = removeFrom(handle.armor, mat, remaining);
-      }
-      if (remaining > 0) {
-        remaining = removeFrom(handle.offhand, mat, remaining);
-      }
-      return remaining <= 0;
+    var mat = PlatformAdapter.toFabricItemType(type);
+    int remaining = amount;
+    if (remaining > 0) {
+      remaining = removeFrom(handle.items, mat, remaining);
     }
-    return false;
+    if (remaining > 0) {
+      remaining = removeFrom(handle.armor, mat, remaining);
+    }
+    if (remaining > 0) {
+      remaining = removeFrom(handle.offhand, mat, remaining);
+    }
+    return remaining <= 0;
   }
 
   private int removeFrom(Collection<ItemStack> collection, net.minecraft.world.item.Item type, int amount) {

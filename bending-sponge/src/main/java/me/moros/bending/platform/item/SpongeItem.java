@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 public record SpongeItem(Item type, int amount, ItemStack handle) implements ItemSnapshot {
   public SpongeItem(ItemStack handle) {
-    this(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(handle.type()), handle.quantity(), handle);
+    this(PlatformAdapter.fromSpongeItem(handle.type()), handle.quantity(), handle);
   }
 
   @Override

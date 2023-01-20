@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.particle;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record ParticleImpl(Key key) implements Particle {
-  static final Registry<Key, Particle> REGISTRY = Registry.vanilla("particles");
+  static final DefaultedRegistry<Key, Particle> REGISTRY = Registry.vanillaDefaulted("particles", ParticleImpl::new);
 
   static Particle get(String key) {
-    Particle instance = new ParticleImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

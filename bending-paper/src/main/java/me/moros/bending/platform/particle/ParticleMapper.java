@@ -26,7 +26,6 @@ import me.moros.bending.platform.particle.ParticleDustData.Transitive;
 import org.bukkit.Color;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Particle.DustTransition;
-import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static me.moros.bending.platform.particle.Particles.*;
@@ -136,7 +135,7 @@ public final class ParticleMapper {
     if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
       return PlatformAdapter.toBukkitData(state);
     } else if (p == Particle.ITEM && data instanceof Item item) {
-      return new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.valueOrThrow(item));
+      return PlatformAdapter.toBukkitItem(item);
     } else if (p == Particle.DUST && data instanceof ParticleDustData dust) {
       return new DustOptions(Color.fromRGB(dust.red(), dust.green(), dust.blue()), dust.size());
     } else if (p == Particle.DUST_COLOR_TRANSITION && data instanceof Transitive dust) {

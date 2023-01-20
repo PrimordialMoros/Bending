@@ -19,36 +19,27 @@
 
 package me.moros.bending.platform;
 
-import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
-import me.moros.bending.Bending;
 import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
-import me.moros.bending.platform.block.BlockTag;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.block.BukkitBlockState;
 import me.moros.bending.platform.damage.DamageCause;
 import me.moros.bending.platform.entity.BukkitEntity;
 import me.moros.bending.platform.entity.BukkitLivingEntity;
 import me.moros.bending.platform.entity.BukkitPlayer;
-import me.moros.bending.platform.entity.EntityType;
 import me.moros.bending.platform.item.BukkitItem;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.item.ItemTag;
-import me.moros.bending.platform.particle.Particle;
 import me.moros.bending.platform.potion.Potion;
 import me.moros.bending.platform.potion.PotionEffect;
-import me.moros.bending.platform.sound.Sound;
 import me.moros.bending.platform.world.BukkitWorld;
 import me.moros.bending.platform.world.World;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
-import net.kyori.adventure.util.Index;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -59,41 +50,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class PlatformAdapter {
   private PlatformAdapter() {
   }
 
-  public static final Index<org.bukkit.entity.EntityType, EntityType> ENTITY_TYPE_INDEX;
-  public static final Index<org.bukkit.potion.PotionEffectType, PotionEffect> POTION_EFFECT_INDEX;
-  public static final Index<Item, Material> ITEM_MATERIAL_INDEX;
-  public static final Index<BlockType, Material> BLOCK_MATERIAL_INDEX;
   public static final Map<Class<?>, PersistentDataType<?, ?>> PERSISTENT_DATA_TYPE_MAP;
 
   static {
-    var dummy = List.of(BlockType.AIR, BlockTag.DIRT, EntityType.PLAYER, Item.AIR, ItemTag.DIRT,
-      Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
-    Bending.plugin().logger().debug("Init: " + dummy.size()); // Required for proper class loading and initialization
-
-    ENTITY_TYPE_INDEX = Index.create(t -> Registry.ENTITY_TYPE.get(nsk(t.key())), EntityType.registry().stream().toList());
-    POTION_EFFECT_INDEX = Index.create(t -> Registry.POTION_EFFECT_TYPE.get(nsk(t.key())), PotionEffect.registry().stream().toList());
-    Map<Material, Item> itemMap = new EnumMap<>(Material.class);
-    Map<Material, BlockType> blockTypeMap = new EnumMap<>(Material.class);
-    var itemRegistry = Item.registry();
-    var blockRegistry = BlockType.registry();
-    for (Material m : Registry.MATERIAL) {
-      if (!m.isLegacy()) {
-        if (m.isItem()) {
-          tryAdd(m, itemRegistry, itemMap);
-        }
-        if (m.isBlock()) {
-          tryAdd(m, blockRegistry, blockTypeMap);
-        }
-      }
-    }
-    ITEM_MATERIAL_INDEX = Index.create(Material.class, itemMap::get, itemMap.keySet().toArray(Material[]::new));
-    BLOCK_MATERIAL_INDEX = Index.create(Material.class, blockTypeMap::get, blockTypeMap.keySet().toArray(Material[]::new));
     PERSISTENT_DATA_TYPE_MAP = Map.ofEntries(
       entry(PersistentDataType.SHORT), entry(PersistentDataType.FLOAT), entry(PersistentDataType.DOUBLE),
       entry(BooleanPDT.INSTANCE), entry(PersistentDataType.STRING),
@@ -108,29 +74,50 @@ public final class PlatformAdapter {
     return Map.entry(type.getComplexType(), type);
   }
 
-  private static <T extends Keyed> void tryAdd(Material m, me.moros.bending.model.registry.Registry<Key, T> registry, Map<Material, T> map) {
-    T value = registry.get(fromNsk(m.getKey()));
-    if (value != null) {
-      map.put(m, value);
-    }
+  public static PotionEffectType toBukkitPotion(PotionEffect effect) {
+    return Objects.requireNonNull(Registry.POTION_EFFECT_TYPE.get(PlatformAdapter.nsk(effect.key())));
   }
 
-  public static org.bukkit.potion.@Nullable PotionEffect toBukkitPotion(Potion p) {
-    var bukkitType = POTION_EFFECT_INDEX.key(p.effect());
-    return bukkitType == null ? null : new org.bukkit.potion.PotionEffect(bukkitType, p.duration(), p.amplifier(), p.ambient(), p.particles(), p.icon());
+  public static org.bukkit.potion.PotionEffect toBukkitPotion(Potion p) {
+    return new org.bukkit.potion.PotionEffect(toBukkitPotion(p.effect()), p.duration(), p.amplifier(), p.ambient(), p.particles(), p.icon());
   }
 
-  public static @Nullable Potion fromBukkitPotion(org.bukkit.potion.@Nullable PotionEffect p) {
-    if (p == null) {
-      return null;
-    }
-    var effect = POTION_EFFECT_INDEX.value(p.getType());
-    return effect == null ? null : Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
+  public static Potion fromBukkitPotion(org.bukkit.potion.PotionEffect p) {
+    var effect = PotionEffect.registry().getOrThrow(fromNsk(p.getType().getKey()));
+    return Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
       .ambient(p.isAmbient()).particles(p.hasParticles()).icon(p.hasIcon()).build();
   }
 
+  public static Item fromBukkitItem(Material material) {
+    var item = Item.registry().get(fromNsk(material.getKey()));
+    if (item == null || !material.isItem()) {
+      throw new IllegalStateException(material.name() + " is not a valid item!");
+    }
+    return item;
+  }
+
+  public static BlockType fromBukkitBlock(Material material) {
+    var blockType = BlockType.registry().get(fromNsk(material.getKey()));
+    if (blockType == null || !material.isBlock()) {
+      throw new IllegalStateException(material.name() + " is not a valid block type!");
+    }
+    return blockType;
+  }
+
+  public static Material toBukkitItemMaterial(Item item) {
+    var mat = Registry.MATERIAL.get(nsk(item.key()));
+    if (mat == null || !mat.isItem()) {
+      throw new IllegalStateException(item.key() + " is not a valid item!");
+    }
+    return mat;
+  }
+
+  public static ItemStack toBukkitItem(Item item) {
+    return new ItemStack(toBukkitItemMaterial(item));
+  }
+
   public static ItemStack toBukkitItem(ItemSnapshot item) {
-    ItemStack stack = new ItemStack(ITEM_MATERIAL_INDEX.valueOrThrow(item.type()), item.amount());
+    var stack = new ItemStack(toBukkitItemMaterial(item.type()), item.amount());
     stack.setItemMeta(((BukkitItem) item).handle());
     return stack;
   }

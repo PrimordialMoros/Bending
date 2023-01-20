@@ -96,7 +96,7 @@ public class Bending extends JavaPlugin implements BendingPlugin {
     }
     new Metrics(this, 8717);
     Tasker.inject(CompositeExecutor.of(new BukkitExecutor(this)));
-    Platform.inject(new BukkitPlatform(this));
+    Platform.inject(new BukkitPlatform());
     loadAdapter();
     new ProtectionInitializer(this);
     BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));

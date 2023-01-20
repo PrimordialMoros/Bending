@@ -20,11 +20,11 @@
 package me.moros.bending.platform.entity.player;
 
 interface GameModes {
-  GameMode SURVIVAL = GameModeImpl.of("survival");
+  GameMode SURVIVAL = GameModeImpl.get("survival");
 
-  GameMode CREATIVE = GameModeImpl.of("creative");
+  GameMode CREATIVE = GameModeImpl.get("creative");
 
-  GameMode ADVENTURE = GameModeImpl.of("adventure");
+  GameMode ADVENTURE = GameModeImpl.get("adventure");
 
-  GameMode SPECTATOR = GameModeImpl.of("spectator");
+  GameMode SPECTATOR = GameModeImpl.get("spectator");
 }

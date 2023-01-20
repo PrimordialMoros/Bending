@@ -38,7 +38,6 @@ import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.DamageUtil;
 import me.moros.bending.platform.PlatformAdapter;
-import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.potion.PotionEffect;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
@@ -322,9 +321,8 @@ public class EntityListener implements Listener {
       Iterator<ItemStack> it = event.getDrops().iterator();
       while (it.hasNext()) {
         ItemStack item = it.next();
-        var type = PlatformAdapter.ITEM_MATERIAL_INDEX.keyOr(item.getType(), Item.AIR);
-        var mapped = MaterialUtil.COOKABLE.get(type);
-        Material flamed = mapped == null ? null : PlatformAdapter.ITEM_MATERIAL_INDEX.value(mapped);
+        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromBukkitItem(item.getType()));
+        Material flamed = mapped == null ? null : PlatformAdapter.toBukkitItemMaterial(mapped);
         if (flamed != null) {
           newDrops.add(new ItemStack(flamed, item.getAmount()));
           it.remove();

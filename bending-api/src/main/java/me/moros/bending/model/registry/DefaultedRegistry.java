@@ -17,21 +17,25 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.platform.sound;
+package me.moros.bending.model.registry;
 
-import me.moros.bending.platform.Initializer;
-import me.moros.bending.platform.PlatformAdapter;
-import net.kyori.adventure.key.Key;
-import org.bukkit.Registry;
+import java.util.function.Function;
 
-public final class SoundInitializer implements Initializer {
+public class DefaultedRegistry<K, V> extends SimpleRegistry<K, V> {
+  private final Function<K, V> factory;
+
+  protected DefaultedRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper, Function<K, V> factory) {
+    super(namespace, inverseMapper, keyMapper);
+    this.factory = factory;
+  }
+
   @Override
-  public void init() {
-    for (var sound : Registry.SOUNDS) {
-      Key key = PlatformAdapter.fromNsk(sound.getKey());
-      if (!Sound.registry().containsKey(key)) {
-        Sound.registry().register(new SoundImpl(key));
-      }
+  public V get(K key) {
+    var result = super.get(key);
+    if (result == null) {
+      result = factory.apply(key);
+      register(result);
     }
+    return result;
   }
 }

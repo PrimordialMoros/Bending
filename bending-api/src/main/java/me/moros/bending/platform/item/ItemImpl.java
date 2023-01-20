@@ -19,16 +19,15 @@
 
 package me.moros.bending.platform.item;
 
+import me.moros.bending.model.registry.DefaultedRegistry;
 import me.moros.bending.model.registry.Registry;
 import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record ItemImpl(Key key) implements Item {
-  static final Registry<Key, Item> REGISTRY = Registry.vanilla("item");
+  static final DefaultedRegistry<Key, Item> REGISTRY = Registry.vanillaDefaulted("item", ItemImpl::new);
 
   static Item get(String key) {
-    Item instance = new ItemImpl(KeyUtil.vanilla(key));
-    REGISTRY.register(instance);
-    return instance;
+    return REGISTRY.get(KeyUtil.vanilla(key));
   }
 }

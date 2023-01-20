@@ -20,7 +20,6 @@
 package me.moros.bending.platform.entity;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import me.moros.bending.event.BendingDamageEvent;
 import me.moros.bending.event.EventBus;
@@ -113,22 +112,16 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public boolean addPotion(Potion potion) {
-    var spongePotion = PlatformAdapter.toSpongePotion(potion);
-    if (spongePotion != null) {
-      handle().potionEffects().add(spongePotion);
-      return true;
-    }
-    return false;
+    handle().potionEffects().add(PlatformAdapter.toSpongePotion(potion));
+    return true;
   }
 
   @Override
   public boolean hasPotion(PotionEffect effect) {
-    var spongeEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    if (spongeEffect != null) {
-      for (var p : handle().potionEffects()) {
-        if (p.type().equals(spongeEffect)) {
-          return true;
-        }
+    var spongeEffect = PlatformAdapter.toSpongePotion(effect);
+    for (var p : handle().potionEffects()) {
+      if (p.type().equals(spongeEffect)) {
+        return true;
       }
     }
     return false;
@@ -136,12 +129,10 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public @Nullable Potion potion(PotionEffect effect) {
-    var spongeEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
-    if (spongeEffect != null) {
-      for (var p : handle().potionEffects()) {
-        if (p.type().equals(spongeEffect)) {
-          return PlatformAdapter.fromSpongePotion(p);
-        }
+    var spongeEffect = PlatformAdapter.toSpongePotion(effect);
+    for (var p : handle().potionEffects()) {
+      if (p.type().equals(spongeEffect)) {
+        return PlatformAdapter.fromSpongePotion(p);
       }
     }
     return null;
@@ -149,7 +140,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public void removePotion(PotionEffect effect) {
-    var spongeEffect = PlatformAdapter.POTION_EFFECT_INDEX.key(effect);
+    var spongeEffect = PlatformAdapter.toSpongePotion(effect);
     handle().potionEffects().transform(l -> {
       l.removeIf(p -> p.type().equals(spongeEffect));
       return l;
@@ -158,7 +149,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public Collection<Potion> activePotions() {
-    return handle().potionEffects().get().stream().map(PlatformAdapter::fromSpongePotion).filter(Objects::nonNull).toList();
+    return handle().potionEffects().get().stream().map(PlatformAdapter::fromSpongePotion).toList();
   }
 
   @Override

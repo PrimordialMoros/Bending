@@ -49,7 +49,7 @@ public interface Container<V> extends Keyed, Iterable<V> {
    */
   Stream<V> stream();
 
-  static <V extends Keyed> Container<V> create(Key key, Set<V> values) {
+  static <V> Container<V> create(Key key, Set<V> values) {
     return new ContainerImpl<>(key, Set.copyOf(values));
   }
 }

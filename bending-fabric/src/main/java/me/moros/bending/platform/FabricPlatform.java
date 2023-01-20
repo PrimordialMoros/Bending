@@ -19,33 +19,25 @@
 
 package me.moros.bending.platform;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 
-import me.moros.bending.FabricBending;
 import me.moros.bending.model.ElementHandler;
 import me.moros.bending.model.board.Board;
 import me.moros.bending.model.user.BendingPlayer;
-import me.moros.bending.platform.block.BlockInitializer;
 import me.moros.bending.platform.item.FabricItemBuilder;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemBuilder;
-import me.moros.bending.platform.item.ItemInitializer;
 import me.moros.bending.platform.item.ItemSnapshot;
-import me.moros.bending.platform.sound.SoundInitializer;
 import me.moros.math.fabric.FabricMathAdapter;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.ItemStack;
 
 public class FabricPlatform implements Platform, PlatformFactory {
   private final IntSupplier tickSupplier;
 
-  public FabricPlatform(Path path, FabricBending plugin, MinecraftServer server) {
+  public FabricPlatform(MinecraftServer server) {
     FabricMathAdapter.register();
-    new SoundInitializer().init();
-    new BlockInitializer(path, plugin.logger());
-    new ItemInitializer(path, plugin.logger());
+    new FabricRegistryInitializer().init();
     this.tickSupplier = server::getTickCount;
   }
 
@@ -77,7 +69,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   @Override
   public ItemBuilder itemBuilder(Item item) {
-    return new FabricItemBuilder(new ItemStack(PlatformAdapter.ITEM_MATERIAL_INDEX.keyOrThrow(item)));
+    return new FabricItemBuilder(PlatformAdapter.toFabricItem(item));
   }
 
   @Override

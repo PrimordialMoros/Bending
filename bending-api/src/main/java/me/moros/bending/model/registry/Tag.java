@@ -17,23 +17,22 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.platform.sound;
+package me.moros.bending.model.registry;
 
-import me.moros.bending.platform.Initializer;
-import me.moros.bending.platform.PlatformAdapter;
+import java.util.Locale;
+
+import me.moros.bending.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.RegistryTypes;
 
-public final class SoundInitializer implements Initializer {
-  @Override
-  public void init() {
-    var list = Sponge.game().registry(RegistryTypes.SOUND_TYPE).stream().toList();
-    for (var sound : list) {
-      Key key = PlatformAdapter.fromRsk(sound.key());
-      if (!Sound.registry().containsKey(key)) {
-        Sound.registry().register(new SoundImpl(key));
-      }
-    }
+public interface Tag<V> extends Container<V> {
+  boolean isTagged(Key key);
+
+  default boolean isTagged(String value) {
+    Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(value.toLowerCase(Locale.ROOT));
+    return key != null && isTagged(key);
+  }
+
+  default boolean isTagged(V type) {
+    return containsValue(type);
   }
 }
