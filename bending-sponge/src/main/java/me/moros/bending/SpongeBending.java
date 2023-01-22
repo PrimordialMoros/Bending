@@ -183,6 +183,5 @@ public class SpongeBending implements BendingPlugin {
   @Override
   public @Nullable InputStream resource(String fileName) {
     return getClass().getClassLoader().getResourceAsStream(fileName);
-    //return container.openResource(URI.create("/" + fileName)).orElse(null);
   }
 }

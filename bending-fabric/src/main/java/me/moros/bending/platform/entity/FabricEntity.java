@@ -34,15 +34,22 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FabricEntity implements Entity {
-  private final net.minecraft.world.entity.Entity handle;
+  private net.minecraft.world.entity.Entity handle;
 
   public FabricEntity(net.minecraft.world.entity.Entity handle) {
     this.handle = handle;
+  }
+
+  public void setHandle(net.minecraft.world.entity.Entity handle) {
+    if (uuid().equals(handle.getUUID()) && (!(handle instanceof ServerPlayer))) {
+      this.handle = handle;
+    }
   }
 
   public net.minecraft.world.entity.Entity handle() {
@@ -252,6 +259,6 @@ public class FabricEntity implements Entity {
 
   @Override
   public int hashCode() {
-    return handle.hashCode();
+    return uuid().hashCode();
   }
 }

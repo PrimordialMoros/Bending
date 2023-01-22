@@ -36,6 +36,7 @@ tasks {
     shadowJar {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
+            reloc("cloud.commandframework", "cloudframework")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
             reloc("io.leangen", "leangen")
         }

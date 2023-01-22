@@ -81,13 +81,18 @@ public class FabricBending implements BendingPlugin {
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
     AbilityDamageSource.inject(s -> translationManager.translate(s) != null);
-
+    Tasker.inject(CompositeExecutor.of(new FabricExecutor()));
     registerLifecycleListeners();
     storage = StorageFactory.createInstance(this, dir);
     if (storage != null) {
       loaded = true;
       new AbilityInitializer();
       BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
+      CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
+        CommandExecutionCoordinator.simpleCoordinator(),
+        CommandSender::from, CommandSender::stack
+      );
+      new BendingCommandManager<>(this, game, PlayerCommandSender.class, manager);
     } else {
       loaded = false;
       logger.error("Unable to establish database connection!");
@@ -95,23 +100,13 @@ public class FabricBending implements BendingPlugin {
   }
 
   private void registerLifecycleListeners() {
-    ServerLifecycleEvents.SERVER_STARTING.register(this::onLoad);
     ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
     ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);
   }
 
-  private void onLoad(MinecraftServer server) {
-    Tasker.inject(CompositeExecutor.of(new FabricExecutor(server)));
-  }
-
-  public void onEnable(MinecraftServer server) {
+  private void onEnable(MinecraftServer server) {
     if (loaded) {
-      CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
-        CommandExecutionCoordinator.simpleCoordinator(),
-        CommandSender::from, CommandSender::stack
-      );
       audiences = FabricServerAudiences.of(server);
-      new BendingCommandManager<>(this, game, PlayerCommandSender.class, manager);
       new PlaceholderHook().init();
       if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
         LuckPermsHook.register();
@@ -128,7 +123,7 @@ public class FabricBending implements BendingPlugin {
     }
   }
 
-  public void onDisable(MinecraftServer server) {
+  private void onDisable(MinecraftServer server) {
     if (game != null) {
       FabricMetadata.INSTANCE.cleanup();
       game.cleanup(true);
@@ -164,7 +159,7 @@ public class FabricBending implements BendingPlugin {
 
   @Override
   public @Nullable InputStream resource(String fileName) {
-    return this.getClass().getResourceAsStream(fileName);
+    return getClass().getClassLoader().getResourceAsStream(fileName);
   }
 
   public static @MonotonicNonNull FabricAudiences audiences() {

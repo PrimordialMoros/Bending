@@ -15,8 +15,7 @@
   "license": [
     "AGPLv3"
   ],
-  "provides": "bending",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "me.moros.bending.BendingBootstrap"
@@ -28,9 +27,9 @@
   "depends": {
     "fabric": "*",
     "fabricloader": ">=0.14.12",
-    "minecraft": "1.19.2",
+    "minecraft": "1.19.3",
     "cloud": "*",
-    "adventure-platform-fabric": "*",
-    "java": ">=17"
+    "math-fabric": "*",
+    "adventure-platform-fabric": "*"
   }
 }

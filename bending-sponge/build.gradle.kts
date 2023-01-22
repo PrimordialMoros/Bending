@@ -43,6 +43,7 @@ tasks {
     shadowJar {
         dependencies {
             reloc("org.slf4j", "slf4j")
+            reloc("cloud.commandframework", "cloudframework")
             exclude(dependency("io.leangen.geantyref:geantyref"))
         }
     }
@@ -66,10 +67,6 @@ sponge {
         }
         contributor("Moros") {
             description("Lead Developer")
-        }
-        dependency("spongeapi") {
-            loadOrder(PluginDependency.LoadOrder.AFTER)
-            optional(false)
         }
     }
 }

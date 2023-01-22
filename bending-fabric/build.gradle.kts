@@ -22,12 +22,16 @@ dependencies {
     modImplementation(libs.adventure.legacy)
     include(libs.adventure.legacy)
     bendingImplementation(project(":bending-common"))
-    bendingImplementation(libs.math.fabric.get())
+    modImplementation(libs.math.fabric.get())
+    include(libs.math.fabric.get())
     bendingImplementation(libs.tasker.fabric.get())
     bendingImplementation(libs.configurate.hocon.get())
     bendingImplementation(libs.h2.get())
     modImplementation(libs.cloud.fabric)
     include(libs.cloud.fabric)
+    implementation(libs.cloud.minecraft) {
+        isTransitive = false
+    }
     include(libs.cloud.minecraft)
 }
 

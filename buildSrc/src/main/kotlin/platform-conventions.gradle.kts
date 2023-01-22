@@ -28,7 +28,6 @@ tasks {
             reloc("net.kyori.event", "eventbus")
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
-            reloc("cloud.commandframework", "cloudframework")
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")

@@ -19,13 +19,19 @@
 
 package me.moros.bending.listener;
 
+import java.util.UUID;
+
 import me.moros.bending.model.manager.Game;
+import me.moros.bending.model.registry.Registries;
+import me.moros.bending.model.user.User;
 import me.moros.bending.platform.FabricMetadata;
+import me.moros.bending.platform.entity.FabricEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
 public record WorldListener(Game game) {
@@ -34,17 +40,31 @@ public record WorldListener(Game game) {
     var early = new ResourceLocation("bending", "early");
     ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);
+    ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(early, this::onChangeWorld);
   }
 
-  public void onWorldUnload(MinecraftServer server, ServerLevel world) {
+  private void onWorldUnload(MinecraftServer server, ServerLevel world) {
     var key = world.dimension().location();
     game.worldManager().onWorldUnload(key);
     FabricMetadata.INSTANCE.cleanup(key);
   }
 
-  public void onChangeWorld(Entity originalEntity, Entity newEntity, ServerLevel origin, ServerLevel destination) {
+  private void onChangeWorld(Entity originalEntity, Entity newEntity, ServerLevel origin, ServerLevel destination) {
+    var uuid = newEntity.getUUID();
+    User user = Registries.BENDERS.get(uuid);
+    if (user != null) {
+      ((FabricEntity) user.entity()).setHandle(newEntity);
+      onChangeWorld(uuid, origin, destination);
+    }
+  }
+
+  private void onChangeWorld(ServerPlayer player, ServerLevel origin, ServerLevel destination) {
+    onChangeWorld(player.getUUID(), origin, destination);
+  }
+
+  private void onChangeWorld(UUID uuid, ServerLevel origin, ServerLevel destination) {
     var from = origin.dimension().location();
     var to = destination.dimension().location();
-    game.worldManager().onUserChangeWorld(newEntity.getUUID(), from, to); // TODO check uuid change?
+    game.worldManager().onUserChangeWorld(uuid, from, to);
   }
 }
