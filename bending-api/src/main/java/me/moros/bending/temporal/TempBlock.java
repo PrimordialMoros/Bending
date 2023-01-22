@@ -124,7 +124,7 @@ public final class TempBlock extends Temporary {
     revertToSnapshot(toRevert);
     TempBlockState nextState = snapshots.peekLast();
     if (nextState != null) {
-      repeat = nextState.expirationTicks - t;
+      repeat = Math.max(0, nextState.expirationTicks - t); // TODO check\
     }
     return false;
   }

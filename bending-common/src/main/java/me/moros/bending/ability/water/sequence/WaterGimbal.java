@@ -216,7 +216,7 @@ public class WaterGimbal extends AbilityInstance {
       if (!started) {
         return UpdateResult.REMOVE;
       }
-      if (!user.canBuild(user.eyeBlock())) {
+      if (!user.canBuild()) {
         return UpdateResult.REMOVE;
       }
 

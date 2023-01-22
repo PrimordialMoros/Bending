@@ -34,12 +34,12 @@ final class BooleanPDT implements PersistentDataType<Byte, Boolean> {
 
   @Override
   public @NonNull Class<Byte> getPrimitiveType() {
-    return byte.class;
+    return Byte.class;
   }
 
   @Override
   public @NonNull Class<Boolean> getComplexType() {
-    return boolean.class;
+    return Boolean.class;
   }
 
   @Override

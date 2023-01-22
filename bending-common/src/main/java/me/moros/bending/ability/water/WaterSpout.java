@@ -80,7 +80,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     loadConfig();
 
     double h = userConfig.height + 2;
-    Block block = AbstractSpout.blockCast(user.eyeBlock(), h);
+    Block block = AbstractSpout.blockCast(user.block(), h);
     if (block == null || !predicate.test(block)) {
       return false;
     }
@@ -148,7 +148,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
       column.forEach(this::clean);
       column.clear();
       ignore.clear();
-      Block block = user.eyeBlock();
+      Block block = user.block();
       TempBlock.water().build(block).ifPresent(tb -> column.add(block));
       BlockState state = BlockType.BUBBLE_COLUMN.defaultState().withProperty(StateProperty.DRAG, false);
       Builder bubbles = TempBlock.builder(state);

@@ -117,13 +117,13 @@ public final class PlatformAdapter {
   }
 
   public static ItemStack toBukkitItem(ItemSnapshot item) {
-    var stack = new ItemStack(toBukkitItemMaterial(item.type()), item.amount());
-    stack.setItemMeta(((BukkitItem) item).handle());
+    var stack = ((BukkitItem) item).handle().clone();
+    stack.setAmount(item.amount());
     return stack;
   }
 
-  public static ItemSnapshot fromBukkitItem(@Nullable ItemStack itemStack, ItemSnapshot def) {
-    return itemStack == null ? def : new BukkitItem(itemStack);
+  public static ItemSnapshot fromBukkitItem(@Nullable ItemStack itemStack) {
+    return itemStack == null ? ItemSnapshot.AIR.get() : new BukkitItem(itemStack);
   }
 
   public static NamespacedKey nsk(Key key) {

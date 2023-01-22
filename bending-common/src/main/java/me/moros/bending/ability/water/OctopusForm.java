@@ -105,14 +105,14 @@ public class OctopusForm extends AbilityInstance {
     }
     if (formed) {
       cleanAll();
-      if (!user.canBuild(user.eyeBlock())) {
+      if (!user.canBuild()) {
         return UpdateResult.REMOVE;
       }
       boolean forceUpdate = false;
-      Block current = user.eyeBlock();
+      Block current = user.block();
       if (!current.equals(lastBlock)) {
         base.clear();
-        base.addAll(WorldUtil.createBlockRing(user.eyeBlock(), RADIUS));
+        base.addAll(WorldUtil.createBlockRing(current, RADIUS));
         lastBlock = current;
         forceUpdate = true;
       }

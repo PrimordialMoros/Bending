@@ -197,7 +197,7 @@ public class WaterRing extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
     cleanAll();
-    if (sources <= 0 || !user.canBuild(user.eyeBlock())) {
+    if (sources <= 0 || !user.canBuild()) {
       return UpdateResult.REMOVE;
     }
     Position newPosition = user.location().toVector3i();

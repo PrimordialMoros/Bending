@@ -98,7 +98,7 @@ public class AirScooter extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (!user.canBuild(user.location())) {
+    if (!user.canBuild()) {
       return UpdateResult.REMOVE;
     }
     return scooter.update();

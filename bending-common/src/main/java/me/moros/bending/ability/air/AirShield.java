@@ -91,7 +91,7 @@ public class AirShield extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
-    if (removalPolicy.test(user, description()) || !user.canBuild(user.eyeBlock())) {
+    if (removalPolicy.test(user, description()) || !user.canBuild()) {
       return UpdateResult.REMOVE;
     }
     currentPoint++;

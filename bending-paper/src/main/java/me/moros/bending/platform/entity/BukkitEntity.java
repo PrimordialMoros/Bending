@@ -19,10 +19,13 @@
 
 package me.moros.bending.platform.entity;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.model.data.DataHolder;
+import me.moros.bending.model.data.DataKey;
 import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.platform.BukkitDataHolder;
 import me.moros.bending.platform.PlatformAdapter;
@@ -39,16 +42,13 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class BukkitEntity extends BukkitDataHolder implements Entity {
+public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;
-
-  private BukkitEntity(Supplier<org.bukkit.entity.Entity> handle) {
-    super(handle, handle);
-    this.handle = handle.get();
-  }
+  private final Supplier<DataHolder> holder;
 
   public BukkitEntity(org.bukkit.entity.Entity handle) {
-    this(Suppliers.cached(handle));
+    this.handle = handle;
+    this.holder = Suppliers.lazy(() -> BukkitDataHolder.combined(handle()));
   }
 
   public org.bukkit.entity.Entity handle() {
@@ -243,5 +243,20 @@ public class BukkitEntity extends BukkitDataHolder implements Entity {
   @Override
   public int hashCode() {
     return handle.hashCode();
+  }
+
+  @Override
+  public <T> Optional<T> get(DataKey<T> key) {
+    return holder.get().get(key);
+  }
+
+  @Override
+  public <T> void add(DataKey<T> key, T value) {
+    holder.get().add(key, value);
+  }
+
+  @Override
+  public <T> void remove(DataKey<T> key) {
+    holder.get().remove(key);
   }
 }

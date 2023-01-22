@@ -64,7 +64,7 @@ public class TemporalManager<K, V extends Temporary> implements TickAdapter {
   }
 
   public void addEntry(K key, V value, int ticks) {
-    if (isTemp(key)) {
+    if (isTemp(key) || ticks < 0) {
       return;
     }
     instances.put(key, value);

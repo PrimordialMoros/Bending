@@ -87,7 +87,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public @Nullable Ability activateAbility(User user, Activation method, AbilityDescription desc) {
-    if (!desc.isActivatedBy(method) || !user.canBend(desc) || !user.canBuild(user.location())) {
+    if (!desc.isActivatedBy(method) || !user.canBend(desc) || !user.canBuild()) {
       return null;
     }
     Ability ability = desc.createAbility();

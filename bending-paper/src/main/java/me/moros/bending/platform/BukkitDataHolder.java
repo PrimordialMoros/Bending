@@ -20,47 +20,29 @@
 package me.moros.bending.platform;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import me.moros.bending.Bending;
 import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.model.data.DataKey;
-import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.util.metadata.Metadata;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.persistence.PersistentDataHolder;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BukkitDataHolder implements DataHolder {
-  private final Supplier<? extends Metadatable> handle;
-  private final Supplier<? extends PersistentDataHolder> persistentHandle;
-
-  protected BukkitDataHolder(Supplier<? extends Metadatable> handle, Supplier<? extends PersistentDataHolder> persistentHandle) {
-    this.handle = handle;
-    this.persistentHandle = persistentHandle;
-  }
-
+public record BukkitDataHolder(@Nullable Metadatable handle,
+                               @Nullable PersistentDataHolder persistentHandle) implements DataHolder {
   public static DataHolder nonPersistent(Metadatable handle) {
-    return new BukkitDataHolder(Suppliers.cached(handle), () -> null);
+    return new BukkitDataHolder(handle, null);
   }
 
   public static DataHolder persistent(PersistentDataHolder persistentHandle) {
-    return new BukkitDataHolder(() -> null, Suppliers.cached(persistentHandle));
+    return new BukkitDataHolder(null, persistentHandle);
   }
 
-  public static <T extends Metadatable & PersistentDataHolder> DataHolder combined(T object) {
-    var cached = Suppliers.cached(object);
-    return new BukkitDataHolder(cached, cached);
-  }
-
-  private @MonotonicNonNull Metadatable handle() {
-    return handle.get();
-  }
-
-  private @MonotonicNonNull PersistentDataHolder persistentHandle() {
-    return persistentHandle.get();
+  public static <T extends Metadatable & PersistentDataHolder> DataHolder combined(T handle) {
+    return new BukkitDataHolder(handle, handle);
   }
 
   @Override

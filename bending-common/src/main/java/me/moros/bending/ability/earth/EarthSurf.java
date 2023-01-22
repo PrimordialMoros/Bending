@@ -116,7 +116,7 @@ public class EarthSurf extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (!user.canBuild(user.block())) {
+    if (!user.canBuild()) {
       return UpdateResult.REMOVE;
     }
     if (charging) {

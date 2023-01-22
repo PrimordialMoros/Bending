@@ -76,10 +76,10 @@ public class BukkitInventory implements Inventory {
 
   @Override
   public ArmorContents<ItemSnapshot> armor() {
-    ItemSnapshot h = PlatformAdapter.fromBukkitItem(handle().getHelmet(), ItemSnapshot.AIR.get());
-    ItemSnapshot c = PlatformAdapter.fromBukkitItem(handle().getChestplate(), ItemSnapshot.AIR.get());
-    ItemSnapshot l = PlatformAdapter.fromBukkitItem(handle().getLeggings(), ItemSnapshot.AIR.get());
-    ItemSnapshot b = PlatformAdapter.fromBukkitItem(handle().getBoots(), ItemSnapshot.AIR.get());
+    ItemSnapshot h = PlatformAdapter.fromBukkitItem(handle().getHelmet());
+    ItemSnapshot c = PlatformAdapter.fromBukkitItem(handle().getChestplate());
+    ItemSnapshot l = PlatformAdapter.fromBukkitItem(handle().getLeggings());
+    ItemSnapshot b = PlatformAdapter.fromBukkitItem(handle().getBoots());
     return ArmorContents.of(h, c, l, b);
   }
 
