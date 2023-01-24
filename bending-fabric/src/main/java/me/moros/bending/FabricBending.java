@@ -32,7 +32,7 @@ import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.GameImpl;
 import me.moros.bending.hook.LuckPermsHook;
 import me.moros.bending.hook.PlaceholderHook;
-import me.moros.bending.listener.PlayerListener;
+import me.moros.bending.listener.ConnectionListener;
 import me.moros.bending.listener.WorldListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
@@ -116,7 +116,7 @@ public class FabricBending implements BendingPlugin {
       listeners = List.of(
         //new BlockListener(game),
         //new EntityListener(game),
-        new PlayerListener(game, this),
+        new ConnectionListener(game, this),
         new WorldListener(game)
       );
       GameProvider.register(game);

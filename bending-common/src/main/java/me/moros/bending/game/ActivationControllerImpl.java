@@ -40,6 +40,7 @@ import me.moros.bending.ability.earth.passive.FerroControl;
 import me.moros.bending.ability.earth.passive.Locksmithing;
 import me.moros.bending.ability.earth.sequence.EarthPillars;
 import me.moros.bending.ability.fire.FireJet;
+import me.moros.bending.ability.fire.FireShield;
 import me.moros.bending.ability.fire.HeatControl;
 import me.moros.bending.ability.water.HealingWaters;
 import me.moros.bending.ability.water.WaterWave;
@@ -158,22 +159,18 @@ public final class ActivationControllerImpl implements ActivationController {
   }
 
   @Override
-  public double onEntityDamage(LivingEntity entity, DamageCause cause, double damage) {
+  public double onEntityDamage(LivingEntity entity, DamageCause cause, double damage, @Nullable Vector3d origin) {
     User user = Registries.BENDERS.get(entity.uuid());
     if (user != null) {
-      if (cause == DamageCause.FIRE) {
-        if (!onBurn(user)) {
-          BendingEffect.FIRE_TICK.reset(entity);
-          return 0;
-        }
-      } else if (cause == DamageCause.FALL) {
-        if (!onFall(user)) {
-          return 0;
-        }
-      } else if (cause == DamageCause.KINETIC) {
-        if (onUserGlide(user)) {
-          return 0;
-        }
+      if (cause == DamageCause.FIRE && !onBurn(user)) {
+        BendingEffect.FIRE_TICK.reset(entity);
+        return 0;
+      } else if (cause == DamageCause.FALL && !onFall(user)) {
+        return 0;
+      } else if (cause == DamageCause.KINETIC && onUserGlide(user)) {
+        return 0;
+      } else if (cause == DamageCause.EXPLOSION && origin != null) {
+        return FireShield.shieldFromExplosion(user, origin, damage);
       }
     }
     if (cause == DamageCause.SUFFOCATION && noSuffocate(entity)) {

@@ -131,6 +131,9 @@ public final class PlatformAdapter {
   }
 
   public static DamageCause fromFabricCause(DamageSource type) {
+    if (type.isExplosion()) {
+      return DamageCause.EXPLOSION;
+    }
     if (type.isFire() && !(type instanceof AbilityDamageSource)) {
       return DamageCause.FIRE;
     } else if (type == DamageSource.FALL) {

@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.jmh)
 }
 
+version = "3.0.0-SNAPSHOT"
+
 dependencies {
     api(libs.math.core)
     compileOnlyApi(libs.slf4j.api)

@@ -53,13 +53,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 
-public class BlockListener implements Listener {
-  private final Game game;
-
-  public BlockListener(Game game) {
-    this.game = game;
-  }
-
+public record BlockListener(Game game) implements Listener {
   private boolean disabledWorld(BlockEvent event) {
     return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getBlock().getWorld().getKey()));
   }

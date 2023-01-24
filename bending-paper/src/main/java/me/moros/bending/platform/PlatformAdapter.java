@@ -180,6 +180,7 @@ public final class PlatformAdapter {
       case FALL -> DamageCause.FALL;
       case FLY_INTO_WALL -> DamageCause.KINETIC;
       case SUFFOCATION -> DamageCause.SUFFOCATION;
+      case ENTITY_EXPLOSION, BLOCK_EXPLOSION -> DamageCause.EXPLOSION;
       default -> DamageCause.CUSTOM;
     };
   }

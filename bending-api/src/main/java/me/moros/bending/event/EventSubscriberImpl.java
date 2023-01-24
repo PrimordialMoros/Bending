@@ -17,13 +17,21 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.platform.damage;
+package me.moros.bending.event;
 
-public enum DamageCause {
-  CUSTOM,
-  FALL,
-  FIRE,
-  KINETIC,
-  EXPLOSION,
-  SUFFOCATION
+import java.util.function.Consumer;
+
+import net.kyori.event.EventSubscriber;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+record EventSubscriberImpl<E>(Consumer<E> consumer, int postOrder) implements EventSubscriber<E> {
+  @Override
+  public void on(@NonNull E event) throws Throwable {
+    consumer.accept(event);
+  }
+
+  @Override
+  public boolean acceptsCancelled() {
+    return false;
+  }
 }

@@ -27,6 +27,8 @@ import me.moros.bending.event.TickEffectEvent;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.entity.LivingEntity;
+import me.moros.bending.platform.potion.PotionEffect;
+import me.moros.math.FastMath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -82,13 +84,25 @@ public enum BendingEffect {
       return;
     }
     TickEffectEvent event = EventBus.INSTANCE.postTickEffectEvent(source, entity, ticks, this);
-    if (event.cancelled()) {
+    int duration = event.duration();
+    if (event.cancelled() || duration <= 0) {
       return;
     }
+    if (this == FROST_TICK) {
+      handleFreeze(entity, duration);
+    }
     int current = Math.max(0, currentTicks.get(entity));
-    if (current < ticks) {
-      handler.set(entity, Math.min(maxTicks.get(entity), cumulative ? current + ticks : ticks));
+    if (current < duration) {
+      handler.set(entity, Math.min(maxTicks.get(entity), cumulative ? current + duration : duration));
       trackEntity(entity, source);
+    }
+  }
+
+  private void handleFreeze(Entity entity, int duration) {
+    if (duration >= 30 && entity instanceof LivingEntity living) {
+      int potionDuration = FastMath.round(0.5 * duration);
+      int power = FastMath.floor(duration / 30.0);
+      EntityUtil.tryAddPotion(living, PotionEffect.SLOWNESS, potionDuration, power);
     }
   }
 

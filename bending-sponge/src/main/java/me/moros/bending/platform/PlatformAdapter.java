@@ -41,8 +41,8 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -147,10 +147,14 @@ public final class PlatformAdapter {
     return new SpongePlayer(entity);
   }
 
-  public static DamageCause fromSpongeCause(DamageType type) {
-    if (type == DamageTypes.FIRE.get()) {
+  public static DamageCause fromSpongeCause(DamageSource source) {
+    if (source.isExplosive()) {
+      return DamageCause.EXPLOSION;
+    } else if (source.isFire() && !(source instanceof AbilityDamageSource)) {
       return DamageCause.FIRE;
-    } else if (type == DamageTypes.FALL.get()) {
+    }
+    var type = source.type();
+    if (type == DamageTypes.FALL.get()) {
       return DamageCause.FALL;
     } else if (type == DamageTypes.CONTACT.get()) { // TODO mapping too generic, will include other dmg types too
       return DamageCause.KINETIC;

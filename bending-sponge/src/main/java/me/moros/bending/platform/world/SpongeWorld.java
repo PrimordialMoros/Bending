@@ -48,6 +48,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -97,6 +98,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
   @Override
   public @Nullable Lockable containerLock(Position position) {
     return handle().blockEntity(position.blockX(), position.blockY(), position.blockZ())
+      .filter(tile -> tile.supports(Keys.LOCK_TOKEN))
       .map(LockableImpl::new).orElse(null);
   }
 
@@ -249,11 +251,11 @@ public record SpongeWorld(ServerWorld handle) implements World {
   @Override
   public Dimension dimension() {
     var t = handle().worldType();
-    if (t.equals(WorldTypes.OVERWORLD.get()) || t.equals(WorldTypes.OVERWORLD_CAVES.get())) {
+    if (t == WorldTypes.OVERWORLD.get() || t == WorldTypes.OVERWORLD_CAVES.get()) {
       return Dimension.OVERWORLD;
-    } else if (t.equals(WorldTypes.THE_NETHER.get())) {
+    } else if (t == WorldTypes.THE_NETHER.get()) {
       return Dimension.NETHER;
-    } else if (t.equals(WorldTypes.THE_END.get())) {
+    } else if (t == WorldTypes.THE_END.get()) {
       return Dimension.END;
     } else {
       return Dimension.CUSTOM;

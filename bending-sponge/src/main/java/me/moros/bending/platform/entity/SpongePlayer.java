@@ -68,7 +68,7 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
 
   @Override
   public TriState isRightHanded() {
-    return TriState.byBoolean(handle().dominantHand().get().equals(HandPreferences.RIGHT.get()));
+    return TriState.byBoolean(handle().dominantHand().get() == HandPreferences.RIGHT.get());
   }
 
   @Override

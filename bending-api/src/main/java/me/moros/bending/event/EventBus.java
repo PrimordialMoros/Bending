@@ -63,10 +63,22 @@ public enum EventBus {
    * @param event the event type
    * @param subscriber the subscriber
    * @param <T> the event type
+   * @see #subscribe(Class, Consumer, int)
    */
   public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber) {
+    subscribe(event, subscriber, 0);
+  }
+
+  /**
+   * Registers the given subscriber to receive events.
+   * @param event the event type
+   * @param subscriber the subscriber
+   * @param priority the subscriber's priority, default priority is 0
+   * @param <T> the event type
+   */
+  public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber, int priority) {
     if (!closed) {
-      eventBus.subscribe(event, subscriber::accept);
+      eventBus.subscribe(event, new EventSubscriberImpl<>(subscriber, priority));
     }
   }
 

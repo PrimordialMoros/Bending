@@ -288,13 +288,13 @@ public class FireShield extends AbilityInstance {
     }
   }
 
-  public static double shieldFromExplosion(User user, Entity source, double damage) {
+  public static double shieldFromExplosion(User user, Vector3d source, double damage) {
     FireShield shield = user.game().abilityManager(user.worldKey()).userInstances(user, FireShield.class)
       .filter(FireShield::isSphere).findAny().orElse(null);
     if (shield == null) {
       return damage;
     }
-    double distSq = source.center().distanceSq(user.center());
+    double distSq = source.distanceSq(user.center());
     double r = shield.userConfig.shieldRadius;
     if (distSq >= r * r) {
       return 0;

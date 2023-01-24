@@ -52,7 +52,7 @@ public interface ActivationController {
 
   void onUserDamage(User user);
 
-  double onEntityDamage(LivingEntity entity, DamageCause cause, double damage);
+  double onEntityDamage(LivingEntity entity, DamageCause cause, double damage, @Nullable Vector3d origin);
 
   boolean onBurn(User user);
 

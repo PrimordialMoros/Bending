@@ -29,42 +29,29 @@ import java.util.concurrent.TimeoutException;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.BendingPlugin;
-import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.model.user.profile.PlayerProfile;
-import me.moros.bending.platform.AbilityDamageSource;
-import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.entity.SpongePlayer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.server.ServerWorld;
 
-public class PlayerListener {
+public class ConnectionListener {
   private final Game game;
   private final BendingPlugin plugin;
   private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
 
-  public PlayerListener(Game game, BendingPlugin plugin) {
+  public ConnectionListener(Game game, BendingPlugin plugin) {
     this.game = game;
     this.plugin = plugin;
     this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(game.storage()::createProfile);
-  }
-
-  private boolean disabledWorld(Entity entity) {
-    return !(entity.world() instanceof ServerWorld serverWorld && game.worldManager().isEnabled(PlatformAdapter.fromRsk(serverWorld.key())));
   }
 
   @Listener(order = Order.EARLY)
@@ -110,19 +97,5 @@ public class PlayerListener {
       game.activationController().onUserDeconstruct(user);
     }
     profileCache.synchronous().invalidate(uuid);
-  }
-
-  @Listener(order = Order.POST)
-  public void onPlayerDeath(DestructEntityEvent.Death event, @Getter("entity") ServerPlayer player) {
-    var source = event.cause().first(AbilityDamageSource.class).orElse(null);
-    if (source != null) {
-      AbilityDescription ability = source.ability();
-      TranslatableComponent msg = plugin.translationManager().translate(ability.translationKey() + ".death");
-      if (msg == null) {
-        msg = Component.translatable("bending.ability.generic.death");
-      }
-      // TODO check rendering
-      event.setMessage(msg.args(player.displayName().get(), source.name(), ability.displayName()));
-    }
   }
 }

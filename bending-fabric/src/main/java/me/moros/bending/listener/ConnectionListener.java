@@ -47,8 +47,8 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.world.entity.Entity;
 
-public record PlayerListener(Game game, BendingPlugin plugin, AsyncLoadingCache<UUID, PlayerProfile> profileCache) {
-  public PlayerListener(Game game, BendingPlugin plugin) {
+public record ConnectionListener(Game game, BendingPlugin plugin, AsyncLoadingCache<UUID, PlayerProfile> profileCache) {
+  public ConnectionListener(Game game, BendingPlugin plugin) {
     this(game, plugin, createCache(game));
     ServerLoginConnectionEvents.QUERY_START.register(this::onPlayerPreLogin);
     ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);

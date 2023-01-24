@@ -19,38 +19,37 @@
 
 package me.moros.bending.listener;
 
-import java.time.Duration;
+import java.util.ListIterator;
 import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
-import me.moros.bending.Bending;
+import me.moros.bending.BendingPlugin;
+import me.moros.bending.ability.earth.EarthGlove;
+import me.moros.bending.ability.earth.MetalCable;
 import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.model.BlockInteraction;
 import me.moros.bending.model.DamageSource;
+import me.moros.bending.model.Element;
 import me.moros.bending.model.EntityInteraction;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.ability.ActionType;
 import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.registry.Registries;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
-import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.platform.DamageUtil;
 import me.moros.bending.platform.PlatformAdapter;
-import me.moros.bending.platform.entity.BukkitPlayer;
 import me.moros.bending.temporal.ActionLimiter;
 import me.moros.bending.temporal.TempArmor;
+import me.moros.bending.temporal.TempBlock;
 import me.moros.bending.temporal.TempEntity;
+import me.moros.bending.util.BendingEffect;
+import me.moros.bending.util.material.MaterialUtil;
 import me.moros.bending.util.metadata.Metadata;
+import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -58,16 +57,22 @@ import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
@@ -75,9 +80,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -90,64 +93,246 @@ import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class PlayerListener implements Listener {
-  private final Bending plugin;
+public class UserListener implements Listener {
   private final Game game;
-  private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
+  private final BendingPlugin plugin;
 
-  public PlayerListener(Bending plugin, Game game) {
-    this.plugin = plugin;
+  public UserListener(Game game, BendingPlugin plugin) {
     this.game = game;
-    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(game.storage()::createProfile);
+    this.plugin = plugin;
+  }
+
+  private boolean disabledWorld(EntityEvent event) {
+    return disabledWorld(event.getEntity().getWorld());
   }
 
   private boolean disabledWorld(PlayerEvent event) {
-    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getPlayer().getWorld().getKey()));
+    return disabledWorld(event.getPlayer().getWorld());
+  }
+
+  private boolean disabledWorld(World world) {
+    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(world.getKey()));
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-    UUID uuid = event.getUniqueId();
-    long startTime = System.currentTimeMillis();
-    try {
-      // Timeout after 1000ms to not block the login thread excessively
-      PlayerProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
-      long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
-        plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
+  public void onArrowHit(ProjectileHitEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(MetalCable.CABLE_KEY.value())) {
+      MetalCable cable = (MetalCable) event.getEntity().getMetadata(MetalCable.CABLE_KEY.value()).get(0).value();
+      if (cable != null) {
+        var block = event.getHitBlock();
+        if (block != null) {
+          cable.hitBlock(PlatformAdapter.fromBukkitBlock(block));
+        } else if (event.getHitEntity() instanceof LivingEntity living) {
+          cable.hitEntity(PlatformAdapter.fromBukkitEntity(living));
+        } else {
+          event.getEntity().remove();
+        }
       }
-    } catch (TimeoutException e) {
-      plugin.logger().warn("Timed out while retrieving data for " + uuid);
-    } catch (CancellationException | ExecutionException | InterruptedException e) {
-      plugin.logger().warn(e.getMessage(), e);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityExplodeEvent(EntityExplodeEvent event) {
+    cancelIfLimited(event, null);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityInteractEvent(EntityInteractEvent event) {
+    cancelIfLimited(event, ActionType.INTERACT);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onProjectileLaunchEvent(ProjectileLaunchEvent event) {
+    cancelIfLimited(event, ActionType.SHOOT);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityShootBowEvent(EntityShootBowEvent event) {
+    cancelIfLimited(event, ActionType.SHOOT);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onSlimeSplitEvent(SlimeSplitEvent event) {
+    cancelIfLimited(event, null);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityTarget(EntityTargetEvent event) {
+    cancelIfLimited(event, null);
+  }
+
+  private <E extends EntityEvent & Cancellable> void cancelIfLimited(E event, @Nullable ActionType type) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), type)) {
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityCombustByBlock(EntityCombustByBlockEvent event) {
+    Block block = event.getCombuster();
+    if (block == null || disabledWorld(event)) {
+      return;
+    }
+    TempBlock tb = TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(block)).orElse(null);
+    if (tb != null) {
+      int ticks = event.getDuration() * 20;
+      if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
+        event.setDuration(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20.0));
+      }
+      DamageSource source = tb.damageSource();
+      if (source != null) {
+        DamageUtil.cacheDamageSource(event.getEntity().getUniqueId(), source);
+      }
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerJoin(PlayerJoinEvent event) {
-    Player player = event.getPlayer();
-    UUID uuid = player.getUniqueId();
-    PlayerProfile profile = profileCache.synchronous().get(uuid);
-    if (profile != null) {
-      User user = BendingPlayer.createUser(game, new BukkitPlayer(player), profile).orElse(null);
-      if (user != null) {
-        Registries.BENDERS.register(user);
-        game.abilityManager(user.worldKey()).createPassives(user);
-      }
+  public void onEntityDamageByBlock(EntityDamageByBlockEvent event) {
+    onEntityDamageByBlock(event.getEntity(), event.getDamager());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityInsideBlock(EntityInsideBlockEvent event) {
+    onEntityDamageByBlock(event.getEntity(), event.getBlock());
+  }
+
+  private void onEntityDamageByBlock(Entity entity, @Nullable Block block) {
+    if (block == null || disabledWorld(entity.getWorld())) {
+      return;
+    }
+    TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(block)).map(TempBlock::damageSource)
+      .ifPresent(source -> DamageUtil.cacheDamageSource(entity.getUniqueId(), source));
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(MetalCable.CABLE_KEY.value())) {
+      event.setCancelled(true);
+    } else if (ActionLimiter.isLimited(event.getDamager().getUniqueId(), ActionType.DAMAGE)) {
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onItemMerge(ItemMergeEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (event.getEntity().hasMetadata(EarthGlove.GLOVE_KEY.value()) || event.getTarget().hasMetadata(EarthGlove.GLOVE_KEY.value())) {
+      event.setCancelled(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (event.getEntity() instanceof FallingBlock fallingBlock) {
+      TempEntity.MANAGER.get(fallingBlock.getEntityId()).ifPresent(temp -> {
+        event.setCancelled(true);
+        temp.revert();
+      });
     } else {
-      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.getName() + ")");
+      if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.INTERACT_BLOCK)) {
+        event.setCancelled(true);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onEntityDamageLow(EntityDamageEvent event) {
+    if (event.getDamage() <= 0 || disabledWorld(event)) {
+      return;
+    }
+    if (event.getEntity() instanceof LivingEntity bukkitEntity) {
+      double oldDamage = event.getDamage();
+      var entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
+      var cause = PlatformAdapter.fromBukkitCause(event.getCause());
+      Vector3d origin = null;
+      if (event instanceof EntityDamageByEntityEvent entityEvent) {
+        origin = PlatformAdapter.fromBukkitEntity(entityEvent.getDamager()).center();
+      }
+      double newDamage = game.activationController().onEntityDamage(entity, cause, oldDamage, origin);
+      if (newDamage <= 0) {
+        event.setCancelled(true);
+      } else if (oldDamage != newDamage) {
+        event.setDamage(newDamage);
+      }
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerLogout(PlayerQuitEvent event) {
-    UUID uuid = event.getPlayer().getUniqueId();
+  public void onEntityDamage(EntityDamageEvent event) {
+    if (event.getDamage() <= 0 || disabledWorld(event)) {
+      return;
+    }
+    if (event.getEntity() instanceof LivingEntity entity) {
+      User user = Registries.BENDERS.get(entity.getUniqueId());
+      if (user != null) {
+        game.activationController().onUserDamage(user);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onUserGlide(EntityToggleGlideEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (!event.isGliding() && event.getEntity() instanceof LivingEntity entity) {
+      if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.MOVE)) {
+        return;
+      }
+      User user = Registries.BENDERS.get(entity.getUniqueId());
+      if (user != null && game.activationController().onUserGlide(user)) {
+        event.setCancelled(true);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  public void onEntityDeathHigh(EntityDeathEvent event) {
+    var nsk = PlatformAdapter.nsk(Metadata.ARMOR_KEY);
+    event.getDrops().removeIf(item -> item.getItemMeta().getPersistentDataContainer().has(nsk));
+    if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
+      return;
+    }
+    DamageSource cause = DamageUtil.cachedDamageSource(event.getEntity().getUniqueId());
+    if (cause != null && cause.ability().element() == Element.FIRE) {
+      ListIterator<ItemStack> it = event.getDrops().listIterator();
+      while (it.hasNext()) {
+        ItemStack item = it.next();
+        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromBukkitItem(item.getType()));
+        Material flamed = mapped == null ? null : PlatformAdapter.toBukkitItemMaterial(mapped);
+        if (flamed != null) {
+          it.set(new ItemStack(flamed, item.getAmount()));
+        }
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onUserDeath(EntityDeathEvent event) {
+    UUID uuid = event.getEntity().getUniqueId();
+    ActionLimiter.MANAGER.get(uuid).ifPresent(ActionLimiter::revert);
+    TempArmor.MANAGER.get(uuid).ifPresent(TempArmor::revert);
+    if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
+      return;
+    }
     User user = Registries.BENDERS.get(uuid);
     if (user != null) {
       game.activationController().onUserDeconstruct(user);
     }
-    profileCache.synchronous().invalidate(uuid);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -170,7 +355,7 @@ public class PlayerListener implements Listener {
         }
         Component message = msg.args(player.name(), cause.name(), ability.displayName());
         // Client isn't aware of custom death message translations, so we have to manually broadcast
-        plugin.getServer().filterAudience(predicate).sendMessage(message);
+        player.getServer().filterAudience(predicate).sendMessage(message);
         event.deathMessage(Component.empty());
       }
     }
@@ -190,27 +375,21 @@ public class PlayerListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onUserMove(EntityMoveEvent event) {
-    if (!game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getEntity().getWorld().getKey()))) {
-      return;
-    }
-    if (cancelMovement(event)) {
-      event.setCancelled(true);
-    }
+    onUserMove(event, event);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPlayerMove(PlayerMoveEvent event) {
+  public void onUserMove(PlayerMoveEvent event) {
+    onUserMove(event, new EntityMoveEvent(event.getPlayer(), event.getFrom(), event.getTo()));
+  }
+
+  private void onUserMove(Cancellable originalEvent, EntityMoveEvent event) {
     if (disabledWorld(event)) {
       return;
     }
-    if (cancelMovement(new EntityMoveEvent(event.getPlayer(), event.getFrom(), event.getTo()))) {
-      event.setCancelled(true);
-    }
-  }
-
-  private boolean cancelMovement(EntityMoveEvent event) {
     if (event.hasChangedBlock() && ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.MOVE)) {
-      return true;
+      originalEvent.setCancelled(true);
+      return;
     }
     User user = Registries.BENDERS.get(event.getEntity().getUniqueId());
     if (user != null) {
@@ -218,7 +397,6 @@ public class PlayerListener implements Listener {
       double z = event.getTo().getZ() - event.getFrom().getZ();
       game.activationController().onUserMove(user, Vector3d.of(x, 0, z));
     }
-    return false;
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

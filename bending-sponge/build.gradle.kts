@@ -1,6 +1,5 @@
 import org.spongepowered.gradle.vanilla.repository.MinecraftPlatform
 import org.spongepowered.gradle.plugin.config.PluginLoaders
-import org.spongepowered.plugin.metadata.model.PluginDependency
 
 plugins {
     id("platform-conventions")
