@@ -136,7 +136,7 @@ public class EarthArmor extends AbilityInstance {
   }
 
   private boolean moveBlock() {
-    if (!temp.isValid()) {
+    if (!temp.valid()) {
       return false;
     }
     Vector3d center = temp.center();
@@ -156,7 +156,7 @@ public class EarthArmor extends AbilityInstance {
     }
 
     Vector3d dir = user.eyeLocation().subtract(center).normalize().multiply(speedFactor);
-    temp.entity().applyVelocity(this, dir);
+    temp.applyVelocity(this, dir);
     return true;
   }
 

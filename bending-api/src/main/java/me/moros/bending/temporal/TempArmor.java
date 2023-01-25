@@ -34,12 +34,11 @@ import me.moros.bending.platform.item.Inventory;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.item.ItemSnapshot;
 import me.moros.bending.util.metadata.Metadata;
-import me.moros.tasker.TimerWheel;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class TempArmor extends Temporary {
-  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
+  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(600);
 
   private final LivingEntity entity;
   private final ArmorContents<ItemSnapshot> snapshot;
@@ -150,7 +149,7 @@ public final class TempArmor extends Temporary {
         }
       }
       var newArmor = ArmorContents.of(armorItems[0], armorItems[1], armorItems[2], armorItems[3]);
-      return Optional.of(new TempArmor(user.entity(), newArmor, MANAGER.fromMillis(duration, 600)));
+      return Optional.of(new TempArmor(user.entity(), newArmor, MANAGER.fromMillis(duration)));
     }
   }
 

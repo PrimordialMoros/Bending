@@ -156,11 +156,11 @@ public class EarthShot extends AbilityInstance implements Explosive {
       SoundEffect.EARTH.play(source);
     }
 
-    projectile = TempEntity.fallingBlock(solidData).velocity(Vector3d.of(0, 0.65, 0))
-      .gravity(false).duration(6000).buildReal(source);
     if (!MaterialUtil.isLava(source)) {
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(source);
     }
+    projectile = TempEntity.fallingBlock(solidData).velocity(Vector3d.of(0, 0.65, 0))
+      .gravity(false).buildReal(source);
     location = projectile.center();
     removalPolicy = Policies.builder()
       .add(SwappedSlotsRemovalPolicy.of(description()))
@@ -177,11 +177,10 @@ public class EarthShot extends AbilityInstance implements Explosive {
     }
 
     if (launched) {
-      if (projectile == null || !projectile.entity().valid()) {
+      if (!projectile.valid()) {
         return UpdateResult.REMOVE;
       }
-
-      Vector3d velocity = projectile.entity().velocity();
+      Vector3d velocity = projectile.velocity();
       double minLength = userConfig.speed * 0.85;
       if (lastVelocity.angle(velocity) > Math.PI / 4 || velocity.lengthSq() < minLength * minLength) {
         return UpdateResult.REMOVE;
@@ -190,15 +189,15 @@ public class EarthShot extends AbilityInstance implements Explosive {
         Vector3d dir = user.direction().multiply(0.2);
         velocity = velocity.add(dir.withY(0));
       }
-      projectile.entity().applyVelocity(this, velocity.normalize().multiply(userConfig.speed));
-      lastVelocity = projectile.entity().velocity();
+      projectile.applyVelocity(this, velocity.normalize().multiply(userConfig.speed));
+      lastVelocity = projectile.velocity();
       location = projectile.center();
       Collider c = BOX.at(location);
       boolean magma = mode == Mode.MAGMA;
       if (CollisionUtil.handle(user, c, this::onEntityHit, true, false, magma)) {
         return UpdateResult.REMOVE;
       }
-      projectile.state().asParticle(projectile.entity().location()).count(3).offset(0.25).spawn(user.world());
+      projectile.state().asParticle(projectile.location()).count(3).offset(0.25).spawn(user.world());
     } else {
       if (!ready) {
         handleSource();
@@ -216,13 +215,13 @@ public class EarthShot extends AbilityInstance implements Explosive {
       return false;
     }
     entity.damage(damage, user, description());
-    Vector3d velocity = projectile.entity().velocity().normalize().multiply(0.4);
+    Vector3d velocity = projectile.velocity().normalize().multiply(0.4);
     entity.applyVelocity(this, velocity);
     return true;
   }
 
   private void handleSource() {
-    Block block = projectile.entity().block();
+    Block block = projectile.block();
     if (block.blockY() >= targetY) {
       TempBlock.builder(projectile.state()).build(block);
       projectile.revert();
@@ -231,7 +230,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       ready = true;
     } else {
       location = projectile.center();
-      projectile.state().asParticle(projectile.entity().location()).count(3).offset(0.25).spawn(user.world());
+      projectile.state().asParticle(projectile.location()).count(3).offset(0.25).spawn(user.world());
     }
   }
 
@@ -293,17 +292,17 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (prematureLaunch) {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile.entity().gravity(true);
-      projectile.entity().applyVelocity(this, dir.add(0, 0.2, 0));
+      projectile.gravity(true);
+      projectile.applyVelocity(this, dir.add(0, 0.2, 0));
     } else {
       origin = readySource.center();
       Vector3d dir = getTarget(readySource).subtract(origin).normalize().multiply(userConfig.speed).add(0, 0.2, 0);
-      projectile = TempFallingBlock.fallingBlock(readySource.state()).velocity(dir).buildReal(readySource);
+      BlockState state = readySource.state();
       TempBlock.air().build(readySource);
+      projectile = TempFallingBlock.fallingBlock(state).velocity(dir).buildReal(readySource);
     }
     location = projectile.center();
-    lastVelocity = projectile.entity().velocity();
-
+    lastVelocity = projectile.velocity();
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range, origin, () -> location))
       .build();

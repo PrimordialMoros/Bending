@@ -145,7 +145,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   private UpdateResult updateProjectile() {
-    if (projectile == null || !projectile.entity().valid()) {
+    if (projectile == null || !projectile.valid()) {
       return UpdateResult.REMOVE;
     }
     location = projectile.center();
@@ -272,7 +272,7 @@ public class MetalCable extends AbilityInstance {
       BlockState state = block.state();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
       projectile = TempFallingBlock.fallingBlock(state).velocity(dir.multiply(0.2)).buildReal(block.world(), location);
-      target = new CableTarget(projectile.entity());
+      target = new CableTarget(projectile);
     } else {
       dir = dir.negate();
       target = new CableTarget(block);

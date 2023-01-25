@@ -26,15 +26,15 @@ import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.block.BlockState;
+import me.moros.bending.platform.entity.DelegateEntity;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.world.World;
 import me.moros.math.Vector3d;
-import me.moros.tasker.TimerWheel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TempEntity extends Temporary {
-  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
+  public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>(600);
 
   private final TempEntityData data;
   private boolean reverted = false;
@@ -79,7 +79,7 @@ public class TempEntity extends Temporary {
     }
 
     public TempFallingBlock buildReal(World world, Vector3d center) {
-      return (TempFallingBlock) packetIfSupported(false).build(world, center);
+      return spawnReal(world, center);
     }
 
     public TempEntity build(Block block) {
@@ -88,23 +88,20 @@ public class TempEntity extends Temporary {
 
     @Override
     public TempEntity build(World world, Vector3d center) {
-      Objects.requireNonNull(center);
-      if (particles) {
-        Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
-        data.asParticle(center).count(6).offset(offset).spawn(world);
-      }
-      return packetIfSupported ? spawn(world, center) : spawnReal(world, center);
+      return NativeAdapter.hasNativeSupport() ? spawn(world, center) : spawnReal(world, center);
     }
 
-    public TempEntity spawn(World world, Vector3d center) {
+    private TempEntity spawn(World world, Vector3d center) {
+      renderParticles(data.asParticle(center), world);
       int id = NativeAdapter.instance().createFallingBlock(world, center, data, velocity, gravity);
-      return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration, 600));
+      return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration));
     }
 
-    public TempFallingBlock spawnReal(World world, Vector3d center) {
+    private TempFallingBlock spawnReal(World world, Vector3d center) {
+      renderParticles(data.asParticle(center), world);
       Entity entity = world.createFallingBlock(center, data, gravity);
       entity.velocity(velocity);
-      return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration, 600));
+      return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration));
     }
   }
 
@@ -114,17 +111,12 @@ public class TempEntity extends Temporary {
     }
 
     public TempEntity build(World world, Vector3d center) {
-      Objects.requireNonNull(world);
-      Objects.requireNonNull(center);
-      if (particles) {
-        Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
-        data.asParticle(center.add(armorStandOffset)).count(6).offset(offset).spawn(world);
-      }
-      return new TempEntity(armorStand(world, center), MANAGER.fromMillis(duration, 600));
+      return new TempEntity(armorStand(world, center), MANAGER.fromMillis(duration));
     }
 
     private TempEntityData armorStand(World world, Vector3d center) {
-      if (packetIfSupported) {
+      renderParticles(data.asParticle(center.add(armorStandOffset)), world);
+      if (NativeAdapter.hasNativeSupport()) {
         return new TempEntityData(NativeAdapter.instance().createArmorStand(world, center, data, velocity, gravity));
       }
       Entity entity = world.createArmorStand(center, data, gravity);
@@ -152,7 +144,7 @@ public class TempEntity extends Temporary {
     }
   }
 
-  public static final class TempFallingBlock extends TempEntity {
+  public static final class TempFallingBlock extends TempEntity implements DelegateEntity {
     private final Entity fallingBlock;
     private final BlockState state;
 
@@ -170,12 +162,14 @@ public class TempEntity extends Temporary {
       return state;
     }
 
+    @Override
     public Vector3d center() {
       return fallingBlock.location().add(0, 0.5, 0);
     }
 
-    public boolean isValid() {
-      return !isReverted() && fallingBlock.valid();
+    @Override
+    public boolean valid() {
+      return !isReverted();
     }
   }
 }

@@ -26,11 +26,10 @@ import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.temporal.TemporalManager;
 import me.moros.bending.model.temporal.Temporary;
 import me.moros.bending.model.user.User;
-import me.moros.tasker.TimerWheel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class Cooldown extends Temporary {
-  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(TimerWheel.simple(600), false);
+  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(600, false);
 
   private final UUID uuid;
   private final AbilityDescription desc;
@@ -84,6 +83,6 @@ public final class Cooldown extends Temporary {
   }
 
   public static Cooldown of(User user, AbilityDescription desc, Runnable runnable, long duration) {
-    return new Cooldown(user.uuid(), desc, runnable, MANAGER.fromMillis(duration, 600));
+    return new Cooldown(user.uuid(), desc, runnable, MANAGER.fromMillis(duration));
   }
 }

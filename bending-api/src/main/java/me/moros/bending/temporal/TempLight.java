@@ -30,10 +30,9 @@ import me.moros.bending.platform.block.BlockState;
 import me.moros.bending.platform.block.BlockType;
 import me.moros.bending.platform.property.StateProperty;
 import me.moros.math.FastMath;
-import me.moros.tasker.TimerWheel;
 
 public final class TempLight extends Temporary {
-  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(TimerWheel.simple(600));
+  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(600);
 
   private final Block block;
   private int level;
@@ -157,7 +156,7 @@ public final class TempLight extends Temporary {
         }
         return Optional.of(light);
       }
-      light = new TempLight(block, level, rate, MANAGER.fromMillis(duration, 600));
+      light = new TempLight(block, level, rate, MANAGER.fromMillis(duration));
       light.render(type == Type.WATER);
       return Optional.of(light);
     }

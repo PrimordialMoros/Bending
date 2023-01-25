@@ -319,7 +319,7 @@ public final class TempBlock extends Temporary {
       if (WaterMaterials.ICE_BENDABLE.isTagged(state) && block.world().dimension() == Dimension.NETHER) {
         time = FastMath.floor(0.5 * time);
       }
-      return MANAGER.fromMillis(time, DEFAULT_REVERT);
+      return MANAGER.fromMillis(time);
     }
 
     // Handle falling water

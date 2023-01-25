@@ -552,10 +552,7 @@ public class EarthSmash extends AbilityInstance {
 
     private boolean tryCollisions(Entry<TempFallingBlock, ShardType> entry) {
       TempFallingBlock fb = entry.getKey();
-      if (!fb.isValid()) {
-        return true;
-      }
-      return CollisionUtil.handle(user, AABB.BLOCK_BOUNDS.at(fb.center()), e -> onEntityHit(e, entry.getValue()));
+      return !fb.valid() || CollisionUtil.handle(user, AABB.BLOCK_BOUNDS.at(fb.center()), e -> onEntityHit(e, entry.getValue()));
     }
 
     private boolean onEntityHit(Entity entity, ShardType type) {

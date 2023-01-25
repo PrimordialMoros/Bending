@@ -40,15 +40,25 @@ public class TemporalManager<K, V extends Temporary> implements TickAdapter {
   private final Map<K, V> instances;
   private final boolean revertOnClear;
   private final AtomicBoolean clearing = new AtomicBoolean();
+  private final int max;
 
-  public TemporalManager(TimerWheel wheel) {
-    this(wheel, true);
+  public TemporalManager(int wheelCapacity) {
+    this(wheelCapacity, true);
   }
 
-  public TemporalManager(TimerWheel wheel, boolean revertOnClear) {
+  public TemporalManager(int wheelCapacity, boolean revertOnClear) {
+    this(TimerWheel.simple(wheelCapacity + 1), revertOnClear, wheelCapacity);
+  }
+
+  public TemporalManager(TimerWheel wheel) {
+    this(wheel, true, Temporary.DEFAULT_REVERT);
+  }
+
+  private TemporalManager(TimerWheel wheel, boolean revertOnClear, int max) {
     this.wheel = Objects.requireNonNull(wheel);
     this.instances = new ConcurrentHashMap<>();
     this.revertOnClear = revertOnClear;
+    this.max = max;
   }
 
   public void tick() {
@@ -95,7 +105,7 @@ public class TemporalManager<K, V extends Temporary> implements TickAdapter {
     clearing.set(false);
   }
 
-  public int fromMillis(long duration, int max) {
+  public int fromMillis(long duration) {
     int time = toTicks(duration, TimeUnit.MILLISECONDS);
     return time <= 0 ? max : Math.min(time, max);
   }

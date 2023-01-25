@@ -17,30 +17,29 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.adapter.impl.v1_19_R1;
+package me.moros.bending.sponge;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
-import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.adapter.NativeAdapter;
-import me.moros.bending.model.raytrace.BlockRayTrace;
-import me.moros.bending.model.raytrace.CompositeRayTrace;
-import me.moros.bending.model.raytrace.Context;
 import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.block.SpongeBlockState;
 import me.moros.bending.platform.entity.Entity;
+import me.moros.bending.platform.entity.SpongeEntity;
+import me.moros.bending.platform.entity.SpongePlayer;
 import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.platform.item.Item;
+import me.moros.bending.platform.world.SpongeWorld;
 import me.moros.bending.platform.world.World;
+import me.moros.bending.sponge.mixin.EntityAccess;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
@@ -49,7 +48,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -62,59 +61,39 @@ import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.ClipContext.Fluid;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import org.bukkit.Bukkit;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 public final class NativeAdapterImpl implements NativeAdapter {
-  private final Function<me.moros.bending.platform.block.BlockState, BlockData> mapper;
-  private final PlayerList playerList;
-
-  public NativeAdapterImpl(Function<me.moros.bending.platform.block.BlockState, BlockData> mapper) {
-    this.mapper = mapper;
-    playerList = ((CraftServer) Bukkit.getServer()).getHandle();
-  }
-
   private ServerLevel adapt(World world) {
-    var bukkitWorld = Objects.requireNonNull(Bukkit.getWorld(world.name()));
-    return ((CraftWorld) bukkitWorld).getHandle();
+    return (ServerLevel) ((SpongeWorld) world).handle();
   }
 
   private BlockState adapt(me.moros.bending.platform.block.BlockState state) {
-    return ((CraftBlockData) mapper.apply(state)).getState();
+    return (BlockState) ((SpongeBlockState) state).handle();
   }
 
   private ServerPlayer adapt(Player player) {
-    return Objects.requireNonNull(playerList.getPlayer(player.uuid()));
+    return (ServerPlayer) ((SpongePlayer) player).handle();
   }
 
   private net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
+    return (net.minecraft.world.entity.Entity) ((SpongeEntity) entity).handle();
   }
 
   private ItemStack adapt(Item item) {
-    return Registry.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
+    return BuiltInRegistries.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
   }
 
   @Override
@@ -134,119 +113,17 @@ public final class NativeAdapterImpl implements NativeAdapter {
   }
 
   @Override
-  public BlockRayTrace rayTraceBlocks(Context context, World world) {
-    Vector3d s = context.origin();
-    Vector3d e = context.endPoint();
-    Vec3 startPos = new Vec3(s.x(), s.y(), s.z());
-    Vec3 endPos = new Vec3(e.x(), e.y(), e.z());
-
-    ClipContext.Block ccb = context.ignorePassable() ? ClipContext.Block.COLLIDER : ClipContext.Block.OUTLINE;
-    Fluid ccf = context.ignoreLiquids() ? Fluid.NONE : Fluid.ANY;
-    ClipContext clipContext = new ClipContext(startPos, endPos, ccb, ccf, null);
-
-    return traverseBlocks(world, clipContext, context, CompositeRayTrace.miss(e));
-  }
-
-  private BlockRayTrace traverseBlocks(World world, ClipContext context, Context originalContext, BlockRayTrace miss) {
-    Vec3 start = context.getFrom();
-    Vec3 end = context.getTo();
-    Level level = adapt(world);
-    if (start.equals(end)) {
-      return miss;
-    } else {
-      double d0 = Mth.lerp(-1.0E-7D, end.x, start.x);
-      double d1 = Mth.lerp(-1.0E-7D, end.y, start.y);
-      double d2 = Mth.lerp(-1.0E-7D, end.z, start.z);
-      double d3 = Mth.lerp(-1.0E-7D, start.x, end.x);
-      double d4 = Mth.lerp(-1.0E-7D, start.y, end.y);
-      double d5 = Mth.lerp(-1.0E-7D, start.z, end.z);
-      int i = Mth.floor(d3);
-      int j = Mth.floor(d4);
-      int k = Mth.floor(d5);
-      BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, j, k);
-      BlockRayTrace t0 = checkBlockCollision(level, context, originalContext, mutableBlockPos, miss, r -> hitFactory(world, r));
-      if (t0 != null) {
-        return t0;
-      } else {
-        double d6 = d0 - d3;
-        double d7 = d1 - d4;
-        double d8 = d2 - d5;
-        int l = Mth.sign(d6);
-        int i1 = Mth.sign(d7);
-        int j1 = Mth.sign(d8);
-        double d9 = l == 0 ? Double.MAX_VALUE : l / d6;
-        double d10 = i1 == 0 ? Double.MAX_VALUE : i1 / d7;
-        double d11 = j1 == 0 ? Double.MAX_VALUE : j1 / d8;
-        double d12 = d9 * (l > 0 ? 1.0D - Mth.frac(d3) : Mth.frac(d3));
-        double d13 = d10 * (i1 > 0 ? 1.0D - Mth.frac(d4) : Mth.frac(d4));
-        double d14 = d11 * (j1 > 0 ? 1.0D - Mth.frac(d5) : Mth.frac(d5));
-        BlockRayTrace result;
-        do {
-          if (d12 > 1.0D && d13 > 1.0D && d14 > 1.0D) {
-            return miss;
-          }
-          if (d12 < d13) {
-            if (d12 < d14) {
-              i += l;
-              d12 += d9;
-            } else {
-              k += j1;
-              d14 += d11;
-            }
-          } else if (d13 < d14) {
-            j += i1;
-            d13 += d10;
-          } else {
-            k += j1;
-            d14 += d11;
-          }
-          result = checkBlockCollision(level, context, originalContext, mutableBlockPos.set(i, j, k), miss, r -> hitFactory(world, r));
-        } while (result == null);
-        return result;
-      }
-    }
-  }
-
-  private @Nullable BlockRayTrace checkBlockCollision(Level world, ClipContext context, Context originalContext, BlockPos pos, BlockRayTrace miss, Function<BlockHitResult, BlockRayTrace> hitFactory) {
-    if (originalContext.ignore(pos.getX(), pos.getY(), pos.getZ())) {
-      return null;
-    }
-    BlockState iblockdata = world.getBlockStateIfLoaded(pos);
-    if (iblockdata == null) {
-      return miss;
-    }
-    if (iblockdata.isAir()) return null;
-    FluidState fluid = iblockdata.getFluidState();
-    Vec3 vec3d = context.getFrom();
-    Vec3 vec3d1 = context.getTo();
-    VoxelShape voxelshape = context.getBlockShape(iblockdata, world, pos);
-    BlockHitResult res0 = world.clipWithInteractionOverride(vec3d, vec3d1, pos, voxelshape, iblockdata);
-    VoxelShape voxelshape1 = context.getFluidShape(fluid, world, pos);
-    BlockHitResult res1 = voxelshape1.clip(vec3d, vec3d1, pos);
-    double d0 = res0 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res0.getLocation());
-    double d1 = res1 == null ? Double.MAX_VALUE : context.getFrom().distanceToSqr(res1.getLocation());
-    return d0 <= d1 ? hitFactory.apply(res0) : hitFactory.apply(res1);
-  }
-
-  private @Nullable BlockRayTrace hitFactory(World w, @Nullable BlockHitResult result) {
-    if (result == null) {
-      return null;
-    }
-    var l = result.getLocation();
-    var p = result.getBlockPos();
-    return CompositeRayTrace.hit(Vector3d.of(l.x(), l.y(), l.z()), new Block(w, p.getX(), p.getY(), p.getZ()));
-  }
-
-  @Override
   public void sendNotification(Player player, Item item, Component title) {
     var conn = adapt(player).connection;
     conn.send(createNotification(item, title));
     conn.send(clearNotification());
   }
 
+  private final int armorStandId = BuiltInRegistries.ENTITY_TYPE.getId(EntityType.ARMOR_STAND);
+
   @Override
   public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
-    final int id = net.minecraft.world.entity.Entity.nextEntityId();
+    final int id = EntityAccess.idCounter().incrementAndGet();
     Collection<Packet<?>> packets = new ArrayList<>();
     packets.add(createEntity(id, center, EntityType.ARMOR_STAND, 0));
     if (!gravity) {
@@ -262,7 +139,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
 
   @Override
   public int createFallingBlock(World world, Position center, me.moros.bending.platform.block.BlockState data, Vector3d velocity, boolean gravity) {
-    final int id = net.minecraft.world.entity.Entity.nextEntityId();
+    final int id = EntityAccess.idCounter().incrementAndGet();
     Collection<Packet<?>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
     packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
@@ -289,6 +166,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   @Override
   public void destroy(int[] ids) {
     var packet = new ClientboundRemoveEntitiesPacket(ids);
+    var playerList = ((MinecraftServer) Sponge.server()).getPlayerList();
     playerList.getPlayers().forEach(p -> p.connection.send(packet));
   }
 
@@ -327,7 +205,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";
     ItemStack icon = adapt(item);
-    net.minecraft.network.chat.Component nmsTitle = PaperAdventure.asVanilla(title);
+    net.minecraft.network.chat.Component nmsTitle = SpongeAdventure.asVanilla(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     FrameType type = FrameType.TASK;
     var advancement = Advancement.Builder.advancement()

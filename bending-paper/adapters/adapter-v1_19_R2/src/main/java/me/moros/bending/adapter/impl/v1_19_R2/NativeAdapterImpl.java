@@ -237,8 +237,6 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return CompositeRayTrace.hit(Vector3d.of(l.x(), l.y(), l.z()), new Block(w, p.getX(), p.getY(), p.getZ()));
   }
 
-  private final int armorStandId = BuiltInRegistries.ENTITY_TYPE.getId(EntityType.ARMOR_STAND);
-
   @Override
   public void sendNotification(Player player, Item item, Component title) {
     var conn = adapt(player).connection;
@@ -250,7 +248,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
-    packets.add(createMob(id, armorStandId, center));
+    packets.add(createEntity(id, center, EntityType.ARMOR_STAND, 0));
     if (!gravity) {
       packets.add(new EntityDataBuilder(id).invisible().marker().build());
     }
@@ -267,7 +265,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     final int id = net.minecraft.world.entity.Entity.nextEntityId();
     Collection<Packet<?>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
-    packets.add(createFallingBlock(id, center, blockDataId));
+    packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
     if (!gravity) {
       packets.add(new EntityDataBuilder(id).noGravity().build());
     }
@@ -330,7 +328,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     String criteriaId = "bending:criteria_progress";
     ItemStack icon = adapt(item);
     net.minecraft.network.chat.Component nmsTitle = PaperAdventure.asVanilla(title);
-    net.minecraft.network.chat.Component nmsDesc = PaperAdventure.asVanilla(Component.empty());
+    net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     FrameType type = FrameType.TASK;
     var advancement = Advancement.Builder.advancement()
       .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
@@ -348,41 +346,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(id), Map.of());
   }
 
-  private ClientboundAddEntityPacket createMob(int id, int entityTypeId, Position center) {
-    PacketByteBuffer packetByteBuffer = PacketByteBuffer.get();
-
-    packetByteBuffer.writeVarInt(id);
-    packetByteBuffer.writeUUID(UUID.randomUUID());
-    packetByteBuffer.writeVarInt(entityTypeId);
-
-    // Position
-    packetByteBuffer.writeDouble(center.x());
-    packetByteBuffer.writeDouble(center.y());
-    packetByteBuffer.writeDouble(center.z());
-
-    // Rotation
-    packetByteBuffer.writeByte(0);
-    packetByteBuffer.writeByte(0);
-
-    // Head rotation
-    packetByteBuffer.writeByte(0);
-
-    // Data
-    packetByteBuffer.writeVarInt(0);
-
-    // Velocity
-    packetByteBuffer.writeShort(0);
-    packetByteBuffer.writeShort(0);
-    packetByteBuffer.writeShort(0);
-
-    return new ClientboundAddEntityPacket(packetByteBuffer);
-  }
-
-  private ClientboundAddEntityPacket createFallingBlock(int id, Position center, int blockId) {
+  private ClientboundAddEntityPacket createEntity(int id, Position center, EntityType<?> type, int data) {
     double x = center.x();
     double y = center.y();
     double z = center.z();
-    return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, EntityType.FALLING_BLOCK, blockId, Vec3.ZERO, 0);
+    return new ClientboundAddEntityPacket(id, UUID.randomUUID(), x, y, z, 0, 0, type, data, Vec3.ZERO, 0);
   }
 
   private ClientboundSetEntityMotionPacket addVelocity(int id, Vector3d vel) {

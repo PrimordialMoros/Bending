@@ -10,7 +10,8 @@ cloud = "1.8.0"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.0"
 paper = "1.19.2-R0.1-SNAPSHOT"
-sponge = "10.0.0-SNAPSHOT"
+sponge-api = "10.0.0-SNAPSHOT"
+sponge-common = "1.19.3-10.0.0-SNAPSHOT"
 minecraft = "1.19.3"
 fabric-loom = "1.0-SNAPSHOT"
 fabric-api = "0.72.0+1.19.3"
@@ -85,7 +86,9 @@ worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version
 papi = { module = "me.clip:placeholderapi", version = "2.11.2" }
 
 # Sponge
-sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge" }
+sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }
+sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-common"}
+sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 
 shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow", version.ref = "shadow" }
 

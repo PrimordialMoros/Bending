@@ -29,7 +29,7 @@ import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.protection.ProtectionCache;
 import me.moros.bending.platform.block.Block;
-import me.moros.bending.platform.entity.DelegateEntity;
+import me.moros.bending.platform.entity.DelegateLivingEntity;
 import me.moros.bending.temporal.TempBlock;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
@@ -39,7 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents a user that can bend.
  */
-public sealed interface User extends DelegateEntity, ElementUser, AttributeUser permits BendingUser {
+public sealed interface User extends DelegateLivingEntity, ElementUser, AttributeUser permits BendingUser {
   String NAMESPACE = "bending.user";
 
   /**

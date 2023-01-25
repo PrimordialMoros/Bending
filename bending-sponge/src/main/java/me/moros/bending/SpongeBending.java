@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.sponge.SpongeCommandManager;
 import com.google.inject.Inject;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.command.BendingCommandManager;
 import me.moros.bending.config.ConfigManager;
 import me.moros.bending.game.GameImpl;
@@ -42,6 +43,7 @@ import me.moros.bending.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.platform.Platform;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.SpongePlatform;
+import me.moros.bending.sponge.NativeAdapterImpl;
 import me.moros.bending.storage.StorageFactory;
 import me.moros.bending.util.Tasker;
 import me.moros.bending.util.metadata.Metadata;
@@ -106,6 +108,7 @@ public class SpongeBending implements BendingPlugin {
   @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     if (loaded) {
+      NativeAdapter.inject(new NativeAdapterImpl());
       Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
       Platform.inject(new SpongePlatform());
       game = new GameImpl(this, storage);

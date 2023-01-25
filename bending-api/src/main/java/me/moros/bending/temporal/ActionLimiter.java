@@ -41,7 +41,6 @@ import me.moros.bending.model.user.BendingBar;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.platform.entity.player.Player;
-import me.moros.tasker.TimerWheel;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
@@ -49,7 +48,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActionLimiter extends Temporary {
-  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>(TimerWheel.simple(600)) {
+  public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>(600) {
     @Override
     public void tick() {
       super.tick();
@@ -149,7 +148,7 @@ public final class ActionLimiter extends Temporary {
       if (event.cancelled() || event.duration() <= 0) {
         return Optional.empty();
       }
-      return Optional.of(new ActionLimiter(target, limitedActions, MANAGER.fromMillis(event.duration(), 600)));
+      return Optional.of(new ActionLimiter(target, limitedActions, MANAGER.fromMillis(event.duration())));
     }
   }
 }

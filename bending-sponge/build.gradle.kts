@@ -33,12 +33,11 @@ dependencies {
     bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
     bendingImplementation(libs.slf4j.api)
     bendingImplementation(libs.slf4j.simple)
+    compileOnly(variantOf(libs.sponge.common) { classifier("dev") })
+    compileOnly(libs.sponge.mixin)
 }
 
 tasks {
-    runServer {
-        displayMinecraftVersions
-    }
     shadowJar {
         dependencies {
             reloc("org.slf4j", "slf4j")
@@ -49,7 +48,7 @@ tasks {
 }
 
 sponge {
-    apiVersion(libs.versions.sponge.get())
+    apiVersion(libs.versions.sponge.api.get())
     plugin("bending") {
         loader {
             name(PluginLoaders.JAVA_PLAIN)
