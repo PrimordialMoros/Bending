@@ -17,14 +17,16 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model;
+package me.moros.bending.fabric.mixin.accessor;
 
-import me.moros.bending.model.data.DataKey;
-import me.moros.bending.platform.block.Block;
-import me.moros.bending.util.KeyUtil;
-import me.moros.math.Vector3d;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public record BlockInteraction(Block value, @Nullable Vector3d point) implements Interaction<Block> {
-  public static final DataKey<BlockInteraction> KEY = KeyUtil.data("last-interacted-block", BlockInteraction.class);
+@Mixin(ServerLoginPacketListenerImpl.class)
+public interface ServerLoginPacketListenerImplAccess {
+  @Accessor("gameProfile")
+  @Nullable GameProfile profile();
 }

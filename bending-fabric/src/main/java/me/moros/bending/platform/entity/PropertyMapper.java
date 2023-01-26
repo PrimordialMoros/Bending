@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-import me.moros.bending.fabric.mixin.CreeperAccess;
-import me.moros.bending.fabric.mixin.EntityAccess;
+import me.moros.bending.fabric.mixin.accessor.CreeperAccess;
+import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.platform.property.BooleanProperty;
 import me.moros.bending.platform.property.EntityProperty;
 import net.kyori.adventure.util.TriState;

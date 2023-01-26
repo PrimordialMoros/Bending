@@ -17,14 +17,28 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.model;
+package me.moros.bending.listener;
 
-import me.moros.bending.model.data.DataKey;
-import me.moros.bending.platform.block.Block;
-import me.moros.bending.util.KeyUtil;
-import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.model.manager.Game;
+import me.moros.bending.platform.PlatformAdapter;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.server.ServerWorld;
 
-public record BlockInteraction(Block value, @Nullable Vector3d point) implements Interaction<Block> {
-  public static final DataKey<BlockInteraction> KEY = KeyUtil.data("last-interacted-block", BlockInteraction.class);
+abstract class SpongeListener {
+  protected final Game game;
+
+  protected SpongeListener(Game game) {
+    this.game = game;
+  }
+
+  protected boolean disabledWorld(ServerWorld world) {
+    return !game.worldManager().isEnabled(PlatformAdapter.fromRsk(world.key()));
+  }
+
+  protected boolean disabledWorld(Entity entity) {
+    if (entity.world() instanceof ServerWorld world) {
+      return disabledWorld(world);
+    }
+    return true;
+  }
 }

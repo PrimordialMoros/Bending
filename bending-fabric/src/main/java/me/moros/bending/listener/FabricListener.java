@@ -17,15 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.listener;
 
-import net.minecraft.commands.CommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import me.moros.bending.model.manager.Game;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
-@Mixin(CommandSourceStack.class)
-public interface CommandSourceStackAccess {
-  @Accessor("source")
-  CommandSource source();
+interface FabricListener {
+  Game game();
+
+  default boolean disabledWorld(Entity entity) {
+    if (entity.getLevel() instanceof ServerLevel world) {
+      return disabledWorld(world);
+    }
+    return true;
+  }
+
+  default boolean disabledWorld(ServerLevel world) {
+    return !game().worldManager().isEnabled(world.dimension().location());
+  }
 }

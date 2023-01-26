@@ -4,15 +4,16 @@
   "package": "me.moros.bending.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ChunkMapAccess",
-    "CommandSourceStackAccess",
-    "CreeperAccess",
-    "EntityAccess",
-    "FallingBlockEntityAccess",
-    "LockableBeaconMixin",
-    "LockableContainerMixin",
-    "LockCodeAccess",
-    "ServerLoginPacketListenerAccess"
+    "accessor.ChunkMapAccess",
+    "accessor.CommandSourceStackAccess",
+    "accessor.CreeperAccess",
+    "accessor.EntityAccess",
+    "accessor.FallingBlockEntityAccess",
+    "accessor.LockCodeAccess",
+    "accessor.ServerLoginPacketListenerImplAccess",
+    "BaseContainerBlockEntityMixin",
+    "BeaconBlockEntityMixin",
+    "ServerGamePacketListenerImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

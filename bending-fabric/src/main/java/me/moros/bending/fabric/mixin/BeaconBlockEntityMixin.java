@@ -21,16 +21,17 @@ package me.moros.bending.fabric.mixin;
 
 import java.util.Optional;
 
+import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
 import me.moros.bending.platform.block.Lockable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.LockCode;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BaseContainerBlockEntity.class)
-public abstract class LockableContainerMixin implements Lockable {
+@Mixin(BeaconBlockEntity.class)
+public abstract class BeaconBlockEntityMixin implements Lockable {
   @Shadow
   private LockCode lockKey;
 

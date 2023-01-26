@@ -21,26 +21,27 @@ package me.moros.bending.listener;
 
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.platform.PlatformAdapter;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.event.world.UnloadWorldEvent;
+import org.bukkit.World;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.player.PlayerEvent;
 
-public class WorldListener extends SpongeListener {
-  public WorldListener(Game game) {
-    super(game);
+interface BukkitListener {
+  Game game();
+
+  default boolean disabledWorld(BlockEvent event) {
+    return disabledWorld(event.getBlock().getWorld());
   }
 
-  @Listener(order = Order.LAST)
-  public void onWorldUnload(UnloadWorldEvent event) {
-    var key = PlatformAdapter.fromRsk(event.world().key());
-    game.worldManager().onWorldUnload(key);
+  default boolean disabledWorld(EntityEvent event) {
+    return disabledWorld(event.getEntity().getWorld());
   }
 
-  @Listener(order = Order.LAST)
-  public void onPlayerChangeWorld(ChangeEntityWorldEvent event) {
-    var from = PlatformAdapter.fromRsk(event.originalWorld().key());
-    var to = PlatformAdapter.fromRsk(event.destinationWorld().key());
-    game.worldManager().onUserChangeWorld(event.entity().uniqueId(), from, to);
+  default boolean disabledWorld(PlayerEvent event) {
+    return disabledWorld(event.getPlayer().getWorld());
+  }
+
+  default boolean disabledWorld(World world) {
+    return !game().worldManager().isEnabled(PlatformAdapter.fromNsk(world.getKey()));
   }
 }

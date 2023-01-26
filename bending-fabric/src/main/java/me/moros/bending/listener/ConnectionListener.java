@@ -29,7 +29,7 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.mojang.authlib.GameProfile;
 import me.moros.bending.BendingPlugin;
-import me.moros.bending.fabric.mixin.ServerLoginPacketListenerAccess;
+import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.BendingPlayer;
@@ -41,11 +41,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import net.minecraft.world.entity.Entity;
 
 public record ConnectionListener(Game game, BendingPlugin plugin, AsyncLoadingCache<UUID, PlayerProfile> profileCache) {
   public ConnectionListener(Game game, BendingPlugin plugin) {
@@ -60,12 +58,8 @@ public record ConnectionListener(Game game, BendingPlugin plugin, AsyncLoadingCa
       .buildAsync(game.storage()::createProfile);
   }
 
-  private boolean disabledWorld(Entity entity) {
-    return !(entity.getLevel() instanceof ServerLevel level && game.worldManager().isEnabled(level.dimension().location()));
-  }
-
   private void onPlayerPreLogin(ServerLoginPacketListenerImpl handler, MinecraftServer server, PacketSender sender, LoginSynchronizer synchronizer) {
-    GameProfile prof = ((ServerLoginPacketListenerAccess) handler).profile();
+    GameProfile prof = ((ServerLoginPacketListenerImplAccess) handler).profile();
     if (prof != null) {
       synchronizer.waitFor(profileOrTimeout(prof.getId()));
     }

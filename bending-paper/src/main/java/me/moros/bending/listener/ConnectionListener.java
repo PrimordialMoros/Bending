@@ -43,15 +43,14 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class ConnectionListener implements Listener {
-  private final Game game;
-  private final BendingPlugin plugin;
-  private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
-
+public record ConnectionListener(Game game, BendingPlugin plugin,
+                                 AsyncLoadingCache<UUID, PlayerProfile> profileCache) implements Listener {
   public ConnectionListener(Game game, BendingPlugin plugin) {
-    this.game = game;
-    this.plugin = plugin;
-    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
+    this(game, plugin, createCache(game));
+  }
+
+  private static AsyncLoadingCache<UUID, PlayerProfile> createCache(Game game) {
+    return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(game.storage()::createProfile);
   }
 

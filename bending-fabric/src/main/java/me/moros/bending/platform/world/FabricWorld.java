@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-import me.moros.bending.fabric.mixin.ChunkMapAccess;
-import me.moros.bending.fabric.mixin.FallingBlockEntityAccess;
+import me.moros.bending.fabric.mixin.accessor.ChunkMapAccess;
+import me.moros.bending.fabric.mixin.accessor.FallingBlockEntityAccess;
 import me.moros.bending.model.collision.geometry.AABB;
 import me.moros.bending.model.data.DataHolder;
 import me.moros.bending.model.raytrace.BlockRayTrace;

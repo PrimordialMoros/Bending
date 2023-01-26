@@ -22,7 +22,7 @@ package me.moros.bending.platform.entity;
 import java.util.Optional;
 import java.util.UUID;
 
-import me.moros.bending.fabric.mixin.EntityAccess;
+import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.model.data.DataKey;
 import me.moros.bending.platform.FabricMetadata;
 import me.moros.bending.platform.world.FabricWorld;

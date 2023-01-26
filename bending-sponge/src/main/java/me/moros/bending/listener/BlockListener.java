@@ -46,17 +46,10 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.world.server.ServerWorld;
 
-public class BlockListener {
-  private final Game game;
-
+public class BlockListener extends SpongeListener {
   public BlockListener(Game game) {
-    this.game = game;
-  }
-
-  private boolean disabledWorld(ServerWorld world) {
-    return !game.worldManager().isEnabled(PlatformAdapter.fromRsk(world.key()));
+    super(game);
   }
 
   @Listener(order = Order.EARLY)

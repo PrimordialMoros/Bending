@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge;
+package me.moros.bending.fabric;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,18 +30,20 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.fabric.mixin.accessor.EntityAccess;
+import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.block.Block;
-import me.moros.bending.platform.block.SpongeBlockState;
+import me.moros.bending.platform.block.FabricBlockState;
 import me.moros.bending.platform.entity.Entity;
-import me.moros.bending.platform.entity.SpongeEntity;
-import me.moros.bending.platform.entity.SpongePlayer;
+import me.moros.bending.platform.entity.FabricEntity;
+import me.moros.bending.platform.entity.FabricPlayer;
 import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.platform.item.Item;
-import me.moros.bending.platform.world.SpongeWorld;
+import me.moros.bending.platform.world.FabricWorld;
 import me.moros.bending.platform.world.World;
-import me.moros.bending.sponge.mixin.EntityAccess;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.platform.fabric.FabricAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -72,28 +74,34 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.adventure.SpongeAdventure;
 
 public final class NativeAdapterImpl implements NativeAdapter {
+  private final MinecraftServer server;
+  private final FabricAudiences audiences;
+
+  public NativeAdapterImpl(MinecraftServer server, FabricAudiences audiences) {
+    this.server = server;
+    this.audiences = audiences;
+  }
+
   private ServerLevel adapt(World world) {
-    return (ServerLevel) ((SpongeWorld) world).handle();
+    return ((FabricWorld) world).handle();
   }
 
   private BlockState adapt(me.moros.bending.platform.block.BlockState state) {
-    return (BlockState) ((SpongeBlockState) state).handle();
+    return ((FabricBlockState) state).handle();
   }
 
   private ServerPlayer adapt(Player player) {
-    return (ServerPlayer) ((SpongePlayer) player).handle();
+    return ((FabricPlayer) player).handle();
   }
 
   private net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return (net.minecraft.world.entity.Entity) ((SpongeEntity) entity).handle();
+    return ((FabricEntity) entity).handle();
   }
 
   private ItemStack adapt(Item item) {
-    return BuiltInRegistries.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
+    return BuiltInRegistries.ITEM.get(PlatformAdapter.rsl(item.key())).getDefaultInstance();
   }
 
   @Override
@@ -164,7 +172,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
   @Override
   public void destroy(int[] ids) {
     var packet = new ClientboundRemoveEntitiesPacket(ids);
-    var playerList = ((MinecraftServer) Sponge.server()).getPlayerList();
+    var playerList = server.getPlayerList();
     playerList.getPlayers().forEach(p -> p.connection.send(packet));
   }
 
@@ -203,7 +211,7 @@ public final class NativeAdapterImpl implements NativeAdapter {
     ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";
     ItemStack icon = adapt(item);
-    net.minecraft.network.chat.Component nmsTitle = SpongeAdventure.asVanilla(title);
+    net.minecraft.network.chat.Component nmsTitle = audiences.toNative(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     FrameType type = FrameType.TASK;
     var advancement = Advancement.Builder.advancement()

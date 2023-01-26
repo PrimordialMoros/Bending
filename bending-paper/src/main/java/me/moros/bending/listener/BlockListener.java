@@ -42,7 +42,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
@@ -53,11 +52,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 
-public record BlockListener(Game game) implements Listener {
-  private boolean disabledWorld(BlockEvent event) {
-    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(event.getBlock().getWorld().getKey()));
-  }
-
+public record BlockListener(Game game) implements Listener, BukkitListener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onBlockIgnite(BlockIgniteEvent event) {
     if (disabledWorld(event)) {

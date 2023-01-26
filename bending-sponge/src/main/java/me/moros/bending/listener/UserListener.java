@@ -50,7 +50,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -92,23 +91,13 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.server.ServerWorld;
 
-public class UserListener {
-  private final Game game;
+public class UserListener extends SpongeListener {
   private final BendingPlugin plugin;
 
   public UserListener(Game game, BendingPlugin plugin) {
-    this.game = game;
+    super(game);
     this.plugin = plugin;
-  }
-
-  private boolean disabledWorld(ServerWorld world) {
-    return !game.worldManager().isEnabled(PlatformAdapter.fromRsk(world.key()));
-  }
-
-  private boolean disabledWorld(Entity entity) {
-    return !(entity.world() instanceof ServerWorld serverWorld && game.worldManager().isEnabled(PlatformAdapter.fromRsk(serverWorld.key())));
   }
 
   @Listener(order = Order.EARLY)

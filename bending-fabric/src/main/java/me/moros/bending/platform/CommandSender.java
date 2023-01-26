@@ -19,7 +19,7 @@
 
 package me.moros.bending.platform;
 
-import me.moros.bending.fabric.mixin.CommandSourceStackAccess;
+import me.moros.bending.fabric.mixin.accessor.CommandSourceStackAccess;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minecraft.commands.CommandSourceStack;

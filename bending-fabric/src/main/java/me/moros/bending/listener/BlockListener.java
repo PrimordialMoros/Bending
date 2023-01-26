@@ -17,18 +17,10 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.listener;
 
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import me.moros.bending.model.manager.Game;
 
-@Mixin(FallingBlockEntity.class)
-public interface FallingBlockEntityAccess {
-  @Invoker("<init>")
-  static FallingBlockEntity bending$create(Level level, double d, double e, double f, BlockState blockState) {
-    throw new AssertionError();
-  }
+public record BlockListener(Game game) implements FabricListener {
+
 }

@@ -42,13 +42,12 @@ import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.Tristate;
 
-public class ConnectionListener {
-  private final Game game;
+public class ConnectionListener extends SpongeListener {
   private final BendingPlugin plugin;
   private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
 
   public ConnectionListener(Game game, BendingPlugin plugin) {
-    this.game = game;
+    super(game);
     this.plugin = plugin;
     this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(game.storage()::createProfile);

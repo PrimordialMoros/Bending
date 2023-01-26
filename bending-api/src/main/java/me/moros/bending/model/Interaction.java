@@ -17,17 +17,13 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.model;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.monster.Creeper;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import me.moros.math.Vector3d;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(Creeper.class)
-public interface CreeperAccess {
-  @Accessor("DATA_IS_POWERED")
-  static EntityDataAccessor<Boolean> getDataIsPowered() {
-    throw new AssertionError();
-  }
+public interface Interaction<T> {
+  @Nullable T value();
+
+  @Nullable Vector3d point();
 }

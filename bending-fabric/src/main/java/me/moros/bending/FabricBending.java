@@ -27,12 +27,16 @@ import java.util.List;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.fabric.FabricServerCommandManager;
+import me.moros.bending.adapter.NativeAdapter;
 import me.moros.bending.command.BendingCommandManager;
 import me.moros.bending.config.ConfigManager;
+import me.moros.bending.fabric.NativeAdapterImpl;
 import me.moros.bending.game.GameImpl;
 import me.moros.bending.hook.LuckPermsHook;
 import me.moros.bending.hook.PlaceholderHook;
+import me.moros.bending.listener.BlockListener;
 import me.moros.bending.listener.ConnectionListener;
+import me.moros.bending.listener.UserListener;
 import me.moros.bending.listener.WorldListener;
 import me.moros.bending.locale.TranslationManager;
 import me.moros.bending.model.manager.Game;
@@ -111,11 +115,12 @@ public class FabricBending implements BendingPlugin {
       if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
         LuckPermsHook.register();
       }
+      NativeAdapter.inject(new NativeAdapterImpl(server, audiences));
       Platform.inject(new FabricPlatform(server));
       game = new GameImpl(this, storage);
       listeners = List.of(
-        //new BlockListener(game),
-        //new EntityListener(game),
+        new BlockListener(game),
+        new UserListener(game),
         new ConnectionListener(game, this),
         new WorldListener(game)
       );

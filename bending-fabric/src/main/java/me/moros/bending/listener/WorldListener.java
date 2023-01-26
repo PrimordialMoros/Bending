@@ -34,7 +34,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
-public record WorldListener(Game game) {
+public record WorldListener(Game game) implements FabricListener {
   public WorldListener(Game game) {
     this.game = game;
     var early = new ResourceLocation("bending", "early");

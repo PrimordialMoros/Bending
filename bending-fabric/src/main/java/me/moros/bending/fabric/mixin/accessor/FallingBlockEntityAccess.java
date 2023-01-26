@@ -17,14 +17,18 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.fabric.mixin.accessor;
 
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccess {
-  @Accessor("viewDistance")
-  int viewDistance();
+@Mixin(FallingBlockEntity.class)
+public interface FallingBlockEntityAccess {
+  @Invoker("<init>")
+  static FallingBlockEntity bending$create(Level level, double d, double e, double f, BlockState blockState) {
+    throw new AssertionError();
+  }
 }

@@ -17,17 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.fabric.mixin.accessor;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.LockCode;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Entity.class)
-public interface EntityAccess {
-  @Invoker("setSharedFlag")
-  void bending$setSharedFlag(int flag, boolean value);
-
-  @Invoker("getFireImmuneTicks")
-  int bending$maxFireTicks();
+@Mixin(LockCode.class)
+public interface LockCodeAccess {
+  @Accessor("key")
+  String password();
 }

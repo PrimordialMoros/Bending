@@ -58,7 +58,6 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -74,7 +73,6 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -93,27 +91,7 @@ import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class UserListener implements Listener {
-  private final Game game;
-  private final BendingPlugin plugin;
-
-  public UserListener(Game game, BendingPlugin plugin) {
-    this.game = game;
-    this.plugin = plugin;
-  }
-
-  private boolean disabledWorld(EntityEvent event) {
-    return disabledWorld(event.getEntity().getWorld());
-  }
-
-  private boolean disabledWorld(PlayerEvent event) {
-    return disabledWorld(event.getPlayer().getWorld());
-  }
-
-  private boolean disabledWorld(World world) {
-    return !game.worldManager().isEnabled(PlatformAdapter.fromNsk(world.getKey()));
-  }
-
+public record UserListener(Game game, BendingPlugin plugin) implements Listener, BukkitListener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onArrowHit(ProjectileHitEvent event) {
     if (disabledWorld(event)) {
@@ -291,6 +269,7 @@ public class UserListener implements Listener {
     }
     if (!event.isGliding() && event.getEntity() instanceof LivingEntity entity) {
       if (ActionLimiter.isLimited(event.getEntity().getUniqueId(), ActionType.MOVE)) {
+        event.setCancelled(true);
         return;
       }
       User user = Registries.BENDERS.get(entity.getUniqueId());
