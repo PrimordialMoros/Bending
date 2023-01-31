@@ -19,18 +19,24 @@
 
 package me.moros.bending.listener;
 
+import me.moros.bending.fabric.event.ServerMobEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.model.BlockInteraction;
 import me.moros.bending.model.EntityInteraction;
 import me.moros.bending.model.ability.ActionType;
+import me.moros.bending.model.ability.Activation;
 import me.moros.bending.model.manager.Game;
 import me.moros.bending.model.registry.Registries;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.PlatformAdapter;
 import me.moros.bending.platform.block.Block;
+import me.moros.bending.platform.item.ItemUtil;
 import me.moros.bending.temporal.ActionLimiter;
+import me.moros.bending.temporal.TempArmor;
+import me.moros.bending.util.metadata.Metadata;
 import me.moros.math.Vector3d;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -43,6 +49,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -63,6 +70,9 @@ public record UserListener(Game game) implements FabricListener {
     UseBlockCallback.EVENT.register(this::onRightClickBlock);
     UseItemCallback.EVENT.register(this::onRightClickAir);
     UseEntityCallback.EVENT.register(this::onRightClickEntity);
+    ServerPlayerEvents.CHANGE_GAMEMODE.register(this::onUserGameModeChange);
+    ServerMobEvents.TARGET.register(this::onEntityTarget);
+    ServerEntityEvents.EQUIPMENT_CHANGE.register(this::onArmorChange);
   }
 
   private boolean validGameMode(ServerPlayer player) {
@@ -85,7 +95,6 @@ public record UserListener(Game game) implements FabricListener {
       User user = Registries.BENDERS.get(player.getUUID());
       if (user != null) {
         game.activationController().onUserSwing(user);
-        return InteractionResult.SUCCESS;
       }
     }
     return InteractionResult.PASS;
@@ -104,9 +113,7 @@ public record UserListener(Game game) implements FabricListener {
   private InteractionResultHolder<ItemStack> onRightClickAir(Player playerEntity, Level world, InteractionHand hand) {
     ItemStack stackInHand = playerEntity.getItemInHand(hand);
     if (!world.isClientSide && playerEntity instanceof ServerPlayer player) {
-      if (onUserInteract(player, null, null) == InteractionResult.SUCCESS) {
-        return InteractionResultHolder.success(stackInHand);
-      }
+      onUserInteract(player, null, null);
     }
     return InteractionResultHolder.pass(stackInHand);
   }
@@ -135,7 +142,6 @@ public record UserListener(Game game) implements FabricListener {
           user.store().add(BlockInteraction.KEY, blockInteraction);
         }
         game.activationController().onUserInteract(user, entity, block);
-        return InteractionResult.SUCCESS;
       }
     }
     return InteractionResult.PASS;
@@ -167,5 +173,27 @@ public record UserListener(Game game) implements FabricListener {
       return user == null || !game.activationController().onUserGlide(user);
     }
     return true;
+  }
+
+  private void onUserGameModeChange(ServerPlayer player, GameType gameType) {
+    if (!disabledWorld(player) && gameType == GameType.SPECTATOR) {
+      User user = Registries.BENDERS.get(player.getUUID());
+      if (user != null) {
+        user.board().updateAll();
+        game.abilityManager(user.world().key()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
+      }
+    }
+  }
+
+  private boolean onEntityTarget(LivingEntity entity, Entity target) {
+    return disabledWorld(entity) || !ActionLimiter.isLimited(entity.getUUID());
+  }
+
+  private void onArmorChange(LivingEntity livingEntity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
+    if (equipmentSlot.isArmor() && ItemUtil.hasKey(previousStack, Metadata.ARMOR_KEY)) {
+      if (TempArmor.MANAGER.isTemp(livingEntity.getUUID())) {
+        livingEntity.setItemSlot(equipmentSlot, previousStack); // TODO mixin a cancellable event instead?
+      }
+    }
   }
 }

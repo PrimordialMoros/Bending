@@ -24,6 +24,7 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.GameType;
 
 public final class ServerPlayerEvents {
   private ServerPlayerEvents() {
@@ -57,6 +58,12 @@ public final class ServerPlayerEvents {
     return true;
   });
 
+  public static final Event<GameMode> CHANGE_GAMEMODE = EventFactory.createArrayBacked(GameMode.class, callbacks -> (player, newGameMode) -> {
+    for (GameMode callback : callbacks) {
+      callback.onGameModeChange(player, newGameMode);
+    }
+  });
+
   @FunctionalInterface
   public interface Interact {
     InteractionResult onInteract(ServerPlayer player, InteractionHand hand);
@@ -70,5 +77,10 @@ public final class ServerPlayerEvents {
   @FunctionalInterface
   public interface Sprint {
     boolean onSprint(ServerPlayer player, boolean sprinting);
+  }
+
+  @FunctionalInterface
+  public interface GameMode {
+    void onGameModeChange(ServerPlayer player, GameType newGameMode);
   }
 }

@@ -112,6 +112,7 @@ public class SpongeBending implements BendingPlugin {
       Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
       Platform.inject(new SpongePlatform());
       game = new GameImpl(this, storage);
+      new SpongePermissionInitializer();
       var eventManager = event.game().eventManager();
       eventManager.registerListeners(container, new BlockListener(game));
       eventManager.registerListeners(container, new UserListener(game, this));

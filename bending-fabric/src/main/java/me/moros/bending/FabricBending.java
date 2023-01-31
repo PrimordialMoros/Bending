@@ -103,6 +103,7 @@ public class FabricBending implements BendingPlugin {
     }
   }
 
+  // TODO handle single player lifecycle
   private void registerLifecycleListeners() {
     ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
     ServerLifecycleEvents.SERVER_STOPPED.register(this::onDisable);

@@ -43,8 +43,8 @@ public record FabricBlockState(net.minecraft.world.level.block.state.BlockState 
   @Override
   public <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value) {
     var vanillaProperty = PropertyMapper.find(property);
-    if (vanillaProperty != null && handle().hasProperty(vanillaProperty)) { // extra check, remove later
-      var state = handle().setValue(vanillaProperty, value); // TODO replace with trySet
+    if (vanillaProperty != null) {
+      var state = handle().trySetValue(vanillaProperty, value);
       if (state != handle()) {
         return new FabricBlockState(state, type());
       }

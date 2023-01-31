@@ -122,12 +122,12 @@ public class FabricEntity implements Entity {
 
   @Override
   public boolean valid() {
-    return handle().isAlive(); // TODO improve
+    return handle().isAlive();
   }
 
   @Override
   public boolean dead() {
-    return handle().isAlive();
+    return !handle().isAlive();
   }
 
   @Override
@@ -158,6 +158,11 @@ public class FabricEntity implements Entity {
   @Override
   public void fireTicks(int ticks) {
     handle().setRemainingFireTicks(ticks);
+  }
+
+  @Override
+  public boolean isOnGround() {
+    return handle().isOnGround();
   }
 
   @Override

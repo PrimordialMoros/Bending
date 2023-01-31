@@ -21,7 +21,6 @@ package me.moros.bending.event;
 
 import java.util.Objects;
 
-import me.moros.bending.event.base.AbilityEvent;
 import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
@@ -31,7 +30,7 @@ import me.moros.math.Vector3d;
 /**
  * Called when an ability attempts to alter the velocity of a LivingEntity.
  */
-public class VelocityEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
+public class VelocityEvent extends AbstractCancellableAbilityEvent {
   private final LivingEntity target;
   private Vector3d velocity;
 

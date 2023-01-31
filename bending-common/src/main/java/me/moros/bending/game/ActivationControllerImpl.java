@@ -88,14 +88,13 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public @Nullable Ability activateAbility(User user, Activation method, AbilityDescription desc) {
-    if (!desc.isActivatedBy(method) || !user.canBend(desc) || !user.canBuild()) {
-      return null;
-    }
-    Ability ability = desc.createAbility();
-    if (ability.activate(user, method)) {
-      user.game().abilityManager(user.worldKey()).addAbility(user, ability);
-      EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
-      return ability;
+    if (desc.isActivatedBy(method) && user.canBend(desc) && user.canBuild()) {
+      Ability ability = desc.createAbility();
+      if (ability.activate(user, method)) {
+        user.game().abilityManager(user.worldKey()).addAbility(user, ability);
+        EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
+        return ability;
+      }
     }
     return null;
   }

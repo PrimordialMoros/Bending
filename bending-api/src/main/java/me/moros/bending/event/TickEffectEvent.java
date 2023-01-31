@@ -20,7 +20,6 @@
 package me.moros.bending.event;
 
 import me.moros.bending.event.base.AbstractCancellableUserEvent;
-import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.util.BendingEffect;
@@ -28,7 +27,7 @@ import me.moros.bending.util.BendingEffect;
 /**
  * Called when a {@link BendingEffect} is applied to a target.
  */
-public class TickEffectEvent extends AbstractCancellableUserEvent implements UserEvent {
+public class TickEffectEvent extends AbstractCancellableUserEvent {
   private final Entity target;
   private final BendingEffect type;
 

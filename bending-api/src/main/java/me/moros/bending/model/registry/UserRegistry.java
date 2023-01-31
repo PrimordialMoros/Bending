@@ -39,9 +39,7 @@ public final class UserRegistry extends SimpleMutableRegistry<UUID, User> {
   @Override
   public boolean register(User user) {
     if (super.register(user)) {
-      if (user instanceof BendingPlayer player) {
-        EventBus.INSTANCE.postPlayerRegisterEvent(player);
-      }
+      EventBus.INSTANCE.postUserRegisterEvent(user);
       return true;
     }
     return false;

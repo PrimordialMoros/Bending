@@ -101,6 +101,7 @@ public class Bending extends JavaPlugin implements BendingPlugin {
     new ProtectionInitializer(this);
     BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
     game = new GameImpl(this, storage);
+    new BukkitPermissionInitializer();
 
     getServer().getPluginManager().registerEvents(new BlockListener(game), this);
     getServer().getPluginManager().registerEvents(new UserListener(game, this), this);

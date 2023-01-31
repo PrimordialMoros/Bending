@@ -21,32 +21,25 @@ package me.moros.bending.event;
 
 import me.moros.bending.event.base.AbstractCancellableUserEvent;
 import me.moros.bending.event.base.UserEvent;
+import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Called when a user attempts to bind an ability or {@link Preset}.
+ * Represents an event that is called when a user's binds change.
  */
-public class BindChangeEvent extends AbstractCancellableUserEvent implements UserEvent {
-  private final BindType type;
-
-  protected BindChangeEvent(User user, BindType type) {
-    super(user);
-    this.type = type;
-  }
-
+public interface BindChangeEvent extends UserEvent {
   /**
    * Provides the type of binding
    * @return the type
    */
-  public BindType type() {
-    return type;
-  }
+  BindType type();
 
   /**
    * Represents a type of bind change.
    */
-  public enum BindType {
+  enum BindType {
     /**
      * Represents binding of a single ability.
      */
@@ -55,5 +48,65 @@ public class BindChangeEvent extends AbstractCancellableUserEvent implements Use
      * Represents binding of a preset.
      */
     MULTIPLE
+  }
+
+  /**
+   * Called when a user attempts to bind or clear an ability slot.
+   */
+  class Single extends AbstractCancellableUserEvent implements BindChangeEvent {
+    private final int slot;
+    private final AbilityDescription desc;
+
+    protected Single(User user, int slot, @Nullable AbilityDescription desc) {
+      super(user);
+      this.slot = slot;
+      this.desc = desc;
+    }
+
+    /**
+     * Provides the slot that is changed.
+     * @return the slot index in the range [1, 9] (inclusive).
+     */
+    public int slot() {
+      return slot;
+    }
+
+    /**
+     * Provides the ability that is changed.
+     * @return the ability that is bound or null if the slot is cleared
+     */
+    public @Nullable AbilityDescription ability() {
+      return desc;
+    }
+
+    @Override
+    public BindType type() {
+      return BindType.SINGLE;
+    }
+  }
+
+  /**
+   * Called when multiple binds of a user change.
+   */
+  class Multi extends AbstractCancellableUserEvent implements BindChangeEvent {
+    private final Preset preset;
+
+    protected Multi(User user, Preset preset) {
+      super(user);
+      this.preset = preset;
+    }
+
+    /**
+     * Provides the preset that is being bound.
+     * @return the preset of abilities
+     */
+    public Preset preset() {
+      return preset;
+    }
+
+    @Override
+    public BindType type() {
+      return BindType.MULTIPLE;
+    }
   }
 }

@@ -20,7 +20,6 @@
 package me.moros.bending.event;
 
 import me.moros.bending.event.base.AbstractCancellableUserEvent;
-import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.temporal.ActionLimiter;
@@ -29,7 +28,7 @@ import me.moros.bending.temporal.ActionLimiter;
  * Called when a user attempts to limit the actions of a target through bending.
  * @see ActionLimiter
  */
-public class ActionLimitEvent extends AbstractCancellableUserEvent implements UserEvent {
+public class ActionLimitEvent extends AbstractCancellableUserEvent {
   private final LivingEntity target;
 
   private long duration;

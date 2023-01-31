@@ -118,7 +118,7 @@ public class SpongeEntity implements Entity {
 
   @Override
   public boolean dead() {
-    return nmsEntity().isAlive();
+    return !nmsEntity().isAlive();
   }
 
   @Override
@@ -149,6 +149,11 @@ public class SpongeEntity implements Entity {
   @Override
   public void fireTicks(int ticks) {
     nmsEntity().setRemainingFireTicks(ticks);
+  }
+
+  @Override
+  public boolean isOnGround() {
+    return handle().onGround().get();
   }
 
   @Override

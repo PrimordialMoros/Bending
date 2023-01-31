@@ -17,23 +17,28 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.event;
+package me.moros.bending.fabric.event;
 
-import me.moros.bending.event.base.UserEvent;
-import me.moros.bending.model.user.BendingPlayer;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
-/**
- * Called when a player has successfully been registered.
- */
-public class PlayerRegisterEvent implements UserEvent {
-  private final BendingPlayer user;
-
-  protected PlayerRegisterEvent(BendingPlayer user) {
-    this.user = user;
+public final class ServerMobEvents {
+  private ServerMobEvents() {
   }
 
-  @Override
-  public BendingPlayer user() {
-    return user;
+  public static final Event<Target> TARGET = EventFactory.createArrayBacked(Target.class, callbacks -> (entity, target) -> {
+    for (Target callback : callbacks) {
+      if (!callback.onEntityTarget(entity, target)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  @FunctionalInterface
+  public interface Target {
+    boolean onEntityTarget(LivingEntity entity, Entity target);
   }
 }

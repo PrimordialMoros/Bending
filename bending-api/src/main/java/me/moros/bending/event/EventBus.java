@@ -22,12 +22,11 @@ package me.moros.bending.event;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.event.base.BendingEvent;
+import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.preset.Preset;
-import me.moros.bending.model.user.BendingPlayer;
 import me.moros.bending.model.user.User;
 import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.entity.Entity;
@@ -36,6 +35,7 @@ import me.moros.bending.util.BendingEffect;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.key.Key;
 import net.kyori.event.PostResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The event bus is responsible for posting bending events.
@@ -98,31 +98,31 @@ public enum EventBus {
   }
 
   /**
-   * Posts a new {@link PlayerRegisterEvent}.
-   * @param player the player that was registered
+   * Posts a new {@link UserRegisterEvent}.
+   * @param user the user that was registered
    */
-  public void postPlayerRegisterEvent(BendingPlayer player) {
-    post(new PlayerRegisterEvent(player));
+  public void postUserRegisterEvent(User user) {
+    post(new UserRegisterEvent(user));
   }
 
   /**
-   * Posts a new {@link CooldownAddEvent}.
+   * Posts a new {@link CooldownChangeEvent.Add}.
    * @param user the relevant user
    * @param desc the ability to go on cooldown
    * @param duration the duration of the cooldown in milliseconds
    * @return true if the event was executed and was not cancelled, false otherwise
    */
   public boolean postCooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    return post(new CooldownAddEvent(user, desc, duration)).wasSuccessful();
+    return post(new CooldownChangeEvent.Add(user, desc, duration)).wasSuccessful();
   }
 
   /**
-   * Posts a new {@link CooldownRemoveEvent}.
+   * Posts a new {@link CooldownChangeEvent.Remove}.
    * @param user the relevant user
    * @param desc the ability whose cooldown has expired
    */
   public void postCooldownRemoveEvent(User user, AbilityDescription desc) {
-    post(new CooldownRemoveEvent(user, desc));
+    post(new CooldownChangeEvent.Remove(user, desc));
   }
 
   /**
@@ -137,21 +137,33 @@ public enum EventBus {
   /**
    * Posts a new {@link ElementChangeEvent}.
    * @param user the user who is changing elements
+   * @param element the associated element
    * @param type the type of element change
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postElementChangeEvent(User user, ElementAction type) {
-    return post(new ElementChangeEvent(user, type)).wasSuccessful();
+  public boolean postElementChangeEvent(User user, Element element, ElementAction type) {
+    return post(new ElementChangeEvent(user, element, type)).wasSuccessful();
   }
 
   /**
-   * Posts a new {@link BindChangeEvent}.
+   * Posts a new {@link BindChangeEvent.Single}.
    * @param user the user who is changing binds
-   * @param type the type of bind change
+   * @param slot the slot index that is changed
+   * @param desc the ability that is bound or cleared (null)
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postBindChangeEvent(User user, BindType type) {
-    return post(new BindChangeEvent(user, type)).wasSuccessful();
+  public boolean postSingleBindChangeEvent(User user, int slot, @Nullable AbilityDescription desc) {
+    return post(new BindChangeEvent.Single(user, slot, desc)).wasSuccessful();
+  }
+
+  /**
+   * Posts a new {@link BindChangeEvent.Multi}.
+   * @param user the user who is changing binds
+   * @param preset the preset that is bound
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
+  public boolean postMultiBindChangeEvent(User user, Preset preset) {
+    return post(new BindChangeEvent.Multi(user, preset)).wasSuccessful();
   }
 
   /**

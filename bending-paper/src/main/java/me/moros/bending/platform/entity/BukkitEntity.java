@@ -160,6 +160,11 @@ public class BukkitEntity implements Entity {
   }
 
   @Override
+  public boolean isOnGround() {
+    return handle().isOnGround();
+  }
+
+  @Override
   public boolean inWater(boolean fullySubmerged) {
     return handle().isInWaterOrBubbleColumn() && (!fullySubmerged || NativeAdapter.instance().eyeInWater(this));
   }

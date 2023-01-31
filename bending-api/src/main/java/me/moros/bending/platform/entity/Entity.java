@@ -75,7 +75,7 @@ public interface Entity extends Identity, ForwardingAudience.Single, Damageable,
   void velocity(Vector3d velocity);
 
   /**
-   * Set an entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
+   * Set this entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
    * @param ability the ability the causes this velocity change
    * @param velocity the new velocity
    * @return whether the new velocity was successfully applied
@@ -113,24 +113,15 @@ public interface Entity extends Identity, ForwardingAudience.Single, Damageable,
   }
 
   /**
-   * Accurately checks if an entity is standing on ground using {@link AABB}.
+   * Check if this entity is standing on ground.
    * @return true if entity standing on ground, false otherwise
    */
-  default boolean isOnGround() {
-    AABB entityBounds = bounds().grow(Vector3d.of(0, 0.05, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.1, -1), Vector3d.of(1, 0.1, 1)).at(location());
-    for (Block block : world().nearbyBlocks(floorBounds, b -> b.type().isCollidable())) {
-      if (entityBounds.intersects(block.bounds())) {
-        return true;
-      }
-    }
-    return false;
-  }
+  boolean isOnGround();
 
   /**
-   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
+   * Calculates the distance between this entity and the ground using precise {@link AABB} colliders.
    * By default, it ignores all passable materials except liquids.
-   * @return the distance in blocks between the entity and ground or the max world height.
+   * @return the distance in blocks between this entity and ground or the max world height.
    * @see #distanceAboveGround(double)
    */
   default double distanceAboveGround() {
@@ -138,7 +129,7 @@ public interface Entity extends Identity, ForwardingAudience.Single, Damageable,
   }
 
   /**
-   * Calculates the distance between an entity and the ground using precise {@link AABB} colliders.
+   * Calculates the distance between this entity and the ground using precise {@link AABB} colliders.
    * By default, it ignores all passable materials except liquids.
    * @param maxHeight the maximum height to check
    * @return the distance in blocks between the entity and ground or the max height.

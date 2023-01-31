@@ -19,27 +19,14 @@
 
 package me.moros.bending.event;
 
-import me.moros.bending.event.base.AbilityEvent;
-import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
-import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.event.base.AbstractUserEvent;
 import me.moros.bending.model.user.User;
 
 /**
- * Called when a user's ability will go on cooldown.
+ * Called when a user has successfully been registered.
  */
-public class CooldownAddEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
-  private final long duration;
-
-  protected CooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    super(user, desc);
-    this.duration = duration;
-  }
-
-  /**
-   * Provides the cooldown duration.
-   * @return the cooldown's duration in milliseconds
-   */
-  public long duration() {
-    return duration;
+public class UserRegisterEvent extends AbstractUserEvent {
+  protected UserRegisterEvent(User user) {
+    super(user);
   }
 }

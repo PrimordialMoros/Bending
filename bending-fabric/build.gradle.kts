@@ -15,6 +15,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.loader)
+    modImplementation(libs.fabric.permissions)
     modImplementation(libs.fabric.placeholder)
     include(libs.fabric.placeholder)
     modImplementation(libs.adventure.fabric)
@@ -42,7 +43,9 @@ loom {
 
 tasks {
     shadowJar {
-        reloc("io.leangen", "leangen")
+        dependencies {
+            exclude(dependency("io.leangen.geantyref:geantyref"))
+        }
     }
     named<Copy>("processResources") {
         filesMatching("fabric.mod.json") {

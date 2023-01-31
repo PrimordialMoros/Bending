@@ -90,7 +90,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public DataHolder blockMetadata(int x, int y, int z) {
-    return FabricMetadata.INSTANCE.metadata(key(), x, y, z); // TODO use mixin for meta
+    return FabricMetadata.INSTANCE.metadata(key(), x, y, z);
   }
 
   private @Nullable BlockEntity blockEntity(int x, int y, int z) {

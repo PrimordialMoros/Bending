@@ -13,7 +13,9 @@
     "accessor.ServerLoginPacketListenerImplAccess",
     "BaseContainerBlockEntityMixin",
     "BeaconBlockEntityMixin",
-    "ServerGamePacketListenerImplMixin"
+    "MobMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerPlayerGameModeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

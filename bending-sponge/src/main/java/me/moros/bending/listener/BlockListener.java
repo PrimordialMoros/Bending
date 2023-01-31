@@ -53,7 +53,7 @@ public class BlockListener extends SpongeListener {
   }
 
   @Listener(order = Order.EARLY)
-  public void onBlockIgnite(ChangeBlockEvent.All event) {
+  public void onBlockChange(ChangeBlockEvent.All event) {
     if (disabledWorld(event.world())) {
       return;
     }

@@ -39,7 +39,7 @@ public abstract class ServerGamePacketListenerImplMixin {
 
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
-  public void bending$interactEvent(ServerboundSwingPacket packet, CallbackInfo ci) {
+  private void bending$interactEvent(ServerboundSwingPacket packet, CallbackInfo ci) {
     if (ServerPlayerEvents.INTERACT.invoker().onInteract(this.player, packet.getHand()) != InteractionResult.PASS) {
       ci.cancel();
     }
@@ -47,7 +47,7 @@ public abstract class ServerGamePacketListenerImplMixin {
 
   @Inject(method = "handlePlayerCommand", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
-  public void bending$handlePlayerCommand(ServerboundPlayerCommandPacket packet, CallbackInfo ci) {
+  private void bending$handlePlayerCommand(ServerboundPlayerCommandPacket packet, CallbackInfo ci) {
     var action = packet.getAction();
     switch (action) {
       case PRESS_SHIFT_KEY, RELEASE_SHIFT_KEY -> {

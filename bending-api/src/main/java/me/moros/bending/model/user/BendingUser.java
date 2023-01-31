@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import me.moros.bending.event.BindChangeEvent.BindType;
 import me.moros.bending.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.event.EventBus;
 import me.moros.bending.model.Element;
@@ -110,7 +109,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean addElement(Element element) {
-    if (!hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.ADD)) {
+    if (!hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.ADD)) {
       elements.add(element);
       validatePassives();
       return true;
@@ -120,7 +119,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean removeElement(Element element) {
-    if (hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.REMOVE)) {
+    if (hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.REMOVE)) {
       elements.remove(element);
       validateAbilities();
       validateSlots();
@@ -132,7 +131,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean chooseElement(Element element) {
-    if (EventBus.INSTANCE.postElementChangeEvent(this, ElementAction.CHOOSE)) {
+    if (EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.CHOOSE)) {
       elements.clear();
       elements.add(element);
       validateAbilities();
@@ -159,7 +158,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean bindPreset(Preset preset) {
-    if (EventBus.INSTANCE.postBindChangeEvent(this, BindType.MULTIPLE)) {
+    if (EventBus.INSTANCE.postMultiBindChangeEvent(this, preset)) {
       Preset oldBinds = createPresetFromSlots("");
       preset.copyTo(slots);
       validateSlots();
@@ -183,7 +182,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     if (slot < 1 || slot > 9) {
       return;
     }
-    if (EventBus.INSTANCE.postBindChangeEvent(this, BindType.SINGLE)) {
+    if (EventBus.INSTANCE.postSingleBindChangeEvent(this, slot, desc)) {
       slots[slot - 1] = desc;
       board().updateAll();
     }

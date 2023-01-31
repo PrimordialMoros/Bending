@@ -165,7 +165,11 @@ public class EarthGlove extends AbilityInstance {
     } else {
       double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
       Vector3d gloveVelocity = glove.velocity();
-      if (glove.isOnGround() || lastVelocity.angle(gloveVelocity) > Math.PI / 6 || gloveVelocity.lengthSq() < velocityLimit * velocityLimit) {
+      boolean onGround = glove.isOnGround();
+      if (onGround || lastVelocity.angle(gloveVelocity) > Math.PI / 6 || gloveVelocity.lengthSq() < velocityLimit * velocityLimit) {
+        if (onGround) {
+          glove.velocity(Vector3d.ZERO);
+        }
         shatterGlove();
         return UpdateResult.REMOVE;
       }
@@ -244,7 +248,7 @@ public class EarthGlove extends AbilityInstance {
     ItemSnapshot item = Platform.instance().factory().itemBuilder(isMetal ? Item.IRON_INGOT : Item.STONE).build();
     Entity entity = user.world().dropItem(spawnLocation, item, isMetal);
     entity.invulnerable(true);
-    entity.gravity(false);
+    entity.gravity(isMetal);
     entity.add(GLOVE_KEY, this);
     if (isMetal && inv != null) {
       inv.remove(Item.IRON_INGOT);
@@ -264,7 +268,7 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    if (glove != null) {
+    if (glove != null && !isMetal) {
       glove.remove();
     }
   }
@@ -278,8 +282,9 @@ public class EarthGlove extends AbilityInstance {
     if (!glove.valid()) {
       return;
     }
-    BlockType type = isMetal ? BlockType.IRON_BLOCK : BlockType.STONE;
-    type.asParticle(location).count(6).offset(0.1).spawn(user.world());
+    if (!isMetal) {
+      BlockType.STONE.asParticle(location).count(6).offset(0.1).spawn(user.world());
+    }
     onDestroy();
   }
 

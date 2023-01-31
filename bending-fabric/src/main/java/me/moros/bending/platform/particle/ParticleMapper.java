@@ -31,6 +31,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joml.Vector3f;
@@ -58,6 +59,7 @@ public final class ParticleMapper {
         return new ShriekParticleOption(number);
       }/* else if (p == Particle.VIBRATION && data instanceof Vibration v) { // TODO Add?
       }*/
+      return (SimpleParticleType) fabricParticle;
     }
     return null;
   }

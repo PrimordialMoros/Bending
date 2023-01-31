@@ -32,7 +32,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.HumanoidArm;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-
 public class FabricPlayer extends FabricLivingEntity implements Player {
   public FabricPlayer(ServerPlayer handle) {
     super(handle);
@@ -45,7 +44,7 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public boolean hasPermission(String permission) {
-    return Permissions.check(handle(), permission);
+    return Permissions.check(handle(), permission, handle().getLevel().getServer().getOperatorUserPermissionLevel());
   }
 
   @Override

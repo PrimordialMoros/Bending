@@ -19,7 +19,6 @@
 
 package me.moros.bending.event;
 
-import me.moros.bending.event.base.AbilityEvent;
 import me.moros.bending.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.model.ability.AbilityDescription;
 import me.moros.bending.model.user.User;
@@ -28,7 +27,7 @@ import me.moros.bending.platform.entity.LivingEntity;
 /**
  * Called when a bending ability damages an entity.
  */
-public class BendingDamageEvent extends AbstractCancellableAbilityEvent implements AbilityEvent {
+public class BendingDamageEvent extends AbstractCancellableAbilityEvent {
   private final LivingEntity target;
   private double damage;
 

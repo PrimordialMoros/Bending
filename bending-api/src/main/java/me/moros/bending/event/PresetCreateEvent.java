@@ -20,14 +20,13 @@
 package me.moros.bending.event;
 
 import me.moros.bending.event.base.AbstractCancellableUserEvent;
-import me.moros.bending.event.base.UserEvent;
 import me.moros.bending.model.preset.Preset;
 import me.moros.bending.model.user.User;
 
 /**
  * Called when a user is attempting to create a {@link Preset}.
  */
-public class PresetCreateEvent extends AbstractCancellableUserEvent implements UserEvent {
+public class PresetCreateEvent extends AbstractCancellableUserEvent {
   private final Preset preset;
 
   protected PresetCreateEvent(User user, Preset preset) {

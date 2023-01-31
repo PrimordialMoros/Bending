@@ -71,6 +71,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
@@ -511,6 +512,15 @@ public record UserListener(Game game, BendingPlugin plugin) implements Listener,
     User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
     if (user != null) {
       user.board().activeSlot(event.getPreviousSlot() + 1, event.getNewSlot() + 1);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onHopperItemPickup(InventoryPickupItemEvent event) {
+    var item = event.getItem();
+    if (item.getItemStack().getType() == Material.STONE && item.hasMetadata(EarthGlove.GLOVE_KEY.value())) {
+      event.setCancelled(true);
+      event.getItem().remove();
     }
   }
 

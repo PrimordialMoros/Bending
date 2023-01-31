@@ -13,7 +13,7 @@ paper = "1.19.2-R0.1-SNAPSHOT"
 sponge-api = "10.0.0-SNAPSHOT"
 sponge-common = "1.19.3-10.0.0-SNAPSHOT"
 minecraft = "1.19.3"
-fabric-loom = "1.0-SNAPSHOT"
+fabric-loom = "1.1-SNAPSHOT"
 fabric-api = "0.72.0+1.19.3"
 fabric-loader = "0.14.12"
 shadow = "7.1.2"
@@ -75,6 +75,7 @@ fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" 
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.0.0-pre.2+1.19.3" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.2-SNAPSHOT" }
 
 # Bukkit
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }

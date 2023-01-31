@@ -21,17 +21,28 @@ package me.moros.bending.event;
 
 import me.moros.bending.event.base.AbstractCancellableUserEvent;
 import me.moros.bending.event.base.UserEvent;
+import me.moros.bending.model.Element;
 import me.moros.bending.model.user.User;
 
 /**
  * Called when a user's elements are being changed.
  */
 public class ElementChangeEvent extends AbstractCancellableUserEvent implements UserEvent {
+  private final Element element;
   private final ElementAction action;
 
-  protected ElementChangeEvent(User user, ElementAction action) {
+  protected ElementChangeEvent(User user, Element element, ElementAction action) {
     super(user);
+    this.element = element;
     this.action = action;
+  }
+
+  /**
+   * Provide the element associated with the change.
+   * @return the element
+   */
+  public Element element() {
+    return element;
   }
 
   /**

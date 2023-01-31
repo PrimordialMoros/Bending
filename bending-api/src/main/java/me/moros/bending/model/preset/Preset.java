@@ -26,10 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import me.moros.bending.locale.Message;
 import me.moros.bending.model.Element;
 import me.moros.bending.model.ability.AbilityDescription;
+import me.moros.bending.model.functional.Suppliers;
 import me.moros.bending.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -47,7 +49,7 @@ public final class Preset {
   private final int id;
   private final String name;
   private final AbilityDescription[] abilities;
-  private TextColor presetColor;
+  private final Supplier<TextColor> presetColor;
 
   /**
    * Presets loaded from db have a positive id.
@@ -58,6 +60,7 @@ public final class Preset {
     this.name = name;
     this.abilities = new AbilityDescription[9];
     System.arraycopy(abilities, 0, this.abilities, 0, Math.min(9, abilities.length));
+    this.presetColor = Suppliers.lazy(this::dominantColor);
   }
 
   public int id() {
@@ -69,10 +72,7 @@ public final class Preset {
   }
 
   public Component displayName() {
-    if (presetColor == null) {
-      presetColor = dominantColor();
-    }
-    return Component.text(name, presetColor);
+    return Component.text(name, presetColor.get());
   }
 
   /**

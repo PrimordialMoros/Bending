@@ -282,7 +282,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
 
   @Override
   public void onElementChoose(User user, Element element) {
-    if (!user.hasPermission(CommandPermissions.CHOOSE + "." + element)) {
+    if (!user.hasPermission(CommandPermissions.CHOOSE + "." + element.key().value())) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }

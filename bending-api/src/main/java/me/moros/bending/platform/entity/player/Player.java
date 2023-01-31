@@ -20,10 +20,13 @@
 package me.moros.bending.platform.entity.player;
 
 import me.moros.bending.adapter.NativeAdapter;
+import me.moros.bending.model.collision.geometry.AABB;
+import me.moros.bending.platform.block.Block;
 import me.moros.bending.platform.entity.Entity;
 import me.moros.bending.platform.entity.LivingEntity;
 import me.moros.bending.platform.item.Inventory;
 import me.moros.bending.platform.item.Item;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
 public interface Player extends LivingEntity {
@@ -31,6 +34,22 @@ public interface Player extends LivingEntity {
 
   @Override
   Inventory inventory();
+
+  /**
+   * Accurately checks if this player is standing on ground using {@link AABB}.
+   * @return true if entity standing on ground, false otherwise
+   */
+  @Override
+  default boolean isOnGround() {
+    AABB entityBounds = bounds().grow(Vector3d.of(0, 0.05, 0));
+    AABB floorBounds = new AABB(Vector3d.of(-1, -0.1, -1), Vector3d.of(1, 0.1, 1)).at(location());
+    for (Block block : world().nearbyBlocks(floorBounds, b -> b.type().isCollidable())) {
+      if (entityBounds.intersects(block.bounds())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   GameMode gamemode();
 
