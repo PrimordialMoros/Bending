@@ -103,14 +103,14 @@ public class EarthBlast extends AbilityInstance {
       .filter(eb -> eb.blast == null).toList();
     for (EarthBlast eblast : eblasts) {
       State state = eblast.states.current();
-      if (state instanceof SelectedSource selectedSource) {
+      if (state instanceof SelectedSource.WithState selectedSource) {
         selectedSource.reselect(source, fakeData);
         return false;
       }
     }
 
     states = new StateChain()
-      .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
+      .addState(SelectedSource.create(user, source, userConfig.selectRange, fakeData))
       .start();
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;

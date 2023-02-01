@@ -71,6 +71,7 @@ public record UserListener(Game game) implements FabricListener {
     UseItemCallback.EVENT.register(this::onRightClickAir);
     UseEntityCallback.EVENT.register(this::onRightClickEntity);
     ServerPlayerEvents.CHANGE_GAMEMODE.register(this::onUserGameModeChange);
+    ServerPlayerEvents.CHANGE_SLOT.register(this::onHeldSlotChange);
     ServerMobEvents.TARGET.register(this::onEntityTarget);
     ServerEntityEvents.EQUIPMENT_CHANGE.register(this::onArmorChange);
   }
@@ -182,6 +183,16 @@ public record UserListener(Game game) implements FabricListener {
         user.board().updateAll();
         game.abilityManager(user.world().key()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
+    }
+  }
+
+  private void onHeldSlotChange(ServerPlayer player, int oldSlot, int newSlot) {
+    if (disabledWorld(player)) {
+      return;
+    }
+    User user = Registries.BENDERS.get(player.getUUID());
+    if (user != null) {
+      user.board().activeSlot(oldSlot + 1, newSlot + 1);
     }
   }
 

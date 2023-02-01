@@ -422,13 +422,17 @@ public class UserListener extends SpongeListener {
   }
 
   @Listener(order = Order.POST)
-  public void onItemInteract(InteractItemEvent.Secondary event, @Root Living entity) {
+  public void onItemInteract(InteractItemEvent event, @Root Living entity) {
     if (disabledWorld(entity)) {
       return;
     }
     User user = Registries.BENDERS.get(entity.uniqueId());
     if (user != null) {
-      game.activationController().onUserInteract(user, null, null);
+      if (event instanceof InteractItemEvent.Primary) {
+        game.activationController().onUserSwing(user);
+      } else {
+        game.activationController().onUserInteract(user, null, null);
+      }
     }
   }
 

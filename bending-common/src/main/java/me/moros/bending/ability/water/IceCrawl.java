@@ -100,7 +100,7 @@ public class IceCrawl extends AbilityInstance {
     }
 
     states = new StateChain()
-      .addState(new SelectedSource(user, source, userConfig.selectRange))
+      .addState(SelectedSource.create(user, source, userConfig.selectRange))
       .start();
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();

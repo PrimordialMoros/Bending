@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import me.moros.bending.model.DamageSource;
 import me.moros.bending.model.ability.Ability;
@@ -81,8 +82,9 @@ public final class TempBlock extends Temporary {
     if (snapshots.size() > 1) {
       Iterator<TempBlockState> it = snapshots.iterator();
       it.next(); // ignore original snapshot
+      int tick = Platform.instance().currentTick();
       while (it.hasNext()) {
-        if (Platform.instance().currentTick() > it.next().expirationTicks) {
+        if (tick > it.next().expirationTicks) {
           it.remove();
         }
       }
@@ -92,9 +94,10 @@ public final class TempBlock extends Temporary {
   private TempBlockState cleanStatesReverse() {
     TempBlockState toRevert = Objects.requireNonNull(snapshots.pollLast());
     Iterator<TempBlockState> it = snapshots.descendingIterator();
+    int tick = Platform.instance().currentTick();
     while (it.hasNext()) {
       TempBlockState next = it.next();
-      if (Platform.instance().currentTick() >= next.expirationTicks) {
+      if (tick >= next.expirationTicks) {
         it.remove();
         toRevert = next;
       } else {
@@ -162,18 +165,12 @@ public final class TempBlock extends Temporary {
   }
 
   public static void revertToSnapshot(Block block, @Nullable Snapshot snapshot) {
-    TempBlock tb = MANAGER.get(block).orElse(null);
-    if (snapshot == null) {
-      if (tb != null) {
-        tb.revert();
+    Consumer<TempBlock> func = snapshot == null ? TempBlock::revert : tb -> tb.revertToSnapshot(snapshot);
+    MANAGER.get(block).ifPresentOrElse(func, () -> {
+      if (snapshot != null) {
+        snapshot.revert();
       }
-      return;
-    }
-    if (tb != null) {
-      tb.revertToSnapshot(snapshot);
-    } else {
-      snapshot.revert();
-    }
+    });
   }
 
   private void cleanup() {

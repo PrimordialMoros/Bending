@@ -68,9 +68,8 @@ public class ScoreboardUtil {
     // Remove old
     for (int i = 0; i < 3; ++i) {
       Objective obj = previous.getDisplayObjective(i);
-      if (obj != null && !temp.contains(obj)) {
+      if (obj != null && temp.add(obj)) {
         player.connection.send(new ClientboundSetObjectivePacket(obj, 1));
-        temp.add(obj);
       }
     }
     for (var team : previous.getPlayerTeams()) {
@@ -85,9 +84,8 @@ public class ScoreboardUtil {
     }
     for (int i = 0; i < 19; ++i) {
       Objective obj = scoreboard.getDisplayObjective(i);
-      if (obj != null && !temp.contains(obj)) {
+      if (obj != null && temp.add(obj)) {
         scoreboard.getStartTrackingPackets(obj).forEach(player.connection::send);
-        temp.add(obj);
       }
     }
   }

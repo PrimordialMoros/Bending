@@ -31,7 +31,7 @@ public final class ServerPlayerEvents {
   }
 
   public static final Event<Interact> INTERACT = EventFactory.createArrayBacked(Interact.class, callbacks -> (player, hand) -> {
-    for (Interact callback : callbacks) {
+    for (var callback : callbacks) {
       var result = callback.onInteract(player, hand);
       if (result != InteractionResult.PASS) {
         return result;
@@ -41,7 +41,7 @@ public final class ServerPlayerEvents {
   });
 
   public static final Event<Sneak> TOGGLE_SNEAK = EventFactory.createArrayBacked(Sneak.class, callbacks -> (player, sneaking) -> {
-    for (Sneak callback : callbacks) {
+    for (var callback : callbacks) {
       if (!callback.onSneak(player, sneaking)) {
         return false;
       }
@@ -50,7 +50,7 @@ public final class ServerPlayerEvents {
   });
 
   public static final Event<Sprint> TOGGLE_SPRINT = EventFactory.createArrayBacked(Sprint.class, callbacks -> (player, sprinting) -> {
-    for (Sprint callback : callbacks) {
+    for (var callback : callbacks) {
       if (!callback.onSprint(player, sprinting)) {
         return false;
       }
@@ -59,8 +59,14 @@ public final class ServerPlayerEvents {
   });
 
   public static final Event<GameMode> CHANGE_GAMEMODE = EventFactory.createArrayBacked(GameMode.class, callbacks -> (player, newGameMode) -> {
-    for (GameMode callback : callbacks) {
+    for (var callback : callbacks) {
       callback.onGameModeChange(player, newGameMode);
+    }
+  });
+
+  public static final Event<ChangeHeldSlot> CHANGE_SLOT = EventFactory.createArrayBacked(ChangeHeldSlot.class, callbacks -> (player, oldSlot, newSlot) -> {
+    for (var callback : callbacks) {
+      callback.onHeldSlotChange(player, oldSlot, newSlot);
     }
   });
 
@@ -82,5 +88,10 @@ public final class ServerPlayerEvents {
   @FunctionalInterface
   public interface GameMode {
     void onGameModeChange(ServerPlayer player, GameType newGameMode);
+  }
+
+  @FunctionalInterface
+  public interface ChangeHeldSlot {
+    void onHeldSlotChange(ServerPlayer player, int oldSlot, int newSlot);
   }
 }

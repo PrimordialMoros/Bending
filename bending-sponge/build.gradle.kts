@@ -44,6 +44,7 @@ tasks {
             reloc("cloud.commandframework", "cloudframework")
             exclude(dependency("io.leangen.geantyref:geantyref"))
         }
+        manifest.attributes["MixinConfigs"] = "bending-sponge.mixins.json"
     }
 }
 

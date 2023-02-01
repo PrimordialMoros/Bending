@@ -88,7 +88,7 @@ public class Iceberg extends AbilityInstance {
     }
 
     states = new StateChain()
-      .addState(new SelectedSource(user, source, userConfig.selectRange + 2))
+      .addState(SelectedSource.create(user, source, userConfig.selectRange + 2))
       .start();
 
     removalPolicy = Policies.builder().add(Policies.NOT_SNEAKING).build();

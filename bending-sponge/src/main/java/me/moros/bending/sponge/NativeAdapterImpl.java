@@ -21,6 +21,8 @@ package me.moros.bending.sponge;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,13 +41,15 @@ import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.platform.item.Item;
 import me.moros.bending.platform.world.SpongeWorld;
 import me.moros.bending.platform.world.World;
+import me.moros.bending.sponge.mixin.AdvancementProgressAccess;
+import me.moros.bending.sponge.mixin.CriterionProgressAccess;
 import me.moros.bending.sponge.mixin.EntityAccess;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -209,10 +213,13 @@ public final class NativeAdapterImpl implements NativeAdapter {
     var advancement = Advancement.Builder.advancement()
       .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
       .addCriterion(criteriaId, new Criterion()).build(id);
-    AdvancementProgress progress = new AdvancementProgress();
-    progress.update(Map.of(criteriaId, new Criterion()), new String[][]{});
-    progress.grantProgress(criteriaId);
-    var progressMap = Map.of(id, progress);
+    // Bypass sponge mixins
+    Map<String, CriterionProgress> map = new HashMap<>();
+    var criterion = new CriterionProgress();
+    //noinspection DataFlowIssue
+    ((CriterionProgressAccess) criterion).setDate(new Date());
+    map.put(criteriaId, criterion);
+    var progressMap = Map.of(id, AdvancementProgressAccess.bending$create(map));
     return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);
   }
 

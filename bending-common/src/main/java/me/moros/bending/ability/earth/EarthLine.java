@@ -102,13 +102,13 @@ public class EarthLine extends AbilityInstance {
     Optional<EarthLine> line = user.game().abilityManager(user.worldKey()).firstInstance(user, EarthLine.class);
     if (line.isPresent()) {
       State state = line.get().states.current();
-      if (state instanceof SelectedSource selectedSource) {
+      if (state instanceof SelectedSource.WithState selectedSource) {
         selectedSource.reselect(source, fakeData);
       }
       return false;
     }
     states = new StateChain()
-      .addState(new SelectedSource(user, source, userConfig.selectRange, fakeData))
+      .addState(SelectedSource.create(user, source, userConfig.selectRange, fakeData))
       .start();
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();

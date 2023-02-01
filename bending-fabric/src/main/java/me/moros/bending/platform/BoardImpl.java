@@ -56,8 +56,7 @@ final class BoardImpl implements Board {
     this.player = player;
     this.fabricPlayer = ((FabricPlayer) player.entity()).handle();
     selectedSlot = player.currentSlot();
-    var server = fabricPlayer.server;
-    bendingBoard = new ServerScoreboard(server);
+    bendingBoard = new ServerScoreboard(fabricPlayer.server);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
     bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);
     bendingBoard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, bendingSlots);
@@ -109,7 +108,7 @@ final class BoardImpl implements Board {
       }
       selectedSlot = newSlot;
       getOrCreateTeam(oldSlot).setPlayerPrefix(toNative(INACTIVE));
-      getOrCreateTeam(newSlot).setPlayerSuffix(toNative(ACTIVE));
+      getOrCreateTeam(newSlot).setPlayerPrefix(toNative(ACTIVE));
     }
   }
 

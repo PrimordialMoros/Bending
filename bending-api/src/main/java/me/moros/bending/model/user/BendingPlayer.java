@@ -37,6 +37,7 @@ import me.moros.bending.model.user.profile.PlayerProfile;
 import me.moros.bending.platform.entity.player.GameMode;
 import me.moros.bending.platform.entity.player.Player;
 import me.moros.bending.platform.property.BooleanProperty;
+import me.moros.bending.util.Tasker;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -54,7 +55,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     this.internalId = profile.id();
     presets = new HashSet<>(profile.benderData().presets());
     if (profile.board()) {
-      board();
+      Tasker.sync().submit(this::board);
     }
   }
 

@@ -245,7 +245,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public int lightLevel(int x, int y, int z) {
-    return handle().light(x, y, z);
+    return nms().getMaxLocalRawBrightness(new BlockPos(x, y, z));
   }
 
   @Override

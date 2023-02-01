@@ -118,6 +118,7 @@ public class FabricEntity implements Entity {
   public void velocity(Vector3d velocity) {
     var clamped = velocity.clampVelocity();
     handle().setDeltaMovement(clamped.x(), clamped.y(), clamped.z());
+    handle().hurtMarked = true;
   }
 
   @Override
@@ -257,7 +258,7 @@ public class FabricEntity implements Entity {
       return true;
     }
     if (obj instanceof FabricEntity other) {
-      return handle().equals(other.handle());
+      return uuid().equals(other.uuid());
     }
     return false;
   }

@@ -189,10 +189,8 @@ public class AirBlast extends AbilityInstance {
         SoundEffect.AIR.play(user.world(), location);
       }
       // Handle user separately from the general entity collision.
-      if (selectedOrigin) {
-        if (user.bounds().intersects(new Sphere(location, 2))) {
-          onEntityHit(user);
-        }
+      if (selectedOrigin && user.bounds().intersects(new Sphere(location, 2))) {
+        onEntityHit(user);
       }
     }
 
