@@ -14,9 +14,10 @@ sponge-api = "10.0.0-SNAPSHOT"
 sponge-common = "1.19.3-10.0.0-SNAPSHOT"
 minecraft = "1.19.3"
 fabric-loom = "1.1-SNAPSHOT"
-fabric-api = "0.72.0+1.19.3"
-fabric-loader = "0.14.12"
+fabric-api = "0.73.2+1.19.3"
+fabric-loader = "0.14.13"
 shadow = "7.1.2"
+vanilla-gradle = "0.2.1-SNAPSHOT"
 
 [libraries]
 storage = { module = "me.moros:storage", version = "3.0.0" }
@@ -75,6 +76,7 @@ fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" 
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.0.0-pre.2+1.19.3" }
+sgui = { module = "eu.pb4:sgui", version = "1.2.1+1.19.3" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.2-SNAPSHOT" }
 
 # Bukkit
@@ -92,6 +94,7 @@ sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-com
 sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 
 shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow", version.ref = "shadow" }
+vanilla = { module = "org.spongepowered:vanillagradle", version.ref = "vanilla-gradle" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -106,4 +109,4 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.4.1" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.1.1" }
-vanilla = { id = "org.spongepowered.gradle.vanilla", version = "0.2.1-SNAPSHOT" }
+vanilla = { id = "org.spongepowered.gradle.vanilla", version.ref = "vanilla-gradle" }

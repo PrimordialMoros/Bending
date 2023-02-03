@@ -19,6 +19,7 @@ tasks {
         configurations = listOf(bendingImplementation)
         exclude("org/checkerframework/") // Try to catch the myriad dependency leaks
         archiveClassifier.set("")
+        archiveBaseName.set("bending-${project.name}")
         from("$rootDir/LICENSE") {
             rename { "${rootProject.name.toUpperCase()}_${it}" }
         }

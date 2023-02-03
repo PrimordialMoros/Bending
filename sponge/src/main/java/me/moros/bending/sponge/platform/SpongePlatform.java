@@ -1,0 +1,94 @@
+/*
+ * Copyright 2020-2023 Moros
+ *
+ * This file is part of Bending.
+ *
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.sponge.platform;
+
+import java.util.Optional;
+
+import me.moros.bending.api.ability.element.ElementHandler;
+import me.moros.bending.api.adapter.NativeAdapter;
+import me.moros.bending.api.board.Board;
+import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.platform.PlatformFactory;
+import me.moros.bending.api.platform.PlatformType;
+import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.item.ItemBuilder;
+import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.sponge.adapter.NativeAdapterImpl;
+import me.moros.bending.sponge.board.BoardImpl;
+import me.moros.bending.sponge.platform.item.SpongeItemBuilder;
+import me.moros.math.sponge.SpongeMathAdapter;
+import org.spongepowered.api.Sponge;
+
+public class SpongePlatform implements Platform, PlatformFactory {
+  private final NativeAdapter adapter;
+
+  public SpongePlatform() {
+    SpongeMathAdapter.register();
+    new SpongeRegistryInitializer().init();
+    this.adapter = new NativeAdapterImpl();
+  }
+
+  @Override
+  public PlatformFactory factory() {
+    return this;
+  }
+
+  @Override
+  public PlatformType type() {
+    return PlatformType.SPONGE;
+  }
+
+  @Override
+  public boolean hasNativeSupport() {
+    return true;
+  }
+
+  @Override
+  public NativeAdapter nativeAdapter() {
+    return adapter;
+  }
+
+  @Override
+  public int currentTick() {
+    return (int) Sponge.server().runningTimeTicks().ticks();
+  }
+
+  @Override
+  public Optional<Board> buildBoard(BendingPlayer player) {
+    return Optional.of(new BoardImpl(player));
+  }
+
+  @Override
+  public boolean buildMenu(ElementHandler handler, BendingPlayer player) {
+    //return ElementMenu.createMenu(handler, player); // TODO add gui
+    return false;
+  }
+
+  @Override
+  public ItemBuilder itemBuilder(Item item) {
+    return new SpongeItemBuilder(PlatformAdapter.toSpongeItem(item));
+  }
+
+  @Override
+  public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
+    return new SpongeItemBuilder(PlatformAdapter.toSpongeItem(snapshot));
+  }
+}

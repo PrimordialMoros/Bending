@@ -7,12 +7,13 @@ pluginManagement {
 }
 rootProject.name = "bending"
 
-include("bending-api")
-include("bending-common")
-file("bending-paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
-    include("bending-paper:adapters:${it.name}")
+include("api")
+include("common")
+include("nms")
+file("paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
+    include("paper:adapters:${it.name}")
 }
-include("bending-fabric")
-include("bending-paper")
-include("bending-sponge")
+include("fabric")
+include("paper")
+include("sponge")
 //include("code-generator")

@@ -1,0 +1,45 @@
+/*
+ * Copyright 2020-2023 Moros
+ *
+ * This file is part of Bending.
+ *
+ * Bending is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Bending is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Bending. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package me.moros.bending.api.user.profile;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.ability.preset.Preset;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+/**
+ * A record of bender data stored or to be stored in the database.
+ * @param slots the bender's bound abilities
+ * @param elements the bender's elements
+ * @param presets the bender's presets
+ */
+public record BenderData(List<@Nullable AbilityDescription> slots, Set<Element> elements, Set<Preset> presets) {
+  public static final BenderData EMPTY = new BenderData(List.of(), Set.of(), Set.of());
+
+  public BenderData(List<@Nullable AbilityDescription> slots, Set<Element> elements, Set<Preset> presets) {
+    this.slots = Collections.unmodifiableList(slots);
+    this.elements = Set.copyOf(elements);
+    this.presets = Set.copyOf(presets);
+  }
+}
