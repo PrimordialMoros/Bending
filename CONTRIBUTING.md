@@ -27,27 +27,37 @@ Please fork this repository and contribute back using [pull requests](https://gi
 ## Project Layout
 
 The project is split into the following modules:
-- `bending-api` - Developer api module
-- `bending-common` - Common implementations
-- `bending-paper` - Paper implementation, also has adapter submodules to support different nms versions
+- `api` - Developer api module
+- `common` - Common code module shared between implementations
+- `nms` - Common nms code module
+- `fabric` - Fabric implementation
+- `paper` - Paper implementation, also has adapter submodules to support different nms versions
+- `sponge` - Sponge implementation
 
-`me.moros.bending` is the top level package.
+### api packages
 
-### bending-api packages
-
-- `adapter` - Contains the interface for NMS adapters
-- `config` - Contains config interfaces
-- `event` - Contains bending related events
-- `locale` - Contains locale interfaces
-- `model` - Contains models for bending systems and components
+Top level package: `me.moros.bending.api`
+- `ability` - Contains ability related classes and interfaces
+- `adapter` - Contains packet and NMS code adapters
+- `collision` - Collision and geometry related classes and interfaces
+- `config` - Contains config related classes and interfaces
+- `event` - Contains bending provided events
+- `game` - Contains the main bending systems
+- `locale` - Contains locale related classes and interfaces
 - `platform` - Contains the common platform api
+- `protection` - Contains classes and interfaces for region protection
+- `registry` - Contains classes and interfaces for registries
+- `storage` - Contains the database storage model
 - `temporal` - Contains temporal systems
+- `user` - Contains user related classes and interfaces
 - `util` - Contains utility classes
 
-### bending-common packages
+### common packages
 
+Top level package: `me.moros.bending.common`
 - `ability` - Contains ability implementations
 - `command` - Contains plugin commands
 - `game` - Contains base systems for the main logic of the game
 - `hook` - Contains hooks that provide data to third-party plugins
-- `storage` - Contains persistent storage (databases) implementations
+- `placeholder` - Contains placeholders provided by bending
+- `storage` - Contains sql queries and persistent storage implementations

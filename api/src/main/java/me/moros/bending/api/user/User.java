@@ -19,6 +19,8 @@
 
 package me.moros.bending.api.user;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -27,8 +29,13 @@ import me.moros.bending.api.board.Board;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
+import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.ProtectionCache;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.TempBlock;
+import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.GridIterator;
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.math.FastMath;
@@ -244,5 +251,21 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
       }
     }
     return null;
+  }
+
+  private static <E extends LivingEntity, T extends BenderProfile> Optional<User> create(Game game, E entity, T data, UserFactory<E, T> factory) {
+    Objects.requireNonNull(game);
+    if (!Registries.BENDERS.containsKey(entity.uuid())) {
+      return Optional.of(factory.create(game, entity, data));
+    }
+    return Optional.empty();
+  }
+
+  static Optional<User> create(Game game, LivingEntity entity, BenderProfile data) {
+    return entity instanceof Player ? Optional.empty() : create(game, entity, data, BendingUser::new);
+  }
+
+  static Optional<User> create(Game game, Player player, PlayerBenderProfile profile) {
+    return create(game, player, profile, BendingPlayer::new);
   }
 }

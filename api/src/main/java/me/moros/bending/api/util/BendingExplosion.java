@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.BendingProperties;
@@ -37,7 +38,6 @@ import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.collision.CollisionUtil;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;

@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.platform;
 
-import java.util.Objects;
-
 import me.moros.bending.api.adapter.NativeAdapter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -33,14 +31,6 @@ public interface Platform {
 
     private Holder() {
     }
-  }
-
-  /**
-   * Initialize with a platform instance.
-   * @param platform the platform to inject
-   */
-  static void inject(Platform platform) {
-    Holder.INSTANCE = Objects.requireNonNull(platform);
   }
 
   static @MonotonicNonNull Platform instance() {

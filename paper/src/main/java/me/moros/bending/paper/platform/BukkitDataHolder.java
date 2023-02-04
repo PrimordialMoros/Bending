@@ -22,9 +22,9 @@ package me.moros.bending.paper.platform;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.api.util.metadata.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.metadata.FixedMetadataValue;

@@ -38,7 +38,7 @@ import me.moros.bending.api.platform.sound.SoundGroup;
 import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.registry.Tag;
 import me.moros.bending.api.registry.TagBuilder;
-import me.moros.bending.common.platform.RegistryInitializer;
+import me.moros.bending.common.util.RegistryInitializer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minecraft.sounds.SoundEvent;

@@ -40,6 +40,7 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.sponge.hook.LuckPermsHook;
 import me.moros.bending.sponge.listener.BlockListener;
 import me.moros.bending.sponge.listener.ConnectionListener;
@@ -97,7 +98,6 @@ public class SpongeBending implements BendingPlugin {
     if (storage != null) {
       loaded = true;
       new AbilityInitializer();
-      BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
       SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
         container, CommandExecutionCoordinator.simpleCoordinator(),
         CommandSender::cause, CommandSender::from
@@ -112,8 +112,9 @@ public class SpongeBending implements BendingPlugin {
   @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     if (loaded) {
-      Tasker.inject(CompositeExecutor.of(new SpongeExecutor(container)));
-      Platform.inject(new SpongePlatform());
+      ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(container)));
+      ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
+      ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
       game = new GameImpl(this, storage);
       new SpongePermissionInitializer();
       var eventManager = event.game().eventManager();

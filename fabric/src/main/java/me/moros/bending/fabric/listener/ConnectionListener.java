@@ -32,9 +32,8 @@ import com.mojang.authlib.GameProfile;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.storage.BendingStorage;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
@@ -48,7 +47,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin,
-                                 AsyncLoadingCache<UUID, PlayerProfile> profileCache) implements FabricListener {
+                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements FabricListener {
   public ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin, BendingStorage storage) {
     this(gameSupplier, plugin, createCache(storage));
     ServerLoginConnectionEvents.QUERY_START.register(this::onPlayerPreLogin);
@@ -56,7 +55,7 @@ public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plug
     ServerPlayConnectionEvents.DISCONNECT.register(this::onPlayerLogout);
   }
 
-  private static AsyncLoadingCache<UUID, PlayerProfile> createCache(BendingStorage storage) {
+  private static AsyncLoadingCache<UUID, PlayerBenderProfile> createCache(BendingStorage storage) {
     return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(storage::createProfile);
   }
@@ -70,7 +69,7 @@ public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plug
 
   private CompletableFuture<?> profileOrTimeout(UUID uuid) {
     long startTime = System.currentTimeMillis();
-    CompletableFuture<PlayerProfile> future = profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS);
+    CompletableFuture<PlayerBenderProfile> future = profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS);
     return future.thenApply(profile -> {
       long deltaTime = System.currentTimeMillis() - startTime;
       if (profile != null && deltaTime > 500) {
@@ -90,9 +89,9 @@ public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plug
   private void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
     ServerPlayer player = handler.getPlayer();
     UUID uuid = player.getUUID();
-    PlayerProfile profile = profileCache.synchronous().get(uuid);
+    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
     if (profile != null) {
-      User user = BendingPlayer.createUser(game(), new FabricPlayer(player), profile).orElse(null);
+      User user = User.create(game(), new FabricPlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
         game().abilityManager(user.worldKey()).createPassives(user);

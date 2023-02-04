@@ -22,11 +22,11 @@ package me.moros.bending.common.ability.water.passive;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
-import me.moros.bending.api.functional.Policies;
-import me.moros.bending.api.functional.RemovalPolicy;
+import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.EntityUtil;
+import me.moros.bending.api.util.functional.Policies;
+import me.moros.bending.api.util.functional.RemovalPolicy;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class FastSwim extends AbilityInstance {

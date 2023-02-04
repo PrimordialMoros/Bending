@@ -22,8 +22,6 @@ package me.moros.bending.api.user;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -38,14 +36,12 @@ import me.moros.bending.api.board.Board;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.api.event.EventBus;
-import me.moros.bending.api.functional.BendingConditions;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.Cooldown;
-import me.moros.bending.api.user.profile.BenderData;
+import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.data.DataContainer;
+import me.moros.bending.api.util.functional.BendingConditions;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -65,7 +61,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private boolean canBend = true;
   private int index = 1;
 
-  protected BendingUser(Game game, LivingEntity entity, BenderData data) {
+  protected BendingUser(Game game, LivingEntity entity, BenderProfile data) {
     this.entity = entity;
     this.game = game;
     container = DataContainer.blocking(500, TimeUnit.MILLISECONDS);
@@ -316,13 +312,5 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public int hashCode() {
     return entity().hashCode();
-  }
-
-  public static Optional<User> createUser(Game game, LivingEntity entity, BenderData data) {
-    Objects.requireNonNull(game);
-    if (Registries.BENDERS.containsKey(entity.uuid()) || entity instanceof Player) {
-      return Optional.empty();
-    }
-    return Optional.of(new BendingUser(game, entity, data));
   }
 }

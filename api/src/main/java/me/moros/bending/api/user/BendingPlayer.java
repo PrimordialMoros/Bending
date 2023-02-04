@@ -20,8 +20,6 @@
 package me.moros.bending.api.user;
 
 import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,12 +29,12 @@ import me.moros.bending.api.ability.preset.PresetCreateResult;
 import me.moros.bending.api.board.Board;
 import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.Game;
+import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.property.BooleanProperty;
-import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.profile.BenderData;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,15 +43,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * {@link User} implementation for players.
  */
 public final class BendingPlayer extends BendingUser implements PresetUser {
-  private final Set<Preset> presets;
   private final int internalId;
+  private final Set<Preset> presets;
 
-  private Board board = Board.dummy();
+  private Board board;
 
-  private BendingPlayer(Game game, Player player, PlayerProfile profile) {
-    super(game, player, profile.benderData());
+  BendingPlayer(Game game, Player player, PlayerBenderProfile profile) {
+    super(game, player, profile);
     this.internalId = profile.id();
-    presets = new HashSet<>(profile.benderData().presets());
+    this.presets = new HashSet<>(profile.presets());
+    this.board = Board.dummy();
     if (profile.board()) {
       Tasker.sync().submit(this::board);
     }
@@ -105,11 +104,11 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
 
   @Override
   public Board board() {
-    if (!game().worldManager().isEnabled(worldKey()) || store().has(Board.HIDDEN)) {
+    if (!game().worldManager().isEnabled(worldKey()) || !hasPermission("bending.board") || store().has(Board.HIDDEN)) {
       board.disableScoreboard();
       board = Board.dummy();
     } else if (!board.isEnabled()) {
-      board = Board.create(this);
+      board = Platform.instance().factory().buildBoard(this).orElseGet(Board::dummy);
     }
     return board;
   }
@@ -153,17 +152,8 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
     return true;
   }
 
-  public PlayerProfile toProfile() {
-    BenderData data = new BenderData(createPresetFromSlots("").abilities(), elements(), presets);
-    boolean board = !store().has(Board.HIDDEN);
-    return new PlayerProfile(internalId, board, data);
-  }
-
-  public static Optional<User> createUser(Game game, Player player, PlayerProfile profile) {
-    Objects.requireNonNull(game);
-    if (Registries.BENDERS.containsKey(player.uuid())) {
-      return Optional.empty();
-    }
-    return Optional.of(new BendingPlayer(game, player, profile));
+  public PlayerBenderProfile toProfile() {
+    var data = BenderProfile.of(createPresetFromSlots("").abilities(), elements(), presets);
+    return BenderProfile.of(internalId, !store().has(Board.HIDDEN), data);
   }
 }

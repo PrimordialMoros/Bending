@@ -22,9 +22,9 @@ package me.moros.bending.api.platform.item;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.data.DataHolder;
+import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.text.Component;
 
 public interface ItemSnapshot extends DataHolder {

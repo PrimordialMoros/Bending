@@ -21,6 +21,7 @@ package me.moros.bending.api.ability.preset;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,9 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.util.ColorPalette;
+import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -76,12 +77,17 @@ public final class Preset {
   }
 
   /**
-   * @return a copy of the names of the abilities that this preset holds
+   * Get the abilities that this preset holds.
+   * @return an unmodifiable copy of the abilities
    */
   public List<@Nullable AbilityDescription> abilities() {
-    return Arrays.asList(abilities);
+    return Collections.unmodifiableList(Arrays.asList(abilities));
   }
 
+  /**
+   * Check if this preset is empty.
+   * @return true if this preset holds no abilities, false otherwise
+   */
   public boolean isEmpty() {
     for (AbilityDescription desc : abilities) {
       if (desc != null) {
@@ -91,6 +97,12 @@ public final class Preset {
     return true;
   }
 
+
+  /**
+   * Find the differences between this preset and another.
+   * @param preset the other preset to compare against
+   * @return the number of different abilities between the two presets
+   */
   public int compare(Preset preset) {
     int count = 0;
     for (int slot = 0; slot < 9; slot++) {
@@ -101,6 +113,10 @@ public final class Preset {
     return count;
   }
 
+  /**
+   * Copy this preset to another array.
+   * @param destination the array to copy to
+   */
   public void copyTo(@Nullable AbilityDescription[] destination) {
     if (destination.length != 9) {
       throw new IllegalArgumentException("Destination array must be of length 9!");

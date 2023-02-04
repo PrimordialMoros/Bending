@@ -22,12 +22,35 @@ package me.moros.bending.api.ability.element;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.audience.Audience;
 
+/**
+ * Represents a handler for Element actions.
+ */
 public interface ElementHandler {
+  /**
+   * Perform an action when an element is chosen for a user.
+   * @param user the user
+   * @param element the element being chosen
+   */
   void onElementChoose(User user, Element element);
 
+  /**
+   * Perform an action when an element is added to a user.
+   * @param user the user
+   * @param element the element being added
+   */
   void onElementAdd(User user, Element element);
 
+  /**
+   * Perform an action when an element is removed from a user.
+   * @param user the user
+   * @param element the element being removed
+   */
   void onElementRemove(User user, Element element);
 
+  /**
+   * Perform an action when an element is displayed to a user.
+   * @param user the user
+   * @param element the element being displayed
+   */
   void onElementDisplay(Audience user, Element element);
 }

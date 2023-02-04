@@ -30,9 +30,8 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
 import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -44,7 +43,7 @@ import org.spongepowered.api.util.Tristate;
 
 public class ConnectionListener extends SpongeListener {
   private final BendingPlugin plugin;
-  private final AsyncLoadingCache<UUID, PlayerProfile> profileCache;
+  private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
 
   public ConnectionListener(Game game, BendingPlugin plugin) {
     super(game);
@@ -60,7 +59,7 @@ public class ConnectionListener extends SpongeListener {
     long startTime = System.currentTimeMillis();
     try {
       // Timeout after 1000ms to not block the login thread excessively
-      PlayerProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
+      PlayerBenderProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
       long deltaTime = System.currentTimeMillis() - startTime;
       if (profile != null && deltaTime > 500) {
         plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
@@ -76,9 +75,9 @@ public class ConnectionListener extends SpongeListener {
   public void onPlayerJoin(ServerSideConnectionEvent.Join event) {
     ServerPlayer player = event.player();
     UUID uuid = player.uniqueId();
-    PlayerProfile profile = profileCache.synchronous().get(uuid);
+    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
     if (profile != null) {
-      User user = BendingPlayer.createUser(game, new SpongePlayer(player), profile).orElse(null);
+      User user = User.create(game, new SpongePlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
         game.abilityManager(user.worldKey()).createPassives(user);

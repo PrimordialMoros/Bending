@@ -37,6 +37,7 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.paper.hook.LuckPermsHook;
 import me.moros.bending.paper.hook.PlaceholderAPIHook;
 import me.moros.bending.paper.listener.BlockListener;
@@ -94,10 +95,10 @@ public class PaperBending extends JavaPlugin implements BendingPlugin {
       return;
     }
     new Metrics(this, 8717);
-    Tasker.inject(CompositeExecutor.of(new BukkitExecutor(this)));
-    Platform.inject(new BukkitPlatform(logger));
+    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new BukkitExecutor(this)));
+    ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger));
+    ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
     new ProtectionInitializer(this);
-    BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
     game = new GameImpl(this, storage);
     new BukkitPermissionInitializer();
 

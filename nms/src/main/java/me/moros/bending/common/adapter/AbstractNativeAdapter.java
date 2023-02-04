@@ -20,11 +20,11 @@
 package me.moros.bending.common.adapter;
 
 import me.moros.bending.api.adapter.NativeAdapter;
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.raytrace.BlockRayTrace;
-import me.moros.bending.api.raytrace.Context;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;

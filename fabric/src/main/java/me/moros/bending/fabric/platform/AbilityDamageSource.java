@@ -74,11 +74,4 @@ public class AbilityDamageSource extends EntityDamageSource implements DamageSou
     Objects.requireNonNull(ability);
     return new AbilityDamageSource(user, ability);
   }
-
-  public static void inject(TranslationManager manager) {
-    Objects.requireNonNull(manager);
-    if (AbilityDamageSource.manager == null) {
-      AbilityDamageSource.manager = manager;
-    }
-  }
 }

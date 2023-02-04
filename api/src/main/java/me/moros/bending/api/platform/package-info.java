@@ -18,6 +18,6 @@
  */
 
 /**
- * Provides classes and interfaces for platforms.
+ * Provides classes and interfaces to bridge platforms.
  */
 package me.moros.bending.api.platform;

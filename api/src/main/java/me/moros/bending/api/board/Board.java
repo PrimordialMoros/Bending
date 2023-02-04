@@ -20,8 +20,6 @@
 package me.moros.bending.api.board;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 
@@ -30,8 +28,6 @@ import me.moros.bending.api.util.data.DataKey;
  */
 public interface Board {
   DataKey<Board> HIDDEN = KeyUtil.data("hidden-board", Board.class);
-
-  String SEP = " -------------- ";
 
   /**
    * Check if this instance is enabled.
@@ -62,18 +58,6 @@ public interface Board {
    * @param show whether to show or hide the given description
    */
   void updateMisc(AbilityDescription desc, boolean show);
-
-  /**
-   * Create a board instance for the specified player.
-   * @param player the player to make a board for
-   * @return a new board instance.
-   */
-  static Board create(BendingPlayer player) {
-    if (player.hasPermission("bending.board")) {
-      return Platform.instance().factory().buildBoard(player).orElseGet(Board::dummy);
-    }
-    return dummy();
-  }
 
   /**
    * Get a dummy board instance.

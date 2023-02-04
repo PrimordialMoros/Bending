@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.config;
 
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -30,7 +29,7 @@ public interface BendingProperties {
    * Disregard, internal use only
    */
   final class Holder {
-    private static final BendingProperties DEFAULTS = new BendingProperties() {
+    public static final BendingProperties DEFAULTS = new BendingProperties() {
     };
     private static BendingProperties INSTANCE;
 
@@ -44,16 +43,6 @@ public interface BendingProperties {
 
   static BendingProperties instance() {
     return Holder.INSTANCE == null ? Holder.DEFAULTS : Holder.INSTANCE;
-  }
-
-  static void inject(BendingProperties properties) {
-    if (Holder.INSTANCE != null) {
-      throw new IllegalStateException("Properties have already been initialized!");
-    }
-    if (properties == Holder.DEFAULTS) {
-      throw new IllegalArgumentException("Injected BendingProperties are invalid!");
-    }
-    Holder.INSTANCE = Objects.requireNonNull(properties);
   }
 
   default long earthRevertTime() {

@@ -21,12 +21,12 @@ package me.moros.bending.sponge.listener;
 
 import java.util.Optional;
 
-import me.moros.bending.api.placeholder.DynamicPlaceholder;
-import me.moros.bending.api.placeholder.Placeholder;
-import me.moros.bending.api.placeholder.StaticPlaceholder;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.placeholder.DynamicPlaceholder;
+import me.moros.bending.common.placeholder.Placeholder;
 import me.moros.bending.common.placeholder.PlaceholderProvider;
+import me.moros.bending.common.placeholder.StaticPlaceholder;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import net.kyori.adventure.key.KeyedValue;
 import net.kyori.adventure.text.Component;

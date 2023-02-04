@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.storage.Storage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,21 +36,21 @@ public interface BendingStorage extends Storage {
   /**
    * Creates a new profile for the given uuid or returns an existing one if possible.
    */
-  PlayerProfile createProfile(UUID uuid);
+  PlayerBenderProfile createProfile(UUID uuid);
 
   /**
    * This method will attempt to load a profile from the database.
    * @param uuid the player's uuid
    * @see #createProfile(UUID)
    */
-  CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid);
+  CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid);
 
   /**
    * Asynchronously saves the given profile's data to the database.
    * It updates the stored profile and saves the current elements and bound abilities.
    * @param profile the PlayerProfile to save
    */
-  default void saveProfileAsync(PlayerProfile profile) {
+  default void saveProfileAsync(PlayerBenderProfile profile) {
     saveProfilesAsync(List.of(profile));
   }
 
@@ -58,7 +58,7 @@ public interface BendingStorage extends Storage {
    * Bulk version of {@link #saveProfileAsync}
    * @param profiles the PlayerProfiles to save
    */
-  void saveProfilesAsync(Iterable<PlayerProfile> profiles);
+  void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles);
 
   /**
    * Adds all given abilities to the database

@@ -42,6 +42,7 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.hook.LuckPermsHook;
 import me.moros.bending.fabric.hook.PlaceholderHook;
 import me.moros.bending.fabric.listener.BlockListener;
@@ -84,13 +85,15 @@ public class FabricBending implements BendingPlugin {
 
     configManager = new ConfigManager(logger, dir);
     translationManager = new TranslationManager(logger, dir);
-    AbilityDamageSource.inject(translationManager);
-    Tasker.inject(CompositeExecutor.of(new FabricExecutor()));
+
     storage = StorageFactory.createInstance(this, dir);
     if (storage != null) {
+      ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
+      ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
+      ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager);
+
       registerLifecycleListeners();
       new AbilityInitializer();
-      BendingProperties.inject(ConfigManager.load(BendingPropertiesImpl::new));
       CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
         CommandExecutionCoordinator.simpleCoordinator(),
         CommandSender::from, CommandSender::stack
@@ -119,7 +122,7 @@ public class FabricBending implements BendingPlugin {
       phase = LoadPhase.LOADING;
     }
     if (phase == LoadPhase.LOADING) {
-      Platform.inject(new FabricPlatform(server));
+      ReflectionUtil.injectStatic(Platform.Holder.class, new FabricPlatform(server));
       game = new GameImpl(this, storage);
       GameProviderUtil.registerProvider(game);
       phase = LoadPhase.LOADED;

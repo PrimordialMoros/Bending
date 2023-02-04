@@ -87,8 +87,4 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
   void destroyUserInstances(User user);
 
   void destroyAllInstances();
-
-  static AbilityManager dummy() {
-    return DummyAbilityManager.INSTANCE;
-  }
 }

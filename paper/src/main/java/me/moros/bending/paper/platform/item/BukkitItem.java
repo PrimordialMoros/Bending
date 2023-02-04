@@ -22,11 +22,11 @@ package me.moros.bending.paper.platform.item;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.BukkitDataHolder;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;

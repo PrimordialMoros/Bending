@@ -20,11 +20,11 @@
 package me.moros.bending.paper.adapter;
 
 import me.moros.bending.api.adapter.NativeAdapter;
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
+import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.raytrace.BlockRayTrace;
-import me.moros.bending.api.raytrace.CompositeRayTrace;
-import me.moros.bending.api.raytrace.Context;
 import me.moros.bending.paper.platform.world.BukkitWorld;
 import me.moros.math.Vector3d;
 import org.bukkit.FluidCollisionMode;

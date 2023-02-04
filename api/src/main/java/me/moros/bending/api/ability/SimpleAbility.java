@@ -19,9 +19,9 @@
 
 package me.moros.bending.api.ability;
 
+import me.moros.bending.api.collision.CollisionUtil.CollisionCallback;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.util.collision.CollisionUtil.CollisionCallback;
 
 /**
  * Represents a simple ability.

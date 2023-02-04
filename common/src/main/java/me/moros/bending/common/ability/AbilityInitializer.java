@@ -79,7 +79,7 @@ import me.moros.bending.common.ability.water.passive.FastSwim;
 import me.moros.bending.common.ability.water.passive.HydroSink;
 import me.moros.bending.common.ability.water.sequence.Iceberg;
 import me.moros.bending.common.ability.water.sequence.WaterGimbal;
-import me.moros.bending.common.platform.Initializer;
+import me.moros.bending.common.util.Initializer;
 
 import static me.moros.bending.api.ability.Activation.*;
 import static me.moros.bending.api.ability.element.Element.*;

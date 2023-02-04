@@ -23,12 +23,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.BukkitDataHolder;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.world.BukkitWorld;

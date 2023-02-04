@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.state.State;
 import me.moros.bending.api.ability.state.StateChain;
+import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.platform.block.Block;
@@ -35,7 +36,6 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.collision.CollisionUtil;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;

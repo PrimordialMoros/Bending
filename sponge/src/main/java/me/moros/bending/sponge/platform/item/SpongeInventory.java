@@ -21,11 +21,11 @@ package me.moros.bending.sponge.platform.item;
 
 import java.util.function.Supplier;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.platform.item.ArmorContents;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;

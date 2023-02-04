@@ -19,6 +19,8 @@
 
 package me.moros.bending.api.adapter;
 
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
@@ -26,8 +28,6 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.raytrace.BlockRayTrace;
-import me.moros.bending.api.raytrace.Context;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Position;

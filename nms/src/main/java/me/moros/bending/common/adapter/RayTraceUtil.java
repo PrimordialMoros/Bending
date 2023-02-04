@@ -21,10 +21,10 @@ package me.moros.bending.common.adapter;
 
 import java.util.function.Function;
 
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
+import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.raytrace.BlockRayTrace;
-import me.moros.bending.api.raytrace.CompositeRayTrace;
-import me.moros.bending.api.raytrace.Context;
 import me.moros.math.Vector3d;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

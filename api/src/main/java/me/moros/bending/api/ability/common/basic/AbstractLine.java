@@ -21,14 +21,14 @@ package me.moros.bending.api.ability.common.basic;
 
 import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.Updatable;
+import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Sphere;
+import me.moros.bending.api.collision.raytrace.EntityRayTrace;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.raytrace.EntityRayTrace;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.collision.CollisionUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 

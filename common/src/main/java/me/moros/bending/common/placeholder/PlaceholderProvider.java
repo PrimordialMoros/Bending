@@ -25,9 +25,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import me.moros.bending.api.placeholder.DynamicPlaceholder;
-import me.moros.bending.api.placeholder.Placeholder;
-import me.moros.bending.api.placeholder.StaticPlaceholder;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.KeyedValue;
@@ -65,11 +62,11 @@ public final class PlaceholderProvider implements Iterable<KeyedValue<? extends 
 
   public static Builder defaultBuilder() {
     return builder()
-      .add(Placeholders.ELEMENTS)
-      .add(Placeholders.ELEMENT)
-      .add(Placeholders.DISPLAY_NAME)
-      .add(Placeholders.SELECTED_ABILITY)
-      .add(Placeholders.ABILITY_INFO);
+      .add(Placeholder.ELEMENTS)
+      .add(Placeholder.ELEMENT)
+      .add(Placeholder.DISPLAY_NAME)
+      .add(Placeholder.SELECTED_ABILITY)
+      .add(Placeholder.ABILITY_INFO);
   }
 
   public static final class Builder {

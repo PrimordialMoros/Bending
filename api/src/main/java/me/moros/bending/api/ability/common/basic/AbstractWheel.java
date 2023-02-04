@@ -23,17 +23,17 @@ import java.util.Collection;
 
 import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.Updatable;
+import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Disk;
 import me.moros.bending.api.collision.geometry.OBB;
 import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.collision.geometry.Sphere;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.raytrace.Context;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.collision.CollisionUtil;
 import me.moros.math.Vector3d;
 
 public abstract class AbstractWheel implements Updatable, SimpleAbility {

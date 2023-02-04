@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.TickEffectEvent;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.user.User;

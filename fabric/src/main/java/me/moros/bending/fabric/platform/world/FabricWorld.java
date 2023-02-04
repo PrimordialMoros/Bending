@@ -25,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.collision.geometry.AABB;
+import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
+import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
@@ -33,8 +35,6 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.raytrace.CompositeRayTrace;
-import me.moros.bending.api.raytrace.Context;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.fabric.mixin.accessor.ChunkMapAccess;
 import me.moros.bending.fabric.mixin.accessor.FallingBlockEntityAccess;

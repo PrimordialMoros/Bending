@@ -37,7 +37,7 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.platform.world.World.Dimension;
-import me.moros.bending.api.util.WorldUtil;
+import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.math.FastMath;

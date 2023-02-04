@@ -25,8 +25,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.nbt.CompoundTag;

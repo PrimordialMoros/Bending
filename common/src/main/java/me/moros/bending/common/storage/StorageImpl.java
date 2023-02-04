@@ -46,8 +46,8 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.storage.BendingStorage;
-import me.moros.bending.api.user.profile.BenderData;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
 import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageDataSource;
@@ -107,20 +107,20 @@ public final class StorageImpl implements BendingStorage {
   }
 
   @Override
-  public PlayerProfile createProfile(UUID uuid) {
-    PlayerProfile profile = loadProfile(uuid);
+  public PlayerBenderProfile createProfile(UUID uuid) {
+    PlayerBenderProfile profile = loadProfile(uuid);
     if (profile == null) {
       profile = DB.withHandle(handle -> {
         int id = handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
           .executeAndReturnGeneratedKeys(("player_id")).mapTo(int.class).one();
-        return new PlayerProfile(id);
+        return BenderProfile.of(id, true);
       });
     }
     return profile;
   }
 
   @Override
-  public CompletableFuture<@Nullable PlayerProfile> loadProfileAsync(UUID uuid) {
+  public CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid) {
     return Tasker.async().submit(() -> loadProfile(uuid)).exceptionally(t -> {
       dataSource.logger().error(t.getMessage(), t);
       return null;
@@ -128,7 +128,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   @Override
-  public void saveProfilesAsync(Iterable<PlayerProfile> profiles) {
+  public void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles) {
     Tasker.async().submit(() -> {
       for (var profileToSave : profiles) {
         updateProfile(profileToSave);
@@ -175,42 +175,41 @@ public final class StorageImpl implements BendingStorage {
     Tasker.async().submit(() -> deletePresetExact(presetId)).exceptionally(this::logError);
   }
 
-  private @Nullable PlayerProfile loadProfile(UUID uuid) {
-    PlayerProfile temp = DB.withHandle(handle ->
+  private @Nullable PlayerBenderProfile loadProfile(UUID uuid) {
+    PlayerBenderProfile temp = DB.withHandle(handle ->
       handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
         .bind(0, uuid).map(this::profileRowMapper).findOne().orElse(null)
     );
     if (temp != null && temp.id() > 0) {
       int id = temp.id();
-      BenderData data = new BenderData(getSlots(id), getElements(id), getPresets(id));
-      return new PlayerProfile(id, temp.board(), data);
+      return BenderProfile.of(id, temp.board(), BenderProfile.of(getSlots(id), getElements(id), getPresets(id)));
     }
     return null;
   }
 
-  private void updateProfile(PlayerProfile profile) {
+  private void updateProfile(PlayerBenderProfile profile) {
     DB.useHandle(handle ->
       handle.createUpdate(SqlQueries.PLAYER_UPDATE_PROFILE.query())
         .bind(0, profile.board()).bind(1, profile.id()).execute()
     );
   }
 
-  private void saveElements(PlayerProfile profile) {
+  private void saveElements(PlayerBenderProfile profile) {
     DB.useHandle(handle -> {
       int id = profile.id();
       handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE.query()).bind(0, id).execute();
       PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT.query());
-      for (Element element : profile.benderData().elements()) {
+      for (Element element : profile.elements()) {
         batch.bind(0, id).bind(1, element.name().toLowerCase(Locale.ROOT)).add();
       }
       batch.execute();
     });
   }
 
-  private void saveSlots(PlayerProfile profile) {
+  private void saveSlots(PlayerBenderProfile profile) {
     DB.useHandle(handle -> {
       int id = profile.id();
-      List<AbilityDescription> abilities = profile.benderData().slots();
+      List<AbilityDescription> abilities = profile.slots();
       handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE.query()).bind(0, id).execute();
       PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT.query());
       int size = abilities.size();
@@ -330,9 +329,9 @@ public final class StorageImpl implements BendingStorage {
     return null;
   }
 
-  private @Nullable PlayerProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
+  private @Nullable PlayerBenderProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
     int id = rs.getInt("player_id");
-    return id > 0 ? new PlayerProfile(id, rs.getBoolean("board")) : null;
+    return id > 0 ? BenderProfile.of(id, rs.getBoolean("board")) : null;
   }
 
   private Entry<String, Integer> abilityRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {

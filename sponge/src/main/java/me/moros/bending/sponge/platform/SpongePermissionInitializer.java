@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import me.moros.bending.common.platform.PermissionInitializer;
+import me.moros.bending.common.util.PermissionInitializer;
 import net.kyori.adventure.util.TriState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.SubjectData;

@@ -25,7 +25,7 @@ import java.util.function.Function;
 import me.moros.bending.api.protection.Protection;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.BendingPlugin;
-import me.moros.bending.common.platform.Initializer;
+import me.moros.bending.common.util.Initializer;
 import me.moros.bending.paper.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.paper.protection.plugin.LWCProtection;
 import me.moros.bending.paper.protection.plugin.TownyProtection;

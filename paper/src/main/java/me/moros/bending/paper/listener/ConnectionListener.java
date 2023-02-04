@@ -30,9 +30,8 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerProfile;
+import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
 import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.entity.Player;
@@ -44,12 +43,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public record ConnectionListener(Game game, BendingPlugin plugin,
-                                 AsyncLoadingCache<UUID, PlayerProfile> profileCache) implements Listener {
+                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements Listener {
   public ConnectionListener(Game game, BendingPlugin plugin) {
     this(game, plugin, createCache(game));
   }
 
-  private static AsyncLoadingCache<UUID, PlayerProfile> createCache(Game game) {
+  private static AsyncLoadingCache<UUID, PlayerBenderProfile> createCache(Game game) {
     return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
       .buildAsync(game.storage()::createProfile);
   }
@@ -60,7 +59,7 @@ public record ConnectionListener(Game game, BendingPlugin plugin,
     long startTime = System.currentTimeMillis();
     try {
       // Timeout after 1000ms to not block the login thread excessively
-      PlayerProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
+      PlayerBenderProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
       long deltaTime = System.currentTimeMillis() - startTime;
       if (profile != null && deltaTime > 500) {
         plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
@@ -76,9 +75,9 @@ public record ConnectionListener(Game game, BendingPlugin plugin,
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
     UUID uuid = player.getUniqueId();
-    PlayerProfile profile = profileCache.synchronous().get(uuid);
+    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
     if (profile != null) {
-      User user = BendingPlayer.createUser(game, new BukkitPlayer(player), profile).orElse(null);
+      User user = User.create(game, new BukkitPlayer(player), profile).orElse(null);
       if (user != null) {
         Registries.BENDERS.register(user);
         game.abilityManager(user.worldKey()).createPassives(user);

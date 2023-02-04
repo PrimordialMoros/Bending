@@ -138,24 +138,4 @@ public class StateChain implements Updatable {
   public Collection<Block> chainStore() {
     return chainStore;
   }
-
-  private static final class DummyState implements State {
-    private static final State INSTANCE = new DummyState();
-
-    private DummyState() {
-    }
-
-    @Override
-    public void start(StateChain chain) {
-    }
-
-    @Override
-    public void complete() {
-    }
-
-    @Override
-    public UpdateResult update() {
-      return UpdateResult.REMOVE;
-    }
-  }
 }

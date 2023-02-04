@@ -25,13 +25,13 @@ import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.Updatable;
+import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.collision.CollisionUtil;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;

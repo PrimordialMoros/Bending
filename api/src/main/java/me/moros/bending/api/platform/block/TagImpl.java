@@ -24,9 +24,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.registry.Container;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.key.Key;
 
 record TagImpl(Key key, Supplier<Container<BlockType>> supplier) implements BlockTag {

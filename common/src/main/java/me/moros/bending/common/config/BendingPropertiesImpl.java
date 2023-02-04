@@ -27,17 +27,17 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public final class BendingPropertiesImpl extends Configurable implements BendingProperties {
-  private long earthRevertTime = BendingProperties.super.earthRevertTime();
-  private long fireRevertTime = BendingProperties.super.fireRevertTime();
-  private long explosionRevertTime = BendingProperties.super.explosionRevertTime();
-  private long iceRevertTime = BendingProperties.super.iceRevertTime();
+  private long earthRevertTime = Holder.DEFAULTS.earthRevertTime();
+  private long fireRevertTime = Holder.DEFAULTS.fireRevertTime();
+  private long explosionRevertTime = Holder.DEFAULTS.explosionRevertTime();
+  private long iceRevertTime = Holder.DEFAULTS.iceRevertTime();
 
-  private double explosionKnockback = BendingProperties.super.explosionKnockback();
+  private double explosionKnockback = Holder.DEFAULTS.explosionKnockback();
 
-  private double metalModifier = BendingProperties.super.metalModifier();
-  private double magmaModifier = BendingProperties.super.magmaModifier();
-  private double moonModifier = BendingProperties.super.moonModifier();
-  private double sunModifier = BendingProperties.super.sunModifier();
+  private double metalModifier = Holder.DEFAULTS.metalModifier();
+  private double magmaModifier = Holder.DEFAULTS.magmaModifier();
+  private double moonModifier = Holder.DEFAULTS.moonModifier();
+  private double sunModifier = Holder.DEFAULTS.sunModifier();
 
   private boolean generateLight = BendingProperties.super.canGenerateLight();
 

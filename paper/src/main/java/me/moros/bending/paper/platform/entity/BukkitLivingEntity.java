@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.functional.Suppliers;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
@@ -34,6 +33,7 @@ import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.item.BukkitInventory;

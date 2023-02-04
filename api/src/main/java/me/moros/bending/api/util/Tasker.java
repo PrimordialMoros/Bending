@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.util;
 
-import java.util.Objects;
-
 import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.CompositeExecutor;
 import me.moros.tasker.executor.SyncExecutor;
@@ -30,23 +28,24 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * Utility class to easily schedule sync, async tasks.
  */
 public final class Tasker {
-  private static SyncExecutor SYNC;
-  private static AsyncExecutor ASYNC;
-
-  public static void inject(CompositeExecutor compositeExecutor) {
-    Objects.requireNonNull(compositeExecutor);
-    if (SYNC != null || ASYNC != null) {
-      throw new RuntimeException("Executor has already been injected!");
-    }
-    SYNC = compositeExecutor.sync();
-    ASYNC = compositeExecutor.async();
+  private Tasker() {
   }
 
+  private static CompositeExecutor EXECUTOR;
+
+  /**
+   * Get the sync task executor.
+   * @return the sync task executor
+   */
   public static @MonotonicNonNull SyncExecutor sync() {
-    return SYNC;
+    return EXECUTOR.sync();
   }
 
+  /**
+   * Get the async task executor.
+   * @return the async task executor
+   */
   public static @MonotonicNonNull AsyncExecutor async() {
-    return ASYNC;
+    return EXECUTOR.async();
   }
 }

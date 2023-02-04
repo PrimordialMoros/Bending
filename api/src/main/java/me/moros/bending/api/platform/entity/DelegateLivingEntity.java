@@ -22,11 +22,11 @@ package me.moros.bending.api.platform.entity;
 import java.util.Collection;
 
 import me.moros.bending.api.collision.geometry.Ray;
+import me.moros.bending.api.collision.raytrace.ContextBuilder;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.property.BooleanProperty;
-import me.moros.bending.api.raytrace.ContextBuilder;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;

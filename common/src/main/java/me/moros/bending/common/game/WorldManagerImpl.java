@@ -68,7 +68,7 @@ public final class WorldManagerImpl implements WorldManager {
 
   @Override
   public AbilityManager instance(Key world) {
-    return isEnabled(world) ? computePair(world).abilities : AbilityManager.dummy();
+    return isEnabled(world) ? computePair(world).abilities : DummyAbilityManager.INSTANCE;
   }
 
   private ManagerPair computePair(Key world) {
