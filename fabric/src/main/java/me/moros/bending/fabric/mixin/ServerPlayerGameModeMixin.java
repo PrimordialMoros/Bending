@@ -38,7 +38,7 @@ public abstract class ServerPlayerGameModeMixin {
   protected ServerPlayer player;
 
   @Inject(method = "setGameModeForPlayer", at = @At(value = "HEAD"))
-  private void bending$onGameModeChange(GameType gameType, @Nullable GameType gameType2, CallbackInfo ci) {
+  private void bending$onSetGameModeForPlayer(GameType gameType, @Nullable GameType gameType2, CallbackInfo ci) {
     ServerPlayerEvents.CHANGE_GAMEMODE.invoker().onGameModeChange(this.player, gameType);
   }
 }

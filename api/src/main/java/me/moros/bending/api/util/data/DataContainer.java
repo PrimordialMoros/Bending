@@ -62,6 +62,12 @@ public interface DataContainer extends DataHolder {
    */
   <T extends Enum<T>> T toggle(DataKey<T> key, T defaultValue);
 
+  /**
+   * Get whether this data container is empty.
+   * @return true if no key-value mappings are present, false otherwise
+   */
+  boolean isEmpty();
+
   static DataContainer simple() {
     return new SimpleDataContainer(new ConcurrentHashMap<>());
   }

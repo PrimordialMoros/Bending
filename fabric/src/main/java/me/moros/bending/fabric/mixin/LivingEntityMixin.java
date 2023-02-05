@@ -19,29 +19,17 @@
 
 package me.moros.bending.fabric.mixin;
 
-import me.moros.bending.fabric.event.ServerMobEvents;
+import me.moros.bending.fabric.event.ServerEntityEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(Mob.class)
-public abstract class MobMixin {
-  @Shadow
-  private LivingEntity target;
-
-  @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
-  private void bending$onSetTarget(@Nullable LivingEntity livingEntity, CallbackInfo ci) {
-    Mob bending$this = (Mob) (Object) this;
-    if (bending$this.level.isClientSide || livingEntity == null || target == livingEntity) {
-      return;
-    }
-    if (!ServerMobEvents.TARGET.invoker().onEntityTarget(bending$this, livingEntity)) {
-      ci.cancel();
-    }
+@Mixin(value = LivingEntity.class, priority = 800)
+public abstract class LivingEntityMixin {
+  @ModifyVariable(method = "hurt", at = @At(value = "INVOKE", target = "net/minecraft/world/entity/LivingEntity.isSleeping()Z"), ordinal = 0, argsOnly = true)
+  private float bending$onHurt(float originalValue, DamageSource source, float amount) {
+    return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
   }
 }

@@ -17,22 +17,28 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin.accessor;
+package me.moros.bending.fabric.event;
 
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.ItemEntity;
 
-@Mixin(FallingBlockEntity.class)
-public interface FallingBlockEntityAccess {
-  @Accessor("cancelDrop")
-  void bending$cancelDrop(boolean cancelDrop);
+public final class ServerInventoryEvents {
+  private ServerInventoryEvents() {
+  }
 
-  @Invoker("<init>")
-  static FallingBlockEntity bending$create(Level level, double d, double e, double f, BlockState blockState) {
-    throw new AssertionError();
+  public static final Event<Hopper> HOPPER = EventFactory.createArrayBacked(Hopper.class, callbacks -> (container, itemEntity) -> {
+    for (var callback : callbacks) {
+      if (!callback.onItemPull(container, itemEntity)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  @FunctionalInterface
+  public interface Hopper {
+    boolean onItemPull(Container container, ItemEntity itemEntity);
   }
 }

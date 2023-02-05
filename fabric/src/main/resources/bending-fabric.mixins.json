@@ -13,7 +13,13 @@
     "accessor.ServerLoginPacketListenerImplAccess",
     "BaseContainerBlockEntityMixin",
     "BeaconBlockEntityMixin",
+    "EntityMixin",
+    "FallingBlockEntityMixin",
+    "HopperBlockEntityMixin",
+    "ItemEntityMixin",
+    "LivingEntityMixin",
     "MobMixin",
+    "ProjectileMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerPlayerGameModeMixin"
   ],

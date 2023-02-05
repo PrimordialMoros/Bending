@@ -41,7 +41,7 @@ public abstract class ServerGamePacketListenerImplMixin {
 
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
-  private void bending$interactEvent(ServerboundSwingPacket packet, CallbackInfo ci) {
+  private void bending$onInteractEvent(ServerboundSwingPacket packet, CallbackInfo ci) {
     if (ServerPlayerEvents.INTERACT.invoker().onInteract(this.player, packet.getHand()) != InteractionResult.PASS) {
       ci.cancel();
     }
@@ -49,7 +49,7 @@ public abstract class ServerGamePacketListenerImplMixin {
 
   @Inject(method = "handlePlayerCommand", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
-  private void bending$handlePlayerCommand(ServerboundPlayerCommandPacket packet, CallbackInfo ci) {
+  private void bending$onHandlePlayerCommand(ServerboundPlayerCommandPacket packet, CallbackInfo ci) {
     var action = packet.getAction();
     switch (action) {
       case PRESS_SHIFT_KEY, RELEASE_SHIFT_KEY -> {
@@ -69,7 +69,7 @@ public abstract class ServerGamePacketListenerImplMixin {
     at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I"),
     slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
   )
-  private void bending$heldSlot(ServerboundSetCarriedItemPacket packet, CallbackInfo ci) {
+  private void bending$onHandleSetCarriedItem(ServerboundSetCarriedItemPacket packet, CallbackInfo ci) {
     int oldSlot = this.player.getInventory().selected;
     int newSlot = packet.getSlot();
     ServerPlayerEvents.CHANGE_SLOT.invoker().onHeldSlotChange(this.player, oldSlot, newSlot);

@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -91,6 +92,8 @@ public class FabricBending implements BendingPlugin {
       ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
       ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
       ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager);
+
+      Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
 
       registerLifecycleListeners();
       new AbilityInitializer();

@@ -29,7 +29,7 @@ public final class ServerMobEvents {
   }
 
   public static final Event<Target> TARGET = EventFactory.createArrayBacked(Target.class, callbacks -> (entity, target) -> {
-    for (Target callback : callbacks) {
+    for (var callback : callbacks) {
       if (!callback.onEntityTarget(entity, target)) {
         return false;
       }

@@ -62,6 +62,11 @@ class SimpleDataContainer implements DataContainer {
     return newValue;
   }
 
+  @Override
+  public boolean isEmpty() {
+    return data.isEmpty();
+  }
+
   private <T extends Enum<T>> T toggle(T oldValue) {
     T[] values = oldValue.getDeclaringClass().getEnumConstants();
     int index = (oldValue.ordinal() + 1) % values.length;

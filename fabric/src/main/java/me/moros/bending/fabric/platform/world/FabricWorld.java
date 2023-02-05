@@ -211,6 +211,7 @@ public record FabricWorld(ServerLevel handle) implements World {
     fabricEntity.time = 1; // Is this needed?
     fabricEntity.setNoGravity(!gravity);
     fabricEntity.dropItem = false;
+    ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
     handle().addFreshEntity(fabricEntity);
     return PlatformAdapter.fromFabricEntity(fabricEntity);
   }

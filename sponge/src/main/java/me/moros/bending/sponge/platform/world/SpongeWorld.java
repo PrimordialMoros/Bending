@@ -45,6 +45,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -242,8 +243,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public CompletableFuture<?> loadChunkAsync(int x, int z) {
-    // In shock and awe of the amazing sponge api
-    return CompletableFuture.completedFuture(handle().loadChunk(x, 0, z, false));
+    return nms().getChunkSource().getChunkFuture(x, z, ChunkStatus.EMPTY, false);
   }
 
   @Override

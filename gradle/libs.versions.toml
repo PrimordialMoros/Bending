@@ -41,7 +41,7 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version = "1.7.36" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version = "1.7.36" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.2" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.36.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.37.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
 
@@ -65,8 +65,8 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 
 # Databases
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.29" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.5.1" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.2" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.5.3" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.36.0.3" }
 h2 = { module = "com.h2database:h2", version = "2.1.214" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.1" }
@@ -83,7 +83,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.8" }
 grief-prevention = { module = "com.github.TechFOrtress:GriefPrevention", version = "16.18" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.98.4.21" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.98.6.4" }
 lwc = { module = "com.griefcraft:lwc", version = "2.2.9-dev" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.7" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.2" }
@@ -104,7 +104,7 @@ drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.6.8" }
-checker = { id = "org.checkerframework", version = "0.6.21" }
+checker = { id = "org.checkerframework", version = "0.6.23" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.4.1" }

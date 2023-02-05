@@ -19,28 +19,29 @@
 
 package me.moros.bending.fabric.mixin;
 
-import me.moros.bending.fabric.event.ServerMobEvents;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.fabric.event.ServerEntityEvents;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Mob.class)
-public abstract class MobMixin {
+@Mixin(Entity.class)
+public abstract class EntityMixin {
   @Shadow
-  private LivingEntity target;
+  public Level level;
 
-  @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
-  private void bending$onSetTarget(@Nullable LivingEntity livingEntity, CallbackInfo ci) {
-    Mob bending$this = (Mob) (Object) this;
-    if (bending$this.level.isClientSide || livingEntity == null || target == livingEntity) {
+  @Inject(method = "spawnAtLocation", at = @At("HEAD"), cancellable = true)
+  public void bending$onSpawnAtLocation(ItemStack stack, float offsetY, CallbackInfoReturnable<ItemEntity> ci) {
+    if (level.isClientSide || stack.isEmpty()) {
       return;
     }
-    if (!ServerMobEvents.TARGET.invoker().onEntityTarget(bending$this, livingEntity)) {
+    if (!ServerEntityEvents.DROP_ITEM.invoker().onDropItem((ServerLevel) this.level, stack)) {
       ci.cancel();
     }
   }
