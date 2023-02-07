@@ -17,15 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.board;
+package me.moros.bending.fabric.gui;
 
 import java.util.List;
 
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.BendingPlayer;
-import me.moros.bending.common.board.AbstractBoard;
+import me.moros.bending.common.gui.AbstractBoard;
+import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.ScoreboardUtil;
-import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.ServerScoreboard;
@@ -43,7 +43,7 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
 
   public BoardImpl(BendingPlayer user) {
     super(user);
-    this.fabricPlayer = ((FabricPlayer) user.entity()).handle();
+    this.fabricPlayer = PlatformAdapter.toFabricEntity(user);
     bendingBoard = new ServerScoreboard(fabricPlayer.server);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
     bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);

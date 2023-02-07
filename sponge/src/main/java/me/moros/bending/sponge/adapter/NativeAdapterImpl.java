@@ -33,9 +33,8 @@ import me.moros.bending.common.adapter.AbstractNativeAdapter;
 import me.moros.bending.sponge.mixin.AdvancementProgressAccess;
 import me.moros.bending.sponge.mixin.CriterionProgressAccess;
 import me.moros.bending.sponge.mixin.EntityAccess;
+import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.block.SpongeBlockState;
-import me.moros.bending.sponge.platform.entity.SpongeEntity;
-import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import me.moros.bending.sponge.platform.world.SpongeWorld;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
@@ -70,12 +69,12 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ServerPlayer adapt(Player player) {
-    return (ServerPlayer) ((SpongePlayer) player).handle();
+    return (ServerPlayer) PlatformAdapter.toSpongeEntity(player);
   }
 
   @Override
   protected net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return (net.minecraft.world.entity.Entity) ((SpongeEntity) entity).handle();
+    return (net.minecraft.world.entity.Entity) PlatformAdapter.toSpongeEntity(entity);
   }
 
   @Override

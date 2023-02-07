@@ -48,7 +48,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.item.inventory.Equipable;
 
 public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
-
   public SpongeLivingEntity(Living handle) {
     super(handle);
   }
@@ -75,7 +74,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage, Entity source) {
-    var ds = EntityDamageSource.builder().type(DamageTypes.CUSTOM).entity(((SpongeEntity) source).handle()).build();
+    var ds = EntityDamageSource.builder().type(DamageTypes.CUSTOM).entity(PlatformAdapter.toSpongeEntity(source)).build();
     return handle().damage(damage, ds);
   }
 
@@ -114,7 +113,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public boolean addPotion(Potion potion) {
-    handle().potionEffects().add(PlatformAdapter.toSpongePotion(potion));
+    handle().offerSingle(Keys.POTION_EFFECTS, PlatformAdapter.toSpongePotion(potion));
     return true;
   }
 
@@ -143,9 +142,9 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   @Override
   public void removePotion(PotionEffect effect) {
     var spongeEffect = PlatformAdapter.toSpongePotion(effect);
-    handle().potionEffects().transform(l -> {
-      l.removeIf(p -> p.type().equals(spongeEffect));
-      return l;
+    handle().transform(Keys.POTION_EFFECTS, effects -> {
+      effects.removeIf(p -> p.type().equals(spongeEffect));
+      return effects;
     });
   }
 
@@ -166,7 +165,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public void remainingAir(int amount) {
-    handle().remainingAir().set(amount);
+    handle().offer(Keys.REMAINING_AIR, amount);
   }
 
   @Override
@@ -175,9 +174,9 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
     var arrow = w.createEntity(EntityTypes.ARROW, origin.to(org.spongepowered.math.vector.Vector3d.class));
     ((net.minecraft.world.entity.projectile.Arrow) arrow).shoot(direction.x(), direction.y(), direction.z(), (float) power, 0);
     arrow.offer(Keys.SHOOTER, handle());
-    arrow.gravityAffected().set(false);
-    arrow.invulnerable().set(true);
-    arrow.pickupRule().set(PickupRules.DISALLOWED.get());
+    arrow.offer(Keys.IS_GRAVITY_AFFECTED, false);
+    arrow.offer(Keys.INVULNERABLE, true);
+    arrow.offer(Keys.PICKUP_RULE, PickupRules.DISALLOWED.get());
     w.spawnEntity(arrow);
     return PlatformAdapter.fromSpongeEntity(arrow);
   }

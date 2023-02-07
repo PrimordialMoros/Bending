@@ -35,6 +35,7 @@ import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -47,9 +48,13 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin,
-                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements FabricListener {
+                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements FabricListener, Initializer {
   public ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin, BendingStorage storage) {
     this(gameSupplier, plugin, createCache(storage));
+  }
+
+  @Override
+  public void init() {
     ServerLoginConnectionEvents.QUERY_START.register(this::onPlayerPreLogin);
     ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);
     ServerPlayConnectionEvents.DISCONNECT.register(this::onPlayerLogout);

@@ -19,10 +19,13 @@
 
 package me.moros.bending.paper.platform.entity;
 
+import java.util.Locale;
+
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Inventory;
+import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.item.BukkitPlayerInventory;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.inventory.MainHand;
@@ -40,6 +43,11 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   @Override
   public boolean hasPermission(String permission) {
     return handle().hasPermission(permission);
+  }
+
+  @Override
+  public Locale locale() {
+    return handle().locale();
   }
 
   @Override
@@ -79,6 +87,6 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
 
   @Override
   public boolean canSee(Entity other) {
-    return handle().canSee(((BukkitEntity) other).handle());
+    return handle().canSee(PlatformAdapter.toBukkitEntity(other));
   }
 }

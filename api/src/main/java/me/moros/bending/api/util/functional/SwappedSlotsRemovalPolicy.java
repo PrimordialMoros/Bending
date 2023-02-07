@@ -20,7 +20,6 @@
 package me.moros.bending.api.util.functional;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 
 /**
@@ -35,7 +34,7 @@ public final class SwappedSlotsRemovalPolicy implements RemovalPolicy {
 
   @Override
   public boolean test(User user, AbilityDescription desc) {
-    return user instanceof BendingPlayer && !expected.equals(user.selectedAbility());
+    return !expected.equals(user.selectedAbility());
   }
 
   /**

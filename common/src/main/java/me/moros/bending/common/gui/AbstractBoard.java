@@ -17,13 +17,13 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.board;
+package me.moros.bending.common.gui;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.board.Board;
+import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.text.Component;

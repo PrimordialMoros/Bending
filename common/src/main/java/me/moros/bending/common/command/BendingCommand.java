@@ -22,6 +22,7 @@ package me.moros.bending.common.command;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
@@ -39,11 +40,11 @@ import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.board.Board;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.config.attribute.ModifyPolicy;
+import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -213,7 +214,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
         }
       } else {
         AbilityDescription result = Registries.ABILITIES.fromString(query);
-        if (result != null && !result.hidden() && hasPermission(sender, result)) {
+        if (result != null && !result.hidden() && permissionPredicate(sender).test(result)) {
           onInfo(sender, result);
           return;
         }
@@ -265,14 +266,14 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
         Message.GUI_NO_PERMISSION.send(player);
         return;
       }
-      Platform.instance().factory().buildMenu(this, player);
+      Platform.instance().factory().buildMenu(this, player).ifPresent(g -> g.show(player));
     } else {
       onElementChoose(player, element);
     }
   }
 
   private void sendElementNotification(User user, Element element) {
-    if (user.entity() instanceof Player player) {
+    if (user instanceof Player player) {
       player.sendNotification(Item.NETHER_STAR, Message.ELEMENT_TOAST_NOTIFICATION.build(element.displayName()));
     }
   }
@@ -444,36 +445,39 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
   }
 
   private AbilityDisplay collectAbilities(Audience user, Element element) {
+    var permissionChecker = permissionPredicate(user);
     var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> hasPermission(user, desc))
+      .filter(permissionChecker)
       .map(AbilityDescription::meta)
       .toList();
     return new AbilityDisplay(Message.ABILITIES.build(), components);
   }
 
   private AbilityDisplay collectSequences(Audience user, Element element) {
+    var permissionChecker = permissionPredicate(user);
     var components = Registries.SEQUENCES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> hasPermission(user, desc))
+      .filter(permissionChecker)
       .map(AbilityDescription::meta)
       .toList();
     return new AbilityDisplay(Message.SEQUENCES.build(), components);
   }
 
   private AbilityDisplay collectPassives(Audience user, Element element) {
+    var permissionChecker = permissionPredicate(user);
     var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
-      .filter(desc -> hasPermission(user, desc))
+      .filter(permissionChecker)
       .map(AbilityDescription::meta)
       .toList();
     return new AbilityDisplay(Message.PASSIVES.build(), components);
   }
 
-  private boolean hasPermission(Audience user, AbilityDescription desc) {
+  private Predicate<AbilityDescription> permissionPredicate(Audience user) {
     PermissionChecker checker = user.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.NOT_SET));
-    return desc.permissions().stream().allMatch(checker);
+    return desc -> desc.permissions().stream().allMatch(checker);
   }
 
   private static final class AbilityDisplay implements Iterable<Component> {

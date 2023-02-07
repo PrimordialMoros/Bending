@@ -17,34 +17,43 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.board;
+package me.moros.bending.api.platform.entity;
 
-import me.moros.bending.api.ability.AbilityDescription;
+import java.util.Locale;
 
-final class DummyBoard implements Board {
-  static final Board INSTANCE = new DummyBoard();
+import me.moros.bending.api.platform.entity.player.GameMode;
+import me.moros.bending.api.platform.entity.player.Player;
+import me.moros.bending.api.platform.item.Inventory;
 
-  private DummyBoard() {
+/**
+ * Represents a platform player.
+ */
+public interface DelegatePlayer extends DelegateLivingEntity, Player {
+  @Override
+  Player entity();
+
+  @Override
+  default Inventory inventory() {
+    return entity().inventory();
   }
 
   @Override
-  public boolean isEnabled() {
-    return false;
+  default boolean isOnGround() {
+    return entity().isOnGround();
   }
 
   @Override
-  public void disableScoreboard() {
+  default Locale locale() {
+    return entity().locale();
   }
 
   @Override
-  public void updateAll() {
+  default GameMode gamemode() {
+    return entity().gamemode();
   }
 
   @Override
-  public void activeSlot(int oldSlot, int newSlot) {
-  }
-
-  @Override
-  public void updateMisc(AbilityDescription desc, boolean show) {
+  default boolean canSee(Entity other) {
+    return entity().canSee(other);
   }
 }

@@ -50,7 +50,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -122,17 +121,6 @@ public class UserListener extends SpongeListener {
         entity.remove();
       }
     }
-  }
-
-  @Listener(order = Order.EARLY)
-  public void onFallingBlock(CollideBlockEvent event, @First FallingBlock entity) {
-    if (disabledWorld(entity)) {
-      return;
-    }
-    TempEntity.MANAGER.get(PlatformAdapter.fromSpongeEntity(entity).id()).ifPresent(temp -> {
-      event.setCancelled(true);
-      temp.revert();
-    });
   }
 
   @Listener(order = Order.EARLY)

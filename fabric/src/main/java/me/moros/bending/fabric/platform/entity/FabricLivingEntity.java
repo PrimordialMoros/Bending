@@ -41,6 +41,7 @@ import me.moros.bending.fabric.platform.item.FabricInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
@@ -78,12 +79,13 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   @Override
   public boolean damage(double damage, Entity source) {
     DamageSource damageSource;
-    if (source instanceof FabricPlayer fabricPlayer) {
-      damageSource = DamageSource.playerAttack(fabricPlayer.handle());
-    } else if (source instanceof FabricLivingEntity fabricLiving) {
-      damageSource = DamageSource.mobAttack(fabricLiving.handle());
+    var entity = PlatformAdapter.toFabricEntity(source);
+    if (entity instanceof ServerPlayer player) {
+      damageSource = DamageSource.playerAttack(player);
+    } else if (entity instanceof net.minecraft.world.entity.LivingEntity living) {
+      damageSource = DamageSource.mobAttack(living);
     } else {
-      damageSource = DamageSource.indirectMobAttack(((FabricEntity) source).handle(), null);
+      damageSource = DamageSource.indirectMobAttack(entity, null);
     }
     return handle().hurt(damageSource, (float) damage);
   }

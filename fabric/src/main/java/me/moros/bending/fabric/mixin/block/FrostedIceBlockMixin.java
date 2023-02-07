@@ -17,31 +17,25 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.fabric.mixin.block;
 
-import me.moros.bending.fabric.event.ServerMobEvents;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.fabric.event.ServerBlockEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.FrostedIceBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Mob.class)
-public abstract class MobMixin {
-  @Shadow
-  private LivingEntity target;
-
-  @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
-  private void bending$onSetTarget(@Nullable LivingEntity livingEntity, CallbackInfo ci) {
-    Mob bending$this = (Mob) (Object) this;
-    if (bending$this.level.isClientSide || livingEntity == null || target == livingEntity) {
-      return;
-    }
-    if (!ServerMobEvents.TARGET.invoker().onEntityTarget(bending$this, livingEntity)) {
-      ci.cancel();
+@Mixin(FrostedIceBlock.class)
+public abstract class FrostedIceBlockMixin {
+  @Inject(method = "slightlyMelt", at = @At("HEAD"), cancellable = true)
+  private void bending$onSlightlyMelt(BlockState state, Level level, BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
+    if (!level.isClientSide && !ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {
+      ci.setReturnValue(false);
     }
   }
 }

@@ -17,14 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge.board;
+package me.moros.bending.sponge.gui;
 
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.BendingPlayer;
-import me.moros.bending.common.board.AbstractBoard;
-import me.moros.bending.sponge.platform.entity.SpongePlayer;
+import me.moros.bending.common.gui.AbstractBoard;
+import me.moros.bending.sponge.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -35,15 +35,13 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 
 public final class BoardImpl extends AbstractBoard<Team> {
-  private static final LegacyComponentSerializer SERIALIZER = LegacyComponentSerializer.legacySection();
-
   private final ServerPlayer spongePlayer;
   private final Scoreboard bendingBoard;
   private final Objective bendingSlots;
 
   public BoardImpl(BendingPlayer user) {
     super(user);
-    this.spongePlayer = ((SpongePlayer) user.entity()).handle();
+    this.spongePlayer = PlatformAdapter.toSpongeEntity(user);
     bendingBoard = Scoreboard.builder().build();
     bendingSlots = Objective.builder().name("BendingBoard").criterion(Criteria.DUMMY)
       .displayName(Message.BENDING_BOARD_TITLE.build()).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build();
@@ -79,7 +77,7 @@ public final class BoardImpl extends AbstractBoard<Team> {
   protected Indexed<Team> createTeam(int slot, int textSlot) {
     Team team = Team.builder().name(String.valueOf(textSlot)).build();
     bendingBoard.registerTeam(team);
-    Component hidden = SERIALIZER.deserialize(generateInvisibleLegacyString(textSlot));
+    Component hidden = generateInvisibleLegacy(textSlot);
     team.addMember(hidden);
     bendingSlots.findOrCreateScore(hidden).setScore(-slot);
     return Indexed.create(team, textSlot);
@@ -89,5 +87,20 @@ public final class BoardImpl extends AbstractBoard<Team> {
   protected void removeTeam(Team team) {
     team.members().forEach(bendingBoard::removeScores);
     team.unregister();
+  }
+
+  private static final Component[] CHAT_CODES;
+
+  static {
+    var arr = NamedTextColor.NAMES.values().toArray(NamedTextColor[]::new);
+    CHAT_CODES = new Component[arr.length];
+    for (int i = 0; i < arr.length; i++) {
+      CHAT_CODES[i] = Component.text(" ", arr[i]);
+    }
+  }
+
+  private static Component generateInvisibleLegacy(int slot) {
+    Component hidden = CHAT_CODES[slot % CHAT_CODES.length];
+    return slot <= CHAT_CODES.length ? hidden : hidden.append(generateInvisibleLegacy(slot - CHAT_CODES.length));
   }
 }

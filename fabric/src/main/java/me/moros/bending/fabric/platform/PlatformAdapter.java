@@ -25,6 +25,9 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
+import me.moros.bending.api.platform.entity.DelegateEntity;
+import me.moros.bending.api.platform.entity.DelegateLivingEntity;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -138,6 +141,27 @@ public final class PlatformAdapter {
 
   public static Player fromFabricEntity(ServerPlayer entity) {
     return new FabricPlayer(entity);
+  }
+
+  public static Entity toFabricEntity(me.moros.bending.api.platform.entity.Entity entity) {
+    if (entity instanceof DelegateEntity delegate) {
+      return toFabricEntity(delegate.entity());
+    }
+    return ((FabricEntity) entity).handle();
+  }
+
+  public static LivingEntity toFabricEntity(me.moros.bending.api.platform.entity.LivingEntity entity) {
+    if (entity instanceof DelegateLivingEntity delegate) {
+      return toFabricEntity(delegate.entity());
+    }
+    return ((FabricLivingEntity) entity).handle();
+  }
+
+  public static ServerPlayer toFabricEntity(Player player) {
+    if (player instanceof DelegatePlayer delegate) {
+      return toFabricEntity(delegate.entity());
+    }
+    return ((FabricPlayer) player).handle();
   }
 
   public static DamageCause fromFabricCause(DamageSource type) {

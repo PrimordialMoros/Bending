@@ -28,8 +28,8 @@ import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
 import net.kyori.adventure.audience.Audience;
@@ -67,8 +67,8 @@ public final class UserParser<T extends Audience> implements ArgumentParser<T, U
   @Override
   public List<String> suggestions(final CommandContext<T> commandContext, final String input) {
     Predicate<User> canSee;
-    if (commandContext.getSender() instanceof BendingPlayer bp) {
-      canSee = e -> bp.entity().canSee(e.entity());
+    if (commandContext.getSender() instanceof Player player) {
+      canSee = player::canSee;
     } else {
       canSee = e -> true;
     }

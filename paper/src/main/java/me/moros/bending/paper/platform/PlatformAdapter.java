@@ -27,6 +27,9 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
+import me.moros.bending.api.platform.entity.DelegateEntity;
+import me.moros.bending.api.platform.entity.DelegateLivingEntity;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.potion.Potion;
@@ -181,6 +184,27 @@ public final class PlatformAdapter {
 
   public static me.moros.bending.api.platform.entity.player.Player fromBukkitEntity(Player entity) {
     return new BukkitPlayer(entity);
+  }
+
+  public static Entity toBukkitEntity(me.moros.bending.api.platform.entity.Entity entity) {
+    if (entity instanceof DelegateEntity delegate) {
+      return toBukkitEntity(delegate.entity());
+    }
+    return ((BukkitEntity) entity).handle();
+  }
+
+  public static LivingEntity toBukkitEntity(me.moros.bending.api.platform.entity.LivingEntity entity) {
+    if (entity instanceof DelegateLivingEntity delegate) {
+      return toBukkitEntity(delegate.entity());
+    }
+    return ((BukkitLivingEntity) entity).handle();
+  }
+
+  public static Player toBukkitEntity(me.moros.bending.api.platform.entity.player.Player player) {
+    if (player instanceof DelegatePlayer delegate) {
+      return toBukkitEntity(delegate.entity());
+    }
+    return ((BukkitPlayer) player).handle();
   }
 
   public static DamageCause fromBukkitCause(EntityDamageEvent.DamageCause cause) {

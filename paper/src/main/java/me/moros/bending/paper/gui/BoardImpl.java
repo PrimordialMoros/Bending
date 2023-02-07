@@ -17,12 +17,12 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.board;
+package me.moros.bending.paper.gui;
 
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.BendingPlayer;
-import me.moros.bending.common.board.AbstractBoard;
-import me.moros.bending.paper.platform.entity.BukkitPlayer;
+import me.moros.bending.common.gui.AbstractBoard;
+import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Criteria;
@@ -39,7 +39,7 @@ public final class BoardImpl extends AbstractBoard<Team> {
 
   public BoardImpl(BendingPlayer user) {
     super(user);
-    this.bukkitPlayer = ((BukkitPlayer) user.entity()).handle();
+    this.bukkitPlayer = PlatformAdapter.toBukkitEntity(user);
     bendingBoard = bukkitPlayer.getServer().getScoreboardManager().getNewScoreboard();
     bendingSlots = bendingBoard.registerNewObjective("BendingBoard", Criteria.DUMMY, Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
     bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);

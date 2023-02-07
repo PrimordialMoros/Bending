@@ -27,8 +27,6 @@ import me.moros.bending.common.adapter.AbstractNativeAdapter;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.block.FabricBlockState;
-import me.moros.bending.fabric.platform.entity.FabricEntity;
-import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
@@ -59,12 +57,12 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ServerPlayer adapt(Player player) {
-    return ((FabricPlayer) player).handle();
+    return PlatformAdapter.toFabricEntity(player);
   }
 
   @Override
   protected net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return ((FabricEntity) entity).handle();
+    return PlatformAdapter.toFabricEntity(entity);
   }
 
   @Override

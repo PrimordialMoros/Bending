@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.fabric.mixin.block.entity;
 
 import java.util.Optional;
 
@@ -26,12 +26,12 @@ import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.LockCode;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BeaconBlockEntity.class)
-public abstract class BeaconBlockEntityMixin implements Lockable {
+@Mixin(BaseContainerBlockEntity.class)
+public abstract class BaseContainerBlockEntityMixin implements Lockable {
   @Shadow
   private LockCode lockKey;
 

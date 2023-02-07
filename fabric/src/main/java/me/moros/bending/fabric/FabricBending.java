@@ -43,6 +43,7 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.hook.LuckPermsHook;
 import me.moros.bending.fabric.hook.PlaceholderHook;
@@ -78,7 +79,7 @@ public class FabricBending implements BendingPlugin {
   private final BendingStorage storage;
   private LoadPhase phase = LoadPhase.FIRST;
   private Game game;
-  private Collection<Object> listeners;
+  private Collection<Initializer> listeners;
 
   public FabricBending(Path dir, ModContainer container) {
     this.container = container;
@@ -138,6 +139,7 @@ public class FabricBending implements BendingPlugin {
         new ConnectionListener(this::game, this, storage),
         new WorldListener(this::game)
       );
+      listeners.forEach(Initializer::init);
     }
   }
 

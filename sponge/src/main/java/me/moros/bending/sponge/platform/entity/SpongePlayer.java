@@ -19,6 +19,9 @@
 
 package me.moros.bending.sponge.platform.entity;
 
+import java.util.Locale;
+import java.util.Objects;
+
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -28,6 +31,7 @@ import me.moros.bending.sponge.platform.item.SpongePlayerInventory;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -48,6 +52,11 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
   }
 
   @Override
+  public Locale locale() {
+    return handle().locale();
+  }
+
+  @Override
   public Inventory inventory() {
     return new SpongePlayerInventory(handle());
   }
@@ -64,7 +73,7 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
 
   @Override
   public void sneaking(boolean sneaking) {
-    handle().sneaking().set(sneaking);
+    handle().offer(Keys.IS_SNEAKING, sneaking);
   }
 
   @Override
@@ -74,12 +83,13 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
 
   @Override
   public GameMode gamemode() {
-    return GameMode.registry().getOrThrow(PlatformAdapter.fromRsk(handle().gameMode().get().key(RegistryTypes.GAME_MODE)));
+    var name = handle().gameMode().get().key(RegistryTypes.GAME_MODE).value();
+    return Objects.requireNonNull(GameMode.registry().fromString(name));
   }
 
   @Override
   public boolean canSee(Entity other) {
-    return handle().canSee(((SpongeEntity) other).handle());
+    return handle().canSee(PlatformAdapter.toSpongeEntity(other));
   }
 
   @Override

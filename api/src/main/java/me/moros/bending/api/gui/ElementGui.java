@@ -17,28 +17,10 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.event;
+package me.moros.bending.api.gui;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 
-public final class ServerMobEvents {
-  private ServerMobEvents() {
-  }
-
-  public static final Event<Target> TARGET = EventFactory.createArrayBacked(Target.class, callbacks -> (entity, target) -> {
-    for (var callback : callbacks) {
-      if (!callback.onEntityTarget(entity, target)) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  @FunctionalInterface
-  public interface Target {
-    boolean onEntityTarget(LivingEntity entity, Entity target);
-  }
+public interface ElementGui {
+  boolean show(Player player);
 }

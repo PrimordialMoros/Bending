@@ -25,8 +25,8 @@ import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.board.Board;
 import me.moros.bending.api.game.Game;
+import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.LivingEntity;

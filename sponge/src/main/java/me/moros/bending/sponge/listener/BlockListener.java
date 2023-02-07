@@ -70,7 +70,7 @@ public class BlockListener extends SpongeListener {
       }
       var op = transaction.operation();
       var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
-      if (op == Operations.PLACE.get()) {
+      if (op == Operations.PLACE.get() && cause != null) {
         onBlockPlace(block);
       } else if (op == Operations.BREAK.get()) {
         onBlockBreak(transaction, block, cause);

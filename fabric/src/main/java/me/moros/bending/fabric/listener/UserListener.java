@@ -19,6 +19,8 @@
 
 package me.moros.bending.fabric.listener;
 
+import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -29,16 +31,19 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
-import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
+import me.moros.bending.common.util.Initializer;
+import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
-import me.moros.bending.fabric.event.ServerMobEvents;
+import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
+import me.moros.bending.fabric.platform.AbilityDamageSource;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
@@ -46,7 +51,6 @@ import me.moros.bending.fabric.platform.item.ItemUtil;
 import me.moros.math.Vector3d;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -62,7 +66,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -77,12 +80,12 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record UserListener(Supplier<Game> gameSupplier) implements FabricListener {
-  public UserListener(Supplier<Game> gameSupplier) {
-    this.gameSupplier = gameSupplier;
+public record UserListener(Supplier<Game> gameSupplier) implements FabricListener, Initializer {
+  @Override
+  public void init() {
     net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.COPY_FROM.register(this::onPlayerRespawn);
-    me.moros.bending.fabric.event.ServerEntityEvents.PROJECTILE_HIT.register(this::onArrowHit);
-    me.moros.bending.fabric.event.ServerEntityEvents.FALLING_BLOCK.register(this::onFallingBlock);
+    ServerEntityEvents.PROJECTILE_HIT.register(this::onArrowHit);
+    ServerEntityEvents.ENTITY_MOVE.register(this::onUserMove);
     ServerPlayerEvents.INTERACT.register(this::onLeftClickAir);
     ServerPlayerEvents.TOGGLE_SNEAK.register(this::onUserSneak);
     ServerPlayerEvents.TOGGLE_SPRINT.register(this::onUserSprint);
@@ -93,12 +96,13 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     UseEntityCallback.EVENT.register(this::onRightClickEntity);
     ServerPlayerEvents.CHANGE_GAMEMODE.register(this::onUserGameModeChange);
     ServerPlayerEvents.CHANGE_SLOT.register(this::onHeldSlotChange);
-    me.moros.bending.fabric.event.ServerEntityEvents.MERGE.register(this::onItemMerge);
-    ServerMobEvents.TARGET.register(this::onEntityTarget);
-    ServerEntityEvents.EQUIPMENT_CHANGE.register(this::onArmorChange);
+    ServerEntityEvents.MERGE.register(this::onItemMerge);
+    ServerEntityEvents.TARGET.register(this::onEntityTarget);
+    ServerPlayerEvents.MODIFY_INVENTORY_SLOT.register(this::onInventoryClick);
     ServerInventoryEvents.HOPPER.register(this::onHopperItemPickup);
-    me.moros.bending.fabric.event.ServerEntityEvents.DROP_ITEM.register(this::onDropItem);
-    me.moros.bending.fabric.event.ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
+    ServerItemEvents.DROP_ITEM.register(this::onDropItem);
+    ServerItemEvents.ENTITY_DROP_LOOT.register(this::onDropLoot);
+    ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
     ServerLivingEntityEvents.AFTER_DEATH.register(this::onUserDeath);
   }
@@ -134,10 +138,15 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private boolean onFallingBlock(ServerLevel level, BlockPos blockPos) {
-    if (!disabledWorld(level)) {
-      var block = PlatformAdapter.fromFabricWorld(level).blockAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-      return !TempBlock.MANAGER.isTemp(block);
+  private boolean onUserMove(LivingEntity entity, Vector3d from, Vector3d to) {
+    if (!disabledWorld(entity)) {
+      if (!from.toVector3i().equals(to.toVector3i()) && ActionLimiter.isLimited(entity.getUUID(), ActionType.MOVE)) {
+        return false;
+      }
+      User user = Registries.BENDERS.get(entity.getUUID());
+      if (user != null) {
+        game().activationController().onUserMove(user, to.subtract(from).withY(0));
+      }
     }
     return true;
   }
@@ -273,12 +282,15 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return !FabricMetadata.INSTANCE.has(entity, EarthGlove.GLOVE_KEY);
   }
 
-  private void onArmorChange(LivingEntity livingEntity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
-    if (equipmentSlot.isArmor() && ItemUtil.hasKey(previousStack, Metadata.ARMOR_KEY)) {
-      if (TempArmor.MANAGER.isTemp(livingEntity.getUUID())) {
-        livingEntity.setItemSlot(equipmentSlot, previousStack); // TODO mixin a cancellable event instead?
+  private boolean onInventoryClick(ServerPlayer player, ItemStack stack) {
+    if (ItemUtil.hasKey(stack, Metadata.ARMOR_KEY)) {
+      if (!TempArmor.MANAGER.isTemp(player.getUUID())) {
+        stack.setCount(0);
       }
+      return false;
+
     }
+    return true;
   }
 
   private boolean onHopperItemPickup(Container container, ItemEntity itemEntity) {
@@ -292,8 +304,27 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private boolean onDropItem(ServerLevel level, ItemStack stack) {
-    return disabledWorld(level) || !ItemUtil.hasKey(stack, Metadata.ARMOR_KEY);
+  private boolean onDropItem(ServerPlayer player, ItemStack stack) {
+    if (!disabledWorld(player)) {
+      game().activationController().ignoreNextSwing(player.getUUID());
+      return !ItemUtil.hasKey(stack, Metadata.ARMOR_KEY);
+    }
+    return true;
+  }
+
+  private InteractionResultHolder<List<ItemStack>> onDropLoot(LivingEntity entity, DamageSource source, List<ItemStack> items) {
+    if (!disabledWorld(entity) && source instanceof AbilityDamageSource s && s.isFire()) {
+      ListIterator<ItemStack> it = items.listIterator();
+      while (it.hasNext()) {
+        ItemStack item = it.next();
+        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromFabricItem(item.getItem()));
+        var flamed = mapped == null ? null : PlatformAdapter.toFabricItemType(mapped);
+        if (flamed != null) {
+          it.set(new ItemStack(flamed, item.getCount()));
+        }
+      }
+    }
+    return InteractionResultHolder.pass(items);
   }
 
   private double onEntityDamage(LivingEntity entity, DamageSource source, double damage) {

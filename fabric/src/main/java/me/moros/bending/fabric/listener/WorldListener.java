@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
@@ -35,9 +36,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
-public record WorldListener(Supplier<Game> gameSupplier) implements FabricListener {
-  public WorldListener(Supplier<Game> gameSupplier) {
-    this.gameSupplier = gameSupplier;
+public record WorldListener(Supplier<Game> gameSupplier) implements FabricListener, Initializer {
+  @Override
+  public void init() {
     var early = new ResourceLocation("bending", "early");
     ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);

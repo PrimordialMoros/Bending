@@ -17,19 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin;
+package me.moros.bending.fabric.mixin.block.entity;
 
-import me.moros.bending.fabric.event.ServerEntityEvents;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
+import me.moros.bending.fabric.event.ServerInventoryEvents;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = LivingEntity.class, priority = 800)
-public abstract class LivingEntityMixin {
-  @ModifyVariable(method = "hurt", at = @At(value = "INVOKE", target = "net/minecraft/world/entity/LivingEntity.isSleeping()Z"), ordinal = 0, argsOnly = true)
-  private float bending$onHurt(float originalValue, DamageSource source, float amount) {
-    return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
+@Mixin(HopperBlockEntity.class)
+public abstract class HopperBlockEntityMixin {
+  @Inject(method = "addItem", at = @At("HEAD"), cancellable = true)
+  private static void bending$onAddItem(Container container, ItemEntity itemEntity, CallbackInfoReturnable<Boolean> ci) {
+    if (!ServerInventoryEvents.HOPPER.invoker().onItemPull(container, itemEntity)) {
+      ci.setReturnValue(false);
+    }
   }
 }

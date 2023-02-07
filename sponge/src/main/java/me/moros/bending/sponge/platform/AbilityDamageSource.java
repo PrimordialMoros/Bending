@@ -25,7 +25,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.user.User;
-import me.moros.bending.sponge.platform.entity.SpongeEntity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
@@ -59,7 +58,7 @@ public class AbilityDamageSource extends AbstractEntityDamageSource implements D
   public static Builder builder(User user, AbilityDescription ability) {
     Objects.requireNonNull(user);
     Objects.requireNonNull(ability);
-    return new Builder(user.name(), ability).type(DamageTypes.CUSTOM).entity(((SpongeEntity) user.entity()).handle())
+    return new Builder(user.name(), ability).type(DamageTypes.CUSTOM).entity(PlatformAdapter.toSpongeEntity(user))
       .bypassesArmor();
   }
 

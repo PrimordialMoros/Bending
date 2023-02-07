@@ -23,6 +23,9 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
+import me.moros.bending.api.platform.entity.DelegateEntity;
+import me.moros.bending.api.platform.entity.DelegateLivingEntity;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
@@ -157,6 +160,27 @@ public final class PlatformAdapter {
 
   public static Player fromSpongeEntity(ServerPlayer entity) {
     return new SpongePlayer(entity);
+  }
+
+  public static Entity toSpongeEntity(me.moros.bending.api.platform.entity.Entity entity) {
+    if (entity instanceof DelegateEntity delegate) {
+      return toSpongeEntity(delegate.entity());
+    }
+    return ((SpongeEntity) entity).handle();
+  }
+
+  public static Living toSpongeEntity(LivingEntity entity) {
+    if (entity instanceof DelegateLivingEntity delegate) {
+      return toSpongeEntity(delegate.entity());
+    }
+    return ((SpongeLivingEntity) entity).handle();
+  }
+
+  public static ServerPlayer toSpongeEntity(Player player) {
+    if (player instanceof DelegatePlayer delegate) {
+      return toSpongeEntity(delegate.entity());
+    }
+    return ((SpongePlayer) player).handle();
   }
 
   public static DamageCause fromSpongeCause(DamageSource source) {

@@ -19,15 +19,17 @@
 
 package me.moros.bending.fabric.platform.entity;
 
-import java.util.Objects;
+import java.util.Locale;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.fabric.platform.item.FabricPlayerInventory;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.HumanoidArm;
@@ -46,6 +48,11 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   @Override
   public boolean hasPermission(String permission) {
     return Permissions.check(handle(), permission, handle().getLevel().getServer().getOperatorUserPermissionLevel());
+  }
+
+  @Override
+  public Locale locale() {
+    return handle().getOrDefault(Identity.LOCALE, Message.DEFAULT_LOCALE);
   }
 
   @Override
@@ -75,8 +82,12 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public GameMode gamemode() {
-    var name = handle().gameMode.getGameModeForPlayer().getName();
-    return Objects.requireNonNull(GameMode.registry().fromString(name));
+    return switch (handle().gameMode.getGameModeForPlayer()) {
+      case SURVIVAL -> GameMode.SURVIVAL;
+      case CREATIVE -> GameMode.CREATIVE;
+      case ADVENTURE -> GameMode.ADVENTURE;
+      case SPECTATOR -> GameMode.SPECTATOR;
+    };
   }
 
   @Override

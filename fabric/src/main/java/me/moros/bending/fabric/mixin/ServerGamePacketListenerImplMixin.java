@@ -19,7 +19,14 @@
 
 package me.moros.bending.fabric.mixin;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
+import me.moros.math.Vector3d;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket.RelativeArgument;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket.Action;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -38,6 +45,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerGamePacketListenerImplMixin {
   @Shadow
   public ServerPlayer player;
+
+  @Shadow
+  public abstract void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeArgument> relativeArguments);
 
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
@@ -73,5 +83,29 @@ public abstract class ServerGamePacketListenerImplMixin {
     int oldSlot = this.player.getInventory().selected;
     int newSlot = packet.getSlot();
     ServerPlayerEvents.CHANGE_SLOT.invoker().onHeldSlotChange(this.player, oldSlot, newSlot);
+  }
+
+  @Inject(method = "handleMovePlayer",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"),
+    cancellable = true
+  )
+  private void bending$onHandleMovePlayer(ServerboundMovePlayerPacket packet, CallbackInfo ci) {
+    boolean fireMoveEvent = packet.hasPosition();
+    // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
+    if (!fireMoveEvent && !packet.hasRotation()) {
+      return;
+    }
+    var from = Vector3d.of(this.player.getX(), this.player.getY(), this.player.getZ());
+    var to = Vector3d.of(packet.getX(from.x()), packet.getY(from.y()), packet.getZ(from.z()));
+    float xRot = this.player.getXRot();
+    float yRot = this.player.getYRot();
+    if (fireMoveEvent && !ServerEntityEvents.ENTITY_MOVE.invoker().onMove(this.player, from, to)) {
+      double x = from.x();
+      double y = from.y();
+      double z = from.z();
+      this.player.absMoveTo(x, y, z, xRot, yRot);
+      this.teleport(x, y, z, xRot, yRot, EnumSet.of(RelativeArgument.X_ROT, RelativeArgument.Y_ROT));
+      ci.cancel();
+    }
   }
 }

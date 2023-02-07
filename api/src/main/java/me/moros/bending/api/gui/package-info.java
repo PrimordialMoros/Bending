@@ -18,6 +18,6 @@
  */
 
 /**
- * Provides classes and interfaces for modelling the bending board.
+ * Provides classes and interfaces for modelling gui elements.
  */
-package me.moros.bending.api.board;
+package me.moros.bending.api.gui;

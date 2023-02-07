@@ -23,7 +23,8 @@ import java.util.Optional;
 
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.adapter.NativeAdapter;
-import me.moros.bending.api.board.Board;
+import me.moros.bending.api.gui.Board;
+import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
@@ -32,7 +33,8 @@ import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.sponge.adapter.NativeAdapterImpl;
-import me.moros.bending.sponge.board.BoardImpl;
+import me.moros.bending.sponge.gui.BoardImpl;
+import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.platform.item.SpongeItemBuilder;
 import me.moros.math.sponge.SpongeMathAdapter;
 import org.spongepowered.api.Sponge;
@@ -77,9 +79,8 @@ public class SpongePlatform implements Platform, PlatformFactory {
   }
 
   @Override
-  public boolean buildMenu(ElementHandler handler, BendingPlayer player) {
-    //return ElementMenu.createMenu(handler, player); // TODO add gui
-    return false;
+  public Optional<ElementGui> buildMenu(ElementHandler handler, BendingPlayer player) {
+    return Optional.of(ElementMenu.createMenu(handler, player));
   }
 
   @Override

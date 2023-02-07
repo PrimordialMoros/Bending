@@ -41,6 +41,7 @@ import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
 import me.moros.bending.common.util.ReflectionUtil;
+import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.hook.LuckPermsHook;
 import me.moros.bending.sponge.listener.BlockListener;
 import me.moros.bending.sponge.listener.ConnectionListener;
@@ -112,6 +113,7 @@ public class SpongeBending implements BendingPlugin {
   @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     if (loaded) {
+      ReflectionUtil.injectStatic(ElementMenu.class, container);
       ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(container)));
       ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
       ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));

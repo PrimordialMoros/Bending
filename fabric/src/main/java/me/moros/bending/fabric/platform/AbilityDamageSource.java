@@ -27,7 +27,6 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.locale.TranslationManager;
-import me.moros.bending.fabric.platform.entity.FabricEntity;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -42,7 +41,7 @@ public class AbilityDamageSource extends EntityDamageSource implements DamageSou
   private final TranslatableComponent deathMessage;
 
   private AbilityDamageSource(User user, AbilityDescription ability) {
-    super("bending.ability", ((FabricEntity) user.entity()).handle());
+    super("bending.ability", PlatformAdapter.toFabricEntity(user));
     bypassArmor();
     this.name = user.name();
     this.ability = ability;

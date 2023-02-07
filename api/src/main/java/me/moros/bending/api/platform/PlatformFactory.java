@@ -22,7 +22,8 @@ package me.moros.bending.api.platform;
 import java.util.Optional;
 
 import me.moros.bending.api.ability.element.ElementHandler;
-import me.moros.bending.api.board.Board;
+import me.moros.bending.api.gui.Board;
+import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -31,7 +32,7 @@ import me.moros.bending.api.user.BendingPlayer;
 public interface PlatformFactory {
   Optional<Board> buildBoard(BendingPlayer player);
 
-  boolean buildMenu(ElementHandler handler, BendingPlayer player);
+  Optional<ElementGui> buildMenu(ElementHandler handler, BendingPlayer player);
 
   ItemBuilder itemBuilder(Item item);
 

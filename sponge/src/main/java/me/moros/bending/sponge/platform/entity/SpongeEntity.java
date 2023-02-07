@@ -34,6 +34,7 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.registry.RegistryTypes;
 
@@ -109,7 +110,7 @@ public class SpongeEntity implements Entity {
 
   @Override
   public void velocity(Vector3d velocity) {
-    handle().velocity().set(velocity.clampVelocity().to(org.spongepowered.math.vector.Vector3d.class));
+    handle().offer(Keys.VELOCITY, velocity.clampVelocity().to(org.spongepowered.math.vector.Vector3d.class));
   }
 
   @Override
@@ -174,12 +175,12 @@ public class SpongeEntity implements Entity {
 
   @Override
   public double fallDistance() {
-    return nmsEntity().fallDistance;
+    return handle().getDouble(Keys.FALL_DISTANCE).orElse(0);
   }
 
   @Override
   public void fallDistance(double distance) {
-    nmsEntity().fallDistance = (float) distance;
+    handle().offer(Keys.FALL_DISTANCE, distance);
   }
 
   @Override

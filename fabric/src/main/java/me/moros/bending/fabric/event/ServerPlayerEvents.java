@@ -21,10 +21,13 @@ package me.moros.bending.fabric.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class ServerPlayerEvents {
   private ServerPlayerEvents() {
@@ -70,6 +73,24 @@ public final class ServerPlayerEvents {
     }
   });
 
+  public static final Event<ModifyInventorySlot> MODIFY_INVENTORY_SLOT = EventFactory.createArrayBacked(ModifyInventorySlot.class, callbacks -> (player, item) -> {
+    for (var callback : callbacks) {
+      if (!callback.onModify(player, item)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  public static final Event<PlaceBlock> PLACE_BLOCK = EventFactory.createArrayBacked(PlaceBlock.class, callbacks -> (player, pos, state) -> {
+    for (var callback : callbacks) {
+      if (!callback.onPlace(player, pos, state)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   @FunctionalInterface
   public interface Interact {
     InteractionResult onInteract(ServerPlayer player, InteractionHand hand);
@@ -93,5 +114,15 @@ public final class ServerPlayerEvents {
   @FunctionalInterface
   public interface ChangeHeldSlot {
     void onHeldSlotChange(ServerPlayer player, int oldSlot, int newSlot);
+  }
+
+  @FunctionalInterface
+  public interface ModifyInventorySlot {
+    boolean onModify(ServerPlayer player, ItemStack item);
+  }
+
+  @FunctionalInterface
+  public interface PlaceBlock {
+    boolean onPlace(ServerPlayer player, BlockPos pos, BlockState state);
   }
 }

@@ -97,7 +97,7 @@ public final class CollisionUtil {
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
     Vector3d extents = collider.halfExtents();
     boolean hit = false;
-    Predicate<Entity> filter = entityPredicate(user.entity(), livingOnly, selfCollision);
+    Predicate<Entity> filter = entityPredicate(user, livingOnly, selfCollision);
     AABB box = new AABB(collider.position().subtract(extents), collider.position().add(extents));
     for (Entity entity : user.world().nearbyEntities(box, filter)) {
       if (collider.intersects(entity.bounds()) && user.canBuild(entity.block())) {
@@ -113,7 +113,7 @@ public final class CollisionUtil {
 
   private static Predicate<Entity> entityPredicate(Entity source, boolean livingOnly, boolean selfCollision) {
     Predicate<Entity> livingPredicate = livingOnly ? e -> e instanceof LivingEntity : e -> true;
-    Predicate<Entity> selfPredicate = !selfCollision ? e -> !e.equals(source) : e -> true;
+    Predicate<Entity> selfPredicate = !selfCollision ? e -> !e.uuid().equals(source.uuid()) : e -> true;
     Predicate<Entity> valid = CollisionUtil::isValidEntity;
     return selfPredicate.and(livingPredicate).and(valid);
   }

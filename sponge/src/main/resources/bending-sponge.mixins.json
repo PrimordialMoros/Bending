@@ -6,7 +6,8 @@
   "mixins": [
     "AdvancementProgressAccess",
     "CriterionProgressAccess",
-    "EntityAccess"
+    "EntityAccess",
+    "FallingBlockEntityAccess"
   ],
   "injectors": {
     "defaultRequire": 1

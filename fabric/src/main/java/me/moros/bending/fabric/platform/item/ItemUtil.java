@@ -41,6 +41,7 @@ public class ItemUtil {
   private static final String ITEM_DISPLAY = "display";
   private static final String ITEM_LORE = "Lore";
   private static final String ITEM_UNBREAKABLE = "Unbreakable";
+  private static final String ITEM_HIDE_FLAGS = "HideFlags";
 
   private static void deleteLore(ItemStack stack) {
     final CompoundTag tag = stack.getTag();
@@ -67,6 +68,12 @@ public class ItemUtil {
     if (tag != null) {
       tag.remove(key.asString());
     }
+  }
+
+  public static void hideFlag(ItemStack stack, ItemStack.TooltipPart flag) {
+    var tag = stack.getOrCreateTag();
+    var hideFlags = tag.getByte(ITEM_HIDE_FLAGS) | flag.getMask();
+    tag.putByte(ITEM_HIDE_FLAGS, (byte) hideFlags);
   }
 
   public static List<Component> getLore(ItemStack stack) {

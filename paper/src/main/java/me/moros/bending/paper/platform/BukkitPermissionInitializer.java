@@ -33,6 +33,7 @@ public class BukkitPermissionInitializer extends PermissionInitializer {
   public BukkitPermissionInitializer() {
   }
 
+  @Override
   protected void registerDefault(String node, Collection<String> children, TriState def) {
     var permDef = switch (def) {
       case TRUE -> PermissionDefault.TRUE;

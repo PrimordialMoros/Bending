@@ -82,7 +82,7 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage, Entity source) {
-    handle().damage(damage, ((BukkitEntity) source).handle());
+    handle().damage(damage, PlatformAdapter.toBukkitEntity(source));
     return true;
   }
 

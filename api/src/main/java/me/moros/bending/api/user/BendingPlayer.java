@@ -26,13 +26,13 @@ import java.util.concurrent.CompletableFuture;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.ability.preset.PresetCreateResult;
-import me.moros.bending.api.board.Board;
 import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.Game;
+import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
@@ -42,7 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * {@link User} implementation for players.
  */
-public final class BendingPlayer extends BendingUser implements PresetUser {
+public final class BendingPlayer extends BendingUser implements PresetUser, DelegatePlayer {
   private final int internalId;
   private final Set<Preset> presets;
 
@@ -64,23 +64,13 @@ public final class BendingPlayer extends BendingUser implements PresetUser {
   }
 
   @Override
-  public TriState checkProperty(BooleanProperty property) {
-    return entity().checkProperty(property);
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    entity().setProperty(property, value);
-  }
-
-  @Override
   public boolean isSpectator() {
-    return entity().gamemode() == GameMode.SPECTATOR;
+    return gamemode() == GameMode.SPECTATOR;
   }
 
   @Override
   public int currentSlot() {
-    return entity().inventory().selectedSlot() + 1;
+    return inventory().selectedSlot() + 1;
   }
 
   @Override

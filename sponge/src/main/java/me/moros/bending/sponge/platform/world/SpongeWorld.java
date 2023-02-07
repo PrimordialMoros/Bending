@@ -35,6 +35,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
+import me.moros.bending.sponge.mixin.FallingBlockEntityAccess;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.SpongeDataHolder;
 import me.moros.bending.sponge.platform.block.LockableImpl;
@@ -44,7 +45,12 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -52,7 +58,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 
@@ -157,18 +162,21 @@ public record SpongeWorld(ServerWorld handle) implements World {
     double minDistSq = Double.MAX_VALUE;
     var dir = context.dir().normalize().multiply(range);
     var box = AABB.fromRay(context.origin(), dir, context.raySize());
-    var aabb = org.spongepowered.api.util.AABB.of(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
-    var vec3d1 = new Vec3(context.origin().x(), context.origin().y(), context.origin().z());
-    var vec3d2 = new Vec3(dir.x(), dir.y(), dir.z());
-    for (var spongeEntity : handle().entities(aabb)) {
-      var pos = ((net.minecraft.world.entity.Entity) spongeEntity).getBoundingBox().clip(vec3d1, vec3d2).orElse(null);
-      if (pos != null) {
-        Entity entity = PlatformAdapter.fromSpongeEntity(spongeEntity);
-        double distSq = pos.distanceToSqr(vec3d1);
-        if (distSq < minDistSq) {
-          result = entity;
-          resPos = Vector3d.of(pos.x(), pos.y(), pos.z());
-          minDistSq = distSq;
+    var size = box.max.subtract(box.min);
+    if (size.x() != 0 && size.y() != 0 && size.z() != 0) { // Box has no volume?
+      var aabb = org.spongepowered.api.util.AABB.of(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
+      var vec3d1 = new Vec3(context.origin().x(), context.origin().y(), context.origin().z());
+      var vec3d2 = new Vec3(dir.x(), dir.y(), dir.z());
+      for (var spongeEntity : handle().entities(aabb)) {
+        var pos = ((net.minecraft.world.entity.Entity) spongeEntity).getBoundingBox().clip(vec3d1, vec3d2).orElse(null);
+        if (pos != null) {
+          Entity entity = PlatformAdapter.fromSpongeEntity(spongeEntity);
+          double distSq = pos.distanceToSqr(vec3d1);
+          if (distSq < minDistSq) {
+            result = entity;
+            resPos = Vector3d.of(pos.x(), pos.y(), pos.z());
+            minDistSq = distSq;
+          }
         }
       }
     }
@@ -195,29 +203,31 @@ public record SpongeWorld(ServerWorld handle) implements World {
     var vec = position.to(org.spongepowered.math.vector.Vector3d.class);
     Item droppedItem = handle().createEntity(EntityTypes.ITEM, vec);
     droppedItem.item().set(PlatformAdapter.toSpongeItemSnapshot(item));
-    droppedItem.infinitePickupDelay().set(true);
+    droppedItem.offer(Keys.INFINITE_PICKUP_DELAY, true);
     handle().spawnEntity(droppedItem);
     return PlatformAdapter.fromSpongeEntity(droppedItem);
   }
 
   @Override
   public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
-    var spongeEntity = handle().createEntity(EntityTypes.FALLING_BLOCK, center.to(org.spongepowered.math.vector.Vector3d.class));
-    spongeEntity.blockState().set(PlatformAdapter.toSpongeData(state));
-    spongeEntity.gravityAffected().set(gravity);
-    spongeEntity.dropAsItem().set(false);
-    handle().spawnEntity(spongeEntity);
-    return PlatformAdapter.fromSpongeEntity(spongeEntity);
+    var data = (net.minecraft.world.level.block.state.BlockState) PlatformAdapter.toSpongeData(state);
+    var fabricEntity = FallingBlockEntityAccess.bending$create(nms(), center.x(), center.y(), center.z(), data);
+    fabricEntity.time = 1; // Is this needed?
+    fabricEntity.setNoGravity(!gravity);
+    fabricEntity.dropItem = false;
+    ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
+    nms().addFreshEntity(fabricEntity);
+    return PlatformAdapter.fromSpongeEntity((org.spongepowered.api.entity.Entity) fabricEntity);
   }
 
   @Override
   public Entity createArmorStand(Position center, me.moros.bending.api.platform.item.Item type, boolean gravity) {
-    var item = PlatformAdapter.toSpongeItem(type);
     var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, center.to(org.spongepowered.math.vector.Vector3d.class));
-    spongeEntity.invulnerable().set(true);
-    spongeEntity.invisible().set(true);
-    spongeEntity.gravityAffected().set(gravity);
-    spongeEntity.equip(EquipmentTypes.HEAD, item);
+    spongeEntity.offer(Keys.INVULNERABLE, true);
+    spongeEntity.offer(Keys.IS_INVISIBLE, true);
+    spongeEntity.offer(Keys.IS_GRAVITY_AFFECTED, gravity);
+    var item = BuiltInRegistries.ITEM.get(new ResourceLocation(type.key().namespace(), type.key().value()));
+    ((ArmorStand) spongeEntity).setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
     handle().spawnEntity(spongeEntity);
     return PlatformAdapter.fromSpongeEntity(spongeEntity);
   }

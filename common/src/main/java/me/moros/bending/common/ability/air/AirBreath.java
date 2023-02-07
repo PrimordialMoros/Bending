@@ -160,7 +160,7 @@ public class AirBreath extends AbilityInstance {
       WorldUtil.tryCoolLava(user, block);
       if (!MaterialUtil.isTransparentOrWater(block) && user.pitch() > 30) {
         user.applyVelocity(AirBreath.this, user.direction().multiply(-userConfig.knockback));
-        BendingEffect.FIRE_TICK.reset(user.entity());
+        BendingEffect.FIRE_TICK.reset(user);
       }
       return !MaterialUtil.isWater(block);
     }

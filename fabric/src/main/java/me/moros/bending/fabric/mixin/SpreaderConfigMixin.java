@@ -19,24 +19,23 @@
 
 package me.moros.bending.fabric.mixin;
 
-import me.moros.bending.fabric.event.ServerEntityEvents;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.phys.HitResult;
+import me.moros.bending.fabric.event.ServerBlockEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.MultifaceSpreader;
+import net.minecraft.world.level.block.MultifaceSpreader.SpreadPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Projectile.class)
-public abstract class ProjectileMixin extends EntityMixin {
-  @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
-  public void bending$onHit(HitResult hitResult, CallbackInfoReturnable<ItemEntity> ci) {
-    if (this.level.isClientSide) {
-      return;
-    }
-    if (!ServerEntityEvents.PROJECTILE_HIT.invoker().onHit((Projectile) (Object) this, hitResult)) {
-      ci.cancel();
+@Mixin(MultifaceSpreader.DefaultSpreaderConfig.class)
+public abstract class SpreaderConfigMixin {
+  @Inject(method = "canSpreadInto", at = @At(value = "HEAD"), cancellable = true)
+  private void bending$canSpreadInto(BlockGetter blockGetter, BlockPos blockPos, SpreadPos spreadPos, CallbackInfoReturnable<Boolean> cir) {
+    if (blockGetter instanceof ServerLevel level && !ServerBlockEvents.SPREAD.invoker().onSpread(level, blockPos, spreadPos.pos())) {
+      cir.setReturnValue(false);
     }
   }
 }

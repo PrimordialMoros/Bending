@@ -19,15 +19,14 @@
 
 package me.moros.bending.fabric.event;
 
+import me.moros.math.Vector3d;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 
 public final class ServerEntityEvents {
@@ -54,9 +53,19 @@ public final class ServerEntityEvents {
     return value;
   });
 
-  public static final Event<DropItem> DROP_ITEM = EventFactory.createArrayBacked(DropItem.class, callbacks -> (level, stack) -> {
+  // TODO mixin for entities and vehicle passengers?
+  public static final Event<EntityMove> ENTITY_MOVE = EventFactory.createArrayBacked(EntityMove.class, callbacks -> (entity, from, to) -> {
     for (var callback : callbacks) {
-      if (!callback.onDropItem(level, stack)) {
+      if (!callback.onMove(entity, from, to)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  public static final Event<Target> TARGET = EventFactory.createArrayBacked(Target.class, callbacks -> (entity, target) -> {
+    for (var callback : callbacks) {
+      if (!callback.onEntityTarget(entity, target)) {
         return false;
       }
     }
@@ -65,22 +74,12 @@ public final class ServerEntityEvents {
 
   public static final Event<ProjectileHit> PROJECTILE_HIT = EventFactory.createArrayBacked(ProjectileHit.class, callbacks -> (projectile, hitResult) -> {
     for (var callback : callbacks) {
-      if (!callback.onHit(projectile, hitResult)) {
+      if (!callback.onProjectileHit(projectile, hitResult)) {
         return false;
       }
     }
     return true;
   });
-
-  public static final Event<FallingBlock> FALLING_BLOCK = EventFactory.createArrayBacked(FallingBlock.class, callbacks -> (level, blockPos) -> {
-    for (var callback : callbacks) {
-      if (!callback.onFall(level, blockPos)) {
-        return false;
-      }
-    }
-    return true;
-  });
-
 
   @FunctionalInterface
   public interface Merge {
@@ -93,17 +92,17 @@ public final class ServerEntityEvents {
   }
 
   @FunctionalInterface
-  public interface DropItem {
-    boolean onDropItem(ServerLevel level, ItemStack stack);
+  public interface EntityMove {
+    boolean onMove(LivingEntity entity, Vector3d from, Vector3d to);
+  }
+
+  @FunctionalInterface
+  public interface Target {
+    boolean onEntityTarget(LivingEntity entity, Entity target);
   }
 
   @FunctionalInterface
   public interface ProjectileHit {
-    boolean onHit(Projectile projectile, HitResult result);
-  }
-
-  @FunctionalInterface
-  public interface FallingBlock {
-    boolean onFall(ServerLevel level, BlockPos pos);
+    boolean onProjectileHit(Projectile projectile, HitResult hitResult);
   }
 }

@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.board;
+package me.moros.bending.api.gui;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.util.KeyUtil;
