@@ -17,31 +17,20 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.game;
+package me.moros.bending.fabric.game;
 
+import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.config.ConfigProcessor;
-import me.moros.bending.api.storage.BendingStorage;
-import net.kyori.adventure.key.Key;
+import me.moros.bending.api.config.Configurable;
 
-/**
- * Holds all the needed bending sub-systems.
- */
-public interface Game {
-  void reload();
+final class DummyConfigProcessor implements ConfigProcessor {
+  static final ConfigProcessor INSTANCE = new DummyConfigProcessor();
 
-  void cleanup(boolean shutdown);
-
-  BendingStorage storage();
-
-  FlightManager flightManager();
-
-  default AbilityManager abilityManager(Key world) {
-    return worldManager().instance(world);
+  private DummyConfigProcessor() {
   }
 
-  WorldManager worldManager();
-
-  ActivationController activationController();
-
-  ConfigProcessor configProcessor();
+  @Override
+  public <T extends Configurable> T calculate(Ability ability, T config) {
+    return config;
+  }
 }

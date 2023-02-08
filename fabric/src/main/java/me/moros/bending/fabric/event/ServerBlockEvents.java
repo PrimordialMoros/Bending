@@ -39,6 +39,15 @@ public final class ServerBlockEvents {
     return true;
   });
 
+  public static final Event<AfterBreak> AFTER_BREAK = EventFactory.createArrayBacked(AfterBreak.class, callbacks -> (level, pos) -> {
+    for (var callback : callbacks) {
+      if (!callback.onBreak(level, pos)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   public static final Event<Change> CHANGE = EventFactory.createArrayBacked(Change.class, callbacks -> (level, pos) -> {
     for (var callback : callbacks) {
       if (!callback.onChange(level, pos)) {
@@ -61,6 +70,11 @@ public final class ServerBlockEvents {
   @FunctionalInterface
   public interface PistonMove {
     boolean onPistonMove(ServerLevel level, BlockPos pos, List<BlockPos> toPush, List<BlockPos> toDestroy);
+  }
+
+  @FunctionalInterface
+  public interface AfterBreak {
+    boolean onBreak(ServerLevel level, BlockPos pos);
   }
 
   @FunctionalInterface

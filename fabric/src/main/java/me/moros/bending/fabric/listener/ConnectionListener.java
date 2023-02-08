@@ -37,6 +37,7 @@ import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
+import me.moros.bending.fabric.platform.ScoreboardUtil;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
@@ -112,6 +113,7 @@ public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plug
     if (user != null) {
       game().activationController().onUserDeconstruct(user);
     }
+    ScoreboardUtil.resetScoreboard(handler.getPlayer());
     profileCache.synchronous().invalidate(uuid);
   }
 }

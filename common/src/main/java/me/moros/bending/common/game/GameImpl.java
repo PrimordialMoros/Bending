@@ -145,11 +145,6 @@ public final class GameImpl implements Game {
   }
 
   @Override
-  public AbilityManager abilityManager(Key world) {
-    return worldManager.instance(world);
-  }
-
-  @Override
   public WorldManager worldManager() {
     return worldManager;
   }

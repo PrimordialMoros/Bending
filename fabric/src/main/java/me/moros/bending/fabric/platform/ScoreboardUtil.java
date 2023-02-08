@@ -27,29 +27,20 @@ import java.util.UUID;
 
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.Objective;
 
 public class ScoreboardUtil {
   private static final Map<UUID, ServerScoreboard> playerBoards = new HashMap<>();
-  private static ServerScoreboard serverScoreboard;
-
-  private static ServerScoreboard serverScoreboard(MinecraftServer server) {
-    if (serverScoreboard == null) {
-      serverScoreboard = server.getScoreboard();
-    }
-    return serverScoreboard;
-  }
 
   public static ServerScoreboard getScoreboard(ServerPlayer player) {
     ServerScoreboard result = playerBoards.get(player.getUUID());
-    return result != null ? result : serverScoreboard(player.server);
+    return result != null ? result : player.server.getScoreboard();
   }
 
   public static void resetScoreboard(ServerPlayer player) {
-    setScoreboard(player, serverScoreboard(player.server));
+    setScoreboard(player, player.server.getScoreboard());
   }
 
   public static void setScoreboard(ServerPlayer player, ServerScoreboard scoreboard) {
@@ -57,7 +48,7 @@ public class ScoreboardUtil {
     if (scoreboard == previous) {
       return;
     }
-    if (scoreboard == serverScoreboard(player.server)) {
+    if (scoreboard == player.server.getScoreboard()) {
       playerBoards.remove(player.getUUID());
     } else {
       playerBoards.put(player.getUUID(), scoreboard);

@@ -46,6 +46,13 @@ public final class SequenceManagerImpl implements SequenceManager {
     cache = Caffeine.newBuilder()
       .expireAfterAccess(Duration.ofSeconds(10))
       .build(u -> new ArrayDeque<>(16));
+    tryInitRegistry();
+  }
+
+  private void tryInitRegistry() {
+    if (Registries.SEQUENCES.isLocked()) {
+      return;
+    }
     for (AbilityDescription desc : Registries.ABILITIES) {
       if (desc instanceof Sequence sequence && isValid(sequence)) {
         Registries.SEQUENCES.register(sequence);

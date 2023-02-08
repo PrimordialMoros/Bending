@@ -54,7 +54,7 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
   public void init() {
     ServerPlayerEvents.PLACE_BLOCK.register(this::onBlockPlace);
     PlayerBlockBreakEvents.BEFORE.register(this::onBlockBreak);
-    PlayerBlockBreakEvents.AFTER.register(this::onAfterBlockBreak);
+    ServerBlockEvents.AFTER_BREAK.register(this::onAfterBlockBreak);
     ServerItemEvents.BLOCK_DROP_LOOT.register(this::onBlockDropLoot);
     ServerBlockEvents.CHANGE.register(this::onBlockChange);
     ServerBlockEvents.SPREAD.register(this::onBlockSpread);
@@ -93,11 +93,16 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
     return false;
   }
 
-  private void onAfterBlockBreak(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-    if (!level.isClientSide && !disabledWorld(player)) {
-      var block = PlatformAdapter.fromFabricWorld((ServerLevel) level).blockAt(pos.getX(), pos.getY(), pos.getZ());
-      TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
+  private boolean onAfterBlockBreak(ServerLevel level, BlockPos pos) {
+    if (!disabledWorld(level)) {
+      var block = PlatformAdapter.fromFabricWorld(level).blockAt(pos.getX(), pos.getY(), pos.getZ());
+      var tb = TempBlock.MANAGER.get(block).orElse(null);
+      if (tb != null) {
+        tb.removeWithoutReverting();
+        return false;
+      }
     }
+    return true;
   }
 
   private InteractionResultHolder<List<ItemStack>> onBlockDropLoot(ServerLevel level, BlockPos pos, List<ItemStack> dropStacks) {

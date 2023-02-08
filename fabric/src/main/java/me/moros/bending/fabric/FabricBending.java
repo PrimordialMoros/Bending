@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -45,6 +46,7 @@ import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.storage.StorageFactory;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
+import me.moros.bending.fabric.game.DummyGame;
 import me.moros.bending.fabric.hook.LuckPermsHook;
 import me.moros.bending.fabric.hook.PlaceholderHook;
 import me.moros.bending.fabric.listener.BlockListener;
@@ -80,6 +82,7 @@ public class FabricBending implements BendingPlugin {
   private LoadPhase phase = LoadPhase.FIRST;
   private Game game;
   private Collection<Initializer> listeners;
+  private AtomicBoolean exiting = new AtomicBoolean();
 
   public FabricBending(Path dir, ModContainer container) {
     this.container = container;
@@ -111,9 +114,9 @@ public class FabricBending implements BendingPlugin {
 
   private void registerLifecycleListeners() {
     ServerLifecycleEvents.SERVER_STARTED.register(this::onEnable);
-    ServerLifecycleEvents.SERVER_STOPPED.register(s -> onDisable(s.isDedicatedServer()));
+    ServerLifecycleEvents.SERVER_STOPPING.register(s -> onDisable(exiting.get() || s.isDedicatedServer()));
     if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-      ClientLifecycleEvents.CLIENT_STOPPING.register(m -> onDisable(true));
+      ClientLifecycleEvents.CLIENT_STOPPING.register(m -> exiting.set(true));
     }
   }
 
@@ -144,6 +147,7 @@ public class FabricBending implements BendingPlugin {
   }
 
   private void onDisable(boolean fullShutdown) {
+    logger.info("Shutting down: " + fullShutdown + " " + exiting.get());
     if (phase == LoadPhase.LOADED) {
       FabricMetadata.INSTANCE.cleanup();
       game.cleanup(fullShutdown);
@@ -154,7 +158,7 @@ public class FabricBending implements BendingPlugin {
   }
 
   private Game game() {
-    return Objects.requireNonNull(game, "Trying to access game while it's not loaded!");
+    return Objects.requireNonNullElse(game, DummyGame.INSTANCE);
   }
 
   @Override

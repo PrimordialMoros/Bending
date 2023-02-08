@@ -29,7 +29,7 @@ Bending
 - Support for custom translations and [Localization](https://github.com/PrimordialMoros/Bending/wiki/Localization)
 - Support for bending mobs
 - Robust, flexible API
-- Multiple server implementations: Paper, Sponge, Fabric (also works a singleplayer mod)
+- Multiple server implementations: Paper, Sponge, Fabric (also works as a singleplayer mod)
 
 ## Download
 

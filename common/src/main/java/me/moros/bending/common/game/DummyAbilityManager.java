@@ -29,8 +29,8 @@ import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.user.User;
 
-final class DummyAbilityManager implements AbilityManager {
-  static final AbilityManager INSTANCE = new DummyAbilityManager();
+public final class DummyAbilityManager implements AbilityManager {
+  public static final AbilityManager INSTANCE = new DummyAbilityManager();
 
   private DummyAbilityManager() {
   }

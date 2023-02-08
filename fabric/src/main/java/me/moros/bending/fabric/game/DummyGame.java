@@ -17,31 +17,25 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.game;
+package me.moros.bending.fabric.game;
 
 import me.moros.bending.api.config.ConfigProcessor;
+import me.moros.bending.api.game.ActivationController;
+import me.moros.bending.api.game.FlightManager;
+import me.moros.bending.api.game.Game;
+import me.moros.bending.api.game.WorldManager;
 import me.moros.bending.api.storage.BendingStorage;
-import net.kyori.adventure.key.Key;
 
-/**
- * Holds all the needed bending sub-systems.
- */
-public interface Game {
-  void reload();
+public record DummyGame(BendingStorage storage, FlightManager flightManager, WorldManager worldManager,
+                        ActivationController activationController, ConfigProcessor configProcessor) implements Game {
+  public static final Game INSTANCE = new DummyGame(DummyBendingStorage.INSTANCE, DummyFlightManager.INSTANCE,
+    DummyWorldManager.INSTANCE, DummyActivationController.INSTANCE, DummyConfigProcessor.INSTANCE);
 
-  void cleanup(boolean shutdown);
-
-  BendingStorage storage();
-
-  FlightManager flightManager();
-
-  default AbilityManager abilityManager(Key world) {
-    return worldManager().instance(world);
+  @Override
+  public void reload() {
   }
 
-  WorldManager worldManager();
-
-  ActivationController activationController();
-
-  ConfigProcessor configProcessor();
+  @Override
+  public void cleanup(boolean shutdown) {
+  }
 }
