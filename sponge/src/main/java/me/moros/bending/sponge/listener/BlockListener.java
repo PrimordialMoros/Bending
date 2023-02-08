@@ -32,7 +32,6 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -42,6 +41,7 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.LocatableBlock;
 
 public class BlockListener extends SpongeListener {
   public BlockListener(Game game) {
@@ -58,24 +58,25 @@ public class BlockListener extends SpongeListener {
       event.setCancelled(true);
       return;
     }
-    if (living instanceof ServerPlayer player) {
-      for (var loc : event.locations()) {
-        var blockEntity = loc.blockEntity().orElse(null);
-        var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
-        if (blockEntity != null && handleLockedContainer(block, blockEntity, player)) {
-          event.setCancelled(true);
-          return;
-        }
+    var blockCause = event.cause().first(LocatableBlock.class).orElse(null);
+    var player = living instanceof ServerPlayer p ? p : null;
+    for (var loc : event.locations()) {
+      var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
+      if (blockCause != null && TempBlock.MANAGER.isTemp(block)) {
+        event.setCancelled(true);
+        return;
+      } else if (player != null && loc.blockEntity().map(be -> handleLockedContainer(block, be, player)).orElse(false)) {
+        event.setCancelled(true);
+        return;
       }
     }
   }
 
   @Listener(order = Order.EARLY)
-  public void onBlockChange(ChangeBlockEvent.All event) {
+  public void onBlockChange(ChangeBlockEvent.All event, @First Living entity) {
     if (disabledWorld(event.world())) {
       return;
     }
-    var cause = event.cause().first(Entity.class).orElse(null);
     for (var transaction : event.transactions()) {
       var loc = transaction.original().location().orElse(null);
       if (!transaction.isValid() || loc == null) {
@@ -83,18 +84,12 @@ public class BlockListener extends SpongeListener {
       }
       var op = transaction.operation();
       var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
-      if (op == Operations.PLACE.get() && cause != null) {
-        onBlockOverride(block);
-      } else if (op == Operations.BREAK.get()) {
-        onBlockOverride(block);
+      if (op == Operations.PLACE.get() || op == Operations.BREAK.get()) {
+        TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
       } else {
         transaction.setValid(TempBlock.MANAGER.isTemp(block));
       }
     }
-  }
-
-  private void onBlockOverride(Block block) {
-    TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
   }
 
   private boolean handleLockedContainer(Block block, BlockEntity blockEntity, ServerPlayer player) {
@@ -140,9 +135,7 @@ public class BlockListener extends SpongeListener {
         }
         var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
         if (TempBlock.shouldIgnorePhysics(block)) {
-          transaction.setValid(false);
-          event.setCancelled(true);
-          return;
+          transaction.invalidate();
         }
       }
     }

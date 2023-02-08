@@ -19,6 +19,9 @@
 
 package me.moros.bending.sponge.platform;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
@@ -114,8 +117,12 @@ public final class PlatformAdapter {
     return new SpongeItem(itemStack);
   }
 
+  // Sponge data keys dont have proper equals and hashcode checks so we need to cache and use the same key instances
+  private static final Map<DataKey<?>, org.spongepowered.api.data.Key<?>> keyCache = new ConcurrentHashMap<>();
+
+  @SuppressWarnings("unchecked")
   public static <T> org.spongepowered.api.data.Key<Value<T>> dataKey(DataKey<T> key) {
-    return org.spongepowered.api.data.Key.from(rsk(key), key.type());
+    return (org.spongepowered.api.data.Key<Value<T>>) keyCache.computeIfAbsent(key, k -> org.spongepowered.api.data.Key.from(rsk(k), k.type()));
   }
 
   public static ResourceKey rsk(Key key) {

@@ -50,6 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -84,11 +85,11 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.world.LocatableBlock;
 
 public class UserListener extends SpongeListener {
@@ -152,6 +153,9 @@ public class UserListener extends SpongeListener {
       event.setCancelled(true);
     } else if (ActionLimiter.isLimited(entity.uniqueId(), ActionType.SHOOT)) {
       event.filterEntities(e -> !(e instanceof Projectile));
+    } else {
+      var key = PlatformAdapter.dataKey(Metadata.ARMOR_KEY);
+      event.filterEntities(e -> !(e instanceof Item item) || item.get(key).isEmpty());
     }
   }
 
@@ -506,13 +510,30 @@ public class UserListener extends SpongeListener {
   }
 
   @Listener(order = Order.EARLY)
-  public void onArmorChange(ChangeEntityEquipmentEvent event, @Getter("entity") Living entity) {
-    var item = event.transaction().original();
-    if (item.get(PlatformAdapter.dataKey(Metadata.ARMOR_KEY)).isPresent()) {
-      if (!TempArmor.MANAGER.isTemp(entity.uniqueId()) || !(event.slot() instanceof EquipmentSlot)) {
-        event.transaction().setCustom(ItemStackSnapshot.empty());
+  public void onArmorChange(ChangeEntityEquipmentEvent event) {
+    boolean isTemp = TempArmor.MANAGER.isTemp(event.entity().uniqueId());
+    var tr = event.transaction();
+    var item = tr.original();
+    var item2 = tr.finalReplacement();
+    var key = PlatformAdapter.dataKey(Metadata.ARMOR_KEY);
+    if (tr.isValid() && !item.equals(item2) && item.get(key).isPresent()) {
+      if (isTemp) {
+        tr.invalidate();
+        event.setCancelled(true);
+      } else {
+        tr.setCustom(ItemStackSnapshot.empty());
       }
-      event.setCancelled(true);
+    }
+  }
+
+  @Listener(order = Order.EARLY)
+  public void onInventoryClick(ClickContainerEvent event, @First ServerPlayer player) {
+    for (var tr : event.transactions()) {
+      var key = PlatformAdapter.dataKey(Metadata.ARMOR_KEY);
+      if (tr.original().get(key).isPresent() || tr.finalReplacement().get(key).isPresent()) {
+        tr.invalidate();
+        tr.setCustom(ItemStackSnapshot.empty());
+      }
     }
   }
 }

@@ -40,7 +40,12 @@ public final class ParticleMapper {
     if (spongeParticle != null) {
       var data = context.data();
       var offset = context.offset().to(Vector3d.class);
-      var builder = ParticleEffect.builder().type(spongeParticle).quantity(context.count()).offset(offset);
+      var builder = ParticleEffect.builder().type(spongeParticle);
+      if (context.count() <= 0) {
+        builder.quantity(1).velocity(offset);
+      } else {
+        builder.quantity(context.count()).offset(offset);
+      }
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
         builder.option(ParticleOptions.BLOCK_STATE, PlatformAdapter.toSpongeData(state));
       } else if (p == Particle.ITEM && data instanceof Item item) {
@@ -55,6 +60,7 @@ public final class ParticleMapper {
         return new DustTransition(from, to, dust.size());
       } else if (p == Particle.VIBRATION && data instanceof Vibration v) { // TODO Add?
       }*/
+
       return builder.build();
     }
     return null;
