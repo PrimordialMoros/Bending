@@ -41,7 +41,7 @@ public class BukkitItem implements ItemSnapshot {
 
   public BukkitItem(ItemStack handle) {
     this.handle = handle.clone();
-    this.type = Item.registry().getOrThrow(PlatformAdapter.nsk(this.handle.getType().getKey()));
+    this.type = PlatformAdapter.fromBukkitItem(this.handle.getType());
     this.holder = Suppliers.lazy(() -> BukkitDataHolder.persistent(handle().getItemMeta()));
   }
 

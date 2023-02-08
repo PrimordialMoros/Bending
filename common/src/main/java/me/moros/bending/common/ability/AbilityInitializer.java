@@ -199,7 +199,7 @@ public final class AbilityInitializer implements Initializer {
       .element(WATER).activation(PASSIVE).canBind(false).build());
 
     AbilityDescription waterManipulation = AbilityDescription.builder("WaterManipulation", WaterManipulation::new)
-      .element(WATER).activation(SNEAK, ATTACK).sourcePlant(true).bypassCooldown(true).build();
+      .element(WATER).activation(SNEAK, ATTACK).bypassCooldown(true).build();
     abilities.add(waterManipulation);
 
     abilities.add(AbilityDescription.builder("WaterSpout", WaterSpout::new)
@@ -212,10 +212,10 @@ public final class AbilityInitializer implements Initializer {
       .element(WATER).activation(SNEAK).build());
 
     abilities.add(AbilityDescription.builder("OctopusForm", OctopusForm::new)
-      .element(WATER).activation(ATTACK).sourcePlant(true).build());
+      .element(WATER).activation(ATTACK).build());
 
     AbilityDescription waterRing = AbilityDescription.builder("WaterRing", WaterRing::new)
-      .element(WATER).activation(ATTACK).sourcePlant(true).build();
+      .element(WATER).activation(ATTACK).build();
     abilities.add(waterRing);
 
     AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
@@ -223,7 +223,7 @@ public final class AbilityInitializer implements Initializer {
     abilities.add(waterWave);
 
     AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)
-      .element(WATER).activation(ATTACK).sourcePlant(true).bypassCooldown(true).build();
+      .element(WATER).activation(ATTACK).bypassCooldown(true).build();
     abilities.add(torrent);
 
     AbilityDescription phaseChange = AbilityDescription.builder("PhaseChange", PhaseChange::new)

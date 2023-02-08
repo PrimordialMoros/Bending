@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 public record LockableImpl(DataHolder.Mutable handle) implements Lockable {
   @Override
   public Optional<String> lock() {
-    return handle.get(Keys.LOCK_TOKEN);
+    return handle.get(Keys.LOCK_TOKEN).filter(s -> !s.isBlank());
   }
 
   @Override
@@ -40,7 +40,7 @@ public record LockableImpl(DataHolder.Mutable handle) implements Lockable {
 
   @Override
   public void lock(String lock) {
-    if (lock.isEmpty()) {
+    if (lock.isBlank()) {
       unlock();
     } else {
       handle.offer(Keys.LOCK_TOKEN, lock);

@@ -38,7 +38,7 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
   @Override
   public Optional<String> lock() {
     var pass = ((LockCodeAccess) lockKey).password();
-    return pass.isEmpty() ? Optional.empty() : Optional.of(pass);
+    return pass.isBlank() ? Optional.empty() : Optional.of(pass);
   }
 
   @Override
@@ -48,7 +48,7 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
 
   @Override
   public void lock(String lock) {
-    if (lock.isEmpty()) {
+    if (lock.isBlank()) {
       unlock();
     } else {
       lockKey = new LockCode(lock);

@@ -19,16 +19,12 @@
 
 package me.moros.bending.paper.listener;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.sound.Sound;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.block.LockableImpl;
@@ -121,19 +117,11 @@ public record BlockListener(Game game) implements Listener, BukkitListener {
     if (disabledWorld(event)) {
       return;
     }
-    if (TempBlock.MANAGER.isTemp(block)) {
+    var tb = TempBlock.MANAGER.get(block).orElse(null);
+    if (tb != null) {
       event.setDropItems(false);
-    } else if (WaterMaterials.isPlantBendable(block)) {
-      User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
-      if (user != null) {
-        AbilityDescription desc = user.selectedAbility();
-        if (desc != null && desc.sourcePlant() && user.canBend(desc)) {
-          event.setCancelled(true);
-          return;
-        }
-      }
+      tb.removeWithoutReverting();
     }
-    TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
   }
 
   private boolean handleLockedContainer(Player player, me.moros.bending.api.platform.block.Block block, Lockable lockable) {

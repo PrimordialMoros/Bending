@@ -22,17 +22,13 @@ package me.moros.bending.fabric.listener;
 import java.util.List;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.sound.Sound;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.event.ServerBlockEvents;
@@ -80,16 +76,9 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
     if (level.isClientSide || disabledWorld(player)) {
       return true;
     }
-    var block = PlatformAdapter.fromFabricWorld((ServerLevel) level).blockAt(pos.getX(), pos.getY(), pos.getZ());
-    if (blockEntity instanceof Lockable lockable && handleLockedContainer((ServerPlayer) player, block, lockable)) {
-      return false;
-    }
-    if (WaterMaterials.isPlantBendable(block)) {
-      User user = Registries.BENDERS.get(player.getUUID());
-      if (user != null) {
-        AbilityDescription desc = user.selectedAbility();
-        return desc == null || !desc.sourcePlant() || !user.canBend(desc);
-      }
+    if (blockEntity instanceof Lockable lockable) {
+      var block = PlatformAdapter.fromFabricWorld((ServerLevel) level).blockAt(pos.getX(), pos.getY(), pos.getZ());
+      return !handleLockedContainer((ServerPlayer) player, block, lockable);
     }
     return true;
   }

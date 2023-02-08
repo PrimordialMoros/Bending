@@ -19,26 +19,22 @@
 
 package me.moros.bending.sponge.listener;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.sound.Sound;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.block.LockableImpl;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
@@ -53,16 +49,33 @@ public class BlockListener extends SpongeListener {
   }
 
   @Listener(order = Order.EARLY)
+  public void onBlockChangePre(ChangeBlockEvent.Pre event) {
+    if (disabledWorld(event.world())) {
+      return;
+    }
+    var living = event.cause().first(Living.class).orElse(null);
+    if (living != null && ActionLimiter.isLimited(living.uniqueId(), ActionType.INTERACT_BLOCK)) {
+      event.setCancelled(true);
+      return;
+    }
+    if (living instanceof ServerPlayer player) {
+      for (var loc : event.locations()) {
+        var blockEntity = loc.blockEntity().orElse(null);
+        var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
+        if (blockEntity != null && handleLockedContainer(block, blockEntity, player)) {
+          event.setCancelled(true);
+          return;
+        }
+      }
+    }
+  }
+
+  @Listener(order = Order.EARLY)
   public void onBlockChange(ChangeBlockEvent.All event) {
     if (disabledWorld(event.world())) {
       return;
     }
     var cause = event.cause().first(Entity.class).orElse(null);
-    if (cause != null && ActionLimiter.isLimited(cause.uniqueId(), ActionType.INTERACT_BLOCK)) {
-      event.invalidateAll();
-      event.setCancelled(true);
-      return;
-    }
     for (var transaction : event.transactions()) {
       var loc = transaction.original().location().orElse(null);
       if (!transaction.isValid() || loc == null) {
@@ -71,45 +84,26 @@ public class BlockListener extends SpongeListener {
       var op = transaction.operation();
       var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
       if (op == Operations.PLACE.get() && cause != null) {
-        onBlockPlace(block);
+        onBlockOverride(block);
       } else if (op == Operations.BREAK.get()) {
-        onBlockBreak(transaction, block, cause);
+        onBlockOverride(block);
       } else {
         transaction.setValid(TempBlock.MANAGER.isTemp(block));
       }
     }
   }
 
-  private void onBlockPlace(Block block) {
+  private void onBlockOverride(Block block) {
     TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
   }
 
-  private void onBlockBreak(BlockTransaction transaction, Block block, @Nullable Entity cause) {
-    if (cause instanceof ServerPlayer player && handleLockedContainer(block, player)) {
-      transaction.setValid(false);
-      return;
-    }
-    if (WaterMaterials.isPlantBendable(block)) {
-      User user = cause == null ? null : Registries.BENDERS.get(cause.uniqueId());
-      if (user != null) {
-        AbilityDescription desc = user.selectedAbility();
-        if (desc != null && desc.sourcePlant() && user.canBend(desc)) {
-          transaction.setValid(false);
-          return;
-        }
-      }
-    }
-    TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
-  }
-
-  private boolean handleLockedContainer(Block block, ServerPlayer player) {
-    var w = PlatformAdapter.toSpongeWorld(block.world());
-    var tile = w.blockEntity(block.blockX(), block.blockY(), block.blockZ()).orElse(null);
-    if (tile != null && tile.supports(Keys.LOCK_TOKEN)) {
-      if (!Locksmithing.canBreak(PlatformAdapter.fromSpongeEntity(player), new LockableImpl(tile))) {
-        Component name = tile.get(Keys.CUSTOM_NAME).orElse(null);
+  private boolean handleLockedContainer(Block block, BlockEntity blockEntity, ServerPlayer player) {
+    if (blockEntity.supports(Keys.LOCK_TOKEN)) {
+      if (!Locksmithing.canBreak(PlatformAdapter.fromSpongeEntity(player), new LockableImpl(blockEntity))) {
+        Component name = blockEntity.get(Keys.CUSTOM_NAME).orElse(null);
         if (name == null) {
-          name = Component.translatable(block.type().translationKey());
+          var key = PlatformAdapter.fromSpongeBlock(blockEntity.block().type()).translationKey();
+          name = Component.translatable(key);
         }
         player.sendActionBar(Component.translatable("container.isLocked").args(name));
         Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);

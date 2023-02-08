@@ -79,7 +79,7 @@ public final class PlatformAdapter {
   }
 
   public static PotionEffectType toBukkitPotion(PotionEffect effect) {
-    return Objects.requireNonNull(Registry.POTION_EFFECT_TYPE.get(PlatformAdapter.nsk(effect.key())));
+    return Objects.requireNonNull(Registry.POTION_EFFECT_TYPE.get(nsk(effect.key())));
   }
 
   public static org.bukkit.potion.PotionEffect toBukkitPotion(Potion p) {

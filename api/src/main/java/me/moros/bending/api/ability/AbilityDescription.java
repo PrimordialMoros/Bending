@@ -53,7 +53,6 @@ public class AbilityDescription implements Keyed, Translatable {
   private final Component displayName;
   private final boolean canBind;
   private final boolean hidden;
-  private final boolean sourcePlant;
   private final boolean bypassCooldown;
   private final int hashcode;
 
@@ -65,10 +64,9 @@ public class AbilityDescription implements Keyed, Translatable {
     requiredPermissions = List.copyOf(builder.requiredPermissions);
     canBind = builder.canBind && !isActivatedBy(Activation.SEQUENCE);
     hidden = builder.hidden;
-    sourcePlant = builder.sourcePlant;
     bypassCooldown = builder.bypassCooldown;
     displayName = Component.text(name, element.color());
-    hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, sourcePlant, bypassCooldown);
+    hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, bypassCooldown);
     key = Key.key(NAMESPACE, name.toLowerCase(Locale.ROOT));
   }
 
@@ -90,10 +88,6 @@ public class AbilityDescription implements Keyed, Translatable {
 
   public boolean hidden() {
     return hidden;
-  }
-
-  public boolean sourcePlant() {
-    return sourcePlant;
   }
 
   public boolean bypassCooldown() {
@@ -249,7 +243,6 @@ public class AbilityDescription implements Keyed, Translatable {
     private Collection<String> requiredPermissions;
     private boolean canBind = true;
     private boolean hidden = false;
-    private boolean sourcePlant = false;
     private boolean bypassCooldown = false;
 
     private <T extends Ability> Builder(String name, Function<AbilityDescription, T> constructor) {
@@ -290,11 +283,6 @@ public class AbilityDescription implements Keyed, Translatable {
 
     public Builder hidden(boolean hidden) {
       this.hidden = hidden;
-      return this;
-    }
-
-    public Builder sourcePlant(boolean sourcePlant) {
-      this.sourcePlant = sourcePlant;
       return this;
     }
 

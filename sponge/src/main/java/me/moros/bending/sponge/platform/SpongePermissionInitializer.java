@@ -35,9 +35,11 @@ public class SpongePermissionInitializer extends PermissionInitializer {
 
   @Override
   protected void registerDefault(String node, Collection<String> children, TriState def) {
-    // TODO handle permissions for op
-    var map = children.stream().collect(Collectors.toMap(Function.identity(), v -> def.toBooleanOrElse(false)));
-    Sponge.server().serviceProvider().permissionService().defaults()
-      .transientSubjectData().setPermissions(SubjectData.GLOBAL_CONTEXT, map, TransferMethod.MERGE);
+    var defBoolean = def.toBoolean();
+    if (defBoolean != null) {
+      var map = children.stream().collect(Collectors.toMap(Function.identity(), v -> defBoolean));
+      Sponge.server().serviceProvider().permissionService().defaults()
+        .transientSubjectData().setPermissions(SubjectData.GLOBAL_CONTEXT, map, TransferMethod.MERGE);
+    }
   }
 }

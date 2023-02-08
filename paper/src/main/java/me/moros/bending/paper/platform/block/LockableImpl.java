@@ -29,7 +29,7 @@ public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable
   @Override
   public Optional<String> lock() {
     String lock = handle.getLock();
-    return lock.isEmpty() ? Optional.empty() : Optional.of(lock);
+    return lock.isBlank() ? Optional.empty() : Optional.of(lock);
   }
 
   @Override
@@ -39,7 +39,7 @@ public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable
 
   @Override
   public void lock(String lock) {
-    if (lock.isEmpty()) {
+    if (lock.isBlank()) {
       unlock();
     } else {
       handle.setLock(lock);
