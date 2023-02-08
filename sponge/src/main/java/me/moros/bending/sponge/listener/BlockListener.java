@@ -48,6 +48,7 @@ public class BlockListener extends SpongeListener {
     super(game);
   }
 
+  // TODO better event filtering, api block changes also fire events, messing a bunch of systems
   @Listener(order = Order.EARLY)
   public void onBlockChangePre(ChangeBlockEvent.Pre event) {
     if (disabledWorld(event.world())) {

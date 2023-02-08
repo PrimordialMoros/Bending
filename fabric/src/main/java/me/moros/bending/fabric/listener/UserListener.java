@@ -129,7 +129,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
           cable.hitBlock(world.blockAt(pos.getX(), pos.getY(), pos.getZ()));
         } else if (hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living) {
           cable.hitEntity(PlatformAdapter.fromFabricEntity(living));
-          return false;
+          return false; // Cancel the dmg
         } else {
           projectile.discard();
         }

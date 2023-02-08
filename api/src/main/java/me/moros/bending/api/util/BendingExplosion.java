@@ -146,7 +146,7 @@ public final class BendingExplosion {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
       }
       double knockback = BendingProperties.instance().explosionKnockback(sizeFactor * distanceFactor);
-      if (entity.equals(user.entity())) {
+      if (entity.uuid().equals(user.uuid())) {
         knockback *= selfKnockbackFactor;
       }
       Vector3d dir = entityCenter.subtract(center).normalize().multiply(knockback);

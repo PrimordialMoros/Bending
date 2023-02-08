@@ -207,6 +207,6 @@ public final class ContextBuilder {
     if (check instanceof Player player && player.gamemode() == GameMode.SPECTATOR) {
       return false;
     }
-    return check instanceof LivingEntity && !check.equals(entity);
+    return check instanceof LivingEntity && !check.uuid().equals(entity.uuid());
   }
 }

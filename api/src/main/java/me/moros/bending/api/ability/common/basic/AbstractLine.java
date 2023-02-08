@@ -131,6 +131,6 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (target == null || !target.valid()) {
       return false;
     }
-    return target.world().equals(user.world()) && targetLocation.distanceSq(target.location()) < 5 * 5;
+    return target.worldKey().equals(user.worldKey()) && targetLocation.distanceSq(target.location()) < 5 * 5;
   }
 }

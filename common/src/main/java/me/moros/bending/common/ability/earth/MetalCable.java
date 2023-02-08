@@ -21,7 +21,6 @@ package me.moros.bending.common.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -62,6 +61,7 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
@@ -100,10 +100,11 @@ public class MetalCable extends AbilityInstance {
       }
       return false;
     } else if (method == Activation.ATTACK) {
-      Optional<MetalCable> cable = user.game().abilityManager(user.worldKey()).firstInstance(user, MetalCable.class);
-      if (cable.isPresent()) {
-        cable.get().tryLaunchTarget();
-        return false;
+      for (var cable : user.game().abilityManager(user.worldKey()).userInstances(user, MetalCable.class).toList()) {
+        if (!cable.launched) {
+          cable.tryLaunchTarget();
+          return false;
+        }
       }
     }
 
@@ -178,11 +179,10 @@ public class MetalCable extends AbilityInstance {
     }
     Entity entityToMove = user;
     Vector3d targetLocation = location;
-    if (target.type == CableTarget.Type.ENTITY) {
-      if (target.entity != null) {
-        cable.teleport(target.entity.location());
-      }
-      if (user.sneaking() || projectile != null) {
+    if (target.type == Type.ENTITY) {
+      //noinspection DataFlowIssue
+      cable.teleport(target.entity.location().add(0, target.offset, 0));
+      if (user.sneaking()) {
         entityToMove = target.entity;
         Ray ray = user.ray(distance / 2);
         targetLocation = ray.origin.add(ray.direction);
@@ -192,17 +192,19 @@ public class MetalCable extends AbilityInstance {
     if (distance > 3) {
       entityToMove.applyVelocity(this, direction.multiply(userConfig.pullSpeed));
     } else {
-      if (target.type == CableTarget.Type.ENTITY) {
+      if (target.type == Type.ENTITY) {
         entityToMove.applyVelocity(this, Vector3d.ZERO);
         if (projectile != null) {
           projectile.state().asParticle(projectile.center()).count(8).offset(0.25, 0.15, 0.25).spawn(user.world());
+          projectile.remove();
+          return false;
         }
-        if (target.entity != null) {
+        if (target.entity != null && target.entity.type() == EntityType.FALLING_BLOCK) {
           target.entity.remove();
         }
         return false;
       } else {
-        if (distance <= 3 && distance > 1.5) {
+        if (distance > 1.5) {
           entityToMove.applyVelocity(this, direction.multiply(0.4 * userConfig.pullSpeed));
         } else {
           entityToMove.applyVelocity(this, Vector3d.of(0, 0.5, 0));
@@ -272,7 +274,7 @@ public class MetalCable extends AbilityInstance {
       BlockState state = block.state();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
       projectile = TempFallingBlock.fallingBlock(state).velocity(dir.multiply(0.2)).buildReal(block.world(), location);
-      target = new CableTarget(projectile);
+      target = new CableTarget(projectile, 0.5);
     } else {
       dir = dir.negate();
       target = new CableTarget(block);
@@ -282,14 +284,15 @@ public class MetalCable extends AbilityInstance {
   }
 
   public void hitEntity(Entity entity) {
-    if (target != null) {
+    if (target != null || entity.uuid().equals(user.uuid())) {
       return;
     }
     if (!user.canBuild(entity.block())) {
       remove();
       return;
     }
-    target = new CableTarget(entity);
+    double offset = FastMath.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
+    target = new CableTarget(entity, offset);
     entity.fallDistance(0);
     hasHit = true;
   }
@@ -307,7 +310,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   private void tryLaunchTarget() {
-    if (launched || target == null || target.type == CableTarget.Type.BLOCK || target.entity == null) {
+    if (launched || target == null || target.type == Type.BLOCK || target.entity == null) {
       return;
     }
 
@@ -347,32 +350,22 @@ public class MetalCable extends AbilityInstance {
     return List.of(new Sphere(location, 0.8));
   }
 
-  private static final class CableTarget {
-    private enum Type {ENTITY, BLOCK}
+  private enum Type {ENTITY, BLOCK}
 
-    private final Type type;
-    private final Entity entity;
-    private final Block block;
-    private final BlockType material;
-
-    private CableTarget(Entity entity) {
-      block = null;
-      this.material = null;
-      this.entity = entity;
-      type = Type.ENTITY;
+  private record CableTarget(Type type, @Nullable Entity entity,  @Nullable Block block, @Nullable BlockType material, double offset) {
+    private CableTarget(Entity entity, double offset) {
+      this(Type.ENTITY, entity, null, null, offset);
     }
 
     private CableTarget(Block block) {
-      entity = null;
-      this.block = block;
-      material = block.type();
-      type = Type.BLOCK;
+      this(Type.BLOCK, null, block, block.type(), 0);
     }
 
     public boolean isValid(User u) {
       if (type == Type.ENTITY) {
         return entity != null && entity.valid() && entity.world().equals(u.world());
       } else {
+        //noinspection DataFlowIssue
         return block.type() == material;
       }
     }
