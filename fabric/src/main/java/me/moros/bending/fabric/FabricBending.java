@@ -147,10 +147,10 @@ public class FabricBending implements BendingPlugin {
   }
 
   private void onDisable(boolean fullShutdown) {
-    logger.info("Shutting down: " + fullShutdown + " " + exiting.get());
     if (phase == LoadPhase.LOADED) {
       FabricMetadata.INSTANCE.cleanup();
       game.cleanup(fullShutdown);
+      Tasker.sync().shutdown(); // Cancel any sync tasks
       GameProviderUtil.unregisterProvider();
       game = null;
       phase = LoadPhase.LOADING;

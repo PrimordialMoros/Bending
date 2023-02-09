@@ -45,7 +45,6 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.BendingPlugin;
-import net.kyori.adventure.key.Key;
 
 public final class GameImpl implements Game {
   private final BendingPlugin plugin;

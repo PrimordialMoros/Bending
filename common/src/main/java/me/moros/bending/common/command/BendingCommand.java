@@ -476,7 +476,7 @@ public class BendingCommand<T extends Audience> implements ElementHandler {
   }
 
   private Predicate<AbilityDescription> permissionPredicate(Audience user) {
-    PermissionChecker checker = user.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.NOT_SET));
+    PermissionChecker checker = user.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.TRUE));
     return desc -> desc.permissions().stream().allMatch(checker);
   }
 
