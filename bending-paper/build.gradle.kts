@@ -2,7 +2,7 @@ import io.papermc.paperweight.userdev.attribute.Obfuscation
 
 plugins {
     id("com.github.johnrengelman.shadow").version("7.1.2")
-    id("io.papermc.paperweight.userdev").version("1.3.11").apply(false)
+    id("io.papermc.paperweight.userdev").version("1.5.0").apply(false)
 }
 
 repositories {
