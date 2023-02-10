@@ -198,7 +198,7 @@ public class Catapult extends AbilityInstance {
     private int length = 7;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "catapult");
     }
   }

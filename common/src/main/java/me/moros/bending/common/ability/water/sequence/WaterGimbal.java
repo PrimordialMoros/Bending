@@ -331,7 +331,7 @@ public class WaterGimbal extends AbilityInstance {
     private double knockup = 0.25;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "sequences", "watergimbal");
     }
   }

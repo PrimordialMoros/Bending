@@ -178,7 +178,7 @@ public class FireJet extends AbilityInstance {
     private long jetBlastDuration = 2000;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "firejet");
     }
   }

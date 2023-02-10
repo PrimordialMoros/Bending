@@ -283,7 +283,7 @@ public class LavaDisk extends AbilityInstance {
     private double powerDiminishPerEntity = 7.5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "lavadisk");
     }
   }

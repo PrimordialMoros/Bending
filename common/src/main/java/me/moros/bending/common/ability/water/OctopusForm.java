@@ -272,7 +272,7 @@ public class OctopusForm extends AbilityInstance {
     private double knockback = 1.75;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "octopusform");
     }
   }

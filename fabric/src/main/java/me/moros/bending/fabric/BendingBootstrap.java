@@ -22,13 +22,16 @@ package me.moros.bending.fabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
-public class BendingBootstrap implements ModInitializer {
+public final class BendingBootstrap implements ModInitializer {
+  private FabricBending instance;
+
   @Override
   public void onInitialize() {
     var container = FabricLoader.getInstance().getModContainer("bending").orElseThrow(
       () -> new IllegalStateException("Bending mod missing in Fabric")
     );
-    var path = FabricLoader.getInstance().getConfigDir().resolve("bending");
-    new FabricBending(path, container);
+    if (instance == null) {
+      instance = new FabricBending(container, FabricLoader.getInstance().getConfigDir().resolve("bending"));
+    }
   }
 }

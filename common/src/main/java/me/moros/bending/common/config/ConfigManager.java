@@ -22,20 +22,15 @@ package me.moros.bending.common.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;
-import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 public final class ConfigManager {
   private static ConfigManager INSTANCE;
@@ -75,16 +70,6 @@ public final class ConfigManager {
       listener.close();
     } catch (IOException e) {
       logger.warn(e.getMessage(), e);
-    }
-  }
-
-  public <T extends Configurable> @Nullable ValueReference<T, CommentedConfigurationNode> reference(Class<T> clazz, T config) {
-    NodePath path = NodePath.of(List.of(config.path()));
-    try {
-      return reference.referenceTo(clazz, path, config);
-    } catch (SerializationException e) {
-      logger.error(e.getMessage(), e);
-      return null;
     }
   }
 

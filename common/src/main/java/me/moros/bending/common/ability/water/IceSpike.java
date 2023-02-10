@@ -276,7 +276,7 @@ public class IceSpike extends AbilityInstance {
     private double fieldRadius = 10;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "icespike");
     }
   }

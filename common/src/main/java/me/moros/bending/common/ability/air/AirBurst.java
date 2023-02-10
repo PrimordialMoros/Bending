@@ -240,7 +240,7 @@ public class AirBurst extends AbilityInstance {
     private double fallThreshold = 14;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airburst");
     }
   }

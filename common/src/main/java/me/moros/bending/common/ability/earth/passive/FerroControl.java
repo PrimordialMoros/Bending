@@ -155,7 +155,7 @@ public class FerroControl extends AbilityInstance {
     private double controlSpeed = 0.8;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "passives", "ferrocontrol");
     }
   }

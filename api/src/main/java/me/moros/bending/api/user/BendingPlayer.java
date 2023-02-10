@@ -34,6 +34,7 @@ import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
 import net.kyori.adventure.util.TriState;
@@ -123,9 +124,9 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
     if (n.isEmpty() || !EventBus.INSTANCE.postPresetCreateEvent(this, preset)) {
       return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
-    return game().storage().savePresetAsync(internalId, preset).thenApply(success -> {
-      if (success) {
-        presets.add(preset);
+    return game().storage().savePresetAsync(Identifiable.of(internalId, uuid()), preset).thenApply(id -> {
+      if (id > 0) {
+        presets.add(preset.withId(id));
         return PresetCreateResult.SUCCESS;
       }
       return PresetCreateResult.FAIL;
@@ -138,12 +139,12 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
       return false;
     }
     presets.remove(preset);
-    game().storage().deletePresetAsync(preset.id());
+    game().storage().deletePresetAsync(Identifiable.of(internalId, uuid()), preset);
     return true;
   }
 
   public PlayerBenderProfile toProfile() {
     var data = BenderProfile.of(createPresetFromSlots("").abilities(), elements(), presets);
-    return BenderProfile.of(internalId, !store().has(Board.HIDDEN), data);
+    return BenderProfile.of(internalId, uuid(), !store().has(Board.HIDDEN), data);
   }
 }

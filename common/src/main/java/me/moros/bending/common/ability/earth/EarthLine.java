@@ -312,7 +312,7 @@ public class EarthLine extends AbilityInstance {
     private long prisonDuration = 1500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "earthline");
     }
   }

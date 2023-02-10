@@ -175,7 +175,7 @@ public class AirShield extends AbilityInstance {
     private double maxPush = 2.6;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airshield");
     }
   }

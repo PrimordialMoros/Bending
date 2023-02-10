@@ -159,7 +159,7 @@ public class HealingWaters extends AbilityInstance {
     private int power = 2;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "healingwaters");
     }
   }

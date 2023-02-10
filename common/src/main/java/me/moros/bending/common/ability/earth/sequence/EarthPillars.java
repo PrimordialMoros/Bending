@@ -177,7 +177,7 @@ public class EarthPillars extends AbilityInstance {
     private double maxFallThreshold = 60;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "sequences", "earthpillars");
     }
   }

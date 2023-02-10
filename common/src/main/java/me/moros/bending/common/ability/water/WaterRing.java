@@ -389,7 +389,7 @@ public class WaterRing extends AbilityInstance {
     private long waveChargeTime = 750;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "waterring");
     }
   }

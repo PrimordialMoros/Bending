@@ -172,7 +172,7 @@ public class EarthShards extends AbilityInstance {
     private long interval = 100;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "sequences", "earthshards");
     }
   }

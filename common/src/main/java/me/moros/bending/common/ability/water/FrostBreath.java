@@ -190,7 +190,7 @@ public class FrostBreath extends AbilityInstance {
     private int freezeTicks = 5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "frostbreath");
     }
   }

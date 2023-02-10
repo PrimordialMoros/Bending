@@ -206,7 +206,7 @@ public class Tornado extends AbilityInstance {
     private long growthTime = 3000;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "tornado");
     }
   }

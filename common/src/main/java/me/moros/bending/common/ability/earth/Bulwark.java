@@ -128,7 +128,7 @@ public class Bulwark extends AbilityInstance {
     private double wallRange = 4.5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "eartharmor", "wall");
     }
   }

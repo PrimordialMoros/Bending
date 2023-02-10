@@ -22,6 +22,7 @@ package me.moros.bending.api.user.profile;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
@@ -58,11 +59,11 @@ public interface BenderProfile {
     return new BenderProfileImpl(Collections.unmodifiableList(slots), Set.copyOf(elements), Set.copyOf(presets));
   }
 
-  static PlayerBenderProfile of(int id, boolean board) {
-    return of(id, board, empty());
+  static PlayerBenderProfile of(int id, UUID uuid, boolean board) {
+    return of(id, uuid, board, empty());
   }
 
-  static PlayerBenderProfile of(int id, boolean board, BenderProfile benderProfile) {
-    return new PlayerBenderProfileImpl(id, board, benderProfile);
+  static PlayerBenderProfile of(int id, UUID uuid, boolean board, BenderProfile benderProfile) {
+    return new PlayerBenderProfileImpl(id, uuid, board, benderProfile);
   }
 }

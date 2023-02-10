@@ -214,7 +214,7 @@ public class IceWall extends AbilityInstance {
     private int wallHealth = 12;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "icewall");
     }
   }

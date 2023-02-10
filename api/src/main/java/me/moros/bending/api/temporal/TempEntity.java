@@ -87,7 +87,6 @@ public class TempEntity extends Temporary {
     @Override
     public TempEntity build(World world, Vector3d center) {
       int id = Platform.instance().nativeAdapter().createFallingBlock(world, center, data, velocity, gravity);
-      ;
       if (id > 0) {
         renderParticles(data.asParticle(center), world);
         return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration));

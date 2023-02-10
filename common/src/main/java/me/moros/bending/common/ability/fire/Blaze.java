@@ -155,7 +155,7 @@ public class Blaze extends AbilityInstance {
     private double ringRange = 7;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "blaze");
     }
   }

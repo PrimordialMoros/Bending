@@ -247,7 +247,7 @@ public class Torrent extends AbilityInstance {
     private long freezeDuration = 12500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "torrent");
     }
   }

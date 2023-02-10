@@ -174,7 +174,7 @@ public class WaterBubble extends AbilityInstance {
     private double speed = 0.5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "waterbubble");
     }
   }

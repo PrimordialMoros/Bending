@@ -157,7 +157,7 @@ public class AirPunch extends AbilityInstance {
     private double speed = 0.8;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airpunch");
     }
   }

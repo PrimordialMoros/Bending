@@ -285,7 +285,7 @@ public class HeatControl extends AbilityInstance {
     private long cookInterval = 2000;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "heatcontrol");
     }
   }

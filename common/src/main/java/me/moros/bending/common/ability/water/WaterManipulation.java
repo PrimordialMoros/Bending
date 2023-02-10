@@ -279,7 +279,7 @@ public class WaterManipulation extends AbilityInstance {
     private double maxRedirectRange = 20;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "watermanipulation");
     }
   }

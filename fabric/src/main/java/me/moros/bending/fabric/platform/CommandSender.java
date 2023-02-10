@@ -19,17 +19,12 @@
 
 package me.moros.bending.fabric.platform;
 
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.moros.bending.fabric.mixin.accessor.CommandSourceStackAccess;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.permission.PermissionChecker;
-import net.kyori.adventure.pointer.Pointer;
-import net.kyori.adventure.util.TriState;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CommandSender implements ForwardingAudience.Single {
   private final CommandSourceStack stack;
@@ -63,32 +58,15 @@ public class CommandSender implements ForwardingAudience.Single {
     return ((CommandSourceStackAccess) this.stack).source().hashCode();
   }
 
-  public static final class PlayerCommandSender extends CommandSender implements PermissionChecker {
-    private final ServerPlayer player;
-
-    private PlayerCommandSender(CommandSourceStack stack, ServerPlayer player) {
+  public static final class PlayerCommandSender extends CommandSender {
+    private PlayerCommandSender(CommandSourceStack stack) {
       super(stack);
-      this.player = player;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> @Nullable T getOrDefault(Pointer<T> pointer, @Nullable T defaultValue) {
-      if (pointer == PermissionChecker.POINTER) {
-        return (T) this;
-      }
-      return super.getOrDefault(pointer, defaultValue);
-    }
-
-    @Override
-    public @NonNull TriState value(String permission) {
-      return TriState.byBoolean(Permissions.check(player, permission, player.getLevel().getServer().getOperatorUserPermissionLevel()));
     }
   }
 
   public static CommandSender from(CommandSourceStack stack) {
-    if (((CommandSourceStackAccess) stack).source() instanceof ServerPlayer player) {
-      return new PlayerCommandSender(stack, player);
+    if (((CommandSourceStackAccess) stack).source() instanceof ServerPlayer) {
+      return new PlayerCommandSender(stack);
     }
     return new CommandSender(stack);
   }

@@ -185,7 +185,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     private double maxSpeed = 0.2;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "waterspout");
     }
   }

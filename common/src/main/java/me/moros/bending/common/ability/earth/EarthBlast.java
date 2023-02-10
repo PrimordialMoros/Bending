@@ -259,7 +259,7 @@ public class EarthBlast extends AbilityInstance {
     private double shatterRange = 14;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "earthblast");
     }
   }

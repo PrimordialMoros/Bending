@@ -232,7 +232,7 @@ public class AirSwipe extends AbilityInstance {
     private double chargeFactor = 2;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airswipe");
     }
   }

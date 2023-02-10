@@ -393,7 +393,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     private double explosionRadius = 2.5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "earthshot");
     }
   }

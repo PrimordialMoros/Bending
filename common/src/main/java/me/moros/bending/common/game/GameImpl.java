@@ -45,6 +45,7 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.storage.StorageFactory;
 
 public final class GameImpl implements Game {
   private final BendingPlugin plugin;
@@ -58,10 +59,10 @@ public final class GameImpl implements Game {
 
   private final Collection<TemporalManager<?, ?>> temporal;
 
-  public GameImpl(BendingPlugin plugin, BendingStorage storage) {
+  public GameImpl(BendingPlugin plugin) {
     this.plugin = plugin;
     this.configProcessor = plugin.configManager().processor();
-    this.storage = storage;
+    this.storage = new StorageFactory(plugin).createInstance();
 
     flightManager = new FlightManagerImpl();
     worldManager = new WorldManagerImpl(plugin);
@@ -71,7 +72,7 @@ public final class GameImpl implements Game {
 
     lockRegistries();
     plugin.configManager().save();
-    storage.createAbilities(Registries.ABILITIES);
+    storage.init();
 
     Tasker.sync().repeat(this::update, 1);
     Tasker.sync().repeat(BendingEffect::cleanup, 5);
@@ -108,24 +109,17 @@ public final class GameImpl implements Game {
 
   @Override
   public void reload() {
-    cleanup(false);
+    cleanup();
     plugin.translationManager().reload();
     Registries.BENDERS.forEach(u -> worldManager.instance(u.worldKey()).createPassives(u));
   }
 
   @Override
-  public void cleanup(boolean shutdown) {
+  public void cleanup() {
     worldManager.forEach(AbilityManager::destroyAllInstances);
     flightManager.removeAll();
     temporal.forEach(TemporalManager::removeAll);
     storage.saveProfilesAsync(Registries.BENDERS.players().map(BendingPlayer::toProfile).toList());
-    if (shutdown) {
-      EventBus.INSTANCE.shutdown();
-      plugin.configManager().close();
-      Tasker.sync().shutdown();
-      Tasker.async().shutdown();
-      storage.close();
-    }
   }
 
   private Collection<TemporalManager<?, ?>> initTemporary() {

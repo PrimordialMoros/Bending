@@ -29,7 +29,7 @@ import net.kyori.adventure.key.Key;
 public interface Game {
   void reload();
 
-  void cleanup(boolean shutdown);
+  void cleanup();
 
   BendingStorage storage();
 

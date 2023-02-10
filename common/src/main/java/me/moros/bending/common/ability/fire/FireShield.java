@@ -324,7 +324,7 @@ public class FireShield extends AbilityInstance {
     private double shieldRadius = 3;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "fireshield");
     }
   }

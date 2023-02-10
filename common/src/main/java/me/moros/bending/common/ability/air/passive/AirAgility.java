@@ -90,7 +90,7 @@ public class AirAgility extends AbilityInstance {
     private int jumpAmplifier = 3;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "passives", "airagility");
     }
   }

@@ -5,9 +5,9 @@ plugins {
 
 val platformExt = extensions.create("bendingPlatform", BendingPlatformExtension::class)
 
-val bendingImplementation: Configuration by configurations.creating
+configurations.create("bendingImplementation")
 configurations.implementation {
-    extendsFrom(bendingImplementation)
+    extendsFrom(configurations.getByName("bendingImplementation"))
 }
 
 tasks {
@@ -16,7 +16,7 @@ tasks {
         isReproducibleFileOrder = true
     }
     shadowJar {
-        configurations = listOf(bendingImplementation)
+        configurations = listOf(project.configurations.getByName("bendingImplementation"))
         exclude("org/checkerframework/") // Try to catch the myriad dependency leaks
         archiveClassifier.set("")
         archiveBaseName.set("bending-${project.name}")
@@ -27,8 +27,6 @@ tasks {
             reloc("org.bstats", "bstats")
             reloc("me.moros.storage", "storage")
             reloc("net.kyori.event", "eventbus")
-            reloc("com.typesafe", "typesafe")
-            reloc("org.spongepowered.configurate", "configurate")
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")

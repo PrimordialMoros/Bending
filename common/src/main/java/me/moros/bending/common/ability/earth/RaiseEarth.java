@@ -195,7 +195,7 @@ public class RaiseEarth extends AbilityInstance {
     private int wallWidth = 6;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "raiseearth");
     }
   }

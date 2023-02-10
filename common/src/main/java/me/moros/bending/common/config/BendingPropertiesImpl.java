@@ -45,7 +45,7 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   }
 
   @Override
-  public Iterable<String> path() {
+  public List<String> path() {
     return List.of("properties");
   }
 

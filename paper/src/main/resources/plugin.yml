@@ -1,6 +1,6 @@
 name: Bending
 version: ${pluginVersion}
-main: me.moros.bending.paper.PaperBending
+main: me.moros.bending.paper.BendingBootstrap
 author: Moros
 description: Bending plugin for PaperMC.
 website: https://github.com/PrimordialMoros/Bending

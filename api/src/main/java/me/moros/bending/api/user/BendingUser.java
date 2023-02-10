@@ -149,7 +149,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public Preset createPresetFromSlots(String name) {
-    return new Preset(0, name, slots);
+    return Preset.create(0, name, slots);
   }
 
   @Override

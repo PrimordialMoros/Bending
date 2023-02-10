@@ -33,6 +33,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.util.ColorPalette;
+import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -45,18 +46,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable representation of slots.
  */
 public final class Preset {
-  public static final Preset EMPTY = new Preset(0, "", new AbilityDescription[9]);
+  public static final Preset EMPTY = from(new AbilityDescription[9]);
 
   private final int id;
   private final String name;
   private final AbilityDescription[] abilities;
   private final Supplier<TextColor> presetColor;
 
-  /**
-   * Presets loaded from db have a positive id.
-   * New presets must use a non-positive id as they will acquire a real one when they get saved.
-   */
-  public Preset(int id, String name, @Nullable AbilityDescription[] abilities) {
+  private Preset(int id, String name, @Nullable AbilityDescription[] abilities) {
     this.id = id;
     this.name = name;
     this.abilities = new AbilityDescription[9];
@@ -173,5 +170,36 @@ public final class Preset {
     result = 31 * result + name.hashCode();
     result = 31 * result + Arrays.hashCode(abilities);
     return result;
+  }
+
+  /**
+   * Create a copy of this preset with the given id.
+   * @param id the new preset id
+   * @return the preset copy with the new id
+   */
+  public Preset withId(int id) {
+    return id == this.id ? this : new Preset(id, name, abilities);
+  }
+
+  public static Preset from(AbilityDescription[] abilities) {
+    return create(0, "", abilities);
+  }
+
+  /**
+   * Create a new preset.
+   * <br>Note: New presets must use a non-positive id as they will acquire a real one when they get saved.
+   * @param id the id of the preset to create
+   * @param name the name of the preset to create
+   * @param abilities the abilities of the preset to create
+   * @return the newly created preset
+   * @throws IllegalArgumentException if preset name is invalid, use {@link TextUtil#sanitizeInput(String)} to validate.
+   */
+  public static Preset create(int id, String name, AbilityDescription[] abilities) {
+    Objects.requireNonNull(abilities);
+    String validatedName = TextUtil.sanitizeInput(name);
+    if (!validatedName.equals(name)) {
+      throw new IllegalArgumentException("Invalid preset name: " + name);
+    }
+    return new Preset(id, name, abilities);
   }
 }

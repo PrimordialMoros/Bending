@@ -221,7 +221,7 @@ public class IceCrawl extends AbilityInstance {
     private double damage = 2;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "icecrawl");
     }
   }

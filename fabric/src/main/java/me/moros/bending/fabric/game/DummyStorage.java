@@ -22,21 +22,25 @@ package me.moros.bending.fabric.game;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.storage.BendingStorage;
+import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.storage.StorageType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-final class DummyBendingStorage implements BendingStorage {
-  static final BendingStorage INSTANCE = new DummyBendingStorage();
+final class DummyStorage implements BendingStorage {
+  static final BendingStorage INSTANCE = new DummyStorage();
 
-  private DummyBendingStorage() {
+  private DummyStorage() {
   }
 
   @Override
-  public PlayerBenderProfile createProfile(UUID uuid) {
+  public boolean init() {
+    return true; // TODO false?
+  }
+
+  @Override
+  public PlayerBenderProfile loadOrCreateProfile(UUID uuid) {
     throw new UnsupportedOperationException("Can't create profile in dummy storage");
   }
 
@@ -50,22 +54,12 @@ final class DummyBendingStorage implements BendingStorage {
   }
 
   @Override
-  public boolean createAbilities(Iterable<AbilityDescription> abilities) {
-    return false;
+  public CompletableFuture<Integer> savePresetAsync(Identifiable user, Preset preset) {
+    return CompletableFuture.completedFuture(0);
   }
 
   @Override
-  public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
-    return CompletableFuture.completedFuture(false);
-  }
-
-  @Override
-  public void deletePresetAsync(int presetId) {
-  }
-
-  @Override
-  public StorageType type() {
-    return StorageType.H2;
+  public void deletePresetAsync(Identifiable user, Preset preset) {
   }
 
   @Override

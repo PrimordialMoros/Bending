@@ -107,7 +107,7 @@ public class DensityShift extends AbilityInstance {
     private double radius = 2;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "passives", "densityshift");
     }
   }

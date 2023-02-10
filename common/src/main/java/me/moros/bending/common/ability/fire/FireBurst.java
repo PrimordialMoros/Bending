@@ -236,7 +236,7 @@ public class FireBurst extends AbilityInstance {
     private double coneRange = 11;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "fireburst");
     }
   }

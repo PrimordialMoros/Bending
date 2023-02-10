@@ -198,7 +198,7 @@ public class EarthArmor extends AbilityInstance {
     private int metalPower = 3;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "eartharmor");
     }
   }

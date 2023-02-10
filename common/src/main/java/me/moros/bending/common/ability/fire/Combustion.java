@@ -233,7 +233,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     private double range = 48;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "combustion");
     }
   }

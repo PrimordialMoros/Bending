@@ -158,7 +158,7 @@ public class AirWheel extends AbilityInstance {
     private double damage = 1;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "sequences", "airwheel");
     }
   }

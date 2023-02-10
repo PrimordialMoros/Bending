@@ -267,7 +267,7 @@ public class LavaFlux extends AbilityInstance {
     private long duration = 8000;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "lavaflux");
     }
   }

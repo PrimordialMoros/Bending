@@ -28,23 +28,41 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.common.BendingPlugin;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.bending.common.storage.file.loader.Loader;
 import me.moros.storage.Builder;
 import me.moros.storage.StorageDataSource;
 import me.moros.storage.StorageType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 /**
  * Factory class that constructs and returns a Hikari-based database storage for Bending.
  * @see BendingStorage
  */
-public final class StorageFactory {
-  private StorageFactory() {
+public record StorageFactory(BendingPlugin plugin) {
+  private StorageEngine parseEngine() {
+    var def = StorageEngine.H2;
+    var node = plugin.configManager().config().node("storage", "engine");
+    try {
+      return node.get(StorageEngine.class, def);
+    } catch (SerializationException ignore) {
+    }
+    return def;
   }
 
-  public static @Nullable BendingStorage createInstance(BendingPlugin plugin, Path directory) {
+  public @Nullable BendingStorage createInstance() {
+    var engine = parseEngine();
+    return engine.loader().map(this::fileStorage).orElseGet(() -> engine.type().map(this::sqlStorage).orElse(null));
+  }
+
+  private BendingStorage fileStorage(Loader<?> loader) {
+    return new FileStorage(plugin.logger(), plugin.path().resolve("data").resolve("flatfile"), loader);
+  }
+
+  private @Nullable BendingStorage sqlStorage(StorageType storageType) {
     Config config = ConfigManager.load(Config::new);
-    Builder builder = StorageDataSource.builder(config.engine).database(config.database)
+    Builder builder = StorageDataSource.builder(storageType).database(config.database)
       .host(config.host).port(config.port).username(config.username).password(config.password);
     builder.configure(c -> {
       c.setMaximumPoolSize(config.poolSettings.maximumPoolSize);
@@ -53,8 +71,8 @@ public final class StorageFactory {
       c.setKeepaliveTime(config.poolSettings.keepAliveTime);
       c.setConnectionTimeout(config.poolSettings.connectionTimeout);
     });
-    if (config.engine.isLocal()) {
-      switch (config.engine) {
+    if (storageType.isLocal()) {
+      switch (storageType) {
         case HSQL -> builder.properties(p -> {
           p.put("sql.syntax_mys", true);
           p.put("hsqldb.default_table_type", "cached");
@@ -64,28 +82,21 @@ public final class StorageFactory {
           p.put("DB_CLOSE_ON_EXIT", false);
         });
       }
-      Path parent = directory.resolve("data").resolve(config.engine.realName());
+      Path parent = plugin.path().resolve("data").resolve(storageType.realName());
       try {
         Files.createDirectories(parent);
       } catch (IOException e) {
         plugin.logger().error(e.getMessage(), e);
         return null;
       }
-      builder.path("./" + parent.resolve("bending") + (config.engine == StorageType.SQLITE ? ".db" : ""));
+      builder.path("./" + parent.resolve("bending") + (storageType == StorageType.SQLITE ? ".db" : ""));
     }
     StorageDataSource data = builder.build("bending-hikari", plugin.logger());
-    if (data != null) {
-      StorageImpl storage = new StorageImpl(data);
-      if (storage.init(plugin::resource)) {
-        return storage;
-      }
-    }
-    return null;
+    return data == null ? null : new SqlStorage(plugin, data);
   }
 
   @ConfigSerializable
   private static final class Config extends Configurable {
-    private StorageType engine = StorageType.H2;
     private String host = "localhost";
     private int port = 5432;
     private String username = "bending";
@@ -94,7 +105,7 @@ public final class StorageFactory {
     private PoolSettings poolSettings = new PoolSettings();
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("storage");
     }
   }

@@ -216,7 +216,7 @@ public class Iceberg extends AbilityInstance {
     private double length = 16;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "sequences", "iceberg");
     }
   }

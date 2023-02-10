@@ -724,7 +724,7 @@ public class EarthSmash extends AbilityInstance {
     private long sandDuration = 1500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "earthsmash");
     }
   }

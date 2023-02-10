@@ -20,7 +20,6 @@
 package me.moros.bending.api.ability.element;
 
 import me.moros.bending.api.user.User;
-import net.kyori.adventure.audience.Audience;
 
 /**
  * Represents a handler for Element actions.
@@ -52,5 +51,5 @@ public interface ElementHandler {
    * @param user the user
    * @param element the element being displayed
    */
-  void onElementDisplay(Audience user, Element element);
+  void onElementDisplay(User user, Element element);
 }

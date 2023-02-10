@@ -161,7 +161,7 @@ public class AirScooter extends AbilityInstance {
     private long duration = 15000;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airscooter");
     }
   }

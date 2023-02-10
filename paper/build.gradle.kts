@@ -21,8 +21,10 @@ dependencies {
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
     bendingImplementation(libs.cloud.paper)
-    bendingImplementation(libs.configurate.hocon)
     bendingImplementation(libs.inventory.framework)
+    bendingImplementation(libs.bundles.configurate) {
+        exclude(module = "gson")
+    }
     bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
     compileOnly(libs.paper)
     compileOnly(libs.grief.prevention)
@@ -37,6 +39,8 @@ tasks {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("cloud.commandframework", "cloudframework")
+            reloc("com.typesafe", "typesafe")
+            reloc("org.spongepowered.configurate", "configurate")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
             reloc("io.leangen", "leangen")
         }

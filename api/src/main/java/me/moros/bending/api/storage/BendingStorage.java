@@ -19,36 +19,41 @@
 
 package me.moros.bending.api.storage;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
+import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.storage.Storage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles all Storage tasks and their concurrency.
  */
-public interface BendingStorage extends Storage {
-  /**
-   * Creates a new profile for the given uuid or returns an existing one if possible.
-   */
-  PlayerBenderProfile createProfile(UUID uuid);
+public interface BendingStorage extends Closeable {
+  boolean init();
 
   /**
-   * This method will attempt to load a profile from the database.
+   * Tries to load the bender profile for the user identified by the given uuid.
+   * If the data doesn't exist, it will create a new profile.
    * @param uuid the player's uuid
-   * @see #createProfile(UUID)
+   * @return the player's bender profile
+   */
+  PlayerBenderProfile loadOrCreateProfile(UUID uuid);
+
+  /**
+   * This method will attempt to load a profile from storage.
+   * @param uuid the player's uuid
+   * @see #loadOrCreateProfile(UUID)
    */
   CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid);
 
   /**
-   * Asynchronously saves the given profile's data to the database.
+   * Asynchronously saves the given profile's data to storage.
    * It updates the stored profile and saves the current elements and bound abilities.
-   * @param profile the PlayerProfile to save
+   * @param profile the profile to save
    */
   default void saveProfileAsync(PlayerBenderProfile profile) {
     saveProfilesAsync(List.of(profile));
@@ -56,26 +61,24 @@ public interface BendingStorage extends Storage {
 
   /**
    * Bulk version of {@link #saveProfileAsync}
-   * @param profiles the PlayerProfiles to save
+   * @param profiles the profiles to save
    */
   void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles);
 
   /**
-   * Adds all given abilities to the database
-   * @param abilities the abilities to add
+   * Asynchronously saves the given player's preset to storage.
+   * @param user the preset owner
+   * @param preset the preset to save
    */
-  boolean createAbilities(Iterable<AbilityDescription> abilities);
-
-  /**
-   * Asynchronously saves the given player's preset to the database.
-   * @param playerId the player's profile id
-   * @param preset the Preset to save
-   */
-  CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset);
+  CompletableFuture<Integer> savePresetAsync(Identifiable user, Preset preset);
 
   /**
    * Asynchronously deletes the specified preset.
-   * @param presetId the id of the preset to delete
+   * @param user the preset owner
+   * @param preset the preset to delete
    */
-  void deletePresetAsync(int presetId);
+  void deletePresetAsync(Identifiable user, Preset preset);
+
+  @Override
+  void close();
 }

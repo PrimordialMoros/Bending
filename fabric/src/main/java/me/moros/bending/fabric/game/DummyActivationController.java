@@ -25,7 +25,6 @@ import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.game.ActivationController;
-import me.moros.bending.api.game.FlightManager;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.damage.DamageCause;
 import me.moros.bending.api.platform.entity.Entity;

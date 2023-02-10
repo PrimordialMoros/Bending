@@ -307,7 +307,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     private long chargedCooldown = 500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "fireblast");
     }
   }

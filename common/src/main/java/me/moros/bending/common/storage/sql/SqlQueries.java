@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.storage;
+package me.moros.bending.common.storage.sql;
 
 import me.moros.storage.StorageType;
 

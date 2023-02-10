@@ -157,7 +157,7 @@ public class Locksmithing extends AbilityInstance {
     private long cooldown = 500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "passives", "locksmithing");
     }
   }

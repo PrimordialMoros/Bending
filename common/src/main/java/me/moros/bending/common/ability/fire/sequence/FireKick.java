@@ -161,7 +161,7 @@ public class FireKick extends AbilityInstance {
     private double speed = 1;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "sequences", "firekick");
     }
   }

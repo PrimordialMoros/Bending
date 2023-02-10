@@ -260,7 +260,7 @@ public class FlameRush extends AbilityInstance {
     private long maxChargeTime = 2500;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "flamerush");
     }
   }

@@ -311,7 +311,7 @@ public class FireWall extends AbilityInstance {
     private double moveMaxHeight = 8;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "firewall");
     }
   }

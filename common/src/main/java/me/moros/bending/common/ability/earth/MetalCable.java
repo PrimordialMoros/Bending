@@ -352,7 +352,8 @@ public class MetalCable extends AbilityInstance {
 
   private enum Type {ENTITY, BLOCK}
 
-  private record CableTarget(Type type, @Nullable Entity entity,  @Nullable Block block, @Nullable BlockType material, double offset) {
+  private record CableTarget(Type type, @Nullable Entity entity, @Nullable Block block, @Nullable BlockType material,
+                             double offset) {
     private CableTarget(Entity entity, double offset) {
       this(Type.ENTITY, entity, null, null, offset);
     }
@@ -387,7 +388,7 @@ public class MetalCable extends AbilityInstance {
     private double launchSpeed = 1.6;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "metalcable");
     }
   }

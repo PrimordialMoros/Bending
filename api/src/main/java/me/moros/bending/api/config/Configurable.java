@@ -20,6 +20,7 @@
 package me.moros.bending.api.config;
 
 import java.io.Serializable;
+import java.util.List;
 
 import me.moros.bending.api.ability.Ability;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -37,7 +38,7 @@ public abstract class Configurable implements Serializable {
    * Provides the path that serves as the root node for this configuration when serialized.
    * @return the path of this configuration's root node.
    */
-  public abstract Iterable<String> path();
+  public abstract List<String> path();
 
   /**
    * Controls if this configuration external and cannot be loaded from the main configuration file.

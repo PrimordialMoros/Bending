@@ -49,16 +49,12 @@ public final class WorldManagerImpl implements WorldManager {
     this.logger = plugin.logger();
     worlds = new ConcurrentHashMap<>();
     disabled = ConcurrentHashMap.newKeySet();
-    Config config = ConfigManager.load(Config::new);
-    var ref = plugin.configManager().reference(Config.class, config);
-    if (ref != null) {
-      ref.subscribe(this::onConfigUpdate);
-    }
+    refreshDisabled();
   }
 
-  private void onConfigUpdate(Config config) {
+  private void refreshDisabled() {
     disabled.clear();
-    for (String raw : config.disabledWorlds) {
+    for (String raw : ConfigManager.load(Config::new).disabledWorlds) {
       Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(raw.toLowerCase(Locale.ROOT));
       if (key != null) {
         disabled.add(key);
@@ -77,7 +73,7 @@ public final class WorldManagerImpl implements WorldManager {
 
   private ManagerPair createPair(Key world) {
     AbilityManager abilities = new AbilityManagerImpl(logger, world);
-    return new ManagerPair(abilities);
+    return new ManagerPair(abilities, new CollisionManager(abilities));
   }
 
   @Override
@@ -124,10 +120,6 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   private record ManagerPair(AbilityManager abilities, CollisionManager collisions) {
-    private ManagerPair(AbilityManager abilities) {
-      this(abilities, new CollisionManager(abilities));
-    }
-
     private void update() {
       abilities.update();
       collisions.update();
@@ -141,7 +133,7 @@ public final class WorldManagerImpl implements WorldManager {
 
     @Override
     public List<String> path() {
-      return List.of("properties", "disabled-worlds");
+      return List.of("properties");
     }
   }
 }

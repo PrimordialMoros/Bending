@@ -177,7 +177,7 @@ public class WaterWave extends AbilityInstance {
     private int freezeTicks = 100;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "waterring", "waterwave");
     }
   }

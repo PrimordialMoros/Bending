@@ -31,7 +31,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.mojang.authlib.GameProfile;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.BendingPlugin;
@@ -48,10 +47,25 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
-public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin,
-                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements FabricListener, Initializer {
-  public ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin, BendingStorage storage) {
-    this(gameSupplier, plugin, createCache(storage));
+public final class ConnectionListener implements FabricListener, Initializer {
+  private final Supplier<Game> gameSupplier;
+  private final BendingPlugin plugin;
+  private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
+
+  public ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin) {
+    this.gameSupplier = gameSupplier;
+    this.plugin = plugin;
+    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
+      .buildAsync(this::cacheLoad);
+  }
+
+  @Override
+  public Supplier<Game> gameSupplier() {
+    return gameSupplier;
+  }
+
+  private PlayerBenderProfile cacheLoad(UUID uuid) {
+    return game().storage().loadOrCreateProfile(uuid);
   }
 
   @Override
@@ -59,11 +73,6 @@ public record ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plug
     ServerLoginConnectionEvents.QUERY_START.register(this::onPlayerPreLogin);
     ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);
     ServerPlayConnectionEvents.DISCONNECT.register(this::onPlayerLogout);
-  }
-
-  private static AsyncLoadingCache<UUID, PlayerBenderProfile> createCache(BendingStorage storage) {
-    return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(storage::createProfile);
   }
 
   private void onPlayerPreLogin(ServerLoginPacketListenerImpl handler, MinecraftServer server, PacketSender sender, LoginSynchronizer synchronizer) {

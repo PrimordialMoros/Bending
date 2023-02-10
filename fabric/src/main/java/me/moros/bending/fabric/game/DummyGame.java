@@ -28,7 +28,7 @@ import me.moros.bending.api.storage.BendingStorage;
 
 public record DummyGame(BendingStorage storage, FlightManager flightManager, WorldManager worldManager,
                         ActivationController activationController, ConfigProcessor configProcessor) implements Game {
-  public static final Game INSTANCE = new DummyGame(DummyBendingStorage.INSTANCE, DummyFlightManager.INSTANCE,
+  public static final Game INSTANCE = new DummyGame(DummyStorage.INSTANCE, DummyFlightManager.INSTANCE,
     DummyWorldManager.INSTANCE, DummyActivationController.INSTANCE, DummyConfigProcessor.INSTANCE);
 
   @Override
@@ -36,6 +36,6 @@ public record DummyGame(BendingStorage storage, FlightManager flightManager, Wor
   }
 
   @Override
-  public void cleanup(boolean shutdown) {
+  public void cleanup() {
   }
 }

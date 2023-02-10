@@ -454,7 +454,7 @@ public class Lightning extends AbilityInstance {
     private double overchargeDamage = 4;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "lightning");
     }
   }

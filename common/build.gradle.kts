@@ -6,7 +6,7 @@ dependencies {
     api(libs.storage)
     api(libs.tasker.core)
     api(libs.caffeine)
-    compileOnlyApi(libs.configurate.hocon)
+    compileOnlyApi(libs.bundles.configurate)
     compileOnlyApi(libs.guava)
     compileOnlyApi(libs.bundles.cloud)
     compileOnlyApi(libs.luckperms.api)

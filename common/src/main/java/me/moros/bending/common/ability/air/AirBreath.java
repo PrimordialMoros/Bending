@@ -180,7 +180,7 @@ public class AirBreath extends AbilityInstance {
     private double knockback = 0.5;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airbreath");
     }
   }

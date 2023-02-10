@@ -28,12 +28,10 @@ dependencies {
     bendingImplementation(libs.math.sponge)
     bendingImplementation(libs.tasker.sponge)
     bendingImplementation(libs.bstats.sponge)
-    bendingImplementation(libs.configurate.hocon)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
     bendingImplementation(libs.cloud.sponge)
     bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
-    bendingImplementation(libs.slf4j.api)
-    bendingImplementation(libs.slf4j.simple)
+    bendingImplementation(libs.bundles.slf4j)
     compileOnly(variantOf(libs.sponge.common) { classifier("dev") })
     compileOnly(libs.sponge.mixin)
 }

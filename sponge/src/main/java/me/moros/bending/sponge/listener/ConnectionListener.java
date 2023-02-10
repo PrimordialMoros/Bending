@@ -49,7 +49,7 @@ public class ConnectionListener extends SpongeListener {
     super(game);
     this.plugin = plugin;
     this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(game.storage()::createProfile);
+      .buildAsync(game.storage()::loadOrCreateProfile);
   }
 
   @Listener(order = Order.EARLY)

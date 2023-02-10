@@ -21,13 +21,15 @@ package me.moros.bending.api.user.profile;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-record PlayerBenderProfileImpl(int id, boolean board, BenderProfile benderProfile) implements PlayerBenderProfile {
+record PlayerBenderProfileImpl(int id, UUID uuid, boolean board,
+                               BenderProfile benderProfile) implements PlayerBenderProfile {
   @Override
   public List<@Nullable AbilityDescription> slots() {
     return benderProfile().slots();

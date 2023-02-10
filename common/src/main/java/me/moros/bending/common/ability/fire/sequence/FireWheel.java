@@ -165,7 +165,7 @@ public class FireWheel extends AbilityInstance {
     private boolean fireTrail = true;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "sequences", "firewheel");
     }
   }

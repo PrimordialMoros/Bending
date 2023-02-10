@@ -159,7 +159,7 @@ public class Collapse extends AbilityInstance {
     private int maxHeight = 6;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "collapse");
     }
   }

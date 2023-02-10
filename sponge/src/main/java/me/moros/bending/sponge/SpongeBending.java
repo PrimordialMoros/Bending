@@ -19,27 +19,17 @@
 
 package me.moros.bending.sponge;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.sponge.SpongeCommandManager;
 import com.google.inject.Inject;
-import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.BendingPlugin;
-import me.moros.bending.common.GameProviderUtil;
-import me.moros.bending.common.ability.AbilityInitializer;
-import me.moros.bending.common.command.BendingCommandManager;
-import me.moros.bending.common.config.BendingPropertiesImpl;
-import me.moros.bending.common.config.ConfigManager;
-import me.moros.bending.common.game.GameImpl;
-import me.moros.bending.common.locale.TranslationManager;
-import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.BendingPluginBase;
+import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.hook.LuckPermsHook;
@@ -56,8 +46,6 @@ import me.moros.bending.sponge.platform.SpongePlatform;
 import me.moros.tasker.executor.CompositeExecutor;
 import me.moros.tasker.sponge.SpongeExecutor;
 import org.bstats.sponge.Metrics;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
@@ -74,84 +62,49 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("bending")
-public class SpongeBending implements BendingPlugin {
-  private final PluginContainer container;
-  private final Logger logger;
-
-  private final ConfigManager configManager;
-  private final TranslationManager translationManager;
-
-  private final BendingStorage storage;
-  private Game game;
-
-  private final boolean loaded;
-
+public final class SpongeBending extends BendingPluginBase<PluginContainer> {
   @Inject
-  public SpongeBending(@ConfigDir(sharedRoot = false) Path dir, PluginContainer container, Metrics.Factory metricsFactory) {
-    this.container = container;
+  public SpongeBending(PluginContainer container, @ConfigDir(sharedRoot = false) Path dir, Metrics.Factory metricsFactory) {
+    super(container, dir, LoggerFactory.getLogger("bending"));
     metricsFactory.make(8717);
-    this.logger = LoggerFactory.getLogger("bending");
 
-    configManager = new ConfigManager(logger, dir);
-    translationManager = new TranslationManager(logger, dir);
-
-    storage = StorageFactory.createInstance(this, dir);
-    if (storage != null) {
-      loaded = true;
-      new AbilityInitializer();
-      SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
-        container, CommandExecutionCoordinator.simpleCoordinator(),
-        CommandSender::cause, CommandSender::from
-      );
-      new BendingCommandManager<>(this, PlayerCommandSender.class, manager);
-    } else {
-      loaded = false;
-      logger.error("Unable to establish database connection!");
-    }
+    SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
+      container, CommandExecutionCoordinator.simpleCoordinator(),
+      CommandSender::cause, CommandSender::from
+    );
+    Commander.create(manager, PlayerCommandSender.class, this).init();
   }
 
   @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
-    if (loaded) {
-      ReflectionUtil.injectStatic(ElementMenu.class, container);
-      ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(container)));
-      ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
-      ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
-      game = new GameImpl(this, storage);
-      new SpongePermissionInitializer();
-      var eventManager = event.game().eventManager();
-      eventManager.registerListeners(container, new BlockListener(game));
-      eventManager.registerListeners(container, new UserListener(game, this));
-      eventManager.registerListeners(container, new ConnectionListener(game, this));
-      eventManager.registerListeners(container, new WorldListener(game));
-      eventManager.registerListeners(container, new PlaceholderListener());
-      GameProviderUtil.registerProvider(game);
-    }
+    ReflectionUtil.injectStatic(ElementMenu.class, parent);
+    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(parent)));
+    ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
+    load();
+    new SpongePermissionInitializer();
+    var eventManager = event.game().eventManager();
+    eventManager.registerListeners(parent, new BlockListener(game));
+    eventManager.registerListeners(parent, new UserListener(game, this));
+    eventManager.registerListeners(parent, new ConnectionListener(game, this));
+    eventManager.registerListeners(parent, new WorldListener(game));
+    eventManager.registerListeners(parent, new PlaceholderListener());
   }
 
   @Listener
   public void onGameLoad(LoadedGameEvent event) { // Plugins, Game-scoped registries are ready
-    if (loaded) {
-      if (event.game().pluginManager().plugin("LuckPerms").isPresent()) {
-        LuckPermsHook.register(event.game().serviceProvider());
-      }
+    if (game != null && event.game().pluginManager().plugin("LuckPerms").isPresent()) {
+      LuckPermsHook.register(event.game().serviceProvider());
     }
   }
 
   @Listener
   public void onReload(RefreshGameEvent event) {
-    if (game != null) {
-      game.reload();
-    }
+    reload();
   }
 
   @Listener
   public void onDisable(StoppingEngineEvent<Server> event) {
-    if (game != null) {
-      game.cleanup(true);
-      GameProviderUtil.unregisterProvider();
-      game = null;
-    }
+    disable();
   }
 
   @Listener
@@ -169,38 +122,11 @@ public class SpongeBending implements BendingPlugin {
 
   @Override
   public String author() {
-    return container.metadata().contributors().get(0).name();
+    return parent.metadata().contributors().get(0).name();
   }
 
   @Override
   public String version() {
-    return container.metadata().version().toString();
-  }
-
-  @Override
-  public Logger logger() {
-    return logger;
-  }
-
-  @Override
-  public void reload() {
-    if (game != null) {
-      game.reload();
-    }
-  }
-
-  @Override
-  public ConfigManager configManager() {
-    return configManager;
-  }
-
-  @Override
-  public TranslationManager translationManager() {
-    return translationManager;
-  }
-
-  @Override
-  public @Nullable InputStream resource(String fileName) {
-    return getClass().getClassLoader().getResourceAsStream(fileName);
+    return parent.metadata().version().toString();
   }
 }

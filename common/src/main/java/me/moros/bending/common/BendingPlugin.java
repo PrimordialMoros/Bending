@@ -20,6 +20,7 @@
 package me.moros.bending.common;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.locale.TranslationManager;
@@ -34,6 +35,8 @@ public interface BendingPlugin {
   Logger logger();
 
   void reload();
+
+  Path path();
 
   ConfigManager configManager();
 

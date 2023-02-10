@@ -159,7 +159,7 @@ public class FireSpin extends AbilityInstance {
     private double knockback = 1.8;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "fire", "sequences", "firespin");
     }
   }

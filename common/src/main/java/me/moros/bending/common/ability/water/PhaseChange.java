@@ -175,7 +175,7 @@ public class PhaseChange extends AbilityInstance {
     private int meltSpeed = 8;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "water", "phasechange");
     }
   }

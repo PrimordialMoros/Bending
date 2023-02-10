@@ -16,27 +16,20 @@ dependencies {
     modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.permissions)
-    modImplementation(libs.fabric.placeholder)
-    include(libs.fabric.placeholder)
-    modImplementation(libs.sgui)
-    include(libs.sgui)
-    modImplementation(libs.adventure.fabric)
-    include(libs.adventure.fabric)
-    modImplementation(libs.adventure.legacy)
-    include(libs.adventure.legacy)
+    modImplementation(include(libs.fabric.placeholder.get())!!)
+    modImplementation(include(libs.sgui.get())!!)
+    modImplementation(include(libs.adventure.fabric.get())!!)
+    modImplementation(include(libs.adventure.legacy.get())!!)
+    modImplementation(include(libs.math.fabric.get())!!)
+    modImplementation(include(libs.cloud.fabric.get())!!)
+    implementation(include(libs.cloud.minecraft.get())!!)
     bendingImplementation(project(":common"))
     bendingImplementation(project(":nms"))
-    modImplementation(libs.math.fabric.get())
-    include(libs.math.fabric.get())
-    bendingImplementation(libs.tasker.fabric.get())
-    bendingImplementation(libs.configurate.hocon.get())
-    bendingImplementation(libs.h2.get())
-    modImplementation(libs.cloud.fabric)
-    include(libs.cloud.fabric)
-    implementation(libs.cloud.minecraft) {
-        isTransitive = false
+    bendingImplementation(libs.tasker.fabric)
+    bendingImplementation(libs.bundles.configurate) {
+        exclude(module = "gson")
     }
-    include(libs.cloud.minecraft)
+    bendingImplementation(libs.h2)
 }
 
 loom {
@@ -46,6 +39,8 @@ loom {
 tasks {
     shadowJar {
         dependencies {
+            reloc("com.typesafe", "typesafe")
+            reloc("org.spongepowered.configurate", "configurate")
             exclude(dependency("io.leangen.geantyref:geantyref"))
         }
     }

@@ -278,7 +278,7 @@ public class Shockwave extends AbilityInstance {
     private double fallThreshold = 12;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "earth", "shockwave");
     }
   }

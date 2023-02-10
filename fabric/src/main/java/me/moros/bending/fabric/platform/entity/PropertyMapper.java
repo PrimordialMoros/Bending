@@ -28,10 +28,10 @@ import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.bending.fabric.mixin.accessor.CreeperAccess;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import net.kyori.adventure.util.TriState;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.player.Player;
 
 import static java.util.Map.entry;
 
@@ -42,11 +42,8 @@ final class PropertyMapper {
     PROPERTIES = Map.ofEntries(
       entry(EntityProperty.SNEAKING, boolProp(Entity.class, Entity::isShiftKeyDown, Entity::setShiftKeyDown)),
       entry(EntityProperty.SPRINTING, boolProp(Entity.class, Entity::isSprinting, Entity::setSprinting)),
-      entry(EntityProperty.ALLOW_FLIGHT, boolProp(Player.class, p -> p.getAbilities().mayfly, (e, v) -> {
-        e.getAbilities().mayfly = v;
-        e.onUpdateAbilities();
-      })),
-      entry(EntityProperty.FLYING, boolProp(Entity.class, e -> e.hasImpulse, (e, v) -> e.hasImpulse = v)),
+      entry(EntityProperty.ALLOW_FLIGHT, boolProp(ServerPlayer.class, p -> p.getAbilities().mayfly, PlayerUtil::setAllowFlight)),
+      entry(EntityProperty.FLYING, boolProp(ServerPlayer.class, e -> e.hasImpulse, PlayerUtil::setFlying)),
       entry(EntityProperty.GLIDING, boolProp(LivingEntity.class, LivingEntity::isFallFlying, (e, v) -> ((EntityAccess) e).bending$setSharedFlag(7, v))),
       entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, (e, v) -> e.getEntityData().set(CreeperAccess.getDataIsPowered(), v)))
     );

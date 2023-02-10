@@ -50,7 +50,7 @@ public record ConnectionListener(Game game, BendingPlugin plugin,
 
   private static AsyncLoadingCache<UUID, PlayerBenderProfile> createCache(Game game) {
     return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(game.storage()::createProfile);
+      .buildAsync(game.storage()::loadOrCreateProfile);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

@@ -22,8 +22,6 @@ package me.moros.bending.api.user.profile;
 /**
  * Represents player bender data.
  */
-public interface PlayerBenderProfile extends BenderProfile {
-  int id();
-
+public interface PlayerBenderProfile extends BenderProfile, Identifiable {
   boolean board();
 }

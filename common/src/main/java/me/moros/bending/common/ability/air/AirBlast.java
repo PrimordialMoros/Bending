@@ -256,7 +256,7 @@ public class AirBlast extends AbilityInstance {
     private double selectRange = 8.0;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airblast");
     }
   }

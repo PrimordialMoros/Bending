@@ -35,8 +35,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
@@ -45,13 +43,13 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.api.util.Tasker;
+import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.storage.sql.SqlQueries;
 import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageDataSource;
-import me.moros.storage.StorageType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
@@ -62,13 +60,16 @@ import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.StatementContext;
 
-public final class StorageImpl implements BendingStorage {
+final class SqlStorage extends AbstractStorage {
   private final BiMap<AbilityDescription, Integer> abilityMap;
 
+  private final BendingPlugin plugin;
   private final StorageDataSource dataSource;
   private final Jdbi DB;
 
-  StorageImpl(StorageDataSource dataSource) {
+  SqlStorage(BendingPlugin plugin, StorageDataSource dataSource) {
+    super(dataSource.logger());
+    this.plugin = plugin;
     this.dataSource = dataSource;
     this.DB = Jdbi.create(this.dataSource.source());
     if (!nativeUuid()) {
@@ -77,14 +78,15 @@ public final class StorageImpl implements BendingStorage {
     this.abilityMap = HashBiMap.create(64);
   }
 
-  boolean init(Function<String, InputStream> resourceProvider) {
+  @Override
+  public boolean init() {
     if (!tableExists("bending_players")) {
       Collection<String> statements;
       String path = Path.of("schema", dataSource.type().realName() + ".sql").toString();
-      try (InputStream stream = resourceProvider.apply(path)) {
+      try (InputStream stream = plugin.resource(path)) {
         statements = SqlStreamReader.parseQueries(stream);
       } catch (Exception e) {
-        dataSource.logger().error(e.getMessage(), e);
+        logError(e);
         return false;
       }
       DB.useHandle(handle -> {
@@ -93,12 +95,8 @@ public final class StorageImpl implements BendingStorage {
         batch.execute();
       });
     }
+    createAbilities();
     return true;
-  }
-
-  @Override
-  public StorageType type() {
-    return dataSource.type();
   }
 
   @Override
@@ -106,43 +104,10 @@ public final class StorageImpl implements BendingStorage {
     dataSource.source().close();
   }
 
-  @Override
-  public PlayerBenderProfile createProfile(UUID uuid) {
-    PlayerBenderProfile profile = loadProfile(uuid);
-    if (profile == null) {
-      profile = DB.withHandle(handle -> {
-        int id = handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
-          .executeAndReturnGeneratedKeys(("player_id")).mapTo(int.class).one();
-        return BenderProfile.of(id, true);
-      });
-    }
-    return profile;
-  }
-
-  @Override
-  public CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid) {
-    return Tasker.async().submit(() -> loadProfile(uuid)).exceptionally(t -> {
-      dataSource.logger().error(t.getMessage(), t);
-      return null;
-    });
-  }
-
-  @Override
-  public void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles) {
-    Tasker.async().submit(() -> {
-      for (var profileToSave : profiles) {
-        updateProfile(profileToSave);
-        saveElements(profileToSave);
-        saveSlots(profileToSave);
-      }
-    }).exceptionally(this::logError);
-  }
-
-  @Override
-  public boolean createAbilities(Iterable<AbilityDescription> abilities) {
+  private void createAbilities() {
     DB.useHandle(handle -> {
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(type()));
-      for (AbilityDescription desc : abilities) {
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(dataSource.type()));
+      for (AbilityDescription desc : Registries.ABILITIES) {
         if (desc.canBind()) {
           batch.bind(0, desc.name()).add();
         }
@@ -159,35 +124,74 @@ public final class StorageImpl implements BendingStorage {
         abilityMap.forcePut(desc, entry.getValue());
       }
     }
-    return true;
   }
 
   @Override
-  public CompletableFuture<Boolean> savePresetAsync(int playerId, Preset preset) {
-    return Tasker.async().submit(() -> savePreset(playerId, preset)).exceptionally(t -> {
-      dataSource.logger().error(t.getMessage(), t);
-      return false;
-    });
+  protected int createNewProfileId(UUID uuid) {
+    return DB.withHandle(handle -> handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
+      .executeAndReturnGeneratedKeys(("player_id")).mapTo(int.class).one());
   }
 
   @Override
-  public void deletePresetAsync(int presetId) {
-    Tasker.async().submit(() -> deletePresetExact(presetId)).exceptionally(this::logError);
-  }
-
-  private @Nullable PlayerBenderProfile loadProfile(UUID uuid) {
-    PlayerBenderProfile temp = DB.withHandle(handle ->
+  protected @Nullable PlayerBenderProfile loadProfile(UUID uuid) {
+    Entry<Integer, Boolean> temp = DB.withHandle(handle ->
       handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
         .bind(0, uuid).map(this::profileRowMapper).findOne().orElse(null)
     );
-    if (temp != null && temp.id() > 0) {
-      int id = temp.id();
-      return BenderProfile.of(id, temp.board(), BenderProfile.of(getSlots(id), getElements(id), getPresets(id)));
+    if (temp != null && temp.getKey() > 0) {
+      int id = temp.getKey();
+      return BenderProfile.of(id, uuid, temp.getValue(), BenderProfile.of(getSlots(id), getElements(id), getPresets(id)));
     }
     return null;
   }
 
-  private void updateProfile(PlayerBenderProfile profile) {
+  @Override
+  protected void saveProfile(PlayerBenderProfile profile) {
+    saveBoard(profile);
+    saveElements(profile);
+    saveSlots(profile);
+  }
+
+  @Override
+  protected int savePreset(Identifiable user, Preset preset) {
+    try {
+      DB.useHandle(handle ->
+        handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, user.id()).bind(1, preset.name())
+      );
+    } catch (Exception e) {
+      logError(e);
+      return 0;
+    }
+    List<AbilityDescription> abilities = preset.abilities();
+    return DB.withHandle(handle -> {
+      int presetId = handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
+        .bind(0, user.id()).bind(1, preset.name())
+        .executeAndReturnGeneratedKeys("preset_id")
+        .mapTo(int.class).findOne().orElse(0);
+      if (presetId <= 0) {
+        return 0;
+      }
+      PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
+      int size = abilities.size();
+      for (int slot = 0; slot < size; slot++) {
+        int abilityId = getAbilityId(abilities.get(slot));
+        if (abilityId > 0) {
+          batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
+        }
+      }
+      batch.execute();
+      return presetId;
+    });
+  }
+
+  @Override
+  protected void deletePreset(Identifiable user, Preset preset) {
+    DB.useHandle(handle ->
+      handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, preset.id()).execute()
+    );
+  }
+
+  private void saveBoard(PlayerBenderProfile profile) {
     DB.useHandle(handle ->
       handle.createUpdate(SqlQueries.PLAYER_UPDATE_PROFILE.query())
         .bind(0, profile.board()).bind(1, profile.id()).execute()
@@ -224,32 +228,6 @@ public final class StorageImpl implements BendingStorage {
     });
   }
 
-  private boolean savePreset(int playerId, Preset preset) {
-    if (preset.id() > 0 || !deletePreset(playerId, preset.name())) {
-      return false;
-    }
-    List<AbilityDescription> abilities = preset.abilities();
-    return DB.withHandle(handle -> {
-      int presetId = handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
-        .bind(0, playerId).bind(1, preset.name())
-        .executeAndReturnGeneratedKeys("preset_id")
-        .mapTo(int.class).findOne().orElse(0);
-      if (presetId <= 0) {
-        return false;
-      }
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
-      int size = abilities.size();
-      for (int slot = 0; slot < size; slot++) {
-        int abilityId = getAbilityId(abilities.get(slot));
-        if (abilityId > 0) {
-          batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
-        }
-      }
-      batch.execute();
-      return true;
-    });
-  }
-
   private int getAbilityId(@Nullable AbilityDescription desc) {
     return desc == null ? 0 : abilityMap.getOrDefault(desc, 0);
   }
@@ -279,26 +257,11 @@ public final class StorageImpl implements BendingStorage {
         if (id > 0) {
           Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT.query()).bind(0, id);
           AbilityDescription[] abilities = slotMapper(query.mapToMap());
-          presets.add(new Preset(id, name, abilities));
+          presets.add(Preset.create(id, name, abilities));
         }
       }
       return presets;
     });
-  }
-
-  private boolean deletePreset(int playerId, String presetName) {
-    DB.useHandle(handle ->
-      handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, playerId).bind(1, presetName)
-    );
-    return true;
-  }
-
-  private void deletePresetExact(int presetId) {
-    if (presetId > 0) {
-      DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, presetId).execute()
-      );
-    }
   }
 
   private AbilityDescription[] slotMapper(Iterable<Map<String, Object>> results) {
@@ -319,19 +282,13 @@ public final class StorageImpl implements BendingStorage {
           .map(x -> x.getColumn("TABLE_NAME", String.class)).stream().anyMatch(table::equalsIgnoreCase);
       });
     } catch (Exception e) {
-      dataSource.logger().warn(e.getMessage(), e);
+      logError(e);
     }
     return false;
   }
 
-  private <R> R logError(Throwable t) {
-    dataSource.logger().error(t.getMessage(), t);
-    return null;
-  }
-
-  private @Nullable PlayerBenderProfile profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
-    int id = rs.getInt("player_id");
-    return id > 0 ? BenderProfile.of(id, rs.getBoolean("board")) : null;
+  private Entry<Integer, Boolean> profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
+    return Map.entry(rs.getInt("player_id"), rs.getBoolean("board"));
   }
 
   private Entry<String, Integer> abilityRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
@@ -343,7 +300,7 @@ public final class StorageImpl implements BendingStorage {
   }
 
   private boolean nativeUuid() {
-    return switch (type()) {
+    return switch (dataSource.type()) {
       case POSTGRESQL, H2, HSQL -> true;
       default -> false;
     };

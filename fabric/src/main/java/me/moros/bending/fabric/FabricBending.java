@@ -19,31 +19,21 @@
 
 package me.moros.bending.fabric;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.fabric.FabricServerCommandManager;
-import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.util.Tasker;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.BendingPluginBase;
 import me.moros.bending.common.GameProviderUtil;
-import me.moros.bending.common.ability.AbilityInitializer;
-import me.moros.bending.common.command.BendingCommandManager;
-import me.moros.bending.common.config.BendingPropertiesImpl;
-import me.moros.bending.common.config.ConfigManager;
-import me.moros.bending.common.game.GameImpl;
-import me.moros.bending.common.locale.TranslationManager;
-import me.moros.bending.common.storage.StorageFactory;
+import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.game.DummyGame;
@@ -67,49 +57,34 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.server.MinecraftServer;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FabricBending implements BendingPlugin {
-  private final ModContainer container;
-  private final Logger logger;
-
-  private final ConfigManager configManager;
-  private final TranslationManager translationManager;
-
-  private final BendingStorage storage;
+final class FabricBending extends BendingPluginBase<ModContainer> {
   private LoadPhase phase = LoadPhase.FIRST;
-  private Game game;
-  private Collection<Initializer> listeners;
-  private AtomicBoolean exiting = new AtomicBoolean();
+  private final Collection<Initializer> listeners;
+  private final AtomicBoolean exiting = new AtomicBoolean();
 
-  public FabricBending(Path dir, ModContainer container) {
-    this.container = container;
-    this.logger = LoggerFactory.getLogger(container.getMetadata().getName());
+  FabricBending(ModContainer container, Path path) {
+    super(container, path, LoggerFactory.getLogger(container.getMetadata().getName()));
 
-    configManager = new ConfigManager(logger, dir);
-    translationManager = new TranslationManager(logger, dir);
+    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
+    ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager());
 
-    storage = StorageFactory.createInstance(this, dir);
-    if (storage != null) {
-      ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
-      ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
-      ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager);
+    Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
 
-      Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
+    listeners = List.of(
+      new BlockListener(this::game),
+      new UserListener(this::game),
+      new ConnectionListener(this::game, this),
+      new WorldListener(this::game)
+    );
+    registerLifecycleListeners();
 
-      registerLifecycleListeners();
-      new AbilityInitializer();
-      CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
-        CommandExecutionCoordinator.simpleCoordinator(),
-        CommandSender::from, CommandSender::stack
-      );
-      new BendingCommandManager<>(this, PlayerCommandSender.class, manager);
-    } else {
-      phase = LoadPhase.FAIL;
-      logger.error("Unable to establish database connection!");
-    }
+    CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
+      CommandExecutionCoordinator.simpleCoordinator(),
+      CommandSender::from, CommandSender::stack
+    );
+    Commander.create(manager, PlayerCommandSender.class, this).init();
   }
 
   private void registerLifecycleListeners() {
@@ -122,6 +97,7 @@ public class FabricBending implements BendingPlugin {
 
   private void onEnable(MinecraftServer server) {
     if (phase == LoadPhase.FIRST) {
+      listeners.forEach(Initializer::init);
       new PlaceholderHook().init();
       if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
         LuckPermsHook.register();
@@ -130,73 +106,40 @@ public class FabricBending implements BendingPlugin {
     }
     if (phase == LoadPhase.LOADING) {
       ReflectionUtil.injectStatic(Platform.Holder.class, new FabricPlatform(server));
-      game = new GameImpl(this, storage);
-      GameProviderUtil.registerProvider(game);
+      load();
       phase = LoadPhase.LOADED;
-    }
-
-    if (listeners == null) {
-      listeners = List.of(
-        new BlockListener(this::game),
-        new UserListener(this::game),
-        new ConnectionListener(this::game, this, storage),
-        new WorldListener(this::game)
-      );
-      listeners.forEach(Initializer::init);
     }
   }
 
   private void onDisable(boolean fullShutdown) {
     if (phase == LoadPhase.LOADED) {
       FabricMetadata.INSTANCE.cleanup();
-      game.cleanup(fullShutdown);
-      Tasker.sync().shutdown(); // Cancel any sync tasks
-      GameProviderUtil.unregisterProvider();
-      game = null;
+      if (fullShutdown) {
+        disable();
+      } else {
+        game.cleanup();
+        game.storage().close();
+        Tasker.sync().clear(); // Clear any sync tasks
+        GameProviderUtil.unregisterProvider();
+        game = null;
+      }
       phase = LoadPhase.LOADING;
     }
   }
 
   private Game game() {
-    return Objects.requireNonNullElse(game, DummyGame.INSTANCE);
+    return game != null ? game : DummyGame.INSTANCE;
   }
 
   @Override
   public String author() {
-    return container.getMetadata().getAuthors().stream().map(Person::getName).findFirst().orElse("Moros");
+    return parent.getMetadata().getAuthors().stream().map(Person::getName).findFirst().orElse("Moros");
   }
 
   @Override
   public String version() {
-    return container.getMetadata().getVersion().getFriendlyString();
+    return parent.getMetadata().getVersion().getFriendlyString();
   }
 
-  @Override
-  public Logger logger() {
-    return logger;
-  }
-
-  @Override
-  public void reload() {
-    if (game != null) {
-      game.reload();
-    }
-  }
-
-  @Override
-  public ConfigManager configManager() {
-    return configManager;
-  }
-
-  @Override
-  public TranslationManager translationManager() {
-    return translationManager;
-  }
-
-  @Override
-  public @Nullable InputStream resource(String fileName) {
-    return getClass().getClassLoader().getResourceAsStream(fileName);
-  }
-
-  private enum LoadPhase {FIRST, LOADING, LOADED, FAIL}
+  private enum LoadPhase {FIRST, LOADING, LOADED}
 }

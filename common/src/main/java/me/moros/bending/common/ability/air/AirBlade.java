@@ -243,7 +243,7 @@ public class AirBlade extends AbilityInstance {
     private double chargeFactor = 3;
 
     @Override
-    public Iterable<String> path() {
+    public List<String> path() {
       return List.of("abilities", "air", "airblade");
     }
   }
