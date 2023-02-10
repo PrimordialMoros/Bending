@@ -7,7 +7,7 @@ plugins {
 dependencies {
     api("me.moros", "math", "1.0.0")
     api("me.moros", "storage", "3.0.0")
-    compileOnly("com.github.ben-manes.caffeine", "caffeine", "3.1.2")
+    compileOnly("com.github.ben-manes.caffeine", "caffeine", "3.1.3")
     compileOnly("org.spongepowered", "configurate-core", "4.1.2")
     compileOnly("io.papermc.paper", "paper-api", "1.18.2-R0.1-SNAPSHOT")
 }
