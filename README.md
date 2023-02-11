@@ -6,7 +6,7 @@ Bending
 <br>
 </h1>
 
-<h4 align="center">Experience the universe of <i>Avatar: The Last Airbender</i> in your minecraft server.</h4>
+<h4 align="center">Experience the universe of <i>Avatar: The Last Airbender</i> in minecraft.</h4>
 
 <p align="center">
 <a href="https://github.com/PrimordialMoros/Bending/actions"><img src="https://img.shields.io/github/actions/workflow/status/PrimordialMoros/Bending/gradle.yml?branch=master&style=flat-square" alt="Gradle CI"/></a>
@@ -29,6 +29,7 @@ Bending
 - Support for custom translations and [Localization](https://github.com/PrimordialMoros/Bending/wiki/Localization)
 - Support for bending mobs
 - Robust, flexible API
+- Multiple server implementations: Paper, Sponge, Fabric (also works as a singleplayer mod)
 
 ## Download
 

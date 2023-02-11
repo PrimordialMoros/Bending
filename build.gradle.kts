@@ -1,10 +1,11 @@
 plugins {
-    id("org.checkerframework").version("0.6.20")
+    `java-library`
+    alias(libs.plugins.checker)
 }
 
 allprojects {
     group = "me.moros"
-    version = "2.3.0-SNAPSHOT"
+    version = "3.0.0-SNAPSHOT"
 
     apply(plugin = "java-library")
     apply(plugin = "org.checkerframework")
@@ -12,15 +13,16 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://oss.sonatype.org/content/repositories/snapshots/")
     }
+
     configure<JavaPluginExtension> {
         toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
+
     tasks {
         withType<JavaCompile> {
-            options.compilerArgs.add("-Xlint:unchecked")
-            options.compilerArgs.add("-Xlint:deprecation")
+            options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
             options.encoding = "UTF-8"
         }
     }

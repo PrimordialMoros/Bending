@@ -1,0 +1,40 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "me.moros.bending.fabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "accessor.ChunkMapAccess",
+    "accessor.CommandSourceStackAccess",
+    "accessor.CreeperAccess",
+    "accessor.EntityAccess",
+    "accessor.FallingBlockEntityAccess",
+    "accessor.LockCodeAccess",
+    "accessor.ServerLoginPacketListenerImplAccess",
+    "block.entity.BaseContainerBlockEntityMixin",
+    "block.entity.BeaconBlockEntityMixin",
+    "block.entity.HopperBlockEntityMixin",
+    "block.BlockMixin",
+    "block.FireBlockMixin",
+    "block.FrostedIceBlockMixin",
+    "block.IceBlockMixin",
+    "block.PistonBaseBlockMixin",
+    "entity.EntityMixin",
+    "entity.FallingBlockEntityMixin",
+    "entity.ItemEntityMixin",
+    "entity.LivingEntityMixin",
+    "entity.MobMixin",
+    "entity.PlayerMixin",
+    "entity.ProjectileMixin",
+    "BlockItemMixin",
+    "ExplosionMixin",
+    "FlowingFluidMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerPlayerGameModeMixin",
+    "SlotMixin",
+    "SpreaderConfigMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

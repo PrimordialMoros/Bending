@@ -8,19 +8,18 @@
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["patch"],
-      "excludePackageNames": ["gradle"],
-      "groupName": "patch-release dependency changes"
-    },
-    {
-      "matchManagers": ["gradle-wrapper", "github-actions"],
-      "groupName": "gradle and github actions"
-    },
-    {
-      "matchDepTypes": ["plugin"],
-      "groupName": "gradle and github actions"
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
     }
   ],
   "prHourlyLimit": 4,
   "semanticCommitType": "build"
 }
+
