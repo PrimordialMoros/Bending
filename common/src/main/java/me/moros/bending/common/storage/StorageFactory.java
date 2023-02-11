@@ -89,7 +89,7 @@ public record StorageFactory(BendingPlugin plugin) {
         plugin.logger().error(e.getMessage(), e);
         return null;
       }
-      builder.path("./" + parent.resolve("bending") + (storageType == StorageType.SQLITE ? ".db" : ""));
+      builder.path(parent.resolve("bending" + (storageType == StorageType.SQLITE ? ".db" : "")).toString());
     }
     StorageDataSource data = builder.build("bending-hikari", plugin.logger());
     return data == null ? null : new SqlStorage(plugin, data);
