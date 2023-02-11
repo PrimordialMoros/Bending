@@ -21,7 +21,6 @@ package me.moros.bending.common.ability.earth.passive;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
@@ -30,6 +29,7 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -42,7 +42,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.config.ConfigManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -96,27 +95,26 @@ public class Locksmithing extends AbilityInstance {
         Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
         user.sendActionBar(Component.text("Locked", description().element().color()));
       } else if (user.sneaking() && (user.hasPermission(OVERRIDE) || validKey(key, container.lock().orElse("")))) {
-        container.unlock();
+        container.lock("");
         Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
         user.sendActionBar(Component.text("Unlocked", description().element().color()));
       }
     }
   }
 
-  private Component getOrCreateKey(Inventory inv, ItemSnapshot item) {
-    Component keyName = item.customDisplayName().orElse(null);
-    if (keyName == null || item.get(Metadata.METAL_KEY).isEmpty()) {
-      keyName = generateName();
-      var key = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, true).name(keyName).build(item.amount());
-      inv.setItemInMainHand(key);
+  private String getOrCreateKey(Inventory inv, ItemSnapshot item) {
+    var key = item.get(Metadata.METAL_KEY).orElse("");
+    if (key.isBlank()) {
+      key = UUID.randomUUID().toString();
+      var builder = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, key);
+      // Should we put custom lore to visually identify the items?
+      if (Platform.instance().type() == PlatformType.BUKKIT) {
+        // TODO backwards compatibility before paper implemented BlockLockCheckEvent in 1.19.3
+        builder.name(Component.text(key));
+      }
+      inv.setItemInMainHand(builder.build(item.amount()));
     }
-    return keyName;
-  }
-
-  private Component generateName() {
-    List<NamedTextColor> colors = List.copyOf(NamedTextColor.NAMES.values());
-    NamedTextColor randomColor = colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
-    return Component.text(UUID.randomUUID().toString(), randomColor);
+    return key;
   }
 
   public static void act(User user, Block block) {

@@ -66,7 +66,6 @@ public final class ServerBlockEvents {
     return true;
   });
 
-
   @FunctionalInterface
   public interface PistonMove {
     boolean onPistonMove(ServerLevel level, BlockPos pos, List<BlockPos> toPush, List<BlockPos> toDestroy);

@@ -22,13 +22,18 @@ package me.moros.bending.fabric.mixin.block.entity;
 import java.util.Optional;
 
 import me.moros.bending.api.platform.block.Lockable;
+import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.world.LockCode;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin implements Lockable {
@@ -37,26 +42,33 @@ public abstract class BaseContainerBlockEntityMixin implements Lockable {
 
   @Override
   public Optional<String> lock() {
-    var pass = ((LockCodeAccess) lockKey).password();
+    var pass = extractLockCode(lockKey);
     return pass.isBlank() ? Optional.empty() : Optional.of(pass);
-  }
-
-  @Override
-  public void lock(Component lock) {
-    lock(LegacyComponentSerializer.legacySection().serializeOr(lock, ""));
   }
 
   @Override
   public void lock(String lock) {
     if (lock.isBlank()) {
-      unlock();
+      lockKey = LockCode.NO_LOCK;
     } else {
       lockKey = new LockCode(lock);
     }
   }
 
-  @Override
-  public void unlock() {
-    lockKey = LockCode.NO_LOCK;
+  @Unique
+  private static String extractLockCode(LockCode code) {
+    return ((LockCodeAccess) code).password();
+  }
+
+  @Inject(method = "canUnlock", at = @At(value = "HEAD"), cancellable = true)
+  private static void bending$canUnlock(Player player, LockCode lock, net.minecraft.network.chat.Component name, CallbackInfoReturnable<Boolean> cir) {
+    if (!player.isSpectator()) {
+      var result = ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, extractLockCode(lock), player.getMainHandItem());
+      if (result == TriState.TRUE) {
+        cir.setReturnValue(true);
+      } else if (result == TriState.FALSE) {
+        cir.setReturnValue(false);
+      }
+    }
   }
 }

@@ -45,7 +45,7 @@ public abstract class BlockMixin {
     method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V",
     at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
   )
-  private static void dropStacks(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack stack) {
+  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack stack) {
     bending$filterDrops(stacks, action, (ServerLevel) level, blockPos);
   }
 
@@ -54,7 +54,7 @@ public abstract class BlockMixin {
     method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
     at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
   )
-  private static void dropStacks(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, LevelAccessor levelAccessor, BlockPos blockPos) {
+  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, LevelAccessor levelAccessor, BlockPos blockPos) {
     bending$filterDrops(stacks, action, (ServerLevel) levelAccessor, blockPos);
   }
 
@@ -62,7 +62,7 @@ public abstract class BlockMixin {
     method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
     at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
   )
-  private static void dropStacks(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos) {
+  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos) {
     bending$filterDrops(stacks, action, (ServerLevel) level, blockPos);
   }
 

@@ -45,6 +45,7 @@ import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import me.moros.bending.sponge.platform.item.SpongeItem;
 import me.moros.bending.sponge.platform.world.SpongeWorld;
 import net.kyori.adventure.key.Key;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.value.Value;
@@ -52,7 +53,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -190,7 +190,7 @@ public final class PlatformAdapter {
     return ((SpongePlayer) player).handle();
   }
 
-  public static DamageCause fromSpongeCause(DamageSource source) {
+  public static DamageCause fromSpongeCause(org.spongepowered.api.event.cause.entity.damage.source.DamageSource source) {
     if (source.isExplosive()) {
       return DamageCause.EXPLOSION;
     } else if (source.isFire() && !(source instanceof AbilityDamageSource)) {
@@ -199,7 +199,7 @@ public final class PlatformAdapter {
     var type = source.type();
     if (type == DamageTypes.FALL.get()) {
       return DamageCause.FALL;
-    } else if (type == DamageTypes.CONTACT.get()) { // TODO mapping too generic, will include other dmg types too
+    } else if (type == DamageTypes.CONTACT.get() && source instanceof DamageSource nms && "flyIntoWall".equals(nms.getMsgId())) {
       return DamageCause.KINETIC;
     } else if (type == DamageTypes.SUFFOCATE.get()) {
       return DamageCause.SUFFOCATION;

@@ -1,4 +1,4 @@
 files:
-  - source: /src/main/resources/bending_en.properties
-    translation: /src/main/resources/bending_%two_letters_code%.properties
+  - source: /common/src/main/resources/lang/bending_en.properties
+    translation: /common/src/main/resources/lang/bending_%two_letters_code%.properties
 commit_message: '[ci-skip]'

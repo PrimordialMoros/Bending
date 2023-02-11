@@ -280,6 +280,19 @@ public record UserListener(Game game, BendingPlugin plugin) implements Listener,
     }
   }
 
+  /* TODO Locksmithing - available after 1.19.3
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onAccessLock(BlockLockCheckEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    var lock = new LockableImpl(event.getBlockState()).lock().orElse("");
+    var key = PlatformAdapter.fromBukkitItem(event.getKeyItem()).get(Metadata.METAL_KEY).orElse("");
+    if (!key.isBlank()) {
+      event.setResult(key.equals(lock) ? Result.ALLOW : Result.DENY);
+    }
+  }*/
+
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onEntityDeathHigh(EntityDeathEvent event) {
     var nsk = PlatformAdapter.nsk(Metadata.ARMOR_KEY);

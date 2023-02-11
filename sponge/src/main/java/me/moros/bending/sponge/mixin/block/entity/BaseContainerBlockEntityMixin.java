@@ -17,19 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge.mixin;
+package me.moros.bending.sponge.mixin.block.entity;
 
-import java.util.Map;
-
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.advancements.CriterionProgress;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(AdvancementProgress.class)
-public interface AdvancementProgressAccess {
-  @Invoker("<init>")
-  static AdvancementProgress bending$create(Map<String, CriterionProgress> arg) {
-    throw new AssertionError();
-  }
+@Mixin(BaseContainerBlockEntity.class)
+public abstract class BaseContainerBlockEntityMixin {
+  /*@Inject(method = "canUnlock", at = @At(value = "HEAD"), cancellable = true)
+  private static boolean bending$canUnlock(Player player, LockCode lock, Component name) {
+    // TODO use event for lock.unlocksWith(itemStack);
+  }*/
 }

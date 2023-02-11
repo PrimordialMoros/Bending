@@ -23,6 +23,7 @@ import java.util.List;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,6 +31,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public final class ServerItemEvents {
@@ -67,6 +69,16 @@ public final class ServerItemEvents {
     return InteractionResultHolder.pass(items);
   });
 
+  public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, lock, item) -> {
+    for (var callback : callbacks) {
+      var result = callback.onAccess(player, lock, item);
+      if (result != TriState.DEFAULT) {
+        return result;
+      }
+    }
+    return TriState.DEFAULT;
+  });
+
   @FunctionalInterface
   public interface DropItem {
     boolean onDrop(ServerPlayer player, ItemStack item);
@@ -80,5 +92,10 @@ public final class ServerItemEvents {
   @FunctionalInterface
   public interface BlockDropLoot {
     InteractionResultHolder<List<ItemStack>> onDropLoot(ServerLevel level, BlockPos pos, List<ItemStack> items);
+  }
+
+  @FunctionalInterface
+  public interface AccessLock {
+    TriState onAccess(Player player, String lock, ItemStack stack);
   }
 }

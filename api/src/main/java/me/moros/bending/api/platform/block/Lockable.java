@@ -21,14 +21,8 @@ package me.moros.bending.api.platform.block;
 
 import java.util.Optional;
 
-import net.kyori.adventure.text.Component;
-
 public interface Lockable {
   Optional<String> lock();
 
-  void lock(Component lock);
-
   void lock(String lock);
-
-  void unlock();
 }

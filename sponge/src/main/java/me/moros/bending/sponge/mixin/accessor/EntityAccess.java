@@ -17,16 +17,19 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge.mixin;
+package me.moros.bending.sponge.mixin.accessor;
 
-import java.util.Date;
 
-import net.minecraft.advancements.CriterionProgress;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CriterionProgress.class)
-public interface CriterionProgressAccess {
-  @Accessor("obtained")
-  void setDate(Date date);
+@Mixin(Entity.class)
+public interface EntityAccess {
+  @Accessor("ENTITY_COUNTER")
+  static AtomicInteger idCounter() {
+    throw new AssertionError();
+  }
 }

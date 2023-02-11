@@ -249,7 +249,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public CompletableFuture<?> loadChunkAsync(int x, int z) {
-    return handle().getChunkSource().getChunkFuture(x, z, ChunkStatus.EMPTY, false); // TODO check
+    return handle().getChunkSource().getChunkFuture(x, z, ChunkStatus.EMPTY, false);
   }
 
   @Override

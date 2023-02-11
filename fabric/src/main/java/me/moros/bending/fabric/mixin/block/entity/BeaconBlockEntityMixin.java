@@ -23,8 +23,6 @@ import java.util.Optional;
 
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,21 +40,11 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
   }
 
   @Override
-  public void lock(Component lock) {
-    lock(LegacyComponentSerializer.legacySection().serializeOr(lock, ""));
-  }
-
-  @Override
   public void lock(String lock) {
     if (lock.isBlank()) {
-      unlock();
+      lockKey = LockCode.NO_LOCK;
     } else {
       lockKey = new LockCode(lock);
     }
-  }
-
-  @Override
-  public void unlock() {
-    lockKey = LockCode.NO_LOCK;
   }
 }

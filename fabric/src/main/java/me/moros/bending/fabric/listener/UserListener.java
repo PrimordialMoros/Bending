@@ -55,6 +55,7 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -102,6 +103,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerInventoryEvents.HOPPER.register(this::onHopperItemPickup);
     ServerItemEvents.DROP_ITEM.register(this::onDropItem);
     ServerItemEvents.ENTITY_DROP_LOOT.register(this::onDropLoot);
+    ServerItemEvents.ACCESS_LOCK.register(this::onAccessLock);
     ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
     ServerLivingEntityEvents.AFTER_DEATH.register(this::onUserDeath);
@@ -325,6 +327,16 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
       }
     }
     return InteractionResultHolder.pass(items);
+  }
+
+  private TriState onAccessLock(Player player, String lock, ItemStack item) {
+    if (!disabledWorld(player)) {
+      var key = ItemUtil.getKey(item, Metadata.METAL_KEY);
+      if (key != null) {
+        return TriState.of(lock.equals(key));
+      }
+    }
+    return TriState.DEFAULT;
   }
 
   private double onEntityDamage(LivingEntity entity, DamageSource source, double damage) {

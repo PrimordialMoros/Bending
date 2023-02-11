@@ -22,8 +22,6 @@ package me.moros.bending.sponge.platform.block;
 import java.util.Optional;
 
 import me.moros.bending.api.platform.block.Lockable;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Keys;
 
@@ -34,21 +32,11 @@ public record LockableImpl(DataHolder.Mutable handle) implements Lockable {
   }
 
   @Override
-  public void lock(Component lock) {
-    lock(LegacyComponentSerializer.legacySection().serializeOr(lock, ""));
-  }
-
-  @Override
   public void lock(String lock) {
     if (lock.isBlank()) {
-      unlock();
+      handle.offer(Keys.LOCK_TOKEN, "");
     } else {
       handle.offer(Keys.LOCK_TOKEN, lock);
     }
-  }
-
-  @Override
-  public void unlock() {
-    handle.offer(Keys.LOCK_TOKEN, "");
   }
 }

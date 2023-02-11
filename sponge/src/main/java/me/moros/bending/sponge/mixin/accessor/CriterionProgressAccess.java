@@ -17,25 +17,16 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.util.metadata;
+package me.moros.bending.sponge.mixin.accessor;
 
-import me.moros.bending.api.util.KeyUtil;
-import me.moros.bending.api.util.data.DataKey;
+import java.util.Date;
 
-/**
- * Utility class to provide metadata keys
- */
-public final class Metadata {
-  public static final DataKey<Boolean> NPC = KeyUtil.data("bending-npc", Boolean.class);
+import net.minecraft.advancements.CriterionProgress;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-  public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("bending-armor", Boolean.class);
-  public static final DataKey<String> METAL_KEY = KeyUtil.data("bending-metal-key", String.class);
-
-  private Metadata() {
-  }
-
-  // Maybe use registry
-  public static boolean isPersistent(DataKey<?> key) {
-    return key == ARMOR_KEY || key == METAL_KEY;
-  }
+@Mixin(CriterionProgress.class)
+public interface CriterionProgressAccess {
+  @Accessor("obtained")
+  void setDate(Date date);
 }

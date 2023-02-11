@@ -35,7 +35,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
-import me.moros.bending.sponge.mixin.FallingBlockEntityAccess;
+import me.moros.bending.sponge.mixin.accessor.FallingBlockEntityAccess;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.SpongeDataHolder;
 import me.moros.bending.sponge.platform.block.LockableImpl;

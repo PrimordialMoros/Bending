@@ -27,6 +27,7 @@ import java.util.stream.Collector;
 
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
+import me.moros.bending.fabric.platform.NBTUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +35,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ItemUtil {
   private static final Supplier<GsonComponentSerializer> gcs = Suppliers.lazy(GsonComponentSerializer::gson);
@@ -51,16 +53,29 @@ public class ItemUtil {
   }
 
   public static void setUnbreakable(ItemStack stack, boolean value) {
-    setBooleanTag(stack, ITEM_UNBREAKABLE, value);
+    if (value || stack.hasTag()) {
+      CompoundTag tag = stack.getOrCreateTag();
+      if (value) {
+        tag.putBoolean(ITEM_UNBREAKABLE, true);
+      } else {
+        tag.remove(ITEM_UNBREAKABLE);
+      }
+    }
   }
 
   public static boolean hasKey(ItemStack stack, DataKey<?> key) {
     var tag = stack.getTag();
-    return tag != null && tag.getBoolean(key.asString());
+    return tag != null && tag.contains(key.asString());
   }
 
-  public static void addKey(ItemStack stack, DataKey<?> key, boolean value) {
-    setBooleanTag(stack, key.asString(), value);
+  public static <T> @Nullable T getKey(ItemStack stack, DataKey<T> key) {
+    var tag = stack.getTag();
+    return tag == null ? null : NBTUtil.read(tag, key);
+  }
+
+  public static <T> void addKey(ItemStack stack, DataKey<T> key, T value) {
+    var tag = stack.getOrCreateTag();
+    NBTUtil.write(tag, key, value);
   }
 
   public static void removeKey(ItemStack stack, DataKey<?> key) {
@@ -92,17 +107,6 @@ public class ItemUtil {
       return;
     }
     stack.getOrCreateTagElement(ITEM_DISPLAY).put(ITEM_LORE, listTagJson(lore));
-  }
-
-  public static void setBooleanTag(ItemStack stack, String tagName, boolean value) {
-    if (value || stack.hasTag()) {
-      CompoundTag tag = stack.getOrCreateTag();
-      if (value) {
-        tag.putBoolean(tagName, true);
-      } else {
-        tag.remove(tagName);
-      }
-    }
   }
 
   private static List<Component> json(final List<String> strings) {

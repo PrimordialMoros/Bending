@@ -65,27 +65,22 @@ public class FabricItem implements ItemSnapshot {
     return handle().hasCustomHoverName() ? Optional.of(handle().getHoverName().asComponent()) : Optional.empty();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return isValidKey(key) ? (Optional<T>) Optional.of(ItemUtil.hasKey(handle(), key)) : Optional.empty();
+    return Metadata.isPersistent(key) ? Optional.ofNullable(ItemUtil.getKey(handle(), key)) : Optional.empty();
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    if (isValidKey(key) && value instanceof Boolean booleanValue) {
-      ItemUtil.addKey(handle(), key, booleanValue);
+    if (Metadata.isPersistent(key)) {
+      ItemUtil.addKey(handle(), key, value);
     }
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    if (isValidKey(key)) {
+    if (Metadata.isPersistent(key)) {
       ItemUtil.removeKey(handle(), key);
     }
-  }
-
-  private static boolean isValidKey(DataKey<?> key) {
-    return Metadata.isPersistent(key) && key.type() == Boolean.class;
   }
 }

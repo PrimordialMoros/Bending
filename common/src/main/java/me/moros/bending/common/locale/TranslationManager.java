@@ -75,7 +75,7 @@ public final class TranslationManager implements Iterable<Locale> {
 
     loadCustom();
 
-    ResourceBundle bundle = ResourceBundle.getBundle("bending", Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
+    ResourceBundle bundle = ResourceBundle.getBundle("lang.bending", Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
     registry.registerAll(Message.DEFAULT_LOCALE, bundle, false);
 
     loadFromRegistry();

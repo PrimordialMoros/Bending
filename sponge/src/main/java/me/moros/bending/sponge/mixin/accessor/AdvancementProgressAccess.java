@@ -17,19 +17,19 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge.mixin;
+package me.moros.bending.sponge.mixin.accessor;
 
+import java.util.Map;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import net.minecraft.world.entity.Entity;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.CriterionProgress;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Entity.class)
-public interface EntityAccess {
-  @Accessor("ENTITY_COUNTER")
-  static AtomicInteger idCounter() {
+@Mixin(AdvancementProgress.class)
+public interface AdvancementProgressAccess {
+  @Invoker("<init>")
+  static AdvancementProgress bending$create(Map<String, CriterionProgress> arg) {
     throw new AssertionError();
   }
 }
