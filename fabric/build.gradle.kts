@@ -54,7 +54,7 @@ tasks {
         dependsOn(shadowJar)
         inputFile.set(shadowJar.archiveFile)
         addNestedDependencies.set(true)
-        archiveFileName.set("bending-${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar")
+        archiveFileName.set("${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar")
     }
 }
 
