@@ -7,5 +7,5 @@ minecraft {
 }
 
 dependencies {
-    compileOnly(project(":api"))
+    compileOnly(projects.bendingApi)
 }

@@ -7,8 +7,8 @@ subprojects {
     apply(plugin = "com.github.johnrengelman.shadow")
 
     dependencies {
-        compileOnly(project(":api"))
-        implementation(project(":nms"))
+        compileOnly(project(":bending-api"))
+        implementation(project(":bending-nms"))
     }
 }
 

@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":api"))
+    api(projects.bendingApi)
     api(libs.eventbus)
     api(libs.hikari)
     api(libs.jdbi) { exclude(module = "caffeine") }

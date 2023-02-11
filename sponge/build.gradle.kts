@@ -23,8 +23,8 @@ minecraft {
 }
 
 dependencies {
-    bendingImplementation(project(":common"))
-    bendingImplementation(project(":nms"))
+    bendingImplementation(projects.bendingCommon)
+    bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.math.sponge)
     bendingImplementation(libs.tasker.sponge)
     bendingImplementation(libs.bstats.sponge)
@@ -38,7 +38,7 @@ dependencies {
 
 tasks {
     shadowJar {
-        archiveBaseName.set("bending-${project.name}-mc${libs.versions.minecraft.get()}")
+        archiveBaseName.set("${project.name}-mc${libs.versions.minecraft.get()}")
         dependencies {
             reloc("org.slf4j", "slf4j")
             reloc("cloud.commandframework", "cloudframework")

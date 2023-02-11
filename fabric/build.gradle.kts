@@ -23,8 +23,8 @@ dependencies {
     modImplementation(include(libs.math.fabric.get())!!)
     modImplementation(include(libs.cloud.fabric.get())!!)
     implementation(include(libs.cloud.minecraft.get())!!)
-    bendingImplementation(project(":common"))
-    bendingImplementation(project(":nms"))
+    bendingImplementation(projects.bendingCommon)
+    bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.tasker.fabric)
     bendingImplementation(libs.bundles.configurate) {
         exclude(module = "gson")

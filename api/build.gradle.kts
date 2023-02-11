@@ -36,7 +36,7 @@ tasks {
     }
     withType<Jar> {
         manifest {
-            attributes["Automatic-Module-Name"] = "me.moros.bending-api"
+            attributes["Automatic-Module-Name"] = "me.moros.bending.api"
         }
     }
 }

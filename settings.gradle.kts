@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -7,13 +9,19 @@ pluginManagement {
 }
 rootProject.name = "bending"
 
-include("api")
-include("common")
-include("nms")
+setupSubproject("api")
+setupSubproject("common")
+setupSubproject("nms")
+setupSubproject("fabric")
+setupSubproject("paper")
+setupSubproject("sponge")
 file("paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
-    include("paper:adapters:${it.name}")
+    include("bending-paper:adapters:${it.name}")
 }
-include("fabric")
-include("paper")
-include("sponge")
 //include("code-generator")
+
+fun setupSubproject(name: String) {
+    val moduleName = "${rootProject.name}-$name"
+    include(moduleName)
+    project(":$moduleName").projectDir = file(name)
+}
