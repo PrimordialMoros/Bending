@@ -97,10 +97,6 @@ public final class AbilityInitializer implements Initializer {
 
   private final Collection<AbilityDescription> abilities = new ArrayList<>(64);
 
-  public AbilityInitializer() {
-    init();
-  }
-
   @Override
   public void init() {
     initAir();

@@ -62,9 +62,9 @@ final class PaperBending extends BendingPluginBase<BendingBootstrap> {
     ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new BukkitExecutor(parent)));
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger()));
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
-    new ProtectionInitializer(this);
+    new ProtectionInitializer(this).init();
     load();
-    new BukkitPermissionInitializer();
+    new BukkitPermissionInitializer().init();
 
     var pluginManager = parent.getServer().getPluginManager();
     pluginManager.registerEvents(new BlockListener(game), parent);

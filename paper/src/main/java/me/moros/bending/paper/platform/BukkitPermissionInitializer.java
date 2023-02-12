@@ -30,9 +30,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public class BukkitPermissionInitializer extends PermissionInitializer {
-  public BukkitPermissionInitializer() {
-  }
-
   @Override
   protected void registerDefault(String node, Collection<String> children, TriState def) {
     var permDef = switch (def) {

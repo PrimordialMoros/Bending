@@ -30,9 +30,6 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.TransferMethod;
 
 public class SpongePermissionInitializer extends PermissionInitializer {
-  public SpongePermissionInitializer() {
-  }
-
   @Override
   protected void registerDefault(String node, Collection<String> children, TriState def) {
     var defBoolean = def.toBoolean();

@@ -33,7 +33,6 @@ import net.kyori.adventure.util.TriState;
 
 public abstract class PermissionInitializer implements Initializer {
   protected PermissionInitializer() {
-    init();
   }
 
   @Override

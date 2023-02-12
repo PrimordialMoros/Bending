@@ -81,7 +81,7 @@ public final class SpongeBending extends BendingPluginBase<PluginContainer> {
     ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(parent)));
     ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
     load();
-    new SpongePermissionInitializer();
+    new SpongePermissionInitializer().init();
     var eventManager = event.game().eventManager();
     eventManager.registerListeners(parent, new BlockListener(game));
     eventManager.registerListeners(parent, new UserListener(game, this));

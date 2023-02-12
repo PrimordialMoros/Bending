@@ -3,7 +3,7 @@
   "id": "bending",
   "version": "${pluginVersion}",
   "name": "Bending",
-  "description": "Bending plugin for Fabric.",
+  "description": "Bending mod for Fabric.",
   "contact": {
     "homepage": "https://github.com/PrimordialMoros/Bending/",
     "sources": "https://github.com/PrimordialMoros/Bending/",
@@ -12,9 +12,8 @@
   "authors": [
     "Moros"
   ],
-  "license": [
-    "AGPLv3"
-  ],
+  "license": "AGPLv3",
+  "icon": "assets/bending/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -29,7 +28,6 @@
     "fabricloader": ">=0.14.12",
     "minecraft": "1.19.3",
     "cloud": "*",
-    "math-fabric": "*",
     "adventure-platform-fabric": "*"
   }
 }

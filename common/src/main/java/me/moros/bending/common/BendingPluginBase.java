@@ -53,7 +53,7 @@ public abstract class BendingPluginBase<T> implements BendingPlugin, PluginLifec
     this.configManager = new ConfigManager(logger, dir);
     this.translationManager = new TranslationManager(logger, dir);
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
-    new AbilityInitializer();
+    new AbilityInitializer().init();
   }
 
   @Override

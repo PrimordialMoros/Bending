@@ -39,7 +39,6 @@ public final class ProtectionInitializer implements Initializer {
 
   public ProtectionInitializer(BendingPlugin plugin) {
     this.config = plugin.configManager().config();
-    init();
   }
 
   @Override

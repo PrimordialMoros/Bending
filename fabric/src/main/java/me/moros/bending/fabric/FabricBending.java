@@ -47,6 +47,7 @@ import me.moros.bending.fabric.platform.AbilityDamageSource;
 import me.moros.bending.fabric.platform.CommandSender;
 import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.fabric.platform.FabricMetadata;
+import me.moros.bending.fabric.platform.FabricPermissionInitializer;
 import me.moros.bending.fabric.platform.FabricPlatform;
 import me.moros.tasker.executor.CompositeExecutor;
 import me.moros.tasker.fabric.FabricExecutor;
@@ -93,6 +94,7 @@ final class FabricBending extends BendingPluginBase<ModContainer> {
     if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
       ClientLifecycleEvents.CLIENT_STOPPING.register(m -> exiting.set(true));
     }
+    new FabricPermissionInitializer().init();
   }
 
   private void onEnable(MinecraftServer server) {

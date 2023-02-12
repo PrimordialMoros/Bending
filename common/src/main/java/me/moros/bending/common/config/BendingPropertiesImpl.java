@@ -41,9 +41,6 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
 
   private boolean generateLight = BendingProperties.super.canGenerateLight();
 
-  public BendingPropertiesImpl() {
-  }
-
   @Override
   public List<String> path() {
     return List.of("properties");
