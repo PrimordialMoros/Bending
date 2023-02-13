@@ -80,7 +80,7 @@ final class SqlStorage extends AbstractStorage {
   @Override
   public void init() {
     if (!tableExists("bending_players")) {
-      String path = Path.of("bending", "bending/schema", dataSource.type().realName() + ".sql").toString();
+      String path = Path.of("bending", "schema", dataSource.type().realName() + ".sql").toString();
       Collection<String> statements = SqlStreamReader.parseQueries(plugin.resource(path));
       DB.useHandle(handle -> {
         Batch batch = handle.createBatch();
